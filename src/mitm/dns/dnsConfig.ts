@@ -120,6 +120,8 @@ function hasHostEntry(hostsContent: string, hostname: string): boolean {
  * invocation so the user gets one UAC prompt instead of one per line.
  */
 export async function addDNSEntries(hosts: string[], sudoPassword: string): Promise<void> {
+  // Guard: "1" only (matches OMNIROUTE_SKIP_SYSTEM_TRUST convention).
+  if (process.env.OMNIROUTE_SKIP_DNS_WRITE === "1") return;
   const hostsContent = readHostsFile();
   const missingEntries: string[] = [];
 
@@ -178,6 +180,8 @@ fs.writeFileSync(filePath, filtered.join("\\n").replace(/\\n*$/, "\\n"));
  * invocation so the user gets one UAC prompt instead of one per host.
  */
 export async function removeDNSEntries(hosts: string[], sudoPassword: string): Promise<void> {
+  // Guard: "1" only (matches OMNIROUTE_SKIP_SYSTEM_TRUST convention).
+  if (process.env.OMNIROUTE_SKIP_DNS_WRITE === "1") return;
   const hostsContent = readHostsFile();
   const presentHosts = hosts.filter((h) => hasHostEntry(hostsContent, h));
 
