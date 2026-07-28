@@ -377,6 +377,8 @@ export async function cleanupComboConnectionRefs(connectionId: string) {
         out = rest;
         changed = true;
       }
+      // Both checks run sequentially on the same `out` object — if connectionId
+      // matched above, it is already removed; this also cleans allowedConnectionIds.
       if (Array.isArray(out.allowedConnectionIds)) {
         const filtered = out.allowedConnectionIds.filter(
           (id: string) => id !== connectionId
@@ -386,6 +388,8 @@ export async function cleanupComboConnectionRefs(connectionId: string) {
           changed = true;
         }
       }
+      // If step lost its only connectionId and has no allowedConnectionIds,
+      // keep it — the runtime will resolve via providerId + model name.
       return out;
     });
     if (changed && typeof combo.id === "string") {
@@ -399,4 +403,62 @@ export async function cleanupComboConnectionRefs(connectionId: string) {
     }
   }
   return touched;
+}
+
+/**
+ * Remove stale connectionId refs from ALL combos.
+ * Called once on startup to clean up refs left by connections deleted
+ * before the per-delete cleanup was added.
+ */
+export async function cleanupAllStaleComboConnectionRefs() {
+  const db = getDbInstance();
+  const activeIds = new Set(
+    db.prepare("SELECT id FROM provider_connections WHERE is_active=1")
+      .all()
+      .map((r: { id: string }) => r.id)
+  );
+  // Read raw combo data to avoid normalization stripping connectionId.
+  const rows = db
+    .prepare("SELECT id, name, data FROM combos")
+    .all() as { id: string; name: string; data: string }[];
+  let total = 0;
+  for (const row of rows) {
+    let data: Record<string, unknown>;
+    try {
+      data = JSON.parse(row.data);
+    } catch {
+      continue;
+    }
+    if (!Array.isArray(data.models)) continue;
+    let changed = false;
+    const models = (data.models as Record<string, unknown>[]).map((step) => {
+      let out = step;
+      if (out.connectionId && !activeIds.has(out.connectionId as string)) {
+        const { connectionId: _, ...rest } = out;
+        out = rest;
+        changed = true;
+      }
+      if (Array.isArray(out.allowedConnectionIds)) {
+        const filtered = out.allowedConnectionIds.filter(
+          (id: string) => activeIds.has(id)
+        );
+        if (filtered.length !== out.allowedConnectionIds.length) {
+          out = { ...out, allowedConnectionIds: filtered };
+          changed = true;
+        }
+      }
+      return out;
+    });
+    if (changed) {
+      try {
+        data.models = models;
+        db.prepare("UPDATE combos SET data=?, updated_at=?")
+          .run(JSON.stringify(data), new Date().toISOString());
+        total++;
+      } catch {
+        // Best-effort.
+      }
+    }
+  }
+  return total;
 }

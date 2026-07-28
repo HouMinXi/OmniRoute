@@ -1283,6 +1283,14 @@ export function getDbInstance(): SqliteDatabase {
   }
 
   startDbHealthCheckScheduler(db);
+
+  // One-time cleanup: remove stale connectionId refs from combos
+  // left by connections deleted before per-delete cleanup was added.
+  import("./combos.ts").then(({ cleanupAllStaleComboConnectionRefs }) => {
+    cleanupAllStaleComboConnectionRefs().then((n) => {
+      if (n > 0) console.log(`[DB] Cleaned up stale combo connectionId refs: ${n} combos updated`);
+    }).catch(() => {});
+  }).catch(() => {});
   // Log the resolved absolute DATA_DIR + SQLITE_FILE once at init so a
   // multi-replica / Docker volume-topology mismatch (each replica opening a
   // different on-disk DB → "phantom"/missing combos & connections) is
