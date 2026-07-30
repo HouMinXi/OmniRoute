@@ -42,6 +42,18 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: ${{ env.CI_NODE_VERSION }}
+      # Refuse a PR that targets its own head branch before spending anything on it. #8912 has
+      # head == base == release/v3.8.50: no diff, can never merge, and it sits in the queue with
+      # a full check board attached on every push to that branch. One field comparison.
+      - name: Reject a PR that targets its own branch
+        if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: node scripts/check/check-pr-self-target.mjs
+
       - id: classify
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -330,8 +342,16 @@ jobs:
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
           # actionlint — official download script
           bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash) latest "$HOME/.local/bin"
-          # zizmor — PyPI (pipx preferred, pip --user fallback); lands in ~/.local/bin
-          pipx install zizmor || pip install --user zizmor
+          # zizmor — PyPI (pipx preferred, pip --user fallback); lands in ~/.local/bin.
+          # PINNED on purpose. Unpinned, the runner installed whatever PyPI served that day and
+          # measured 1 finding MORE than the devbox on the identical commit (190 vs 189) during
+          # the v3.8.49 cycle — which cost a second rebaseline push per release, chasing a
+          # number that was never the code's. The ratchet compares counts across machines, so
+          # the auditor version has to be the same on both. Bump this deliberately, and
+          # rebaseline in the same commit: check-workflows.mjs now prints `zizmorVersion=` next
+          # to the count so the new number is traceable to the tool that produced it.
+          ZIZMOR_VERSION=1.25.2
+          pipx install "zizmor==$ZIZMOR_VERSION" || pip install --user "zizmor==$ZIZMOR_VERSION"
           # oasdiff — download latest linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
           gh release download --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
