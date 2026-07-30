@@ -129,6 +129,19 @@ interface ProviderConnectionLike {
 }
 
 /**
+ * Return a frozen snapshot of the alias-to-canonical-provider map.
+ * Safe for external modules to iterate without risking mutation.
+ * Cached after first call to avoid repeated allocations.
+ */
+let _frozenAliasMap: Readonly<Record<string, string>> | null = null;
+export function getAliasToProviderMap(): Readonly<Record<string, string>> {
+  if (!_frozenAliasMap) {
+    _frozenAliasMap = Object.freeze({ ...ALIAS_TO_PROVIDER_ID });
+  }
+  return _frozenAliasMap;
+}
+
+/**
  * Resolve provider alias to provider ID
  */
 export function resolveProviderAlias(aliasOrId: string | null | undefined): string | null {

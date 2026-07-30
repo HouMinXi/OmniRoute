@@ -59,7 +59,8 @@ import { fetchCodexQuota } from "./codexQuotaFetcher.ts";
 import { evaluateQuotaCutoff, getQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
 import * as semaphore from "./rateLimitSemaphore.ts";
 import { getCircuitBreaker } from "../../src/shared/utils/circuitBreaker";
-import { parseModel } from "./model.ts";
+import { fisherYatesShuffle, getNextFromDeck } from "../../src/shared/utils/shuffleDeck";
+import { parseModel, getAliasToProviderMap } from "./model.ts";
 import { createComboContext } from "./combo/context.ts";
 import { phaseComboSetup } from "./combo/comboSetup.ts";
 import { checkCredentialGate, logCredentialSkip } from "./credentialGate.ts";
@@ -333,11 +334,31 @@ export async function buildAutoCandidates(
   await Promise.all(
     uniqueProviders.map(async (provider) => {
       try {
-        const connections = (await getCachedProviderConnections({
+        let connections = (await getCachedProviderConnections({
           provider,
           isActive: true,
         })) as Array<Record<string, unknown>>;
-        const active = Array.isArray(connections) ? connections : [];
+        let active = Array.isArray(connections) ? connections : [];
+
+        // Fallback: when canonical provider has no connections, check aliases
+        // that map to it. E.g. "agy" is an alias for "antigravity" in
+        // ALIAS_TO_PROVIDER_ID - if antigravity has 0 connections, try agy.
+        if (active.length === 0) {
+          for (const [alias, canonical] of Object.entries(getAliasToProviderMap())) {
+            if (canonical === provider && alias !== provider) {
+              const aliasConns = (await getCachedProviderConnections({
+                provider: alias,
+                isActive: true,
+              })) as Array<Record<string, unknown>>;
+              if (Array.isArray(aliasConns) && aliasConns.length > 0) {
+                connections = aliasConns;
+                active = aliasConns;
+                break;
+              }
+            }
+          }
+        }
+
         connectionPoolCounts.set(provider, active.length);
         connectionsByProvider.set(provider, active);
         for (const connection of active) {

@@ -963,6 +963,18 @@ async function getProviderSearchPool(provider: string): Promise<string[]> {
 
   const searchPool = new Set([provider, canonicalProvider, canonicalAlias].filter(Boolean));
 
+  // Include aliases that map TO this provider. E.g. "agy" is an alias for
+  // "antigravity" — if the user registered connections under "agy", the
+  // canonical search for "antigravity" would miss them without this.
+  const { getAliasToProviderMap } = await import(
+    "@omniroute/open-sse/services/model.ts"
+  );
+  for (const [alias, canonical] of Object.entries(getAliasToProviderMap())) {
+    if (canonical === canonicalProvider && alias !== canonicalProvider) {
+      searchPool.add(alias);
+    }
+  }
+
   // Built-in providers already resolve through static ids/aliases. Only
   // compatible/custom providers need provider_nodes expansion back to the
   // generated internal connection ids. (#3058)
