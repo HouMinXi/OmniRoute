@@ -249,11 +249,33 @@ jobs:
           persist-credentials: false
           fetch-depth: 0
 
+      # `merge-multiple` is deliberately OFF. It resolves same-name collisions by ARRIVAL
+      # ORDER, and the two macOS jobs each emit their own `latest-mac.yml` listing only their
+      # own dmg (measured: 338 and 350 bytes, different content, identical name). One silently
+      # overwrote the other — arm64 won in the published v3.8.48, and since the Intel dmg
+      # carries no arch suffix in its name, electron-updater's
+      # `files.find(url includes process.arch) ?? files.shift()` sends every Intel Mac to the
+      # ARM dmg. Downloading into per-artifact subdirectories keeps both, so they can be
+      # merged on purpose instead of by luck.
       - name: Download all artifacts
         uses: actions/download-artifact@v8
         with:
-          path: release-assets
-          merge-multiple: true
+          path: artifacts
+
+      # Writes release-assets/latest-mac.yml with BOTH dmgs, un-suffixed entry first (that is
+      # the one electron-updater can only reach through its fallback). Refuses to write when the
+      # inputs disagree on version — a manifest stitched from two builds is worse than none.
+      - name: Merge the per-arch macOS updater manifests
+        run: node scripts/release/merge-mac-update-manifest.mjs artifacts release-assets
+
+      # Everything else moves across as-is. The partial latest-mac.yml files are excluded so
+      # they cannot clobber the merged one; -n is a second belt on the same braces.
+      - name: Collect the remaining artifacts
+        run: |
+          mkdir -p release-assets
+          find artifacts -type f ! -name latest-mac.yml -exec cp -n {} release-assets/ \;
+          echo "release-assets:"
+          ls -la release-assets/
 
       - name: Create source archives
         env:

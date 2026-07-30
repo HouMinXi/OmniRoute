@@ -179,18 +179,36 @@ jobs:
           REPO: ${{ github.repository }}
         run: |
           set -uo pipefail
-          RUN=$(gh api "repos/$REPO/actions/runs?head_sha=$HEAD_SHA&per_page=100" \
+          # The question is "which run HAS the artifact", not "which run passed" (gap 16).
+          # Requiring `conclusion == "success"` on the whole run discarded a perfectly good tree
+          # whenever any unrelated shard went red — one flaky test then pushed the publish into
+          # the 40-minute build this step exists to avoid. The artifact is only uploaded if the
+          # Build job itself succeeded, so its PRESENCE is the accurate signal; the run's overall
+          # conclusion is noise from jobs that have nothing to do with the tree.
+          #
+          # `head_repository.full_name == env.REPO` stays, and it is not a filter refinement:
+          # this tree becomes the published npm tarball, and fork `pull_request` runs execute in
+          # THIS repository's context uploading their own next-build. That clause is the
+          # supply-chain guard (CodeQL actions/artifact-poisoning).
+          CANDIDATES=$(gh api "repos/$REPO/actions/runs?head_sha=$HEAD_SHA&per_page=100" \
             --jq '[.workflow_runs[]
                    | select(.name == "CI"
-                            and .conclusion == "success"
                             and .head_repository.full_name == env.REPO)]
-                  | .[0].id // empty') || RUN=""
-          if [ -z "$RUN" ]; then
-            echo "::notice::no successful CI run for $HEAD_SHA — falling back to a full build"
+                  | sort_by(.run_started_at) | reverse | .[0:5] | .[].id') || CANDIDATES=""
+          if [ -z "$CANDIDATES" ]; then
+            echo "::notice::no CI run from this repository for $HEAD_SHA — falling back to a full build"
             exit 0
           fi
-          if ! gh run download "$RUN" --repo "$REPO" --name next-build --dir /tmp/next-build; then
-            echo "::notice::next-build artifact unavailable for run $RUN (expired?) — falling back to a full build"
+          RUN=""
+          for candidate in $CANDIDATES; do
+            if gh run download "$candidate" --repo "$REPO" --name next-build --dir /tmp/next-build 2>/dev/null; then
+              RUN="$candidate"
+              break
+            fi
+            echo "  run $candidate carries no usable next-build — trying the next"
+          done
+          if [ -z "$RUN" ]; then
+            echo "::notice::none of the candidate runs still carries next-build (1-day retention) — falling back to a full build"
             exit 0
           fi
           tar -xzf /tmp/next-build/e2e-build.tar.gz -C .

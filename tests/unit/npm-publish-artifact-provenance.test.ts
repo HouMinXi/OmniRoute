@@ -58,7 +58,29 @@ test("the artifact fast path only trusts runs from THIS repository", () => {
     /head_sha=\$HEAD_SHA/,
     "the run must still be matched on head_sha — that is the tree-equality guarantee"
   );
-  assert.match(step, /\.conclusion == "success"/, "only a successful run may be restored");
+  // Was: `assert.match(step, /\.conclusion == "success"/)`. That assertion encoded the wrong
+  // criterion (gap 16) and is deliberately INVERTED here, not deleted. Requiring the whole run to
+  // have concluded successfully discarded a perfectly good tree whenever any unrelated shard went
+  // red, pushing the publish into the 40-minute build this fast path exists to avoid. The artifact
+  // is only uploaded when the Build job itself succeeded, so its PRESENCE is the accurate signal.
+  //
+  // The replacement is strictly stronger: it pins BOTH that the loose criterion is gone AND that
+  // the step actually probes candidates for the artifact, which the old assertion never checked.
+  assert.doesNotMatch(
+    step,
+    /\.conclusion == "success"/,
+    "an unrelated red shard must not discard a valid build artifact"
+  );
+  assert.match(
+    step,
+    /gh run download .*--name next-build/,
+    "the criterion is now whether the run HAS the artifact — so it must try to download it"
+  );
+  assert.match(
+    step,
+    /for candidate in \$CANDIDATES/,
+    "…across more than one candidate run, or a single miss still falls back to a full build"
+  );
 });
 
 test("REPO is passed through env, never interpolated into the script body", () => {
