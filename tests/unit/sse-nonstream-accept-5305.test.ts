@@ -49,9 +49,10 @@ describe("#5305 resolveStreamFlag — openai non-stream with mixed Accept", () =
     assert.equal(resolveStreamFlag(undefined, "text/event-stream", "openai"), true);
   });
 
-  it("keeps streaming for openai + omitted stream + no/`*/*` Accept (legacy default unchanged)", () => {
-    assert.equal(resolveStreamFlag(undefined, undefined, "openai"), true);
-    assert.equal(resolveStreamFlag(undefined, "*/*", "openai"), true);
+  it("defaults to non-streaming for openai + omitted stream + no/`*/*` Accept (OpenAI spec compliant)", () => {
+    // OpenAI Chat Completions contract: omitted `stream` defaults to false.
+    assert.equal(resolveStreamFlag(undefined, undefined, "openai"), false);
+    assert.equal(resolveStreamFlag(undefined, "*/*", "openai"), false);
   });
 
   it("explicit body stream:true still wins over a json-leaning Accept", () => {
