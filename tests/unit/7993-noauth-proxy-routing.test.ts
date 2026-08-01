@@ -80,8 +80,14 @@ test("#7993 getProviderCredentials('opencode-zen') hydrates the proxy saved unde
     providerSpecificData?: { fingerprints?: unknown; accountProxies?: unknown };
   } | null;
 
-  assert.ok(creds, "opencode-zen must resolve to synthetic no-auth credentials");
-  assert.equal(creds!.connectionId, "noauth");
+  assert.ok(
+    creds,
+    "opencode-zen must resolve to credentials (via sibling alias or noauth fallback)"
+  );
+  // PR #8779: opencode-zen now finds the sibling 'opencode' DB connection via
+  // reverse alias scan, so connectionId is the DB row UUID instead of "noauth".
+  // Either path is valid — what matters is that the proxy config is hydrated.
+  assert.ok(creds!.connectionId, "connectionId must be present");
   const psd = creds!.providerSpecificData || {};
   assert.ok(
     Array.isArray(psd.fingerprints) && psd.fingerprints.length === 1,
@@ -100,7 +106,8 @@ test("#7993 a canonical 'opencode/<model>' resolved combo/catalog target egresse
   let observedSource: string | null = null;
   const originalFetch = globalThis.fetch;
   globalThis.fetch = (async (input: unknown) => {
-    const url = typeof input === "string" ? input : (input as { url?: string })?.url || String(input);
+    const url =
+      typeof input === "string" ? input : (input as { url?: string })?.url || String(input);
     observedSource = resolveProxyForRequest(url).source;
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
