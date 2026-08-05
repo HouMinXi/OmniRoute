@@ -28,6 +28,7 @@ import {
 import { pickMaskedDisplayValue } from "@/shared/utils/maskEmail";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import { refreshGithubCopilotSubTokenIfNeeded } from "@/lib/tokenHealthCheckCopilot";
+import type { JobRegistry } from "../jobRegistry/registry";
 
 const LOG_PREFIX = "[HealthCheck]";
 const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
@@ -1014,7 +1015,44 @@ export async function checkConnection(conn) {
   }
 }
 
-// Auto-start when imported
-initTokenHealthCheck();
-
-export default initTokenHealthCheck;
+/**
+ * Token-health-check handler wrapper.
+ *
+ * Migrated to the JobRegistry: the old initTokenHealthCheck() auto-start on import
+ * is removed (the registry owns scheduling now). This module exports `sweep` (the
+ * core logic, kept for tests) and `registerTokenHealthCheck`, which wraps sweep
+ * with the preserved isHealthCheckDisabled() gate and wires it into a registry.
+ *
+ * The disable semantics are unchanged - isHealthCheckDisabled() still checks
+ * OMNIROUTE_DISABLE_TOKEN_HEALTHCHECK, NEXT_PHASE=phase-production-build, and
+ * isAutomatedTestProcess(). The registry only triggers the interval; the handler
+ * internally decides whether to actually sweep.
+ */
+export function registerTokenHealthCheck(registry: JobRegistry): void {
+  registry.register({
+    id: "token_health_check",
+    type: "interval",
+    cron: null,
+    intervalMs: 60000,
+    enabled: true,
+    envFlag: null,
+    config: {},
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    handler: async () => {
+      if (isHealthCheckDisabled()) {
+        return { success: true, recordsAffected: 0 };
+      }
+      try {
+        await sweep();
+        return { success: true, recordsAffected: 0 };
+      } catch (err) {
+        return {
+          success: false,
+          recordsAffected: 0,
+          error: err instanceof Error ? err.message : String(err),
+        };
+      }
+    },
+  });
+}

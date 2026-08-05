@@ -5,9 +5,10 @@ import { extractResolvedProxyConfig } from "@/lib/tokenHealthCheck";
 import { refreshAndUpdateCredentials } from "@/lib/usage/providerLimits";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch";
 import { logger } from "@omniroute/open-sse/utils/logger";
-import { matchesCron } from "@/lib/jobs/cronMatch";
 import { getCircuitBreakerStore } from "./warmupScheduler/circuitBreakerFactory";
 import { TERMINAL_CONNECTION_STATUSES } from "@/lib/quota/connectionRecovery";
+import type { JobRegistry } from "./jobRegistry/registry";
+import type { HandlerResult } from "./jobRegistry/core";
 import type { WarmupResult, WarmupFailureKind, WarmupTarget } from "./warmupScheduler/core";
 
 export type { WarmupResult, WarmupFailureKind } from "./warmupScheduler/core";
@@ -35,26 +36,6 @@ function getWarmupMessage(): string {
   return msg;
 }
 
-declare global {
-  var __omnirouteWarmupScheduler: {
-    timer: NodeJS.Timeout | null;
-    executing: boolean;
-    lastFireMinute: number;
-  };
-}
-const STATE = (globalThis.__omnirouteWarmupScheduler ??= {
-  timer: null,
-  executing: false,
-  lastFireMinute: -1,
-});
-
-const TRUE_ENV_VALUES = new Set(["1", "true", "yes", "on"]);
-
-function isEnabled(): boolean {
-  const raw = process.env.OMNIROUTE_WARMUP_ENABLED;
-  return raw ? TRUE_ENV_VALUES.has(raw.trim().toLowerCase()) : false;
-}
-
 function getCron(): string {
   return process.env.OMNIROUTE_WARMUP_CRON || "0 7 * * *";
 }
@@ -65,84 +46,20 @@ function getConcurrency(): number {
   return Math.min(10, Math.max(1, Number.isFinite(parsed) ? parsed : 3));
 }
 
-function toPacificTime(date: Date): Date {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Los_Angeles",
-    hour12: false,
-    hourCycle: "h23",
-    year: "numeric",
-    month: "numeric",
-    day: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    second: "numeric",
-  }).formatToParts(date);
-  const get = (t: string) => parseInt(parts.find((p) => p.type === t)?.value || "0", 10);
-  return new Date(
-    get("year"),
-    get("month") - 1,
-    get("day"),
-    get("hour"),
-    get("minute"),
-    get("second")
-  );
-}
-
-export function startWarmupScheduler(): NodeJS.Timeout | null {
-  if (STATE.timer) return STATE.timer;
-  if (!isEnabled()) {
-    log.info("disabled (OMNIROUTE_WARMUP_ENABLED not set)");
-    return null;
-  }
-  const cron = getCron();
-  log.info("scheduler started", { cron, concurrency: getConcurrency() });
-  STATE.timer = setInterval(tick, 60_000);
-  STATE.timer.unref();
-  tick();
-  return STATE.timer;
-}
-
-export function stopWarmupScheduler(): void {
-  if (STATE.timer) {
-    clearInterval(STATE.timer);
-    STATE.timer = null;
-  }
-  STATE.executing = false;
-  STATE.lastFireMinute = -1;
-}
-
-/** Test-only: reset the globalThis singleton so each test starts fresh. */
-export function __resetWarmupState(): void {
-  if (STATE.timer) {
-    clearInterval(STATE.timer);
-  }
-  STATE.timer = null;
-  STATE.executing = false;
-  STATE.lastFireMinute = -1;
-}
-
-async function tick(): Promise<void> {
-  if (STATE.executing) return;
-  const now = new Date();
-  const ptNow = toPacificTime(now);
-  if (!matchesCron(getCron(), ptNow)) {
-    STATE.lastFireMinute = -1;
-    return;
-  }
-  const minuteKey = Math.floor(ptNow.getTime() / 60_000);
-  if (minuteKey === STATE.lastFireMinute) return;
-  STATE.lastFireMinute = minuteKey;
-  STATE.executing = true;
-  try {
-    await executeWarmup();
-  } catch (err) {
-    log.error("tick failed", { err });
-  } finally {
-    STATE.executing = false;
-  }
-}
-
-async function executeWarmup(): Promise<void> {
+/**
+ * Core warmup execution.
+ *
+ * Migrated to the JobRegistry: the old start/stop/tick timer loop and the
+ * globalThis singleton are removed (the registry owns scheduling + the
+ * OMNIROUTE_WARMUP_ENABLED env gate). executeWarmup is now the handler, exported
+ * for direct use, and returns an aggregated HandlerResult:
+ *   - recordsAffected = connections attempted
+ *   - success = false only when every connection was forbidden or an overall
+ *     exception occurred; partial failures are absorbed by the circuit breaker
+ *     (errors written per-connection to CircuitBreakerStore, not thrown).
+ * Circuit-breaker logic and connection_runtime_state persistence are unchanged.
+ */
+export async function executeWarmup(): Promise<HandlerResult> {
   const settings = await getSettings();
   const enabledMap = (settings?.claudeWarmup as Record<string, boolean> | undefined)?.connections;
   const connections = (await getProviderConnections({
@@ -171,13 +88,24 @@ async function executeWarmup(): Promise<void> {
       });
       continue;
     }
-    if (await cbStore.isInBackoff(conn.id)) {
-      log.debug("warmup skip", { connectionId: conn.id, reason: "backoff" });
-      continue;
-    }
-    const cbState = await cbStore.get(conn.id);
-    if (cbState?.lastResult === "forbidden") {
-      log.debug("warmup skip", { connectionId: conn.id, reason: "forbidden" });
+    try {
+      if (await cbStore.isInBackoff(conn.id)) {
+        log.debug("warmup skip", { connectionId: conn.id, reason: "backoff" });
+        continue;
+      }
+      const cbState = await cbStore.get(conn.id);
+      if (cbState?.lastResult === "forbidden") {
+        log.debug("warmup skip", { connectionId: conn.id, reason: "forbidden" });
+        continue;
+      }
+    } catch (err) {
+      // Transient store error (Redis blip, SQLite locked) -- skip this connection
+      // rather than aborting the entire tick. Per-connection degradation matches
+      // the recordResult pattern below which is already try/caught.
+      log.warn("circuit breaker read failed, skipping connection", {
+        connectionId: conn.id,
+        err,
+      });
       continue;
     }
     const proxyResolution = await resolveProxyForConnection(conn.id).catch((err) => {
@@ -206,9 +134,11 @@ async function executeWarmup(): Promise<void> {
 
   if (targets.length === 0) {
     log.info("no subscription connections to warm up");
-    return;
+    return { success: true, recordsAffected: 0 };
   }
 
+  let forbiddenCount = 0;
+  let failureCount = 0;
   for (let i = 0; i < targets.length; i += concurrency) {
     const chunk = targets.slice(i, i + concurrency);
     const results = await Promise.allSettled(chunk.map((t) => executeWarmupTarget(t)));
@@ -225,6 +155,8 @@ async function executeWarmup(): Promise<void> {
               failureKind: "unknown",
               error: String(settled.reason),
             };
+      if (result.failureKind === "forbidden") forbiddenCount++;
+      if (!result.success) failureCount++;
       try {
         await cbStore.recordResult(target.connectionId, result);
       } catch (err) {
@@ -232,6 +164,13 @@ async function executeWarmup(): Promise<void> {
       }
     }
   }
+
+  const allForbidden = forbiddenCount === targets.length && targets.length > 0;
+  return {
+    success: !allForbidden,
+    recordsAffected: targets.length,
+    ...(allForbidden ? { error: "all connections forbidden" } : {}),
+  };
 }
 
 async function getWarmupHeaders(): Promise<Record<string, string>> {
@@ -411,4 +350,20 @@ async function extractTokens(resp: Response): Promise<number> {
   } catch {
     return 5;
   }
+}
+
+/** Wire the warmup job into a JobRegistry (idempotent - call at boot). */
+export function registerWarmupScheduler(registry: JobRegistry): void {
+  registry.register({
+    id: "warmup",
+    type: "cron",
+    cronGetter: getCron,
+    intervalMs: null,
+    enabled: true,
+    envFlag: "OMNIROUTE_WARMUP_ENABLED",
+    config: { timezone: "America/Los_Angeles", envDefault: false },
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    handler: executeWarmup,
+  });
 }

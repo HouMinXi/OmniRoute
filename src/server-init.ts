@@ -4,7 +4,7 @@ import { enforceWebRuntimeEnv } from "./lib/env/runtimeEnv";
 import { enforceSecrets } from "./shared/utils/secretsValidator";
 import { initAuditLog, cleanupExpiredLogs, logAuditEvent } from "./lib/compliance/index";
 import { initConsoleInterceptor } from "./lib/consoleInterceptor";
-import { startBudgetResetJob } from "./lib/jobs/budgetResetJob";
+import { registerBudgetResetJob } from "./lib/jobs/budgetResetJob";
 import { startReasoningCacheCleanupJob } from "./lib/jobs/reasoningCacheCleanupJob";
 import { startCleanupScheduler } from "./lib/db/cleanup";
 import { getSettings } from "./lib/db/settings";
@@ -113,7 +113,13 @@ async function startServer() {
     }
 
     await initializeCloudSync();
-    startBudgetResetJob();
+    // register() only persists the definition; start() is what arms the timer.
+    // This path does not call ensureCloudSyncInitialized(), so nothing else here
+    // would ever call startAll() on our behalf.
+    const { getJobRegistry } = await import("./lib/jobRegistry");
+    const jobRegistry = getJobRegistry();
+    registerBudgetResetJob(jobRegistry);
+    jobRegistry.start("budget_reset");
     startReasoningCacheCleanupJob();
     startCleanupScheduler();
     startRuntimeConfigHotReload();
