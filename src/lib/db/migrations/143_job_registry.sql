@@ -1,4 +1,4 @@
--- Migration 136: generic job registry (jobs + job_runs tables)
+-- Migration 139: generic job registry (jobs + job_runs tables)
 -- Job registry (#8848): centralized periodic-job scheduling + run history.
 --
 -- jobs:      one row per registered job (interval or cron), with env-flag gating
@@ -33,10 +33,14 @@ CREATE INDEX IF NOT EXISTS idx_jr_started_at ON job_runs(started_at);
 -- Built-in job registration (idempotent - INSERT OR IGNORE).
 -- env_flag = NULL means "no registry-level boolean gate"; per-job disable semantics
 -- live inside the handler itself (see token_health_check wrapper).
-INSERT OR IGNORE INTO jobs (id, type, cron, interval_ms, env_flag, config) VALUES
-  ('budget_reset', 'interval', NULL, 600000, NULL, '{}'),
-  ('warmup', 'cron', '0 7 * * *', NULL, 'OMNIROUTE_WARMUP_ENABLED', '{"timezone":"America/Los_Angeles","envDefault":false}'),
-  ('token_health_check', 'interval', NULL, 60000, NULL, '{}');
+-- 'warmup' is seeded disabled because its handler is not part of this change.
+-- startAll() filters on enabled before it looks for a handler, so a disabled row
+-- stays quiet instead of warning on every boot; the change that brings the warmup
+-- handler flips it on.
+INSERT OR IGNORE INTO jobs (id, type, cron, interval_ms, enabled, env_flag, config) VALUES
+  ('budget_reset', 'interval', NULL, 600000, 1, NULL, '{}'),
+  ('warmup', 'cron', '0 7 * * *', NULL, 0, 'OMNIROUTE_WARMUP_ENABLED', '{"timezone":"America/Los_Angeles","envDefault":false}'),
+  ('token_health_check', 'interval', NULL, 60000, 1, NULL, '{}');
 
 -- records_affected semantics:
 --   budget_reset       = number of budget records reset (UPDATE ... SET budget_used=0 row count)

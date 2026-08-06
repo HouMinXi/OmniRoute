@@ -1,5 +1,5 @@
 /**
- * Tests for jobRegistry persistence (migration 136 + jobRegistryDb.ts).
+ * Tests for jobRegistry persistence (migration 139 + jobRegistryDb.ts).
  *
  * Verifies:
  *  - 3 built-in jobs seeded by the migration
@@ -54,7 +54,9 @@ test("seed: warmup is cron type with env gate + envDefault=false", () => {
   assert.equal(warmup.type, "cron");
   assert.equal(warmup.cron, "0 7 * * *");
   assert.equal(warmup.envFlag, "OMNIROUTE_WARMUP_ENABLED");
-  assert.equal(warmup.enabled, true);
+  // Seeded disabled: the warmup handler is not registered by this change, and
+  // startAll() would otherwise warn about the missing handler on every boot.
+  assert.equal(warmup.enabled, false);
   assert.equal(warmup.config.envDefault, false);
   assert.equal(warmup.config.timezone, "America/Los_Angeles");
 });
