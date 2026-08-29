@@ -185,10 +185,13 @@ function parseMemoryStatFileBytes(text: string | null): number | null {
   for (const line of text.split("\n")) {
     const [key, rawValue] = line.trim().split(/\s+/, 2);
     if (key !== "file" || rawValue == null) continue;
+    // sanitizeMemoryBytes rejects 0, but a zero file cache is a valid reading;
+    // parse the numeric form here and keep 0 (falls back to the raw ratio in
+    // workingSetBytes) while still rejecting malformed values.
+    const sanitized = sanitizeMemoryBytes(rawValue);
+    if (sanitized != null) return sanitized;
     const parsed = Number(rawValue);
-    return Number.isFinite(parsed) && parsed >= 0 && parsed < Number.MAX_SAFE_INTEGER
-      ? Math.floor(parsed)
-      : null;
+    return Number.isFinite(parsed) && parsed === 0 ? 0 : null;
   }
   return null;
 }
