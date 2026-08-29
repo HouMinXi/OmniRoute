@@ -229,6 +229,57 @@ describe("resource pressure policy", () => {
     assert.equal(state.severity, "normal", "workingset below recovery ratio releases the latch");
   });
 
+  it("handles workingset boundary conditions", () => {
+    const tracker = createResourcePressureTracker(fastThresholds);
+    const mk = (cur: number, file: number | null): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: {
+        currentBytes: cur,
+        maxBytes: 5 * 1024 ** 3,
+        highBytes: null,
+        fileBytes: file,
+        events: { low: 0, high: 0, max: 0, oom: 0, oom_kill: 0 },
+      },
+    });
+
+    // measurement skew: file > current falls back to the raw ratio, never 0.
+    // Raw current 95% with a bogus file reading must still read as critical.
+    tracker.observe(mk(5_033_164_800, 5_999_000_000));
+    let state = tracker.observe(mk(5_033_164_800, 5_999_000_000));
+    assert.equal(state.severity, "critical");
+
+    // file = 0 is a valid stat read (no page cache): raw ratio path.
+    tracker.observe(mk(5_033_164_800, 0));
+    state = tracker.observe(mk(5_033_164_800, 0));
+    assert.equal(state.severity, "critical");
+
+    // file exactly equal to current: workingset is 0 (all cache), ratio 0.
+    tracker.observe(mk(5_033_164_800, 5_033_164_800));
+    state = tracker.observe(mk(5_033_164_800, 5_033_164_800));
+    assert.equal(state.severity, "normal");
+  });
+
+  it("keeps the cgroup_high reason on the raw total charge", () => {
+    const tracker = createResourcePressureTracker(fastThresholds);
+    const mk = (cur: number, file: number, high: number): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: {
+        currentBytes: cur,
+        maxBytes: 5 * 1024 ** 3,
+        highBytes: high,
+        fileBytes: file,
+        events: { low: 0, high: 0, max: 0, oom: 0, oom_kill: 0 },
+      },
+    });
+    // Total charge 3.5 GiB over a 3 GiB high with 3 GiB of it file cache:
+    // kernel throttles on the total, so the guard must fire on cgroup_high
+    // even though the workingset (0.5 GiB) is tiny.
+    tracker.observe(mk(3_758_096_384, 3_221_225_472, 3 * 1024 ** 3));
+    const state = tracker.observe(mk(3_758_096_384, 3_221_225_472, 3 * 1024 ** 3));
+    assert.equal(state.severity, "critical");
+    assert.equal(state.reason, "cgroup_high");
+  });
+
   it("keeps snapshot state fields and bounded-cardinality values", () => {
     const tracker = createResourcePressureTracker(fastThresholds);
     const state: ResourcePressureState = tracker.observe(baseSignals());

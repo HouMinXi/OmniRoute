@@ -181,6 +181,9 @@ export function classifyAdaptiveResourcePressure(
   // pages under allocation pressure (memory.events high/max stay 0). Ratio the
   // working set (current minus file cache) so cache-heavy-but-healthy hosts do
   // not trip the guard. Without memory.stat, fall back to the raw ratio.
+  // memory.high keeps the raw current: the kernel throttles on TOTAL charge
+  // (file cache included) when crossing high, so a workingset ratio there
+  // would miss kernel-side reclaim stalls.
   const cgroupWorkingSetBytes = workingSetBytes(signals.cgroup);
   best = maxLevel(
     best,
@@ -188,7 +191,7 @@ export function classifyAdaptiveResourcePressure(
   );
   best = maxLevel(
     best,
-    ratioLevel(cgroupWorkingSetBytes, signals.cgroup.highBytes, thresholds, "cgroup_high")
+    ratioLevel(signals.cgroup.currentBytes, signals.cgroup.highBytes, thresholds, "cgroup_high")
   );
   best = maxLevel(best, psiLevel(signals.psi?.someAvg10 ?? null, thresholds, "psi_some"));
   return maxLevel(best, psiLevel(signals.psi?.fullAvg10 ?? null, thresholds, "psi_full"));
@@ -197,7 +200,12 @@ export function classifyAdaptiveResourcePressure(
 function workingSetBytes(cgroup: ResourceSignals["cgroup"]): number | null {
   if (cgroup.currentBytes == null) return null;
   if (cgroup.fileBytes == null || cgroup.fileBytes <= 0) return cgroup.currentBytes;
-  return Math.max(0, cgroup.currentBytes - cgroup.fileBytes);
+  // memory.current and memory.stat are separate, non-atomic reads; under churn
+  // file can momentarily exceed a fresher current. Treat that as a bad sample
+  // and fall back to the raw ratio rather than clamping to 0, which would
+  // read as zero pressure and could force a premature recovery.
+  if (cgroup.fileBytes > cgroup.currentBytes) return cgroup.currentBytes;
+  return cgroup.currentBytes - cgroup.fileBytes;
 }
 
 function isRecovered(signals: ResourceSignals, thresholds: ResourcePressureThresholds): boolean {
@@ -205,7 +213,7 @@ function isRecovered(signals: ResourceSignals, thresholds: ResourcePressureThres
   const ratios: Array<readonly [number | null, number | null]> = [
     [signals.v8.heapUsedBytes, signals.v8.heapLimitBytes],
     [cgroupWorkingSetBytes, signals.cgroup.maxBytes],
-    [cgroupWorkingSetBytes, signals.cgroup.highBytes],
+    [signals.cgroup.currentBytes, signals.cgroup.highBytes],
   ];
   if (
     ratios.some(

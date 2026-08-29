@@ -239,7 +239,7 @@ export async function sampleResourceSignals(
   }
 
   const cgroupDirectory = await resolveCgroupDirectory(readText);
-  const cgroupContents = cgroupDirectory
+  const cgroupReads = cgroupDirectory
     ? await Promise.all([
         readText(path.join(cgroupDirectory, "memory.current")),
         readText(path.join(cgroupDirectory, "memory.max")),
@@ -247,7 +247,17 @@ export async function sampleResourceSignals(
         readText(path.join(cgroupDirectory, "memory.events")),
         readText(path.join(cgroupDirectory, "memory.stat")),
       ])
-    : [null, null, null, null, null];
+    : null;
+  // Named bindings instead of positional indices: the read order above is
+  // easy to shuffle on edit, and a silent index shift would corrupt the
+  // current/max/high/stat mapping.
+  const cgroupFiles = {
+    current: cgroupReads?.[0] ?? null,
+    max: cgroupReads?.[1] ?? null,
+    high: cgroupReads?.[2] ?? null,
+    events: cgroupReads?.[3] ?? null,
+    stat: cgroupReads?.[4] ?? null,
+  };
   const psi = await readText("/proc/pressure/memory").catch(() => null);
 
   return {
@@ -261,11 +271,11 @@ export async function sampleResourceSignals(
       constrainedBytes: safeNumber(deps.constrainedMemory ?? (() => process.constrainedMemory?.())),
     },
     cgroup: {
-      currentBytes: sanitizeMemoryBytes(cgroupContents[0]),
-      maxBytes: sanitizeMemoryBytes(cgroupContents[1]),
-      highBytes: sanitizeMemoryBytes(cgroupContents[2]),
-      fileBytes: parseMemoryStatFileBytes(cgroupContents[4]),
-      events: parseMemoryEvents(cgroupContents[3]),
+      currentBytes: sanitizeMemoryBytes(cgroupFiles.current),
+      maxBytes: sanitizeMemoryBytes(cgroupFiles.max),
+      highBytes: sanitizeMemoryBytes(cgroupFiles.high),
+      fileBytes: parseMemoryStatFileBytes(cgroupFiles.stat),
+      events: parseMemoryEvents(cgroupFiles.events),
     },
     psi: parsePsi(psi),
   };
