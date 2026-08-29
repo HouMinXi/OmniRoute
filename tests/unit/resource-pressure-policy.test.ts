@@ -133,6 +133,7 @@ describe("resource pressure policy", () => {
           currentBytes: null,
           maxBytes: null,
           highBytes: null,
+          fileBytes: null,
           events: { low: 0, high: 0, max: 0, oom, oom_kill },
         },
       });
@@ -160,6 +161,7 @@ describe("resource pressure policy", () => {
           currentBytes: null,
           maxBytes: null,
           highBytes: null,
+          fileBytes: null,
           events: { low: 0, high: 0, max: 0, oom, oom_kill },
         },
       });
