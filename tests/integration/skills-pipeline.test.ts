@@ -161,7 +161,7 @@ test("matching tool calls execute the registered skill and return tool results",
 
   globalThis.fetch = async () =>
     buildOpenAIToolCallResponse({
-      toolName: "lookupWeather@1.0.0",
+      toolName: encodeSkillToolName("lookupWeather", "1.0.0"),
       argumentsObject: { location: "Recife" },
     });
 
@@ -454,8 +454,8 @@ test("responses input context participates in AUTO skill injection", async () =>
     .map((tool) => decodeSkillToolName(tool?.function?.name ?? ""))
     .filter((name) => typeof name === "string" && name.length > 0);
 
-  assert.ok(names.includes("issueSearch@1.0.0"));
-  assert.ok(!names.includes("calendarPlanner@1.0.0"));
+  assert.ok(names.includes(encodeSkillToolName("issueSearch", "1.0.0")));
+  assert.ok(!names.includes(encodeSkillToolName("calendarPlanner", "1.0.0")));
 });
 
 test("handleToolCallExecution() processes a tool call correctly", async () => {
@@ -787,7 +787,10 @@ test("builtin and custom skills coexist in the injected tool list", async () => 
     .sort();
 
   assert.equal(response.status, 200);
-  assert.deepEqual(toolNames, ["lookupWeather@1.0.0", "webSearch@1.0.0"]);
+  assert.deepEqual(toolNames, [
+    encodeSkillToolName("lookupWeather", "1.0.0"),
+    encodeSkillToolName("webSearch", "1.0.0"),
+  ]);
 });
 
 test("web_search fallback converts built-in tools for unsupported providers and executes search", async () => {
@@ -862,7 +865,7 @@ test("web_search fallback preserves Responses API output by appending function_c
   await seedConnection("serper-search", { apiKey: "serper-search-key" });
   const apiKey = await seedApiKey();
 
-  globalThis.fetch = async (url, init = {}) => {
+  globalThis.fetch = async (url, _init = {}) => {
     const urlStr = String(url);
     if (urlStr.includes("google.serper.dev/search")) {
       return new Response(
@@ -926,4 +929,80 @@ test("web_search fallback preserves Responses API output by appending function_c
       : functionCallOutput.output;
   assert.equal(output.success, true);
   assert.equal(output.results[0].title, "Responses Search Result");
+});
+
+test("web_search fallback auto-selects a configured paid provider over duckduckgo-free in responses pipeline", async () => {
+  await seedConnection("openai", { apiKey: "sk-openai-skill-enable" });
+  // Seed a paid provider that is NOT the cheapest non-fallback web provider.
+  // Without the fix, auto-selection falls back to duckduckgo-free as soon as the
+  // cheapest non-fallback provider has no credentials, producing empty results.
+  await seedConnection("serper-search", { apiKey: "serper-paid-key" });
+  const apiKey = await seedApiKey();
+
+  globalThis.fetch = async (url, _init = {}) => {
+    const urlStr = String(url);
+    if (urlStr.includes("google.serper.dev/search")) {
+      return new Response(
+        JSON.stringify({
+          organic: [
+            {
+              title: "Paid Provider Result",
+              link: "https://example.com/paid",
+              snippet: "Result from the configured paid search provider",
+            },
+          ],
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    }
+    if (urlStr.includes("lite.duckduckgo.com")) {
+      // Return empty HTML success -- without the fix this is what gets selected
+      // and no failover to the paid provider occurs.
+      return new Response("<html></html>", {
+        status: 200,
+        headers: { "Content-Type": "text/html" },
+      });
+    }
+    return buildOpenAIToolCallResponse({
+      toolName: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME,
+      toolCallId: "call_responses_auto_search",
+      argumentsObject: {
+        query: "paid provider auto-select test",
+      },
+    });
+  };
+
+  const response = await handleChat(
+    buildRequest({
+      url: "http://localhost/v1/responses",
+      authKey: apiKey.key,
+      body: {
+        model: "openai/gpt-4o-mini",
+        stream: false,
+        input: [
+          {
+            type: "message",
+            role: "user",
+            content: [{ type: "input_text", text: "Search the web for the latest OmniRoute roadmap" }],
+          },
+        ],
+        tools: [{ type: "web_search_preview", search_context_size: "low" }],
+      },
+    })
+  );
+  const json = (await response.json()) as any;
+  const functionCall = json.output.find((item) => item.type === "function_call");
+  const functionCallOutput = json.output.find((item) => item.type === "function_call_output");
+  const output =
+    typeof functionCallOutput.output === "string"
+      ? JSON.parse(functionCallOutput.output)
+      : functionCallOutput.output;
+
+  assert.equal(response.status, 200);
+  assert.ok(functionCall, "should include the original function_call item");
+  assert.ok(functionCallOutput, "should append function_call_output");
+  assert.equal(functionCall.name, OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME);
+  assert.equal(functionCallOutput.call_id, "call_responses_auto_search");
+  assert.equal(output.provider, "serper-search");
+  assert.equal(output.results[0].title, "Paid Provider Result");
 });
