@@ -28,9 +28,19 @@ export async function GET(request: NextRequest) {
         .filter(
           (connection) =>
             (typeof connection.apiKey === "string" && connection.apiKey.trim().length > 0) ||
-            connection.authType === "oauth"
+            connection.authType === "oauth" ||
+            connection.authType === "none" ||
+            connection.provider === "ollama-local" ||
+            connection.provider === "lm-studio" ||
+            connection.provider === "lmstudio" ||
+            connection.provider === "vllm" ||
+            connection.provider === "mlx-gemma" ||
+            connection.provider === "mlx-qwen"
         )
-        .map((connection) => String(connection.provider || ""))
+        .map((connection) => {
+          const p = String(connection.provider || "");
+          return p === "lm-studio" ? "lmstudio" : p;
+        })
         .filter(Boolean)
     );
 

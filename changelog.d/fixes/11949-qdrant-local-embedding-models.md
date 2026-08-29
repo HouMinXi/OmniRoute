@@ -1,0 +1,1 @@
+- **fix(memory):** include active local and no-auth provider connections (`ollama-local`, `lm-studio`, `vllm`, `mlx-*`) in `GET /api/settings/qdrant/embedding-models` options list ([#11949](https://github.com/diegosouzapw/OmniRoute/issues/11949)).
