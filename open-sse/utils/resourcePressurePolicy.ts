@@ -29,6 +29,7 @@ export type ResourceSignals = {
     currentBytes: ResourceMetricBytes;
     maxBytes: ResourceMetricBytes;
     highBytes: ResourceMetricBytes;
+    fileBytes: ResourceMetricBytes;
     events: {
       low: ResourceMetricBytes;
       high: ResourceMetricBytes;
@@ -176,23 +177,35 @@ export function classifyAdaptiveResourcePressure(
     best,
     ratioLevel(signals.v8.heapUsedBytes, signals.v8.heapLimitBytes, thresholds, "v8_heap_ratio")
   );
+  // memory.current includes reclaimable page cache; the kernel drops those
+  // pages under allocation pressure (memory.events high/max stay 0). Ratio the
+  // working set (current minus file cache) so cache-heavy-but-healthy hosts do
+  // not trip the guard. Without memory.stat, fall back to the raw ratio.
+  const cgroupWorkingSetBytes = workingSetBytes(signals.cgroup);
   best = maxLevel(
     best,
-    ratioLevel(signals.cgroup.currentBytes, signals.cgroup.maxBytes, thresholds, "cgroup_ratio")
+    ratioLevel(cgroupWorkingSetBytes, signals.cgroup.maxBytes, thresholds, "cgroup_ratio")
   );
   best = maxLevel(
     best,
-    ratioLevel(signals.cgroup.currentBytes, signals.cgroup.highBytes, thresholds, "cgroup_high")
+    ratioLevel(cgroupWorkingSetBytes, signals.cgroup.highBytes, thresholds, "cgroup_high")
   );
   best = maxLevel(best, psiLevel(signals.psi?.someAvg10 ?? null, thresholds, "psi_some"));
   return maxLevel(best, psiLevel(signals.psi?.fullAvg10 ?? null, thresholds, "psi_full"));
 }
 
+function workingSetBytes(cgroup: ResourceSignals["cgroup"]): number | null {
+  if (cgroup.currentBytes == null) return null;
+  if (cgroup.fileBytes == null || cgroup.fileBytes <= 0) return cgroup.currentBytes;
+  return Math.max(0, cgroup.currentBytes - cgroup.fileBytes);
+}
+
 function isRecovered(signals: ResourceSignals, thresholds: ResourcePressureThresholds): boolean {
+  const cgroupWorkingSetBytes = workingSetBytes(signals.cgroup);
   const ratios: Array<readonly [number | null, number | null]> = [
     [signals.v8.heapUsedBytes, signals.v8.heapLimitBytes],
-    [signals.cgroup.currentBytes, signals.cgroup.maxBytes],
-    [signals.cgroup.currentBytes, signals.cgroup.highBytes],
+    [cgroupWorkingSetBytes, signals.cgroup.maxBytes],
+    [cgroupWorkingSetBytes, signals.cgroup.highBytes],
   ];
   if (
     ratios.some(

@@ -180,6 +180,19 @@ function parsePsiNumber(line: string, name: string): number | null {
   return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
 }
 
+function parseMemoryStatFileBytes(text: string | null): number | null {
+  if (!text) return null;
+  for (const line of text.split("\n")) {
+    const [key, rawValue] = line.trim().split(/\s+/, 2);
+    if (key !== "file" || rawValue == null) continue;
+    const parsed = Number(rawValue);
+    return Number.isFinite(parsed) && parsed >= 0 && parsed < Number.MAX_SAFE_INTEGER
+      ? Math.floor(parsed)
+      : null;
+  }
+  return null;
+}
+
 function parsePsi(text: string | null): ResourceSignals["psi"] {
   if (!text) return null;
   const result: NonNullable<ResourceSignals["psi"]> = {
@@ -232,8 +245,9 @@ export async function sampleResourceSignals(
         readText(path.join(cgroupDirectory, "memory.max")),
         readText(path.join(cgroupDirectory, "memory.high")),
         readText(path.join(cgroupDirectory, "memory.events")),
+        readText(path.join(cgroupDirectory, "memory.stat")),
       ])
-    : [null, null, null, null];
+    : [null, null, null, null, null];
   const psi = await readText("/proc/pressure/memory").catch(() => null);
 
   return {
@@ -250,6 +264,7 @@ export async function sampleResourceSignals(
       currentBytes: sanitizeMemoryBytes(cgroupContents[0]),
       maxBytes: sanitizeMemoryBytes(cgroupContents[1]),
       highBytes: sanitizeMemoryBytes(cgroupContents[2]),
+      fileBytes: parseMemoryStatFileBytes(cgroupContents[4]),
       events: parseMemoryEvents(cgroupContents[3]),
     },
     psi: parsePsi(psi),

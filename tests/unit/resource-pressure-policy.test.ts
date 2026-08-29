@@ -23,7 +23,7 @@ function baseSignals(overrides: Partial<ResourceSignals> = {}): ResourceSignals 
       availableBytes: null,
       constrainedBytes: null,
     },
-    cgroup: { currentBytes: null, maxBytes: null, highBytes: null, events: null },
+    cgroup: { currentBytes: null, maxBytes: null, highBytes: null, fileBytes: null, events: null },
     psi: null,
     ...overrides,
   };
@@ -172,6 +172,59 @@ describe("resource pressure policy", () => {
       "normal"
     );
     assert.equal(tracker.observe(events(9, 3)).severity, "normal", "replacement re-baselines");
+  });
+
+  it("ignores reclaimable page cache in the cgroup workingset ratio", () => {
+    // Incident 2026-08-29: memory.current included 3.01 GiB of reclaimable
+    // page cache on top of 1.62 GiB anon, tripping cgroup_ratio critical at
+    // 95% while the real working set was 33% and memory.events stayed zero.
+    const tracker = createResourcePressureTracker(fastThresholds);
+    const cgroup = (
+      currentBytes: number,
+      fileBytes: number | null
+    ): ResourceSignals["cgroup"] => ({
+      currentBytes,
+      maxBytes: 5 * 1024 ** 3,
+      highBytes: null,
+      fileBytes,
+      events: { low: 0, high: 0, max: 0, oom: 0, oom_kill: 0 },
+    });
+    const signals = (c: ResourceSignals["cgroup"]): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: c,
+    });
+
+    // Raw current at 95% with 3 GiB reclaimable cache: workingset is 1.62/5 = 32%.
+    assert.equal(tracker.observe(signals(cgroup(5_033_164_800, 3_232_225_280))).severity, "normal");
+    // Same current with zero cache is genuine pressure (sustained 2 samples).
+    tracker.observe(signals(cgroup(5_033_164_800, 0)));
+    assert.equal(tracker.observe(signals(cgroup(5_033_164_800, 0))).severity, "critical");
+    // Missing memory.stat (fileBytes null) keeps the legacy raw-ratio behavior.
+    tracker.observe(signals(cgroup(5_033_164_800, null)));
+    assert.equal(tracker.observe(signals(cgroup(5_033_164_800, null))).severity, "critical");
+  });
+
+  it("recovers the cgroup_ratio latch once page cache drains", () => {
+    const tracker = createResourcePressureTracker(fastThresholds);
+    const cgroup = (currentBytes: number, fileBytes: number | null): ResourceSignals => ({
+      ...baseSignals(),
+      cgroup: {
+        currentBytes,
+        maxBytes: 5 * 1024 ** 3,
+        highBytes: null,
+        fileBytes,
+        events: { low: 0, high: 0, max: 0, oom: 0, oom_kill: 0 },
+      },
+    });
+
+    let state = tracker.observe(cgroup(5_033_164_800, 0)); // genuine critical
+    state = tracker.observe(cgroup(5_033_164_800, 0)); // sustained 2 samples
+    assert.equal(state.severity, "critical");
+    // Cache grows while anon stays low: current stays high but workingset drops.
+    state = tracker.observe(cgroup(4_662_461_440, 3_232_225_280));
+    assert.equal(state.severity, "critical", "recovery needs sustained samples");
+    state = tracker.observe(cgroup(4_662_461_440, 3_232_225_280));
+    assert.equal(state.severity, "normal", "workingset below recovery ratio releases the latch");
   });
 
   it("keeps snapshot state fields and bounded-cardinality values", () => {
