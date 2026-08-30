@@ -9,10 +9,14 @@ import { test } from "node:test";
 // Regression: 2026-08-30, switching env credentials globally made every
 // existing antigravity/agy refresh return 401 unauthorized_client.
 import { getAccessToken } from "../../open-sse/services/tokenRefresh.ts";
+import type { GoogleOauthClientMarker } from "../../open-sse/services/tokenRefresh/googleClientBinding.ts";
 
 const CUSTOM_ID = "custom-client-id.apps.googleusercontent.com";
 
-async function captureRefreshCall(providerOverridePsd, provider = "antigravity") {
+async function captureRefreshCall(
+  providerOverridePsd?: { oauthClient?: GoogleOauthClientMarker } & Record<string, unknown>,
+  provider = "antigravity"
+) {
   const calls = [];
   // refreshGoogleToken reads PROVIDERS[provider].clientId from
   // ../config/constants.ts. The registry resolves the built-in desktop client

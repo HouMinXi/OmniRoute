@@ -7,7 +7,10 @@ import {
   getAntigravityOAuthUserAgent,
 } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "@omniroute/open-sse/services/codeAssistSubscription.ts";
-import { BUILTIN_ANTIGRAVITY_CLIENT } from "@omniroute/open-sse/services/tokenRefresh/googleClientBinding.ts";
+import {
+  BUILTIN_ANTIGRAVITY_CLIENT,
+  type GoogleOauthClientMarker,
+} from "@omniroute/open-sse/services/tokenRefresh/googleClientBinding.ts";
 
 const POSTEXCHANGE_TIMEOUT_MS = 8_000;
 
@@ -43,7 +46,7 @@ type AntigravityPostExchange = {
   userInfo: { email?: string };
   projectDiscoveryOutcome?: AntigravityProjectDiscoveryOutcome;
   /** Literal issuer of the connection's refresh token: "builtin" or "custom:<clientId>". */
-  oauthClient?: string;
+  oauthClient?: GoogleOauthClientMarker;
 };
 
 async function fetchFirstOk(endpoints: string[], init: RequestInit, timeoutMs?: number) {
