@@ -23,8 +23,16 @@ const BUILTIN_GEMINI_CLIENT = {
   clientSecret: resolvePublicCred("gemini_alt"),
 } as const;
 
+/** Marker recorded at authorize time; the literal id guards client rotation. */
+export type GoogleOauthClientMarker = "builtin" | `custom:${string}` | undefined;
+
 function builtinClientFor(provider: string) {
-  return provider === "gemini" ? BUILTIN_GEMINI_CLIENT : BUILTIN_ANTIGRAVITY_CLIENT;
+  if (provider === "gemini") return BUILTIN_GEMINI_CLIENT;
+  if (provider === "antigravity" || provider === "agy") return BUILTIN_ANTIGRAVITY_CLIENT;
+  // Unknown Google-family provider: no embedded client exists to fall back
+  // to. The antigravity client would mint Google 401s for tokens it never
+  // issued, so refuse loudly instead of guessing.
+  throw new Error(`no builtin OAuth client registered for provider: ${provider}`);
 }
 
 /**
@@ -51,7 +59,7 @@ function builtinClientFor(provider: string) {
  */
 export function selectGoogleRefreshClient(
   provider: string,
-  oauthClientMarker: unknown,
+  oauthClientMarker: GoogleOauthClientMarker | unknown,
   configuredClient: { clientId?: string; clientSecret?: string } | null | undefined
 ): { clientId: string; clientSecret: string } {
   if (

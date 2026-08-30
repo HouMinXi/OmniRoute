@@ -93,10 +93,24 @@ test("gemini connection without a marker refreshes with the gemini builtin clien
   // gemini embeds a DIFFERENT desktop client than antigravity; the fallback
   // must be keyed by provider or every pre-existing gemini connection would
   // suddenly refresh against the antigravity client (401 unauthorized_client).
-  const calls = await captureRefreshCall(undefined, "gemini");
-  assert.equal(calls.length, 1);
-  assert.notEqual(calls[0].client_id, CUSTOM_ID);
-  assert.ok(calls[0].client_id.endsWith(".apps.googleusercontent.com"));
-  const agyCalls = await captureRefreshCall(undefined, "antigravity");
-  assert.notEqual(calls[0].client_id, agyCalls[0].client_id, "gemini and antigravity built-ins differ");
+  // This also exercises the env-override interplay verified live: with
+  // GEMINI_OAUTH_CLIENT_ID set to a custom client, an unmarked gemini
+  // connection still refreshes against the gemini builtin.
+  const realGeminiId = process.env.GEMINI_OAUTH_CLIENT_ID;
+  const realGeminiSecret = process.env.GEMINI_OAUTH_CLIENT_SECRET;
+  process.env.GEMINI_OAUTH_CLIENT_ID = "fake-custom-gemini-id.apps.googleusercontent.com";
+  process.env.GEMINI_OAUTH_CLIENT_SECRET = "fake-secret";
+  try {
+    const calls = await captureRefreshCall(undefined, "gemini");
+    assert.equal(calls.length, 1);
+    assert.notEqual(calls[0].client_id, "fake-custom-gemini-id.apps.googleusercontent.com");
+    assert.ok(calls[0].client_id.endsWith(".apps.googleusercontent.com"));
+    const agyCalls = await captureRefreshCall(undefined, "antigravity");
+    assert.notEqual(calls[0].client_id, agyCalls[0].client_id, "gemini and antigravity built-ins differ");
+  } finally {
+    if (realGeminiId === undefined) delete process.env.GEMINI_OAUTH_CLIENT_ID;
+    else process.env.GEMINI_OAUTH_CLIENT_ID = realGeminiId;
+    if (realGeminiSecret === undefined) delete process.env.GEMINI_OAUTH_CLIENT_SECRET;
+    else process.env.GEMINI_OAUTH_CLIENT_SECRET = realGeminiSecret;
+  }
 });
