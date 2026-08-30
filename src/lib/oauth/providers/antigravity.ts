@@ -7,8 +7,19 @@ import {
   getAntigravityOAuthUserAgent,
 } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "@omniroute/open-sse/services/codeAssistSubscription.ts";
+import { BUILTIN_ANTIGRAVITY_CLIENT } from "@omniroute/open-sse/services/tokenRefresh/googleClientBinding.ts";
 
 const POSTEXCHANGE_TIMEOUT_MS = 8_000;
+
+/**
+ * True when the OAuth config carries operator-provided credentials instead
+ * of the embedded desktop client. `ANTIGRAVITY_CONFIG.clientId` resolves
+ * env overrides (ANTIGRAVITY_OAUTH_CLIENT_ID) at module load, so compare by
+ * value against the raw embedded default.
+ */
+function isCustomAntigravityClient(config: AntigravityOAuthConfig): boolean {
+  return config.clientId !== BUILTIN_ANTIGRAVITY_CLIENT.clientId;
+}
 
 type AntigravityOAuthConfig = typeof ANTIGRAVITY_CONFIG;
 type AntigravityTokenPayload = {
@@ -278,8 +289,10 @@ export function createAntigravityOAuthProvider(
         ...extra,
         // Record which OAuth client issued the refresh token we just
         // received, so refreshes keep presenting that same client even after
-        // the operator swaps the env-level custom client later on.
-        oauthClient: config.clientId === ANTIGRAVITY_CONFIG.clientId ? "builtin" : "custom",
+        // the operator swaps the env-level custom client later on. Compare by
+        // value against the embedded default: `config` may be the very same
+        // object as ANTIGRAVITY_CONFIG when no runtime override exists.
+        oauthClient: isCustomAntigravityClient(config) ? "custom" : "builtin",
       })),
     mapTokens: (tokens, extra) => mapAntigravityTokens(clientProfile, tokens, extra),
   };

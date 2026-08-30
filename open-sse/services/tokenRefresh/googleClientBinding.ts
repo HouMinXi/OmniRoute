@@ -35,10 +35,17 @@ export const BUILTIN_ANTIGRAVITY_CLIENT = {
  */
 export function selectGoogleRefreshClient(
   oauthClientMarker: unknown,
-  configuredClient: { clientId: string; clientSecret: string }
+  configuredClient: { clientId?: string; clientSecret?: string } | null | undefined
 ): { clientId: string; clientSecret: string } {
-  if (oauthClientMarker === "custom" && configuredClient) {
-    return configuredClient;
+  if (
+    oauthClientMarker === "custom" &&
+    configuredClient?.clientId &&
+    configuredClient?.clientSecret
+  ) {
+    return {
+      clientId: configuredClient.clientId,
+      clientSecret: configuredClient.clientSecret,
+    };
   }
   return {
     clientId: BUILTIN_ANTIGRAVITY_CLIENT.clientId,

@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { test, mock } from "node:test";
+import { test } from "node:test";
 
 // A Google refresh token is bound to the OAuth client that issued it. When an
 // operator overrides ANTIGRAVITY_OAUTH_CLIENT_ID/SECRET with their own web
@@ -10,7 +10,6 @@ import { test, mock } from "node:test";
 // existing antigravity/agy refresh return 401 unauthorized_client.
 import { getAccessToken } from "../../open-sse/services/tokenRefresh.ts";
 
-const BUILTIN_ID = "builtin-client-id.apps.googleusercontent.com"; // unused after assert rewrite
 const CUSTOM_ID = "custom-client-id.apps.googleusercontent.com";
 
 async function captureRefreshCall(providerOverridePsd, provider = "antigravity") {
@@ -18,23 +17,11 @@ async function captureRefreshCall(providerOverridePsd, provider = "antigravity")
   // refreshGoogleToken reads PROVIDERS[provider].clientId from
   // ../config/constants.ts. The registry resolves the built-in desktop client
   // unless env overrides exist; point the env at the "custom" client so the
-  // proxy below reports which one the refresh actually used.
+  // captured refresh reports which one the code actually used.
   const realId = process.env.ANTIGRAVITY_OAUTH_CLIENT_ID;
   const realSecret = process.env.ANTIGRAVITY_OAUTH_CLIENT_SECRET;
   process.env.ANTIGRAVITY_OAUTH_CLIENT_ID = CUSTOM_ID;
   process.env.ANTIGRAVITY_OAUTH_CLIENT_SECRET = "custom-secret";
-  const config = await import("../../open-sse/config/constants.ts");
-  const fake = new Proxy(
-    { [provider]: { clientId: CUSTOM_ID, clientSecret: "custom-secret" } },
-    {
-      get(t, p) {
-        if (p === provider) return t[p];
-        return { clientId: BUILTIN_ID, clientSecret: "builtin-secret" };
-      },
-    }
-  );
-  // Temporarily replace the exported binding is not possible for const; instead
-  // patch via globalThis fetch to capture what refreshGoogleToken sends.
   const realFetch = globalThis.fetch;
   globalThis.fetch = async (url, init) => {
     if (String(url).includes("oauth2.googleapis.com/token")) {
