@@ -31,14 +31,20 @@ function builtinClientFor(provider: string) {
  * Pick the OAuth client credentials a Google refresh must use.
  *
  * The marker lives in the connection's providerSpecificData.oauthClient:
- *   - "custom": the connection was authorized under the operator's custom
- *     client (env override set at authorize time), so the refresh must
- *     present that same client.
- *   - "builtin" or missing: the connection predates the marker or was
- *     authorized with the embedded desktop client. Missing deliberately
- *     means built-in: every connection created before this marker existed
- *     was issued by an embedded client, because no per-connection custom
- *     client could be recorded at all.
+ *   - a string starting with "custom:" records the LITERAL client id that
+ *     issued the token. The refresh compares it against the currently
+ *     configured client: matching means the operator's custom client is
+ *     unchanged and can refresh; a mismatch (the operator swapped to a
+ *     different custom client after authorization) or a missing/malformed
+ *     marker means the connection predates per-connection binding or lost
+ *     its issuer, so the embedded desktop client of the connection's own
+ *     provider is the only client that can still own that token.
+ *   - "builtin": authorized with the embedded desktop client.
+ *
+ * Storing the literal id (not just a boolean) matters because Google binds
+ * each refresh token to the exact issuing client; "custom" alone would
+ * silently move old connections onto a *different* custom client when the
+ * operator rotates credentials.
  *
  * When no custom credentials are configured, both branches resolve to the
  * same built-in client and the choice is moot.
@@ -49,8 +55,9 @@ export function selectGoogleRefreshClient(
   configuredClient: { clientId?: string; clientSecret?: string } | null | undefined
 ): { clientId: string; clientSecret: string } {
   if (
-    oauthClientMarker === "custom" &&
-    configuredClient?.clientId &&
+    typeof oauthClientMarker === "string" &&
+    oauthClientMarker.startsWith("custom:") &&
+    oauthClientMarker.slice("custom:".length) === configuredClient?.clientId &&
     configuredClient?.clientSecret
   ) {
     return {

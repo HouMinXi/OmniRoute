@@ -71,10 +71,22 @@ test("connection marked oauthClient=builtin refreshes with the built-in client",
   assert.ok(calls[0].client_id.endsWith(".apps.googleusercontent.com"));
 });
 
-test("connection marked oauthClient=custom refreshes with the custom client", async () => {
-  const calls = await captureRefreshCall({ oauthClient: "custom" });
+test("connection marked oauthClient=custom:<id> matching the configured client refreshes with it", async () => {
+  const calls = await captureRefreshCall({ oauthClient: `custom:${CUSTOM_ID}` });
   assert.equal(calls.length, 1);
   assert.equal(calls[0].client_id, CUSTOM_ID);
+});
+
+test("custom-marked connection falls back to builtin after the operator rotates the custom client", async () => {
+  // The marker stores the LITERAL issuing client id. When the operator swaps
+  // to a different custom client, the old connection's token belongs to a
+  // client neither the env nor the embedded default can represent — the
+  // builtin fallback is chosen (and the refresh will fail with 401, which is
+  // the honest outcome: that connection needs re-authorization).
+  const calls = await captureRefreshCall({ oauthClient: "custom:rotated-away-id.apps.googleusercontent.com" });
+  assert.equal(calls.length, 1);
+  assert.notEqual(calls[0].client_id, CUSTOM_ID);
+  assert.ok(calls[0].client_id.endsWith(".apps.googleusercontent.com"));
 });
 
 test("gemini connection without a marker refreshes with the gemini builtin client", async () => {

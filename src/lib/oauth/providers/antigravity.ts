@@ -44,7 +44,8 @@ type AntigravityPostExchange = {
   tierId: string;
   userInfo: { email?: string };
   projectDiscoveryOutcome?: AntigravityProjectDiscoveryOutcome;
-  oauthClient?: "builtin" | "custom";
+  /** Literal issuer of the connection's refresh token: "builtin" or "custom:<clientId>". */
+  oauthClient?: string;
 };
 
 async function fetchFirstOk(endpoints: string[], init: RequestInit, timeoutMs?: number) {
@@ -289,12 +290,15 @@ export function createAntigravityOAuthProvider(
     postExchange: (tokens) =>
       postExchangeAntigravity(config, clientProfile, tokens).then((extra) => ({
         ...extra,
-        // Record which OAuth client issued the refresh token we just
-        // received, so refreshes keep presenting that same client even after
-        // the operator swaps the env-level custom client later on. Compare by
-        // value against the embedded default: `config` may be the very same
-        // object as ANTIGRAVITY_CONFIG when no runtime override exists.
-        oauthClient: isCustomAntigravityClient(config) ? "custom" : "builtin",
+        // Record the LITERAL client id that issued the refresh token we
+        // just received (custom:<id> / builtin), so refreshes keep
+        // presenting that same client even after the operator rotates the
+        // env-level custom client later on. Compare by value against the
+        // embedded default: `config` may be the very same object as
+        // ANTIGRAVITY_CONFIG when no runtime override exists.
+        oauthClient: isCustomAntigravityClient(config)
+          ? `custom:${config.clientId}`
+          : "builtin",
       })),
     mapTokens: (tokens, extra) => mapAntigravityTokens(clientProfile, tokens, extra),
   };
