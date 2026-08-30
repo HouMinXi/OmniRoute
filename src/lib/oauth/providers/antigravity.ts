@@ -31,6 +31,7 @@ type AntigravityPostExchange = {
   tierId: string;
   userInfo: { email?: string };
   projectDiscoveryOutcome?: AntigravityProjectDiscoveryOutcome;
+  oauthClient?: "builtin" | "custom";
 };
 
 async function fetchFirstOk(endpoints: string[], init: RequestInit, timeoutMs?: number) {
@@ -247,6 +248,11 @@ function mapAntigravityTokens(
       clientProfile,
       projectId: extra?.projectId,
       tier: extra?.tierId,
+      // Which OAuth client issued this connection's refresh token. The token
+      // refresh must present the same client Google saw at authorize time;
+      // switching the operator's custom client via env afterwards must not
+      // retroactively move existing connections (401 unauthorized_client).
+      oauthClient: extra?.oauthClient,
       // The Antigravity backend ships new models frequently (e.g. Gemini 3.7
       // Flash tiers appeared upstream weeks before the pinned catalog knew
       // them). Default new connections into the 24h model auto-sync (#488) so
@@ -267,7 +273,14 @@ export function createAntigravityOAuthProvider(
     buildAuthUrl: buildAntigravityAuthUrl,
     exchangeToken: (runtimeConfig, code, redirectUri) =>
       exchangeAntigravityToken(runtimeConfig, clientProfile, code, redirectUri),
-    postExchange: (tokens) => postExchangeAntigravity(config, clientProfile, tokens),
+    postExchange: (tokens) =>
+      postExchangeAntigravity(config, clientProfile, tokens).then((extra) => ({
+        ...extra,
+        // Record which OAuth client issued the refresh token we just
+        // received, so refreshes keep presenting that same client even after
+        // the operator swaps the env-level custom client later on.
+        oauthClient: config.clientId === ANTIGRAVITY_CONFIG.clientId ? "builtin" : "custom",
+      })),
     mapTokens: (tokens, extra) => mapAntigravityTokens(clientProfile, tokens, extra),
   };
 }
