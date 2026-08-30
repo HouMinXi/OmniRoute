@@ -7,18 +7,20 @@ import {
   getAntigravityOAuthUserAgent,
 } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "@omniroute/open-sse/services/codeAssistSubscription.ts";
-import { BUILTIN_ANTIGRAVITY_CLIENT } from "@omniroute/open-sse/services/tokenRefresh/googleClientBinding.ts";
+import { selectGoogleRefreshClient } from "@omniroute/open-sse/services/tokenRefresh/googleClientBinding.ts";
 
 const POSTEXCHANGE_TIMEOUT_MS = 8_000;
 
 /**
  * True when the OAuth config carries operator-provided credentials instead
  * of the embedded desktop client. `ANTIGRAVITY_CONFIG.clientId` resolves
- * env overrides (ANTIGRAVITY_OAUTH_CLIENT_ID) at module load, so compare by
- * value against the raw embedded default.
+ * env overrides (ANTIGRAVITY_OAUTH_CLIENT_ID) at module load; ask the
+ * binding module for the built-in antigravity client and compare by value
+ * (antigravity and agy embed the same client, so one comparison covers both).
  */
 function isCustomAntigravityClient(config: AntigravityOAuthConfig): boolean {
-  return config.clientId !== BUILTIN_ANTIGRAVITY_CLIENT.clientId;
+  const builtin = selectGoogleRefreshClient("antigravity", "builtin", null);
+  return config.clientId !== builtin.clientId;
 }
 
 type AntigravityOAuthConfig = typeof ANTIGRAVITY_CONFIG;

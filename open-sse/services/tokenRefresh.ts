@@ -338,6 +338,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       // the built-in desktop client must not be refreshed against the custom
       // one (401 unauthorized_client, 2026-08-30 incident).
       const refreshClient = selectGoogleRefreshClient(
+        provider,
         credentials.providerSpecificData?.oauthClient,
         PROVIDERS[provider]
       );
