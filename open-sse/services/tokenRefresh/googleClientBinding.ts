@@ -13,12 +13,12 @@ import { resolvePublicCred } from "../../utils/publicCreds.ts";
  * gemini and antigravity embed DIFFERENT desktop clients, so the fallback is
  * keyed by provider, not global.
  */
-const BUILTIN_ANTIGRAVITY_CLIENT = {
+export const BUILTIN_ANTIGRAVITY_CLIENT = {
   clientId: resolvePublicCred("antigravity_id"),
   clientSecret: resolvePublicCred("antigravity_alt"),
 } as const;
 
-const BUILTIN_GEMINI_CLIENT = {
+export const BUILTIN_GEMINI_CLIENT = {
   clientId: resolvePublicCred("gemini_id"),
   clientSecret: resolvePublicCred("gemini_alt"),
 } as const;
@@ -59,7 +59,7 @@ function builtinClientFor(provider: string) {
  */
 export function selectGoogleRefreshClient(
   provider: string,
-  oauthClientMarker: GoogleOauthClientMarker | unknown,
+  oauthClientMarker: GoogleOauthClientMarker,
   configuredClient: { clientId?: string; clientSecret?: string } | null | undefined
 ): { clientId: string; clientSecret: string } {
   if (
