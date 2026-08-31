@@ -87,6 +87,38 @@ test("persistOAuthConnection does not save agy with empty projectId as active", 
   assert.equal(stored?.isActive, true, "refresh token stays stored; request-time bootstrap can heal");
 });
 
+test("persistOAuthConnection clears stale degrade fields once projectId appears", async () => {
+  const first = await persistOAuthConnection("agy", {
+    email: "heal-project@example.test",
+    accessToken: "agy-access-token-fixture",
+    refreshToken: "agy-refresh-token-fixture",
+    expiresIn: 3600,
+    projectId: "",
+    providerSpecificData: { clientProfile: "cli", projectId: "", tier: "legacy-tier" },
+  });
+  assert.equal(first.testStatus, "degraded");
+  assert.equal(first.errorCode, "missing_project_id");
+
+  const healed = await persistOAuthConnection("agy", {
+    email: "heal-project@example.test",
+    accessToken: "agy-access-token-fixture-2",
+    refreshToken: "agy-refresh-token-fixture",
+    expiresIn: 3600,
+    projectId: "healed-cloud-code-proj",
+    providerSpecificData: {
+      clientProfile: "cli",
+      projectId: "healed-cloud-code-proj",
+      tier: "g1-pro-tier",
+    },
+  });
+  const stored = await providersDb.getProviderConnectionById(healed.id);
+  assert.equal(stored?.id, first.id, "same connection is updated, not duplicated");
+  assert.equal(stored?.testStatus, "active");
+  assert.ok(!stored?.errorCode);
+  assert.ok(!stored?.lastErrorType);
+  assert.ok(!stored?.lastError);
+});
+
 test("persistOAuthConnection keeps a discovered projectId active", async () => {
   const connection = await persistOAuthConnection("agy", {
     email: "has-project@example.test",

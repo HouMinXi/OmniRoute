@@ -172,7 +172,7 @@ export async function persistOAuthConnection(
               lastErrorType: degradedProject.lastErrorType,
               lastError: degradedProject.lastError,
             }
-          : {}),
+          : { errorCode: null, lastErrorType: null, lastError: null }),
         isActive: true,
       });
     }
