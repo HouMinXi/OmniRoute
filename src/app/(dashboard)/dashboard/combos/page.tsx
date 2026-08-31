@@ -911,6 +911,9 @@ export default function CombosPage() {
       if (res.ok) {
         setCombos(combos.filter((c) => c.id !== id));
         notify.success(t("comboDeleted"));
+      } else {
+        const err = await res.json().catch(() => null);
+        notify.error(err?.error?.message || err?.error || t("errorDeleting"));
       }
     } catch (error) {
       notify.error(t("errorDeleting"));
