@@ -26,6 +26,9 @@ test("#9204: reimporting an inactive Antigravity CLI account reactivates it", as
     expiresAt: new Date(Date.now() - 60_000).toISOString(),
     isActive: false,
     testStatus: "expired",
+    errorCode: "missing_project_id",
+    lastErrorType: "oauth_missing_project_id",
+    lastError: "stale degrade leftover",
     providerSpecificData: {
       oauthClient: "custom:293923686274-example.apps.googleusercontent.com",
       clientProfile: "cli",
@@ -49,6 +52,9 @@ test("#9204: reimporting an inactive Antigravity CLI account reactivates it", as
   const stored = await providersDb.getProviderConnectionById(existing.id as string);
   assert.equal(stored?.testStatus, "active");
   assert.equal(stored?.isActive, true, "a successful reimport must reactivate the account");
+  assert.ok(!stored?.errorCode, "reimport must clear leftover degrade errorCode");
+  assert.ok(!stored?.lastErrorType);
+  assert.ok(!stored?.lastError);
   const specific = (stored?.providerSpecificData ?? {}) as Record<string, unknown>;
   assert.equal(
     specific.oauthClient,

@@ -28,7 +28,9 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
-const { persistOAuthConnection } = await import("../../src/lib/oauth/connectionPersistence.ts");
+const { persistOAuthConnection, buildOAuthConnectionCreatePayload } = await import(
+  "../../src/lib/oauth/connectionPersistence.ts"
+);
 const { createConnectionFromAgyToken } = await import("../../src/lib/oauth/utils/agyAuthImport.ts");
 
 test.after(() => {
@@ -173,4 +175,59 @@ test("agy CLI import with a projectId stays active (#9204 reactivation still wor
   );
   const stored = await providersDb.getProviderConnectionById(connection.id as string);
   assert.equal(stored?.testStatus, "active");
+  // getProviderConnectionById runs cleanNulls, so SQL NULL becomes undefined.
+  assert.ok(!stored?.errorCode);
+  assert.ok(!stored?.lastErrorType);
+  assert.ok(!stored?.lastError);
+});
+
+test("healthy create payload sets error fields to null, not omitted", () => {
+  const payload = buildOAuthConnectionCreatePayload(
+    "agy",
+    { email: "create-null@example.test", accessToken: "t", refreshToken: "r" },
+    null,
+    null
+  );
+  assert.equal(payload.testStatus, "active");
+  assert.equal(payload.errorCode, null);
+  assert.equal(payload.lastErrorType, null);
+  assert.equal(payload.lastError, null);
+  assert.ok("errorCode" in payload, "key must be present so SQLite writes NULL");
+});
+
+test("createProviderConnection upsert clears stale degrade fields from payload nulls", async () => {
+  const first = await providersDb.createProviderConnection({
+    provider: "agy",
+    authType: "oauth",
+    email: "create-upsert@example.test",
+    accessToken: "agy-access-token-fixture",
+    refreshToken: "agy-refresh-token-fixture",
+    isActive: true,
+    testStatus: "degraded",
+    errorCode: "missing_project_id",
+    lastErrorType: "oauth_missing_project_id",
+    lastError: "no Cloud Code projectId",
+  });
+  assert.equal(first?.errorCode, "missing_project_id");
+
+  await providersDb.createProviderConnection({
+    provider: "agy",
+    authType: "oauth",
+    email: "create-upsert@example.test",
+    accessToken: "agy-access-token-fixture-2",
+    refreshToken: "agy-refresh-token-fixture",
+    isActive: true,
+    testStatus: "active",
+    errorCode: null,
+    lastErrorType: null,
+    lastError: null,
+    projectId: "healed-cloud-code-proj",
+  });
+
+  const stored = await providersDb.getProviderConnectionById(first.id as string);
+  assert.equal(stored?.id, first.id, "same connection is updated, not duplicated");
+  assert.equal(stored?.testStatus, "active");
+  assert.ok(!stored?.errorCode);
+  assert.ok(!stored?.lastErrorType);
+  assert.ok(!stored?.lastError);
 });
