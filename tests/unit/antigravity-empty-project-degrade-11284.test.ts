@@ -69,6 +69,17 @@ test("gate stays null for a real Cloud Code projectId", () => {
   );
 });
 
+test("gate stays healthy when projectId is present even if discovery_failed", () => {
+  assert.equal(
+    antigravityDegradedProjectState("agy", {
+      projectId: "aicode-consumers-xyz",
+      projectDiscoveryOutcome: "discovery_failed",
+    }),
+    null,
+    "projectId is the source of truth; outcome only picks the empty-id warning"
+  );
+});
+
 test("gate ignores non-antigravity providers even with empty projectId", () => {
   assert.equal(antigravityDegradedProjectState("codex", { projectId: "" }), null);
 });

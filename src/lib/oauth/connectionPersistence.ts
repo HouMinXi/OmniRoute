@@ -14,7 +14,10 @@ import {
 } from "@/models";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
-import { antigravityDegradedProjectState } from "@/lib/oauth/antigravityProjectGate";
+import {
+  antigravityDegradedProjectState,
+  type AntigravityDegradedProjectState,
+} from "@/lib/oauth/antigravityProjectGate";
 
 /**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
@@ -98,12 +101,8 @@ export function buildOAuthConnectionCreatePayload(
   provider: string,
   tokenData: Record<string, any>,
   expiresAt: string | null,
-  degradedProject?: {
-    testStatus: "degraded";
-    errorCode: string;
-    lastErrorType: string;
-    lastError: string;
-  } | null
+  // warning is HTTP-response only (oauth route); persistence copies error fields.
+  degradedProject?: AntigravityDegradedProjectState | null
 ) {
   return {
     provider,
