@@ -21,7 +21,10 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { antigravityDegradedProjectState } from "../../src/lib/oauth/antigravityProjectGate.ts";
+import {
+  antigravityDegradedProjectState,
+  antigravityPersistStatus,
+} from "../../src/lib/oauth/antigravityProjectGate.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-11284-empty-project-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -82,6 +85,21 @@ test("gate stays healthy when projectId is present even if discovery_failed", ()
 
 test("gate ignores non-antigravity providers even with empty projectId", () => {
   assert.equal(antigravityDegradedProjectState("codex", { projectId: "" }), null);
+});
+
+test("antigravityPersistStatus wins over stale error fields in a spread payload", () => {
+  const stale = { errorCode: "missing_project_id", lastErrorType: "oauth_missing_project_id" };
+  const merged = { ...stale, ...antigravityPersistStatus(null) };
+  assert.equal(merged.testStatus, "active");
+  assert.equal(merged.errorCode, null);
+  assert.equal(merged.lastErrorType, null);
+  assert.equal(merged.lastError, null);
+
+  const degraded = antigravityDegradedProjectState("agy", { projectId: "" });
+  assert.ok(degraded);
+  const down = { testStatus: "active", ...antigravityPersistStatus(degraded) };
+  assert.equal(down.testStatus, "degraded");
+  assert.equal(down.errorCode, "missing_project_id");
 });
 
 test("persistOAuthConnection does not save agy with empty projectId as active", async () => {

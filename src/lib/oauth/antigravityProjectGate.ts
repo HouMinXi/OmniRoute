@@ -40,7 +40,7 @@ function toRecord(value: unknown): Record<string, unknown> {
 }
 
 /** Cloud Code project id from either the mapped token top-level or providerSpecificData. */
-export function extractAntigravityProjectId(
+function extractAntigravityProjectId(
   tokenData: Record<string, unknown> | null | undefined
 ): string {
   if (!tokenData) return "";
@@ -80,5 +80,30 @@ export function antigravityDegradedProjectState(
       resolvedOutcome === "requires_manual_project" ? BYOP_WARNING : DISCOVERY_FAILED_WARNING,
     warning:
       resolvedOutcome === "requires_manual_project" ? BYOP_WARNING : DISCOVERY_FAILED_WARNING,
+  };
+}
+
+/** Persist fields that MUST win over a spread tokenData payload. */
+export function antigravityPersistStatus(
+  degradedProject: AntigravityDegradedProjectState | null | undefined
+): {
+  testStatus: "degraded" | "active";
+  errorCode: string | null;
+  lastErrorType: string | null;
+  lastError: string | null;
+} {
+  if (degradedProject) {
+    return {
+      testStatus: degradedProject.testStatus,
+      errorCode: degradedProject.errorCode,
+      lastErrorType: degradedProject.lastErrorType,
+      lastError: degradedProject.lastError,
+    };
+  }
+  return {
+    testStatus: "active",
+    errorCode: null,
+    lastErrorType: null,
+    lastError: null,
   };
 }

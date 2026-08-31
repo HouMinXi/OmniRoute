@@ -16,6 +16,7 @@ import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
 import {
   antigravityDegradedProjectState,
+  antigravityPersistStatus,
   type AntigravityDegradedProjectState,
 } from "@/lib/oauth/antigravityProjectGate";
 
@@ -112,15 +113,9 @@ export function buildOAuthConnectionCreatePayload(
     tokenExpiresAt: expiresAt,
     // #11284: degraded when Cloud Code projectId discovery failed at connect
     // time — the row is saved (refresh token stored, request-time bootstrap
-    // can self-heal) but visibly NOT active.
-    testStatus: degradedProject?.testStatus ?? ("active" as const),
-    ...(degradedProject
-      ? {
-          errorCode: degradedProject.errorCode,
-          lastErrorType: degradedProject.lastErrorType,
-          lastError: degradedProject.lastError,
-        }
-      : { errorCode: null, lastErrorType: null, lastError: null }),
+    // can self-heal) but visibly NOT active. Spread AFTER tokenData so stale
+    // error fields in the payload cannot leak through.
+    ...antigravityPersistStatus(degradedProject),
   };
 }
 
@@ -164,14 +159,7 @@ export async function persistOAuthConnection(
       connection = await updateProviderConnection(matchId, {
         ...tokenData,
         expiresAt,
-        testStatus: degradedProject?.testStatus ?? "active",
-        ...(degradedProject
-          ? {
-              errorCode: degradedProject.errorCode,
-              lastErrorType: degradedProject.lastErrorType,
-              lastError: degradedProject.lastError,
-            }
-          : { errorCode: null, lastErrorType: null, lastError: null }),
+        ...antigravityPersistStatus(degradedProject),
         isActive: true,
       });
     }

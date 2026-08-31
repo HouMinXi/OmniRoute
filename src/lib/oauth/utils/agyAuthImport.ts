@@ -9,7 +9,10 @@ import {
   getAntigravityLoadCodeAssistMetadata,
 } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { extractCodeAssistOnboardTierId } from "@omniroute/open-sse/services/codeAssistSubscription.ts";
-import { antigravityDegradedProjectState } from "@/lib/oauth/antigravityProjectGate";
+import {
+  antigravityDegradedProjectState,
+  antigravityPersistStatus,
+} from "@/lib/oauth/antigravityProjectGate";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -219,14 +222,7 @@ export async function createConnectionFromAgyToken(
           (existing.name as string | undefined) ||
           resolvedEmail ||
           "Antigravity CLI (imported)",
-        testStatus: degradedProject?.testStatus ?? "active",
-        ...(degradedProject
-          ? {
-              errorCode: degradedProject.errorCode,
-              lastErrorType: degradedProject.lastErrorType,
-              lastError: degradedProject.lastError,
-            }
-          : { errorCode: null, lastErrorType: null, lastError: null }),
+        ...antigravityPersistStatus(degradedProject),
         isActive: true,
         providerSpecificData: {
           // Auto-sync default for newly discovered backends — see
@@ -274,14 +270,7 @@ export async function createConnectionFromAgyToken(
     refreshToken: enriched.refreshToken,
     expiresAt: enriched.expiresAt,
     isActive: true,
-    testStatus: degradedProject?.testStatus ?? "active",
-    ...(degradedProject
-      ? {
-          errorCode: degradedProject.errorCode,
-          lastErrorType: degradedProject.lastErrorType,
-          lastError: degradedProject.lastError,
-        }
-      : { errorCode: null, lastErrorType: null, lastError: null }),
+    ...antigravityPersistStatus(degradedProject),
     providerSpecificData: {
       // Default new imports into model auto-sync — see mapAntigravityTokens.
       autoSync: true,
