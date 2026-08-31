@@ -281,7 +281,7 @@ export async function createConnectionFromAgyToken(
           lastErrorType: degradedProject.lastErrorType,
           lastError: degradedProject.lastError,
         }
-      : {}),
+      : { errorCode: null, lastErrorType: null, lastError: null }),
     providerSpecificData: {
       // Default new imports into model auto-sync — see mapAntigravityTokens.
       autoSync: true,

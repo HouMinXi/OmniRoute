@@ -121,7 +121,7 @@ export function buildOAuthConnectionCreatePayload(
           lastErrorType: degradedProject.lastErrorType,
           lastError: degradedProject.lastError,
         }
-      : {}),
+      : { errorCode: null, lastErrorType: null, lastError: null }),
   };
 }
 
