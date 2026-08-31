@@ -14,6 +14,7 @@ import {
 } from "@/models";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncToCloud } from "@/lib/cloudSync";
+import { antigravityDegradedProjectState } from "@/lib/oauth/antigravityProjectGate";
 
 /**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
@@ -148,6 +149,7 @@ export async function persistOAuthConnection(
   const expiresAt = tokenData.expiresIn
     ? new Date(Date.now() + tokenData.expiresIn * 1000).toISOString()
     : null;
+  const degradedProject = antigravityDegradedProjectState(provider, tokenData);
 
   let connection: any;
   // A connectionId is an explicit "update THIS connection" signal (token refresh
@@ -163,14 +165,21 @@ export async function persistOAuthConnection(
       connection = await updateProviderConnection(matchId, {
         ...tokenData,
         expiresAt,
-        testStatus: "active",
+        testStatus: degradedProject?.testStatus ?? "active",
+        ...(degradedProject
+          ? {
+              errorCode: degradedProject.errorCode,
+              lastErrorType: degradedProject.lastErrorType,
+              lastError: degradedProject.lastError,
+            }
+          : {}),
         isActive: true,
       });
     }
   }
   if (!connection) {
     connection = await createProviderConnection(
-      buildOAuthConnectionCreatePayload(provider, tokenData, expiresAt)
+      buildOAuthConnectionCreatePayload(provider, tokenData, expiresAt, degradedProject)
     );
   }
 

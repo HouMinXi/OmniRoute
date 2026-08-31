@@ -35,6 +35,15 @@ test("connects are SAVED with degraded status, not rejected", () => {
   assert.match(routeSource, /testStatus: degradedProject\?\.testStatus \?\? "active"/);
   assert.match(persistenceSource, /degradedProject\?\.testStatus \?\? \("active" as const\)/);
   assert.match(routeSource, /warning: degradedProject\.warning/);
+  // paste-credentials / device-complete used to hardcode testStatus:"active".
+  assert.match(
+    persistenceSource,
+    /const degradedProject = antigravityDegradedProjectState\(provider, tokenData\)/
+  );
+  assert.match(
+    persistenceSource,
+    /buildOAuthConnectionCreatePayload\(provider, tokenData, expiresAt, degradedProject\)/
+  );
 });
 
 test("gate only applies to antigravity and agy, marks typed error fields", () => {
