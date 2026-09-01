@@ -74,7 +74,7 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>();
 
 function cacheKey(provider: string, connectionId: string): string {
-  return `${provider}::${connectionId}`;
+  return `${provider.trim()}::${connectionId.trim()}`;
 }
 
 function dropExpiredPendingForceRefresh(key: string, now: number): boolean {
@@ -275,7 +275,7 @@ function normalizeQuotaWindows(
 export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) => {
   if (!connection) return null;
   const conn = connection as ConnectionInputs;
-  const provider = typeof conn.provider === "string" ? conn.provider : null;
+  const provider = typeof conn.provider === "string" ? conn.provider.trim() : "";
   if (!provider) return null;
 
   const key = cacheKey(provider, connectionId);
@@ -318,7 +318,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   // modal inputs without waiting for the user to open the page.
   registerQuotaWindows(provider, Object.keys(quota.windows || {}));
 
-  cache.set(key, { quota, fetchedAt: Date.now() });
+  cache.set(key, { quota, fetchedAt: now });
   return quota;
 };
 
@@ -347,13 +347,14 @@ export function invalidateGenericQuotaCacheOnStatus(args: {
   connectionId: string | null | undefined;
   status: number;
   isolateProbe?: boolean;
-}): void {
-  if (args.isolateProbe) return;
-  if (args.status !== 429) return;
+}): boolean {
+  if (args.isolateProbe) return false;
+  if (args.status !== 429) return false;
   const provider = typeof args.provider === "string" ? args.provider.trim() : "";
   const connectionId = typeof args.connectionId === "string" ? args.connectionId.trim() : "";
-  if (!provider || !connectionId) return;
+  if (!provider || !connectionId) return false;
   invalidateGenericQuotaCache(provider, connectionId);
+  return true;
 }
 
 /**

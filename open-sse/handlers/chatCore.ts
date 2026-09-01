@@ -3239,13 +3239,13 @@ export async function handleChatCore({
                 }
               } else if (attemptConnectionId && res.response.status === 429) {
                 const isolateProbe = await shouldIsolateProbeFailures();
-                invalidateGenericQuotaCacheOnStatus({
+                const dropped = invalidateGenericQuotaCacheOnStatus({
                   provider,
                   connectionId: String(attemptConnectionId),
                   status: res.response.status,
                   isolateProbe,
                 });
-                if (!isolateProbe) {
+                if (dropped) {
                   log?.debug?.(
                     "QUOTA",
                     `Dropped generic quota cache after 429 provider=${provider} connection=${attemptConnectionId}`
