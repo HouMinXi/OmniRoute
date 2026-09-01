@@ -302,9 +302,16 @@ export async function validateBailianCodingPlanProvider({
       }),
     });
 
-    // 401/403 => invalid key
+    // 401/403 => invalid key. An expired/lapsed Token Plan subscription yields the
+    // exact same upstream 401 invalid_api_key (observed live 2026-09-01: subscription
+    // ended 08-23, the previously working key started failing), so name it as a cause.
     if (response.status === 401 || response.status === 403) {
-      return { valid: false, error: "Invalid API key" };
+      return {
+        valid: false,
+        error:
+          "Invalid API key — or the Token Plan subscription is expired/inactive; " +
+          "check it in the Model Studio console",
+      };
     }
 
     // Non-auth 4xx (e.g., 400 bad request) means auth passed but request was malformed
