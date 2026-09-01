@@ -4,8 +4,32 @@ import assert from "node:assert/strict";
 const genericModule = await import("../../open-sse/services/genericQuotaFetcher.ts");
 const preflightModule = await import("../../open-sse/services/quotaPreflight.ts");
 
-const { convertUsageToQuotaInfo, registerGenericQuotaFetchers } = genericModule;
+const {
+  convertUsageToQuotaInfo,
+  fetchGenericQuota,
+  invalidateGenericQuotaCache,
+  invalidateGenericQuotaCacheOnStatus,
+  registerGenericQuotaFetchers,
+  __setGenericUsageFetcherForTests,
+} = genericModule;
 const { getQuotaFetcher } = preflightModule;
+
+function usageShape(remainingPercentage: number) {
+  return {
+    quotas: {
+      "gemini-3-flash": {
+        remainingPercentage,
+        fractionReported: true,
+        resetAt: "2026-09-01T20:00:00Z",
+      },
+      gemini_models_weekly: {
+        remainingPercentage,
+        fractionReported: true,
+        resetAt: "2026-09-07T00:00:00Z",
+      },
+    },
+  };
+}
 
 test("convertUsageToQuotaInfo returns null on null/undefined input", () => {
   assert.equal(convertUsageToQuotaInfo(null), null);
@@ -113,4 +137,105 @@ test("registerGenericQuotaFetchers registers Claude, GLM, and OpenCode Go via th
   // assert "codex" here without first calling registerCodexQuotaFetcher,
   // which would couple this test to chat.ts startup wiring. The skip list
   // semantics are exercised by the source code review.
+});
+
+test.afterEach(() => {
+  __setGenericUsageFetcherForTests(null);
+});
+
+test("fetchGenericQuota caches a hit inside the 60s window", async () => {
+  const connectionId = `agy-cache-${Date.now()}`;
+  const calls: Array<{ forceRefresh?: boolean }> = [];
+  __setGenericUsageFetcherForTests(async (_conn, options) => {
+    calls.push({ forceRefresh: options?.forceRefresh });
+    return usageShape(80);
+  });
+
+  const connection = { provider: "agy", id: connectionId };
+  const first = await fetchGenericQuota(connectionId, connection);
+  const second = await fetchGenericQuota(connectionId, connection);
+
+  assert.equal(calls.length, 1, "second fetch must reuse the generic cache");
+  assert.equal(first?.percentUsed, 0.2);
+  assert.deepEqual(second, first);
+  invalidateGenericQuotaCache("agy", connectionId);
+});
+
+test("invalidateGenericQuotaCache makes the next fetch bypass provider-inner usage caches", async () => {
+  const connectionId = `agy-invalidate-${Date.now()}`;
+  const calls: Array<{ forceRefresh?: boolean }> = [];
+  let remaining = 80;
+  __setGenericUsageFetcherForTests(async (_conn, options) => {
+    calls.push({ forceRefresh: options?.forceRefresh });
+    return usageShape(remaining);
+  });
+
+  const connection = { provider: "agy", id: connectionId };
+  const first = await fetchGenericQuota(connectionId, connection);
+  assert.equal(first?.percentUsed, 0.2);
+  assert.equal(calls[0]?.forceRefresh, undefined);
+
+  remaining = 0;
+  invalidateGenericQuotaCache("agy", connectionId);
+  const second = await fetchGenericQuota(connectionId, connection);
+
+  assert.equal(calls.length, 2, "invalidate must drop the 60s generic cache");
+  assert.equal(
+    calls[1]?.forceRefresh,
+    true,
+    "agy retrieveUserQuota / weekly caches are 60s–5min; invalidate must force-refresh or the recache is stale"
+  );
+  assert.equal(second?.percentUsed, 1);
+  invalidateGenericQuotaCache("agy", connectionId);
+});
+
+test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", async () => {
+  const connectionId = `agy-429-${Date.now()}`;
+  const calls: Array<{ forceRefresh?: boolean }> = [];
+  __setGenericUsageFetcherForTests(async (_conn, options) => {
+    calls.push({ forceRefresh: options?.forceRefresh });
+    return usageShape(50);
+  });
+
+  const connection = { provider: "agy", id: connectionId };
+  await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 1);
+
+  invalidateGenericQuotaCacheOnStatus({
+    provider: "agy",
+    connectionId,
+    status: 200,
+    isolateProbe: false,
+  });
+  await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 1, "200 must not drop the generic quota cache");
+
+  invalidateGenericQuotaCacheOnStatus({
+    provider: "agy",
+    connectionId,
+    status: 429,
+    isolateProbe: false,
+  });
+  await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 2, "429 must drop the generic quota cache");
+  assert.equal(calls[1]?.forceRefresh, true);
+
+  invalidateGenericQuotaCacheOnStatus({
+    provider: "agy",
+    connectionId,
+    status: 429,
+    isolateProbe: true,
+  });
+  await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 2, "probe-origin 429 must not touch routing caches");
+
+  assert.doesNotThrow(() =>
+    invalidateGenericQuotaCacheOnStatus({
+      provider: "agy",
+      connectionId: null,
+      status: 429,
+      isolateProbe: false,
+    })
+  );
+  invalidateGenericQuotaCache("agy", connectionId);
 });

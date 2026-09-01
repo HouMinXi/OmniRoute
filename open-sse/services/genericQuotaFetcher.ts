@@ -25,6 +25,20 @@ import {
   type QuotaInfo,
 } from "./quotaPreflight.ts";
 
+type UsageFetcher = (
+  connection: Parameters<typeof getUsageForProvider>[0],
+  options?: { forceRefresh?: boolean }
+) => Promise<unknown>;
+
+let usageFetcherOverride: UsageFetcher | null = null;
+const pendingForceRefresh = new Set<string>();
+const MAX_PENDING_FORCE_REFRESH = 200;
+
+/** Test-only: inject the usage dispatcher; pass null to restore. */
+export function __setGenericUsageFetcherForTests(fetcher: UsageFetcher | null): void {
+  usageFetcherOverride = fetcher;
+}
+
 // 60s — matches Codex's TTL. Long enough to avoid hammering upstream usage
 // endpoints on every routing decision, short enough that a near-exhausted
 // account is skipped within one minute of crossing its threshold.
@@ -221,20 +235,26 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   if (!provider) return null;
 
   const key = cacheKey(provider, connectionId);
+  const forceRefresh = pendingForceRefresh.has(key);
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+  if (!forceRefresh && cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
   }
 
   let usage: unknown;
   try {
-    usage = await getUsageForProvider(conn as Parameters<typeof getUsageForProvider>[0]);
+    const fetchUsage = usageFetcherOverride ?? getUsageForProvider;
+    usage = await fetchUsage(conn as Parameters<typeof getUsageForProvider>[0], {
+      ...(forceRefresh ? { forceRefresh: true } : {}),
+    });
   } catch {
     return null;
   }
 
   const quota = convertUsageToQuotaInfo(usage);
   if (!quota) return null;
+
+  pendingForceRefresh.delete(key);
 
   // Refresh the static window catalog so the dashboard can render the right
   // modal inputs without waiting for the user to open the page.
@@ -250,7 +270,34 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
  * fresh data instead of a 60s stale window.
  */
 export function invalidateGenericQuotaCache(provider: string, connectionId: string): void {
-  cache.delete(cacheKey(provider, connectionId));
+  const key = cacheKey(provider, connectionId);
+  cache.delete(key);
+  // Next fetch must bypass provider-inner usage caches (agy retrieveUserQuota /
+  // weekly are 60s–5min). Without this, dropping the 60s wrapper recaches stale.
+  if (pendingForceRefresh.size >= MAX_PENDING_FORCE_REFRESH) {
+    const oldest = pendingForceRefresh.values().next().value;
+    if (oldest) pendingForceRefresh.delete(oldest);
+  }
+  pendingForceRefresh.add(key);
+}
+
+/**
+ * Drop the generic quota cache after an upstream 429, matching Codex's
+ * `invalidateCodexQuotaCache` on 429. Probe-origin failures must not mutate
+ * routing caches (#9817).
+ */
+export function invalidateGenericQuotaCacheOnStatus(args: {
+  provider: string | null | undefined;
+  connectionId: string | null | undefined;
+  status: number;
+  isolateProbe?: boolean;
+}): void {
+  if (args.isolateProbe) return;
+  if (args.status !== 429) return;
+  const provider = typeof args.provider === "string" ? args.provider.trim() : "";
+  const connectionId = typeof args.connectionId === "string" ? args.connectionId.trim() : "";
+  if (!provider || !connectionId) return;
+  invalidateGenericQuotaCache(provider, connectionId);
 }
 
 /**

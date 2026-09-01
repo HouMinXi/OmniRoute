@@ -166,6 +166,11 @@ test("direct Antigravity has one downstream model-lock owner and clamps body pro
   );
   assert.match(
     chatCoreSource,
+    /invalidateGenericQuotaCacheOnStatus/,
+    "agy/antigravity 429 must drop the generic quota cache the same way Codex drops its own"
+  );
+  assert.match(
+    chatCoreSource,
     /accountSemaphoreKey && !deferAntigravityQuotaStateToCaller/,
     "chatCore must not apply a prose-derived Antigravity semaphore TTL"
   );

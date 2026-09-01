@@ -381,6 +381,7 @@ import { sanitizeOpenAITool } from "../services/toolSchemaSanitizer.ts";
 import { isCompactResponsesEndpoint } from "../executors/codex.ts";
 import { persistCodexChildQuotaResponse } from "../services/codexAccount/index.ts";
 import { invalidateCodexQuotaCache } from "../services/codexQuotaFetcher.ts";
+import { invalidateGenericQuotaCacheOnStatus } from "../services/genericQuotaFetcher.ts";
 import { translateNonStreamingResponse } from "./responseTranslator.ts";
 import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
 import { unwrapClineNonStreamingEnvelope } from "./chatCore/clineResponseEnvelope.ts";
@@ -3236,6 +3237,13 @@ export async function handleChatCore({
                   const errMessage = err instanceof Error ? err.message : String(err);
                   log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
                 }
+              } else if (attemptConnectionId && res.response.status === 429) {
+                invalidateGenericQuotaCacheOnStatus({
+                  provider,
+                  connectionId: String(attemptConnectionId),
+                  status: res.response.status,
+                  isolateProbe: await shouldIsolateProbeFailures(),
+                });
               }
 
               // Track Gemini RPM + RPD request counts for 429 classification
