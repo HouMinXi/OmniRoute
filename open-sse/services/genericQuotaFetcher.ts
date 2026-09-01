@@ -318,7 +318,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   // modal inputs without waiting for the user to open the page.
   registerQuotaWindows(provider, Object.keys(quota.windows || {}));
 
-  cache.set(key, { quota, fetchedAt: now });
+  cache.set(key, { quota, fetchedAt: Date.now() });
   return quota;
 };
 
