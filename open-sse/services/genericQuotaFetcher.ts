@@ -95,6 +95,8 @@ function isPendingForceRefresh(key: string, now: number = Date.now()): boolean {
   return pendingForceRefresh.has(key);
 }
 
+// 5min — same as Codex. Expiry is lazy on read (`isPendingForceRefresh`);
+// this timer only reaps keys nobody fetches after the 5min TTL.
 const _cacheCleanup = setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of cache) {
@@ -103,7 +105,7 @@ const _cacheCleanup = setInterval(() => {
   for (const key of pendingForceRefresh.keys()) {
     dropExpiredPendingForceRefresh(key, now);
   }
-}, CACHE_TTL_MS);
+}, 5 * 60_000);
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
