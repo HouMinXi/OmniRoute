@@ -31,18 +31,29 @@ type UsageFetcher = (
 ) => Promise<unknown>;
 
 let usageFetcherOverride: UsageFetcher | null = null;
-const pendingForceRefresh = new Set<string>();
-const MAX_PENDING_FORCE_REFRESH = 200;
+
+// 60s — matches Codex's TTL. Long enough to avoid hammering upstream usage
+// endpoints on every routing decision, short enough that a near-exhausted
+// account is skipped within one minute of crossing its threshold.
+const CACHE_TTL_MS = 60_000;
+/** Drop unused force-refresh flags once inner provider caches (60s–5min) have expired. */
+const PENDING_FORCE_REFRESH_TTL_MS = CACHE_TTL_MS * 5;
+/** key → Date.now() when invalidate asked the next fetch to force-refresh. */
+const pendingForceRefresh = new Map<string, number>();
 
 /** Test-only: inject the usage dispatcher; pass null to restore. */
 export function __setGenericUsageFetcherForTests(fetcher: UsageFetcher | null): void {
   usageFetcherOverride = fetcher;
 }
 
-// 60s — matches Codex's TTL. Long enough to avoid hammering upstream usage
-// endpoints on every routing decision, short enough that a near-exhausted
-// account is skipped within one minute of crossing its threshold.
-const CACHE_TTL_MS = 60_000;
+/** Test-only: backdate a pending force-refresh so TTL expiry is unit-testable. */
+export function __agePendingForceRefreshForTests(
+  provider: string,
+  connectionId: string,
+  ageMs: number
+): void {
+  pendingForceRefresh.set(cacheKey(provider, connectionId), Date.now() - ageMs);
+}
 
 interface CacheEntry {
   quota: QuotaInfo;
@@ -56,10 +67,23 @@ function cacheKey(provider: string, connectionId: string): string {
 }
 
 // Auto-cleanup stale entries — same shape as codexQuotaFetcher.
+function isPendingForceRefresh(key: string, now: number = Date.now()): boolean {
+  const stampedAt = pendingForceRefresh.get(key);
+  if (stampedAt === undefined) return false;
+  if (now - stampedAt > PENDING_FORCE_REFRESH_TTL_MS) {
+    pendingForceRefresh.delete(key);
+    return false;
+  }
+  return true;
+}
+
 const _cacheCleanup = setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of cache) {
     if (now - entry.fetchedAt > CACHE_TTL_MS * 5) cache.delete(key);
+  }
+  for (const [key, stampedAt] of pendingForceRefresh) {
+    if (now - stampedAt > PENDING_FORCE_REFRESH_TTL_MS) pendingForceRefresh.delete(key);
   }
 }, 5 * 60_000);
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
@@ -235,7 +259,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   if (!provider) return null;
 
   const key = cacheKey(provider, connectionId);
-  const forceRefresh = pendingForceRefresh.has(key);
+  const forceRefresh = isPendingForceRefresh(key);
   const cached = cache.get(key);
   if (!forceRefresh && cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
@@ -253,6 +277,9 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
 
   const quota = convertUsageToQuotaInfo(usage);
   if (!quota) return null;
+  // Keep the flag on convert-null / fetch throw: agy inner caches are still
+  // stale, so the next attempt must force-refresh. Clear only after a
+  // measurable quota is recached.
 
   pendingForceRefresh.delete(key);
 
@@ -274,11 +301,8 @@ export function invalidateGenericQuotaCache(provider: string, connectionId: stri
   cache.delete(key);
   // Next fetch must bypass provider-inner usage caches (agy retrieveUserQuota /
   // weekly are 60s–5min). Without this, dropping the 60s wrapper recaches stale.
-  if (pendingForceRefresh.size >= MAX_PENDING_FORCE_REFRESH) {
-    const oldest = pendingForceRefresh.values().next().value;
-    if (oldest) pendingForceRefresh.delete(oldest);
-  }
-  pendingForceRefresh.add(key);
+  // TTL matches those inner caches: after 5min the flag is a no-op.
+  pendingForceRefresh.set(key, Date.now());
 }
 
 /**

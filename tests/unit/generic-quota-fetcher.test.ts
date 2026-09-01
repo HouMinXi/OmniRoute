@@ -10,6 +10,7 @@ const {
   invalidateGenericQuotaCache,
   invalidateGenericQuotaCacheOnStatus,
   registerGenericQuotaFetchers,
+  __agePendingForceRefreshForTests,
   __setGenericUsageFetcherForTests,
 } = genericModule;
 const { getQuotaFetcher } = preflightModule;
@@ -236,6 +237,56 @@ test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", a
       status: 429,
       isolateProbe: false,
     })
+  );
+  invalidateGenericQuotaCache("agy", connectionId);
+});
+
+test("convert-null after invalidate keeps forceRefresh until a measurable quota recaches", async () => {
+  const connectionId = `agy-null-${Date.now()}`;
+  const calls: Array<{ forceRefresh?: boolean }> = [];
+  let n = 0;
+  __setGenericUsageFetcherForTests(async (_conn, options) => {
+    calls.push({ forceRefresh: options?.forceRefresh });
+    n += 1;
+    if (n === 1) return usageShape(80);
+    if (n === 2) return { message: "auth expired" };
+    return usageShape(10);
+  });
+
+  const connection = { provider: "agy", id: connectionId };
+  await fetchGenericQuota(connectionId, connection);
+  invalidateGenericQuotaCache("agy", connectionId);
+
+  const second = await fetchGenericQuota(connectionId, connection);
+  assert.equal(second, null);
+  assert.equal(calls[1]?.forceRefresh, true);
+
+  const third = await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 3);
+  assert.equal(calls[2]?.forceRefresh, true, "convert-null must not drop the force-refresh flag");
+  assert.equal(third?.percentUsed, 0.9);
+  invalidateGenericQuotaCache("agy", connectionId);
+});
+
+test("expired pending force-refresh does not bypass the 60s wrapper cache", async () => {
+  const connectionId = `agy-expire-${Date.now()}`;
+  const calls: Array<{ forceRefresh?: boolean }> = [];
+  __setGenericUsageFetcherForTests(async (_conn, options) => {
+    calls.push({ forceRefresh: options?.forceRefresh });
+    return usageShape(80);
+  });
+
+  const connection = { provider: "agy", id: connectionId };
+  await fetchGenericQuota(connectionId, connection);
+  invalidateGenericQuotaCache("agy", connectionId);
+  __agePendingForceRefreshForTests("agy", connectionId, 5 * 60_000 + 1);
+
+  await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 2, "wrapper cache was dropped; fetch still happens");
+  assert.equal(
+    calls[1]?.forceRefresh,
+    undefined,
+    "expired force-refresh must not pass forceRefresh after inner caches have aged out"
   );
   invalidateGenericQuotaCache("agy", connectionId);
 });
