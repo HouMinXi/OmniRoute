@@ -40,6 +40,8 @@ const CACHE_TTL_MS = 60_000;
 const PENDING_FORCE_REFRESH_TTL_MS = CACHE_TTL_MS * 5;
 /** key → Date.now() when invalidate asked the next fetch to force-refresh. */
 const pendingForceRefresh = new Map<string, number>();
+/** key → last convert-null / throw while force-refresh was pending. */
+const pendingForceRefreshMiss = new Map<string, number>();
 
 /** Test-only: inject the usage dispatcher; pass null to restore. */
 export function __setGenericUsageFetcherForTests(fetcher: UsageFetcher | null): void {
@@ -55,6 +57,15 @@ export function __agePendingForceRefreshForTests(
   pendingForceRefresh.set(cacheKey(provider, connectionId), Date.now() - ageMs);
 }
 
+/** Test-only: backdate a convert-null miss so the 60s hammer-guard is unit-testable. */
+export function __agePendingForceRefreshMissForTests(
+  provider: string,
+  connectionId: string,
+  ageMs: number
+): void {
+  pendingForceRefreshMiss.set(cacheKey(provider, connectionId), Date.now() - ageMs);
+}
+
 interface CacheEntry {
   quota: QuotaInfo;
   fetchedAt: number;
@@ -66,15 +77,22 @@ function cacheKey(provider: string, connectionId: string): string {
   return `${provider}::${connectionId}`;
 }
 
-// Auto-cleanup stale entries — same shape as codexQuotaFetcher.
-function isPendingForceRefresh(key: string, now: number = Date.now()): boolean {
+function dropExpiredPendingForceRefresh(key: string, now: number): boolean {
   const stampedAt = pendingForceRefresh.get(key);
-  if (stampedAt === undefined) return false;
+  if (stampedAt === undefined) return true;
   if (now - stampedAt > PENDING_FORCE_REFRESH_TTL_MS) {
     pendingForceRefresh.delete(key);
-    return false;
+    pendingForceRefreshMiss.delete(key);
+    return true;
   }
-  return true;
+  return false;
+}
+
+// Lazy expiry on read — same as the provider breaker. Name stays `is*` because
+// callers only need a boolean; the map is not a public API.
+function isPendingForceRefresh(key: string, now: number = Date.now()): boolean {
+  if (dropExpiredPendingForceRefresh(key, now)) return false;
+  return pendingForceRefresh.has(key);
 }
 
 const _cacheCleanup = setInterval(() => {
@@ -82,10 +100,10 @@ const _cacheCleanup = setInterval(() => {
   for (const [key, entry] of cache) {
     if (now - entry.fetchedAt > CACHE_TTL_MS * 5) cache.delete(key);
   }
-  for (const [key, stampedAt] of pendingForceRefresh) {
-    if (now - stampedAt > PENDING_FORCE_REFRESH_TTL_MS) pendingForceRefresh.delete(key);
+  for (const key of pendingForceRefresh.keys()) {
+    dropExpiredPendingForceRefresh(key, now);
   }
-}, 5 * 60_000);
+}, CACHE_TTL_MS);
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
@@ -259,10 +277,19 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   if (!provider) return null;
 
   const key = cacheKey(provider, connectionId);
-  const forceRefresh = isPendingForceRefresh(key);
+  const now = Date.now();
+  const forceRefresh = isPendingForceRefresh(key, now);
   const cached = cache.get(key);
-  if (!forceRefresh && cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+  if (!forceRefresh && cached && now - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
+  }
+  // convert-null / throw keep the force-refresh flag (agy inner caches are
+  // still stale) but must not hammer those endpoints on every routing tick.
+  if (forceRefresh) {
+    const missedAt = pendingForceRefreshMiss.get(key);
+    if (missedAt !== undefined && now - missedAt < CACHE_TTL_MS) {
+      return null;
+    }
   }
 
   let usage: unknown;
@@ -272,16 +299,18 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
       ...(forceRefresh ? { forceRefresh: true } : {}),
     });
   } catch {
+    if (forceRefresh) pendingForceRefreshMiss.set(key, Date.now());
     return null;
   }
 
   const quota = convertUsageToQuotaInfo(usage);
-  if (!quota) return null;
-  // Keep the flag on convert-null / fetch throw: agy inner caches are still
-  // stale, so the next attempt must force-refresh. Clear only after a
-  // measurable quota is recached.
+  if (!quota) {
+    if (forceRefresh) pendingForceRefreshMiss.set(key, Date.now());
+    return null;
+  }
 
   pendingForceRefresh.delete(key);
+  pendingForceRefreshMiss.delete(key);
 
   // Refresh the static window catalog so the dashboard can render the right
   // modal inputs without waiting for the user to open the page.
@@ -303,6 +332,7 @@ export function invalidateGenericQuotaCache(provider: string, connectionId: stri
   // weekly are 60s–5min). Without this, dropping the 60s wrapper recaches stale.
   // TTL matches those inner caches: after 5min the flag is a no-op.
   pendingForceRefresh.set(key, Date.now());
+  pendingForceRefreshMiss.delete(key);
 }
 
 /**

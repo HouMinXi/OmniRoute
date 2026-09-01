@@ -10,8 +10,9 @@ const {
   invalidateGenericQuotaCache,
   invalidateGenericQuotaCacheOnStatus,
   registerGenericQuotaFetchers,
-  __agePendingForceRefreshForTests,
   __setGenericUsageFetcherForTests,
+  __agePendingForceRefreshForTests,
+  __agePendingForceRefreshMissForTests,
 } = genericModule;
 const { getQuotaFetcher } = preflightModule;
 
@@ -262,9 +263,13 @@ test("convert-null after invalidate keeps forceRefresh until a measurable quota 
   assert.equal(calls[1]?.forceRefresh, true);
 
   const third = await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 2, "convert-null must not hammer usage inside 60s");
+
+  __agePendingForceRefreshMissForTests("agy", connectionId, 60_000 + 1);
+  const fourth = await fetchGenericQuota(connectionId, connection);
   assert.equal(calls.length, 3);
   assert.equal(calls[2]?.forceRefresh, true, "convert-null must not drop the force-refresh flag");
-  assert.equal(third?.percentUsed, 0.9);
+  assert.equal(fourth?.percentUsed, 0.9);
   invalidateGenericQuotaCache("agy", connectionId);
 });
 
