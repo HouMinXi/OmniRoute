@@ -1,8 +1,8 @@
-import { createRequire } from "module";
 import { createHash } from "node:crypto";
+import * as nodeModule from "node:module";
 import { getTlsClientTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
 
-const runtimeRequire = createRequire(import.meta.url);
+const runtimeRequire = nodeModule.createRequire(import.meta.url);
 
 function loadRuntimeModule(moduleName: string): unknown {
   // Keep the specifier dynamic. Turbopack rewrites a literal createRequire call
@@ -55,14 +55,7 @@ function getProxyFromEnv(): string | undefined {
 }
 
 export type WreqBodyInit =
-  | string
-  | ArrayBuffer
-  | ArrayBufferView
-  | URLSearchParams
-  | Buffer
-  | Blob
-  | FormData
-  | null;
+  string | ArrayBuffer | ArrayBufferView | URLSearchParams | Buffer | Blob | FormData | null;
 
 export interface TlsFetchOptions {
   method?: string;
@@ -251,14 +244,10 @@ export class TlsClient {
   private readonly _libraryAvailable: boolean;
   private readonly maxSessions: number;
 
-  constructor(
-    createSessionFn: CreateSessionFn | null = createSession,
-    maxSessions = 128
-  ) {
+  constructor(createSessionFn: CreateSessionFn | null = createSession, maxSessions = 128) {
     this.createSessionFn = createSessionFn;
     this._libraryAvailable = !!createSessionFn;
-    this.maxSessions =
-      Number.isInteger(maxSessions) && maxSessions > 0 ? maxSessions : 128;
+    this.maxSessions = Number.isInteger(maxSessions) && maxSessions > 0 ? maxSessions : 128;
   }
 
   /** Library availability only. Per-session circuit state is enforced inside fetch(). */
@@ -445,10 +434,7 @@ export class TlsClient {
     return true;
   }
 
-  private recordFailure(
-    key = this.getDefaultSessionKey(),
-    sessionHadCookies = false
-  ): void {
+  private recordFailure(key = this.getDefaultSessionKey(), sessionHadCookies = false): void {
     const state = this.circuits.get(key) ?? {
       failureCount: 0,
       cooldownMs: this.baseCooldownMs,
@@ -501,10 +487,7 @@ export class TlsClient {
     if (state) state.halfOpenInFlight = false;
   }
 
-  private async getSession(
-    resolvedProxy: string | null,
-    key: string
-  ): Promise<WreqSession | null> {
+  private async getSession(resolvedProxy: string | null, key: string): Promise<WreqSession | null> {
     const cached = this.sessions.get(key);
     if (cached) {
       this.pendingEvictions.delete(key);
@@ -526,10 +509,7 @@ export class TlsClient {
 
     const creating = Reflect.apply(this.createSessionFn, undefined, [sessionOpts])
       .then(async (session) => {
-        if (
-          globalEpoch !== this.globalSessionEpoch ||
-          sessionEpoch !== this.getSessionEpoch(key)
-        ) {
+        if (globalEpoch !== this.globalSessionEpoch || sessionEpoch !== this.getSessionEpoch(key)) {
           await this.closeSession(session);
           throw new Error("wreq-js session invalidated");
         }
@@ -615,8 +595,7 @@ export class TlsClient {
       return response;
     } catch (err) {
       const isCallerAbort = options.signal?.aborted === true;
-      const sessionHadCookies =
-        !isCallerAbort && this.hasSessionCookies(session, url);
+      const sessionHadCookies = !isCallerAbort && this.hasSessionCookies(session, url);
       releaseSession();
       if (isCallerAbort) {
         this.releaseHalfOpen(key);
@@ -664,14 +643,11 @@ export class TlsClient {
     const circuitOpenUntil = state?.circuitOpenUntil ?? 0;
     const circuitTripped = state?.circuitTripped ?? false;
     return {
-      available:
-        this._libraryAvailable &&
-        (!circuitTripped || Date.now() >= circuitOpenUntil),
+      available: this._libraryAvailable && (!circuitTripped || Date.now() >= circuitOpenUntil),
       circuitTripped,
       failureCount: state?.failureCount ?? 0,
       circuitOpenUntil,
-      coolDownRemainingMs:
-        circuitOpenUntil > 0 ? Math.max(0, circuitOpenUntil - Date.now()) : 0,
+      coolDownRemainingMs: circuitOpenUntil > 0 ? Math.max(0, circuitOpenUntil - Date.now()) : 0,
     };
   }
 }

@@ -77,7 +77,7 @@ import {
   isStripReasoningRequested,
 } from "./chatCore/headers.ts";
 import { markCodexScopeRateLimited } from "./chatCore/codexFailover.ts";
-import { getCodexClientSessionId, isCodexOriginatedHeaders } from "../config/codexIdentity.ts";
+import { getCodexClientSessionId, isCodexOriginatedHeaders, isClaudeCodeOriginatedHeaders } from "../config/codexIdentity.ts";
 import {
   noteCodexTurnStateProvenance,
   readCodexTurnStateHeader,
@@ -981,8 +981,14 @@ export async function handleChatCore({
   const isCodexResponsesEcho =
     (isResponsesEndpoint || sourceFormat === FORMATS.OPENAI_RESPONSES) &&
     isCodexOriginatedHeaders(clientRawRequest?.headers);
+
+  // Detect Claude Code CLI so we can auto-enable model echo — this prevents
+  // session restore failures when the resolved upstream model (e.g.
+  // `oc/nemotron-3-ultra-free`) is not recognized by the client on `--resume`.
+  const isClaudeCodeClient = isClaudeCodeOriginatedHeaders(clientRawRequest?.headers);
+
   let echoModel =
-    (settings.echoRequestedModelName === true || isCodexResponsesEcho) &&
+    (settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient) &&
     typeof requestedModel === "string" &&
     requestedModel
       ? requestedModel
@@ -1574,12 +1580,12 @@ export async function handleChatCore({
             await import("../services/compression/outputStyles/backCompat.ts");
           const selection = resolveOutputStyleSelection(config);
           if (selection.length > 0) {
-            const { applyOutputStyles } =
+            const { applyOutputStyles, resolveOutputStyleLanguage } =
               await import("../services/compression/outputStyles/apply.ts");
-            const outputStyleLanguage =
-              config.languageConfig?.enabled === true
-                ? config.languageConfig.defaultLanguage
-                : "en";
+            const outputStyleLanguage = resolveOutputStyleLanguage(
+              config.languageConfig,
+              body as Parameters<typeof resolveOutputStyleLanguage>[1]
+            );
             outputStyleResult = applyOutputStyles(
               body as Parameters<typeof applyOutputStyles>[0],
               selection,
@@ -2725,6 +2731,7 @@ export async function handleChatCore({
 
   const previousResponseIdPolicy = applyResponsesPreviousResponseIdPolicy(translatedBody, {
     mode: settings.responsesPreviousResponseIdMode,
+    provider,
     sourceFormat,
     targetFormat,
     credentials,
@@ -5465,6 +5472,7 @@ export async function handleChatCore({
 
   const streamReadiness = await ensureStreamReadiness(providerResponse, {
     timeoutMs: streamReadinessPolicy.timeoutMs,
+    maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
     provider,
     model,
     log,

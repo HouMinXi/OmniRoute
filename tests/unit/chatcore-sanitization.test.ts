@@ -413,13 +413,12 @@ test("chatCore sanitization strips empty message names and filters empty tool na
   assert.equal(call.body.messages[0].name, undefined);
   assert.equal(call.body.messages[1].name, "valid-name");
   // 3 invalid tools removed: 2 empty function names + 1 empty anthropic name
-  // 2 valid remain: lookup_weather (function) + anthropic_lookup (anthropic-format)
+  // 2 valid remain (sorted alphabetically): anthropic_lookup + lookup_weather
   assert.equal(call.body.tools.length, 2);
-  assert.equal(call.body.tools[0].function.name, "lookup_weather");
-  // The second tool (anthropic-format) may be wrapped in .function by the translator
-  // or preserved as-is with .name; check whichever is available
-  const tool2Name = call.body.tools[1].function?.name ?? call.body.tools[1].name;
-  assert.equal(tool2Name, "anthropic_lookup");
+  const tool0Name = call.body.tools[0].function?.name ?? call.body.tools[0].name;
+  assert.equal(tool0Name, "anthropic_lookup");
+  const tool1Name = call.body.tools[1].function?.name ?? call.body.tools[1].name;
+  assert.equal(tool1Name, "lookup_weather");
 });
 
 test("chatCore sanitization strips empty input item names on responses endpoint", async () => {

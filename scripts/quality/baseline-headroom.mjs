@@ -63,9 +63,19 @@ export function sumTypecheckBaseline(json) {
   return n;
 }
 
+// Files whose size is not an editable-code signal: generated modules are frozen at
+// their emitter's exact output size (≈0% headroom by construction — growth is policed
+// by re-freezing, e.g. openapi.generated.ts in #12212), and vendored code is upstream's.
+// The GATE (check:file-size) still enforces both; only the monitor skips them so the
+// nightly headroom-alert reflects files a human can actually slim.
+export function isMonitorExemptFile(file) {
+  return file.includes(".generated.") || /(^|\/)vendor\//.test(file);
+}
+
 /**
  * Frozen-file headroom: the worst (most consumed) frozen file and how many sit within
  * `warnFraction` of their cap. `locOf(file)` returns the live line count or null.
+ * Generated/vendored files are excluded (see isMonitorExemptFile).
  */
 export function fileSizeHeadroom(frozen, locOf, warnFraction = 0.1) {
   let worst = null;
@@ -73,7 +83,7 @@ export function fileSizeHeadroom(frozen, locOf, warnFraction = 0.1) {
   let over = 0;
   let measured = 0;
   for (const [file, capRaw] of Object.entries(frozen)) {
-    if (file.startsWith("_")) continue;
+    if (file.startsWith("_") || isMonitorExemptFile(file)) continue;
     const cap = Number(capRaw);
     const loc = locOf(file);
     if (!Number.isFinite(cap) || loc === null || loc === undefined) continue;

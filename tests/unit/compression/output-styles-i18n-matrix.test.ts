@@ -38,11 +38,11 @@ const KNOWN_ENGLISH_ONLY: Record<string, string> = {
  */
 const BASELINE_LANGUAGES: Record<string, string[]> = {
   // terse-prose reuses CAVEMAN_INSTRUCTION_BY_LANGUAGE (outputMode.ts), which
-  // localizes to pt-BR/ja/id/vi — keep the two in sync when adding a language.
-  "terse-prose": ["pt-BR", "ja", "id", "vi"],
-  "less-code": ["pt-BR", "vi", "ja", "id"],
-  ponytail: ["pt-BR", "vi", "ja", "id"],
-  "i-have-adhd": ["pt-BR", "vi", "ja", "id"],
+  // localizes to pt-BR/es/de/fr/it/ru/zh/ja/id/vi — keep the two in sync.
+  "terse-prose": ["pt-BR", "es", "de", "fr", "it", "ru", "zh", "ja", "id", "vi"],
+  "less-code": ["pt-BR", "vi", "ja", "id", "es", "de", "fr", "it", "ru", "zh"],
+  ponytail: ["pt-BR", "vi", "ja", "id", "es", "de", "fr", "it", "ru", "zh"],
+  "i-have-adhd": ["pt-BR", "vi", "ja", "id", "es", "de", "fr", "it", "ru", "zh"],
   // locale-gated to zh: the single-language instruction IS the feature.
   "terse-cjk": [],
 };
@@ -134,5 +134,22 @@ test("KNOWN_ENGLISH_ONLY does not hide a style that is actually translated", () 
       0,
       `style "${id}" now has translations — remove it from KNOWN_ENGLISH_ONLY`
     );
+  }
+});
+
+test("wave-2 translations are written in their own language, not copied English", () => {
+  const anchors: Record<string, Record<string, RegExp>> = {
+    "less-code": { es: /petición|archivos/, de: /Änderung|Dateien/, fr: /demande|fichier/, it: /modifica|righe/, ru: /[А-Яа-яЁё]/, zh: /[一-鿿]/ },
+    ponytail: { es: /escribir|perezoso/, de: /faul|schreiben/i, fr: /paresseux|écrire/, it: /pigro|scrivere/, ru: /[А-Яа-яЁё]/, zh: /[一-鿿]/ },
+    "i-have-adhd": { es: /acción/, de: /ADHS/, fr: /délimitée|préambule/, it: /delimitata|preamboli/, ru: /[А-Яа-яЁё]/, zh: /[一-鿿]/ },
+    "terse-prose": { es: /Responde/, de: /Antworte/, fr: /Reponds|Réponds/i, it: /Rispondi/, ru: /[А-Яа-яЁё]/, zh: /[一-鿿]/ },
+  };
+  for (const [styleId, langs] of Object.entries(anchors)) {
+    const i18n = outputStyleMeta(styleId).i18n ?? {};
+    for (const [lang, anchor] of Object.entries(langs)) {
+      for (const level of ["lite", "full", "ultra"] as const) {
+        assert.ok(anchor.test(i18n[lang][level]), `${styleId}.${lang}.${level} fails its language anchor`);
+      }
+    }
   }
 });

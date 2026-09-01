@@ -88,7 +88,9 @@ export default function FreeProviderRankingsPage() {
   );
 
   useEffect(() => {
-    fetchRankings(filter || undefined, { configuredOnly, availableOnly });
+    void (async () => {
+      await fetchRankings(filter || undefined, { configuredOnly, availableOnly });
+    })();
   }, [filter, configuredOnly, availableOnly, fetchRankings]);
 
   // Client-side Type filter + "group by type" sort (#6915) — purely derived

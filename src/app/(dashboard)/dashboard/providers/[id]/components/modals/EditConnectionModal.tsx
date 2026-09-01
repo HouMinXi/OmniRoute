@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Badge, Input, Modal, Toggle, Select } from "@/shared/components";
+import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
@@ -111,6 +112,7 @@ export default function EditConnectionModal({
     priority: 1,
     maxConcurrent: "",
     rpm: "",
+    rpd: "",
     tpm: "",
     tpd: "",
     minTime: "",
@@ -158,7 +160,9 @@ export default function EditConnectionModal({
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
     runtimeKey: "",
-    connectorName: stringField(connectionProviderSpecificData?.connectorName) || "OmniRoute Codex",
+    connectorName:
+      stringField(connectionProviderSpecificData?.connectorName) ||
+      CHATGPT_WEB_CODEX_CONNECTOR_NAME,
     m365Tier: normalizeM365TierValue(connectionProviderSpecificData?.tier) as M365TierValue,
     peakHourProtection: { ...EMPTY_PEAK_HOUR_PROTECTION, windows: [] } as PeakHourProtectionConfig,
   });
@@ -262,8 +266,19 @@ export default function EditConnectionModal({
       : apiKeyOptional
         ? t("apiKeyOptionalHint")
         : t("leaveBlankKeepCurrentApiKey");
-  useEffect(() => {
-    if (isOpen && connection) {
+  // Modal-open form initialization from the loaded connection — applied as a
+  // render-phase adjustment guarded by the previously initialized connection
+  // (react.dev "adjusting state when a prop changes") instead of the former
+  // synchronous-setState effect. Remounting the 30+ field form per connection
+  // id stays out of scope (#11251 follow-up, #9985); closing clears the marker
+  // so the next open re-initializes again.
+  const [initializedFor, setInitializedFor] = useState<{
+    connection: EditConnectionModalConnection;
+    providerId: string;
+  } | null>(null);
+  if (isOpen && connection) {
+    if (initializedFor?.connection !== connection || initializedFor.providerId !== providerId) {
+      setInitializedFor({ connection, providerId });
       const effectiveProvider = connection.provider || providerId;
       const existingBaseUrl = stringField(connection.providerSpecificData?.baseUrl);
       const existingTargetFormat = stringField(connection.providerSpecificData?.targetFormat);
@@ -293,13 +308,6 @@ export default function EditConnectionModal({
         connection.providerSpecificData?.quotaPerUnit != null
           ? String(connection.providerSpecificData.quotaPerUnit)
           : "";
-      // Modal-open form initialization from the loaded connection (sync with an
-      // external system on `isOpen`); remounting the 30+ field form per
-      // connection id is a behavior-risking restructure out of scope here
-      // (#11251 follow-up, #9985).
-      // NOTE: no react-hooks/set-state-in-effect suppression needed — the rule
-      // only fires on unconditional synchronous setState, and this one is
-      // guarded by the isOpen/connection condition above.
       setFormData({
         name: connection.name || "",
         priority: connection.priority || 1,
@@ -310,6 +318,10 @@ export default function EditConnectionModal({
         rpm:
           connection.rateLimitOverrides?.rpm != null
             ? String(connection.rateLimitOverrides.rpm)
+            : "",
+        rpd:
+          connection.rateLimitOverrides?.rpd != null
+            ? String(connection.rateLimitOverrides.rpd)
             : "",
         tpm:
           connection.rateLimitOverrides?.tpm != null
@@ -367,13 +379,16 @@ export default function EditConnectionModal({
         quotaPerUnit: existingQuotaPerUnit,
         glmOrganizationId: existingGlmOrganizationId,
         glmProjectId: existingGlmProjectId,
+        // Console-session credentials are stripped from API responses
+        // (sanitizeProviderSpecificDataForResponse), so there is nothing to
+        // round-trip: start empty and let "blank keeps the stored value" hold —
+        // the quota-scraping assign skips empty fields and the PUT merge
+        // preserves keys the payload does not carry.
         ollamaCloudUsageCookie: "",
-        alibabaConsoleCookie: stringField(connection.providerSpecificData?.alibabaConsoleCookie),
-        qwenCloudCookie: stringField(connection.providerSpecificData?.qwenCloudCookie),
-        qwenCloudSecToken: stringField(connection.providerSpecificData?.qwenCloudSecToken),
-        alibabaConsoleSecToken: stringField(
-          connection.providerSpecificData?.alibabaConsoleSecToken
-        ),
+        alibabaConsoleCookie: "",
+        qwenCloudCookie: "",
+        qwenCloudSecToken: "",
+        alibabaConsoleSecToken: "",
         ccCompatibleContext1m: ccRequestDefaults.context1m,
         ccCompatibleRedactThinking: ccRequestDefaults.redactThinking,
         ccCompatibleSummarizeThinking: ccRequestDefaults.summarizeThinking,
@@ -392,7 +407,8 @@ export default function EditConnectionModal({
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
         runtimeKey: "",
         connectorName:
-          stringField(connection.providerSpecificData?.connectorName) || "OmniRoute Codex",
+          stringField(connection.providerSpecificData?.connectorName) ||
+          CHATGPT_WEB_CODEX_CONNECTOR_NAME,
         m365Tier: normalizeM365TierValue(connection.providerSpecificData?.tier) as M365TierValue,
         peakHourProtection: {
           ...EMPTY_PEAK_HOUR_PROTECTION,
@@ -437,15 +453,9 @@ export default function EditConnectionModal({
       setValidatedProviderSpecificData(undefined);
       setSaveError(null);
     }
-  }, [
-    isOpen,
-    connection,
-    providerId,
-    defaultBaseUrl,
-    showsRegion,
-    defaultRegion,
-    setOpenRouterPreset,
-  ]);
+  } else if (initializedFor !== null) {
+    setInitializedFor(null);
+  }
   const handleTest = async () => {
     if (!provider) return;
     setTesting(true);
@@ -559,6 +569,7 @@ export default function EditConnectionModal({
       };
       const overrides: Record<string, number> = {};
       if (formData.rpm.trim()) overrides.rpm = Number(formData.rpm);
+      if (formData.rpd.trim()) overrides.rpd = Number(formData.rpd);
       if (formData.tpm.trim()) overrides.tpm = Number(formData.tpm);
       if (formData.tpd.trim()) overrides.tpd = Number(formData.tpd);
       if (formData.minTime.trim()) overrides.minTime = Number(formData.minTime);
@@ -1046,6 +1057,7 @@ export default function EditConnectionModal({
                   onChange={(event) =>
                     setFormData({ ...formData, connectorName: event.target.value })
                   }
+                  placeholder={CHATGPT_WEB_CODEX_CONNECTOR_NAME}
                 />
                 <Button
                   variant="secondary"
@@ -1243,6 +1255,15 @@ export default function EditConnectionModal({
                       onChange={(e) => setFormData({ ...formData, rpm: e.target.value })}
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesRpmHint")}
+                    />
+                    <Input
+                      label={t("rateLimitOverridesRpdLabel")}
+                      type="number"
+                      min={0}
+                      value={formData.rpd}
+                      onChange={(e) => setFormData({ ...formData, rpd: e.target.value })}
+                      placeholder={t("inherit")}
+                      hint={t("rateLimitOverridesRpdHint")}
                     />
                     <Input
                       label={t("rateLimitOverridesTpmLabel")}

@@ -30,6 +30,7 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "acp-agents",
   "cloud-agents",
   "conductor",
+  "orchestration",
   "agent-bridge",
   "traffic-inspector",
   "discovery",

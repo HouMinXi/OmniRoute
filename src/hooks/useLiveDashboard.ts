@@ -11,7 +11,7 @@
 
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { DashboardChannel, DashboardEventName } from "@/lib/events/types";
 import { deriveLiveWsPath, resolveLiveWsUrl, sanitizeLiveWsPort } from "@/shared/utils/wsPath";
 
@@ -168,6 +168,14 @@ export function useLiveDashboard({
     onEventRef.current = onEvent;
   }, [onEvent]);
 
+  // Key + memo pair: the channel ARRAY is usually a fresh literal each render,
+  // so `connect` deps use a stable identity derived from its contents.
+  const channelsKey = channels.join(",");
+  const stableChannels = useMemo(
+    () => channelsKey.split(",").filter(Boolean) as DashboardChannel[],
+    [channelsKey]
+  );
+
   const connect = useCallback(() => {
     if (!mountedRef.current) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
@@ -196,7 +204,7 @@ export function useLiveDashboard({
         });
 
         // Subscribe to channels
-        ws.send(JSON.stringify({ type: "subscribe", channels }));
+        ws.send(JSON.stringify({ type: "subscribe", channels: stableChannels }));
 
         // Heartbeat: send a periodic ping so the server (which only refreshes
         // liveness from inbound messages) never terminates a healthy, idle
@@ -293,7 +301,7 @@ export function useLiveDashboard({
   }, [
     effectiveWsUrl,
     apiKey,
-    channels.join(","),
+    stableChannels,
     autoReconnect,
     connection.reconnectAttempt,
     stopPingHeartbeat,

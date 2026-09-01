@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "Törölje az összes befejezett köteget",
     "batchListBatchesTable": "Batches",
     "changelogViewerLoading": "Változásnapló betöltése a GitHubról...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "Loading profile...",
     "profileHowToEarn": "How to earn",
     "bootstrapBannerDismiss": "Elvetés",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "A keretet kimerítő kérések átirányítása a vészhelyzeti ingyenes tartalék szolgáltatóhoz/modellhez.",
   "featureFlagArenaEloSyncEnabledDescription": "Rendszeres Arena AI ranglista ELO szinkronizáció engedélyezése a modellintelligencia rangsorokhoz.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Hirdesse a claude/&lt;provider&gt;/&lt;model&gt; tükör azonosítókat a /v1/models-on, hogy a Claude Code átjáró modell felfedezése nem Claude modelleket is listázzon. Figyelmeztetés: globális engedélyezés esetén megduplázza a katalógus bejegyzéseket minden kliens számára.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "Tegye lehetővé a bérlőnkénti adaptív virtuális beléptetősávokat a szolgáltatók felé történő továbbításhoz (#9654): az egyik bérlő kiugró terhelése már nem okoz 503-as hibát egy másiknál. Az OMNIROUTE_CHAT_VIRTUAL_LANES környezeti változó felülírja ezt a vezérlőpult-beállítást; a változtatások a szerver újraindításakor lépnek életbe.",
   "sidebar": {
     "home": "Otthon",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "Szolgáltatók vizsgálata ingyenes hozzáférésért",
     "conductor": "Vezető",
     "conductorSubtitle": "CLI-ügynök flotta",
+    "orchestration": "Orkesztráció",
+    "orchestrationSubtitle": "Élő nézet mindenről, ami fut",
     "resilienceConnections": "Kapcsolat Ellenálló Képesség",
     "resilienceConnectionsSubtitle": "Cooldown, megszakító, zárolási állapot",
     "settingsModalityBridge": "Modalitás Híd",
@@ -1768,7 +1772,8 @@
     "tools": "Eszközök",
     "agentBridge": "Ágenshíd",
     "trafficInspector": "Forgalomvizsgáló",
-    "usage": "Használat"
+    "usage": "Használat",
+    "orchestration": "Orkesztráció"
   },
   "home": {
     "quickStart": "Gyors kezdés",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "Warp AI terminál egyéni szolgáltató támogatásával",
       "agent-deck": "Agent Deck többágenses orkesztrátor",
-      "5dive": "5dive — saját üzemeltetésű kódolóügynök-flotta; egyetlen auth profil mindet az OmniRoute-ra irányítja",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — saját üzemeltetésű kódolóügynök-flotta; egyetlen auth profil mindet az OmniRoute-ra irányítja"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "Kérések közötti minimális idő (ms). Felülbírálja az alapértelmezett sebességkorlátozó késleltetést.",
     "rateLimitOverridesMinTimeLabel": "Min. intervallum (ms)",
+    "rateLimitOverridesRpdHint": "Maximális kérések száma naponta ehhez a kapcsolathoz. Felülbírálja a szolgáltató alapértelmezését.",
+    "rateLimitOverridesRpdLabel": "RPD (Kérés/nap)",
     "rateLimitOverridesRpmHint": "Maximális percenkénti kérésszám ehhez a kapcsolathoz. Felülbírálja a szolgáltató alapértelmezését.",
     "rateLimitOverridesRpmLabel": "RPM (kérés/perc)",
     "rateLimitOverridesTpdHint": "Maximális napi tokenszám ehhez a kapcsolathoz. Felülbírálja a szolgáltató alapértelmezését.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "Globális fiókstratégia felülírása ehhez a szolgáltatóhoz (9router paritás).",
     "providerRoutingStrategy": "Fiókstratégia",
     "providerRoutingInheritGlobal": "Globális alapértelmezés öröklése",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Modell álnevek",
     "modelAliasesTitle": "Modell aliasok",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "Ha engedélyezve van, a hibás szolgáltatókat a rendszer globálisan követi, és egy lehűlési időszakra kihagyja őket.",
     "resilienceProviderCooldownMin": "Minimális lehűlési idő",
     "resilienceProviderCooldownMax": "Maximális lehűlési idő",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Munkamenet-affinitás",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "Egészség",
     "cliproxyapiPort": "Port",
     "qdrantHost": "Gazda",
-    "qdrantCollection": "Gyűjtemény",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "Gyűjtemény"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "Másolás",
       "autoscrollOn": "Automatikus görgetés: be",
       "autoscrollOff": "Automatikus Görgetés: ki",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "Kliens Nyers Kérés",
         "clientRequest": "Ügyfél Kérés",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "MCP-szerver",
-        "description": "Csatlakozás az OmniRoute MCP-szerverhez (37 eszköz, 3 transzport: SSE/stdio/HTTP). Lefedi az útvonalválasztást, a gyorsítótárat, a tömörítést, a memóriát, a képességeket, a szolgáltatókat és az audit eszközöket 16 jogosultsági körben."
+        "description": "Csatlakozás az OmniRoute MCP-szerverhez (110 eszköz, 3 transzport: SSE/stdio/HTTP). Lefedi az útvonalválasztást, a gyorsítótárat, a tömörítést, a memóriát, a képességeket, a szolgáltatókat és az audit eszközöket 33 jogosultsági körben."
       },
       "omni-agents-a2a": {
         "name": "Ágensek és A2A protokoll",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "Hálózati hozzáférés engedélyezése a készségek homokozójában."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "A beszédszintézis meghiúsult (ellenőrizze a TTS modellt/szolgáltatót)",
     "micDenied": "A mikrofon nem elérhető, vagy a hozzáférés megtagadva"
   },
+  "orchestration": {
+    "title": "Orkesztráció",
+    "description": "Minden, amit az OmniRoute éppen futtat — ügynökök, flotta és útválasztás",
+    "tabAgents": "Ügynökök",
+    "tabRouting": "Útválasztás",
+    "tabOverview": "Áttekintés",
+    "showCompleted": "Befejezettek megjelenítése",
+    "sourceCloudAgent": "Felhőügynök",
+    "sourceA2A": "A2A",
+    "sourceConductor": "Vezető",
+    "sourceStale": "Elavult ekkor óta: {since}",
+    "sourceOffline": "Offline",
+    "stateQueued": "Sorban áll",
+    "stateRunning": "Fut",
+    "stateWaitingApproval": "Jóváhagyásra vár",
+    "stateSucceeded": "Sikeres",
+    "stateFailed": "Sikertelen",
+    "stateCancelled": "Megszakítva",
+    "overflowMore": "+{count} további",
+    "emptyTitle": "Még semmi sem fut",
+    "emptyCloudAgentCta": "Felhőügynökök beállítása",
+    "emptyA2ACta": "A2A megnyitása",
+    "emptyConductorCta": "Vezető megnyitása",
+    "drawerObjective": "Cél",
+    "drawerTimeline": "Idővonal",
+    "drawerMetrics": "Metrikák",
+    "drawerResult": "Eredmény",
+    "drawerActions": "Műveletek",
+    "actionApprove": "Terv jóváhagyása",
+    "actionCancel": "Mégse",
+    "actionSeeInGraph": "Megtekintés a grafikonon",
+    "actionDone": "Művelet végrehajtva",
+    "actionFailed": "A művelet sikertelen: {error}",
+    "mirroredInA2A": "Tükrözve az A2A-ban"
+  },
   "cliproxyProviderExposure": {
     "title": "Szolgáltató Expozíció",
     "description": "Expose CLIProxyAPI modelleként egy útvonal célpontjaként a <prefix>cliproxyapi/</prefix> előtag alatt.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

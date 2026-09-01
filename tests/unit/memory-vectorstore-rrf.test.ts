@@ -250,3 +250,23 @@ test("searchHybrid: apiKeyId filters both vec and FTS results", async (t) => {
     assert.notEqual(h.memoryId, "mem-key1", "key1 should not appear when filtering for key2");
   }
 });
+
+test("searchHybrid: handles control symbols and system reminder tags without FTS5 syntax errors", async (t) => {
+  const store = getStoreOrSkip(t);
+  if (!store) return;
+
+  const db = core.getDbInstance();
+  await setupTable(store);
+
+  insertMemoryWithFts(db, "mem-tag-1", "key1", "CRITICAL test query memory");
+  await store.upsertVector("mem-tag-1", makeVec(1.0, 0.0, 0.0, 0.0));
+
+  await assert.doesNotReject(async () => {
+    const hits = await store.searchHybrid(
+      makeVec(1.0, 0.0, 0.0, 0.0),
+      "<system-reminder> CRITICAL: test query! </system-reminder>",
+      10
+    );
+    assert.ok(Array.isArray(hits));
+  }, "should not throw FTS5 syntax error on control symbols or XML-like tags");
+});

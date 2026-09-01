@@ -815,3 +815,15 @@ html[dir="rtl"] :where(code, pre, kbd, samp, input[type="email"], input[type="ur
 html[dir="rtl"] :where(.material-symbols-outlined, .traffic-lights, .react-flow) {
   direction: ltr;
 }
+
+/* Orchestration Canvas: honor prefers-reduced-motion (spec §6). Scoped so the
+   other xyflow surfaces keep their current behavior until elevation #4 lands. */
+@media (prefers-reduced-motion: reduce) {
+  .orchestration-canvas .animate-ping {
+    animation: none;
+  }
+  .orchestration-canvas .react-flow__edge.animated path {
+    animation: none;
+    stroke-dasharray: none;
+  }
+}

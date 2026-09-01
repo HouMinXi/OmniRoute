@@ -40,6 +40,7 @@ import {
   normalizeResponsesReasoningEffort,
   RESPONSES_STORE_MARKER,
 } from "./request/openai-responses/helpers.ts";
+import { applyReasoningInputPolicy } from "../services/reasoningInputPolicy.ts";
 
 bootstrapTranslatorRegistry();
 export { register } from "./registry.ts";
@@ -575,6 +576,14 @@ export function translateRequest(
   // Normalize openai-responses input shape for providers that require list input.
   if (targetFormat === FORMATS.OPENAI_RESPONSES) {
     result = normalizeOpenAIResponsesRequest(result);
+    // #12128: Sanitize reasoning input items for Responses targets (strip plaintext content for opaque backends)
+    applyReasoningInputPolicy(result as Record<string, unknown>, "responses", {
+      provider,
+      preserveEncryptedReasoning:
+        (credentials as { providerSpecificData?: { preserveEncryptedReasoning?: boolean } } | null)
+          ?.providerSpecificData?.preserveEncryptedReasoning === true,
+      onIncompatibleReasoning: "drop",
+    });
   }
 
   // Second role normalization: only for OPENAI_RESPONSES. Here messages are built from input

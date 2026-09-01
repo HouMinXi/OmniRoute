@@ -33,6 +33,9 @@ const BASE_REF = baseRefArg();
 const NEW_CODE_SCOPE = {
   dirs: ["src", "open-sse", "electron", "bin"],
   exts: [".ts", ".tsx", ".js", ".mjs"],
+  // Authorship ratchets must not force local rewrites of byte-faithful third-party source.
+  // The release-wide full walk still measures vendor complexity against the frozen baseline.
+  excludePrefixes: ["open-sse/vendor/"],
 };
 const CYCLOMATIC_RULES = new Set(["complexity", "max-lines-per-function"]);
 const COGNITIVE_RULES = new Set(["sonarjs/cognitive-complexity"]);

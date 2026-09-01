@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "সমস্ত সমাপ্ত ব্যাচ মুছুন",
     "batchListBatchesTable": "ব্যাচ",
     "changelogViewerLoading": "GitHub থেকে চেঞ্জলগ লোড হচ্ছে...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "প্রোফাইল লোড হচ্ছে...",
     "profileHowToEarn": "কিভাবে আয় করা যায়",
     "bootstrapBannerDismiss": "খারিজ",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "বাজেট শেষ হয়ে যাওয়া অনুরোধগুলো জরুরি ফ্রি ফলব্যাক প্রোভাইডার/মডেলে রুট করুন।",
   "featureFlagArenaEloSyncEnabledDescription": "মডেল ইন্টেলিজেন্স র‍্যাঙ্কিংয়ের জন্য পর্যায়ক্রমিক Arena AI লিডারবোর্ড ELO সিঙ্ক সক্ষম করুন।",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models এ claude/&lt;provider&gt;/&lt;model&gt; মিরর আইডি বিজ্ঞাপন দিন যাতে Claude Code গেটওয়ে মডেল আবিষ্কার non-Claude মডেল তালিকাভুক্ত করে। সতর্কতা: এটি গ্লোবালি সক্ষম হলে সমস্ত ক্লায়েন্টের জন্য ক্যাটালগ এন্ট্রি দ্বিগুণ করে।",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "প্রোভাইডার ডিসপ্যাচের জন্য প্রতি-টেন্যান্ট অ্যাডাপ্টিভ ভার্চুয়াল অ্যাডমিশন লেন সক্ষম করুন (#9654): এক টেন্যান্টের বিস্ফোরণ আর অন্য টেন্যান্টে 503 ফেরায় না। OMNIROUTE_CHAT_VIRTUAL_LANES এনভায়রনমেন্ট ভেরিয়েবল এই ড্যাশবোর্ড সেটিংয়ের উপরে প্রাধান্য পায়; পরিবর্তনগুলি সার্ভার পুনরায় চালু হলে কার্যকর হয়।",
   "sidebar": {
     "home": "Home",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "ফ্রি অ্যাক্সেসের জন্য প্রোভাইডার স্ক্যান করুন",
     "conductor": "কন্ডাক্টর",
     "conductorSubtitle": "CLI-এজেন্ট ফ্লিট",
+    "orchestration": "অর্কেস্ট্রেশন",
+    "orchestrationSubtitle": "চলমান সবকিছুর লাইভ ভিউ",
     "resilienceConnections": "সংযোগ স্থিতিস্থাপকতা",
     "resilienceConnectionsSubtitle": "কুলডাউন, ব্রেকার, লকআউট অবস্থা",
     "settingsModalityBridge": "মোডালিটি ব্রিজ",
@@ -1768,7 +1772,8 @@
     "tools": "টুলস",
     "agentBridge": "এজেন্ট ব্রিজ",
     "trafficInspector": "ট্রাফিক ইন্সপেক্টর",
-    "usage": "ব্যবহার"
+    "usage": "ব্যবহার",
+    "orchestration": "অর্কেস্ট্রেশন"
   },
   "home": {
     "quickStart": "Quick Start",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "কাস্টম প্রোভাইডার সাপোর্ট সহ Warp AI টার্মিনাল",
       "agent-deck": "Agent Deck মাল্টি-এজেন্ট অর্কেস্ট্রেটর",
-      "5dive": "5dive — নিজে হোস্ট করা কোডিং এজেন্টের বহর; একটি auth প্রোফাইল সবগুলোকে OmniRoute-এ নির্দেশ করে",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — নিজে হোস্ট করা কোডিং এজেন্টের বহর; একটি auth প্রোফাইল সবগুলোকে OmniRoute-এ নির্দেশ করে"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "অনুরোধগুলোর মধ্যে ন্যূনতম সময় (ms)। ডিফল্ট রেট লিমিটারের বিলম্ব ওভাররাইড করে।",
     "rateLimitOverridesMinTimeLabel": "ন্যূনতম ব্যবধান (ms)",
+    "rateLimitOverridesRpdHint": "এই সংযোগের জন্য প্রতিদিন সর্বাধিক অনুরোধ। প্রদানকারীর ডিফল্ট ওভাররাইড করে।",
+    "rateLimitOverridesRpdLabel": "RPD (অনুরোধ/দিন)",
     "rateLimitOverridesRpmHint": "এই সংযোগের জন্য প্রতি মিনিটে সর্বোচ্চ অনুরোধ। প্রদানকারীর ডিফল্ট ওভাররাইড করে।",
     "rateLimitOverridesRpmLabel": "RPM (অনুরোধ/মিনিট)",
     "rateLimitOverridesTpdHint": "এই সংযোগের জন্য প্রতিদিন সর্বোচ্চ টোকেন। প্রদানকারীর ডিফল্ট ওভাররাইড করে।",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "এই প্রোভাইডারের জন্য গ্লোবাল অ্যাকাউন্ট কৌশল ওভাররাইড করুন (9router প্যারিটি)।",
     "providerRoutingStrategy": "অ্যাকাউন্ট কৌশল",
     "providerRoutingInheritGlobal": "গ্লোবাল ডিফল্ট ইনহেরিট করুন",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Model Aliases",
     "modelAliasesTitle": "Model Aliases",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "সক্ষম করা হলে, ব্যর্থ প্রোভাইডারগুলিকে বিশ্বব্যাপী ট্র্যাক করা হয় এবং একটি কুলডাউন সময়ের জন্য এড়িয়ে যাওয়া হয়।",
     "resilienceProviderCooldownMin": "সর্বনিম্ন কুলডাউন",
     "resilienceProviderCooldownMax": "সর্বোচ্চ কুলডাউন",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "সেশন অ্যাফিনিটি",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "স্বাস্থ্য",
     "cliproxyapiPort": "পোর্ট",
     "qdrantHost": "হোস্ট",
-    "qdrantCollection": "সংগ্রহ",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "সংগ্রহ"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "কপি করুন",
       "autoscrollOn": "অটোস্ক্রল: চালু",
       "autoscrollOff": "অটোস্ক্রোল: বন্ধ",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "ক্লায়েন্ট কাঁচা অনুরোধ",
         "clientRequest": "ক্লায়েন্টের অনুরোধ",
@@ -12951,6 +12959,18 @@
       }
     }
   },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+    }
+  },
   "comboControl": {
     "title": "কম্বো কন্ট্রোল সেন্টার",
     "unavailable": "Combo Control Center অনুপলব্ধ",
@@ -13898,6 +13918,41 @@
     "ttsFailed": "স্পিচ সিন্থেসিস ব্যর্থ হয়েছে (TTS মডেল/প্রদানকারী পরীক্ষা করুন)",
     "micDenied": "মাইক্রোফোন উপলব্ধ নয় বা অনুমতি অস্বীকৃত"
   },
+  "orchestration": {
+    "title": "অর্কেস্ট্রেশন",
+    "description": "OmniRoute এখন যা কিছু চালাচ্ছে — এজেন্ট, ফ্লিট এবং রাউটিং",
+    "tabAgents": "এজেন্ট",
+    "tabRouting": "রাউটিং",
+    "tabOverview": "সংক্ষিপ্ত বিবরণ",
+    "showCompleted": "সম্পন্ন দেখান",
+    "sourceCloudAgent": "ক্লাউড এজেন্ট",
+    "sourceA2A": "A2A",
+    "sourceConductor": "কন্ডাক্টর",
+    "sourceStale": "{since} থেকে পুরনো",
+    "sourceOffline": "অফলাইন",
+    "stateQueued": "সারিতে",
+    "stateRunning": "চলছে",
+    "stateWaitingApproval": "অনুমোদনের অপেক্ষায়",
+    "stateSucceeded": "সফল",
+    "stateFailed": "ব্যর্থ",
+    "stateCancelled": "বাতিল করা হয়েছে",
+    "overflowMore": "+{count} আরও",
+    "emptyTitle": "এখনো কিছু চলছে না",
+    "emptyCloudAgentCta": "ক্লাউড এজেন্ট সেট আপ করুন",
+    "emptyA2ACta": "A2A খুলুন",
+    "emptyConductorCta": "কন্ডাক্টর খুলুন",
+    "drawerObjective": "উদ্দেশ্য",
+    "drawerTimeline": "টাইমলাইন",
+    "drawerMetrics": "মেট্রিক্স",
+    "drawerResult": "ফলাফল",
+    "drawerActions": "কার্যক্রম",
+    "actionApprove": "পরিকল্পনা অনুমোদন করুন",
+    "actionCancel": "বাতিল করুন",
+    "actionSeeInGraph": "গ্রাফে দেখুন",
+    "actionDone": "কার্যক্রম প্রয়োগ করা হয়েছে",
+    "actionFailed": "কার্যক্রম ব্যর্থ হয়েছে: {error}",
+    "mirroredInA2A": "A2A-তে প্রতিফলিত"
+  },
   "cliproxyProviderExposure": {
     "title": "প্রদানকারী এক্সপোজার",
     "description": "<prefix>cliproxyapi/</prefix> প্রিফিক্সের অধীনে একটি রাউটিং টার্গেট হিসেবে CLIProxyAPI মডেলগুলি প্রকাশ করুন।",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

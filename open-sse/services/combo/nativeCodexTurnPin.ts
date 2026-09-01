@@ -1,4 +1,15 @@
 import { createHash } from "node:crypto";
+import { buildErrorBody } from "../../utils/error.ts";
+import { isModelLocked, hasPerModelQuota } from "../accountFallback.ts";
+import { isProviderInCooldown } from "../providerCooldownTracker.ts";
+import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker.ts";
+import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
+import { checkCredentialGate } from "../credentialGate.ts";
+import { canAffordRequest } from "../../../src/lib/quota/quotaScheduler.ts";
+import { resolveQuotaExhaustionCutoffForTarget } from "./quotaExhaustionCutoff.ts";
+import type { ResetWindowConfig } from "./quotaScoring.ts";
+import { parseModel } from "../model.ts";
+import type { ComboLogger, IsModelAvailable } from "./types.ts";
 
 import type { ResolvedComboTarget } from "./types.ts";
 
@@ -148,6 +159,124 @@ export function revokeNativeCodexTurnPinsForConnection(connectionId: string): nu
     revoked += 1;
   }
   return revoked;
+}
+
+export const NATIVE_CODEX_PINNED_MODEL_UNAVAILABLE_CODE = "NATIVE_CODEX_PINNED_MODEL_UNAVAILABLE";
+export const NATIVE_CODEX_PINNED_MODEL_UNAVAILABLE_MESSAGE =
+  "The model handling this native Codex turn is no longer available. This turn cannot switch providers or models after output has been emitted. Start a new turn to allow Combo routing to select another model.";
+
+export function createPinnedModelUnavailableResponse(): Response {
+  const body = buildErrorBody(400, NATIVE_CODEX_PINNED_MODEL_UNAVAILABLE_MESSAGE, undefined, {
+    code: NATIVE_CODEX_PINNED_MODEL_UNAVAILABLE_CODE,
+    type: "invalid_request_error",
+  });
+  return new Response(JSON.stringify(body), {
+    status: 400,
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+export interface CheckPinnedTargetsModelScopedUnusableOptions {
+  pinnedTargets: ResolvedComboTarget[];
+  resilienceSettings?: ResilienceSettings | null;
+  quotaCutoffResetWindowConfig?: ResetWindowConfig;
+  comboName: string;
+  body: Record<string, unknown>;
+  log?: ComboLogger;
+  isModelAvailable?: IsModelAvailable;
+}
+
+export async function isPinnedTargetModelScopedUnusable(args: {
+  target: ResolvedComboTarget;
+  resilienceSettings?: ResilienceSettings | null;
+  quotaCutoffResetWindowConfig?: ResetWindowConfig;
+  comboName: string;
+  body: Record<string, unknown>;
+  log?: ComboLogger;
+  isModelAvailable?: IsModelAvailable;
+}): Promise<boolean> {
+  const {
+    target,
+    resilienceSettings,
+    quotaCutoffResetWindowConfig,
+    comboName,
+    body,
+    log,
+    isModelAvailable,
+  } = args;
+  const provider = target.provider;
+  const connectionId = target.connectionId || "";
+  const rawModel = parseModel(target.modelStr).model || target.modelStr;
+
+  if (provider && provider !== "unknown") {
+    const cb = getCircuitBreaker(provider);
+    if (cb.getStatus().state === "OPEN") return false;
+    if (
+      resilienceSettings?.providerCooldown?.enabled &&
+      (isProviderInCooldown(provider, connectionId || undefined, resilienceSettings) ||
+        isProviderInCooldown(provider, undefined, resilienceSettings))
+    ) {
+      return false;
+    }
+  }
+
+  if (
+    connectionId &&
+    checkCredentialGate(connectionId, provider, target.modelStr).allowed === false
+  ) {
+    return false;
+  }
+
+  if (provider && rawModel && isModelLocked(provider, connectionId, rawModel)) return true;
+
+  if (
+    process.env.OMNIROUTE_QUOTA_AWARE_ROUTING === "1" &&
+    provider &&
+    connectionId &&
+    !canAffordRequest(connectionId, target.modelStr, body).affordable
+  ) {
+    return true;
+  }
+
+  if (provider && connectionId && quotaCutoffResetWindowConfig) {
+    const cutoff = await resolveQuotaExhaustionCutoffForTarget(
+      provider,
+      connectionId,
+      resilienceSettings,
+      quotaCutoffResetWindowConfig,
+      comboName,
+      log ?? { info: () => {}, warn: () => {}, error: () => {}, debug: () => {} }
+    );
+    if (cutoff.blocked) return true;
+  }
+
+  if (isModelAvailable) {
+    const available = await Promise.resolve(isModelAvailable(target.modelStr, target)).catch(
+      () => true
+    );
+    if (
+      !available &&
+      provider &&
+      rawModel &&
+      (isModelLocked(provider, connectionId, rawModel) || hasPerModelQuota(provider, rawModel))
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export async function areAllPinnedTargetsModelScopedUnusable(
+  options: CheckPinnedTargetsModelScopedUnusableOptions
+): Promise<boolean> {
+  if (!options.pinnedTargets?.length) return false;
+  for (const target of options.pinnedTargets) {
+    if (!(await isPinnedTargetModelScopedUnusable({ target, ...options }))) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function clearNativeCodexTurnPinsForTests(): void {

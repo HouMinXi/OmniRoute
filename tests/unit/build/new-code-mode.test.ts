@@ -32,6 +32,23 @@ test("filterScope keeps only in-scope dirs/extensions, sorted and trimmed", () =
   assert.deepEqual(files, ["bin/f.mjs", "open-sse/b.tsx", "src/a.ts"]);
 });
 
+test("filterScope can exclude first-party vendored source from authorship ratchets", () => {
+  const files = filterScope(
+    [
+      "open-sse/executors/chatgpt-web-codex.ts",
+      "open-sse/vendor/codex-chatgpt-web/bridge.ts",
+      "open-sse/vendor/other-package/index.ts",
+    ],
+    {
+      dirs: ["open-sse"],
+      exts: [".ts"],
+      excludePrefixes: ["open-sse/vendor/"],
+    }
+  );
+
+  assert.deepEqual(files, ["open-sse/executors/chatgpt-web-codex.ts"]);
+});
+
 test("perFileRuleCounts counts only the requested rules and relativizes absolute paths", () => {
   const report = [
     {

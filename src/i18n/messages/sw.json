@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "Futa makundi yote yaliyokamilishwa",
     "batchListBatchesTable": "Makundi",
     "changelogViewerLoading": "Inapakia logi ya mabadiliko kutoka kwa GitHub...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "Inapakia wasifu...",
     "profileHowToEarn": "Jinsi ya kupata",
     "bootstrapBannerDismiss": "Ondoa",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "Elekeza maombi yaliyomaliza bajeti kwenye mtoa huduma/muundo wa dharura wa akiba usiolipiwa.",
   "featureFlagArenaEloSyncEnabledDescription": "Washa usawazishaji wa mara kwa mara wa ELO wa ubao wa wanaoongoza wa Arena AI kwa viwango vya akili vya muundo.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Tangaza claude/&lt;provider&gt;/&lt;model&gt; vitambulisho vya kioo kwenye /v1/models ili orodha ya kugundua modeli za Claude Code iwe na modeli zisizo za Claude. Onyo: inafanya kuingia mara mbili kwenye katalogi kwa wateja wote inapowekwa kuwa ya ulimwengu mzima.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "Washa njia za uandikishaji pepe zinazobadilika kwa kila mpangaji (tenant) kwa utumaji wa watoa huduma (#9654): mlipuko wa mpangaji mmoja hautoi tena 503 kwa mwingine. Kigezo cha mazingira cha OMNIROUTE_CHAT_VIRTUAL_LANES kinashinda mpangilio huu wa dashibodi; mabadiliko yanatumika wakati seva inapoanzishwa upya.",
   "sidebar": {
     "home": "Home",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "Changanua watoa huduma kwa ufikiaji wa bure",
     "conductor": "Msimamizi",
     "conductorSubtitle": "CLI-agent meli",
+    "orchestration": "Uratibu",
+    "orchestrationSubtitle": "Muonekano wa moja kwa moja wa kila kitu kinachoendesha",
     "resilienceConnections": "Uimara wa Muunganisho",
     "resilienceConnectionsSubtitle": "Kupoa, kivunja mzunguko, hali ya kufuli",
     "settingsModalityBridge": "Daraja la Modality",
@@ -1768,7 +1772,8 @@
     "tools": "Zana",
     "agentBridge": "Daraja la Wakala",
     "trafficInspector": "Kikaguzi cha Trafiki",
-    "usage": "Matumizi"
+    "usage": "Matumizi",
+    "orchestration": "Uratibu"
   },
   "home": {
     "quickStart": "Quick Start",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "Terminal ya Warp AI yenye usaidizi wa mtoa huduma maalum",
       "agent-deck": "Mratibu wa mawakala wengi wa Agent Deck",
-      "5dive": "5dive — kundi la mawakala wa uandishi wa msimbo unaojipangisha; wasifu mmoja wa auth huwaelekeza wote kwa OmniRoute",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — kundi la mawakala wa uandishi wa msimbo unaojipangisha; wasifu mmoja wa auth huwaelekeza wote kwa OmniRoute"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "Muda wa chini zaidi (ms) kati ya maombi. Hubatilisha ucheleweshaji wa kikomo cha kasi chaguo-msingi.",
     "rateLimitOverridesMinTimeLabel": "Muda wa Chini (ms)",
+    "rateLimitOverridesRpdHint": "Upeo wa maombi kwa siku kwa muunganisho huu. Hubatilisha chaguomsingi la mtoa huduma.",
+    "rateLimitOverridesRpdLabel": "RPD (Maombi/siku)",
     "rateLimitOverridesRpmHint": "Upeo wa juu wa maombi kwa dakika kwa muunganisho huu. Hubatilisha chaguo-msingi la mtoa huduma.",
     "rateLimitOverridesRpmLabel": "RPM (Maombi/dakika)",
     "rateLimitOverridesTpdHint": "Upeo wa juu wa tokeni kwa siku kwa muunganisho huu. Hubatilisha chaguo-msingi la mtoa huduma.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "Batilisha mkakati wa kimataifa wa akaunti kwa mtoa huduma huyu (usawa wa 9router).",
     "providerRoutingStrategy": "Mkakati wa akaunti",
     "providerRoutingInheritGlobal": "Urithi chaguo-msingi la jumla",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Model Aliases",
     "modelAliasesTitle": "Model Aliases",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "Ikiwashwa, watoa huduma walioshindwa hufuatiliwa kwa jumla na kupitwa kwa kipindi cha cooldown.",
     "resilienceProviderCooldownMin": "Cooldown ya chini zaidi",
     "resilienceProviderCooldownMax": "Cooldown ya juu zaidi",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Session affinity",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "Afya",
     "cliproxyapiPort": "Bandari",
     "qdrantHost": "Mwenyeji",
-    "qdrantCollection": "Mkusanyiko",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "Mkusanyiko"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "Nakili",
       "autoscrollOn": "Autoscroll: on",
       "autoscrollOff": "Autoscroll: off",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "Omba Mbichi ya Mteja",
         "clientRequest": "Omba Mteja",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "Seva ya MCP",
-        "description": "Unganisha kwenye seva ya OmniRoute MCP (zana 37, usafirishaji 3: SSE/stdio/HTTP). Inajumuisha uelekezaji, kache, mgandamizo, kumbukumbu, ujuzi, watoa huduma, na zana za ukaguzi kwenye mawanda 16 ya ruhusa."
+        "description": "Unganisha kwenye seva ya OmniRoute MCP (zana 110, usafirishaji 3: SSE/stdio/HTTP). Inajumuisha uelekezaji, kache, mgandamizo, kumbukumbu, ujuzi, watoa huduma, na zana za ukaguzi kwenye mawanda 33 ya ruhusa."
       },
       "omni-agents-a2a": {
         "name": "Ejenti na Itifaki ya A2A",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "Wezesha ufikiaji wa mtandao katika sandbox ya ujuzi."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "Uundaji wa sauti umeshindwa (angalia mfano/mtoa huduma wa TTS)",
     "micDenied": "Mikrofoni haipatikani au ruhusa imekataliwa"
   },
+  "orchestration": {
+    "title": "Uratibu",
+    "description": "Kila kitu ambacho OmniRoute inaendesha sasa hivi — mawakala, meli na uelekezaji",
+    "tabAgents": "Mawakala",
+    "tabRouting": "Uelekezaji",
+    "tabOverview": "Muhtasari",
+    "showCompleted": "Onyesha vilivyokamilika",
+    "sourceCloudAgent": "Wakala wa Wingu",
+    "sourceA2A": "A2A",
+    "sourceConductor": "Msimamizi",
+    "sourceStale": "Imepitwa na wakati tangu {since}",
+    "sourceOffline": "Nje ya mtandao",
+    "stateQueued": "Kwenye foleni",
+    "stateRunning": "Inaendesha",
+    "stateWaitingApproval": "Inasubiri idhini",
+    "stateSucceeded": "Imefaulu",
+    "stateFailed": "Imeshindwa",
+    "stateCancelled": "Imeghairiwa",
+    "overflowMore": "+{count} zaidi",
+    "emptyTitle": "Hakuna kinachoendesha bado",
+    "emptyCloudAgentCta": "Sanidi Mawakala wa Wingu",
+    "emptyA2ACta": "Fungua A2A",
+    "emptyConductorCta": "Fungua Msimamizi",
+    "drawerObjective": "Lengo",
+    "drawerTimeline": "Ratiba ya matukio",
+    "drawerMetrics": "Vipimo",
+    "drawerResult": "Matokeo",
+    "drawerActions": "Vitendo",
+    "actionApprove": "Idhinisha mpango",
+    "actionCancel": "Ghairi",
+    "actionSeeInGraph": "Ona kwenye grafu",
+    "actionDone": "Kitendo kimetumika",
+    "actionFailed": "Kitendo kimeshindwa: {error}",
+    "mirroredInA2A": "Kimeakisiwa katika A2A"
+  },
   "cliproxyProviderExposure": {
     "title": "Ufunuo wa Mtoa Huduma",
     "description": "Fichua mifano ya CLIProxyAPI kama lengo la njia chini ya <prefix>cliproxyapi/</prefix> prefix.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

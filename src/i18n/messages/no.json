@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "Slett alle fullførte batcher",
     "batchListBatchesTable": "Batcher",
     "changelogViewerLoading": "Laster inn endringslogg fra GitHub...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "Laster profil...",
     "profileHowToEarn": "Hvordan tjene",
     "bootstrapBannerDismiss": "Avvis",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "Rut forespørsler med oppbrukt budsjett til gratis reserveleverandør/-modell for nødstilfeller.",
   "featureFlagArenaEloSyncEnabledDescription": "Aktiver periodisk synkronisering av Arena AI-ledertavlens ELO for rangering av modellintelligens.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Reklamer claude/&lt;provider&gt;/&lt;model&gt; speil-id-er på /v1/models slik at Claude Code gateway-modelloppdagelse viser ikke-Claude-modeller. Advarsel: dobler katalogoppføringer for alle klienter når det er aktivert globalt.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "Aktiver adaptive virtuelle tilgangsfelt per tenant for leverandørdistribusjon (#9654): et utbrudd fra én tenant gir ikke lenger en annen 503. Miljøvariabelen OMNIROUTE_CHAT_VIRTUAL_LANES overstyrer denne innstillingen i dashbordet; endringer trer i kraft ved omstart av serveren.",
   "sidebar": {
     "home": "Hjem",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "Skann leverandører for gratis tilgang",
     "conductor": "Konduktør",
     "conductorSubtitle": "CLI-agent flåte",
+    "orchestration": "Orkestrering",
+    "orchestrationSubtitle": "Direktevisning av alt som kjører",
     "resilienceConnections": "Tilkoblingsresiliens",
     "resilienceConnectionsSubtitle": "Cooldown, bryter, lockout-status",
     "settingsModalityBridge": "Modality Bridge",
@@ -1768,7 +1772,8 @@
     "tools": "Verktøy",
     "agentBridge": "Agentbro",
     "trafficInspector": "Trafikkinspektør",
-    "usage": "Bruk"
+    "usage": "Bruk",
+    "orchestration": "Orkestrering"
   },
   "home": {
     "quickStart": "Rask start",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "Warp AI-terminal med støtte for tilpasset leverandør",
       "agent-deck": "Agent Deck multi-agent-orkestrator",
-      "5dive": "5dive — selvhostet flåte av kodeagenter; én auth-profil peker dem alle mot OmniRoute",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — selvhostet flåte av kodeagenter; én auth-profil peker dem alle mot OmniRoute"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "Minimumstid (ms) mellom forespørsler. Overstyrer standardforsinkelsen for hastighetsbegrenseren.",
     "rateLimitOverridesMinTimeLabel": "Min. intervall (ms)",
+    "rateLimitOverridesRpdHint": "Maksimalt antall forespørsler per dag for denne tilkoblingen. Overstyrer leverandørens standard.",
+    "rateLimitOverridesRpdLabel": "RPD (Forespørsler/dag)",
     "rateLimitOverridesRpmHint": "Maks forespørsler per minutt for denne tilkoblingen. Overstyrer leverandørstandarden.",
     "rateLimitOverridesRpmLabel": "RPM (Forespørsler/min)",
     "rateLimitOverridesTpdHint": "Maks tokens per dag for denne tilkoblingen. Overstyrer leverandørstandarden.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "Overstyr global kontostrategi for denne leverandøren (9router-paritet).",
     "providerRoutingStrategy": "Kontostrategi",
     "providerRoutingInheritGlobal": "Arv global standard",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Modellaliaser",
     "modelAliasesTitle": "Modellaliaser",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "Når aktivert, spores feilede leverandører globalt og hoppes over i en nedkjølingsperiode.",
     "resilienceProviderCooldownMin": "Minimum nedkjøling",
     "resilienceProviderCooldownMax": "Maksimum nedkjøling",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Sesjonsaffinitet",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "Helse",
     "cliproxyapiPort": "Port",
     "qdrantHost": "Vert",
-    "qdrantCollection": "Samling",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "Samling"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "Kopier",
       "autoscrollOn": "Autoscroll: på",
       "autoscrollOff": "Autoscroll: av",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "Klient Rå Forespørsel",
         "clientRequest": "Klientforespørsel",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "MCP-server",
-        "description": "Koble til OmniRoute MCP-serveren (37 verktøy, 3 transporter: SSE/stdio/HTTP). Dekker ruting, hurtigbuffer, komprimering, minne, ferdigheter, leverandører og revisjonsverktøy på tvers av 16 tillatelsesomfang."
+        "description": "Koble til OmniRoute MCP-serveren (110 verktøy, 3 transporter: SSE/stdio/HTTP). Dekker ruting, hurtigbuffer, komprimering, minne, ferdigheter, leverandører og revisjonsverktøy på tvers av 33 tillatelsesomfang."
       },
       "omni-agents-a2a": {
         "name": "Agenter og A2A-protokoll",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "Aktiver nettverkstilgang i ferdighetssandkassen."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "Tale syntese mislyktes (sjekk TTS-modellen/leverandøren)",
     "micDenied": "Mikrofon utilgjengelig eller tillatelse nektet"
   },
+  "orchestration": {
+    "title": "Orkestrering",
+    "description": "Alt OmniRoute kjører akkurat nå — agenter, flåte og ruting",
+    "tabAgents": "Agenter",
+    "tabRouting": "Ruting",
+    "tabOverview": "Oversikt",
+    "showCompleted": "Vis fullførte",
+    "sourceCloudAgent": "Skyagent",
+    "sourceA2A": "A2A",
+    "sourceConductor": "Konduktør",
+    "sourceStale": "Utdatert siden {since}",
+    "sourceOffline": "Frakoblet",
+    "stateQueued": "I kø",
+    "stateRunning": "Kjører",
+    "stateWaitingApproval": "Venter på godkjenning",
+    "stateSucceeded": "Vellykket",
+    "stateFailed": "Mislyktes",
+    "stateCancelled": "Kansellert",
+    "overflowMore": "+{count} til",
+    "emptyTitle": "Ingenting kjører ennå",
+    "emptyCloudAgentCta": "Sett opp skyagenter",
+    "emptyA2ACta": "Åpne A2A",
+    "emptyConductorCta": "Åpne konduktør",
+    "drawerObjective": "Mål",
+    "drawerTimeline": "Tidslinje",
+    "drawerMetrics": "Målinger",
+    "drawerResult": "Resultat",
+    "drawerActions": "Handlinger",
+    "actionApprove": "Godkjenn plan",
+    "actionCancel": "Avbryt",
+    "actionSeeInGraph": "Se i grafen",
+    "actionDone": "Handling utført",
+    "actionFailed": "Handling mislyktes: {error}",
+    "mirroredInA2A": "Speilet i A2A"
+  },
   "cliproxyProviderExposure": {
     "title": "Leverandør Eksponering",
     "description": "Eksponer CLIProxyAPI-modeller som et rutemål under <prefix>cliproxyapi/</prefix>-prefikset.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

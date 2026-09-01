@@ -61,7 +61,7 @@ export function structuralRejectionResponse(status: 413 | 503, maxMessages: numb
     status,
     historyLimit
       ? `Chat history exceeds the ${maxMessages}-message limit; compact the conversation and retry.`
-      : "Structurally heavy chat request capacity is busy; retry shortly.",
+      : "Local chat admission capacity is busy for this structurally heavy request; upstream provider routing was not attempted. Retry shortly.",
     undefined,
     {
       type: historyLimit ? "payload_too_large" : "server_error",

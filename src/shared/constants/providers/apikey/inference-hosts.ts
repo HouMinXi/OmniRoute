@@ -236,7 +236,7 @@ export const APIKEY_PROVIDERS_INFERENCE = {
     color: "#EA580C",
     textIcon: "FL",
     website: "https://featherless.ai",
-    hasFree: true,
+    hasFree: false,
     freeNote: "Free tier available — no credit card required",
   },
   friendliai: {

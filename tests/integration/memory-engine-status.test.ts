@@ -60,10 +60,30 @@ test("GET /api/memory/engine-status — 200 + valid MemoryEngineStatusSchema sha
 
   const body = await res.json();
 
-  // Validate shape matches MemoryEngineStatusSchema
+  // Validate shape matches MemoryEngineStatusSchema. Keyword availability is
+  // probe-driven (runtime FTS5 support), so assert the honest schema contract
+  // rather than a hardcoded "always available" claim: available is a boolean,
+  // backend is the FTS5/none enum, and reason is a non-empty string. When the
+  // probe reports available, the backend must be FTS5.
   assert.ok(body.keyword, "should have keyword section");
-  assert.strictEqual(body.keyword.available, true, "keyword.available should be true");
-  assert.strictEqual(body.keyword.backend, "FTS5", "keyword.backend should be FTS5");
+  assert.strictEqual(
+    typeof body.keyword.available,
+    "boolean",
+    "keyword.available should be boolean"
+  );
+  assert.ok(
+    ["FTS5", "none"].includes(body.keyword.backend),
+    "keyword.backend should be FTS5 or none (probe-driven)"
+  );
+  assert.ok(typeof body.keyword.reason === "string", "keyword.reason should be a string");
+  assert.ok(body.keyword.reason.length > 0, "keyword.reason should be non-empty");
+  if (body.keyword.available) {
+    assert.strictEqual(
+      body.keyword.backend,
+      "FTS5",
+      "available keyword tier must report FTS5 backend"
+    );
+  }
 
   assert.ok(body.embedding, "should have embedding section");
   assert.strictEqual(

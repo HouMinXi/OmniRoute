@@ -162,6 +162,9 @@ function mainNewCode(baselineValue) {
   const changed = listChangedFiles(mergeBase, {
     dirs: ["src", "open-sse", "electron", "bin", "scripts"],
     exts: [".ts", ".tsx", ".js", ".mjs"],
+    // Knip still reports vendor symbols in the global advisory total. Exclude them only from
+    // the PR authorship comparison so vendored public APIs remain faithful to upstream.
+    excludePrefixes: ["open-sse/vendor/"],
   });
   const headKnip = runKnip();
   const { deadTotal } = parseKnipMetrics(headKnip);

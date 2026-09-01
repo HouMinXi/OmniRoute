@@ -106,6 +106,189 @@ tags:
       All routes are LOCAL_ONLY + SPAWN_CAPABLE (hard rules #15, #17).
       See docs/frameworks/TRAFFIC_INSPECTOR.md.
 
+  - name: A2a
+    description: A2a endpoints (generated route coverage)
+  - name: Acp
+    description: Acp endpoints (generated route coverage)
+  - name: Admin
+    description: Admin endpoints (generated route coverage)
+  - name: Analytics
+    description: Analytics endpoints (generated route coverage)
+  - name: Assess
+    description: Assess endpoints (generated route coverage)
+  - name: Auth
+    description: Auth endpoints (generated route coverage)
+  - name: Batches
+    description: Batches endpoints (generated route coverage)
+  - name: Cache
+    description: Cache endpoints (generated route coverage)
+  - name: Chaos
+    description: Chaos endpoints (generated route coverage)
+  - name: Codex
+    description: Codex endpoints (generated route coverage)
+  - name: Conductor
+    description: Conductor endpoints (generated route coverage)
+  - name: Context
+    description: Context endpoints (generated route coverage)
+  - name: Conversations
+    description: Conversations endpoints (generated route coverage)
+  - name: Copilot
+    description: Copilot endpoints (generated route coverage)
+  - name: Cursor cli
+    description: Cursor cli endpoints (generated route coverage)
+  - name: Dahl
+    description: Dahl endpoints (generated route coverage)
+  - name: Db
+    description: Db endpoints (generated route coverage)
+  - name: Db backups
+    description: Db backups endpoints (generated route coverage)
+  - name: Discovery
+    description: Discovery endpoints (generated route coverage)
+  - name: Docs
+    description: Docs endpoints (generated route coverage)
+  - name: Evals
+    description: Evals endpoints (generated route coverage)
+  - name: Files
+    description: Files endpoints (generated route coverage)
+  - name: Free models
+    description: Free models endpoints (generated route coverage)
+  - name: Free provider rankings
+    description: Free provider rankings endpoints (generated route coverage)
+  - name: Free tier
+    description: Free tier endpoints (generated route coverage)
+  - name: Gamification
+    description: Gamification endpoints (generated route coverage)
+  - name: Github skills
+    description: Github skills endpoints (generated route coverage)
+  - name: Guardrails
+    description: Guardrails endpoints (generated route coverage)
+  - name: Headroom
+    description: Headroom endpoints (generated route coverage)
+  - name: Health
+    description: Health endpoints (generated route coverage)
+  - name: Intelligence
+    description: Intelligence endpoints (generated route coverage)
+  - name: Internal
+    description: Internal endpoints (generated route coverage)
+  - name: Issue agent
+    description: Issue agent endpoints (generated route coverage)
+  - name: Keys
+    description: Keys endpoints (generated route coverage)
+  - name: Local
+    description: Local endpoints (generated route coverage)
+  - name: Logs
+    description: Logs endpoints (generated route coverage)
+  - name: Mcp
+    description: Mcp endpoints (generated route coverage)
+  - name: Middleware
+    description: Middleware endpoints (generated route coverage)
+  - name: Model capability overrides
+    description: Model capability overrides endpoints (generated route coverage)
+  - name: Model combo mappings
+    description: Model combo mappings endpoints (generated route coverage)
+  - name: Network
+    description: Network endpoints (generated route coverage)
+  - name: Omniroute
+    description: Omniroute endpoints (generated route coverage)
+  - name: OmnirouteApiCatchAll
+    description: OmnirouteApiCatchAll endpoints (generated route coverage)
+  - name: Plugins
+    description: Plugins endpoints (generated route coverage)
+  - name: Provider metrics
+    description: Provider metrics endpoints (generated route coverage)
+  - name: Provider stats
+    description: Provider stats endpoints (generated route coverage)
+  - name: Proxy fallback
+    description: Proxy fallback endpoints (generated route coverage)
+  - name: Quota
+    description: Quota endpoints (generated route coverage)
+  - name: Radar
+    description: Radar endpoints (generated route coverage)
+  - name: Relay
+    description: Relay endpoints (generated route coverage)
+  - name: Resilience
+    description: Resilience endpoints (generated route coverage)
+  - name: Routing
+    description: Routing endpoints (generated route coverage)
+  - name: Services
+    description: Services endpoints (generated route coverage)
+  - name: Session pools
+    description: Session pools endpoints (generated route coverage)
+  - name: Skills
+    description: Skills endpoints (generated route coverage)
+  - name: Sync
+    description: Sync endpoints (generated route coverage)
+  - name: Synced available models
+    description: Synced available models endpoints (generated route coverage)
+  - name: Tools
+    description: Tools endpoints (generated route coverage)
+  - name: Tunnels
+    description: Tunnels endpoints (generated route coverage)
+  - name: Upstream proxy
+    description: Upstream proxy endpoints (generated route coverage)
+  - name: V1 Accounts
+    description: V1 Accounts endpoints (generated route coverage)
+  - name: V1 Agents
+    description: V1 Agents endpoints (generated route coverage)
+  - name: V1 Antigravity
+    description: V1 Antigravity endpoints (generated route coverage)
+  - name: V1 Auto-combo
+    description: V1 Auto-combo endpoints (generated route coverage)
+  - name: V1 Batches
+    description: V1 Batches endpoints (generated route coverage)
+  - name: V1 Classify
+    description: V1 Classify endpoints (generated route coverage)
+  - name: V1 Combos
+    description: V1 Combos endpoints (generated route coverage)
+  - name: V1 Completions
+    description: V1 Completions endpoints (generated route coverage)
+  - name: V1 Files
+    description: V1 Files endpoints (generated route coverage)
+  - name: V1 Images
+    description: V1 Images endpoints (generated route coverage)
+  - name: V1 Issues
+    description: V1 Issues endpoints (generated route coverage)
+  - name: V1 Management
+    description: V1 Management endpoints (generated route coverage)
+  - name: V1 Me
+    description: V1 Me endpoints (generated route coverage)
+  - name: V1 Models
+    description: V1 Models endpoints (generated route coverage)
+  - name: V1 Muse-code
+    description: V1 Muse-code endpoints (generated route coverage)
+  - name: V1 Music
+    description: V1 Music endpoints (generated route coverage)
+  - name: V1 OmnirouteCatchAll
+    description: V1 OmnirouteCatchAll endpoints (generated route coverage)
+  - name: V1 Providers
+    description: V1 Providers endpoints (generated route coverage)
+  - name: V1 Quotas
+    description: V1 Quotas endpoints (generated route coverage)
+  - name: V1 Registered-keys
+    description: V1 Registered-keys endpoints (generated route coverage)
+  - name: V1 Relay
+    description: V1 Relay endpoints (generated route coverage)
+  - name: V1 Responses
+    description: V1 Responses endpoints (generated route coverage)
+  - name: V1 Search
+    description: V1 Search endpoints (generated route coverage)
+  - name: V1 Segment
+    description: V1 Segment endpoints (generated route coverage)
+  - name: V1 Video-bridge
+    description: V1 Video-bridge endpoints (generated route coverage)
+  - name: V1 Videos
+    description: V1 Videos endpoints (generated route coverage)
+  - name: V1 Vscode
+    description: V1 Vscode endpoints (generated route coverage)
+  - name: V1 Web
+    description: V1 Web endpoints (generated route coverage)
+  - name: Version manager
+    description: Version manager endpoints (generated route coverage)
+  - name: Vnc session
+    description: Vnc session endpoints (generated route coverage)
+  - name: Webhooks
+    description: Webhooks endpoints (generated route coverage)
+
 paths:
   /api/v1/session-leases:
     post:
@@ -8106,6 +8289,4768 @@ paths:
       responses:
         "200":
           description: CodeWhale config entry removed.
+
+  # --- Generated route coverage (docs audit 2026-08-31) -----------------------
+  # Minimal entries for every implemented route not documented above. Methods
+  # are parsed from each route.ts's exports; summaries are path-derived.
+  # Regenerate with: node scripts/ad-hoc/gen-openapi-missing-paths.mjs --apply
+  /api/{omnirouteApiCatchAll}:
+    delete:
+      tags:
+        - OmnirouteApiCatchAll
+      summary: "DELETE <omnirouteApiCatchAll>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - OmnirouteApiCatchAll
+      summary: "GET <omnirouteApiCatchAll>"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - OmnirouteApiCatchAll
+      summary: "PATCH <omnirouteApiCatchAll>"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - OmnirouteApiCatchAll
+      summary: "POST <omnirouteApiCatchAll>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - OmnirouteApiCatchAll
+      summary: "PUT <omnirouteApiCatchAll>"
+      responses:
+        "200":
+          description: OK
+  /api/a2a/status:
+    get:
+      tags:
+        - A2a
+      summary: "GET a2a › status"
+      responses:
+        "200":
+          description: OK
+  /api/a2a/tasks:
+    get:
+      tags:
+        - A2a
+      summary: "GET a2a › tasks"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - A2a
+      summary: "POST a2a › tasks"
+      responses:
+        "200":
+          description: OK
+  /api/a2a/tasks/{id}:
+    get:
+      tags:
+        - A2a
+      summary: "GET a2a › tasks › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/a2a/tasks/{id}/cancel:
+    post:
+      tags:
+        - A2a
+      summary: "POST a2a › tasks › <id> › cancel"
+      responses:
+        "200":
+          description: OK
+  /api/acp/agents:
+    delete:
+      tags:
+        - Acp
+      summary: "DELETE acp › agents"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Acp
+      summary: "GET acp › agents"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Acp
+      summary: "POST acp › agents"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/admin/concurrency:
+    get:
+      tags:
+        - Admin
+      summary: "GET admin › concurrency"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Admin
+      summary: "POST admin › concurrency"
+      responses:
+        "200":
+          description: OK
+  /api/analytics/auto-routing:
+    get:
+      tags:
+        - Analytics
+      summary: "GET analytics › auto routing"
+      responses:
+        "200":
+          description: OK
+  /api/analytics/compression:
+    get:
+      tags:
+        - Analytics
+      summary: "GET analytics › compression"
+      responses:
+        "200":
+          description: OK
+  /api/analytics/diversity:
+    get:
+      tags:
+        - Analytics
+      summary: "GET analytics › diversity"
+      responses:
+        "200":
+          description: OK
+  /api/assess:
+    get:
+      tags:
+        - Assess
+      summary: "GET assess"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Assess
+      summary: "POST assess"
+      responses:
+        "200":
+          description: OK
+  /api/auth/csrf:
+    get:
+      tags:
+        - Auth
+      summary: "GET auth › csrf"
+      responses:
+        "200":
+          description: OK
+  /api/auth/status:
+    get:
+      tags:
+        - Auth
+      summary: "GET auth › status"
+      responses:
+        "200":
+          description: OK
+  /api/batches:
+    get:
+      tags:
+        - Batches
+      summary: "GET batches"
+      responses:
+        "200":
+          description: OK
+  /api/batches/{id}:
+    get:
+      tags:
+        - Batches
+      summary: "GET batches › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/cache/entries:
+    delete:
+      tags:
+        - Cache
+      summary: "DELETE cache › entries"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cache
+      summary: "GET cache › entries"
+      responses:
+        "200":
+          description: OK
+  /api/cache/reasoning:
+    delete:
+      tags:
+        - Cache
+      summary: "DELETE cache › reasoning"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cache
+      summary: "GET cache › reasoning"
+      responses:
+        "200":
+          description: OK
+  /api/chaos/config:
+    delete:
+      tags:
+        - Chaos
+      summary: "DELETE chaos › config"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Chaos
+      summary: "GET chaos › config"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Chaos
+      summary: "PUT chaos › config"
+      responses:
+        "200":
+          description: OK
+  /api/chaos/run:
+    post:
+      tags:
+        - Chaos
+      summary: "POST chaos › run"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/all-statuses:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › all statuses"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/apply:
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › apply"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/config:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › config"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › config"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/deepseek-tui-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › deepseek tui settings"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › deepseek tui settings"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › deepseek tui settings"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/detect:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › detect"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/forge-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › forge settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › forge settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › forge settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/grok-build-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › grok build settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › grok build settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › grok build settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/hermes-agent-settings:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › hermes agent settings"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › hermes agent settings"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/jcode-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › jcode settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › jcode settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › jcode settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/keys:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › keys"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/letta-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › letta settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › letta settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › letta settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/logs:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › logs"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/omp-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › omp settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › omp settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › omp settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/openclaw/auto-order:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › openclaw › auto order"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/pi-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › pi settings"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › pi settings"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › pi settings"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/qwen-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › qwen settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › qwen settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › qwen settings"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/smelt-settings:
+    delete:
+      tags:
+        - Cli tools
+      summary: "DELETE cli tools › smelt settings"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › smelt settings"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cli tools
+      summary: "POST cli tools › smelt settings"
+      responses:
+        "200":
+          description: OK
+  /api/cli-tools/status:
+    get:
+      tags:
+        - Cli tools
+      summary: "GET cli tools › status"
+      responses:
+        "200":
+          description: OK
+  /api/codex/connect/{token}:
+    get:
+      tags:
+        - Codex
+      summary: "GET codex › connect › <token>"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Codex
+      summary: "POST codex › connect › <token>"
+      responses:
+        "200":
+          description: OK
+  /api/combos/auto:
+    get:
+      tags:
+        - Combos
+      summary: "GET combos › auto"
+      responses:
+        "200":
+          description: OK
+  /api/combos/builder/options:
+    get:
+      tags:
+        - Combos
+      summary: "GET combos › builder › options"
+      responses:
+        "200":
+          description: OK
+  /api/combos/duplicate:
+    post:
+      tags:
+        - Combos
+      summary: "POST combos › duplicate"
+      responses:
+        "200":
+          description: OK
+  /api/combos/reorder:
+    post:
+      tags:
+        - Combos
+      summary: "POST combos › reorder"
+      responses:
+        "200":
+          description: OK
+  /api/compression/compare:
+    post:
+      tags:
+        - Compression
+      summary: "POST compression › compare"
+      responses:
+        "200":
+          description: OK
+  /api/compression/compare/verify:
+    post:
+      tags:
+        - Compression
+      summary: "POST compression › compare › verify"
+      responses:
+        "200":
+          description: OK
+  /api/compression/engines:
+    get:
+      tags:
+        - Compression
+      summary: "GET compression › engines"
+      responses:
+        "200":
+          description: OK
+  /api/compression/retrieve:
+    post:
+      tags:
+        - Compression
+      summary: "POST compression › retrieve"
+      responses:
+        "200":
+          description: OK
+  /api/conductor/ask:
+    post:
+      tags:
+        - Conductor
+      summary: "POST conductor › ask"
+      responses:
+        "200":
+          description: OK
+  /api/conductor/fleet:
+    get:
+      tags:
+        - Conductor
+      summary: "GET conductor › fleet"
+      responses:
+        "200":
+          description: OK
+  /api/conductor/tasks/{id}:
+    get:
+      tags:
+        - Conductor
+      summary: "GET conductor › tasks › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/conductor/tasks/{id}/cancel:
+    post:
+      tags:
+        - Conductor
+      summary: "POST conductor › tasks › <id> › cancel"
+      responses:
+        "200":
+          description: OK
+  /api/context/analytics:
+    get:
+      tags:
+        - Context
+      summary: "GET context › analytics"
+      responses:
+        "200":
+          description: OK
+  /api/context/analytics/engine:
+    get:
+      tags:
+        - Context
+      summary: "GET context › analytics › engine"
+      responses:
+        "200":
+          description: OK
+  /api/context/caveman/config:
+    get:
+      tags:
+        - Context
+      summary: "GET context › caveman › config"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Context
+      summary: "PUT context › caveman › config"
+      responses:
+        "200":
+          description: OK
+  /api/context/combos:
+    get:
+      tags:
+        - Context
+      summary: "GET context › combos"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Context
+      summary: "POST context › combos"
+      responses:
+        "200":
+          description: OK
+  /api/context/combos/{id}:
+    delete:
+      tags:
+        - Context
+      summary: "DELETE context › combos › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Context
+      summary: "GET context › combos › <id>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Context
+      summary: "PUT context › combos › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/context/combos/{id}/assignments:
+    get:
+      tags:
+        - Context
+      summary: "GET context › combos › <id> › assignments"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Context
+      summary: "PUT context › combos › <id> › assignments"
+      responses:
+        "200":
+          description: OK
+  /api/context/combos/default:
+    get:
+      tags:
+        - Context
+      summary: "GET context › combos › default"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Context
+      summary: "POST context › combos › default"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Context
+      summary: "PUT context › combos › default"
+      responses:
+        "200":
+          description: OK
+  /api/context/rtk/discover:
+    get:
+      tags:
+        - Context
+      summary: "GET context › rtk › discover"
+      responses:
+        "200":
+          description: OK
+  /api/context/rtk/learn:
+    get:
+      tags:
+        - Context
+      summary: "GET context › rtk › learn"
+      responses:
+        "200":
+          description: OK
+  /api/conversations:
+    get:
+      tags:
+        - Conversations
+      summary: "GET conversations"
+      responses:
+        "200":
+          description: OK
+  /api/conversations/{id}/tree:
+    get:
+      tags:
+        - Conversations
+      summary: "GET conversations › <id> › tree"
+      responses:
+        "200":
+          description: OK
+  /api/copilot/chat:
+    post:
+      tags:
+        - Copilot
+      summary: "POST copilot › chat"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/cursor-cli/{path}:
+    get:
+      tags:
+        - Cursor cli
+      summary: "GET cursor cli › <path>"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Cursor cli
+      summary: "POST cursor cli › <path>"
+      responses:
+        "200":
+          description: OK
+  /api/dahl/tokens:
+    post:
+      tags:
+        - Dahl
+      summary: "POST dahl › tokens"
+      responses:
+        "200":
+          description: OK
+  /api/db-backups/export:
+    get:
+      tags:
+        - Db backups
+      summary: "GET db backups › export"
+      responses:
+        "200":
+          description: OK
+  /api/db-backups/exportAll:
+    get:
+      tags:
+        - Db backups
+      summary: "GET db backups › exportAll"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/db-backups/import:
+    post:
+      tags:
+        - Db backups
+      summary: "POST db backups › import"
+      responses:
+        "200":
+          description: OK
+  /api/db/health:
+    get:
+      tags:
+        - Db
+      summary: "GET db › health"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Db
+      summary: "POST db › health"
+      responses:
+        "200":
+          description: OK
+  /api/discovery/results:
+    get:
+      tags:
+        - Discovery
+      summary: "GET discovery › results"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/discovery/results/{id}:
+    delete:
+      tags:
+        - Discovery
+      summary: "DELETE discovery › results › <id>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Discovery
+      summary: "GET discovery › results › <id>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/discovery/scan:
+    post:
+      tags:
+        - Discovery
+      summary: "POST discovery › scan"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/discovery/verify/{id}:
+    post:
+      tags:
+        - Discovery
+      summary: "POST discovery › verify › <id>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/docs:
+    get:
+      tags:
+        - Docs
+      summary: "GET docs"
+      responses:
+        "200":
+          description: OK
+  /api/docs/codex-cli:
+    get:
+      tags:
+        - Docs
+      summary: "GET docs › codex cli"
+      responses:
+        "200":
+          description: OK
+  /api/evals/suites:
+    post:
+      tags:
+        - Evals
+      summary: "POST evals › suites"
+      responses:
+        "200":
+          description: OK
+  /api/evals/suites/{suiteId}:
+    delete:
+      tags:
+        - Evals
+      summary: "DELETE evals › suites › <suiteId>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Evals
+      summary: "GET evals › suites › <suiteId>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Evals
+      summary: "PUT evals › suites › <suiteId>"
+      responses:
+        "200":
+          description: OK
+  /api/files:
+    get:
+      tags:
+        - Files
+      summary: "GET files"
+      responses:
+        "200":
+          description: OK
+  /api/files/{id}/content:
+    get:
+      tags:
+        - Files
+      summary: "GET files › <id> › content"
+      responses:
+        "200":
+          description: OK
+  /api/free-models:
+    get:
+      tags:
+        - Free models
+      summary: "GET free models"
+      responses:
+        "200":
+          description: OK
+  /api/free-provider-rankings:
+    get:
+      tags:
+        - Free provider rankings
+      summary: "GET free provider rankings"
+      responses:
+        "200":
+          description: OK
+  /api/free-tier/summary:
+    get:
+      tags:
+        - Free tier
+      summary: "GET free tier › summary"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/anomalies:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › anomalies"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/badges:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › badges"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/badges/earned:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › badges › earned"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/federation/leaderboard:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › federation › leaderboard"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/federation/score:
+    post:
+      tags:
+        - Gamification
+      summary: "POST gamification › federation › score"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/invite:
+    delete:
+      tags:
+        - Gamification
+      summary: "DELETE gamification › invite"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › invite"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Gamification
+      summary: "POST gamification › invite"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/invite/redeem:
+    post:
+      tags:
+        - Gamification
+      summary: "POST gamification › invite › redeem"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/leaderboard:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › leaderboard"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/level:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › level"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/notifications:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › notifications"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/rotate:
+    post:
+      tags:
+        - Gamification
+      summary: "POST gamification › rotate"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/servers:
+    delete:
+      tags:
+        - Gamification
+      summary: "DELETE gamification › servers"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › servers"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Gamification
+      summary: "POST gamification › servers"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/stream:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › stream"
+      responses:
+        "200":
+          description: OK
+  /api/gamification/transfer:
+    get:
+      tags:
+        - Gamification
+      summary: "GET gamification › transfer"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Gamification
+      summary: "POST gamification › transfer"
+      responses:
+        "200":
+          description: OK
+  /api/github-skills:
+    get:
+      tags:
+        - Github skills
+      summary: "GET github skills"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Github skills
+      summary: "POST github skills"
+      responses:
+        "200":
+          description: OK
+  /api/guardrails:
+    get:
+      tags:
+        - Guardrails
+      summary: "GET guardrails"
+      responses:
+        "200":
+          description: OK
+  /api/guardrails/test:
+    post:
+      tags:
+        - Guardrails
+      summary: "POST guardrails › test"
+      responses:
+        "200":
+          description: OK
+  /api/headroom/start:
+    post:
+      tags:
+        - Headroom
+      summary: "POST headroom › start"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/headroom/status:
+    get:
+      tags:
+        - Headroom
+      summary: "GET headroom › status"
+      responses:
+        "200":
+          description: OK
+  /api/headroom/stop:
+    post:
+      tags:
+        - Headroom
+      summary: "POST headroom › stop"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/health/degradation:
+    get:
+      tags:
+        - Health
+      summary: "GET health › degradation"
+      responses:
+        "200":
+          description: OK
+  /api/health/ping:
+    get:
+      tags:
+        - Health
+      summary: "GET health › ping"
+      responses:
+        "200":
+          description: OK
+  /api/intelligence/sync:
+    delete:
+      tags:
+        - Intelligence
+      summary: "DELETE intelligence › sync"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Intelligence
+      summary: "GET intelligence › sync"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Intelligence
+      summary: "POST intelligence › sync"
+      responses:
+        "200":
+          description: OK
+  /api/internal/codex-responses-ws:
+    post:
+      tags:
+        - Internal
+      summary: "POST internal › codex responses ws"
+      responses:
+        "200":
+          description: OK
+  /api/issue-agent/runs:
+    get:
+      tags:
+        - Issue agent
+      summary: "GET issue agent › runs"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Issue agent
+      summary: "POST issue agent › runs"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/keys/{id}/regenerate:
+    post:
+      tags:
+        - Keys
+      summary: "POST keys › <id> › regenerate"
+      responses:
+        "200":
+          description: OK
+  /api/keys/{id}/reveal:
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › <id> › reveal"
+      responses:
+        "200":
+          description: OK
+  /api/keys/{id}/usage-limits:
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › <id> › usage limits"
+      responses:
+        "200":
+          description: OK
+  /api/keys/groups:
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › groups"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Keys
+      summary: "POST keys › groups"
+      responses:
+        "200":
+          description: OK
+  /api/keys/groups/{id}:
+    delete:
+      tags:
+        - Keys
+      summary: "DELETE keys › groups › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › groups › <id>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Keys
+      summary: "PUT keys › groups › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/keys/groups/{id}/keys:
+    delete:
+      tags:
+        - Keys
+      summary: "DELETE keys › groups › <id> › keys"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › groups › <id> › keys"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Keys
+      summary: "POST keys › groups › <id> › keys"
+      responses:
+        "200":
+          description: OK
+  /api/keys/groups/{id}/permissions:
+    delete:
+      tags:
+        - Keys
+      summary: "DELETE keys › groups › <id> › permissions"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Keys
+      summary: "GET keys › groups › <id> › permissions"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Keys
+      summary: "POST keys › groups › <id> › permissions"
+      responses:
+        "200":
+          description: OK
+  /api/local/redis/start:
+    post:
+      tags:
+        - Local
+      summary: "POST local › redis › start"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/local/redis/status:
+    get:
+      tags:
+        - Local
+      summary: "GET local › redis › status"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/local/redis/stop:
+    post:
+      tags:
+        - Local
+      summary: "POST local › redis › stop"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/logs/{id}:
+    get:
+      tags:
+        - Logs
+      summary: "GET logs › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/logs/console:
+    get:
+      tags:
+        - Logs
+      summary: "GET logs › console"
+      responses:
+        "200":
+          description: OK
+  /api/logs/detail:
+    get:
+      tags:
+        - Logs
+      summary: "GET logs › detail"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Logs
+      summary: "POST logs › detail"
+      responses:
+        "200":
+          description: OK
+  /api/logs/export:
+    get:
+      tags:
+        - Logs
+      summary: "GET logs › export"
+      responses:
+        "200":
+          description: OK
+  /api/mcp/audit:
+    get:
+      tags:
+        - Mcp
+      summary: "GET mcp › audit"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/mcp/audit/stats:
+    get:
+      tags:
+        - Mcp
+      summary: "GET mcp › audit › stats"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/mcp/sse:
+    get:
+      tags:
+        - Mcp
+      summary: "GET mcp › sse"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Mcp
+      summary: "POST mcp › sse"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/mcp/status:
+    get:
+      tags:
+        - Mcp
+      summary: "GET mcp › status"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/mcp/stream:
+    delete:
+      tags:
+        - Mcp
+      summary: "DELETE mcp › stream"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Mcp
+      summary: "GET mcp › stream"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Mcp
+      summary: "POST mcp › stream"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/mcp/tools:
+    get:
+      tags:
+        - Mcp
+      summary: "GET mcp › tools"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/middleware/hooks:
+    get:
+      tags:
+        - Middleware
+      summary: "GET middleware › hooks"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Middleware
+      summary: "POST middleware › hooks"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/middleware/hooks/{name}:
+    delete:
+      tags:
+        - Middleware
+      summary: "DELETE middleware › hooks › <name>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Middleware
+      summary: "GET middleware › hooks › <name>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Middleware
+      summary: "PUT middleware › hooks › <name>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/model-capability-overrides:
+    delete:
+      tags:
+        - Model capability overrides
+      summary: "DELETE model capability overrides"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Model capability overrides
+      summary: "GET model capability overrides"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Model capability overrides
+      summary: "PATCH model capability overrides"
+      responses:
+        "200":
+          description: OK
+  /api/model-combo-mappings:
+    get:
+      tags:
+        - Model combo mappings
+      summary: "GET model combo mappings"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Model combo mappings
+      summary: "POST model combo mappings"
+      responses:
+        "200":
+          description: OK
+  /api/model-combo-mappings/{id}:
+    delete:
+      tags:
+        - Model combo mappings
+      summary: "DELETE model combo mappings › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Model combo mappings
+      summary: "GET model combo mappings › <id>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Model combo mappings
+      summary: "PUT model combo mappings › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/models/openrouter-catalog:
+    get:
+      tags:
+        - Models
+      summary: "GET models › openrouter catalog"
+      responses:
+        "200":
+          description: OK
+  /api/models/test:
+    post:
+      tags:
+        - Models
+      summary: "POST models › test"
+      responses:
+        "200":
+          description: OK
+  /api/models/test-all:
+    post:
+      tags:
+        - Models
+      summary: "POST models › test all"
+      responses:
+        "200":
+          description: OK
+  /api/network/info:
+    get:
+      tags:
+        - Network
+      summary: "GET network › info"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/{provider}/paste-credentials:
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › <provider> › paste credentials"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/cliproxy-import:
+    get:
+      tags:
+        - Oauth
+      summary: "GET oauth › cliproxy import"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › cliproxy import"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/codex/import:
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › codex › import"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/cursor/login/cancel:
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › cursor › login › cancel"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/cursor/login/poll:
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › cursor › login › poll"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/cursor/login/start:
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › cursor › login › start"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/kiro/api-key:
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › kiro › api key"
+      responses:
+        "200":
+          description: OK
+  /api/oauth/trae/import:
+    get:
+      tags:
+        - Oauth
+      summary: "GET oauth › trae › import"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › trae › import"
+      responses:
+        "200":
+          description: OK
+  /api/omniroute/route/preview:
+    post:
+      tags:
+        - Omniroute
+      summary: "POST omniroute › route › preview"
+      responses:
+        "200":
+          description: OK
+  /api/omniroute/status:
+    get:
+      tags:
+        - Omniroute
+      summary: "GET omniroute › status"
+      responses:
+        "200":
+          description: OK
+  /api/playground/simulate-route:
+    post:
+      tags:
+        - Playground
+      summary: "POST playground › simulate route"
+      responses:
+        "200":
+          description: OK
+  /api/plugins:
+    get:
+      tags:
+        - Plugins
+      summary: "GET plugins"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Plugins
+      summary: "POST plugins"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/plugins/{name}:
+    delete:
+      tags:
+        - Plugins
+      summary: "DELETE plugins › <name>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Plugins
+      summary: "GET plugins › <name>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/plugins/{name}/activate:
+    post:
+      tags:
+        - Plugins
+      summary: "POST plugins › <name> › activate"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/plugins/{name}/config:
+    get:
+      tags:
+        - Plugins
+      summary: "GET plugins › <name> › config"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Plugins
+      summary: "PUT plugins › <name> › config"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/plugins/{name}/deactivate:
+    post:
+      tags:
+        - Plugins
+      summary: "POST plugins › <name> › deactivate"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/plugins/marketplace:
+    get:
+      tags:
+        - Plugins
+      summary: "GET plugins › marketplace"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/plugins/marketplace/install:
+    post:
+      tags:
+        - Plugins
+      summary: "POST plugins › marketplace › install"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/plugins/scan:
+    post:
+      tags:
+        - Plugins
+      summary: "POST plugins › scan"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/pricing/sync:
+    delete:
+      tags:
+        - Pricing
+      summary: "DELETE pricing › sync"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Pricing
+      summary: "GET pricing › sync"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Pricing
+      summary: "POST pricing › sync"
+      responses:
+        "200":
+          description: OK
+  /api/provider-metrics:
+    get:
+      tags:
+        - Provider metrics
+      summary: "GET provider metrics"
+      responses:
+        "200":
+          description: OK
+  /api/provider-stats:
+    get:
+      tags:
+        - Provider stats
+      summary: "GET provider stats"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/cc-alias:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › <id> › cc alias"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Providers
+      summary: "PUT providers › <id> › cc alias"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/chatgpt-web-codex-doctor:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › <id> › chatgpt web codex doctor"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/claude-auth/apply-local:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › claude auth › apply local"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/claude-auth/export:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › claude auth › export"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/codex-auth/apply-local:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › codex auth › apply local"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/codex-auth/export:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › codex auth › export"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/interception-rules:
+    delete:
+      tags:
+        - Providers
+      summary: "DELETE providers › <id> › interception rules"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › <id> › interception rules"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Providers
+      summary: "PUT providers › <id> › interception rules"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/login:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › login"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/param-filters:
+    delete:
+      tags:
+        - Providers
+      summary: "DELETE providers › <id> › param filters"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › <id> › param filters"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Providers
+      summary: "PUT providers › <id> › param filters"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/refresh:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › refresh"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/refresh-cursor:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › refresh cursor"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/refresh-token:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › refresh token"
+      responses:
+        "200":
+          description: OK
+  /api/providers/{id}/sync-models:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › <id> › sync models"
+      responses:
+        "200":
+          description: OK
+  /api/providers/bulk:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › bulk"
+      responses:
+        "200":
+          description: OK
+  /api/providers/bulk-web-session:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › bulk web session"
+      responses:
+        "200":
+          description: OK
+  /api/providers/claude-auth/import:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › claude auth › import"
+      responses:
+        "200":
+          description: OK
+  /api/providers/claude-auth/import-bulk:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › claude auth › import bulk"
+      responses:
+        "200":
+          description: OK
+  /api/providers/claude-auth/zip-extract:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › claude auth › zip extract"
+      responses:
+        "200":
+          description: OK
+  /api/providers/codex-auth/import:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › codex auth › import"
+      responses:
+        "200":
+          description: OK
+  /api/providers/codex-auth/import-bulk:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › codex auth › import bulk"
+      responses:
+        "200":
+          description: OK
+  /api/providers/codex-auth/zip-extract:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › codex auth › zip extract"
+      responses:
+        "200":
+          description: OK
+  /api/providers/command-code/auth/apply:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › command code › auth › apply"
+      responses:
+        "200":
+          description: OK
+  /api/providers/command-code/auth/callback:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › command code › auth › callback"
+      responses:
+        "200":
+          description: OK
+  /api/providers/command-code/auth/start:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › command code › auth › start"
+      responses:
+        "200":
+          description: OK
+  /api/providers/command-code/auth/status:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › command code › auth › status"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › command code › auth › status"
+      responses:
+        "200":
+          description: OK
+  /api/providers/expiration:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › expiration"
+      responses:
+        "200":
+          description: OK
+  /api/providers/free-onboarding:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › free onboarding"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › free onboarding"
+      responses:
+        "200":
+          description: OK
+  /api/providers/health-autopilot:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › health autopilot"
+      responses:
+        "200":
+          description: OK
+  /api/providers/health-autopilot/actions:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › health autopilot › actions"
+      x-always-protected: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/health-matrix:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › health matrix"
+      responses:
+        "200":
+          description: OK
+  /api/providers/import:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › import"
+      responses:
+        "200":
+          description: OK
+  /api/providers/openrouter-stats:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › openrouter stats"
+      responses:
+        "200":
+          description: OK
+  /api/providers/quota-windows:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › quota windows"
+      responses:
+        "200":
+          description: OK
+  /api/providers/volcengine-plan/connect:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › volcengine plan › connect"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/volcengine-plan/connect/{sessionId}/cancel:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › volcengine plan › connect › <sessionId> › cancel"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/volcengine-plan/connect/{sessionId}/code:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › volcengine plan › connect › <sessionId> › code"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/volcengine-plan/connect/{sessionId}/identity:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › volcengine plan › connect › <sessionId> › identity"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/volcengine-plan/connect/{sessionId}/resend:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › volcengine plan › connect › <sessionId> › resend"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/volcengine-plan/connect/{sessionId}/status:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › volcengine plan › connect › <sessionId> › status"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/providers/web-session-contract:
+    get:
+      tags:
+        - Providers
+      summary: "GET providers › web session contract"
+      responses:
+        "200":
+          description: OK
+  /api/providers/zed/discover:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › zed › discover"
+      responses:
+        "200":
+          description: OK
+  /api/providers/zed/import:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › zed › import"
+      responses:
+        "200":
+          description: OK
+  /api/providers/zed/manual-import:
+    post:
+      tags:
+        - Providers
+      summary: "POST providers › zed › manual import"
+      responses:
+        "200":
+          description: OK
+  /api/proxy-fallback/test:
+    post:
+      tags:
+        - Proxy fallback
+      summary: "POST proxy fallback › test"
+      responses:
+        "200":
+          description: OK
+  /api/quota/groups:
+    get:
+      tags:
+        - Quota
+      summary: "GET quota › groups"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Quota
+      summary: "POST quota › groups"
+      responses:
+        "200":
+          description: OK
+  /api/quota/groups/{id}:
+    delete:
+      tags:
+        - Quota
+      summary: "DELETE quota › groups › <id>"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Quota
+      summary: "PATCH quota › groups › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/quota/keys/{id}/models:
+    get:
+      tags:
+        - Quota
+      summary: "GET quota › keys › <id> › models"
+      responses:
+        "200":
+          description: OK
+  /api/quota/pools/{id}/log:
+    get:
+      tags:
+        - Quota
+      summary: "GET quota › pools › <id> › log"
+      responses:
+        "200":
+          description: OK
+  /api/radar/catalog:
+    get:
+      tags:
+        - Radar
+      summary: "GET radar › catalog"
+      responses:
+        "200":
+          description: OK
+  /api/radar/intel:
+    get:
+      tags:
+        - Radar
+      summary: "GET radar › intel"
+      responses:
+        "200":
+          description: OK
+  /api/radar/intel/sync:
+    post:
+      tags:
+        - Radar
+      summary: "POST radar › intel › sync"
+      responses:
+        "200":
+          description: OK
+  /api/radar/local-model-state:
+    delete:
+      tags:
+        - Radar
+      summary: "DELETE radar › local model state"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Radar
+      summary: "GET radar › local model state"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Radar
+      summary: "PATCH radar › local model state"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Radar
+      summary: "PUT radar › local model state"
+      responses:
+        "200":
+          description: OK
+  /api/radar/offers:
+    get:
+      tags:
+        - Radar
+      summary: "GET radar › offers"
+      responses:
+        "200":
+          description: OK
+  /api/radar/offers/sync:
+    post:
+      tags:
+        - Radar
+      summary: "POST radar › offers › sync"
+      responses:
+        "200":
+          description: OK
+  /api/radar/referrals:
+    get:
+      tags:
+        - Radar
+      summary: "GET radar › referrals"
+      responses:
+        "200":
+          description: OK
+  /api/radar/settings:
+    get:
+      tags:
+        - Radar
+      summary: "GET radar › settings"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Radar
+      summary: "POST radar › settings"
+      responses:
+        "200":
+          description: OK
+  /api/radar/status:
+    get:
+      tags:
+        - Radar
+      summary: "GET radar › status"
+      responses:
+        "200":
+          description: OK
+  /api/radar/sync:
+    post:
+      tags:
+        - Radar
+      summary: "POST radar › sync"
+      responses:
+        "200":
+          description: OK
+  /api/radar/sync-all:
+    post:
+      tags:
+        - Radar
+      summary: "POST radar › sync all"
+      responses:
+        "200":
+          description: OK
+  /api/relay/tokens:
+    get:
+      tags:
+        - Relay
+      summary: "GET relay › tokens"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Relay
+      summary: "POST relay › tokens"
+      responses:
+        "200":
+          description: OK
+  /api/relay/tokens/{id}:
+    delete:
+      tags:
+        - Relay
+      summary: "DELETE relay › tokens › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Relay
+      summary: "GET relay › tokens › <id>"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Relay
+      summary: "PATCH relay › tokens › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/resilience/model-cooldowns:
+    delete:
+      tags:
+        - Resilience
+      summary: "DELETE resilience › model cooldowns"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Resilience
+      summary: "GET resilience › model cooldowns"
+      responses:
+        "200":
+          description: OK
+  /api/routing/decisions/{requestId}:
+    get:
+      tags:
+        - Routing
+      summary: "GET routing › decisions › <requestId>"
+      responses:
+        "200":
+          description: OK
+  /api/search/providers:
+    get:
+      tags:
+        - Search
+      summary: "GET search › providers"
+      responses:
+        "200":
+          description: OK
+  /api/search/stats:
+    get:
+      tags:
+        - Search
+      summary: "GET search › stats"
+      responses:
+        "200":
+          description: OK
+  /api/services/9router/models:
+    get:
+      tags:
+        - Services
+      summary: "GET services › 9router › models"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/services/9router/provider-expose:
+    post:
+      tags:
+        - Services
+      summary: "POST services › 9router › provider expose"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/services/cliproxy/accounts:
+    get:
+      tags:
+        - Services
+      summary: "GET services › cliproxy › accounts"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/services/cliproxy/provider-expose:
+    post:
+      tags:
+        - Services
+      summary: "POST services › cliproxy › provider expose"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/session-pools:
+    get:
+      tags:
+        - Session pools
+      summary: "GET session pools"
+      responses:
+        "200":
+          description: OK
+  /api/session-pools/{provider}:
+    get:
+      tags:
+        - Session pools
+      summary: "GET session pools › <provider>"
+      responses:
+        "200":
+          description: OK
+  /api/settings/authz-inventory:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › authz inventory"
+      responses:
+        "200":
+          description: OK
+  /api/settings/auto-disable-accounts:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › auto disable accounts"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › auto disable accounts"
+      responses:
+        "200":
+          description: OK
+  /api/settings/background-degradation:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › background degradation"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › background degradation"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › background degradation"
+      responses:
+        "200":
+          description: OK
+  /api/settings/cache-config:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › cache config"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › cache config"
+      responses:
+        "200":
+          description: OK
+  /api/settings/cache-metrics:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › cache metrics"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › cache metrics"
+      responses:
+        "200":
+          description: OK
+  /api/settings/cc-discovery-metrics:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › cc discovery metrics"
+      responses:
+        "200":
+          description: OK
+  /api/settings/compression/rules:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › compression › rules"
+      responses:
+        "200":
+          description: OK
+  /api/settings/compression/run-telemetry:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › compression › run telemetry"
+      responses:
+        "200":
+          description: OK
+  /api/settings/database:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › database"
+      x-always-protected: true
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Settings
+      summary: "PATCH settings › database"
+      x-always-protected: true
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › database"
+      x-always-protected: true
+      responses:
+        "200":
+          description: OK
+  /api/settings/database/refresh-stats:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › database › refresh stats"
+      responses:
+        "200":
+          description: OK
+  /api/settings/database/vacuum:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › database › vacuum"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › database › vacuum"
+      responses:
+        "200":
+          description: OK
+  /api/settings/export-json:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › export json"
+      x-always-protected: true
+      responses:
+        "200":
+          description: OK
+  /api/settings/favicon:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › favicon"
+      responses:
+        "200":
+          description: OK
+  /api/settings/feature-flags:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › feature flags"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › feature flags"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › feature flags"
+      responses:
+        "200":
+          description: OK
+  /api/settings/free-proxies:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › free proxies"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › free proxies"
+      responses:
+        "200":
+          description: OK
+  /api/settings/free-proxies/{id}/add-to-pool:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › free proxies › <id> › add to pool"
+      responses:
+        "200":
+          description: OK
+  /api/settings/free-proxies/bulk-add-to-pool:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › free proxies › bulk add to pool"
+      responses:
+        "200":
+          description: OK
+  /api/settings/free-proxies/stats:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › free proxies › stats"
+      responses:
+        "200":
+          description: OK
+  /api/settings/free-proxies/sync:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › free proxies › sync"
+      responses:
+        "200":
+          description: OK
+  /api/settings/import-json:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › import json"
+      x-always-protected: true
+      responses:
+        "200":
+          description: OK
+  /api/settings/lkgp-cache:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › lkgp cache"
+      responses:
+        "200":
+          description: OK
+  /api/settings/local-corpus:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › local corpus"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › local corpus"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › local corpus"
+      responses:
+        "200":
+          description: OK
+  /api/settings/mitm:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › mitm"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › mitm"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › mitm"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/settings/model-aliases:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › model aliases"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › model aliases"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › model aliases"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › model aliases"
+      responses:
+        "200":
+          description: OK
+  /api/settings/models-dev:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › models dev"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › models dev"
+      responses:
+        "200":
+          description: OK
+  /api/settings/notion:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › notion"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › notion"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › notion"
+      responses:
+        "200":
+          description: OK
+  /api/settings/obsidian:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › obsidian"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › obsidian"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › obsidian"
+      responses:
+        "200":
+          description: OK
+  /api/settings/obsidian/webdav:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › obsidian › webdav"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › obsidian › webdav"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › obsidian › webdav"
+      responses:
+        "200":
+          description: OK
+  /api/settings/oneproxy:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › oneproxy"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › oneproxy"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › oneproxy"
+      responses:
+        "200":
+          description: OK
+  /api/settings/oneproxy/rotate:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › oneproxy › rotate"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › proxies"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › proxies"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Settings
+      summary: "PATCH settings › proxies"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/{id}/repair-relay:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies › <id> › repair relay"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/assignments:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › proxies › assignments"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › proxies › assignments"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/auto-test:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies › auto test"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/batch-activate:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies › batch activate"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/batch-delete:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies › batch delete"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/bulk-assign:
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › proxies › bulk assign"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/bulk-import:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies › bulk import"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/egress:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › proxies › egress"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies › egress"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/health:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › proxies › health"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/migrate:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxies › migrate"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxies/pool:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › proxies › pool"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › proxies › pool"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Settings
+      summary: "PATCH settings › proxies › pool"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › proxies › pool"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxy/cloudflare-deploy:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxy › cloudflare deploy"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxy/deno-deploy:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxy › deno deploy"
+      responses:
+        "200":
+          description: OK
+  /api/settings/proxy/vercel-deploy:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › proxy › vercel deploy"
+      responses:
+        "200":
+          description: OK
+  /api/settings/purge-call-logs:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › purge call logs"
+      responses:
+        "200":
+          description: OK
+  /api/settings/purge-detailed-logs:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › purge detailed logs"
+      responses:
+        "200":
+          description: OK
+  /api/settings/purge-logs:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › purge logs"
+      responses:
+        "200":
+          description: OK
+  /api/settings/purge-quota-snapshots:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › purge quota snapshots"
+      responses:
+        "200":
+          description: OK
+  /api/settings/quota/state:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › quota › state"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › quota › state"
+      responses:
+        "200":
+          description: OK
+  /api/settings/reasoning-routing-rules:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › reasoning routing rules"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › reasoning routing rules"
+      responses:
+        "200":
+          description: OK
+  /api/settings/reasoning-routing-rules/{id}:
+    delete:
+      tags:
+        - Settings
+      summary: "DELETE settings › reasoning routing rules › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › reasoning routing rules › <id>"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Settings
+      summary: "PATCH settings › reasoning routing rules › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/settings/reasoning-routing-rules/simulate:
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › reasoning routing rules › simulate"
+      responses:
+        "200":
+          description: OK
+  /api/settings/task-routing:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › task routing"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Settings
+      summary: "POST settings › task routing"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › task routing"
+      responses:
+        "200":
+          description: OK
+  /api/settings/tier-config:
+    get:
+      tags:
+        - Settings
+      summary: "GET settings › tier config"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Settings
+      summary: "PUT settings › tier config"
+      responses:
+        "200":
+          description: OK
+  /api/skills:
+    get:
+      tags:
+        - Skills
+      summary: "GET skills"
+      responses:
+        "200":
+          description: OK
+  /api/skills/{id}:
+    delete:
+      tags:
+        - Skills
+      summary: "DELETE skills › <id>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Skills
+      summary: "PUT skills › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/skills/collect/chaos:
+    post:
+      tags:
+        - Skills
+      summary: "POST skills › collect › chaos"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/skills/collect/detect:
+    get:
+      tags:
+        - Skills
+      summary: "GET skills › collect › detect"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/skills/collect/install:
+    post:
+      tags:
+        - Skills
+      summary: "POST skills › collect › install"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/skills/executions:
+    get:
+      tags:
+        - Skills
+      summary: "GET skills › executions"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Skills
+      summary: "POST skills › executions"
+      responses:
+        "200":
+          description: OK
+  /api/skills/install:
+    post:
+      tags:
+        - Skills
+      summary: "POST skills › install"
+      responses:
+        "200":
+          description: OK
+  /api/skills/marketplace:
+    get:
+      tags:
+        - Skills
+      summary: "GET skills › marketplace"
+      responses:
+        "200":
+          description: OK
+  /api/skills/marketplace/install:
+    post:
+      tags:
+        - Skills
+      summary: "POST skills › marketplace › install"
+      responses:
+        "200":
+          description: OK
+  /api/skills/skillssh:
+    get:
+      tags:
+        - Skills
+      summary: "GET skills › skillssh"
+      responses:
+        "200":
+          description: OK
+  /api/skills/skillssh/install:
+    post:
+      tags:
+        - Skills
+      summary: "POST skills › skillssh › install"
+      responses:
+        "200":
+          description: OK
+  /api/sync/bundle:
+    get:
+      tags:
+        - Sync
+      summary: "GET sync › bundle"
+      responses:
+        "200":
+          description: OK
+  /api/sync/tokens:
+    get:
+      tags:
+        - Sync
+      summary: "GET sync › tokens"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Sync
+      summary: "POST sync › tokens"
+      responses:
+        "200":
+          description: OK
+  /api/sync/tokens/{id}:
+    delete:
+      tags:
+        - Sync
+      summary: "DELETE sync › tokens › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/synced-available-models:
+    get:
+      tags:
+        - Synced available models
+      summary: "GET synced available models"
+      responses:
+        "200":
+          description: OK
+  /api/system/env/repair:
+    get:
+      tags:
+        - System
+      summary: "GET system › env › repair"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - System
+      summary: "POST system › env › repair"
+      responses:
+        "200":
+          description: OK
+  /api/system/version:
+    get:
+      tags:
+        - System
+      summary: "GET system › version"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - System
+      summary: "POST system › version"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/agents/{id}:
+    get:
+      tags:
+        - Tools
+      summary: "GET tools › agent bridge › agents › <id>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - Tools
+      summary: "PATCH tools › agent bridge › agents › <id>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/agents/{id}/detect:
+    get:
+      tags:
+        - Tools
+      summary: "GET tools › agent bridge › agents › <id> › detect"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/agents/{id}/detected-models:
+    get:
+      tags:
+        - Tools
+      summary: "GET tools › agent bridge › agents › <id> › detected models"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/cert/download:
+    get:
+      tags:
+        - Tools
+      summary: "GET tools › agent bridge › cert › download"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/cert/regenerate:
+    post:
+      tags:
+        - Tools
+      summary: "POST tools › agent bridge › cert › regenerate"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/config:
+    get:
+      tags:
+        - Tools
+      summary: "GET tools › agent bridge › config"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Tools
+      summary: "POST tools › agent bridge › config"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/diagnose:
+    get:
+      tags:
+        - Tools
+      summary: "GET tools › agent bridge › diagnose"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/repair:
+    post:
+      tags:
+        - Tools
+      summary: "POST tools › agent bridge › repair"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/tproxy:
+    delete:
+      tags:
+        - Tools
+      summary: "DELETE tools › agent bridge › tproxy"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Tools
+      summary: "GET tools › agent bridge › tproxy"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Tools
+      summary: "POST tools › agent bridge › tproxy"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/agent-bridge/upstream-ca/test:
+    post:
+      tags:
+        - Tools
+      summary: "POST tools › agent bridge › upstream ca › test"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tools/traffic-inspector/sessions/{id}/requests:
+    post:
+      tags:
+        - Tools
+      summary: "POST tools › traffic inspector › sessions › <id> › requests"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/translator/transform-stream:
+    post:
+      tags:
+        - Translator
+      summary: "POST translator › transform stream"
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/cloudflared:
+    get:
+      tags:
+        - Tunnels
+      summary: "GET tunnels › cloudflared"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Tunnels
+      summary: "POST tunnels › cloudflared"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/ngrok:
+    get:
+      tags:
+        - Tunnels
+      summary: "GET tunnels › ngrok"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Tunnels
+      summary: "POST tunnels › ngrok"
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/tailscale:
+    get:
+      tags:
+        - Tunnels
+      summary: "GET tunnels › tailscale"
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/tailscale/check:
+    get:
+      tags:
+        - Tunnels
+      summary: "GET tunnels › tailscale › check"
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/tailscale/disable:
+    post:
+      tags:
+        - Tunnels
+      summary: "POST tunnels › tailscale › disable"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/tailscale/enable:
+    post:
+      tags:
+        - Tunnels
+      summary: "POST tunnels › tailscale › enable"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/tailscale/install:
+    post:
+      tags:
+        - Tunnels
+      summary: "POST tunnels › tailscale › install"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/tailscale/login:
+    post:
+      tags:
+        - Tunnels
+      summary: "POST tunnels › tailscale › login"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/tunnels/tailscale/start-daemon:
+    post:
+      tags:
+        - Tunnels
+      summary: "POST tunnels › tailscale › start daemon"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/upstream-proxy/{providerId}:
+    delete:
+      tags:
+        - Upstream proxy
+      summary: "DELETE upstream proxy › <providerId>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Upstream proxy
+      summary: "GET upstream proxy › <providerId>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Upstream proxy
+      summary: "PUT upstream proxy › <providerId>"
+      responses:
+        "200":
+          description: OK
+  /api/usage/budget/bulk:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › budget › bulk"
+      responses:
+        "200":
+          description: OK
+  /api/usage/codex-reset-credit:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › codex reset credit"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Usage
+      summary: "POST usage › codex reset credit"
+      responses:
+        "200":
+          description: OK
+  /api/usage/combo-forecast:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › combo forecast"
+      responses:
+        "200":
+          description: OK
+  /api/usage/combo-health:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › combo health"
+      responses:
+        "200":
+          description: OK
+  /api/usage/combo-health-autopilot:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › combo health autopilot"
+      responses:
+        "200":
+          description: OK
+  /api/usage/combo-health-dashboard:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › combo health dashboard"
+      responses:
+        "200":
+          description: OK
+  /api/usage/combo-scoring-inspector:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › combo scoring inspector"
+      responses:
+        "200":
+          description: OK
+  /api/usage/combo-trace/{id}:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › combo trace › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/usage/om-usage:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › om usage"
+      responses:
+        "200":
+          description: OK
+  /api/usage/provider-limits:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › provider limits"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Usage
+      summary: "POST usage › provider limits"
+      responses:
+        "200":
+          description: OK
+  /api/usage/provider-window-costs:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › provider window costs"
+      responses:
+        "200":
+          description: OK
+  /api/usage/quota:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › quota"
+      responses:
+        "200":
+          description: OK
+  /api/usage/requests-by-provider-date:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › requests by provider date"
+      responses:
+        "200":
+          description: OK
+  /api/usage/route-explain/{id}:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › route explain › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/usage/token-limits:
+    delete:
+      tags:
+        - Usage
+      summary: "DELETE usage › token limits"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › token limits"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Usage
+      summary: "POST usage › token limits"
+      responses:
+        "200":
+          description: OK
+  /api/usage/utilization:
+    get:
+      tags:
+        - Usage
+      summary: "GET usage › utilization"
+      responses:
+        "200":
+          description: OK
+  /api/v1/{omnirouteCatchAll}:
+    delete:
+      tags:
+        - V1 OmnirouteCatchAll
+      summary: "DELETE <omnirouteCatchAll>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 OmnirouteCatchAll
+      summary: "GET <omnirouteCatchAll>"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - V1 OmnirouteCatchAll
+      summary: "PATCH <omnirouteCatchAll>"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 OmnirouteCatchAll
+      summary: "POST <omnirouteCatchAll>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - V1 OmnirouteCatchAll
+      summary: "PUT <omnirouteCatchAll>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/accounts/{id}/limits:
+    get:
+      tags:
+        - V1 Accounts
+      summary: "GET accounts › <id> › limits"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - V1 Accounts
+      summary: "PUT accounts › <id> › limits"
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/credentials:
+    get:
+      tags:
+        - V1 Agents
+      summary: "GET agents › credentials"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Agents
+      summary: "POST agents › credentials"
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/health:
+    get:
+      tags:
+        - V1 Agents
+      summary: "GET agents › health"
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/tasks:
+    delete:
+      tags:
+        - V1 Agents
+      summary: "DELETE agents › tasks"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 Agents
+      summary: "GET agents › tasks"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Agents
+      summary: "POST agents › tasks"
+      responses:
+        "200":
+          description: OK
+  /api/v1/agents/tasks/{id}:
+    delete:
+      tags:
+        - V1 Agents
+      summary: "DELETE agents › tasks › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 Agents
+      summary: "GET agents › tasks › <id>"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Agents
+      summary: "POST agents › tasks › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/antigravity:
+    post:
+      tags:
+        - V1 Antigravity
+      summary: "POST antigravity"
+      responses:
+        "200":
+          description: OK
+  /api/v1/auto-combo/{channel}/candidates:
+    get:
+      tags:
+        - V1 Auto-combo
+      summary: "GET auto combo › <channel> › candidates"
+      responses:
+        "200":
+          description: OK
+  /api/v1/batches:
+    get:
+      tags:
+        - V1 Batches
+      summary: "GET batches"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Batches
+      summary: "POST batches"
+      responses:
+        "200":
+          description: OK
+  /api/v1/batches/{id}:
+    delete:
+      tags:
+        - V1 Batches
+      summary: "DELETE batches › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 Batches
+      summary: "GET batches › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/batches/{id}/cancel:
+    post:
+      tags:
+        - V1 Batches
+      summary: "POST batches › <id> › cancel"
+      responses:
+        "200":
+          description: OK
+  /api/v1/batches/delete-completed:
+    delete:
+      tags:
+        - V1 Batches
+      summary: "DELETE batches › delete completed"
+      responses:
+        "200":
+          description: OK
+  /api/v1/classify:
+    post:
+      tags:
+        - V1 Classify
+      summary: "POST classify"
+      responses:
+        "200":
+          description: OK
+  /api/v1/combos:
+    get:
+      tags:
+        - V1 Combos
+      summary: "GET combos"
+      responses:
+        "200":
+          description: OK
+  /api/v1/completions:
+    post:
+      tags:
+        - V1 Completions
+      summary: "POST completions"
+      responses:
+        "200":
+          description: OK
+  /api/v1/files:
+    get:
+      tags:
+        - V1 Files
+      summary: "GET files"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Files
+      summary: "POST files"
+      responses:
+        "200":
+          description: OK
+  /api/v1/files/{id}:
+    delete:
+      tags:
+        - V1 Files
+      summary: "DELETE files › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 Files
+      summary: "GET files › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/files/{id}/content:
+    get:
+      tags:
+        - V1 Files
+      summary: "GET files › <id> › content"
+      responses:
+        "200":
+          description: OK
+  /api/v1/images/edits:
+    post:
+      tags:
+        - V1 Images
+      summary: "POST images › edits"
+      responses:
+        "200":
+          description: OK
+  /api/v1/images/upscale:
+    get:
+      tags:
+        - V1 Images
+      summary: "GET images › upscale"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Images
+      summary: "POST images › upscale"
+      responses:
+        "200":
+          description: OK
+  /api/v1/issues/report:
+    post:
+      tags:
+        - V1 Issues
+      summary: "POST issues › report"
+      responses:
+        "200":
+          description: OK
+  /api/v1/management/proxies:
+    delete:
+      tags:
+        - V1 Management
+      summary: "DELETE management › proxies"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 Management
+      summary: "GET management › proxies"
+      responses:
+        "200":
+          description: OK
+    patch:
+      tags:
+        - V1 Management
+      summary: "PATCH management › proxies"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Management
+      summary: "POST management › proxies"
+      responses:
+        "200":
+          description: OK
+  /api/v1/management/proxies/assignments:
+    get:
+      tags:
+        - V1 Management
+      summary: "GET management › proxies › assignments"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - V1 Management
+      summary: "PUT management › proxies › assignments"
+      responses:
+        "200":
+          description: OK
+  /api/v1/management/proxies/bulk-assign:
+    put:
+      tags:
+        - V1 Management
+      summary: "PUT management › proxies › bulk assign"
+      responses:
+        "200":
+          description: OK
+  /api/v1/management/proxies/health:
+    get:
+      tags:
+        - V1 Management
+      summary: "GET management › proxies › health"
+      responses:
+        "200":
+          description: OK
+  /api/v1/me/status:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › status"
+      responses:
+        "200":
+          description: OK
+  /api/v1/models/{model}:
+    get:
+      tags:
+        - V1 Models
+      summary: "GET models › <model>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/muse-code/models:
+    get:
+      tags:
+        - V1 Muse-code
+      summary: "GET muse code › models"
+      responses:
+        "200":
+          description: OK
+  /api/v1/music/generations:
+    get:
+      tags:
+        - V1 Music
+      summary: "GET music › generations"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Music
+      summary: "POST music › generations"
+      responses:
+        "200":
+          description: OK
+  /api/v1/providers/{provider}/limits:
+    get:
+      tags:
+        - V1 Providers
+      summary: "GET providers › <provider> › limits"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - V1 Providers
+      summary: "PUT providers › <provider> › limits"
+      responses:
+        "200":
+          description: OK
+  /api/v1/quotas/check:
+    get:
+      tags:
+        - V1 Quotas
+      summary: "GET quotas › check"
+      responses:
+        "200":
+          description: OK
+  /api/v1/registered-keys:
+    get:
+      tags:
+        - V1 Registered-keys
+      summary: "GET registered keys"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Registered-keys
+      summary: "POST registered keys"
+      responses:
+        "200":
+          description: OK
+  /api/v1/registered-keys/{id}:
+    delete:
+      tags:
+        - V1 Registered-keys
+      summary: "DELETE registered keys › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 Registered-keys
+      summary: "GET registered keys › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/registered-keys/{id}/revoke:
+    post:
+      tags:
+        - V1 Registered-keys
+      summary: "POST registered keys › <id> › revoke"
+      responses:
+        "200":
+          description: OK
+  /api/v1/relay/chat/completions:
+    post:
+      tags:
+        - V1 Relay
+      summary: "POST relay › chat › completions"
+      responses:
+        "200":
+          description: OK
+  /api/v1/relay/chat/completions/bifrost:
+    post:
+      tags:
+        - V1 Relay
+      summary: "POST relay › chat › completions › bifrost"
+      responses:
+        "200":
+          description: OK
+  /api/v1/responses/{path}:
+    post:
+      tags:
+        - V1 Responses
+      summary: "POST responses › <path>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/search/analytics:
+    get:
+      tags:
+        - V1 Search
+      summary: "GET search › analytics"
+      responses:
+        "200":
+          description: OK
+  /api/v1/segment:
+    post:
+      tags:
+        - V1 Segment
+      summary: "POST segment"
+      responses:
+        "200":
+          description: OK
+  /api/v1/video-bridge/drilldown:
+    delete:
+      tags:
+        - V1 Video-bridge
+      summary: "DELETE video bridge › drilldown"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - V1 Video-bridge
+      summary: "GET video bridge › drilldown"
+      responses:
+        "200":
+          description: OK
+  /api/v1/videos/generations:
+    get:
+      tags:
+        - V1 Videos
+      summary: "GET videos › generations"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Videos
+      summary: "POST videos › generations"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › <token>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/api/chat:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › <token> › api › chat"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/api/show:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › <token> › api › show"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/api/tags:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › <token> › api › tags"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/api/version:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › <token> › api › version"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/chat/completions:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › <token> › chat › completions"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/combos:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › <token> › combos"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/models:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › <token> › models"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/responses:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › <token> › responses"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/v1/chat/completions:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › <token> › v1 › chat › completions"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/{token}/v1/models:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › <token> › v1 › models"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/combos/{token}/{{slug}}:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › combos › <token> › <{slug>}"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › combos › <token> › <{slug>}"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › raw › <token>"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/api/chat:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › raw › <token> › api › chat"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/api/show:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › raw › <token> › api › show"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/api/tags:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › raw › <token> › api › tags"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/api/version:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › raw › <token> › api › version"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/chat/completions:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › raw › <token> › chat › completions"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/combos:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › raw › <token> › combos"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/models:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › raw › <token> › models"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/responses:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › raw › <token> › responses"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/v1/chat/completions:
+    post:
+      tags:
+        - V1 Vscode
+      summary: "POST vscode › raw › <token> › v1 › chat › completions"
+      responses:
+        "200":
+          description: OK
+  /api/v1/vscode/raw/{token}/v1/models:
+    get:
+      tags:
+        - V1 Vscode
+      summary: "GET vscode › raw › <token> › v1 › models"
+      responses:
+        "200":
+          description: OK
+  /api/v1/web/fetch:
+    post:
+      tags:
+        - V1 Web
+      summary: "POST web › fetch"
+      responses:
+        "200":
+          description: OK
+  /api/version-manager/check-update:
+    get:
+      tags:
+        - Version manager
+      summary: "GET version manager › check update"
+      responses:
+        "200":
+          description: OK
+  /api/version-manager/install:
+    post:
+      tags:
+        - Version manager
+      summary: "POST version manager › install"
+      responses:
+        "200":
+          description: OK
+  /api/version-manager/restart:
+    post:
+      tags:
+        - Version manager
+      summary: "POST version manager › restart"
+      responses:
+        "200":
+          description: OK
+  /api/version-manager/start:
+    post:
+      tags:
+        - Version manager
+      summary: "POST version manager › start"
+      responses:
+        "200":
+          description: OK
+  /api/version-manager/status:
+    get:
+      tags:
+        - Version manager
+      summary: "GET version manager › status"
+      responses:
+        "200":
+          description: OK
+  /api/version-manager/stop:
+    post:
+      tags:
+        - Version manager
+      summary: "POST version manager › stop"
+      responses:
+        "200":
+          description: OK
+  /api/vnc-session:
+    get:
+      tags:
+        - Vnc session
+      summary: "GET vnc session"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/vnc-session/{params}:
+    delete:
+      tags:
+        - Vnc session
+      summary: "DELETE vnc session › <params>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Vnc session
+      summary: "GET vnc session › <params>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Vnc session
+      summary: "POST vnc session › <params>"
+      x-loopback-only: true
+      responses:
+        "200":
+          description: OK
+  /api/webhooks:
+    get:
+      tags:
+        - Webhooks
+      summary: "GET webhooks"
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - Webhooks
+      summary: "POST webhooks"
+      responses:
+        "200":
+          description: OK
+  /api/webhooks/{id}:
+    delete:
+      tags:
+        - Webhooks
+      summary: "DELETE webhooks › <id>"
+      responses:
+        "200":
+          description: OK
+    get:
+      tags:
+        - Webhooks
+      summary: "GET webhooks › <id>"
+      responses:
+        "200":
+          description: OK
+    put:
+      tags:
+        - Webhooks
+      summary: "PUT webhooks › <id>"
+      responses:
+        "200":
+          description: OK
+  /api/webhooks/{id}/deliveries:
+    get:
+      tags:
+        - Webhooks
+      summary: "GET webhooks › <id> › deliveries"
+      responses:
+        "200":
+          description: OK
+  /api/webhooks/{id}/test:
+    post:
+      tags:
+        - Webhooks
+      summary: "POST webhooks › <id> › test"
+      responses:
+        "200":
+          description: OK
+  /api/webhooks/validate-url:
+    post:
+      tags:
+        - Webhooks
+      summary: "POST webhooks › validate url"
+      responses:
+        "200":
+          description: OK
 
 components:
   securitySchemes:

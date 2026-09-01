@@ -191,7 +191,7 @@ function isOptionalFts5Migration(migration: { version: string; name: string }): 
   return OPTIONAL_FTS5_MIGRATION_VERSIONS.has(migration.version);
 }
 
-function supportsFts5(db: SqliteAdapter): boolean {
+export function supportsFts5(db: SqliteAdapter): boolean {
   const cached = fts5SupportCache.get(db);
   if (cached !== undefined) {
     return cached;
@@ -513,9 +513,8 @@ function isSchemaAlreadyApplied(
       if (migration.name !== "rename_freepik_to_magnific") return false;
       if (!hasTable(db, "provider_connections")) return false;
       return (
-        db
-          .prepare("SELECT 1 FROM provider_connections WHERE provider = 'freepik' LIMIT 1")
-          .get() == null
+        db.prepare("SELECT 1 FROM provider_connections WHERE provider = 'freepik' LIMIT 1").get() ==
+        null
       );
     default:
       return false;

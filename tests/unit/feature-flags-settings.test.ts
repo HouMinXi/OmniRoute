@@ -36,8 +36,10 @@ const {
 // (feature flag gating the opt-in Codex app-server WebSocket transport),
 // bumping it from 51 to 52. NO_THINKING_ALIAS_ENABLED (master switch for the
 // no-think/<provider>/<model> gateway aliases) then bumped it from 52 to 53.
-// OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS bumped it from 53 to 54.
-const EXPECTED_FEATURE_FLAG_COUNT = 54;
+// OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS bumped it from 53 to 54;
+// the dead ONEPROXY_ENABLED (readerless since the 1proxy purge, #12091)
+// brought it back to 53.
+const EXPECTED_FEATURE_FLAG_COUNT = 53;
 
 // ──────────────────────────────────────────────────────
 // Test group 1 — Flag definitions registry

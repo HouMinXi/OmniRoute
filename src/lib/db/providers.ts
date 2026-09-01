@@ -514,6 +514,10 @@ export async function createProviderConnection(data: JsonRecord) {
       // (legacy rows created before this disambiguation existed).
       const incomingUsername = toStringOrNull(providerSpecificData.username);
       const incomingProfileArn = toStringOrNull(providerSpecificData.profileArn);
+      // Claude: one identity reaches its personal workspace and every Team
+      // organization with the same email and the same accountUUID, so
+      // organizationUUID is what separates the accounts.
+      const incomingOrganizationUuid = toStringOrNull(providerSpecificData.organizationUUID);
       const emailMatches = db
         .prepare(
           "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'oauth' AND email = ?"
@@ -521,7 +525,12 @@ export async function createProviderConnection(data: JsonRecord) {
         .all(data.provider, data.email) as JsonRecord[];
       existing =
         emailMatches.find((row) =>
-          isMatchingOauthIdentity(row, incomingUsername, incomingProfileArn)
+          isMatchingOauthIdentity(
+            row,
+            incomingUsername,
+            incomingProfileArn,
+            incomingOrganizationUuid
+          )
         ) || null;
     }
   } else if (data.authType === "apikey") {

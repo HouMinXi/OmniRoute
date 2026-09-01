@@ -1,5 +1,9 @@
 import { retrieveMemories } from "@/lib/memory/retrieval";
-import { getMemorySettings, DEFAULT_MEMORY_SETTINGS, toMemoryRetrievalConfig } from "@/lib/memory/settings";
+import {
+  getMemorySettings,
+  DEFAULT_MEMORY_SETTINGS,
+  toMemoryRetrievalConfig,
+} from "@/lib/memory/settings";
 import { injectMemory, shouldInjectMemory } from "@/lib/memory/injection";
 import { injectSkills } from "@/lib/skills/injection";
 import { buildMemoryToolsForProvider } from "@/lib/skills/memoryBuiltins";
@@ -9,7 +13,25 @@ import { detectCachingContext } from "../../services/compression/cachingAware.ts
 
 type MemorySkillsLogger = { debug?: (...args: unknown[]) => void } | null | undefined;
 
-export function getSkillsProviderForFormat(format: string): "openai" | "anthropic" | "google" | "other" {
+function getToolName(tool: unknown): string {
+  if (!tool || typeof tool !== "object") return "";
+  const r = tool as Record<string, unknown>;
+  if (typeof r.name === "string") return r.name;
+  if (r.function && typeof r.function === "object") {
+    const fn = r.function as Record<string, unknown>;
+    if (typeof fn.name === "string") return fn.name;
+  }
+  return "";
+}
+
+export function sortToolsByName<T>(tools: T[]): T[] {
+  if (!Array.isArray(tools) || tools.length <= 1) return tools;
+  return [...tools].sort((a, b) => getToolName(a).localeCompare(getToolName(b)));
+}
+
+export function getSkillsProviderForFormat(
+  format: string
+): "openai" | "anthropic" | "google" | "other" {
   switch (format) {
     case FORMATS.CLAUDE:
       return "anthropic";
@@ -101,7 +123,7 @@ export async function injectMemoryAndSkills({
           }
           return "";
         }
-        
+
         if (Array.isArray(body.messages)) {
           const r = pickFrom(body.messages);
           if (r) return r;
@@ -160,8 +182,7 @@ export async function injectMemoryAndSkills({
       getSkillsProviderForFormat(sourceFormat)
     ).filter((tool) => {
       const record = tool as Record<string, unknown>;
-      const name =
-        (record.function as Record<string, unknown> | undefined)?.name ?? record.name;
+      const name = (record.function as Record<string, unknown> | undefined)?.name ?? record.name;
       return typeof name === "string" && !existingToolNames.has(name);
     });
     if (memoryTools.length > 0) {
@@ -206,6 +227,13 @@ export async function injectMemoryAndSkills({
       };
       log?.debug?.("SKILLS", `Injected ${mergedTools.length - existingTools.length} skills`);
     }
+  }
+
+  if (Array.isArray(body.tools) && body.tools.length > 1) {
+    body = {
+      ...body,
+      tools: sortToolsByName(body.tools),
+    };
   }
 
   return { body, memorySettings };

@@ -310,7 +310,10 @@ function ConversationsPageContent() {
     if (!activeConversationId) return;
     const fresh = conversations.find((c) => c.id === activeConversationId);
     if (!fresh) return;
-    setActiveConversation((prev) => (prev && prev.id === fresh.id ? fresh : prev));
+    void (async () => {
+      await Promise.resolve();
+      setActiveConversation((prev) => (prev && prev.id === fresh.id ? fresh : prev));
+    })();
   }, [conversations, activeConversationId]);
 
   useEffect(() => {
@@ -595,7 +598,10 @@ function ConversationsPageContent() {
   // RequestLoggerDetail's CONVERSATION_ACTIVE_POLL_INTERVAL_MS.
   useEffect(() => {
     if (!activeCallLogId) {
-      setLivePartialText("");
+      void (async () => {
+        await Promise.resolve();
+        setLivePartialText("");
+      })();
       return;
     }
     let cancelled = false;

@@ -73,12 +73,19 @@ npm run dev
 npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
+# Fast backend/API-only compile for contributor changes
+npm run build:contributor
+
 # Release build (clean rebuild + HEAD sentinel — required for deploy)
 npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Common port configuration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
+
+The contributor build performs compile-only validation: it does not assemble the standalone
+distribution or build optional native packaging assets. Use the regular production build when
+you need to validate the shippable bundle.
 
 ### Build Output Layout
 
@@ -99,6 +106,11 @@ npm run build
 
 `npm run build:release` additionally cleans both directories first and writes
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) as a deploy integrity sentinel.
+
+`npm run build:contributor` uses the backend-only build profile. It temporarily stubs
+dashboard UI files while building, keeps API route handlers, and restores the original files
+after the build. Use `npm run build` for changes that affect the dashboard UI or for full
+release validation; the contributor profile is not a replacement for the release build.
 
 > **VPS deploy note:** the remote image directory `/usr/lib/node_modules/omniroute/app/`
 > is unchanged. The deploy skills rsync the contents of `dist/` into it.
@@ -301,7 +313,7 @@ src/                        # TypeScript (.ts / .tsx)
 open-sse/                   # @omniroute/open-sse workspace
 ├── executors/              # 89 executor implementation modules
 ├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 unique tools, 3 transports, 32 scopes)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
 ├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
 ├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API transformer

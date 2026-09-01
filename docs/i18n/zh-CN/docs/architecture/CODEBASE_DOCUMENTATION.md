@@ -298,7 +298,6 @@ v1/
 
 - `localDb.ts` — 仅作重新导出层。**切勿**在此添加逻辑。
 - `proxyHealth.ts`、`proxyLogger.ts`、`tokenHealthCheck.ts`、`localHealthCheck.ts`
-- `oneproxyRotator.ts`、`oneproxySync.ts`
 - `apiBridgeServer.ts`、`cacheLayer.ts`、`semanticCache.ts`、`settingsCache.ts`
 - `cloudSync.ts`、`initCloudSync.ts`
 - `cloudflaredTunnel.ts`、`ngrokTunnel.ts`、`tailscaleTunnel.ts`
@@ -404,7 +403,7 @@ server/
   `bodySize.ts`、`colors.ts`、`appConfig.ts`、`config.ts`、
   `sidebarVisibility.ts`、`visionBridgeDefaults.ts`。
 - `validation/` — `schemas.ts`（约 80 个 Zod Schema）、`compressionConfigSchemas.ts`、
-  `oneproxySchemas.ts`、`providerSchema.ts`、`settingsSchemas.ts`、`helpers.ts`。
+  `providerSchema.ts`、`settingsSchemas.ts`、`helpers.ts`。
 - `contracts/` — 发布到 npm 的公开 API 契约。
 - `types/` — 共享 TS 类型。
 - `utils/` — `circuitBreaker.ts`、`apiAuth.ts`、`apiKey.ts`、`apiKeyPolicy.ts`、

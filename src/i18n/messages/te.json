@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "పూర్తయిన అన్ని బ్యాచ్‌లను తొలగించండి",
     "batchListBatchesTable": "బ్యాచ్‌లు",
     "changelogViewerLoading": "GitHub నుండి చేంజ్లాగ్ లోడ్ అవుతోంది...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "ప్రొఫైల్ లోడ్ అవుతోంది...",
     "profileHowToEarn": "ఎలా సంపాదించాలి",
     "bootstrapBannerDismiss": "తొలగించు",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "బడ్జెట్ ముగిసిపోయిన అభ్యర్థనలను అత్యవసర ఉచిత ఫాల్‌బ్యాక్ ప్రొవైడర్/మోడల్‌కు రూట్ చేయండి.",
   "featureFlagArenaEloSyncEnabledDescription": "మోడల్ ఇంటెలిజెన్స్ ర్యాంకింగ్‌ల కోసం క్రమానుగత Arena AI లీడర్‌బోర్డ్ ELO సమకాలీకరణను ప్రారంభించండి.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models లో claude/&lt;provider&gt;/&lt;model&gt; మిర్రర్ ఐడీలను ప్రచారం చేయండి కాబట్టి Claude Code గేట్వే మోడల్ డిస్కవరీ non-Claude మోడళ్లను జాబితా చేస్తుంది. హెచ్చరిక: ఇది ప్రపంచవ్యాప్తంగా ప్రారంభించినప్పుడు అన్ని క్లయింట్ల కోసం కాటలాగ్ ఎంట్రీలను డబుల్ చేస్తుంది.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "ప్రొవైడర్ డిస్పాచ్ కోసం ప్రతి-టెనెంట్ అడాప్టివ్ వర్చువల్ అడ్మిషన్ లేన్లను ప్రారంభించండి (#9654): ఒక టెనెంట్ బర్స్ట్ ఇకపై మరొక టెనెంట్కు 503 ఇవ్వదు. OMNIROUTE_CHAT_VIRTUAL_LANES ఎన్విరాన్మెంట్ వేరియబుల్ ఈ డాష్బోర్డ్ సెట్టింగ్ కంటే ప్రాధాన్యత పొందుతుంది; మార్పులు సర్వర్ పునఃప్రారంభంలో ప్రభావం చూపుతాయి.",
   "sidebar": {
     "home": "Home",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "ఉచిత యాక్సెస్ కోసం ప్రొవైడర్లను స్కాన్ చేయండి",
     "conductor": "కండక్టర్",
     "conductorSubtitle": "CLI-ఏజెంట్ ఫ్లీట్",
+    "orchestration": "ఆర్కెస్ట్రేషన్",
+    "orchestrationSubtitle": "నడుస్తున్న ప్రతిదాని ప్రత్యక్ష వీక్షణ",
     "resilienceConnections": "కనెక్షన్ స్థితిస్థాపకత",
     "resilienceConnectionsSubtitle": "కూల్‌డౌన్, బ్రేకర్, లాక్‌అవుట్ స్థితి",
     "settingsModalityBridge": "మోడాలిటీ బ్రిడ్జ్",
@@ -1768,7 +1772,8 @@
     "tools": "సాధనాలు",
     "agentBridge": "ఏజెంట్ బ్రిడ్జ్",
     "trafficInspector": "ట్రాఫిక్ ఇన్‌స్పెక్టర్",
-    "usage": "వినియోగం"
+    "usage": "వినియోగం",
+    "orchestration": "ఆర్కెస్ట్రేషన్"
   },
   "home": {
     "quickStart": "Quick Start",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "కస్టమ్ ప్రొవైడర్ సపోర్ట్‌తో Warp AI టెర్మినల్",
       "agent-deck": "Agent Deck మల్టీ-ఏజెంట్ ఆర్కెస్ట్రేటర్",
-      "5dive": "5dive — స్వీయ-హోస్టెడ్ కోడింగ్ ఏజెంట్ల సముదాయం; ఒక auth ప్రొఫైల్ అన్నింటినీ OmniRoute వైపు మళ్లిస్తుంది",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — స్వీయ-హోస్టెడ్ కోడింగ్ ఏజెంట్ల సముదాయం; ఒక auth ప్రొఫైల్ అన్నింటినీ OmniRoute వైపు మళ్లిస్తుంది"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "అభ్యర్థనల మధ్య కనీస సమయం (ms). డిఫాల్ట్ రేట్ లిమిటర్ ఆలస్యాన్ని ఓవర్‌రైడ్ చేస్తుంది.",
     "rateLimitOverridesMinTimeLabel": "కనీస విరామం (ms)",
+    "rateLimitOverridesRpdHint": "ఈ కనెక్షన్ కోసం రోజుకు గరిష్ట అభ్యర్థనలు. ప్రొవైడర్ డిఫాల్ట్‌ను భర్తీ చేస్తుంది.",
+    "rateLimitOverridesRpdLabel": "RPD (అభ్యర్థనలు/రోజు)",
     "rateLimitOverridesRpmHint": "ఈ కనెక్షన్ కోసం నిమిషానికి గరిష్ట అభ్యర్థనలు. ప్రొవైడర్ డిఫాల్ట్‌ను ఓవర్‌రైడ్ చేస్తుంది.",
     "rateLimitOverridesRpmLabel": "RPM (అభ్యర్థనలు/నిమిషం)",
     "rateLimitOverridesTpdHint": "ఈ కనెక్షన్ కోసం రోజుకు గరిష్ట టోకెన్‌లు. ప్రొవైడర్ డిఫాల్ట్‌ను ఓవర్‌రైడ్ చేస్తుంది.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "ఈ ప్రొవైడర్ కోసం గ్లోబల్ ఖాతా వ్యూహాన్ని భర్తీ చేయండి (9router పారిటీ).",
     "providerRoutingStrategy": "ఖాతా వ్యూహం",
     "providerRoutingInheritGlobal": "గ్లోబల్ డిఫాల్ట్‌ను వారసత్వంగా పొందండి",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Model Aliases",
     "modelAliasesTitle": "Model Aliases",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "ప్రారంభించినప్పుడు, విఫలమైన ప్రొవైడర్‌లు ప్రపంచవ్యాప్తంగా ట్రాక్ చేయబడతాయి మరియు కూల్‌డౌన్ వ్యవధి కోసం దాటవేయబడతాయి.",
     "resilienceProviderCooldownMin": "కనీస కూల్‌డౌన్",
     "resilienceProviderCooldownMax": "గరిష్ట కూల్‌డౌన్",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "సెషన్ అఫినిటీ",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "ఆరోగ్యం",
     "cliproxyapiPort": "పోర్ట్",
     "qdrantHost": "హోస్ట్",
-    "qdrantCollection": "సేకరణ",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "సేకరణ"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "కాపీ",
       "autoscrollOn": "ఆటోస్క్రోల్: ఆన్",
       "autoscrollOff": "ఆటోస్క్రోల్: ఆఫ్",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "క్లయింట్ రా అభ్యర్థన",
         "clientRequest": "క్లయింట్ అభ్యర్థన",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "MCP సర్వర్",
-        "description": "OmniRoute MCP సర్వర్‌కు కనెక్ట్ అవ్వండి (37 టూల్స్, 3 ట్రాన్స్‌పోర్ట్‌లు: SSE/stdio/HTTP). 16 అనుమతి స్కోప్‌లలో రూటింగ్, కాష్, కంప్రెషన్, మెమరీ, స్కిల్స్, ప్రొవైడర్లు మరియు ఆడిట్ టూల్స్‌ను కవర్ చేస్తుంది."
+        "description": "OmniRoute MCP సర్వర్‌కు కనెక్ట్ అవ్వండి (110 టూల్స్, 3 ట్రాన్స్‌పోర్ట్‌లు: SSE/stdio/HTTP). 33 అనుమతి స్కోప్‌లలో రూటింగ్, కాష్, కంప్రెషన్, మెమరీ, స్కిల్స్, ప్రొవైడర్లు మరియు ఆడిట్ టూల్స్‌ను కవర్ చేస్తుంది."
       },
       "omni-agents-a2a": {
         "name": "ఏజెంట్లు & A2A ప్రోటోకాల్",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "స్కిల్స్ శాండ్‌బాక్స్‌లో నెట్‌వర్క్ యాక్సెస్‌ను ప్రారంభించండి."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "స్పీచ్ సింథసిస్ విఫలమైంది (TTS మోడల్/ప్రొవైడర్‌ను తనిఖీ చేయండి)",
     "micDenied": "మైక్రోఫోన్ అందుబాటులో లేదు లేదా అనుమతి నిరాకరించబడింది"
   },
+  "orchestration": {
+    "title": "ఆర్కెస్ట్రేషన్",
+    "description": "OmniRoute ఇప్పుడు నడుపుతున్న ప్రతిదీ — ఏజెంట్లు, ఫ్లీట్ మరియు రూటింగ్",
+    "tabAgents": "ఏజెంట్లు",
+    "tabRouting": "రూటింగ్",
+    "tabOverview": "అవలోకనం",
+    "showCompleted": "పూర్తయినవి చూపించు",
+    "sourceCloudAgent": "క్లౌడ్ ఏజెంట్",
+    "sourceA2A": "A2A",
+    "sourceConductor": "కండక్టర్",
+    "sourceStale": "{since} నుండి పాతది",
+    "sourceOffline": "ఆఫ్‌లైన్",
+    "stateQueued": "క్యూలో ఉంది",
+    "stateRunning": "నడుస్తోంది",
+    "stateWaitingApproval": "ఆమోదం కోసం వేచి ఉంది",
+    "stateSucceeded": "విజయవంతమైంది",
+    "stateFailed": "విఫలమైంది",
+    "stateCancelled": "రద్దు చేయబడింది",
+    "overflowMore": "+{count} మరిన్ని",
+    "emptyTitle": "ఇంకా ఏమీ నడవడం లేదు",
+    "emptyCloudAgentCta": "క్లౌడ్ ఏజెంట్లను సెటప్ చేయండి",
+    "emptyA2ACta": "A2A తెరవండి",
+    "emptyConductorCta": "కండక్టర్‌ని తెరవండి",
+    "drawerObjective": "లక్ష్యం",
+    "drawerTimeline": "కాలక్రమం",
+    "drawerMetrics": "మెట్రిక్స్",
+    "drawerResult": "ఫలితం",
+    "drawerActions": "చర్యలు",
+    "actionApprove": "ప్రణాళికను ఆమోదించండి",
+    "actionCancel": "రద్దు చేయండి",
+    "actionSeeInGraph": "గ్రాఫ్‌లో చూడండి",
+    "actionDone": "చర్య వర్తింపజేయబడింది",
+    "actionFailed": "చర్య విఫలమైంది: {error}",
+    "mirroredInA2A": "A2Aలో ప్రతిబింబించబడింది"
+  },
   "cliproxyProviderExposure": {
     "title": "ప్రొవైడర్ ఎక్స్‌పోజర్",
     "description": "<prefix>cliproxyapi/</prefix> ప్రిఫిక్స్ కింద రౌటింగ్ లక్ష్యంగా CLIProxyAPI మోడల్స్‌ను ఎక్స్‌పోజ్ చేయండి.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

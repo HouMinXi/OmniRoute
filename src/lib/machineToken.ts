@@ -1,12 +1,12 @@
 import { createHash, createHmac } from "node:crypto";
-import { createRequire } from "node:module";
+import * as nodeModule from "node:module";
 
 let machineIdSync: (original?: boolean) => string;
 try {
   // Anchor runtime resolution to the process entrypoint. Turbopack rewrites
   // createRequire(import.meta.url) into an in-bundle resolver, which cannot load
   // external CommonJS packages from the installed standalone node_modules tree.
-  const runtimeRequire = createRequire(process.argv[1] || process.cwd());
+  const runtimeRequire = nodeModule.createRequire(process.argv[1] || process.cwd());
   const mod = runtimeRequire("node-machine-id");
   machineIdSync = mod.machineIdSync || mod.default?.machineIdSync;
 } catch {

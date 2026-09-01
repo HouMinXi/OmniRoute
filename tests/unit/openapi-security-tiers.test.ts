@@ -7,13 +7,13 @@ import * as yaml from "js-yaml";
 const ROOT = process.cwd();
 const OPENAPI_PATH = path.join(ROOT, "docs", "openapi.yaml");
 
-const { LOCAL_ONLY_API_PREFIXES, ALWAYS_PROTECTED_API_PATHS } =
+const { LOCAL_ONLY_API_PREFIXES, LOCAL_ONLY_API_PATTERNS, ALWAYS_PROTECTED_API_PATHS } =
   await import("../../src/server/authz/routeGuard.ts");
 
 const raw: any = yaml.load(fs.readFileSync(OPENAPI_PATH, "utf-8"));
 const paths: Record<string, any> = raw.paths || {};
 
-test("every x-loopback-only path matches a LOCAL_ONLY prefix in routeGuard.ts", () => {
+test("every x-loopback-only path matches a LOCAL_ONLY prefix or pattern in routeGuard.ts", () => {
   for (const [pathStr, methods] of Object.entries(paths)) {
     if (!methods || typeof methods !== "object") continue;
     for (const [method, spec] of Object.entries(methods as Record<string, any>)) {
@@ -25,10 +25,16 @@ test("every x-loopback-only path matches a LOCAL_ONLY prefix in routeGuard.ts", 
           return pathStr === norm || pathStr.startsWith(norm + "/");
         }
       );
+      // Param-shaped routes (e.g. /api/providers/{id}/login) are classified by
+      // LOCAL_ONLY_API_PATTERNS regexes rather than a static prefix — the OpenAPI
+      // {param} placeholder satisfies the same [^/]+ segment the runtime matches.
+      const matchesPattern = (LOCAL_ONLY_API_PATTERNS as ReadonlyArray<RegExp>).some((re) =>
+        re.test(pathStr)
+      );
       assert.ok(
-        matchesPrefix,
-        `YAML path "${pathStr}" ${method.toUpperCase()} has x-loopback-only but is NOT in LOCAL_ONLY_API_PREFIXES. ` +
-          `Add it to routeGuard.ts LOCAL_ONLY_API_PREFIXES or remove x-loopback-only.`
+        matchesPrefix || matchesPattern,
+        `YAML path "${pathStr}" ${method.toUpperCase()} has x-loopback-only but is NOT in LOCAL_ONLY_API_PREFIXES ` +
+          `or LOCAL_ONLY_API_PATTERNS. Add it to routeGuard.ts or remove x-loopback-only.`
       );
     }
   }

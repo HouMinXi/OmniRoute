@@ -70,7 +70,9 @@ export function LogExportPageClient() {
   }, []);
 
   useEffect(() => {
-    void load();
+    void (async () => {
+      await load();
+    })();
   }, [load]);
 
   const handleSubmit = async (payload: SubmitPayload) => {

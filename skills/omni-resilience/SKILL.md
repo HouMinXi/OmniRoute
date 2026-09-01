@@ -25,6 +25,15 @@ curl https://localhost:20128/api/monitoring/health \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
+### GET /api/provider-metrics
+
+GET provider metrics
+
+```bash
+curl https://localhost:20128/api/provider-metrics \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.

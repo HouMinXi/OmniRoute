@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   fileSizeHeadroom,
   headroomOf,
+  isMonitorExemptFile,
   renderMarkdown,
   statusOf,
   sumTypecheckBaseline,
@@ -52,6 +53,30 @@ test("fileSizeHeadroom reports the worst frozen file and the near-cap / over cou
   assert.equal(r.nearCap, 1); // a.ts within 10%
   assert.equal(r.worst?.file, "b.ts");
   assert.ok(r.worst!.headroom < 0);
+});
+
+test("fileSizeHeadroom skips generated and vendored files (monitor-only exemption)", () => {
+  assert.equal(isMonitorExemptFile("src/app/docs/lib/openapi.generated.ts"), true);
+  assert.equal(
+    isMonitorExemptFile("open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/browser-worker.ts"),
+    true
+  );
+  assert.equal(isMonitorExemptFile("vendor/thing.ts"), true);
+  assert.equal(isMonitorExemptFile("src/lib/generatedReport.ts"), false);
+  assert.equal(isMonitorExemptFile("src/lib/vendorAdapter.ts"), false);
+
+  const frozen = {
+    "x.generated.ts": 100, // 0% headroom by construction — must not be the worst
+    "open-sse/vendor/lib/big.ts": 1000,
+    "real.ts": "1200",
+  };
+  const loc = (f: string) =>
+    ({ "x.generated.ts": 100, "open-sse/vendor/lib/big.ts": 999, "real.ts": 900 })[f] ?? null;
+  const r = fileSizeHeadroom(frozen, loc, 0.1);
+  assert.equal(r.measured, 1); // only real.ts counted
+  assert.equal(r.nearCap, 0);
+  assert.equal(r.over, 0);
+  assert.equal(r.worst?.file, "real.ts");
 });
 
 test("renderMarkdown lists every row with its status icon and flags the bad ones", () => {

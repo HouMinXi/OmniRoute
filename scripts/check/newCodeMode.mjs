@@ -50,18 +50,19 @@ export function resolveMergeBase(baseRef) {
  * Files added/copied/modified/renamed between `mergeBase` and HEAD, filtered to the gate's
  * scope. Deleted files are irrelevant (nothing to measure on HEAD).
  */
-export function listChangedFiles(mergeBase, { dirs, exts }) {
+export function listChangedFiles(mergeBase, { dirs, exts, excludePrefixes = [] }) {
   const out = git(["diff", "--name-only", "--diff-filter=ACMR", `${mergeBase}...HEAD`]);
-  return filterScope(out.split("\n"), { dirs, exts });
+  return filterScope(out.split("\n"), { dirs, exts, excludePrefixes });
 }
 
 /** Pure: keep paths under one of `dirs` with one of `exts`. */
-export function filterScope(paths, { dirs, exts }) {
+export function filterScope(paths, { dirs, exts, excludePrefixes = [] }) {
   return paths
     .map((p) => p.trim())
     .filter(Boolean)
     .filter((p) => dirs.some((d) => p === d || p.startsWith(`${d}/`)))
     .filter((p) => exts.some((e) => p.endsWith(e)))
+    .filter((p) => !excludePrefixes.some((prefix) => p.startsWith(prefix)))
     .sort();
 }
 

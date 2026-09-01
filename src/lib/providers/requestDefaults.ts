@@ -336,6 +336,14 @@ export function sanitizeProviderSpecificDataForResponse(value: unknown): JsonRec
   delete sanitized.ollamaCloudUsageCookie;
   delete sanitized.ollamaCloudCookie;
   delete sanitized.usageCookie;
+  // Qwen/Alibaba Token Plan console session — a browser credential for the operator's
+  // cloud-console account, same class as the ollama/opencode cookies above. The edit
+  // modal initializes these fields empty and the PUT merge preserves unsent keys, so
+  // stripping them here cannot clobber the stored values.
+  delete sanitized.qwenCloudCookie;
+  delete sanitized.qwenCloudSecToken;
+  delete sanitized.alibabaConsoleCookie;
+  delete sanitized.alibabaConsoleSecToken;
   delete sanitized.runtimeKey;
   delete sanitized.validationId;
   // System-managed Codex fingerprint seed: never exposed through the API

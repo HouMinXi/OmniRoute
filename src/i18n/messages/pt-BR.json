@@ -986,8 +986,10 @@
   },
   "disabled": "Desabilitado",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Roteie solicitações com orçamento esgotado para o provedor/modelo de fallback gratuito de emergência.",
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Desative a geração de variantes de nível de pensamento (por exemplo, -low, -medium, -high) no catálogo /v1/models.",
   "featureFlagArenaEloSyncEnabledDescription": "Ativar a sincronização periódica do ELO do leaderboard da Arena AI para classificações de inteligência do modelo.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Divulgar ids espelho claude/&lt;provider&gt;/&lt;model&gt; em /v1/models para que a descoberta de modelos do gateway Claude Code liste modelos não-Claude. Atenção: duplica as entradas do catálogo para todos os clientes quando ativado globalmente.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "Ative faixas de admissão virtuais adaptativas por tenant para o despacho de provedores (#9654): o pico de um tenant não gera mais 503 para outro. A variável de ambiente OMNIROUTE_CHAT_VIRTUAL_LANES tem precedência sobre esta configuração do painel; as alterações entram em vigor ao reiniciar o servidor.",
   "sidebar": {
     "home": "Início",
@@ -1291,6 +1293,8 @@
     "discoverySubtitle": "Buscar acesso gratuito em provedores",
     "conductor": "Conductor",
     "conductorSubtitle": "Frota de agentes CLI",
+    "orchestration": "Orquestração",
+    "orchestrationSubtitle": "Visão ao vivo de tudo em execução",
     "resilienceConnections": "Resiliência de Conexão",
     "resilienceConnectionsSubtitle": "Cooldown, disjuntor, estado de bloqueio",
     "settingsModalityBridge": "Ponte de Modalidade",
@@ -1769,7 +1773,8 @@
     "tools": "Ferramentas",
     "agentBridge": "Agent Bridge",
     "trafficInspector": "Inspector de Tráfego",
-    "usage": "Uso"
+    "usage": "Uso",
+    "orchestration": "Orquestração"
   },
   "home": {
     "quickStart": "Início Rápido",
@@ -5883,6 +5888,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "Tempo mínimo (ms) entre solicitações. Substitui o atraso padrão do limitador de taxa.",
     "rateLimitOverridesMinTimeLabel": "Min Intervalo (ms)",
+    "rateLimitOverridesRpdHint": "Máximo de requisições por dia para esta conexão. Substitui o padrão do provedor.",
+    "rateLimitOverridesRpdLabel": "RPD (Requisições/dia)",
     "rateLimitOverridesRpmHint": "Máximo de requisições por minuto para esta conexão. Substitui o padrão do provedor.",
     "rateLimitOverridesRpmLabel": "RPM (Requisições/min)",
     "rateLimitOverridesTpdHint": "Máximo de tokens por dia para esta conexão. Substitui o padrão do provedor.",
@@ -7054,6 +7061,14 @@
     "providerAccountRoutingDesc": "Substitui a estratégia global de contas para este provedor (paridade com 9router).",
     "providerRoutingStrategy": "Estratégia de conta",
     "providerRoutingInheritGlobal": "Herdar padrão global",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Aliases de Modelo",
     "modelAliasesTitle": "Aliases de Modelo",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8313,15 +8328,7 @@
     "cliproxyapiHealth": "Saúde",
     "cliproxyapiPort": "Porta",
     "qdrantHost": "Host",
-    "qdrantCollection": "Coleção",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "Coleção"
   },
   "contextRtk": {
     "title": "Motor RTK",
@@ -9216,6 +9223,13 @@
     "grokAutoTopUpMax": "máximo",
     "grokAutoTopUpMonth": "mês",
     "grokAdditionalCredits": "Créditos adicionais",
+    "kiloAccountBalance": "__MISSING__:Account Balance",
+    "kiloPassBonus": "__MISSING__:Available bonus",
+    "kiloPassMeterLabel": "__MISSING__:Kilo Pass usage meter",
+    "kiloPassPaid": "__MISSING__:Paid",
+    "kiloPassRemaining": "__MISSING__:Remaining",
+    "kiloPassRenews": "__MISSING__:Renews {count} days",
+    "kiloPassUsageLabel": "__MISSING__:This month's usage",
     "kimiExtraUsageCredits": "Créditos de uso extra",
     "kimiExtraUsage": "Uso extra",
     "kimiExtraUsageEnabled": "Ativado",
@@ -11246,7 +11260,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -12310,7 +12325,7 @@
       },
       "omni-mcp": {
         "name": "MCP",
-        "description": "Conecte-se ao servidor MCP do OmniRoute (37 ferramentas, 3 transportes: SSE/stdio/HTTP). Abrange ferramentas de roteamento, cache, compressão, memória, skills, provedores e auditoria em 16 escopos de permissão."
+        "description": "Conecte-se ao servidor MCP do OmniRoute (110 ferramentas, 3 transportes: SSE/stdio/HTTP). Abrange ferramentas de roteamento, cache, compressão, memória, skills, provedores e auditoria em 33 escopos de permissão."
       },
       "omni-agents-a2a": {
         "name": "Agentes e Protocolo A2A",
@@ -12950,6 +12965,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "Ativa o acesso à rede no sandbox de skills."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "Ordenar por",
+      "method": {
+        "manual": "Manual",
+        "provider": "Provedor",
+        "score": "Pontuação (modelos gratuitos)",
+        "name": "Nome"
+      },
+      "scoreHint": "A ordenação por pontuação vale só para provedores gratuitos; os demais ficam onde estão."
     }
   },
   "comboControl": {
@@ -13899,6 +13926,41 @@
     "ttsFailed": "Síntese de voz falhou (confira modelo/provider de TTS)",
     "micDenied": "Microfone indisponível ou permissão negada"
   },
+  "orchestration": {
+    "title": "Orquestração",
+    "description": "Tudo que o OmniRoute está executando agora — agentes, frota e roteamento",
+    "tabAgents": "Agentes",
+    "tabRouting": "Roteamento",
+    "tabOverview": "Visão geral",
+    "showCompleted": "Mostrar concluídos",
+    "sourceCloudAgent": "Cloud Agent",
+    "sourceA2A": "A2A",
+    "sourceConductor": "Conductor",
+    "sourceStale": "Sem atualização desde {since}",
+    "sourceOffline": "Offline",
+    "stateQueued": "Na fila",
+    "stateRunning": "Em execução",
+    "stateWaitingApproval": "Aguardando aprovação",
+    "stateSucceeded": "Concluída com sucesso",
+    "stateFailed": "Falhou",
+    "stateCancelled": "Cancelada",
+    "overflowMore": "+{count} a mais",
+    "emptyTitle": "Nada rodando ainda",
+    "emptyCloudAgentCta": "Configurar Cloud Agents",
+    "emptyA2ACta": "Abrir A2A",
+    "emptyConductorCta": "Abrir Conductor",
+    "drawerObjective": "Objetivo",
+    "drawerTimeline": "Linha do tempo",
+    "drawerMetrics": "Métricas",
+    "drawerResult": "Resultado",
+    "drawerActions": "Ações",
+    "actionApprove": "Aprovar plano",
+    "actionCancel": "Cancelar",
+    "actionSeeInGraph": "Ver no grafo",
+    "actionDone": "Ação aplicada",
+    "actionFailed": "Ação falhou: {error}",
+    "mirroredInA2A": "Espelhado no A2A"
+  },
   "cliproxyProviderExposure": {
     "title": "Exposição do Provedor",
     "description": "Expose modelos CLIProxyAPI como um alvo de roteamento sob o prefixo <prefix>cliproxyapi/</prefix>.",
@@ -13973,17 +14035,5 @@
     "cta": "Obter uma chave de API",
     "partnerLinkNote": "Link de parceiro",
     "dismissAriaLabel": "Dispensar"
-  },
-  "combo": {
-    "sort": {
-      "label": "Ordenar por",
-      "method": {
-        "manual": "Manual",
-        "provider": "Provedor",
-        "score": "Pontuação (modelos gratuitos)",
-        "name": "Nome"
-      },
-      "scoreHint": "A ordenação por pontuação vale só para provedores gratuitos; os demais ficam onde estão."
-    }
   }
 }

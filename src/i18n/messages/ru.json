@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "Удалить все завершенные пакеты",
     "batchListBatchesTable": "Пакеты",
     "changelogViewerLoading": "Загрузка журнала изменений с GitHub...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "Загрузка профиля...",
     "profileHowToEarn": "Как заработать",
     "bootstrapBannerDismiss": "Уволить",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "Перенаправлять запросы при исчерпании бюджета на резервный бесплатный провайдер/модель.",
   "featureFlagArenaEloSyncEnabledDescription": "Включить периодическую синхронизацию ELO из таблицы лидеров Arena AI для рейтинга интеллектуальности моделей.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Публиковать claude/&lt;провайдер&gt;/&lt;модель&gt; зеркальные ID на /v1/models, чтобы Claude Code мог видеть не-Claude модели. Внимание: удваивает записи каталога для всех клиентов при глобальном включении.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "Включите адаптивные виртуальные полосы допуска для каждого тенанта при маршрутизации к провайдерам (#9654): всплеск нагрузки одного тенанта больше не вызывает 503 у другого. Переменная окружения OMNIROUTE_CHAT_VIRTUAL_LANES имеет приоритет над этой настройкой в панели; изменения вступают в силу после перезапуска сервера.",
   "sidebar": {
     "home": "Главная",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "Сканировать провайдеров на наличие бесплатного доступа",
     "conductor": "Кондуктор",
     "conductorSubtitle": "CLI-агент флот",
+    "orchestration": "Оркестрация",
+    "orchestrationSubtitle": "Живой обзор всего, что выполняется",
     "resilienceConnections": "Устойчивость Соединения",
     "resilienceConnectionsSubtitle": "Cooldown, автомат защиты, состояние блокировки",
     "settingsModalityBridge": "Мост Модальности",
@@ -1768,7 +1772,8 @@
     "tools": "Инструменты",
     "agentBridge": "Мост агентов",
     "trafficInspector": "Инспектор трафика",
-    "usage": "Использование"
+    "usage": "Использование",
+    "orchestration": "Оркестрация"
   },
   "home": {
     "quickStart": "Быстрый старт",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "Терминал Warp AI с поддержкой кастомных провайдеров",
       "agent-deck": "Мультиагентный оркестратор Agent Deck",
-      "5dive": "5dive — самостоятельно размещаемый флот агентов для кода; один auth-профиль направляет их всех в OmniRoute",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — самостоятельно размещаемый флот агентов для кода; один auth-профиль направляет их всех в OmniRoute"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "Минимальное время (мс) между запросами. Переопределяет задержку ограничителя запросов по умолчанию.",
     "rateLimitOverridesMinTimeLabel": "Мин. интервал (мс)",
+    "rateLimitOverridesRpdHint": "Максимальное количество запросов в день для этого подключения. Переопределяет значение по умолчанию провайдера.",
+    "rateLimitOverridesRpdLabel": "RPD (Запросов/день)",
     "rateLimitOverridesRpmHint": "Максимальное количество запросов в минуту для этого подключения. Переопределяет значение по умолчанию для провайдера.",
     "rateLimitOverridesRpmLabel": "RPM (запросов/мин)",
     "rateLimitOverridesTpdHint": "Максимальное количество токенов в день для этого подключения. Переопределяет значение по умолчанию для провайдера.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "Переопределить глобальную стратегию аккаунтов для этого провайдера (паритет с 9router).",
     "providerRoutingStrategy": "Стратегия аккаунтов",
     "providerRoutingInheritGlobal": "Наследовать глобальное значение по умолчанию",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Псевдонимы моделей",
     "modelAliasesTitle": "Псевдонимы моделей",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "Если включено, сбои провайдеров отслеживаются глобально, и они пропускаются на время кулдауна.",
     "resilienceProviderCooldownMin": "Минимальный кулдаун",
     "resilienceProviderCooldownMax": "Максимальный кулдаун",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Всегда включено для {provider} — требуется для безопасности OAuth-аккаунта; отключить нельзя.",
     "forcedFingerprintBadge": "Обязательно",
     "sessionAffinityTitle": "Привязка сессии",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "Здоровье",
     "cliproxyapiPort": "Порт",
     "qdrantHost": "Хост",
-    "qdrantCollection": "Коллекция",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "Коллекция"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "Копировать",
       "autoscrollOn": "Автопрокрутка: включена",
       "autoscrollOff": "Автопрокрутка: выключена",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "Сырой запрос клиента",
         "clientRequest": "Запрос клиента",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "MCP-сервер",
-        "description": "Connect to the OmniRoute MCP server (37 tools, 3 transports: SSE/stdio/HTTP). Covers routing, cache, compression, memory, skills, providers, and audit tools across 16 permission scopes."
+        "description": "Connect to the OmniRoute MCP server (110 tools, 3 transports: SSE/stdio/HTTP). Covers routing, cache, compression, memory, skills, providers, and audit tools across 33 permission scopes."
       },
       "omni-agents-a2a": {
         "name": "Агенты и протокол A2A",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "Enable network access in the skills sandbox."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "Синтез речи не удался (проверьте модель/поставщика TTS)",
     "micDenied": "Микрофон недоступен или доступ запрещен"
   },
+  "orchestration": {
+    "title": "Оркестрация",
+    "description": "Всё, что OmniRoute выполняет прямо сейчас — агенты, флот и маршрутизация",
+    "tabAgents": "Агенты",
+    "tabRouting": "Маршрутизация",
+    "tabOverview": "Обзор",
+    "showCompleted": "Показать завершённые",
+    "sourceCloudAgent": "Облачный агент",
+    "sourceA2A": "A2A",
+    "sourceConductor": "Кондуктор",
+    "sourceStale": "Устарело с {since}",
+    "sourceOffline": "Не в сети",
+    "stateQueued": "В очереди",
+    "stateRunning": "Выполняется",
+    "stateWaitingApproval": "Ожидает подтверждения",
+    "stateSucceeded": "Успешно",
+    "stateFailed": "Не удалось",
+    "stateCancelled": "Отменено",
+    "overflowMore": "+ещё {count}",
+    "emptyTitle": "Пока ничего не выполняется",
+    "emptyCloudAgentCta": "Настроить облачных агентов",
+    "emptyA2ACta": "Открыть A2A",
+    "emptyConductorCta": "Открыть Кондуктор",
+    "drawerObjective": "Цель",
+    "drawerTimeline": "Хронология",
+    "drawerMetrics": "Метрики",
+    "drawerResult": "Результат",
+    "drawerActions": "Действия",
+    "actionApprove": "Утвердить план",
+    "actionCancel": "Отмена",
+    "actionSeeInGraph": "Посмотреть на графе",
+    "actionDone": "Действие применено",
+    "actionFailed": "Действие не удалось: {error}",
+    "mirroredInA2A": "Отражено в A2A"
+  },
   "cliproxyProviderExposure": {
     "title": "Экспозиция Провайдера",
     "description": "Экспортируйте модели CLIProxyAPI в качестве целевого маршрута под префиксом <prefix>cliproxyapi/</prefix>.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

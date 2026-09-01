@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "ลบแบทช์ที่เสร็จสมบูรณ์ทั้งหมด",
     "batchListBatchesTable": "แบตช์",
     "changelogViewerLoading": "กำลังโหลดบันทึกการเปลี่ยนแปลงจาก GitHub...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "กำลังโหลดโปรไฟล์...",
     "profileHowToEarn": "วิธีการได้รับ",
     "bootstrapBannerDismiss": "ยกเลิก",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "กำหนดเส้นทางคำขอที่งบประมาณหมดไปยังผู้ให้บริการ/โมเดลสำรองฟรีในกรณีฉุกเฉิน",
   "featureFlagArenaEloSyncEnabledDescription": "เปิดใช้งานการซิงค์ ELO ของลีดเดอร์บอร์ด Arena AI เป็นระยะสำหรับการจัดอันดับความฉลาดของโมเดล",
   "featureFlagExposeCcDiscoveryAliasesDescription": "โฆษณา claude/&lt;provider&gt;/&lt;model&gt; mirror ids บน /v1/models เพื่อให้รายการการค้นหาโมเดลของ Claude Code แสดงโมเดลที่ไม่ใช่ Claude เตือน: จะทำให้มีรายการในแคตตาล็อกซ้ำสำหรับลูกค้าทุกคนเมื่อเปิดใช้งานทั่วโลก.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "เปิดใช้เลนรับเข้าเสมือนแบบปรับตัวต่อเทนแนนต์สำหรับการส่งไปยังผู้ให้บริการ (#9654): การพุ่งสูงของเทนแนนต์หนึ่งจะไม่ทำให้อีกเทนแนนต์ได้รับ 503 อีกต่อไป ตัวแปรสภาพแวดล้อม OMNIROUTE_CHAT_VIRTUAL_LANES มีผลเหนือการตั้งค่าแดชบอร์ดนี้ การเปลี่ยนแปลงมีผลเมื่อรีสตาร์ทเซิร์ฟเวอร์",
   "sidebar": {
     "home": "บ้าน",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "สแกนผู้ให้บริการเพื่อเข้าใช้งานฟรี",
     "conductor": "ตัวนำ",
     "conductorSubtitle": "ฝูงเรือ CLI-agent",
+    "orchestration": "ออร์เคสเตรชัน",
+    "orchestrationSubtitle": "มุมมองสดของทุกสิ่งที่กำลังทำงาน",
     "resilienceConnections": "ความยืดหยุ่นของการเชื่อมต่อ",
     "resilienceConnectionsSubtitle": "คูลดาวน์ เบรกเกอร์ สถานะการล็อกเอาต์",
     "settingsModalityBridge": "สะพานโมดัลิตี้",
@@ -1768,7 +1772,8 @@
     "tools": "เครื่องมือ",
     "agentBridge": "Agent Bridge",
     "trafficInspector": "ตัวตรวจสอบทราฟฟิก",
-    "usage": "การใช้งาน"
+    "usage": "การใช้งาน",
+    "orchestration": "ออร์เคสเตรชัน"
   },
   "home": {
     "quickStart": "เริ่มต้นอย่างรวดเร็ว",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "เทอร์มินัล Warp AI ที่รองรับผู้ให้บริการแบบกำหนดเอง",
       "agent-deck": "ตัวประสานงานหลายเอเจนต์ Agent Deck",
-      "5dive": "5dive — ฟลีตเอเจนต์เขียนโค้ดที่โฮสต์เอง; โปรไฟล์ auth เดียวชี้ทั้งหมดไปที่ OmniRoute",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — ฟลีตเอเจนต์เขียนโค้ดที่โฮสต์เอง; โปรไฟล์ auth เดียวชี้ทั้งหมดไปที่ OmniRoute"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "เวลาขั้นต่ำ (มิลลิวินาที) ระหว่างคำขอ ซึ่งจะเขียนทับการหน่วงเวลาของตัวจำกัดอัตราเริ่มต้น",
     "rateLimitOverridesMinTimeLabel": "ช่วงเวลาขั้นต่ำ (มิลลิวินาที)",
+    "rateLimitOverridesRpdHint": "จำนวนคำขอสูงสุดต่อวันสำหรับการเชื่อมต่อนี้ แทนที่ค่าเริ่มต้นของผู้ให้บริการ",
+    "rateLimitOverridesRpdLabel": "RPD (คำขอ/วัน)",
     "rateLimitOverridesRpmHint": "จำนวนคำขอสูงสุดต่อนาทีสำหรับการเชื่อมต่อนี้ ซึ่งจะเขียนทับค่าเริ่มต้นของผู้ให้บริการ",
     "rateLimitOverridesRpmLabel": "RPM (คำขอ/นาที)",
     "rateLimitOverridesTpdHint": "จำนวนโทเค็นสูงสุดต่อวันสำหรับการเชื่อมต่อนี้ ซึ่งจะเขียนทับค่าเริ่มต้นของผู้ให้บริการ",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "เขียนทับกลยุทธ์บัญชีส่วนกลางสำหรับผู้ให้บริการรายนี้ (เทียบเท่า 9router)",
     "providerRoutingStrategy": "กลยุทธ์บัญชี",
     "providerRoutingInheritGlobal": "สืบทอดค่าเริ่มต้นส่วนกลาง",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "นามแฝงของโมเดล",
     "modelAliasesTitle": "นามแฝงโมเดล",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "เมื่อเปิดใช้งาน ผู้ให้บริการที่ล้มเหลวจะถูกติดตามทั่วทั้งระบบและถูกข้ามเป็นระยะเวลาคูลดาวน์",
     "resilienceProviderCooldownMin": "คูลดาวน์ขั้นต่ำ",
     "resilienceProviderCooldownMax": "คูลดาวน์สูงสุด",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Session affinity",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "สุขภาพ",
     "cliproxyapiPort": "พอร์ต",
     "qdrantHost": "โฮสต์",
-    "qdrantCollection": "การรวบรวม",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "การรวบรวม"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "คัดลอก",
       "autoscrollOn": "เลื่อนอัตโนมัติ: เปิดใช้งาน",
       "autoscrollOff": "เลื่อนอัตโนมัติ: ปิด",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "คำขอดิบของลูกค้า",
         "clientRequest": "คำขอของลูกค้า",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "เซิร์ฟเวอร์ MCP",
-        "description": "เชื่อมต่อกับเซิร์ฟเวอร์ OmniRoute MCP (37 เครื่องมือ, 3 ช่องทางการรับส่งข้อมูล: SSE/stdio/HTTP) ครอบคลุมการกำหนดเส้นทาง, แคช, การบีบอัดข้อมูล, หน่วยความจำ, ทักษะ, ผู้ให้บริการ และเครื่องมือตรวจสอบใน 16 ขอบเขตสิทธิ์การใช้งาน"
+        "description": "เชื่อมต่อกับเซิร์ฟเวอร์ OmniRoute MCP (110 เครื่องมือ, 3 ช่องทางการรับส่งข้อมูล: SSE/stdio/HTTP) ครอบคลุมการกำหนดเส้นทาง, แคช, การบีบอัดข้อมูล, หน่วยความจำ, ทักษะ, ผู้ให้บริการ และเครื่องมือตรวจสอบใน 33 ขอบเขตสิทธิ์การใช้งาน"
       },
       "omni-agents-a2a": {
         "name": "เอเจนต์และโปรโตคอล A2A",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "เปิดใช้งานการเข้าถึงเครือข่ายใน skills sandbox"
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "การสังเคราะห์เสียงล้มเหลว (โปรดตรวจสอบโมเดล/ผู้ให้บริการ TTS)",
     "micDenied": "ไมโครโฟนไม่พร้อมใช้งานหรือถูกปฏิเสธสิทธิ์"
   },
+  "orchestration": {
+    "title": "ออร์เคสเตรชัน",
+    "description": "ทุกสิ่งที่ OmniRoute กำลังทำงานอยู่ในขณะนี้ — เอเจนต์ ฝูงบิน และการกำหนดเส้นทาง",
+    "tabAgents": "เอเจนต์",
+    "tabRouting": "การกำหนดเส้นทาง",
+    "tabOverview": "ภาพรวม",
+    "showCompleted": "แสดงที่เสร็จสิ้นแล้ว",
+    "sourceCloudAgent": "เอเจนต์คลาวด์",
+    "sourceA2A": "A2A",
+    "sourceConductor": "ตัวนำ",
+    "sourceStale": "ไม่มีการอัปเดตตั้งแต่ {since}",
+    "sourceOffline": "ออฟไลน์",
+    "stateQueued": "อยู่ในคิว",
+    "stateRunning": "กำลังทำงาน",
+    "stateWaitingApproval": "รอการอนุมัติ",
+    "stateSucceeded": "สำเร็จ",
+    "stateFailed": "ล้มเหลว",
+    "stateCancelled": "ยกเลิกแล้ว",
+    "overflowMore": "อีก {count} รายการ",
+    "emptyTitle": "ยังไม่มีอะไรทำงานอยู่",
+    "emptyCloudAgentCta": "ตั้งค่าเอเจนต์คลาวด์",
+    "emptyA2ACta": "เปิด A2A",
+    "emptyConductorCta": "เปิดตัวนำ",
+    "drawerObjective": "วัตถุประสงค์",
+    "drawerTimeline": "ไทม์ไลน์",
+    "drawerMetrics": "เมตริก",
+    "drawerResult": "ผลลัพธ์",
+    "drawerActions": "การดำเนินการ",
+    "actionApprove": "อนุมัติแผน",
+    "actionCancel": "ยกเลิก",
+    "actionSeeInGraph": "ดูในกราฟ",
+    "actionDone": "ดำเนินการเรียบร้อยแล้ว",
+    "actionFailed": "การดำเนินการล้มเหลว: {error}",
+    "mirroredInA2A": "สะท้อนใน A2A"
+  },
   "cliproxyProviderExposure": {
     "title": "การเปิดเผยผู้ให้บริการ",
     "description": "เปิดเผยโมเดล CLIProxyAPI เป็นเป้าหมายการกำหนดเส้นทางภายใต้ <prefix>cliproxyapi/</prefix> คำนำหน้า",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

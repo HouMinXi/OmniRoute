@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "पूर्ण झालेल्या सर्व बॅचेस हटवा",
     "batchListBatchesTable": "बॅचेस",
     "changelogViewerLoading": "GitHub वरून चेंजलॉग लोड करत आहे...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "प्रोफाइल लोड करत आहे...",
     "profileHowToEarn": "कसे कमवायचे",
     "bootstrapBannerDismiss": "डिसमिस करा",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
   "featureFlagArenaEloSyncEnabledDescription": "Enable periodic Arena AI leaderboard ELO sync for model intelligence rankings.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models वर claude/&lt;provider&gt;/&lt;model&gt; मिरर आयडीज जाहिरात करा जेणेकरून Claude Code गेटवे मॉडेल शोध सूचीमध्ये नॉन-Claude मॉडेल्स समाविष्ट होतील. चेतावणी: जागतिक स्तरावर सक्षम केल्यास सर्व क्लायंटसाठी कॅटलॉग नोंदी दुहेरी होतात.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "प्रदाता डिस्पॅचसाठी प्रति-टेनंट अनुकूली व्हर्च्युअल अॅडमिशन लेन सक्षम करा (#9654): एका टेनंटचा बर्स्ट यापुढे दुसऱ्या टेनंटला 503 देत नाही. OMNIROUTE_CHAT_VIRTUAL_LANES पर्यावरण चल या डॅशबोर्ड सेटिंगपेक्षा वरचढ आहे; बदल सर्व्हर रीस्टार्ट केल्यावर प्रभावी होतात.",
   "sidebar": {
     "home": "Home",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "मोफत ॲक्सेससाठी प्रोव्हायडर्स स्कॅन करा",
     "conductor": "संवहनकर्ता",
     "conductorSubtitle": "CLI-एजंट फ्लीट",
+    "orchestration": "ऑर्केस्ट्रेशन",
+    "orchestrationSubtitle": "चालू असलेल्या प्रत्येक गोष्टीचे थेट दृश्य",
     "resilienceConnections": "कनेक्शन लवचिकता",
     "resilienceConnectionsSubtitle": "कूलडाउन, ब्रेकर, लॉकआउट स्थिती",
     "settingsModalityBridge": "मोडालिटी ब्रिज",
@@ -1768,7 +1772,8 @@
     "tools": "साधने",
     "agentBridge": "एजंट ब्रिज",
     "trafficInspector": "ट्रॅफिक इन्स्पेक्टर",
-    "usage": "वापर"
+    "usage": "वापर",
+    "orchestration": "ऑर्केस्ट्रेशन"
   },
   "home": {
     "quickStart": "Quick Start",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "कस्टम प्रोव्हायडर सपोर्टसह Warp AI टर्मिनल",
       "agent-deck": "Agent Deck मल्टी-एजंट ऑर्केस्ट्रेटर",
-      "5dive": "5dive — स्वयं-होस्टेड कोडिंग एजंट्सचा ताफा; एक auth प्रोफाइल सर्वांना OmniRoute कडे निर्देशित करते",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — स्वयं-होस्टेड कोडिंग एजंट्सचा ताफा; एक auth प्रोफाइल सर्वांना OmniRoute कडे निर्देशित करते"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "विनंत्यांमधील किमान वेळ (ms). डीफॉल्ट रेट लिमिटर विलंब ओव्हरराइड करते.",
     "rateLimitOverridesMinTimeLabel": "किमान मध्यांतर (ms)",
+    "rateLimitOverridesRpdHint": "या कनेक्शनसाठी दररोज कमाल विनंत्या. प्रदाता डीफॉल्ट ओव्हरराइड करते.",
+    "rateLimitOverridesRpdLabel": "RPD (विनंत्या/दिवस)",
     "rateLimitOverridesRpmHint": "या कनेक्शनसाठी प्रति मिनिट कमाल विनंत्या. प्रदाता डीफॉल्ट ओव्हरराइड करते.",
     "rateLimitOverridesRpmLabel": "RPM (विनंत्या/मिनिट)",
     "rateLimitOverridesTpdHint": "या कनेक्शनसाठी प्रति दिवस कमाल टोकन्स. प्रदाता डीफॉल्ट ओव्हरराइड करते.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "या प्रदात्यासाठी ग्लोबल खाते धोरण ओव्हरराइड करा (9router पॅरिटी).",
     "providerRoutingStrategy": "खाते धोरण",
     "providerRoutingInheritGlobal": "ग्लोबल डीफॉल्ट इनहेरिट करा",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Model Aliases",
     "modelAliasesTitle": "Model Aliases",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "सक्षम केल्यावर, अयशस्वी प्रदात्यांचा जागतिक स्तरावर मागोवा घेतला जातो आणि कूलडाउन कालावधीसाठी ते वगळले जातात.",
     "resilienceProviderCooldownMin": "किमान कूलडाउन",
     "resilienceProviderCooldownMax": "कमाल कूलडाउन",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "सत्र एफिनिटी",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "आरोग्य",
     "cliproxyapiPort": "पोर्ट",
     "qdrantHost": "होस्ट",
-    "qdrantCollection": "संग्रह",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "संग्रह"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "कॉपी",
       "autoscrollOn": "ऑटोस्क्रोल: चालू",
       "autoscrollOff": "ऑटोस्क्रोल: बंद",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "क्लायंट कच्चा विनंती",
         "clientRequest": "ग्राहक विनंती",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "MCP सर्व्हर",
-        "description": "OmniRoute MCP सर्व्हरशी कनेक्ट व्हा (37 टूल्स, 3 ट्रान्सपोर्ट्स: SSE/stdio/HTTP). 16 परवानगी स्कोप्समधील राउटिंग, कॅश, कॉम्प्रेशन, मेमरी, स्किल्स, प्रोव्हायडर्स आणि ऑडिट टूल्स समाविष्ट करते."
+        "description": "OmniRoute MCP सर्व्हरशी कनेक्ट व्हा (110 टूल्स, 3 ट्रान्सपोर्ट्स: SSE/stdio/HTTP). 33 परवानगी स्कोप्समधील राउटिंग, कॅश, कॉम्प्रेशन, मेमरी, स्किल्स, प्रोव्हायडर्स आणि ऑडिट टूल्स समाविष्ट करते."
       },
       "omni-agents-a2a": {
         "name": "एजंट्स आणि A2A प्रोटोकॉल",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "स्किल्स सँडबॉक्समध्ये नेटवर्क ॲक्सेस सक्षम करा."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "भाषण संश्लेषण अयशस्वी झाले (TTS मॉडेल/प्रदाता तपासा)",
     "micDenied": "मायक्रोफोन उपलब्ध नाही किंवा परवानगी नाकारली आहे"
   },
+  "orchestration": {
+    "title": "ऑर्केस्ट्रेशन",
+    "description": "OmniRoute आत्ता जे काही चालवत आहे — एजंट, फ्लीट आणि राउटिंग",
+    "tabAgents": "एजंट",
+    "tabRouting": "राउटिंग",
+    "tabOverview": "आढावा",
+    "showCompleted": "पूर्ण झालेले दाखवा",
+    "sourceCloudAgent": "क्लाउड एजंट",
+    "sourceA2A": "A2A",
+    "sourceConductor": "संवहनकर्ता",
+    "sourceStale": "{since} पासून जुने",
+    "sourceOffline": "ऑफलाइन",
+    "stateQueued": "रांगेत",
+    "stateRunning": "सुरू आहे",
+    "stateWaitingApproval": "मंजुरीची वाट पाहत आहे",
+    "stateSucceeded": "यशस्वी",
+    "stateFailed": "अयशस्वी",
+    "stateCancelled": "रद्द केले",
+    "overflowMore": "+{count} अधिक",
+    "emptyTitle": "अजून काहीही सुरू नाही",
+    "emptyCloudAgentCta": "क्लाउड एजंट सेट करा",
+    "emptyA2ACta": "A2A उघडा",
+    "emptyConductorCta": "संवहनकर्ता उघडा",
+    "drawerObjective": "उद्दिष्ट",
+    "drawerTimeline": "टाइमलाइन",
+    "drawerMetrics": "मेट्रिक्स",
+    "drawerResult": "निकाल",
+    "drawerActions": "क्रिया",
+    "actionApprove": "योजना मंजूर करा",
+    "actionCancel": "रद्द करा",
+    "actionSeeInGraph": "आलेखात पहा",
+    "actionDone": "क्रिया लागू केली",
+    "actionFailed": "क्रिया अयशस्वी: {error}",
+    "mirroredInA2A": "A2A मध्ये प्रतिबिंबित"
+  },
   "cliproxyProviderExposure": {
     "title": "प्रदाता प्रदर्शन",
     "description": "<prefix>cliproxyapi/</prefix> प्रिफिक्स अंतर्गत CLIProxyAPI मॉडेल्सना रूटिंग लक्ष्य म्हणून उघडा.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

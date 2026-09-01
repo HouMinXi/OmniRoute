@@ -703,6 +703,9 @@ paths:
                         type: string
                         enum:
                           - FTS5
+                          - none
+                      reason:
+                        type: string
                   embedding:
                     type: object
                     properties:

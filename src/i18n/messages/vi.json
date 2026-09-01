@@ -986,8 +986,10 @@
   },
   "disabled": "Đã tắt",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Định tuyến các yêu cầu đã hết ngân sách đến nhà cung cấp/mô hình dự phòng khẩn cấp miễn phí.",
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Tắt tính năng tạo biến thể cấp độ suy nghĩ (ví dụ: -low, -medium, -high) trong danh mục /v1/models.",
   "featureFlagArenaEloSyncEnabledDescription": "Bật đồng bộ ELO định kỳ từ bảng xếp hạng Arena AI để xếp hạng năng lực của mô hình.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Quảng bá các id phản chiếu claude/&lt;provider&gt;/&lt;model&gt; trên /v1/models để tính năng khám phá mô hình qua gateway của Claude Code liệt kê được các mô hình không phải Claude. Cảnh báo: khi bật ở phạm vi toàn cục, số mục trong danh mục tăng gấp đôi với mọi client.",
+  "featureFlagNoThinkingAliasEnabledDescription": "Công tắc chính cho các bí danh gateway no-think/&lt;provider&gt;/&lt;model&gt;. Bật (mặc định): /v1/models quảng bá biến thể không suy nghĩ cho mọi mô hình Claude có khả năng suy nghĩ đủ điều kiện, và id no-think/ được gửi trên một yêu cầu sẽ giải quyết lại về mô hình thực với phần lý luận bị triệt tiêu. Tắt: không có biến thể nào được quảng bá và id no-think/ được xử lý như bất kỳ id mô hình không xác định nào khác. Tùy chọn tham gia/từ chối ModelSpec.noThinkingAlias theo từng mô hình vẫn áp dụng khi tính năng này bật.",
   "featureFlagChatVirtualLanesEnabledDescription": "Bật làn tiếp nhận ảo thích ứng cho từng đối tượng thuê (tenant) để phân phối nhà cung cấp (#9654): một đợt bùng phát của tenant này không còn trả 503 cho tenant khác. Biến môi trường OMNIROUTE_CHAT_VIRTUAL_LANES được ưu tiên hơn cài đặt bảng điều khiển này; các thay đổi có hiệu lực khi khởi động lại máy chủ.",
   "sidebar": {
     "home": "Trang chủ",
@@ -1291,6 +1293,8 @@
     "discoverySubtitle": "Quét các nhà cung cấp để tìm quyền truy cập miễn phí",
     "conductor": "Người dẫn dắt",
     "conductorSubtitle": "Đội tàu CLI-agent",
+    "orchestration": "Điều phối",
+    "orchestrationSubtitle": "Xem trực tiếp mọi thứ đang chạy",
     "resilienceConnections": "Khả Năng Phục Hồi Kết Nối",
     "resilienceConnectionsSubtitle": "Cooldown, cầu dao, trạng thái khóa",
     "settingsModalityBridge": "Cầu Kết Nối Modality",
@@ -1769,7 +1773,8 @@
     "tools": "Công cụ",
     "agentBridge": "Agent Bridge",
     "trafficInspector": "Traffic Inspector",
-    "usage": "Mức sử dụng"
+    "usage": "Mức sử dụng",
+    "orchestration": "Điều phối"
   },
   "home": {
     "quickStart": "Bắt đầu nhanh",
@@ -5883,6 +5888,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "Thời gian chờ hàng đợi tối đa (ms)",
     "rateLimitOverridesMinTimeHint": "Thời gian tối thiểu (ms) giữa các yêu cầu. Ghi đè độ trễ bộ giới hạn tốc độ mặc định.",
     "rateLimitOverridesMinTimeLabel": "Khoảng thời gian tối thiểu (ms)",
+    "rateLimitOverridesRpdHint": "Số lượng yêu cầu tối đa mỗi ngày cho kết nối này. Ghi đè cài đặt mặc định của nhà cung cấp.",
+    "rateLimitOverridesRpdLabel": "RPD (Yêu cầu/ngày)",
     "rateLimitOverridesRpmHint": "Số yêu cầu tối đa mỗi phút cho kết nối này. Ghi đè giá trị mặc định của nhà cung cấp.",
     "rateLimitOverridesRpmLabel": "RPM (Số yêu cầu/phút)",
     "rateLimitOverridesTpdHint": "Số token tối đa mỗi ngày cho kết nối này. Ghi đè giá trị mặc định của nhà cung cấp.",
@@ -7054,6 +7061,14 @@
     "providerAccountRoutingDesc": "Ghi đè chiến lược tài khoản toàn cầu cho nhà cung cấp này (tương thích với 9router).",
     "providerRoutingStrategy": "Chiến lược tài khoản",
     "providerRoutingInheritGlobal": "Kế thừa mặc định toàn cầu",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Bí danh mô hình",
     "modelAliasesTitle": "Bí danh mô hình",
     "modelAliasesDesc": "Ánh xạ lại tên mô hình bằng cách khớp chính xác hoặc mẫu ký tự đại diện.",
@@ -8313,15 +8328,7 @@
     "cliproxyapiHealth": "Sức Khỏe",
     "cliproxyapiPort": "Cổng",
     "qdrantHost": "Máy chủ",
-    "qdrantCollection": "Bộ Sưu Tập",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "Bộ Sưu Tập"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -9216,6 +9223,13 @@
     "grokAutoTopUpMax": "tối đa",
     "grokAutoTopUpMonth": "tháng",
     "grokAdditionalCredits": "Tín dụng bổ sung",
+    "kiloAccountBalance": "Số dư tài khoản",
+    "kiloPassBonus": "Bonus khả dụng",
+    "kiloPassMeterLabel": "Đồng hồ mức sử dụng Kilo Pass",
+    "kiloPassPaid": "Đã thanh toán",
+    "kiloPassRemaining": "Còn lại",
+    "kiloPassRenews": "Gia hạn sau {count} ngày",
+    "kiloPassUsageLabel": "Mức sử dụng tháng này",
     "kimiExtraUsageCredits": "Tín dụng sử dụng bổ sung",
     "kimiExtraUsage": "Sử dụng bổ sung",
     "kimiExtraUsageEnabled": "Đã bật",
@@ -11246,7 +11260,8 @@
       "tps": "TPS",
       "duration": "Thời lượng",
       "time": "Thời gian",
-      "conversation": "Cuộc trò chuyện"
+      "conversation": "Cuộc trò chuyện",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Đang tải nhật ký...",
     "noLogs": "Chưa có nhật ký nào. Hãy thực hiện một số cuộc gọi API để xem chúng ở đây.",
@@ -11281,16 +11296,16 @@
     "detail": {
       "collapse": "Thu gọn {title}",
       "expand": "Mở rộng {title}",
-      "collapseAllLevels": "Thu gọn tất cả",
-      "collapseOneLevel": "Thu gọn một cấp",
-      "currentExpandLevel": "Cấp mở rộng hiện tại",
-      "expandOneLevel": "Mở rộng một cấp",
-      "expandAllLevels": "Mở rộng tất cả",
       "copyTitle": "Sao chép {title}",
       "copied": "Đã sao chép!",
       "copy": "Sao chép",
       "autoscrollOn": "Tự động cuộn: bật",
       "autoscrollOff": "Tự động cuộn: tắt",
+      "collapseAllLevels": "Thu gọn tất cả",
+      "collapseOneLevel": "Thu gọn một cấp",
+      "currentExpandLevel": "Cấp mở rộng hiện tại",
+      "expandOneLevel": "Mở rộng một cấp",
+      "expandAllLevels": "Mở rộng tất cả",
       "payload": {
         "clientRawRequest": "Yêu cầu thô của client",
         "clientRequest": "Yêu cầu client",
@@ -12310,7 +12325,7 @@
       },
       "omni-mcp": {
         "name": "Máy chủ MCP",
-        "description": "Kết nối máy chủ MCP OmniRoute với 37 công cụ và 3 transport SSE/stdio/HTTP. Bao phủ định tuyến, cache, nén, bộ nhớ, skill, nhà cung cấp và kiểm toán trong 16 phạm vi quyền."
+        "description": "Kết nối máy chủ MCP OmniRoute với 110 công cụ và 3 transport SSE/stdio/HTTP. Bao phủ định tuyến, cache, nén, bộ nhớ, skill, nhà cung cấp và kiểm toán trong 33 phạm vi quyền."
       },
       "omni-agents-a2a": {
         "name": "Agent & giao thức A2A",
@@ -12950,6 +12965,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "Cho phép môi trường sandbox của kỹ năng truy cập mạng."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "Sắp xếp theo",
+      "method": {
+        "manual": "Thủ công",
+        "provider": "Nhà cung cấp",
+        "score": "Điểm (mô hình miễn phí)",
+        "name": "Tên"
+      },
+      "scoreHint": "Xếp hạng theo điểm chỉ áp dụng cho nhà cung cấp miễn phí; các nhà cung cấp khác giữ nguyên vị trí."
     }
   },
   "comboControl": {
@@ -13899,6 +13926,41 @@
     "ttsFailed": "Không thể tổng hợp giọng nói (kiểm tra mô hình/cung cấp TTS)",
     "micDenied": "Microphone không khả dụng hoặc quyền bị từ chối"
   },
+  "orchestration": {
+    "title": "Điều phối",
+    "description": "Mọi thứ OmniRoute đang chạy ngay bây giờ — tác nhân, đội và định tuyến",
+    "tabAgents": "Tác nhân",
+    "tabRouting": "Định tuyến",
+    "tabOverview": "Tổng quan",
+    "showCompleted": "Hiển thị đã hoàn tất",
+    "sourceCloudAgent": "Tác nhân đám mây",
+    "sourceA2A": "A2A",
+    "sourceConductor": "Người dẫn dắt",
+    "sourceStale": "Không cập nhật từ {since}",
+    "sourceOffline": "Ngoại tuyến",
+    "stateQueued": "Đang xếp hàng",
+    "stateRunning": "Đang chạy",
+    "stateWaitingApproval": "Chờ phê duyệt",
+    "stateSucceeded": "Thành công",
+    "stateFailed": "Thất bại",
+    "stateCancelled": "Đã hủy",
+    "overflowMore": "+{count} nữa",
+    "emptyTitle": "Chưa có gì đang chạy",
+    "emptyCloudAgentCta": "Thiết lập Tác nhân đám mây",
+    "emptyA2ACta": "Mở A2A",
+    "emptyConductorCta": "Mở Người dẫn dắt",
+    "drawerObjective": "Mục tiêu",
+    "drawerTimeline": "Dòng thời gian",
+    "drawerMetrics": "Chỉ số",
+    "drawerResult": "Kết quả",
+    "drawerActions": "Hành động",
+    "actionApprove": "Phê duyệt kế hoạch",
+    "actionCancel": "Hủy",
+    "actionSeeInGraph": "Xem trong sơ đồ",
+    "actionDone": "Đã áp dụng hành động",
+    "actionFailed": "Hành động thất bại: {error}",
+    "mirroredInA2A": "Được phản chiếu trong A2A"
+  },
   "cliproxyProviderExposure": {
     "title": "Tiếp Xúc Nhà Cung Cấp",
     "description": "Tiết lộ các mô hình CLIProxyAPI như một mục tiêu định tuyến dưới tiền tố <prefix>cliproxyapi/</prefix>.",
@@ -13973,17 +14035,5 @@
     "cta": "Lấy khóa API",
     "partnerLinkNote": "Liên kết đối tác",
     "dismissAriaLabel": "Đóng"
-  },
-  "combo": {
-    "sort": {
-      "label": "Sắp xếp theo",
-      "method": {
-        "manual": "Thủ công",
-        "provider": "Nhà cung cấp",
-        "score": "Điểm (mô hình miễn phí)",
-        "name": "Tên"
-      },
-      "scoreHint": "Xếp hạng theo điểm chỉ áp dụng cho nhà cung cấp miễn phí; các nhà cung cấp khác giữ nguyên vị trí."
-    }
   }
 }

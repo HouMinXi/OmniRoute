@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "완료된 모든 배치 삭제",
     "batchListBatchesTable": "배치",
     "changelogViewerLoading": "GitHub에서 변경 로그를 로드하는 중...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "프로필 로드 중...",
     "profileHowToEarn": "적립 방법",
     "bootstrapBannerDismiss": "닫기",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "예산이 소진된 요청을 긴급 무료 폴백 제공자/모델로 라우팅합니다.",
   "featureFlagArenaEloSyncEnabledDescription": "모델 지능 순위를 위해 주기적인 Arena AI 리더보드 ELO 동기화를 활성화합니다.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "/v1/models에서 Claude Code 게이트웨이 모델 검색 목록에 비Claude 모델이 포함되도록 claude/&lt;provider&gt;/&lt;model&gt; 미러 ID를 광고합니다. 경고: 전역적으로 활성화하면 모든 클라이언트에 대해 카탈로그 항목이 두 배로 증가합니다.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "공급자 디스패치를 위해 테넌트별 적응형 가상 승인 레인을 활성화합니다(#9654): 한 테넌트의 폭증이 더 이상 다른 테넌트에 503을 반환하지 않습니다. OMNIROUTE_CHAT_VIRTUAL_LANES 환경 변수가 이 대시보드 설정보다 우선하며, 변경 사항은 서버 재시작 시 적용됩니다.",
   "sidebar": {
     "home": "홈",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "무료 액세스를 위한 제공자 스캔",
     "conductor": "지휘자",
     "conductorSubtitle": "CLI-에이전트 플릿",
+    "orchestration": "오케스트레이션",
+    "orchestrationSubtitle": "실행 중인 모든 항목의 실시간 보기",
     "resilienceConnections": "연결 복원력",
     "resilienceConnectionsSubtitle": "쿨다운, 차단기, 잠금 상태",
     "settingsModalityBridge": "모달리티 브리지",
@@ -1768,7 +1772,8 @@
     "tools": "도구",
     "agentBridge": "에이전트 브릿지",
     "trafficInspector": "트래픽 검사기",
-    "usage": "사용량"
+    "usage": "사용량",
+    "orchestration": "오케스트레이션"
   },
   "home": {
     "quickStart": "빠른 시작",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "사용자 정의 제공자 지원 기능이 포함된 Warp AI 터미널",
       "agent-deck": "Agent Deck 다중 에이전트 오케스트레이터",
-      "5dive": "5dive — 자체 호스팅 코딩 에이전트 플릿; 인증 프로필 하나로 전체를 OmniRoute로 연결",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — 자체 호스팅 코딩 에이전트 플릿; 인증 프로필 하나로 전체를 OmniRoute로 연결"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "요청 간 최소 시간(ms)입니다. 기본 속도 제한기 지연 시간을 재정의합니다.",
     "rateLimitOverridesMinTimeLabel": "최소 간격 (ms)",
+    "rateLimitOverridesRpdHint": "이 연결에 대한 하루 최대 요청 수입니다. 공급자 기본값을 재정의합니다.",
+    "rateLimitOverridesRpdLabel": "RPD (요청/일)",
     "rateLimitOverridesRpmHint": "이 연결에 대한 분당 최대 요청 수입니다. 제공업체 기본값을 재정의합니다.",
     "rateLimitOverridesRpmLabel": "RPM (분당 요청 수)",
     "rateLimitOverridesTpdHint": "이 연결에 대한 일일 최대 토큰 수입니다. 제공업체 기본값을 재정의합니다.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "이 제공자에 대한 글로벌 계정 전략을 재정의합니다 (9router 패리티).",
     "providerRoutingStrategy": "계정 전략",
     "providerRoutingInheritGlobal": "글로벌 기본값 상속",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "모델 별칭",
     "modelAliasesTitle": "모델 별칭",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "활성화하면 실패한 제공자를 전역적으로 추적하고 쿨다운 기간 동안 건너뜁니다.",
     "resilienceProviderCooldownMin": "최소 쿨다운",
     "resilienceProviderCooldownMax": "최대 쿨다운",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "세션 어피니티",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "건강",
     "cliproxyapiPort": "포트",
     "qdrantHost": "호스트",
-    "qdrantCollection": "컬렉션",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "컬렉션"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "복사",
       "autoscrollOn": "자동 스크롤: 켜짐",
       "autoscrollOff": "자동 스크롤: 꺼짐",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "클라이언트 원시 요청",
         "clientRequest": "클라이언트 요청",
@@ -12951,6 +12959,18 @@
       }
     }
   },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+    }
+  },
   "comboControl": {
     "title": "콤보 제어 센터",
     "unavailable": "콤보 제어 센터를 사용할 수 없음",
@@ -13898,6 +13918,41 @@
     "ttsFailed": "음성 합성에 실패했습니다 (TTS 모델/제공자를 확인하세요)",
     "micDenied": "마이크를 사용할 수 없거나 권한이 거부되었습니다"
   },
+  "orchestration": {
+    "title": "오케스트레이션",
+    "description": "OmniRoute가 지금 실행 중인 모든 것 — 에이전트, 플릿, 라우팅",
+    "tabAgents": "에이전트",
+    "tabRouting": "라우팅",
+    "tabOverview": "개요",
+    "showCompleted": "완료 항목 표시",
+    "sourceCloudAgent": "클라우드 에이전트",
+    "sourceA2A": "A2A",
+    "sourceConductor": "지휘자",
+    "sourceStale": "{since}부터 오래됨",
+    "sourceOffline": "오프라인",
+    "stateQueued": "대기 중",
+    "stateRunning": "실행 중",
+    "stateWaitingApproval": "승인 대기 중",
+    "stateSucceeded": "성공",
+    "stateFailed": "실패",
+    "stateCancelled": "취소됨",
+    "overflowMore": "+{count}개 더보기",
+    "emptyTitle": "아직 실행 중인 항목이 없습니다",
+    "emptyCloudAgentCta": "클라우드 에이전트 설정",
+    "emptyA2ACta": "A2A 열기",
+    "emptyConductorCta": "지휘자 열기",
+    "drawerObjective": "목표",
+    "drawerTimeline": "타임라인",
+    "drawerMetrics": "지표",
+    "drawerResult": "결과",
+    "drawerActions": "작업",
+    "actionApprove": "계획 승인",
+    "actionCancel": "취소",
+    "actionSeeInGraph": "그래프에서 보기",
+    "actionDone": "작업이 적용됨",
+    "actionFailed": "작업 실패: {error}",
+    "mirroredInA2A": "A2A에 미러링됨"
+  },
   "cliproxyProviderExposure": {
     "title": "제공자 노출",
     "description": "<prefix>cliproxyapi/</prefix> 접두사 아래에 CLIProxyAPI 모델을 라우팅 대상으로 노출합니다.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

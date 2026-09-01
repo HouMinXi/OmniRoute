@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "Padamkan semua kumpulan yang lengkap",
     "batchListBatchesTable": "kelompok",
     "changelogViewerLoading": "Memuatkan changelog daripada GitHub...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "Memuatkan profil...",
     "profileHowToEarn": "Bagaimana untuk mendapatkan",
     "bootstrapBannerDismiss": "Tolak",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "Route budget-exhausted requests to the emergency free fallback provider/model.",
   "featureFlagArenaEloSyncEnabledDescription": "Enable periodic Arena AI leaderboard ELO sync for model intelligence rankings.",
   "featureFlagExposeCcDiscoveryAliasesDescription": "Iklankan claude/&lt;provider&gt;/&lt;model&gt; mirror ids pada /v1/models supaya senarai penemuan model gerbang Claude Code termasuk model bukan Claude. Amaran: menggandakan entri katalog untuk semua klien apabila diaktifkan secara global.",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "Aktifkan lorong kemasukan maya adaptif setiap-tenant untuk penghantaran pembekal (#9654): lonjakan satu tenant tidak lagi memberikan 503 kepada tenant lain. Pemboleh ubah persekitaran OMNIROUTE_CHAT_VIRTUAL_LANES mengatasi tetapan papan pemuka ini; perubahan berkuat kuasa apabila pelayan dimulakan semula.",
   "sidebar": {
     "home": "Rumah",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "Imbas penyedia untuk akses percuma",
     "conductor": "Pengendali",
     "conductorSubtitle": "CLI-ejen armada",
+    "orchestration": "Orkestrasi",
+    "orchestrationSubtitle": "Paparan langsung semua yang sedang berjalan",
     "resilienceConnections": "Daya Tahan Sambungan",
     "resilienceConnectionsSubtitle": "Cooldown, breaker, status penguncian",
     "settingsModalityBridge": "Jambatan Modality",
@@ -1768,7 +1772,8 @@
     "tools": "Alat",
     "agentBridge": "Jambatan Ejen",
     "trafficInspector": "Pemeriksa Trafik",
-    "usage": "Penggunaan"
+    "usage": "Penggunaan",
+    "orchestration": "Orkestrasi"
   },
   "home": {
     "quickStart": "Mula Pantas",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "Terminal Warp AI dengan sokongan penyedia tersuai",
       "agent-deck": "Orkestrator berbilang ejen Agent Deck",
-      "5dive": "5dive — armada ejen pengekodan yang dihoskan sendiri; satu profil auth menghalakan semuanya ke OmniRoute",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — armada ejen pengekodan yang dihoskan sendiri; satu profil auth menghalakan semuanya ke OmniRoute"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "Masa minimum (ms) antara permintaan. Menggantikan kelewatan pengehad kadar lalai.",
     "rateLimitOverridesMinTimeLabel": "Selang Minimum (ms)",
+    "rateLimitOverridesRpdHint": "Permintaan maksimum sehari untuk sambungan ini. Mengatasi lalai penyedia.",
+    "rateLimitOverridesRpdLabel": "RPD (Permintaan/hari)",
     "rateLimitOverridesRpmHint": "Permintaan maksimum seminit untuk sambungan ini. Menggantikan lalai penyedia.",
     "rateLimitOverridesRpmLabel": "RPM (Permintaan/min)",
     "rateLimitOverridesTpdHint": "Token maksimum sehari untuk sambungan ini. Menggantikan lalai penyedia.",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "Batalkan strategi akaun global untuk penyedia ini (pariti 9router).",
     "providerRoutingStrategy": "Strategi akaun",
     "providerRoutingInheritGlobal": "Warisi lalai global",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "Alias Model",
     "modelAliasesTitle": "Alias Model",
     "modelAliasesDesc": "Remap model names using exact matches or wildcard patterns.",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "Apabila didayakan, penyedia yang gagal dijejaki secara global dan dilangkau untuk tempoh bertenang.",
     "resilienceProviderCooldownMin": "Tempoh bertenang minimum",
     "resilienceProviderCooldownMax": "Tempoh bertenang maksimum",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Afiniti sesi",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "Kesihatan",
     "cliproxyapiPort": "Pelabuhan",
     "qdrantHost": "Hos",
-    "qdrantCollection": "Koleksi",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "Koleksi"
   },
   "contextRtk": {
     "title": "RTK Engine",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "Duration",
       "time": "Time",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "Loading logs...",
     "noLogs": "No logs yet. Make some API calls to see them here.",
@@ -11290,6 +11293,11 @@
       "copy": "Salin",
       "autoscrollOn": "Autoscroll: hidup",
       "autoscrollOff": "Autoscroll: mati",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "Permintaan Mentah Klien",
         "clientRequest": "Permintaan Klien",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "Pelayan MCP",
-        "description": "Sambung ke pelayan MCP OmniRoute (37 alatan, 3 pengangkutan: SSE/stdio/HTTP). Meliputi penghalaan, cache, pemampatan, memori, kemahiran, penyedia dan alatan audit merentasi 16 skop kebenaran."
+        "description": "Sambung ke pelayan MCP OmniRoute (110 alatan, 3 pengangkutan: SSE/stdio/HTTP). Meliputi penghalaan, cache, pemampatan, memori, kemahiran, penyedia dan alatan audit merentasi 33 skop kebenaran."
       },
       "omni-agents-a2a": {
         "name": "Ejen & Protokol A2A",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "Dayakan akses rangkaian dalam kotak pasir kemahiran."
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "Penghasilan ucapan gagal (semak model/provider TTS)",
     "micDenied": "Mikrofon tidak tersedia atau kebenaran ditolak"
   },
+  "orchestration": {
+    "title": "Orkestrasi",
+    "description": "Semua yang sedang dijalankan oleh OmniRoute sekarang — ejen, armada dan penghalaan",
+    "tabAgents": "Ejen",
+    "tabRouting": "Penghalaan",
+    "tabOverview": "Gambaran Keseluruhan",
+    "showCompleted": "Tunjukkan yang selesai",
+    "sourceCloudAgent": "Ejen Awan",
+    "sourceA2A": "A2A",
+    "sourceConductor": "Pengendali",
+    "sourceStale": "Lapuk sejak {since}",
+    "sourceOffline": "Luar talian",
+    "stateQueued": "Dalam giliran",
+    "stateRunning": "Berjalan",
+    "stateWaitingApproval": "Menunggu kelulusan",
+    "stateSucceeded": "Berjaya",
+    "stateFailed": "Gagal",
+    "stateCancelled": "Dibatalkan",
+    "overflowMore": "+{count} lagi",
+    "emptyTitle": "Belum ada yang berjalan",
+    "emptyCloudAgentCta": "Sediakan Ejen Awan",
+    "emptyA2ACta": "Buka A2A",
+    "emptyConductorCta": "Buka Pengendali",
+    "drawerObjective": "Objektif",
+    "drawerTimeline": "Garis Masa",
+    "drawerMetrics": "Metrik",
+    "drawerResult": "Keputusan",
+    "drawerActions": "Tindakan",
+    "actionApprove": "Luluskan pelan",
+    "actionCancel": "Batal",
+    "actionSeeInGraph": "Lihat dalam graf",
+    "actionDone": "Tindakan digunakan",
+    "actionFailed": "Tindakan gagal: {error}",
+    "mirroredInA2A": "Dicerminkan dalam A2A"
+  },
   "cliproxyProviderExposure": {
     "title": "Pendedahan Penyedia",
     "description": "Dedahkan model CLIProxyAPI sebagai sasaran penghalaan di bawah awalan <prefix>cliproxyapi/</prefix>.",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }

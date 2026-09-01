@@ -770,6 +770,7 @@
     "batchListDeleteAllCompletedTitle": "刪除所有已完成的批次",
     "batchListBatchesTable": "批次",
     "changelogViewerLoading": "正在從 GitHub 載入變更日誌...",
+    "profile": "__MISSING__:Profile",
     "profileLoading": "正在載入個人資料...",
     "profileHowToEarn": "如何賺取",
     "bootstrapBannerDismiss": "解僱",
@@ -987,6 +988,7 @@
   "featureFlagOmnirouteEmergencyFallbackDescription": "將預算耗盡的請求路由到緊急免費備用提供者/模型。",
   "featureFlagArenaEloSyncEnabledDescription": "啟用定期 Arena AI 排行榜 ELO 同步，用於模型智慧排名。",
   "featureFlagExposeCcDiscoveryAliasesDescription": "在 /v1/models 上廣告 claude/&lt;provider&gt;/&lt;model&gt; 鏡像 ID，以便 Claude Code 閘道模型發現列出非 Claude 模型。警告：當全域啟用時，會為所有客戶端重複目錄條目。",
+  "featureFlagNoThinkingAliasEnabledDescription": "__MISSING__:Master switch for the no-think/&lt;provider&gt;/&lt;model&gt; gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on.",
   "featureFlagChatVirtualLanesEnabledDescription": "為提供者調度啟用按租戶的自適應虛擬准入通道（#9654）：一個租戶的突發流量不再導致另一個租戶收到 503。OMNIROUTE_CHAT_VIRTUAL_LANES 環境變數優先於此儀表板設定；變更在伺服器重新啟動後生效。",
   "sidebar": {
     "home": "首頁",
@@ -1290,6 +1292,8 @@
     "discoverySubtitle": "掃描提供者以尋找免費存取",
     "conductor": "導體",
     "conductorSubtitle": "CLI-代理艦隊",
+    "orchestration": "編排",
+    "orchestrationSubtitle": "即時檢視所有正在執行的內容",
     "resilienceConnections": "連線韌性",
     "resilienceConnectionsSubtitle": "冷卻、斷路器、鎖定狀態",
     "settingsModalityBridge": "模態橋接",
@@ -1768,7 +1772,8 @@
     "tools": "工具",
     "agentBridge": "代理橋接",
     "trafficInspector": "流量檢查器",
-    "usage": "用量"
+    "usage": "用量",
+    "orchestration": "編排"
   },
   "home": {
     "quickStart": "快速入門",
@@ -2935,8 +2940,7 @@
       "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support",
       "warp": "Warp AI 終端機，支援自訂提供者",
       "agent-deck": "Agent Deck 多代理協調器",
-      "5dive": "5dive — 自架的編碼代理機群；一個認證設定檔即可將全部指向 OmniRoute",
-      "prime-agent": "Prime Agent — self-improving RLM coding harness with OpenAI-compatible provider support"
+      "5dive": "5dive — 自架的編碼代理機群；一個認證設定檔即可將全部指向 OmniRoute"
     },
     "guides": {
       "cursor": {
@@ -5883,6 +5887,8 @@
     "rateLimitOverridesMaxWaitMsLabel": "__MISSING__:Max Queue Wait (ms)",
     "rateLimitOverridesMinTimeHint": "請求之間的最小時間（毫秒）。覆蓋預設速率限制器延遲。",
     "rateLimitOverridesMinTimeLabel": "最小間隔（毫秒）",
+    "rateLimitOverridesRpdHint": "此連線的每天最大請求數。覆蓋提供者預設值。",
+    "rateLimitOverridesRpdLabel": "RPD（請求數/天）",
     "rateLimitOverridesRpmHint": "此連線的每分鐘最大請求數。覆蓋提供者預設值。",
     "rateLimitOverridesRpmLabel": "RPM（請求/分鐘）",
     "rateLimitOverridesTpdHint": "此連線的每日最大權杖數。覆蓋提供者預設值。",
@@ -7054,6 +7060,14 @@
     "providerAccountRoutingDesc": "覆寫此提供者的全域帳號策略（9router 對等）。",
     "providerRoutingStrategy": "帳號策略",
     "providerRoutingInheritGlobal": "繼承全域預設",
+    "quotaPreflightTitle": "Quota Preflight Cutoff",
+    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
+    "quotaPreflightEnable": "Enable quota preflight",
+    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
+    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
+    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
+    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
+    "quotaPreflightLoadFailed": "Unable to load quota preflight settings.",
     "modelAliases": "模型別名",
     "modelAliasesTitle": "模型別名",
     "modelAliasesDesc": "使用精確匹配或萬用字元模式重對映模型名稱。",
@@ -8070,6 +8084,14 @@
     "resilienceProviderCooldownEnabledDesc": "啟用後，失敗的提供者會在全域範圍內被追蹤並在冷卻期間內被跳過。",
     "resilienceProviderCooldownMin": "最小冷卻",
     "resilienceProviderCooldownMax": "最大冷卻",
+    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
+    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
+    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
+    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
+    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
+    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
+    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
+    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
     "forcedFingerprintTitle": "{provider} 始終啟用 — OAuth 帳戶安全所必需；無法關閉。",
     "forcedFingerprintBadge": "必需",
     "sessionAffinityTitle": "Session 親和性",
@@ -8305,27 +8327,7 @@
     "cliproxyapiHealth": "健康",
     "cliproxyapiPort": "埠",
     "qdrantHost": "主機",
-    "qdrantCollection": "集合",
-    "presetAll": "All",
-    "presetAllDesc": "Show everything",
-    "presetEssentials": "Essentials",
-    "presetEssentialsDesc": "Beginner path - Advanced tools stay searchable",
-    "presetMinimal": "Minimal",
-    "presetMinimalDesc": "Core pages only",
-    "presetDeveloper": "Developer",
-    "presetDeveloperDesc": "Dev & proxy tools",
-    "presetAdmin": "Admin",
-    "presetAdminDesc": "Monitoring & audit",
-    "settingsSidebarTitle": "Sidebar Customization",
-    "settingsSidebarDesc": "Choose which sidebar items to show. Essentials keeps Advanced tools searchable.",
-    "quotaPreflightTitle": "Quota Preflight Cutoff",
-    "quotaPreflightSubtitle": "Skip accounts that are out of quota before sending the request upstream",
-    "quotaPreflightEnable": "Enable quota preflight",
-    "quotaPreflightEnableDesc": "Before each request, check the account's remaining quota (5h / weekly / monthly windows). Accounts at or below the cutoff are skipped without an upstream call. Per-window cutoffs set on the Provider Quota page always win over the default here.",
-    "quotaPreflightCutoff": "Global cutoff (min remaining %)",
-    "quotaPreflightCutoffDesc": "Stop using an account when its remaining quota drops to this percent or below, for every window without its own cutoff. Matches the remaining-% bars on the Provider Quota page.",
-    "quotaPreflightWindowsHint": "Windows with their own per-window or per-provider cutoff (set in the Cutoff modal on the Provider Quota page) are unaffected by this default.",
-    "quotaPreflightLoadFailed": "Unable to load quota preflight settings."
+    "qdrantCollection": "集合"
   },
   "contextRtk": {
     "title": "RTK 引擎",
@@ -11250,7 +11252,8 @@
       "tps": "TPS",
       "duration": "時長",
       "time": "時間",
-      "conversation": "Conversation"
+      "conversation": "Conversation",
+      "ttft": "TTFT"
     },
     "loadingLogs": "正在載入日誌...",
     "noLogs": "暫無日誌記錄。進行一些API呼叫以在此處檢視它們。",
@@ -11290,6 +11293,11 @@
       "copy": "複製",
       "autoscrollOn": "自動滾動：開啟",
       "autoscrollOff": "自動滾動：關閉",
+      "collapseAllLevels": "__MISSING__:Collapse all",
+      "collapseOneLevel": "__MISSING__:Collapse one level",
+      "currentExpandLevel": "__MISSING__:Current expand level",
+      "expandOneLevel": "__MISSING__:Expand one level",
+      "expandAllLevels": "__MISSING__:Expand all",
       "payload": {
         "clientRawRequest": "客戶原始請求",
         "clientRequest": "客戶請求",
@@ -12309,7 +12317,7 @@
       },
       "omni-mcp": {
         "name": "MCP 伺服器",
-        "description": "連線至 OmniRoute MCP 伺服器（37 個工具、3 種傳輸方式：SSE/stdio/HTTP）。涵蓋 16 個權限範圍內的路由、快取、壓縮、記憶體、技能、提供者和稽核工具。"
+        "description": "連線至 OmniRoute MCP 伺服器（110 個工具、3 種傳輸方式：SSE/stdio/HTTP）。涵蓋 33 個權限範圍內的路由、快取、壓縮、記憶體、技能、提供者和稽核工具。"
       },
       "omni-agents-a2a": {
         "name": "代理程式與 A2A 協定",
@@ -12949,6 +12957,18 @@
       "SKILLS_SANDBOX_NETWORK_ENABLED": {
         "description": "在技能沙盒中啟用網路存取。"
       }
+    }
+  },
+  "combo": {
+    "sort": {
+      "label": "__MISSING__:Sort by",
+      "method": {
+        "manual": "__MISSING__:Manual",
+        "provider": "__MISSING__:Provider",
+        "score": "__MISSING__:Score (free models)",
+        "name": "__MISSING__:Name"
+      },
+      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
     }
   },
   "comboControl": {
@@ -13898,6 +13918,41 @@
     "ttsFailed": "語音合成失敗（檢查 TTS 模型/提供者）",
     "micDenied": "麥克風不可用或權限被拒絕"
   },
+  "orchestration": {
+    "title": "編排",
+    "description": "OmniRoute 目前正在執行的一切——代理、艦隊與路由",
+    "tabAgents": "代理",
+    "tabRouting": "路由",
+    "tabOverview": "總覽",
+    "showCompleted": "顯示已完成",
+    "sourceCloudAgent": "雲端代理",
+    "sourceA2A": "A2A",
+    "sourceConductor": "導體",
+    "sourceStale": "自 {since} 起未更新",
+    "sourceOffline": "離線",
+    "stateQueued": "佇列中",
+    "stateRunning": "執行中",
+    "stateWaitingApproval": "等待核准",
+    "stateSucceeded": "已成功",
+    "stateFailed": "已失敗",
+    "stateCancelled": "已取消",
+    "overflowMore": "還有 {count} 個",
+    "emptyTitle": "目前沒有正在執行的內容",
+    "emptyCloudAgentCta": "設定雲端代理",
+    "emptyA2ACta": "開啟 A2A",
+    "emptyConductorCta": "開啟導體",
+    "drawerObjective": "目標",
+    "drawerTimeline": "時間軸",
+    "drawerMetrics": "指標",
+    "drawerResult": "結果",
+    "drawerActions": "動作",
+    "actionApprove": "核准計畫",
+    "actionCancel": "取消",
+    "actionSeeInGraph": "在圖中檢視",
+    "actionDone": "動作已套用",
+    "actionFailed": "動作失敗：{error}",
+    "mirroredInA2A": "已在 A2A 中鏡射"
+  },
   "cliproxyProviderExposure": {
     "title": "提供者暴露",
     "description": "將 CLIProxyAPI 模型作為路由目標，位於 <prefix>cliproxyapi/</prefix> 前綴下。",
@@ -13972,5 +14027,6 @@
     "cta": "Get an API Key",
     "partnerLinkNote": "Partner link",
     "dismissAriaLabel": "Dismiss"
-  }
+  },
+  "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Disable the generation of thinking level variants (e.g. -low, -medium, -high) in the /v1/models catalog."
 }
