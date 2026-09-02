@@ -1,5 +1,5 @@
 import { hasSelfAccountQuotaScope, hasSelfUsageScope } from "@/shared/constants/selfServiceScopes";
-import { USAGE_SUPPORTED_PROVIDERS } from "@/shared/constants/providers";
+import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
 
 type JsonRecord = Record<string, unknown>;
 type DateLike = number | string | Date | null | undefined;
@@ -208,8 +208,11 @@ function normalizePlan(value: unknown): unknown {
   return undefined;
 }
 
-function isSupportedProvider(provider: string): boolean {
-  return USAGE_SUPPORTED_PROVIDERS.includes(provider as (typeof USAGE_SUPPORTED_PROVIDERS)[number]);
+function isSupportedProvider(
+  provider: string,
+  connection?: { provider?: string; providerSpecificData?: unknown },
+): boolean {
+  return supportsProviderQuota(provider, connection);
 }
 
 function getConnectionIdentity(value: unknown): { id: string; provider: string } | null {
