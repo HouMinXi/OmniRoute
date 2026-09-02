@@ -289,7 +289,7 @@ test("convert-null after invalidate keeps forceRefresh until a measurable quota 
   assert.equal(second, null);
   assert.equal(calls[1]?.forceRefresh, true);
 
-  const third = await fetchGenericQuota(connectionId, connection);
+  await fetchGenericQuota(connectionId, connection);
   assert.equal(calls.length, 2, "convert-null must not hammer usage inside 60s");
 
   __agePendingForceRefreshMissForTests("agy", connectionId, 60_000 + 1);
