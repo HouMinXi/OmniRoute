@@ -13,6 +13,7 @@ const {
   __setGenericUsageFetcherForTests,
   __agePendingForceRefreshForTests,
   __agePendingForceRefreshMissForTests,
+  __resetGenericQuotaFetcherForTests,
 } = genericModule;
 const { getQuotaFetcher } = preflightModule;
 
@@ -143,6 +144,7 @@ test("registerGenericQuotaFetchers registers Claude, GLM, and OpenCode Go via th
 
 test.afterEach(() => {
   __setGenericUsageFetcherForTests(null);
+  __resetGenericQuotaFetcherForTests();
 });
 
 test("fetchGenericQuota caches a hit inside the 60s window", async () => {
@@ -353,5 +355,36 @@ test("expired pending force-refresh does not bypass the 60s wrapper cache", asyn
     undefined,
     "expired force-refresh must not pass forceRefresh after inner caches have aged out"
   );
+  invalidateGenericQuotaCache("agy", connectionId);
+});
+
+test("stamp expiry during in-flight fetch still writes the wrapper cache", async () => {
+  const connectionId = `agy-stamp-expire-${Date.now()}`;
+  let release: (value?: unknown) => void = () => {};
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  const calls: Array<{ forceRefresh?: boolean }> = [];
+  let n = 0;
+  __setGenericUsageFetcherForTests(async (_conn, options) => {
+    calls.push({ forceRefresh: options?.forceRefresh });
+    n += 1;
+    if (n === 1) return usageShape(50);
+    await gate;
+    return usageShape(80);
+  });
+
+  const connection = { provider: "agy", id: connectionId };
+  await fetchGenericQuota(connectionId, connection);
+  invalidateGenericQuotaCache("agy", connectionId);
+
+  const inflight = fetchGenericQuota(connectionId, connection);
+  await Promise.resolve();
+  __agePendingForceRefreshForTests("agy", connectionId, 5 * 60_000 + 1);
+  release();
+  await inflight;
+
+  await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 2, "expired stamp during await is not a 429; cache the result");
   invalidateGenericQuotaCache("agy", connectionId);
 });

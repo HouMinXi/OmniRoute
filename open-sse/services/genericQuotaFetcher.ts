@@ -66,6 +66,13 @@ export function __agePendingForceRefreshMissForTests(
   pendingForceRefreshMiss.set(cacheKey(provider, connectionId), Date.now() - ageMs);
 }
 
+/** Test-only: drop all wrapper/flag maps so tests cannot leak across ids. */
+export function __resetGenericQuotaFetcherForTests(): void {
+  cache.clear();
+  pendingForceRefresh.clear();
+  pendingForceRefreshMiss.clear();
+}
+
 interface CacheEntry {
   quota: QuotaInfo;
   fetchedAt: number;
@@ -315,8 +322,16 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
     return null;
   }
 
-  if (pendingForceRefresh.get(key) !== refreshStamp) {
-    return quota;
+  const currentStamp = pendingForceRefresh.get(key);
+  if (currentStamp !== refreshStamp) {
+    // Concurrent 429 re-stamped a still-live flag — do not recache the
+    // pre-429 snapshot. A vanished or expired stamp is not a 429.
+    if (
+      currentStamp !== undefined &&
+      Date.now() - currentStamp <= PENDING_FORCE_REFRESH_TTL_MS
+    ) {
+      return quota;
+    }
   }
 
   pendingForceRefresh.delete(key);
@@ -356,7 +371,7 @@ export function invalidateGenericQuotaCacheOnStatus(args: {
   status: number;
   isolateProbe?: boolean;
 }): boolean {
-  if (args.isolateProbe === true) return false;
+  if (args.isolateProbe === true) return false; // undefined from callers that omit isolateProbe must still invalidate
   if (args.status !== 429) return false;
   const provider = typeof args.provider === "string" ? args.provider.trim() : "";
   const connectionId = typeof args.connectionId === "string" ? args.connectionId.trim() : "";
