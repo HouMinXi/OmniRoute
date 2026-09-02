@@ -126,6 +126,8 @@ export async function POST(request) {
       modelsPath,
       customHeaders,
       iconUrl,
+      dailyQuotaResetTimezone,
+      dailyQuotaResetHour,
     } = validation.data;
 
     if (preset === "vibeproxy-openai") {
@@ -145,6 +147,9 @@ export async function POST(request) {
         modelsPath: modelsPath || null,
         iconUrl: iconUrl?.trim() || null,
         customHeaders: customHeaders || null,
+        dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
+        dailyQuotaResetHour:
+          dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
       return NextResponse.json({ node }, { status: 201 });
     }
@@ -170,6 +175,9 @@ export async function POST(request) {
         modelsPath: modelsPath || null,
         iconUrl: iconUrl?.trim() || null,
         customHeaders: customHeaders || null,
+        dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
+        dailyQuotaResetHour:
+          dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
       return NextResponse.json({ node }, { status: 201 });
     }
@@ -200,6 +208,9 @@ export async function POST(request) {
         modelsPath: compatMode === "cc" ? null : modelsPath || null,
         iconUrl: iconUrl?.trim() || null,
         customHeaders: customHeaders || null,
+        dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
+        dailyQuotaResetHour:
+          dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
       return NextResponse.json({ node }, { status: 201 });
     }

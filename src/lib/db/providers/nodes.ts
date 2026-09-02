@@ -88,14 +88,19 @@ export async function createProviderNode(data: JsonRecord) {
     // Optional operator-supplied remote icon URL (#2166) — plain TEXT, no JSON parsing needed.
     iconUrl: data.iconUrl || null,
     customHeadersJson,
+    dailyQuotaResetTimezone: data.dailyQuotaResetTimezone || null,
+    dailyQuotaResetHour:
+      data.dailyQuotaResetHour === 0 || data.dailyQuotaResetHour
+        ? Number(data.dailyQuotaResetHour)
+        : null,
     createdAt: now,
     updatedAt: now,
   };
 
   db.prepare(
     `
-    INSERT INTO provider_nodes (id, type, name, prefix, api_type, base_url, chat_path, models_path, icon_url, custom_headers_json, created_at, updated_at)
-    VALUES (@id, @type, @name, @prefix, @apiType, @baseUrl, @chatPath, @modelsPath, @iconUrl, @customHeadersJson, @createdAt, @updatedAt)
+    INSERT INTO provider_nodes (id, type, name, prefix, api_type, base_url, chat_path, models_path, icon_url, custom_headers_json, daily_quota_reset_timezone, daily_quota_reset_hour, created_at, updated_at)
+    VALUES (@id, @type, @name, @prefix, @apiType, @baseUrl, @chatPath, @modelsPath, @iconUrl, @customHeadersJson, @dailyQuotaResetTimezone, @dailyQuotaResetHour, @createdAt, @updatedAt)
   `
   ).run(node);
 
@@ -144,7 +149,10 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     UPDATE provider_nodes SET type = @type, name = @name, prefix = @prefix,
     api_type = @apiType, base_url = @baseUrl, chat_path = @chatPath,
     models_path = @modelsPath, icon_url = @iconUrl,
-    custom_headers_json = @customHeadersJson, updated_at = @updatedAt
+    custom_headers_json = @customHeadersJson,
+    daily_quota_reset_timezone = @dailyQuotaResetTimezone,
+    daily_quota_reset_hour = @dailyQuotaResetHour,
+    updated_at = @updatedAt
     WHERE id = @id
   `
   ).run({
@@ -160,6 +168,11 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     // stored custom icon when the caller submits an empty value.
     iconUrl: merged["iconUrl"] || null,
     customHeadersJson: merged["customHeadersJson"] || null,
+    dailyQuotaResetTimezone: merged["dailyQuotaResetTimezone"] || null,
+    dailyQuotaResetHour:
+      merged["dailyQuotaResetHour"] === 0 || merged["dailyQuotaResetHour"]
+        ? Number(merged["dailyQuotaResetHour"])
+        : null,
     updatedAt: merged["updatedAt"],
   });
 

@@ -56,7 +56,7 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (isValidationFailure(validation)) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
-    const { name, prefix, apiType, baseUrl, chatPath, modelsPath, customHeaders, iconUrl } =
+    const { name, prefix, apiType, baseUrl, chatPath, modelsPath, customHeaders, iconUrl, dailyQuotaResetTimezone, dailyQuotaResetHour } =
       validation.data;
     const node: any = await getProviderNodeById(id);
 
@@ -98,6 +98,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       // previously stored custom icon.
       iconUrl: iconUrl?.trim() || null,
       customHeaders: customHeaders || null,
+      dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
+      dailyQuotaResetHour:
+        dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
     };
 
     if (node.type === "openai-compatible") {

@@ -516,6 +516,11 @@ function isSchemaAlreadyApplied(
         db.prepare("SELECT 1 FROM provider_connections WHERE provider = 'freepik' LIMIT 1").get() ==
         null
       );
+    case "172":
+      return (
+        hasColumn(db, "provider_nodes", "daily_quota_reset_timezone") &&
+        hasColumn(db, "provider_nodes", "daily_quota_reset_hour")
+      );
     default:
       return false;
   }
