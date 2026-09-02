@@ -300,6 +300,39 @@ test("convert-null after invalidate keeps forceRefresh until a measurable quota 
   invalidateGenericQuotaCache("agy", connectionId);
 });
 
+test("in-flight fetch must not drop a concurrent 429 force-refresh", async () => {
+  const connectionId = `agy-race-${Date.now()}`;
+  let release: (value?: unknown) => void = () => {};
+  const gate = new Promise((resolve) => {
+    release = resolve;
+  });
+  const calls: Array<{ forceRefresh?: boolean }> = [];
+  let n = 0;
+  __setGenericUsageFetcherForTests(async (_conn, options) => {
+    calls.push({ forceRefresh: options?.forceRefresh });
+    n += 1;
+    if (n === 1) {
+      await gate;
+      return usageShape(80);
+    }
+    return usageShape(10);
+  });
+
+  const connection = { provider: "agy", id: connectionId };
+  const inflight = fetchGenericQuota(connectionId, connection);
+  await Promise.resolve();
+  invalidateGenericQuotaCache("agy", connectionId);
+  release();
+  const first = await inflight;
+  assert.equal(first?.percentUsed, 0.2);
+
+  const second = await fetchGenericQuota(connectionId, connection);
+  assert.equal(calls.length, 2, "concurrent 429 must not let the in-flight recache wipe force-refresh");
+  assert.equal(calls[1]?.forceRefresh, true);
+  assert.equal(second?.percentUsed, 0.9);
+  invalidateGenericQuotaCache("agy", connectionId);
+});
+
 test("expired pending force-refresh does not bypass the 60s wrapper cache", async () => {
   const connectionId = `agy-expire-${Date.now()}`;
   const calls: Array<{ forceRefresh?: boolean }> = [];

@@ -294,6 +294,10 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
     }
   }
 
+  // Capture before await: a 429 during fetchUsage re-stamps this; writing
+  // the pre-429 snapshot would wipe that flag and recache stale quota.
+  const refreshStamp = pendingForceRefresh.get(key);
+
   let usage: unknown;
   try {
     const fetchUsage = usageFetcherOverride ?? getUsageForProvider;
@@ -301,14 +305,18 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
       ...(forceRefresh ? { forceRefresh: true } : {}),
     });
   } catch {
-    if (forceRefresh) pendingForceRefreshMiss.set(key, Date.now());
+    if (isPendingForceRefresh(key)) pendingForceRefreshMiss.set(key, Date.now());
     return null;
   }
 
   const quota = convertUsageToQuotaInfo(usage);
   if (!quota) {
-    if (forceRefresh) pendingForceRefreshMiss.set(key, Date.now());
+    if (isPendingForceRefresh(key)) pendingForceRefreshMiss.set(key, Date.now());
     return null;
+  }
+
+  if (pendingForceRefresh.get(key) !== refreshStamp) {
+    return quota;
   }
 
   pendingForceRefresh.delete(key);
@@ -348,7 +356,7 @@ export function invalidateGenericQuotaCacheOnStatus(args: {
   status: number;
   isolateProbe?: boolean;
 }): boolean {
-  if (args.isolateProbe) return false;
+  if (args.isolateProbe === true) return false;
   if (args.status !== 429) return false;
   const provider = typeof args.provider === "string" ? args.provider.trim() : "";
   const connectionId = typeof args.connectionId === "string" ? args.connectionId.trim() : "";
