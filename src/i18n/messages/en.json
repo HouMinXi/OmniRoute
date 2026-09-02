@@ -5067,6 +5067,9 @@
     "importFromFileImporting": "Importing…",
     "importFromFileImport": "Import {count} providers",
     "importFromFileResult": "Imported {success} providers ({failed} failed)",
+    "importFromFileDownloadTemplate": "Download CSV template",
+    "importFromFileMoreErrors": "+{count} more",
+    "importFromFileSchemaHint": "CSV columns are positional: provider, name, apiKey, baseUrl (optional), priority (optional). The provider column must be an existing managed provider id or an already-registered OpenAI/Anthropic-compatible node id — this import does not create new endpoint nodes.",
     "adaptaTutorial": {
       "title": "How to connect Adapta Web",
       "introPrefix": "Adapta authenticates through Clerk. The token",
