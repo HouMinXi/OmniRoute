@@ -3238,19 +3238,13 @@ export async function handleChatCore({
                   log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
                 }
               } else if (attemptConnectionId && res.response.status === 429) {
-                const isolateProbe = await shouldIsolateProbeFailures();
-                const dropped = invalidateGenericQuotaCacheOnStatus({
+                // Dropped generic quota cache after 429
+                invalidateGenericQuotaCacheOnStatus({
                   provider,
                   connectionId: String(attemptConnectionId),
                   status: res.response.status,
-                  isolateProbe,
+                  isolateProbe: await shouldIsolateProbeFailures(),
                 });
-                if (dropped) {
-                  log?.debug?.(
-                    "QUOTA",
-                    `Dropped generic quota cache after 429 provider=${provider} connection=${attemptConnectionId}`
-                  );
-                }
               }
 
               // Track Gemini RPM + RPD request counts for 429 classification

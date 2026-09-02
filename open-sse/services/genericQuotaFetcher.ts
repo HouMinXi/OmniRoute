@@ -102,6 +102,41 @@ function isPendingForceRefresh(key: string, now: number = Date.now()): boolean {
   return pendingForceRefresh.has(key);
 }
 
+function markPendingForceRefreshMiss(key: string): void {
+  if (isPendingForceRefresh(key)) pendingForceRefreshMiss.set(key, Date.now());
+}
+
+function cachedQuotaIfFresh(
+  key: string,
+  forceRefresh: boolean,
+  now: number
+): QuotaInfo | null {
+  if (forceRefresh) return null;
+  const cached = cache.get(key);
+  if (cached && now - cached.fetchedAt < CACHE_TTL_MS) return cached.quota;
+  return null;
+}
+
+function isForceRefreshMissCooling(
+  key: string,
+  forceRefresh: boolean,
+  now: number
+): boolean {
+  if (!forceRefresh) return false;
+  const missedAt = pendingForceRefreshMiss.get(key);
+  return missedAt !== undefined && now - missedAt < CACHE_TTL_MS;
+}
+
+/** True when a concurrent 429 re-stamped a still-live flag during fetchUsage. */
+function isConcurrentForceRefresh(key: string, refreshStamp: number | undefined): boolean {
+  const currentStamp = pendingForceRefresh.get(key);
+  if (currentStamp === refreshStamp) return false;
+  return (
+    currentStamp !== undefined &&
+    Date.now() - currentStamp <= PENDING_FORCE_REFRESH_TTL_MS
+  );
+}
+
 // 5min — same as Codex. Expiry is lazy on read (`isPendingForceRefresh`);
 // this timer only reaps keys nobody fetches after the 5min TTL.
 const _cacheCleanup = setInterval(() => {
@@ -288,18 +323,11 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   const key = cacheKey(provider, connectionId);
   const now = Date.now();
   const forceRefresh = isPendingForceRefresh(key, now);
-  const cached = cache.get(key);
-  if (!forceRefresh && cached && now - cached.fetchedAt < CACHE_TTL_MS) {
-    return cached.quota;
-  }
+  const hit = cachedQuotaIfFresh(key, forceRefresh, now);
+  if (hit) return hit;
   // convert-null / throw keep the force-refresh flag (agy inner caches are
   // still stale) but must not hammer those endpoints on every routing tick.
-  if (forceRefresh) {
-    const missedAt = pendingForceRefreshMiss.get(key);
-    if (missedAt !== undefined && now - missedAt < CACHE_TTL_MS) {
-      return null;
-    }
-  }
+  if (isForceRefreshMissCooling(key, forceRefresh, now)) return null;
 
   // Capture before await: a 429 during fetchUsage re-stamps this; writing
   // the pre-429 snapshot would wipe that flag and recache stale quota.
@@ -312,26 +340,20 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
       ...(forceRefresh ? { forceRefresh: true } : {}),
     });
   } catch {
-    if (isPendingForceRefresh(key)) pendingForceRefreshMiss.set(key, Date.now());
+    markPendingForceRefreshMiss(key);
     return null;
   }
 
   const quota = convertUsageToQuotaInfo(usage);
   if (!quota) {
-    if (isPendingForceRefresh(key)) pendingForceRefreshMiss.set(key, Date.now());
+    markPendingForceRefreshMiss(key);
     return null;
   }
 
-  const currentStamp = pendingForceRefresh.get(key);
-  if (currentStamp !== refreshStamp) {
-    // Concurrent 429 re-stamped a still-live flag — do not recache the
-    // pre-429 snapshot. A vanished or expired stamp is not a 429.
-    if (
-      currentStamp !== undefined &&
-      Date.now() - currentStamp <= PENDING_FORCE_REFRESH_TTL_MS
-    ) {
-      return quota;
-    }
+  // Concurrent 429 re-stamped a still-live flag — do not recache the
+  // pre-429 snapshot. A vanished or expired stamp is not a 429.
+  if (isConcurrentForceRefresh(key, refreshStamp)) {
+    return quota;
   }
 
   pendingForceRefresh.delete(key);
