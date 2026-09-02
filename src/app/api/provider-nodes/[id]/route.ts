@@ -109,6 +109,21 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 
     const updated = await updateProviderNode(id, updates);
 
+    try {
+      const { registerMoonshotFetchersForNodes } = await import(
+        "@omniroute/open-sse/services/moonshotQuotaFetcher.ts"
+      );
+      registerMoonshotFetchersForNodes([
+        {
+          id: typeof updated?.id === "string" ? updated.id : id,
+          prefix: prefix.trim(),
+          baseUrl: sanitizedBaseUrl,
+        },
+      ]);
+    } catch (error) {
+      console.warn("Moonshot fetcher re-register after node update skipped:", error);
+    }
+
     const connections = await getProviderConnections({ provider: id });
     await Promise.all(
       connections.flatMap((connectionRaw) => {

@@ -114,3 +114,17 @@ test("registerMoonshotQuotaFetcher wires moonshot and kimi ids", () => {
   assert.equal(typeof getQuotaFetcher("moonshot"), "function");
   assert.equal(typeof getQuotaFetcher("kimi"), "function");
 });
+
+test("registerMoonshotFetchersForNodes registers custom node id and prefix", async () => {
+  const { registerMoonshotFetchersForNodes } = await import(
+    "../../open-sse/services/moonshotQuotaFetcher.ts"
+  );
+  const uuid = "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf";
+  registerMoonshotFetchersForNodes([
+    { id: uuid, prefix: "mnative", baseUrl: CN },
+    { id: "other", prefix: "oc-prod", baseUrl: "https://api.openai.com/v1" },
+  ]);
+  assert.equal(typeof getQuotaFetcher(uuid), "function");
+  assert.equal(typeof getQuotaFetcher("mnative"), "function");
+  assert.equal(getQuotaFetcher("oc-prod"), undefined);
+});

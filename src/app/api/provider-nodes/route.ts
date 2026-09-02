@@ -48,6 +48,26 @@ function sanitizeVibeProxyBaseUrl(baseUrl: string) {
   return `${base}/v1`;
 }
 
+function registerMoonshotFetchersForCreatedNode(node: {
+  id?: unknown;
+  prefix?: unknown;
+  baseUrl?: unknown;
+}): void {
+  void import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts")
+    .then(({ registerMoonshotFetchersForNodes }) => {
+      registerMoonshotFetchersForNodes([
+        {
+          id: typeof node.id === "string" ? node.id : null,
+          prefix: typeof node.prefix === "string" ? node.prefix : null,
+          baseUrl: typeof node.baseUrl === "string" ? node.baseUrl : null,
+        },
+      ]);
+    })
+    .catch((error) => {
+      console.warn("Moonshot fetcher register after node create skipped:", error);
+    });
+}
+
 function sanitizeAnthropicBaseUrl(baseUrl: string) {
   return (baseUrl || "")
     .trim()
@@ -151,6 +171,7 @@ export async function POST(request) {
         dailyQuotaResetHour:
           dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
+      registerMoonshotFetchersForCreatedNode(node);
       return NextResponse.json({ node }, { status: 201 });
     }
 
@@ -179,6 +200,7 @@ export async function POST(request) {
         dailyQuotaResetHour:
           dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
+      registerMoonshotFetchersForCreatedNode(node);
       return NextResponse.json({ node }, { status: 201 });
     }
 
@@ -212,6 +234,7 @@ export async function POST(request) {
         dailyQuotaResetHour:
           dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
+      registerMoonshotFetchersForCreatedNode(node);
       return NextResponse.json({ node }, { status: 201 });
     }
 
