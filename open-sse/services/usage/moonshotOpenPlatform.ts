@@ -68,3 +68,9 @@ export function isMoonshotOpenPlatformConnection(
 ): boolean {
   return resolveMoonshotOrigin(connection, nodeBaseUrl) !== null;
 }
+
+/** Account-level empty wallet on Open Platform. Narrower than any compatible 429. */
+export function isMoonshotAccountBalanceExhausted(errorText: string | null | undefined): boolean {
+  const lower = String(errorText || "").toLowerCase();
+  return lower.includes("insufficient balance") || lower.includes("exceeded_current_quota");
+}

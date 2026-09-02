@@ -98,6 +98,7 @@ const QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   // hardcoded (Tier0=1.5M, Tier1+=unlimited).
   /organization TPD rate limit/i,
   /\bTPD rate limit\b/i,
+  /insufficient balance/i,
 ];
 
 /**
@@ -164,6 +165,7 @@ const TERMINAL_QUOTA_PATTERNS: ReadonlyArray<RegExp> = [
   /daily free allocation/i,
   /organization TPD rate limit/i,
   /\bTPD rate limit\b/i,
+  /insufficient balance/i,
 ];
 
 /**

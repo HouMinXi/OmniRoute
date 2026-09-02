@@ -110,3 +110,36 @@ export function parseTpdLimitFromText(text: string): number | null {
   const n = Number(m[1]);
   return Number.isFinite(n) ? n : null;
 }
+
+export function isTpdRateLimit(errorText: string | null | undefined): boolean {
+  return String(errorText || "")
+    .toLowerCase()
+    .includes("tpd rate limit");
+}
+
+export type TpdCooldownOptions = {
+  timezone?: unknown;
+  hour?: unknown;
+  nowMs?: number;
+  headerResetAtMs?: number | null;
+};
+
+/**
+ * Cooldown for a TPD 429. Header reset wins; else the node clock.
+ * Both missing → null (caller uses short 429, does not guess midnight).
+ */
+export function resolveTpdCooldownMs(
+  errorText: string | null | undefined,
+  options: TpdCooldownOptions = {},
+): number | null {
+  if (!isTpdRateLimit(errorText)) return null;
+  const now = options.nowMs ?? Date.now();
+  if (typeof options.headerResetAtMs === "number" && options.headerResetAtMs > now) {
+    return options.headerResetAtMs - now;
+  }
+  if (typeof options.timezone === "string" && isValidResetHour(options.hour)) {
+    if (!nodeDailyResetConfigured(options.timezone, options.hour)) return null;
+    return nextDailyResetAtMs(options.timezone, options.hour, now) - now;
+  }
+  return null;
+}
