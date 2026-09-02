@@ -174,6 +174,7 @@ import { registerBailianCodingPlanQuotaFetcher } from "@omniroute/open-sse/servi
 import { registerQwenTokenPlanQuotaFetcher } from "@omniroute/open-sse/services/qwenTokenPlanQuotaFetcher.ts";
 import { registerCrofUsageFetcher } from "@omniroute/open-sse/services/crofUsageFetcher.ts";
 import { registerDeepseekQuotaFetcher } from "@omniroute/open-sse/services/deepseekQuotaFetcher.ts";
+import { registerMoonshotQuotaFetcher } from "@omniroute/open-sse/services/moonshotQuotaFetcher.ts";
 import { registerOpenrouterQuotaFetcher } from "@omniroute/open-sse/services/openrouterQuotaFetcher.ts";
 import { registerOpencodeQuotaFetcher } from "@omniroute/open-sse/services/opencodeQuotaFetcher.ts";
 import { registerGrokWebQuotaFetcher } from "@omniroute/open-sse/services/grokQuotaFetcher.ts";
@@ -221,6 +222,7 @@ registerCrofUsageFetcher();
 // Register DeepSeek balance quota fetcher.
 // Hooks into quotaPreflight + quotaMonitor so combos can switch accounts before balance is exhausted.
 registerDeepseekQuotaFetcher();
+registerMoonshotQuotaFetcher();
 registerOpenrouterQuotaFetcher();
 
 // Register OpenCode quota fetcher (opencode-go / opencode / opencode-zen).
