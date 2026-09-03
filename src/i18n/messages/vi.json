@@ -5068,6 +5068,9 @@
     "importFromFileImporting": "Đang nhập…",
     "importFromFileImport": "Nhập {count} nhà cung cấp",
     "importFromFileResult": "Đã nhập {success} nhà cung cấp ({failed} không thành công)",
+    "importFromFileDownloadTemplate": "Tải mẫu CSV",
+    "importFromFileMoreErrors": "+{count} nữa",
+    "importFromFileSchemaHint": "Các cột CSV theo vị trí: provider, name, apiKey, baseUrl (tùy chọn), priority (tùy chọn). Cột provider phải là id nhà cung cấp được quản lý hiện có hoặc id nút tương thích OpenAI/Anthropic đã đăng ký — quá trình nhập này không tạo nút endpoint mới.",
     "adaptaTutorial": {
       "title": "How to connect Adapta Web",
       "introPrefix": "Adapta authenticates through Clerk. The token",

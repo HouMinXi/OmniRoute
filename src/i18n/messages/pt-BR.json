@@ -5068,6 +5068,9 @@
     "importFromFileImporting": "Importando…",
     "importFromFileImport": "Importar {count} provedores",
     "importFromFileResult": "{success} provedores importados ({failed} falharam)",
+    "importFromFileDownloadTemplate": "Baixar modelo CSV",
+    "importFromFileMoreErrors": "+{count} mais",
+    "importFromFileSchemaHint": "As colunas CSV são posicionais: provider, name, apiKey, baseUrl (opcional), priority (opcional). A coluna provider deve ser o id de um provedor gerenciado existente ou o id de um nó compatível com OpenAI/Anthropic já registrado — esta importação não cria novos nós de endpoint.",
     "adaptaTutorial": {
       "title": "Como conectar o Adapta Web",
       "introPrefix": "Adapta autentica através do Clerk. O token",
