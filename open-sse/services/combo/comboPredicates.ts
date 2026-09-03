@@ -11,7 +11,11 @@ import { remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { parseModel } from "../model.ts";
 import { isSelfInflictedUpstreamTimeout } from "../../handlers/chatCore/cooldownClassification.ts";
-import { isLocalStreamLifecycleError, isLocalExecutionError } from "@/shared/utils/circuitBreaker";
+import {
+  isLocalStreamLifecycleError,
+  isLocalExecutionError,
+  isModelCapacityOverloadError,
+} from "@/shared/utils/circuitBreaker";
 import { CONTEXT_OVERFLOW_PATTERNS, MODEL_ACCESS_DENIED_PATTERNS } from "../accountFallback.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
@@ -218,7 +222,9 @@ export function shouldRecordProviderBreakerFailure(args: {
     !args.skipProviderBreaker &&
     !args.requestScopedFailure &&
     !isLocalStreamLifecycleError(args.error) &&
-    !isLocalExecutionError(args.error)
+    !isLocalExecutionError(args.error) &&
+    !isModelCapacityOverloadError(args.error) &&
+    !isModelCapacityOverloadError(args.status)
   );
 }
 
@@ -441,10 +447,7 @@ export function quotaRemainingPercentFromQuota(
 
   const windows = record.windows;
   if (windows && typeof windows === "object" && !Array.isArray(windows)) {
-    const fromWindows = remainingPercentFromQuotaWindows(
-      windows as Record<string, unknown>,
-      scope
-    );
+    const fromWindows = remainingPercentFromQuotaWindows(windows as Record<string, unknown>, scope);
     if (fromWindows !== null) return fromWindows;
   }
 

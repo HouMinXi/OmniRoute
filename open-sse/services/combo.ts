@@ -178,6 +178,7 @@ import {
 } from "./combo/validateQuality.ts";
 import {
   resolveComboCooldownWaitDecision,
+  resolveCircuitOpenWaitDecision,
   ResolveComboCooldownDecisionResult,
 } from "./combo/comboCooldownRetry.ts";
 import {
@@ -1133,6 +1134,8 @@ async function handleComboChatInner({
     let lastError: string | null = null;
     let earliestRetryAfter: ComboRetryAfter | null = null;
     let lastStatus: number | null = null;
+    let skippedForCircuitOpen = false;
+    let earliestCircuitOpenRetryMs = 0;
     // #11804: the loop-safety timer is armed per setTry iteration but must be
     // cleared on EVERY exit path, not just the happy one. Hoisted to function
     // scope so the `finally` at the end of this function always reaches it —
@@ -1272,7 +1275,15 @@ async function handleComboChatInner({
         };
 
         const cb = getCircuitBreaker(provider);
-        if (cb.getStatus().state === "OPEN") {
+        const cbStatus = cb.getStatus();
+        if (cbStatus.state === "OPEN") {
+          skippedForCircuitOpen = true;
+          if (
+            cbStatus.retryAfterMs > 0 &&
+            (earliestCircuitOpenRetryMs === 0 || cbStatus.retryAfterMs < earliestCircuitOpenRetryMs)
+          ) {
+            earliestCircuitOpenRetryMs = cbStatus.retryAfterMs;
+          }
           log.info("COMBO", `Skipping ${modelStr} — circuit breaker OPEN for ${provider}`);
           recordComboDecision(traceInvocationId, {
             step: target.executionKey,
@@ -2761,6 +2772,32 @@ async function handleComboChatInner({
 
       // Retry the entire set if more attempts remain
       if (setTry < maxSetRetries) continue;
+
+      if (!lastStatus && recordedAttempts === 0 && comboCooldownWaitEnabled) {
+        const circuitOpenWait = resolveCircuitOpenWaitDecision({
+          skippedForCircuitOpen,
+          retryAfterMs: earliestCircuitOpenRetryMs,
+          attempt: comboCooldownAttempt,
+          budgetLeftMs: comboCooldownBudgetLeftMs,
+          settings: resilienceSettings.comboCooldownWait,
+        });
+        if (circuitOpenWait.wait) {
+          log.info(
+            "COMBO",
+            `${strategy} circuit-open wait: waiting ${Math.ceil(circuitOpenWait.waitMs / 1000)}s then retrying`
+          );
+          const completed = await waitForCooldownAwareRetry(circuitOpenWait.waitMs, signal);
+          if (!completed) {
+            return errorResponse(499, "Request aborted");
+          }
+          comboCooldownAttempt += 1;
+          comboCooldownBudgetLeftMs = Math.max(
+            0,
+            comboCooldownBudgetLeftMs - circuitOpenWait.waitMs
+          );
+          return dispatchWithCooldownRetry();
+        }
+      }
 
       // All set retries exhausted — return the final error
       // #10681: finalize the decision trace (all targets failed or skipped).
