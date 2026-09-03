@@ -2995,7 +2995,13 @@ export async function markAccountUnavailable(
         "AUTH",
         `Model-only lockout for ${provider}:${model} — ${status} ${reason} ${Math.ceil(lockout.cooldownMs / 1000)}s (failureCount=${lockout.failureCount}, connection stays active)`
       );
-      if (isAntigravityQuotaProvider(provider) && lockout.cooldownMs > 0) {
+      // Weekly/plan quota only. RPM 429s stay exact-model (#8630); writing
+      // family PSD here would rehydrate as family:gemini and block siblings.
+      if (
+        isAntigravityQuotaProvider(provider) &&
+        lockout.cooldownMs > 0 &&
+        reason === "quota_exhausted"
+      ) {
         void persistAntigravityFamilyCooldown({
           connectionId,
           model,

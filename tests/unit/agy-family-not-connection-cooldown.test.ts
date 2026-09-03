@@ -130,6 +130,39 @@ test("markConnectionQuotaExhausted with a Gemini model locks the family, not the
   assert.equal(fallback.isModelLocked("agy", connId, "claude-opus-4-6-thinking"), false);
 });
 
+test("Antigravity QPM 429 stays exact-model and does not persist a family cooldown", async () => {
+  fallback.clearAllModelLockouts();
+  const auth = await import("../../src/sse/services/auth.ts");
+  const conn = await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    email: "qpm@example.test",
+    accessToken: "tok-qpm",
+    isActive: true,
+    testStatus: "active",
+  });
+  const connId = (conn as { id: string }).id;
+
+  await auth.markAccountUnavailable(
+    connId,
+    429,
+    "RESOURCE_EXHAUSTED: Resource has been exhausted (queries per minute limit was reached)",
+    "antigravity",
+    "gemini-3-pro"
+  );
+
+  const sibling = await auth.getProviderCredentials("antigravity", null, null, "gemini-2.5-pro");
+  assert.ok(sibling && !("allRateLimited" in sibling && sibling.allRateLimited));
+  assert.equal(sibling.connectionId, connId);
+
+  const fresh = await providersDb.getProviderConnectionById(connId);
+  const psd = (fresh as { providerSpecificData?: Record<string, unknown> }).providerSpecificData;
+  assert.equal(
+    psd && typeof psd === "object" ? psd.antigravityFamilyRateLimitedUntil : undefined,
+    undefined
+  );
+});
+
 test("persisted family cooldown rehydrates after a process-local lockout wipe", async () => {
   fallback.clearAllModelLockouts();
   const conn = await providersDb.createProviderConnection({

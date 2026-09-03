@@ -650,7 +650,9 @@ export async function recordCoreOwnedAntigravityQuotaState({
       exactCooldownIsUpstreamReset: retryHintBypassesMaxCooldownMs(fallback.retryHintSource),
     }
   );
-  if (lockout.cooldownMs > 0) {
+  // RPM / burst 429s stay exact-model (#8630). Family PSD is only for
+  // weekly/plan quota so Gemini does not inherit a Claude window.
+  if (lockout.cooldownMs > 0 && isProviderExhaustedReason(fallback)) {
     void import("./antigravityFamilyCooldown.ts")
       .then(({ persistAntigravityFamilyCooldown }) =>
         persistAntigravityFamilyCooldown({
