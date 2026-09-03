@@ -7,7 +7,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { redactVideoTranscriptFieldsForLog } from "../../../src/lib/guardrails/videoBridgeSnapshotRedaction.ts";
+import {
+  redactVideoTranscriptFieldsForLog,
+  redactPendingBody,
+} from "../../../src/lib/guardrails/videoBridgeSnapshotRedaction.ts";
 // Heavy import is fine here (test only, never in the production module under test) — used
 // solely to prove the local placeholder literal never drifts from the canonical P1 constant.
 import { VIDEO_TRANSCRIPT_REDACTION_PLACEHOLDER } from "../../../src/lib/guardrails/videoBridgeHelpers.ts";
@@ -204,4 +207,58 @@ test("the redaction placeholder matches the canonical P1 constant (no drift)", (
   const result = redactVideoTranscriptFieldsForLog(body);
   const part = contentAt(result, "messages", 0)[0];
   assert.equal(part.transcript, VIDEO_TRANSCRIPT_REDACTION_PLACEHOLDER);
+});
+
+// #12430 item 6 (P2c): the sibling in-memory leak. `trackPendingRequest`
+// (open-sse/handlers/chatCore.ts) stores the same raw client body under
+// `clientRequest`, live-exposed via /api/usage/call-logs (pendingDetails),
+// /api/logs/[id] and /api/conversations while the request is in-flight. This
+// helper is the guarded call-site wrapper chatCore.ts uses, mirroring
+// logClientRawRequestRedacted's observed/non-observed branching.
+test("redactPendingBody: observed=true delegates to redactVideoTranscriptFieldsForLog", () => {
+  const body = {
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_video",
+            video_url: "https://example.com/clip.mp4",
+            transcript: { cues: [{ text: "pending secret" }] },
+          },
+        ],
+      },
+    ],
+  };
+
+  const result = redactPendingBody(body, true);
+  assert.notEqual(
+    result,
+    body,
+    "observed path must return a new structure, not the same reference"
+  );
+  const part = contentAt(result, "messages", 0)[0];
+  assert.equal(part.transcript, VIDEO_TRANSCRIPT_REDACTION_PLACEHOLDER);
+  assert.ok(!JSON.stringify(result).includes("pending secret"));
+  assert.deepEqual(result, redactVideoTranscriptFieldsForLog(body));
+});
+
+test("redactPendingBody: observed=false returns the SAME reference unchanged", () => {
+  const body = {
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "input_video",
+            video_url: "https://example.com/clip.mp4",
+            transcript: { cues: [{ text: "not observed" }] },
+          },
+        ],
+      },
+    ],
+  };
+
+  const result = redactPendingBody(body, false);
+  assert.equal(result, body, "non-observed path must return the exact same reference");
 });

@@ -360,7 +360,10 @@ import { deleteSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
 import { getCacheControlSettings } from "@/lib/cacheControlSettings";
 import { guardrailRegistry } from "@/lib/guardrails";
 import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
-import { logClientRawRequestRedacted } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
+import {
+  logClientRawRequestRedacted,
+  redactPendingBody,
+} from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import {
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
@@ -381,6 +384,7 @@ import { sanitizeOpenAITool } from "../services/toolSchemaSanitizer.ts";
 import { isCompactResponsesEndpoint } from "../executors/codex.ts";
 import { persistCodexChildQuotaResponse } from "../services/codexAccount/index.ts";
 import { invalidateCodexQuotaCache } from "../services/codexQuotaFetcher.ts";
+import { invalidateGenericQuotaCacheOnStatus } from "../services/genericQuotaFetcher.ts";
 import { translateNonStreamingResponse } from "./responseTranslator.ts";
 import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
 import { unwrapClineNonStreamingEnvelope } from "./chatCore/clineResponseEnvelope.ts";
@@ -928,7 +932,7 @@ export async function handleChatCore({
   const pendingRequestId =
     trackPendingRequest(model, provider, pendingConnId, true, {
       clientEndpoint: clientRawRequest?.endpoint || "/v1/chat/completions",
-      clientRequest: clientRawRequest?.body ?? body,
+      clientRequest: redactPendingBody(clientRawRequest?.body ?? body, videoBridgeObserved),
       providerRequest: initialProviderRequest,
       stage: "registered",
       correlationId,
@@ -3236,6 +3240,14 @@ export async function handleChatCore({
                   const errMessage = err instanceof Error ? err.message : String(err);
                   log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
                 }
+              } else if (attemptConnectionId && res.response.status === 429) {
+                // Dropped generic quota cache after 429
+                invalidateGenericQuotaCacheOnStatus({
+                  provider,
+                  connectionId: String(attemptConnectionId),
+                  status: res.response.status,
+                  isolateProbe: await shouldIsolateProbeFailures(),
+                });
               }
 
               // Track Gemini RPM + RPD request counts for 429 classification

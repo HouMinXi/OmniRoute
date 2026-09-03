@@ -133,3 +133,17 @@ export function logClientRawRequestRedacted(
     clientRawRequest.headers
   );
 }
+
+/**
+ * Call-site wrapper for the `clientRequest` field stored by `trackPendingRequest`
+ * (open-sse/handlers/chatCore.ts): the sibling in-memory leak to
+ * `logClientRawRequestRedacted` above — same raw body, but live-exposed via
+ * /api/usage/call-logs (pendingDetails), /api/logs/[id] and /api/conversations
+ * while the request is in-flight, not just in the persisted detailed-log
+ * snapshot. Identical observed/non-observed branching: a non-observed request
+ * keeps the exact same reference (no clone); an observed one gets the redacted
+ * clone.
+ */
+export function redactPendingBody(clientRequest: unknown, videoBridgeObserved: boolean): unknown {
+  return videoBridgeObserved ? redactVideoTranscriptFieldsForLog(clientRequest) : clientRequest;
+}
