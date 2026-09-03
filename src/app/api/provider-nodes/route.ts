@@ -48,24 +48,25 @@ function sanitizeVibeProxyBaseUrl(baseUrl: string) {
   return `${base}/v1`;
 }
 
-function registerMoonshotFetchersForCreatedNode(node: {
+async function registerMoonshotFetchersForCreatedNode(node: {
   id?: unknown;
   prefix?: unknown;
   baseUrl?: unknown;
-}): void {
-  void import("@omniroute/open-sse/services/moonshotQuotaFetcher.ts")
-    .then(({ registerMoonshotFetchersForNodes }) => {
-      registerMoonshotFetchersForNodes([
-        {
-          id: typeof node.id === "string" ? node.id : null,
-          prefix: typeof node.prefix === "string" ? node.prefix : null,
-          baseUrl: typeof node.baseUrl === "string" ? node.baseUrl : null,
-        },
-      ]);
-    })
-    .catch((error) => {
-      console.warn("Moonshot fetcher register after node create skipped:", error);
-    });
+}): Promise<void> {
+  try {
+    const { registerMoonshotFetchersForNodes } = await import(
+      "@omniroute/open-sse/services/moonshotQuotaFetcher.ts"
+    );
+    registerMoonshotFetchersForNodes([
+      {
+        id: typeof node.id === "string" ? node.id : null,
+        prefix: typeof node.prefix === "string" ? node.prefix : null,
+        baseUrl: typeof node.baseUrl === "string" ? node.baseUrl : null,
+      },
+    ]);
+  } catch (error) {
+    console.warn("Moonshot fetcher register after node create skipped:", error);
+  }
 }
 
 function sanitizeAnthropicBaseUrl(baseUrl: string) {
@@ -171,7 +172,7 @@ export async function POST(request) {
         dailyQuotaResetHour:
           dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
-      registerMoonshotFetchersForCreatedNode(node);
+      await registerMoonshotFetchersForCreatedNode(node);
       return NextResponse.json({ node }, { status: 201 });
     }
 
@@ -200,7 +201,7 @@ export async function POST(request) {
         dailyQuotaResetHour:
           dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
-      registerMoonshotFetchersForCreatedNode(node);
+      await registerMoonshotFetchersForCreatedNode(node);
       return NextResponse.json({ node }, { status: 201 });
     }
 
@@ -234,7 +235,7 @@ export async function POST(request) {
         dailyQuotaResetHour:
           dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,
       });
-      registerMoonshotFetchersForCreatedNode(node);
+      await registerMoonshotFetchersForCreatedNode(node);
       return NextResponse.json({ node }, { status: 201 });
     }
 

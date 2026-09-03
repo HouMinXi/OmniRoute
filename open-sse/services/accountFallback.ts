@@ -1967,6 +1967,10 @@ export function checkFallbackError(
         });
         if (tpdMs == null) {
           // no clock, no header — short 429, do not guess midnight
+          console.warn(
+            "[accountFallback] TPD 429 without node daily-reset clock or Reset header; using short cooldown",
+            { provider },
+          );
         } else {
           return {
             shouldFallback: true,

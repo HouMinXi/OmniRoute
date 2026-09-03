@@ -64,6 +64,7 @@ interface AccountQuotaConnection {
   id: string;
   provider: string;
   lookupFailed?: boolean;
+  providerSpecificData?: unknown;
 }
 
 function toNumber(value: unknown, fallback = 0): number {
@@ -215,7 +216,7 @@ function isSupportedProvider(
   return supportsProviderQuota(provider, connection);
 }
 
-function getConnectionIdentity(value: unknown): { id: string; provider: string } | null {
+function getConnectionIdentity(value: unknown): AccountQuotaConnection | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const record = value as JsonRecord;
   if (record.isActive === false) return null;
@@ -224,7 +225,11 @@ function getConnectionIdentity(value: unknown): { id: string; provider: string }
   const provider = typeof record.provider === "string" ? record.provider : "";
   if (!id || !provider) return null;
 
-  return { id, provider };
+  return {
+    id,
+    provider,
+    providerSpecificData: record.providerSpecificData,
+  };
 }
 
 async function listAccountQuotaConnections(
@@ -300,7 +305,7 @@ async function resolveConnectionAccountQuota(
     };
   }
 
-  if (!isSupportedProvider(connection.provider)) {
+  if (!isSupportedProvider(connection.provider, connection)) {
     return {
       provider: connection.provider,
       connectionId: connection.id,

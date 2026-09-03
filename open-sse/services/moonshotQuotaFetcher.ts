@@ -170,6 +170,7 @@ export async function getMoonshotOpenPlatformUsage(
   }
   const domestic = origin.includes("moonshot.cn");
   const plan = domestic ? "Kimi 开放平台（国内）" : "Kimi Open Platform";
+  const currency = domestic ? "CNY" : "USD";
   const quotas: Record<string, UsageQuota> = {
     available: {
       used: 0,
@@ -178,7 +179,7 @@ export async function getMoonshotOpenPlatformUsage(
       remainingPercentage: quota.limitReached ? 0 : 100,
       resetAt: null,
       unlimited: true,
-      currency: "USD",
+      currency,
     },
     voucher: {
       used: 0,
@@ -187,7 +188,7 @@ export async function getMoonshotOpenPlatformUsage(
       remainingPercentage: 100,
       resetAt: null,
       unlimited: true,
-      currency: "USD",
+      currency,
     },
     cash: {
       used: 0,
@@ -196,7 +197,7 @@ export async function getMoonshotOpenPlatformUsage(
       remainingPercentage: 100,
       resetAt: null,
       unlimited: true,
-      currency: "USD",
+      currency,
     },
   };
   return { plan, quotas, limitReached: quota.limitReached };

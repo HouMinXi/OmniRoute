@@ -109,6 +109,34 @@ test("getMoonshotOpenPlatformUsage uses Open Platform plan label for .ai host", 
   invalidateMoonshotQuotaCache(connectionId);
 });
 
+test("domestic Moonshot balance is labeled CNY, international USD", async () => {
+  const cnId = `ms-cny-${Date.now()}`;
+  globalThis.fetch = async () =>
+    jsonResponse({
+      code: 0,
+      data: { available_balance: 15, voucher_balance: 15, cash_balance: 0 },
+      status: true,
+    });
+  const cn = await getMoonshotOpenPlatformUsage({
+    id: cnId,
+    provider: COMPAT,
+    apiKey: "sk-test",
+    providerSpecificData: { baseUrl: CN },
+  });
+  assert.equal(cn.quotas?.available?.currency, "CNY");
+  invalidateMoonshotQuotaCache(cnId);
+
+  const aiId = `ms-usd-${Date.now()}`;
+  const ai = await getMoonshotOpenPlatformUsage({
+    id: aiId,
+    provider: "moonshot",
+    apiKey: "sk-test",
+    providerSpecificData: { baseUrl: "https://api.moonshot.ai/v1" },
+  });
+  assert.equal(ai.quotas?.available?.currency, "USD");
+  invalidateMoonshotQuotaCache(aiId);
+});
+
 test("registerMoonshotQuotaFetcher wires moonshot and kimi ids", () => {
   registerMoonshotQuotaFetcher();
   assert.equal(typeof getQuotaFetcher("moonshot"), "function");
