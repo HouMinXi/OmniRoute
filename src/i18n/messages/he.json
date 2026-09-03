@@ -6239,6 +6239,7 @@
       "requesty": "צור מפתח API בכתובת https://app.requesty.ai, ולאחר מכן הדבק אותו כאן כ-Bearer token. נקודת קצה תואמת OpenAI בכתובת https://router.requesty.ai/v1, עם קטלוג /v1/models חי.",
       "runwayml": "יצירת וידאו ב-Runway מבוססת משימות. OmniRoute שולח משימות text-to-video או image-to-video, דוגם את /v1/tasks/[id], ומנרמל את פלטי הווידאו המוגמרים בחזרה לתגובה דמוית OpenAI של /v1/videos/generations.",
       "sambanova": "קרדיט חינם בסך $5 בהרשמה (תוקף ל-30 יום), ללא צורך בכרטיס אשראי",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "גילוי מודלים משתמש ב-/v2/lm/scenarios/foundation-models/models ב-AI_API_URL. בקשות צ'אט משתמשות ב-deploymentUrl/chat/completions ודורשות את AI-Resource-Group.",
       "sarvam": "Sarvam AI תואם ל-OpenAI ב-/v1. OmniRoute סורק את /v1/models ומנתב את תנועת השיחה ל-/v1/chat/completions. המודלים מותאמים לשפות אינדיות.",
       "scaleway": "1M טוקנים בחינם לחשבונות חדשים — תואם EU/GDPR (פריז), Qwen3 235B ו-Llama 70B",

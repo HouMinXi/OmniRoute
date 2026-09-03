@@ -6239,6 +6239,7 @@
       "requesty": "Créez une clé API sur https://app.requesty.ai, puis collez-la ici en tant que jeton Bearer. Point de terminaison compatible OpenAI sur https://router.requesty.ai/v1, avec un catalogue /v1/models en direct.",
       "runwayml": "La génération de vidéos Runway est basée sur des tâches. OmniRoute soumet des tâches text-to-video ou image-to-video, interroge /v1/tasks/[id] et normalise les sorties vidéo terminées dans la réponse de type OpenAI /v1/videos/generations.",
       "sambanova": "5 $ de crédits gratuits à l'inscription (validité de 30 jours), aucune carte de crédit requise",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "La découverte de modèles utilise /v2/lm/scenarios/foundation-models/models sur AI_API_URL. Les requêtes de chat utilisent deploymentUrl/chat/completions et nécessitent AI-Resource-Group.",
       "sarvam": "Sarvam AI est compatible avec OpenAI sur /v1. OmniRoute interroge /v1/models et achemine le trafic de chat vers /v1/chat/completions. Les modèles sont optimisés pour les langues indiennes.",
       "scaleway": "1M de tokens gratuits pour les nouveaux comptes — conforme UE/RGPD (Paris), Qwen3 235B & Llama 70B",

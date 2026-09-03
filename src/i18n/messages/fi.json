@@ -6239,6 +6239,7 @@
       "requesty": "Luo API-avain osoitteessa https://app.requesty.ai ja liitä se sitten tähän Bearer-tokenina. OpenAI-yhteensopiva päätepiste osoitteessa https://router.requesty.ai/v1 reaaliaikaisella /v1/models-luettelolla.",
       "runwayml": "Runway-videonluonti on tehtäväpohjaista. OmniRoute lähettää teksti-videoksi- tai kuva-videoksi -töitä, kyselyttää polkua /v1/tasks/[id] ja normalisoi valmiit videotulosteet takaisin OpenAI-tyyliseen /v1/videos/generations-vastaukseen.",
       "sambanova": "$5 ilmaista saldoa rekisteröitymisen yhteydessä (voimassa 30 päivää), luottokorttia ei vaadita",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "Mallien haku käyttää polkua /v2/lm/scenarios/foundation-models/models osoitteessa AI_API_URL. Chat-pyynnöt käyttävät polkua deploymentUrl/chat/completions ja vaativat AI-Resource-Group-otsakkeen.",
       "sarvam": "Sarvam AI on OpenAI-yhteensopiva /v1:ssä. OmniRoute tutkii /v1/malleja ja ohjaa keskusteluliikennettä /v1/chat/completions:iin. Mallit on säädetty indialaisille kielille.",
       "scaleway": "1M ilmaista tokenia uusille tileille — EU/GDPR-yhteensopiva (Pariisi), Qwen3 235B & Llama 70B",

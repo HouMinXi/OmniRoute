@@ -6239,6 +6239,7 @@
       "requesty": "https://app.requesty.ai adresinde bir API anahtarı oluşturun, ardından buraya Bearer token olarak yapıştırın. OpenAI uyumlu uç nokta, canlı bir /v1/models kataloğu ile birlikte https://router.requesty.ai/v1 adresindedir.",
       "runwayml": "Runway video üretimi görev tabanlıdır. OmniRoute, metinden videoya veya görselden videoya işleri gönderir, /v1/tasks/[id] uç noktasını sorgular ve tamamlanan video çıktılarını OpenAI benzeri /v1/videos/generations yanıtına normalleştirir.",
       "sambanova": "Kayıt olunduğunda $5 ücretsiz kredi (30 gün geçerli), kredi kartı gerekmez",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "Model keşfi, AI_API_URL üzerindeki /v2/lm/scenarios/foundation-models/models yolunu kullanır. Sohbet istekleri deploymentUrl/chat/completions yolunu kullanır ve AI-Resource-Group gerektirir.",
       "sarvam": "Sarvam AI, OpenAI ile uyumludur ve /v1 üzerinde çalışır. OmniRoute, /v1/models'ı sorgular ve sohbet trafiğini /v1/chat/completions'a yönlendirir. Modeller, Hint dilleri için ayarlanmıştır.",
       "scaleway": "Yeni hesaplar için 1M ücretsiz token — AB/GDPR uyumlu (Paris), Qwen3 235B & Llama 70B",

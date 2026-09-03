@@ -6240,6 +6240,7 @@
       "requesty": "Tạo khóa API tại https://app.requesty.ai, rồi dán dưới dạng token Bearer. Endpoint tương thích OpenAI tại https://router.requesty.ai/v1, kèm danh mục /v1/models trực tiếp.",
       "runwayml": "Tạo video Runway hoạt động theo tác vụ. OmniRoute gửi tác vụ chuyển văn bản hoặc hình ảnh thành video, thăm dò /v1/tasks/[id], rồi chuẩn hóa đầu ra hoàn tất về phản hồi /v1/videos/generations kiểu OpenAI.",
       "sambanova": "5 USD tín dụng miễn phí khi đăng ký (có hiệu lực 30 ngày), không cần thẻ tín dụng",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "Khám phá mô hình dùng /v2/lm/scenarios/foundation-models/models trên AI_API_URL. Yêu cầu trò chuyện dùng deploymentUrl/chat/completions và yêu cầu AI-Resource-Group.",
       "sarvam": "Sarvam AI tương thích OpenAI trên /v1. OmniRoute thăm dò /v1/models và định tuyến trò chuyện tới /v1/chat/completions. Các mô hình được tinh chỉnh cho ngôn ngữ Ấn Độ.",
       "scaleway": "1 triệu token miễn phí cho tài khoản mới — tuân thủ EU/GDPR (Paris), Qwen3 235B và Llama 70B",

@@ -6239,6 +6239,7 @@
       "requesty": "สร้างคีย์ API ที่ https://app.requesty.ai จากนั้นวางที่นี่เป็นโทเค็น Bearer ปลายทางที่เข้ากันได้กับ OpenAI อยู่ที่ https://router.requesty.ai/v1 พร้อมแคตตาล็อก /v1/models แบบสด",
       "runwayml": "การสร้างวิดีโอของ Runway เป็นแบบอิงตามงาน OmniRoute จะส่งงาน text-to-video หรือ image-to-video ดึงข้อมูลสถานะ /v1/tasks/[id] เป็นระยะ และปรับเอาต์พุตวิดีโอที่เสร็จสมบูรณ์ให้อยู่ในรูปแบบการตอบกลับ /v1/videos/generations ที่คล้ายกับ OpenAI",
       "sambanova": "เครดิตฟรี $5 เมื่อลงทะเบียน (มีอายุ 30 วัน) ไม่ต้องใช้บัตรเครดิต",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "การค้นหาโมเดลใช้ /v2/lm/scenarios/foundation-models/models บน AI_API_URL คำขอแชทใช้ deploymentUrl/chat/completions และต้องระบุ AI-Resource-Group",
       "sarvam": "Sarvam AI เข้ากันได้กับ OpenAI ที่ /v1. OmniRoute ตรวจสอบ /v1/models และจัดเส้นทางการสนทนาไปยัง /v1/chat/completions. โมเดลได้รับการปรับแต่งสำหรับภาษาอินดิก.",
       "scaleway": "โทเค็นฟรี 1M สำหรับบัญชีใหม่ — สอดคล้องตาม EU/GDPR (ปารีส), Qwen3 235B & Llama 70B",

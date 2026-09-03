@@ -1,4 +1,5 @@
 {
+  "_rebaseline_2026_09_02_11786_seekai_provider": "PR #11786 (feat/11786-seekai-provider, closes #11786) own growth: src/shared/constants/providers/apikey/gateways.ts 1438->1458 (check-file-size split-newline=1459; the seekai APIKEY_PROVIDERS_GATEWAYS catalog entry plus authHint, additive data at the existing registry chokepoint, same god-file no-split rationale as prior gateways.ts rebaselines: #10987 logfare, #10531 freebuff). Covered by tests/unit/seekai-provider.test.ts.",
   "_rebaseline_2026_09_02_12429_wreq_migration_suite": "PR #12429 (wreq-js web-cookie transport): new test file tests/unit/tls-client-wreq-migration.test.ts at 1374 lines, above the 1200 new-file testCap. Frozen rather than split: it is the single cohesive regression suite for the transport migration (31 cases covering streaming, fragmented EOF sentinels, proxy isolation, first-byte and hard deadlines, binary responses and cancellation), and the cases share the native-transport harness the file sets up once. Splitting it during a merge would duplicate that harness across files for no coverage gain. Entered at the exact LOC, so it can only ratchet down from here.",
   "_rebaseline_2026_09_02_12239_chatgpt_web_cleanroom": "PR #12239 (backryun, codex/restore-chatgpt-web-cleanroom) own growth at the two existing chat chokepoints for the clean-room ChatGPT Web transport: src/sse/handlers/chat.ts 2384->2424 (+40); open-sse/handlers/chatCore.ts 5946->5976 (+30). Additive dispatch wiring; the retirement guard is narrowed to the GPL-derived cgpt-web alias rather than removed, so #11754's provenance decision still holds for the old implementation. Same own-growth rationale as _rebaseline_2026_08_20_10531_freebuff_provider.",
   "_rebaseline_2026_09_02_12412_grok_web_prettier": "PR #12412 (repository Prettier style applied to tests/unit/grok-web.test.ts): the reformat expands the file +277 lines (2436 -> 2713) with an identical parsed AST — no production code, no assertion changes. Cap set to 2985 rather than the exact 2713 on the operator's instruction (2026-09-02): ~10% headroom so routine additions to this suite do not re-trip the gate on formatting alone. Previous cap 2437. This is a deliberate exception to the down-only ratchet for one reformatted test file; every other entry keeps the #12411 tightening.",
@@ -449,7 +450,7 @@
     "src/lib/tailscaleTunnel.ts": 1208,
     "src/lib/tokenHealthCheck.ts": 1218,
     "src/shared/components/RequestLoggerV2.tsx": 1718,
-    "src/shared/constants/providers/apikey/gateways.ts": 1439,
+    "src/shared/constants/providers/apikey/gateways.ts": 1459,
     "src/shared/services/cliRuntime.ts": 1296,
     "src/sse/handlers/chat.ts": 2424,
     "src/sse/services/auth.ts": 3427,

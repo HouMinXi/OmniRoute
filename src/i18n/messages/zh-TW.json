@@ -6239,6 +6239,7 @@
       "requesty": "在 https://app.requesty.ai 建立 API 金鑰，然後以 Bearer token 形式貼上。OpenAI 相容端點為 https://router.requesty.ai/v1，附即時 /v1/models 目錄。",
       "runwayml": "Runway 影片生成為任務導向。OmniRoute 提交文字轉影片或圖片轉影片作業，輪詢 /v1/tasks/[id]，並將完成的影片輸出正規化為類似 OpenAI 的 /v1/videos/generations 回應。",
       "sambanova": "註冊即贈 $5 美元免費額度（30 天有效期），無需信用卡",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "模型探索使用 AI_API_URL 上的 /v2/lm/scenarios/foundation-models/models。聊天請求使用 deploymentUrl/chat/completions，並需要 AI-Resource-Group。",
       "sarvam": "使用API Key連接Sarvam AI。",
       "scaleway": "新帳戶贈送 100 萬免費 tokens — 符合歐盟/GDPR 規範（巴黎），Qwen3 235B 和 Llama 70B",

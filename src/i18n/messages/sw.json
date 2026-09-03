@@ -6239,6 +6239,7 @@
       "requesty": "Unda ufunguo wa API kwenye https://app.requesty.ai, kisha ubandike hapa kama tokeni ya Bearer. Endpoint inayooana na OpenAI iko kwenye https://router.requesty.ai/v1, ikiwa na orodha ya moja kwa moja ya /v1/models.",
       "runwayml": "Uzalishaji wa video wa Runway unategemea kazi. OmniRoute huwasilisha kazi za maandishi-hadi-video au picha-hadi-video, huangalia mara kwa mara /v1/tasks/[id], na kurekebisha matokeo ya video yaliyokamilika kurudi kwenye jibu la /v1/videos/generations linalofanana na OpenAI.",
       "sambanova": "Salio la bure la $5 unapojisajili (uhalali wa siku 30), hakuna kadi ya mkopo inayohitajika",
+      "seekai": "Create an API key at https://seekai.cc, then paste it here as a Bearer token. OpenAI-compatible base URL: https://seekai.cc/v1.",
       "sap": "Ugunduzi wa miundo hutumia /v2/lm/scenarios/foundation-models/models kwenye AI_API_URL. Maombi ya gumzo hutumia deploymentUrl/chat/completions na yanahitaji AI-Resource-Group.",
       "sarvam": "Sarvam AI inapatana na OpenAI kwenye /v1. OmniRoute inachunguza /v1/models na kuelekeza trafiki ya mazungumzo kwenye /v1/chat/completions. Mifano imeboreshwa kwa lugha za Kihindi.",
       "scaleway": "Tokeni 1M za bure kwa akaunti mpya — inatii EU/GDPR (Paris), Qwen3 235B & Llama 70B",
