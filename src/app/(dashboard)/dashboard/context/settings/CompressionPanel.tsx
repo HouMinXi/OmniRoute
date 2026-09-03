@@ -215,7 +215,9 @@ export default function CompressionPanel() {
   const [saving, setSaving] = useState(false);
   const [status, setStatus] = useState<"" | "saved" | "error">("");
   const configRef = useRef(config);
-  configRef.current = config;
+  useEffect(() => {
+    configRef.current = config;
+  }, [config]);
   const saveGenRef = useRef(0);
   const lastConfirmedRef = useRef(config);
   const lastAckedGenRef = useRef(0);
