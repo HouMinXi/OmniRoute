@@ -81,6 +81,11 @@ test("missing/unknown reason (null) → no wait (only an explicit transient reas
   assert.equal(r.wait, false);
 });
 
+test("reason circuit_open is eligible (whole-provider breaker OPEN is a short reset)", () => {
+  const r = shouldWaitForComboCooldown(baseInput({ reason: "circuit_open" }) as never);
+  assert.equal(r.wait, true);
+});
+
 test("waitMs above the configured ceiling → no wait", () => {
   const r = shouldWaitForComboCooldown(
     baseInput({ waitMs: 5001, settings: baseSettings({ maxWaitMs: 5000 }) }) as never
@@ -294,7 +299,7 @@ test("circuit-open skip with a short breaker reset → wait", () => {
   const r = resolveCircuitOpenWaitDecision(circuitOpenInput() as never);
   assert.equal(r.wait, true);
   assert.equal(r.waitMs, 30_000 + M);
-  assert.equal(r.reason, "overloaded");
+  assert.equal(r.reason, "circuit_open");
 });
 
 test("circuit-open skip is ignored when no target was skipped for circuit_open", () => {

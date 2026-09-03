@@ -56,6 +56,7 @@ export const COMBO_COOLDOWN_RETRYABLE_REASONS: ReadonlySet<string> = new Set([
   "transient",
   "overloaded",
   "server_error",
+  "circuit_open",
 ]);
 
 export interface ComboCooldownWaitSettings {
@@ -281,11 +282,11 @@ export function resolveCircuitOpenWaitDecision(
   if (retryAfterMs <= 0) return { wait: false, waitMs: 0, reason: null };
   const waitMs = retryAfterMs + COMBO_COOLDOWN_WAIT_MARGIN_MS;
   const decision = shouldWaitForComboCooldown({
-    reason: "overloaded",
+    reason: "circuit_open",
     waitMs,
     attempt: input.attempt,
     budgetLeftMs: input.budgetLeftMs,
     settings: input.settings,
   });
-  return { ...decision, reason: "overloaded" };
+  return { ...decision, reason: "circuit_open" };
 }
