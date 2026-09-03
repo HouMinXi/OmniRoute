@@ -2,7 +2,7 @@
  * Persist Antigravity/agy quota cooldowns per model family (gemini vs claude)
  * on the connection row, without cooling the whole account.
  */
-import { lockModel, isModelLocked } from "./accountFallback.ts";
+import { lockModel } from "./accountFallback.ts";
 import {
   getAntigravityQuotaFamily,
   isAntigravityQuotaProvider,
@@ -29,6 +29,16 @@ function parseUntilMs(value: unknown): number {
 
 function dummyModelForFamily(family: "gemini" | "claude"): string {
   return family === "gemini" ? "gemini-family-lock" : "claude-family-lock";
+}
+
+function lockAntigravityFamilyModel(
+  connectionId: string,
+  model: string,
+  reason: string,
+  cooldownMs: number
+): void {
+  lockModel("agy", connectionId, model, reason, cooldownMs);
+  lockModel("antigravity", connectionId, model, reason, cooldownMs);
 }
 
 export async function persistAntigravityFamilyCooldown(params: {
@@ -90,7 +100,7 @@ export async function persistAntigravityPreflightFamilyLock(params: {
   unavailableUntil: string;
 }): Promise<void> {
   const cooldownMs = Math.max(0, Date.parse(params.unavailableUntil) - Date.now());
-  lockModel(params.provider, params.connectionId, params.model, "quota_exhausted", cooldownMs);
+  lockAntigravityFamilyModel(params.connectionId, params.model, "quota_exhausted", cooldownMs);
   await persistAntigravityFamilyCooldown({
     connectionId: params.connectionId,
     model: params.model,
@@ -111,10 +121,7 @@ export function rehydrateAntigravityFamilyLocks(
     if (!Number.isFinite(untilMs) || untilMs <= now) continue;
     const model = dummyModelForFamily(family);
     const remainingMs = untilMs - now;
-    for (const lockProvider of [provider, provider === "agy" ? "antigravity" : "agy"]) {
-      if (isModelLocked(lockProvider, connectionId, model)) continue;
-      lockModel(lockProvider, connectionId, model, "quota_exhausted", remainingMs);
-    }
+    lockAntigravityFamilyModel(connectionId, model, "quota_exhausted", remainingMs);
   }
 }
 
@@ -139,8 +146,7 @@ export function markAntigravityModelQuotaExhausted(
   model?: string | null
 ): boolean {
   if (!model) return false;
-  lockModel("agy", connectionId, model, "quota_exhausted", retryAfterMs);
-  lockModel("antigravity", connectionId, model, "quota_exhausted", retryAfterMs);
+  lockAntigravityFamilyModel(connectionId, model, "quota_exhausted", retryAfterMs);
   persistAntigravityFamilyCooldownIfQuota({
     provider: "agy",
     connectionId,
