@@ -68,6 +68,7 @@
       "tests/unit/agentrouter-lock-scope-10334.test.ts",
       "tests/unit/alibaba-free-tier-exhaustion.test.ts",
       "tests/unit/anthropic-thinking-signature-recovery.test.ts",
+      "tests/unit/agy-family-not-connection-cooldown.test.ts",
       "tests/unit/antigravity-429-quota-cooldown.test.ts",
       "tests/unit/antigravity-429-quota-tdd.test.ts",
       "tests/unit/antigravity-prefer-stored-project.test.ts",

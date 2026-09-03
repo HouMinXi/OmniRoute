@@ -25,10 +25,53 @@ import {
   type QuotaInfo,
 } from "./quotaPreflight.ts";
 
+type UsageFetcher = (
+  connection: Parameters<typeof getUsageForProvider>[0],
+  options?: { forceRefresh?: boolean }
+) => Promise<unknown>;
+
+let usageFetcherOverride: UsageFetcher | null = null;
+
 // 60s — matches Codex's TTL. Long enough to avoid hammering upstream usage
 // endpoints on every routing decision, short enough that a near-exhausted
 // account is skipped within one minute of crossing its threshold.
 const CACHE_TTL_MS = 60_000;
+/** Drop unused force-refresh flags once inner provider caches (60s–5min) have expired. */
+const PENDING_FORCE_REFRESH_TTL_MS = CACHE_TTL_MS * 5;
+/** key → Date.now() when invalidate asked the next fetch to force-refresh. */
+const pendingForceRefresh = new Map<string, number>();
+/** key → last convert-null / throw while force-refresh was pending. */
+const pendingForceRefreshMiss = new Map<string, number>();
+
+/** Test-only: inject the usage dispatcher; pass null to restore. */
+export function __setGenericUsageFetcherForTests(fetcher: UsageFetcher | null): void {
+  usageFetcherOverride = fetcher;
+}
+
+/** Test-only: backdate a pending force-refresh so TTL expiry is unit-testable. */
+export function __agePendingForceRefreshForTests(
+  provider: string,
+  connectionId: string,
+  ageMs: number
+): void {
+  pendingForceRefresh.set(cacheKey(provider, connectionId), Date.now() - ageMs);
+}
+
+/** Test-only: backdate a convert-null miss so the 60s hammer-guard is unit-testable. */
+export function __agePendingForceRefreshMissForTests(
+  provider: string,
+  connectionId: string,
+  ageMs: number
+): void {
+  pendingForceRefreshMiss.set(cacheKey(provider, connectionId), Date.now() - ageMs);
+}
+
+/** Test-only: drop all wrapper/flag maps so tests cannot leak across ids. */
+export function __resetGenericQuotaFetcherForTests(): void {
+  cache.clear();
+  pendingForceRefresh.clear();
+  pendingForceRefreshMiss.clear();
+}
 
 interface CacheEntry {
   quota: QuotaInfo;
@@ -38,14 +81,71 @@ interface CacheEntry {
 const cache = new Map<string, CacheEntry>();
 
 function cacheKey(provider: string, connectionId: string): string {
-  return `${provider}::${connectionId}`;
+  return `${provider.trim()}::${connectionId.trim()}`;
 }
 
-// Auto-cleanup stale entries — same shape as codexQuotaFetcher.
+function dropExpiredPendingForceRefresh(key: string, now: number): boolean {
+  const stampedAt = pendingForceRefresh.get(key);
+  if (stampedAt === undefined) return true;
+  if (now - stampedAt > PENDING_FORCE_REFRESH_TTL_MS) {
+    pendingForceRefresh.delete(key);
+    pendingForceRefreshMiss.delete(key);
+    return true;
+  }
+  return false;
+}
+
+// Lazy expiry on read — same as the provider breaker. Name stays `is*` because
+// callers only need a boolean; the map is not a public API.
+function isPendingForceRefresh(key: string, now: number = Date.now()): boolean {
+  if (dropExpiredPendingForceRefresh(key, now)) return false;
+  return pendingForceRefresh.has(key);
+}
+
+function markPendingForceRefreshMiss(key: string): void {
+  if (isPendingForceRefresh(key)) pendingForceRefreshMiss.set(key, Date.now());
+}
+
+function cachedQuotaIfFresh(
+  key: string,
+  forceRefresh: boolean,
+  now: number
+): QuotaInfo | null {
+  if (forceRefresh) return null;
+  const cached = cache.get(key);
+  if (cached && now - cached.fetchedAt < CACHE_TTL_MS) return cached.quota;
+  return null;
+}
+
+function isForceRefreshMissCooling(
+  key: string,
+  forceRefresh: boolean,
+  now: number
+): boolean {
+  if (!forceRefresh) return false;
+  const missedAt = pendingForceRefreshMiss.get(key);
+  return missedAt !== undefined && now - missedAt < CACHE_TTL_MS;
+}
+
+/** True when a concurrent 429 re-stamped a still-live flag during fetchUsage. */
+function isConcurrentForceRefresh(key: string, refreshStamp: number | undefined): boolean {
+  const currentStamp = pendingForceRefresh.get(key);
+  if (currentStamp === refreshStamp) return false;
+  return (
+    currentStamp !== undefined &&
+    Date.now() - currentStamp <= PENDING_FORCE_REFRESH_TTL_MS
+  );
+}
+
+// 5min — same as Codex. Expiry is lazy on read (`isPendingForceRefresh`);
+// this timer only reaps keys nobody fetches after the 5min TTL.
 const _cacheCleanup = setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of cache) {
     if (now - entry.fetchedAt > CACHE_TTL_MS * 5) cache.delete(key);
+  }
+  for (const key of pendingForceRefresh.keys()) {
+    dropExpiredPendingForceRefresh(key, now);
   }
 }, 5 * 60_000);
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
@@ -217,24 +317,47 @@ function normalizeQuotaWindows(
 export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) => {
   if (!connection) return null;
   const conn = connection as ConnectionInputs;
-  const provider = typeof conn.provider === "string" ? conn.provider : null;
+  const provider = typeof conn.provider === "string" ? conn.provider.trim() : "";
   if (!provider) return null;
 
   const key = cacheKey(provider, connectionId);
-  const cached = cache.get(key);
-  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
-    return cached.quota;
-  }
+  const now = Date.now();
+  const forceRefresh = isPendingForceRefresh(key, now);
+  const hit = cachedQuotaIfFresh(key, forceRefresh, now);
+  if (hit) return hit;
+  // convert-null / throw keep the force-refresh flag (agy inner caches are
+  // still stale) but must not hammer those endpoints on every routing tick.
+  if (isForceRefreshMissCooling(key, forceRefresh, now)) return null;
+
+  // Capture before await: a 429 during fetchUsage re-stamps this; writing
+  // the pre-429 snapshot would wipe that flag and recache stale quota.
+  const refreshStamp = pendingForceRefresh.get(key);
 
   let usage: unknown;
   try {
-    usage = await getUsageForProvider(conn as Parameters<typeof getUsageForProvider>[0]);
+    const fetchUsage = usageFetcherOverride ?? getUsageForProvider;
+    usage = await fetchUsage(conn as Parameters<typeof getUsageForProvider>[0], {
+      ...(forceRefresh ? { forceRefresh: true } : {}),
+    });
   } catch {
+    markPendingForceRefreshMiss(key);
     return null;
   }
 
   const quota = convertUsageToQuotaInfo(usage);
-  if (!quota) return null;
+  if (!quota) {
+    markPendingForceRefreshMiss(key);
+    return null;
+  }
+
+  // Concurrent 429 re-stamped a still-live flag — do not recache the
+  // pre-429 snapshot. A vanished or expired stamp is not a 429.
+  if (isConcurrentForceRefresh(key, refreshStamp)) {
+    return quota;
+  }
+
+  pendingForceRefresh.delete(key);
+  pendingForceRefreshMiss.delete(key);
 
   // Refresh the static window catalog so the dashboard can render the right
   // modal inputs without waiting for the user to open the page.
@@ -250,7 +373,33 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
  * fresh data instead of a 60s stale window.
  */
 export function invalidateGenericQuotaCache(provider: string, connectionId: string): void {
-  cache.delete(cacheKey(provider, connectionId));
+  const key = cacheKey(provider, connectionId);
+  cache.delete(key);
+  // Next fetch must bypass provider-inner usage caches (agy retrieveUserQuota /
+  // weekly are 60s–5min). Without this, dropping the 60s wrapper recaches stale.
+  // TTL matches those inner caches: after 5min the flag is a no-op.
+  pendingForceRefresh.set(key, Date.now());
+  pendingForceRefreshMiss.delete(key);
+}
+
+/**
+ * Drop the generic quota cache after an upstream 429, matching Codex's
+ * `invalidateCodexQuotaCache` on 429. Probe-origin failures must not mutate
+ * routing caches (#9817).
+ */
+export function invalidateGenericQuotaCacheOnStatus(args: {
+  provider: string | null | undefined;
+  connectionId: string | null | undefined;
+  status: number;
+  isolateProbe?: boolean;
+}): boolean {
+  if (args.isolateProbe === true) return false; // undefined from callers that omit isolateProbe must still invalidate
+  if (args.status !== 429) return false;
+  const provider = typeof args.provider === "string" ? args.provider.trim() : "";
+  const connectionId = typeof args.connectionId === "string" ? args.connectionId.trim() : "";
+  if (!provider || !connectionId) return false;
+  invalidateGenericQuotaCache(provider, connectionId);
+  return true;
 }
 
 /**

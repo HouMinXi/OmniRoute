@@ -1,7 +1,7 @@
 {
   "name": "omniroute",
   "version": "3.8.51",
-  "description": "Unified AI router with 355 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
+  "description": "Unified AI router with 356 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
     "omniroute": "bin/omniroute.mjs",
@@ -151,7 +151,8 @@
     "check:router-eval": "node --import tsx scripts/check/check-router-eval-regression.ts",
     "check:doc-links": "node scripts/check/check-doc-links.mjs",
     "check:fabricated-docs": "node scripts/check/check-fabricated-docs.mjs --strict",
-    "check:docs-all": "npm run check:docs-sync && npm run check:docs-counts && npm run check:env-doc-sync && npm run check:deprecated-versions && npm run check:doc-links && npm run check:fabricated-docs",
+    "check:docs-frontmatter": "node scripts/check/check-docs-frontmatter.mjs",
+    "check:docs-all": "npm run check:docs-sync && npm run check:docs-frontmatter && npm run check:docs-counts && npm run check:env-doc-sync && npm run check:deprecated-versions && npm run check:doc-links && npm run check:fabricated-docs",
     "docs:render-diagrams": "node scripts/docs/render-diagrams.mjs",
     "i18n:run": "node scripts/i18n/run-translation.mjs",
     "i18n:run:dry": "node scripts/i18n/run-translation.mjs --dry-run",
