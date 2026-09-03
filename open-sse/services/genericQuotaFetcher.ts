@@ -26,7 +26,7 @@ import {
 } from "./quotaPreflight.ts";
 import {
   getAntigravityQuotaFamily,
-  getQuotaScopedModelForProvider,
+  getQuotaFetchScope,
 } from "./antigravityQuotaFamily.ts";
 
 type UsageFetcher = (
@@ -92,7 +92,7 @@ function quotaCacheScope(
   provider: string,
   requestedModel?: string | null
 ): string {
-  return getQuotaScopedModelForProvider(provider, requestedModel) ?? "*";
+  return getQuotaFetchScope(provider, requestedModel);
 }
 
 function cacheKey(

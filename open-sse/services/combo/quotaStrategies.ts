@@ -46,7 +46,7 @@ import {
 } from "./quotaScoring.ts";
 import { rankByHeadroom, type HeadroomSaturation } from "./headroomRanking.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "../antigravityProjectPersist.ts";
-import { getQuotaFetchScope, getQuotaScopedModelForProvider } from "../antigravityQuotaFamily.ts";
+import { getQuotaFetchScope } from "../antigravityQuotaFamily.ts";
 import { isQuotaExhaustedForRequest } from "../../../src/domain/quotaCache.ts";
 
 const RESET_AWARE_CONNECTION_CACHE_TTL_MS = 30_000;
@@ -360,7 +360,7 @@ export async function fetchResetAwareQuotaWithCache({
 }): Promise<unknown> {
   const requestedModel =
     typeof connection?.requestedModel === "string" ? connection.requestedModel : null;
-  const cacheScope = getQuotaScopedModelForProvider(provider, requestedModel) ?? "*";
+  const cacheScope = getQuotaFetchScope(provider, requestedModel);
   const cacheKey = `${provider}:${connectionId}:${cacheScope}`;
   const ttlMs = config.quotaCacheTtlMs;
   const maxStaleMs = config.quotaCacheMaxStaleMs;

@@ -213,3 +213,22 @@ test("invalidateGenericQuotaCache clears every family-scoped entry for a connect
   });
   assert.equal(fetches, 4);
 });
+
+test("non-Antigravity generic quota cache stays per connection, not per model", async () => {
+  let fetches = 0;
+  genericModule.__testing.setUsageFetcher(async () => {
+    fetches += 1;
+    return usage;
+  });
+
+  const connectionId = "conn-kimi";
+  await fetchGenericQuota(connectionId, {
+    provider: "kimi",
+    requestedModel: "kimi-k2.5",
+  });
+  await fetchGenericQuota(connectionId, {
+    provider: "kimi",
+    requestedModel: "kimi-k2.7",
+  });
+  assert.equal(fetches, 1);
+});
