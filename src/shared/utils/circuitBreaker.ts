@@ -108,6 +108,9 @@ export function isLocalExecutionError(error: unknown): boolean {
  * capacity-throttled, not a whole-provider outage — the same account still
  * serves sibling models. Must not trip the provider circuit breaker.
  *
+ * Accepts an error object/string OR a numeric HTTP status (529). Callers
+ * pass both `error` and `status` at the two breaker predicates.
+ *
  * Live incident 2026-09-03: STREAM_EARLY_EOF: Overloaded opened `claude` and
  * a single-target combo then pre-skipped with ALL_TARGETS_SKIPPED in ~43ms.
  */

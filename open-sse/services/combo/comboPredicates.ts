@@ -217,14 +217,14 @@ export function shouldRecordProviderBreakerFailure(args: {
 }): boolean {
   return (
     (!args.isStreamReadinessFailure || args.isStreamEarlyEof === true) &&
+    !isModelCapacityOverloadError(args.error) &&
+    !isModelCapacityOverloadError(args.status) &&
     PROVIDER_BREAKER_FAILURE_STATUSES.has(args.status) &&
     (!args.sameProviderNext || args.isProxyUnreachable === true) &&
     !args.skipProviderBreaker &&
     !args.requestScopedFailure &&
     !isLocalStreamLifecycleError(args.error) &&
-    !isLocalExecutionError(args.error) &&
-    !isModelCapacityOverloadError(args.error) &&
-    !isModelCapacityOverloadError(args.status)
+    !isLocalExecutionError(args.error)
   );
 }
 

@@ -77,6 +77,17 @@ test("combo: HTTP 529 Overloaded does not record even if someone later adds 529 
   );
 });
 
+test("combo: HTTP 529 alone does not record (overload check runs before the 5xx set)", () => {
+  assert.equal(
+    shouldRecordProviderBreakerFailure({
+      ...OTHER_COMBO_ARGS,
+      status: 529,
+      error: "upstream error",
+    }),
+    false
+  );
+});
+
 test("combo: a genuine 502 without Overloaded still records", () => {
   assert.equal(
     shouldRecordProviderBreakerFailure({
