@@ -495,3 +495,15 @@ export function registerGenericQuotaFetchers(): void {
     registerQuotaFetcher(provider, fetchGenericQuota);
   }
 }
+
+export const __testing = {
+  setUsageFetcher(fetcher: UsageFetcher): void {
+    usageFetcherOverride = fetcher;
+  },
+  resetUsageFetcher(): void {
+    usageFetcherOverride = null;
+  },
+  clearCache(): void {
+    cache.clear();
+  },
+};
