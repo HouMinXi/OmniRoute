@@ -1154,6 +1154,8 @@ async function handleComboChatInner({
       const exhaustedProviders = new Set<string>();
       const exhaustedConnections = new Set<string>();
       const transientRateLimitedProviders = new Set<string>();
+      skippedForCircuitOpen = false;
+      earliestCircuitOpenRetryMs = 0;
       if (setTry > 0) {
         log.info("COMBO", `All targets failed — retrying set (${setTry}/${maxSetRetries})`);
         await new Promise((resolve) => {
@@ -2784,7 +2786,7 @@ async function handleComboChatInner({
         if (circuitOpenWait.wait) {
           log.info(
             "COMBO",
-            `${strategy} circuit-open wait: waiting ${Math.ceil(circuitOpenWait.waitMs / 1000)}s then retrying`
+            `${strategy} circuit-open wait: waiting ${Math.ceil(circuitOpenWait.waitMs / 1000)}s (reason=${circuitOpenWait.reason ?? "circuit_open"}) then retrying (attempt ${comboCooldownAttempt + 1}/${resilienceSettings.comboCooldownWait.maxAttempts})`
           );
           const completed = await waitForCooldownAwareRetry(circuitOpenWait.waitMs, signal);
           if (!completed) {

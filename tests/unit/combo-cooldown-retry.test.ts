@@ -155,6 +155,7 @@ test("returned waitMs is clamped to a finite number (0 when input invalid)", () 
 // ── resolveComboCooldownWaitDecision (target resolution + hint/fallback) ──────
 
 const M = COMBO_COOLDOWN_WAIT_MARGIN_MS;
+assert.equal(M, 50, "wait margin is a pinned production constant, not a free parameter");
 
 function decisionInput(overrides: Record<string, unknown> = {}) {
   return {
@@ -334,4 +335,19 @@ test("circuit-open skip honors attempt/budget the same as model-lockout waits", 
     resolveCircuitOpenWaitDecision(circuitOpenInput({ budgetLeftMs: 1_000 }) as never).wait,
     false
   );
+});
+
+test("circuit-open skip is off when comboCooldownWait.enabled is false", () => {
+  const r = resolveCircuitOpenWaitDecision(
+    circuitOpenInput({
+      settings: baseSettings({
+        enabled: false,
+        maxWaitMs: 90_000,
+        budgetMs: 300_000,
+        maxAttempts: 5,
+      }),
+    }) as never
+  );
+  assert.equal(r.wait, false);
+  assert.equal(r.reason, null);
 });

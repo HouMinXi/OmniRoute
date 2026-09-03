@@ -275,7 +275,7 @@ export interface ResolveCircuitOpenWaitInput {
 export function resolveCircuitOpenWaitDecision(
   input: ResolveCircuitOpenWaitInput
 ): ResolveComboCooldownDecisionResult {
-  if (input.skippedForCircuitOpen !== true) {
+  if (input.settings.enabled !== true || input.skippedForCircuitOpen !== true) {
     return { wait: false, waitMs: 0, reason: null };
   }
   const retryAfterMs = toFiniteWaitMs(input.retryAfterMs);

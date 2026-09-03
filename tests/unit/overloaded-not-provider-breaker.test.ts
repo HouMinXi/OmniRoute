@@ -1,7 +1,10 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { isModelCapacityOverloadError } from "../../src/shared/utils/circuitBreaker.ts";
-import { shouldTripProviderBreakerForResult } from "../../src/sse/handlers/chatPredicates.ts";
+import {
+  shouldTripProviderBreakerForResult,
+  classifyProviderBreakerResult,
+} from "../../src/sse/handlers/chatPredicates.ts";
 import { shouldRecordProviderBreakerFailure } from "../../open-sse/services/combo/comboPredicates.ts";
 
 /**
@@ -77,7 +80,7 @@ test("combo: HTTP 529 Overloaded does not record even if someone later adds 529 
   );
 });
 
-test("combo: HTTP 529 alone does not record (overload check runs before the 5xx set)", () => {
+test("combo: HTTP 529 status alone does not record a breaker failure", () => {
   assert.equal(
     shouldRecordProviderBreakerFailure({
       ...OTHER_COMBO_ARGS,
@@ -134,5 +137,33 @@ test("single-model: HTTP 529 does not trip", () => {
       false
     ),
     false
+  );
+});
+
+test("classifyProviderBreakerResult: Overloaded 502 on the single-model path is ignore", () => {
+  assert.equal(
+    classifyProviderBreakerResult(
+      {
+        success: false,
+        status: 502,
+        errorCode: "STREAM_EARLY_EOF",
+        errorType: "stream_early_eof",
+        error: LIVE_EOF_OVERLOADED,
+      },
+      false,
+      false
+    ),
+    "ignore"
+  );
+});
+
+test("classifyProviderBreakerResult: Overloaded 529 on the single-model path is ignore", () => {
+  assert.equal(
+    classifyProviderBreakerResult(
+      { success: false, status: 529, errorCode: null, errorType: null, error: "Overloaded" },
+      false,
+      false
+    ),
+    "ignore"
   );
 });
