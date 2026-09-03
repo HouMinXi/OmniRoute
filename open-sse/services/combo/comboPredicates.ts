@@ -7,7 +7,7 @@
  */
 
 import { EXECUTOR_CONTRACT_VIOLATION_CODE } from "../../config/constants.ts";
-import { selectAntigravityQuotaWindowNames } from "../antigravityQuotaFamily.ts";
+import { remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { parseModel } from "../model.ts";
 import { isSelfInflictedUpstreamTimeout } from "../../handlers/chatCore/cooldownClassification.ts";
@@ -441,26 +441,11 @@ export function quotaRemainingPercentFromQuota(
 
   const windows = record.windows;
   if (windows && typeof windows === "object" && !Array.isArray(windows)) {
-    const rawWindows = windows as Record<string, unknown>;
-    const names = Object.keys(rawWindows);
-    const scopedNames =
-      scope?.requestedModel && (scope.provider === "agy" || scope.provider === "antigravity")
-        ? selectAntigravityQuotaWindowNames(names, scope.requestedModel)
-        : names;
-    const namesToScan = scopedNames.length > 0 ? scopedNames : names;
-    let minRemaining: number | null = null;
-    for (const name of namesToScan) {
-      const windowInfo = rawWindows[name];
-      if (!windowInfo || typeof windowInfo !== "object") continue;
-      const percentUsed = Number((windowInfo as Record<string, unknown>).percentUsed);
-      if (!Number.isFinite(percentUsed)) continue;
-      const remaining = clampPercent((1 - percentUsed) * 100);
-      minRemaining = minRemaining === null ? remaining : Math.min(minRemaining, remaining);
-    }
-    if (minRemaining !== null) return minRemaining;
-    if (scope?.requestedModel && (scope.provider === "agy" || scope.provider === "antigravity")) {
-      return 100;
-    }
+    const fromWindows = remainingPercentFromQuotaWindows(
+      windows as Record<string, unknown>,
+      scope
+    );
+    if (fromWindows !== null) return fromWindows;
   }
 
   if (record.limitReached === true) return 0;

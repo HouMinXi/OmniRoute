@@ -59,6 +59,36 @@ export function isAntigravityQuotaProvider(provider: string | null | undefined):
   return provider === "antigravity" || provider === "agy";
 }
 
+export function quotaWindowNamesForScope(
+  names: string[],
+  scope?: { provider?: string | null; requestedModel?: string | null }
+): string[] {
+  if (!scope?.requestedModel || !isAntigravityQuotaProvider(scope.provider)) return names;
+  const scoped = selectAntigravityQuotaWindowNames(names, scope.requestedModel);
+  return scoped.length > 0 ? scoped : names;
+}
+
+/** Min remaining % across scoped windows, or 100 when an Antigravity family scope matched none. */
+export function remainingPercentFromQuotaWindows(
+  rawWindows: Record<string, unknown>,
+  scope?: { provider?: string | null; requestedModel?: string | null }
+): number | null {
+  const names = Object.keys(rawWindows);
+  const namesToScan = quotaWindowNamesForScope(names, scope);
+  let minRemaining: number | null = null;
+  for (const name of namesToScan) {
+    const windowInfo = rawWindows[name];
+    if (!windowInfo || typeof windowInfo !== "object") continue;
+    const percentUsed = Number((windowInfo as Record<string, unknown>).percentUsed);
+    if (!Number.isFinite(percentUsed)) continue;
+    const remaining = Math.max(0, Math.min(100, (1 - percentUsed) * 100));
+    minRemaining = minRemaining === null ? remaining : Math.min(minRemaining, remaining);
+  }
+  if (minRemaining !== null) return minRemaining;
+  if (scope?.requestedModel && namesToScan !== names) return 100;
+  return null;
+}
+
 /**
  * Windows that belong to the requested Antigravity family. Claude weekly must
  * not ride along on a Gemini request (and the reverse).

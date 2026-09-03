@@ -3,7 +3,10 @@
  * on the connection row, without cooling the whole account.
  */
 import { lockModel, isModelLocked } from "./accountFallback.ts";
-import { getAntigravityQuotaFamily } from "./antigravityQuotaFamily.ts";
+import {
+  getAntigravityQuotaFamily,
+  isAntigravityQuotaProvider,
+} from "./antigravityQuotaFamily.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -13,10 +16,6 @@ function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as JsonRecord)
     : {};
-}
-
-function isAntigravityProvider(provider: string | null | undefined): boolean {
-  return provider === "antigravity" || provider === "agy";
 }
 
 function parseUntilMs(value: unknown): number {
@@ -47,7 +46,7 @@ export async function persistAntigravityFamilyCooldown(params: {
   const conn = (await getProviderConnectionById(params.connectionId)) as
     | { provider?: string; providerSpecificData?: JsonRecord | null }
     | null;
-  if (!conn || !isAntigravityProvider(conn.provider ?? null)) return null;
+  if (!conn || !isAntigravityQuotaProvider(conn.provider ?? null)) return null;
 
   const psd = asRecord(conn.providerSpecificData);
   const untils = asRecord(psd[FAMILY_PSD_KEY]);
@@ -66,12 +65,45 @@ export async function persistAntigravityFamilyCooldown(params: {
   return nextPsd;
 }
 
+/** Fire-and-forget family PSD write. RPM/burst 429s must pass reason !== quota_exhausted. */
+export function persistAntigravityFamilyCooldownIfQuota(params: {
+  provider?: string | null;
+  connectionId: string;
+  model?: string | null;
+  cooldownMs: number;
+  reason?: string | null;
+}): void {
+  if (!isAntigravityQuotaProvider(params.provider)) return;
+  if (!params.model?.trim() || params.cooldownMs <= 0) return;
+  if (params.reason != null && params.reason !== "quota_exhausted") return;
+  void persistAntigravityFamilyCooldown({
+    connectionId: params.connectionId,
+    model: params.model,
+    rateLimitedUntil: new Date(Date.now() + params.cooldownMs).toISOString(),
+  }).catch(() => {});
+}
+
+export async function persistAntigravityPreflightFamilyLock(params: {
+  provider: string;
+  connectionId: string;
+  model: string;
+  unavailableUntil: string;
+}): Promise<void> {
+  const cooldownMs = Math.max(0, Date.parse(params.unavailableUntil) - Date.now());
+  lockModel(params.provider, params.connectionId, params.model, "quota_exhausted", cooldownMs);
+  await persistAntigravityFamilyCooldown({
+    connectionId: params.connectionId,
+    model: params.model,
+    rateLimitedUntil: params.unavailableUntil,
+  });
+}
+
 export function rehydrateAntigravityFamilyLocks(
   provider: string,
   connectionId: string,
   providerSpecificData: JsonRecord | null | undefined
 ): void {
-  if (!isAntigravityProvider(provider)) return;
+  if (!isAntigravityQuotaProvider(provider)) return;
   const untils = asRecord(asRecord(providerSpecificData)[FAMILY_PSD_KEY]);
   const now = Date.now();
   for (const family of ["gemini", "claude"] as const) {
@@ -84,4 +116,37 @@ export function rehydrateAntigravityFamilyLocks(
       lockModel(lockProvider, connectionId, model, "quota_exhausted", remainingMs);
     }
   }
+}
+
+export function rehydrateAntigravityFamilyLocksForConnections(
+  provider: string,
+  connections: Array<{ id: string; providerSpecificData?: unknown }>
+): void {
+  if (!isAntigravityQuotaProvider(provider)) return;
+  for (const conn of connections) {
+    rehydrateAntigravityFamilyLocks(
+      provider,
+      conn.id,
+      conn.providerSpecificData as JsonRecord | null | undefined
+    );
+  }
+}
+
+/** Family lock for executor quota exhaustion. Returns false when model is absent. */
+export function markAntigravityModelQuotaExhausted(
+  connectionId: string,
+  retryAfterMs: number,
+  model?: string | null
+): boolean {
+  if (!model) return false;
+  lockModel("agy", connectionId, model, "quota_exhausted", retryAfterMs);
+  lockModel("antigravity", connectionId, model, "quota_exhausted", retryAfterMs);
+  persistAntigravityFamilyCooldownIfQuota({
+    provider: "agy",
+    connectionId,
+    model,
+    cooldownMs: retryAfterMs,
+    reason: "quota_exhausted",
+  });
+  return true;
 }
