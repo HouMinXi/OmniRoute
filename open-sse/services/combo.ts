@@ -613,12 +613,16 @@ export async function buildAutoCandidates(
         const quota = await quotaPromises.get(quotaKey)!;
         resetWindowAffinity = calculateResetWindowAffinity(quota, resetWindowConfig);
         if (!quotaCutoffBlocked) {
-          quotaRemaining = quotaRemainingPercentFromQuota(quota);
+          quotaRemaining = quotaRemainingPercentFromQuota(quota, {
+            provider,
+            requestedModel: modelStr,
+          });
         }
         if (!quotaCutoffBlocked && quotaCutoffEnabled) {
           const cutoffDecision = evaluateQuotaCutoff(
             quota as QuotaInfo | null,
-            buildAutoQuotaThresholds(provider, connection, resilienceSettings)
+            buildAutoQuotaThresholds(provider, connection, resilienceSettings),
+            { provider, requestedModel: modelStr }
           );
           if (!cutoffDecision.proceed) {
             quotaCutoffBlocked = true;
@@ -1379,7 +1383,8 @@ async function handleComboChatInner({
             resilienceSettings,
             quotaCutoffResetWindowConfig,
             combo.name,
-            log
+            log,
+            modelStr
           );
           if (quotaCutoff.blocked) {
             log.info(

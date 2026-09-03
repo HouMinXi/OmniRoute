@@ -47,7 +47,11 @@ import {
   hydrateCodexQuotaCacheForRequest,
   isQuotaExhaustedForRequest,
 } from "@/domain/quotaCache";
-import { getQuotaScopeLabelForProvider } from "@omniroute/open-sse/services/antigravityQuotaFamily.ts";
+import {
+  getQuotaScopeLabelForProvider,
+  isAntigravityQuotaProvider,
+} from "@omniroute/open-sse/services/antigravityQuotaFamily.ts";
+import { persistAntigravityFamilyCooldown, rehydrateAntigravityFamilyLocks } from "@omniroute/open-sse/services/antigravityFamilyCooldown.ts";
 import { getCreditsMode } from "@omniroute/open-sse/services/antigravityCredits.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import {
@@ -911,6 +915,17 @@ async function markQuotaPreflightAccountUnavailable(
     return unavailableUntil;
   }
 
+  if (isAntigravityQuotaProvider(provider) && requestedModel?.trim()) {
+    const cooldownMs = Math.max(0, Date.parse(unavailableUntil) - Date.now());
+    lockModel(provider, connectionId, requestedModel, "quota_exhausted", cooldownMs);
+    await persistAntigravityFamilyCooldown({
+      connectionId,
+      model: requestedModel,
+      rateLimitedUntil: unavailableUntil,
+    });
+    return unavailableUntil;
+  }
+
   const percentLabel = Number.isFinite(preflight.quotaPercent)
     ? `${Math.round((preflight.quotaPercent as number) * 100)}%`
     : "exhausted";
@@ -1320,6 +1335,15 @@ export async function getProviderCredentials(
     if (isAlibabaModelStudioProvider(provider)) {
       for (const conn of connections) {
         rehydrateAlibabaFreeDrainedModelLocks(
+          provider,
+          conn.id,
+          conn.providerSpecificData as Record<string, unknown>
+        );
+      }
+    }
+    if (isAntigravityQuotaProvider(provider)) {
+      for (const conn of connections) {
+        rehydrateAntigravityFamilyLocks(
           provider,
           conn.id,
           conn.providerSpecificData as Record<string, unknown>
@@ -2405,7 +2429,11 @@ export async function getProviderCredentialsWithQuotaPreflight(
       return defaultThresholdPercent;
     };
     // #6842: openrouter also needs requestedModel, for the :free-window check.
-    const modelAwarePreflight = provider === "codex" || provider === "openrouter";
+    // agy/antigravity need it so Claude weekly cannot cool a Gemini request.
+    const modelAwarePreflight =
+      provider === "codex" ||
+      provider === "openrouter" ||
+      isAntigravityQuotaProvider(provider);
     const preflightCredentials =
       requestedModel && modelAwarePreflight ? { ...credentials, requestedModel } : credentials;
     let preflight;
@@ -2967,6 +2995,13 @@ export async function markAccountUnavailable(
         "AUTH",
         `Model-only lockout for ${provider}:${model} — ${status} ${reason} ${Math.ceil(lockout.cooldownMs / 1000)}s (failureCount=${lockout.failureCount}, connection stays active)`
       );
+      if (isAntigravityQuotaProvider(provider) && lockout.cooldownMs > 0) {
+        void persistAntigravityFamilyCooldown({
+          connectionId,
+          model,
+          rateLimitedUntil: new Date(Date.now() + lockout.cooldownMs).toISOString(),
+        }).catch(() => {});
+      }
       return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
     }
     const result = fallbackResult;

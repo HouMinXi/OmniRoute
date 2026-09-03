@@ -650,6 +650,17 @@ export async function recordCoreOwnedAntigravityQuotaState({
       exactCooldownIsUpstreamReset: retryHintBypassesMaxCooldownMs(fallback.retryHintSource),
     }
   );
+  if (lockout.cooldownMs > 0) {
+    void import("./antigravityFamilyCooldown.ts")
+      .then(({ persistAntigravityFamilyCooldown }) =>
+        persistAntigravityFamilyCooldown({
+          connectionId,
+          model,
+          rateLimitedUntil: new Date(Date.now() + lockout.cooldownMs).toISOString(),
+        })
+      )
+      .catch(() => {});
+  }
   return { cooldownMs: lockout.cooldownMs, failureCount: lockout.failureCount };
 }
 
@@ -2393,7 +2404,9 @@ export function applyErrorState<T extends AccountState | null | undefined>(
     typeof connId === "string" &&
     connId.length > 0 &&
     effectiveCooldownMs > 0 &&
-    nextState.rateLimitedUntil
+    nextState.rateLimitedUntil &&
+    prov !== "antigravity" &&
+    prov !== "agy"
   ) {
     try {
       const untilMs = cooldownUntilMs(nextState.rateLimitedUntil);

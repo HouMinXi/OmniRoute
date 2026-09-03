@@ -26,6 +26,8 @@ import {
 } from "../services/antigravityCredits.ts";
 import { persistCreditBalance, getAllPersistedCreditBalances } from "@/lib/db/creditBalance";
 import { setConnectionRateLimitUntil } from "@/lib/db/providers";
+import { lockModel } from "../services/accountFallback.ts";
+import { persistAntigravityFamilyCooldown } from "../services/antigravityFamilyCooldown.ts";
 import { getMitmAlias } from "@/lib/db/models";
 import {
   MAX_ANTIGRAVITY_OUTPUT_TOKENS,
@@ -250,8 +252,22 @@ export function createCreditsExtractionTransform(
  * cross-request and post-restart routing skips this connection until the
  * cooldown expires. Exported for unit testing. @internal
  */
-export function markConnectionQuotaExhausted(connectionId: string, retryAfterMs: number): void {
+export function markConnectionQuotaExhausted(
+  connectionId: string,
+  retryAfterMs: number,
+  model?: string | null
+): void {
   try {
+    if (model) {
+      lockModel("agy", connectionId, model, "quota_exhausted", retryAfterMs);
+      lockModel("antigravity", connectionId, model, "quota_exhausted", retryAfterMs);
+      void persistAntigravityFamilyCooldown({
+        connectionId,
+        model,
+        rateLimitedUntil: new Date(Date.now() + retryAfterMs).toISOString(),
+      }).catch(() => {});
+      return;
+    }
     setConnectionRateLimitUntil(connectionId, Date.now() + retryAfterMs);
   } catch {
     // DB write failure must never crash the request path
@@ -1620,7 +1636,7 @@ export class AntigravityExecutor extends BaseExecutor {
           updateAntigravityRemainingCredits
         );
         if (creditsResult) return { kind: "return", result: creditsResult };
-        if (retryMs) markConnectionQuotaExhausted(accountId, retryMs);
+        if (retryMs) markConnectionQuotaExhausted(accountId, retryMs, ctx.model);
       }
 
       return {

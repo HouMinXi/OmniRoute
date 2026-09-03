@@ -7,6 +7,7 @@
  */
 
 import { EXECUTOR_CONTRACT_VIOLATION_CODE } from "../../config/constants.ts";
+import { selectAntigravityQuotaWindowNames } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { parseModel } from "../model.ts";
 import { isSelfInflictedUpstreamTimeout } from "../../handlers/chatCore/cooldownClassification.ts";
@@ -431,15 +432,25 @@ export function clampPercent(value: number): number {
   return Math.max(0, Math.min(100, value));
 }
 
-export function quotaRemainingPercentFromQuota(quota: unknown): number {
+export function quotaRemainingPercentFromQuota(
+  quota: unknown,
+  scope?: { provider?: string | null; requestedModel?: string | null }
+): number {
   if (!quota || typeof quota !== "object") return 100;
   const record = quota as Record<string, unknown>;
-  if (record.limitReached === true) return 0;
 
   const windows = record.windows;
   if (windows && typeof windows === "object" && !Array.isArray(windows)) {
+    const rawWindows = windows as Record<string, unknown>;
+    const names = Object.keys(rawWindows);
+    const scopedNames =
+      scope?.requestedModel && (scope.provider === "agy" || scope.provider === "antigravity")
+        ? selectAntigravityQuotaWindowNames(names, scope.requestedModel)
+        : names;
+    const namesToScan = scopedNames.length > 0 ? scopedNames : names;
     let minRemaining: number | null = null;
-    for (const windowInfo of Object.values(windows as Record<string, unknown>)) {
+    for (const name of namesToScan) {
+      const windowInfo = rawWindows[name];
       if (!windowInfo || typeof windowInfo !== "object") continue;
       const percentUsed = Number((windowInfo as Record<string, unknown>).percentUsed);
       if (!Number.isFinite(percentUsed)) continue;
@@ -447,7 +458,12 @@ export function quotaRemainingPercentFromQuota(quota: unknown): number {
       minRemaining = minRemaining === null ? remaining : Math.min(minRemaining, remaining);
     }
     if (minRemaining !== null) return minRemaining;
+    if (scope?.requestedModel && (scope.provider === "agy" || scope.provider === "antigravity")) {
+      return 100;
+    }
   }
+
+  if (record.limitReached === true) return 0;
 
   const percentUsed = Number(record.percentUsed);
   if (Number.isFinite(percentUsed)) return clampPercent((1 - percentUsed) * 100);
