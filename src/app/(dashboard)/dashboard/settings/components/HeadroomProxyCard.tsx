@@ -57,19 +57,27 @@ export default function HeadroomProxyCard() {
 
   useEffect(() => {
     const ac = new AbortController();
-    fetch("/api/settings", { signal: ac.signal })
-      .then((r) => (r.ok ? r.json() : {}))
-      .then((data: Record<string, unknown>) => {
+    // Async continuation so every setState happens after an await
+    // (react-hooks/set-state-in-effect: no synchronous setState in effect bodies).
+    void (async () => {
+      try {
+        const r = await fetch("/api/settings", { signal: ac.signal });
+        const data = (r.ok ? await r.json() : {}) as Record<string, unknown>;
         if (ac.signal.aborted) return;
         if (typeof data.headroomUrl === "string") setUrl(data.headroomUrl);
-      })
-      .catch(() => undefined)
-      .finally(() => {
+      } catch {
+        // ignore
+      } finally {
         if (!ac.signal.aborted) setLoaded(true);
-      });
-    // Status is for start/stop buttons only. Do not copy status.url into the
-    // input -- that value is HEADROOM_URL fallback and would overwrite empty.
-    refreshStatus(ac.signal).catch(() => undefined);
+      }
+      // Status is for start/stop buttons only. Do not copy status.url into the
+      // input -- that value is HEADROOM_URL fallback and would overwrite empty.
+      try {
+        await refreshStatus(ac.signal);
+      } catch {
+        // ignore
+      }
+    })();
     return () => {
       ac.abort();
       saveAc.current?.abort();

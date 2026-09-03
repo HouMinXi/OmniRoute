@@ -8342,14 +8342,14 @@
     "cliproxyapiPort": "Cổng",
     "qdrantHost": "Máy chủ",
     "qdrantCollection": "Bộ Sưu Tập",
-    "headroomProxyTitle": "__MISSING__:Headroom proxy",
-    "headroomProxyDesc": "__MISSING__:URL of the optional Headroom token-saver proxy. Empty uses HEADROOM_URL or http://localhost:8787.",
-    "headroomProxyUrl": "__MISSING__:Headroom URL",
-    "headroomProxyUrlHint": "__MISSING__:Loopback URLs can be started from this page. External URLs are probed only.",
-    "headroomProxySave": "__MISSING__:Save",
-    "headroomProxyStart": "__MISSING__:Start",
-    "headroomProxyStop": "__MISSING__:Stop",
-    "headroomProxyExternalHint": "__MISSING__:This URL is not loopback, so OmniRoute will not spawn the local CLI."
+    "headroomProxyTitle": "Proxy Headroom",
+    "headroomProxyDesc": "URL của proxy tiết kiệm token Headroom (tùy chọn). Để trống thì dùng HEADROOM_URL hoặc http://localhost:8787.",
+    "headroomProxyUrl": "URL Headroom",
+    "headroomProxyUrlHint": "URL loopback có thể khởi chạy từ trang này. URL bên ngoài chỉ được kiểm tra.",
+    "headroomProxySave": "Lưu",
+    "headroomProxyStart": "Bắt đầu",
+    "headroomProxyStop": "Dừng",
+    "headroomProxyExternalHint": "URL này không phải loopback, nên OmniRoute sẽ không khởi chạy CLI cục bộ."
   },
   "contextRtk": {
     "title": "RTK Engine",
