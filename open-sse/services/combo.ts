@@ -69,6 +69,7 @@ import { resolveModelLockoutSettings } from "../../src/lib/resilience/modelLocko
 import { fetchCodexQuota } from "./codexQuotaFetcher.ts";
 import { evaluateQuotaCutoff, getQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
 import { resolveProviderId } from "../../src/shared/constants/providers.ts";
+import { getQuotaScopedModelForProvider } from "./antigravityQuotaFamily.ts";
 import * as semaphore from "./rateLimitSemaphore.ts";
 import { getCircuitBreaker } from "../../src/shared/utils/circuitBreaker";
 import { parseModel } from "./model.ts";
@@ -595,14 +596,20 @@ export async function buildAutoCandidates(
         statusPenaltyReason = connectionStatusReason;
       }
       if (fetcher && target.connectionId) {
-        const quotaKey = `${provider}:${target.connectionId}`;
+        const quotaScope =
+          provider === "antigravity" || provider === "agy"
+            ? getQuotaScopedModelForProvider(provider, target.modelStr) ?? "*"
+            : "*";
+        const quotaKey = `${provider}:${target.connectionId}:${quotaScope}`;
         if (!quotaPromises.has(quotaKey)) {
           quotaPromises.set(
             quotaKey,
             fetchResetAwareQuotaWithCache({
               provider,
               connectionId: target.connectionId,
-              connection,
+              connection: connection
+                ? { ...connection, requestedModel: target.modelStr }
+                : connection,
               fetcher,
               config: resetWindowConfig,
               log: {},
@@ -1380,7 +1387,8 @@ async function handleComboChatInner({
             resilienceSettings,
             quotaCutoffResetWindowConfig,
             combo.name,
-            log, modelStr
+            log,
+            modelStr
           );
           if (quotaCutoff.blocked) {
             log.info(

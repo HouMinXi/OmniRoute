@@ -119,7 +119,7 @@ export async function resolveQuotaExhaustionCutoffForTarget(
     const quota = await fetchResetAwareQuotaWithCache({
       provider,
       connectionId,
-      connection,
+      connection: connection ? { ...connection, requestedModel } : connection,
       fetcher,
       config: resetWindowConfig,
       log,
