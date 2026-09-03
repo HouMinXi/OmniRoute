@@ -10,6 +10,7 @@
  * Cache: 60s in-memory. Registration: registerMoonshotQuotaFetcher() at startup.
  */
 
+import { toNumber } from "@/shared/utils/numeric";
 import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
@@ -50,15 +51,6 @@ if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
 }
 
-function toNumber(value: unknown, fallback = 0): number {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const parsed = Number.parseFloat(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return fallback;
-}
-
 function toRecord(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -90,19 +82,21 @@ function parseMoonshotQuotaResponse(data: unknown, origin: string): MoonshotQuot
   };
 }
 
+function connectionApiKey(connection?: Record<string, unknown>): string | null {
+  const apiKey = connection?.apiKey;
+  return typeof apiKey === "string" && apiKey.trim().length > 0 ? apiKey : null;
+}
+
 export async function fetchMoonshotQuota(
   connectionId: string,
-  connection?: Record<string, unknown>,
+  connection?: Record<string, unknown>
 ): Promise<QuotaInfo | null> {
   const cached = quotaCache.get(connectionId);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
   }
 
-  const apiKey =
-    typeof connection?.apiKey === "string" && connection.apiKey.trim().length > 0
-      ? connection.apiKey
-      : null;
+  const apiKey = connectionApiKey(connection);
   if (!apiKey) return null;
 
   const origin = resolveMoonshotOrigin({
@@ -154,8 +148,13 @@ export type MoonshotUsageConnection = {
 };
 
 export async function getMoonshotOpenPlatformUsage(
-  connection: MoonshotUsageConnection,
-): Promise<{ plan?: string; quotas?: Record<string, UsageQuota>; message?: string; limitReached?: boolean }> {
+  connection: MoonshotUsageConnection
+): Promise<{
+  plan?: string;
+  quotas?: Record<string, UsageQuota>;
+  message?: string;
+  limitReached?: boolean;
+}> {
   const origin = resolveMoonshotOrigin(connection);
   if (!origin) {
     return { message: "Not a Moonshot Open Platform connection." };
@@ -169,38 +168,38 @@ export async function getMoonshotOpenPlatformUsage(
     return { message: "Moonshot API key not available. Add a key to view usage." };
   }
   const domestic = origin.includes("moonshot.cn");
-  const plan = domestic ? "Kimi 开放平台（国内）" : "Kimi Open Platform";
-  const currency = domestic ? "CNY" : "USD";
-  const quotas: Record<string, UsageQuota> = {
-    available: {
-      used: 0,
-      total: 0,
-      remaining: quota.availableBalance,
-      remainingPercentage: quota.limitReached ? 0 : 100,
-      resetAt: null,
-      unlimited: true,
-      currency,
-    },
-    voucher: {
-      used: 0,
-      total: 0,
-      remaining: quota.voucherBalance,
-      remainingPercentage: 100,
-      resetAt: null,
-      unlimited: true,
-      currency,
-    },
-    cash: {
-      used: 0,
-      total: 0,
-      remaining: quota.cashBalance,
-      remainingPercentage: 100,
-      resetAt: null,
-      unlimited: true,
-      currency,
-    },
+  return {
+    plan: domestic ? "Kimi 开放平台（国内）" : "Kimi Open Platform",
+    quotas: buildMoonshotBalanceQuotas(quota, domestic ? "CNY" : "USD"),
+    limitReached: quota.limitReached,
   };
-  return { plan, quotas, limitReached: quota.limitReached };
+}
+
+function balanceQuota(
+  remaining: number,
+  remainingPercentage: number,
+  currency: string
+): UsageQuota {
+  return {
+    used: 0,
+    total: 0,
+    remaining,
+    remainingPercentage,
+    resetAt: null,
+    unlimited: true,
+    currency,
+  };
+}
+
+function buildMoonshotBalanceQuotas(
+  quota: MoonshotQuota,
+  currency: string
+): Record<string, UsageQuota> {
+  return {
+    available: balanceQuota(quota.availableBalance, quota.limitReached ? 0 : 100, currency),
+    voucher: balanceQuota(quota.voucherBalance, 100, currency),
+    cash: balanceQuota(quota.cashBalance, 100, currency),
+  };
 }
 
 export function registerMoonshotQuotaFetcher(): void {
@@ -211,7 +210,7 @@ export function registerMoonshotQuotaFetcher(): void {
 }
 
 export function registerMoonshotFetchersForNodes(
-  nodes: Array<{ id?: string | null; prefix?: string | null; baseUrl?: string | null }>,
+  nodes: Array<{ id?: string | null; prefix?: string | null; baseUrl?: string | null }>
 ): void {
   for (const node of nodes) {
     const origin = resolveMoonshotOrigin({}, node.baseUrl);

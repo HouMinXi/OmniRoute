@@ -9,6 +9,25 @@ import { backupDbFile } from "../backup";
 import { invalidateDbCache } from "../readCache";
 import { toRecord, type JsonRecord } from "./columns";
 
+function normalizeDailyQuotaResetHour(value: unknown): number | null {
+  return value === 0 || value ? Number(value) : null;
+}
+
+function withParsedCustomHeaders(node: JsonRecord, storedJson: string | null): JsonRecord {
+  const result: JsonRecord = { ...node };
+  if (storedJson) {
+    try {
+      result.customHeaders = JSON.parse(storedJson);
+    } catch {
+      result.customHeaders = null;
+    }
+  } else {
+    result.customHeaders = null;
+  }
+  delete result.customHeadersJson;
+  return result;
+}
+
 interface StatementLike<TRow = unknown> {
   all: (...params: unknown[]) => TRow[];
   get: (...params: unknown[]) => TRow | undefined;
@@ -89,10 +108,7 @@ export async function createProviderNode(data: JsonRecord) {
     iconUrl: data.iconUrl || null,
     customHeadersJson,
     dailyQuotaResetTimezone: data.dailyQuotaResetTimezone || null,
-    dailyQuotaResetHour:
-      data.dailyQuotaResetHour === 0 || data.dailyQuotaResetHour
-        ? Number(data.dailyQuotaResetHour)
-        : null,
+    dailyQuotaResetHour: normalizeDailyQuotaResetHour(data.dailyQuotaResetHour),
     createdAt: now,
     updatedAt: now,
   };
@@ -107,18 +123,7 @@ export async function createProviderNode(data: JsonRecord) {
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
 
-  const result: JsonRecord = { ...node };
-  if (customHeadersJson) {
-    try {
-      result.customHeaders = JSON.parse(customHeadersJson);
-    } catch {
-      result.customHeaders = null;
-    }
-  } else {
-    result.customHeaders = null;
-  }
-  delete result.customHeadersJson;
-  return result;
+  return withParsedCustomHeaders({ ...node }, customHeadersJson);
 }
 
 export async function updateProviderNode(id: string, data: JsonRecord) {
@@ -169,29 +174,14 @@ export async function updateProviderNode(id: string, data: JsonRecord) {
     iconUrl: merged["iconUrl"] || null,
     customHeadersJson: merged["customHeadersJson"] || null,
     dailyQuotaResetTimezone: merged["dailyQuotaResetTimezone"] || null,
-    dailyQuotaResetHour:
-      merged["dailyQuotaResetHour"] === 0 || merged["dailyQuotaResetHour"]
-        ? Number(merged["dailyQuotaResetHour"])
-        : null,
+    dailyQuotaResetHour: normalizeDailyQuotaResetHour(merged["dailyQuotaResetHour"]),
     updatedAt: merged["updatedAt"],
   });
 
   backupDbFile("pre-write");
   invalidateDbCache("nodes");
 
-  const result: JsonRecord = { ...merged };
-  const storedJson = merged["customHeadersJson"] as string | null;
-  if (storedJson) {
-    try {
-      result.customHeaders = JSON.parse(storedJson);
-    } catch {
-      result.customHeaders = null;
-    }
-  } else {
-    result.customHeaders = null;
-  }
-  delete result.customHeadersJson;
-  return result;
+  return withParsedCustomHeaders(merged, (merged["customHeadersJson"] as string | null) ?? null);
 }
 
 export async function deleteProviderNode(id: string) {
