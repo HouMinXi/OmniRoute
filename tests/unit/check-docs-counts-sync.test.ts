@@ -485,8 +485,8 @@ const TRAINING_CLAIM = {
 };
 
 test("the hard-stop claim passes on the real sentence and fails on a stale count", () => {
-  const v = makeValidator(7, HARD_STOP_CLAIM);
-  assert.equal(v("7 entries carry an independently documented hard stop, and").ok, true);
+  const v = makeValidator(5, HARD_STOP_CLAIM);
+  assert.equal(v("5 entries carry an independently documented hard stop, and").ok, true);
   assert.equal(v("99 entries carry an independently documented hard stop, and").ok, false);
 });
 
@@ -500,10 +500,10 @@ test("the training claim passes on the real sentence and fails on a stale count"
 test("a reworded or deleted sentence fails, instead of passing as absent", () => {
   // The gate's real failure mode is not a stale number, it is silence: reword the
   // sentence past the pattern and "no claim in this file" used to read green.
-  const required = makeValidator(7, { ...HARD_STOP_CLAIM, requireClaim: true });
-  assert.equal(required("7 entries have a provider-documented hard-stop guarantee.").ok, false);
+  const required = makeValidator(5, { ...HARD_STOP_CLAIM, requireClaim: true });
+  assert.equal(required("5 entries have a provider-documented hard-stop guarantee.").ok, false);
   assert.equal(required("the page no longer mentions it at all").ok, false);
-  assert.equal(required("7 entries carry an independently documented hard stop.").ok, true);
+  assert.equal(required("5 entries carry an independently documented hard stop.").ok, true);
 
   const trainingRequired = makeValidator(13, { ...TRAINING_CLAIM, requireClaim: true });
   assert.equal(trainingRequired("13 entries disclose training use.").ok, false);
@@ -514,7 +514,7 @@ test("the live page actually satisfies both required gates", () => {
   // A unit test on synthetic strings proves the validator; this one proves the
   // document. Without it, the two could drift apart and both stay green.
   const page = readFileSync(path.resolve(here, "../../docs/reference/FREE_TIERS.md"), "utf8");
-  assert.equal(makeValidator(7, { ...HARD_STOP_CLAIM, requireClaim: true })(page).ok, true);
+  assert.equal(makeValidator(5, { ...HARD_STOP_CLAIM, requireClaim: true })(page).ok, true);
   assert.equal(makeValidator(13, { ...TRAINING_CLAIM, requireClaim: true })(page).ok, true);
 });
 

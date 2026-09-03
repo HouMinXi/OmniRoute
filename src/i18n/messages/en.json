@@ -6139,7 +6139,7 @@
       "bluesminds": "Get your API key at https://www.bluesminds.com — OpenAI-compatible endpoint at https://api.bluesminds.com/v1 with free daily credits. VIP models (Claude Opus 4.5, Gemini 2.5 Pro) consume pi credits.",
       "byteplus": "Connect BytePlus ModelArk with an API key.",
       "bytez": "$1 free credits, refreshes every 4 weeks",
-      "cerebras": "Free Trial: 1M tokens/day, 30K TPM, 5 RPM — no credit card.",
+      "cerebras": "One-time $5 signup credit (30-day validity); a payment method is required. Not a recurring free tier.",
       "charm-hyper": "Create an API key at https://hyper.charm.land, then paste it here as a Bearer token.",
       "chutes": "Bearer API key for the Chutes OpenAI-compatible gateway.",
       "clarifai": "Clarifai exposes OpenAI-compatible chat, responses and /models on /v2/ext/openai/v1. Public/community models typically require a PAT; app-scoped keys only work for resources inside that app.",

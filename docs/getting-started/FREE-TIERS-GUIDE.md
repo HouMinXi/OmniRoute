@@ -161,8 +161,8 @@ The live, pool-deduplicated catalog currently reports:
 
 | Metric                                               |                            Current audited value | Interpretation                                                                            |
 | ---------------------------------------------------- | -----------------------------------------------: | ----------------------------------------------------------------------------------------- |
-| Recurring quantified grant                           |                          **~1.51B tokens/month** | Shared pools counted once; excludes uncapped providers from the sum                       |
-| First month with signup grants                       |                                **~2.13B tokens** | Recurring total plus one-time and recurring credits                                       |
+| Recurring quantified grant                           |                          **~1.48B tokens/month** | Shared pools counted once; excludes uncapped providers from the sum                       |
+| First month with signup grants                       |                                **~2.10B tokens** | Recurring total plus one-time and recurring credits                                       |
 | Audited free-model inventory                         | **39 recurring pool keys / 445 catalog entries** | 438 active + 7 discontinued; distinct from the 351-provider catalog                       |
 | Recurring/keyless free-forever providers represented |                                           **55** | Unique providers across recurring daily/monthly/credit/uncapped and keyless catalog types |
 | Provider catalog entries marked `hasFree`            |                                    **152 / 351** | Broader provider metadata; not all have a quantifiable recurring quota                    |

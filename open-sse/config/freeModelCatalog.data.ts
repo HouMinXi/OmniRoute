@@ -106,9 +106,12 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "bytez", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "meta-llama/Llama-3.3-70B-Instruct", monthlyTokens: 0, creditTokens: 1000000, freeType: "recurring-credit", poolKey: "bytez", tos: "ambiguous" },
   { provider: "bytez", modelId: "mistralai/Mistral-7B-Instruct-v0.3", displayName: "mistralai/Mistral-7B-Instruct-v0.3", monthlyTokens: 0, creditTokens: 1000000, freeType: "recurring-credit", poolKey: "bytez", tos: "ambiguous" },
   { provider: "bytez", modelId: "Qwen/Qwen2.5-72B-Instruct", displayName: "Qwen/Qwen2.5-72B-Instruct", monthlyTokens: 0, creditTokens: 1000000, freeType: "recurring-credit", poolKey: "bytez", tos: "ambiguous" },
-  // hardStopGuaranteed: Cerebras pricing page states "Free Trial: 1M tokens/day... no credit card" (open-sse/services/../providers/apikey/inference-hosts.ts:74-84).
-  { provider: "cerebras", modelId: "zai-glm-4.7", displayName: "GLM 4.7", monthlyTokens: 30000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "cerebras", tos: "caution", hardStopGuaranteed: true },
-  { provider: "cerebras", modelId: "gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 30000000, creditTokens: 0, freeType: "recurring-daily", poolKey: "cerebras", tos: "caution", hardStopGuaranteed: true },
+  // #11773: cerebras.ai/pricing (2026-09-03) is a one-time $5 signup credit
+  // gated on a payment method, 30-day expiry — not the old no-card 1M/day
+  // trial. creditTokens stays 0 because Cerebras publishes dollars, not a
+  // token grant. hardStopGuaranteed must stay unset: a stored card can bill.
+  { provider: "cerebras", modelId: "zai-glm-4.7", displayName: "GLM 4.7", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution" },
+  { provider: "cerebras", modelId: "gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "cerebras", tos: "caution" },
   // #8717: drop dead Workers AI ids (400/403/410). Keep Neurons/day budget on fp8-fast.
   { provider: "cloudflare-ai", modelId: "@cf/mistral/mistral-7b-instruct-v0.2-lora", displayName: "Mistral 7B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
   { provider: "cloudflare-ai", modelId: "@cf/qwen/qwen2.5-coder-32b-instruct", displayName: "Qwen 2.5 Coder 32B (🆓)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-daily", poolKey: "cloudflare-ai", tos: "caution" },
