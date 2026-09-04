@@ -104,7 +104,8 @@ export interface ServerOwnedToolLoopResult {
     | "tool_output_budget"
     | "deadline"
     | "provider_error"
-    | "execution_unknown";
+    | "execution_unknown"
+    | "connection_mismatch";
 }
 
 // ─── §5.1 Shared Context ───────────────────────────────────────────────────

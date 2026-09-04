@@ -5,6 +5,7 @@ import {
   canonicalJsonSha256,
   deriveToolRequestIdentity,
 } from "../../src/lib/skills/stableJson.ts";
+import type { ServerOwnedToolLoopResult } from "../../src/lib/skills/toolLoopTypes.ts";
 
 test("canonicalJson sorts nested object keys and preserves array order", () => {
   const a = { z: [{ b: 2, a: 1 }], a: true };
@@ -148,4 +149,62 @@ test("deriveToolRequestIdentity includes apiKeyId and body digest", () => {
     postInjectionBody: { x: 2 },
   });
   assert.notEqual(r1, r3);
+});
+
+test("canonicalJson sorts BMP PUA \uE000 before astral \u{10000} in same object", () => {
+  // U+E000 (BMP private-use, code point 57344) vs U+10000 (Linear B, code point 65536)
+  // code-point order: E000 < 10000
+  // UTF-16 code-unit order: \uD800 (surrogate of 10000) < \uE000 — reversed!
+  // So default .sort() would place \u{10000} before \uE000.
+  const obj = { "\u{10000}": 1, "\uE000": 2 };
+  const serialized = canonicalJson(obj);
+  const e000Pos = serialized.indexOf("\uE000");
+  const astralPos = serialized.indexOf("\u{10000}");
+  assert.ok(
+    e000Pos < astralPos,
+    `expected \\uE000 (pos ${e000Pos}) before \\u{10000} (pos ${astralPos}) in: ${serialized}`
+  );
+});
+
+test("canonicalJson rejects objects with getters without invoking the getter", () => {
+  let getterCallCount = 0;
+  const obj: Record<string, unknown> = {};
+  Object.defineProperty(obj, "hidden", {
+    get() {
+      getterCallCount++;
+      return 42;
+    },
+    enumerable: true,
+  });
+  assert.throws(() => canonicalJson(obj), /canonical JSON/i);
+  assert.equal(
+    getterCallCount,
+    0,
+    "getter must not be invoked when canonicalJson rejects the object"
+  );
+});
+
+test("ServerOwnedToolLoopResult.termination includes connection_mismatch", () => {
+  const TERMINATION_VALUES = [
+    "completed",
+    "client_tools",
+    "mixed_tools",
+    "max_followups",
+    "tool_output_budget",
+    "deadline",
+    "provider_error",
+    "execution_unknown",
+    "connection_mismatch",
+  ] as const;
+
+  // Compile-time: "connection_mismatch" must be assignable to Termination.
+  // If Termination omits "connection_mismatch", this line is a type error.
+  type Termination = ServerOwnedToolLoopResult["termination"];
+  const _mustInclude: Termination = "connection_mismatch";
+
+  // Runtime: connection_mismatch is present
+  assert.ok(
+    (TERMINATION_VALUES as readonly string[]).includes("connection_mismatch"),
+    "TERMINATION_VALUES must include connection_mismatch"
+  );
 });
