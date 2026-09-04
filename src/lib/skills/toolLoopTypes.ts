@@ -71,10 +71,14 @@ export interface ServerOwnedToolLoopOptions {
   sourceFormat: "openai" | "claude";
   skillsModelId: string;
   executionContext: ExecutionContext;
+  executeServerOwned: (
+    calls: ToolCall[],
+    context: ExecutionContext
+  ) => Promise<ExecutedToolResult[]>;
   resumeUpstream: (
     nextSourceBody: Record<string, unknown>,
     expectedConnectionId: string,
-    deadlineAtMs: number,
+    deadlineAtMs: number
   ) => Promise<NonStreamingProviderLegResult>;
   maxFollowUps?: number;
   maxResultChars?: number;
@@ -115,6 +119,7 @@ export interface ExecutionContext {
   apiKeyId: string;
   sessionId: string;
   requestId: string;
+  requestIdentity?: string;
   builtinToolNames?: string[];
   injectedCustomSkillNames?: string[];
   customSkillExecutionEnabled?: boolean;
