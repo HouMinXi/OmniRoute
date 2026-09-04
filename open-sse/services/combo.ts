@@ -7,34 +7,24 @@
 
 import {
   checkFallbackError,
-  classifyLockoutReason,
-  CONTEXT_OVERFLOW_PATTERNS,
   decayModelFailureCount,
   formatRetryAfter,
-  getModelLockoutInfo,
   getRuntimeProviderProfile,
   hasPerModelQuota,
-  isAccountSemaphoreFull,
   isModelLocked,
-  lockModelIfPerModelQuota,
-  MODEL_ACCESS_DENIED_PATTERNS,
-  recordModelLockoutFailure,
-  recordProviderFailure,
   recordProviderSuccess,
-  retryHintBypassesMaxCooldownMs,
-  selectLockoutCooldownMs,
 } from "./accountFallback.ts";
 import {
   errorResponse,
   unavailableResponse,
   errorResponseWithComboDiagnostics,
 } from "../utils/error.ts";
-import type { ComboDiagnostics } from "../utils/error.ts";
+
 import { recordComboFailure } from "./combo/failureTracker.ts";
 import { buildRecoveryHint } from "./combo/pinRecovery.ts";
 import { formatExhaustedConnectionKey } from "./combo/comboDiagFormat.ts";
 import { buildTargetTimeoutRunner } from "./combo/targetTimeoutRunner.ts";
-import { recordComboRequest, recordComboShadowRequest, getComboMetrics } from "./comboMetrics.ts";
+import { recordComboRequest, getComboMetrics } from "./comboMetrics.ts";
 import { qualityScoreFor } from "./routing/index.ts";
 import {
   expandComboSystemPromptIfPresent,
@@ -47,22 +37,9 @@ import {
   isComboCooldownWaitEligible,
   resolveComboTargetTimeoutMsForCombo,
 } from "./comboConfig.ts";
-import {
-  maybeGenerateHandoff,
-  maybeGenerateUniversalHandoff,
-  injectUniversalHandoffBody,
-  SKIP_UNIVERSAL_HANDOFF_FLAG,
-  type MessageLike,
-} from "./contextHandoff.ts";
-import {
-  recordSessionModelUsage,
-  getLastSessionModel,
-  getHandoff,
-} from "../../src/lib/db/contextHandoffs.ts";
-import { extractSessionAffinityKey } from "@/sse/services/auth";
+
 import { getHiddenModelsByProvider } from "@/models";
-import { resolveModelLockoutSettings } from "../../src/lib/resilience/modelLockoutSettings";
-import { fetchCodexQuota } from "./codexQuotaFetcher.ts";
+
 import { evaluateQuotaCutoff, getQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
 import { resolveProviderId } from "../../src/shared/constants/providers.ts";
 import { getQuotaFetchScope } from "./antigravityQuotaFamily.ts";
@@ -72,11 +49,9 @@ import { parseModel } from "./model.ts";
 import { rejectRetiredAutoComboCandidates } from "./modelLifecycle.ts";
 import { createComboContext } from "./combo/context.ts";
 import { phaseComboSetup } from "./combo/comboSetup.ts";
-import { checkCredentialGate, logCredentialSkip } from "./credentialGate.ts";
-import { emit } from "../../src/lib/events/eventBus";
-import { notifyWebhookEvent } from "../../src/lib/webhookDispatcher";
+
 import { type ProviderCandidate } from "./autoCombo/scoring.ts";
-import { estimateTokens } from "./contextManager.ts";
+
 import { getSessionConnection } from "./sessionManager.ts";
 import { getOAuthSessionAvailability } from "./oauthSessionOccupancy.ts";
 import {
@@ -88,10 +63,10 @@ import {
   peekStickyConnectionId,
   resolveDisableSessionStickiness,
 } from "./combo/sessionStickiness.ts";
-import { selectQuotaShareTarget } from "./combo/quotaShareStrategy.ts";
+
 import { makeConnectionConcurrencyResolver, lookupPositiveCap } from "./combo/concurrencyCaps.ts";
 import { acquireQuotaShareConcurrencySlot } from "./combo/quotaShareConcurrency.ts";
-import { canAffordRequest } from "../../src/lib/quota/quotaScheduler.ts";
+
 import { resolveConnectionTimeoutMs } from "../handlers/chatCore/upstreamTimeouts.ts";
 import { getCachedProviderConnectionById } from "../../src/lib/db/readCache.ts";
 import { orderTargetsByEvalScores } from "./evalRouting.ts";
@@ -130,7 +105,7 @@ import {
   resolveComboTerminalStatus,
 } from "./combo/comboErrorAggregation.ts";
 import type { ComboErrorEntry } from "./combo/comboErrorAggregation.ts";
-import type { CompressionMode } from "./compression/types.ts";
+
 import { getCachedProviderConnections } from "../../src/lib/db/readCache";
 import { isProviderInCooldown, recordProviderCooldown } from "./providerCooldownTracker.ts";
 import {
@@ -157,12 +132,8 @@ import {
   MAX_RR_COUNTERS,
   rrCounters,
   rrStickyTargets,
-  clampStickyRoundRobinTargetLimit,
-  clampStickyWeightedTargetLimit,
   getStickyRoundRobinStartIndex,
   recordStickyRoundRobinSuccess,
-  getStickyWeightedExecutionKey,
-  recordStickyWeightedSuccess,
   resolveComboStickyRoundRobinLimit,
 } from "./combo/rrState.ts";
 import { expandTargetsForAllStrategies } from "./combo/connectionAwareExpansion.ts";
@@ -172,7 +143,7 @@ import {
   releaseRejectedQualityResponse,
   toRetryAfterDisplayValue,
 } from "./combo/validateQuality.ts";
-import { dispatchChaosFromCombo, type ChaosTuning } from "./autoCombo/chaosEngine.ts";
+import { dispatchChaosFromCombo } from "./autoCombo/chaosEngine.ts";
 import {
   TRANSIENT_FOR_SEMAPHORE,
   MAX_FALLBACK_WAIT_MS,
@@ -186,20 +157,15 @@ import {
   shouldRecordProviderBreakerFailure,
   isComboRequestScopedFailure as isScopedFailure,
   isRequestScopedUpstreamFailure,
-  isInputBoundRequestFailure,
   shouldSkipConnDisable,
   resolveDelayMs,
   comboModelNotFoundResponse,
   isStreamReadinessFailureErrorBody,
-  isStreamEarlyEofErrorBody,
   isTokenLimitBreachErrorBody,
   isLocalQueueCapacityErrorBody,
   toRecordedTarget,
   getExhaustedTargetSkipReason,
-  clampPercent,
   quotaRemainingPercentFromQuota,
-  normalizeConnectionStatus,
-  hasFutureRateLimitUntil,
   getConnectionStatusQuotaCutoffReason,
   getPersistedConnectionCooldownSkipReason,
   resolvePersistedConnectionCooldownSkipReason,
@@ -221,7 +187,6 @@ import {
   areAllPinnedTargetsModelScopedUnusable,
   createPinnedModelUnavailableResponse,
   getNativeCodexTurnPin,
-  pinNativeCodexTurn,
 } from "./combo/nativeCodexTurnPin.ts";
 import {
   pinIsDurablyUnhealthy,
@@ -245,14 +210,7 @@ import {
   resolveComboRuntimeUnits,
   resolveComboTargets,
 } from "./combo/comboStructure.ts";
-import {
-  createInvocationId,
-  finalizeComboTrace,
-  finishComboTrace,
-  getComboTrace,
-  recordComboDecision,
-  startComboTrace,
-} from "./combo/decisionTrace.ts";
+import { createInvocationId, getComboTrace, startComboTrace } from "./combo/decisionTrace.ts";
 import {
   QUOTA_SOFT_DEPRIORITIZE_FACTOR,
   setCandidateQuotaSoftPenalty,
@@ -269,20 +227,13 @@ import {
   type ResetWindowConfig,
 } from "./combo/quotaScoring.ts";
 import { fetchResetAwareQuotaWithCache, preScreenTargets } from "./combo/quotaStrategies.ts";
-import {
-  buildAutoQuotaThresholds,
-  resolveQuotaExhaustionCutoffForTarget,
-} from "./combo/quotaExhaustionCutoff.ts";
+import { buildAutoQuotaThresholds } from "./combo/quotaExhaustionCutoff.ts";
 import { expandTargetsByFingerprints } from "./combo/fingerprintExpansion.ts";
 import { resolveComboTargetPipeline } from "./combo/targetResolution.ts";
 import { dispatchWithCooldownRetry } from "./combo/comboAttemptLoop.ts";
 import { evaluateExecuteTargetGates } from "./combo/executeTargetGates.ts";
 import { executeTargetAttempt } from "./combo/executeTargetAttempt.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./combo/attemptLoopTypes.ts";
-import {
-  isQuotaExhaustionResponse,
-  recordQuotaExhaustionClassification,
-} from "./combo/quotaExhaustion.ts";
 
 export { RESET_WINDOW_NAMES, QUOTA_SOFT_DEPRIORITIZE_FACTOR, setCandidateQuotaSoftPenalty };
 export { scoreAutoTargets, expandAutoComboCandidatePool };
@@ -320,26 +271,6 @@ export {
  * peekStickyConnectionId guards against clearing an unrelated pin when the
  * failing target isn't actually the currently sticky-bound connection.
  */
-/**
- * Connection read for the pre-dispatch persisted-cooldown gate.
- *
- * `fresh: false` (first attempt) uses the shared 5s readCache — the row was just
- * read by the surrounding target resolution, so a second uncached hit is pure cost.
- * `fresh: true` (every retry) goes straight to SQLite: during a burst a sibling
- * request routinely writes `rate_limited_until` while this attempt is sleeping out
- * its retry delay, so the cached snapshot would still say "no cooldown" — which is
- * exactly how a retry ended up dispatching into a real upstream 429 on a connection
- * the engine had already marked unavailable.
- */
-async function readConnectionForCooldownGate(
-  connectionId: string,
-  fresh: boolean
-): Promise<Record<string, unknown> | null | undefined> {
-  if (!fresh) return getCachedProviderConnectionById(connectionId);
-  const { getProviderConnectionById } = await import("@/lib/db/providers");
-  return (await getProviderConnectionById(connectionId)) as Record<string, unknown> | null;
-}
-
 export function releaseStickyPinOnFailure(
   messageHash: string | null | undefined,
   failedConnectionId: string | null | undefined
@@ -1185,14 +1116,14 @@ async function handleRoundRobinCombo({
   allCombos,
   signal,
   apiKeyAllowedConnections = null,
-  nesting = null,
+  nesting: _nesting = null,
   hiddenModelsByProvider = getHiddenModelsByProvider(),
-  clientManagedResponsesContext,
-  deferContextOverflowWhenCompressible = false,
-  compressionExclusions,
-  sourceFormat = null,
-  endpointPath = null,
-  requestHeaders = null,
+  clientManagedResponsesContext: _clientManagedResponsesContext,
+  deferContextOverflowWhenCompressible: _deferContextOverflowWhenCompressible = false,
+  compressionExclusions: _compressionExclusions,
+  sourceFormat: _sourceFormat = null,
+  endpointPath: _endpointPath = null,
+  requestHeaders: _requestHeaders = null,
   relayOptions,
   perTargetAdmission = null,
 }: HandleRoundRobinOptions): Promise<Response> {
