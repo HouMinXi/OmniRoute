@@ -32,6 +32,9 @@ import type { ResolvedComboTarget } from "./types.ts";
  * Cached vs fresh connection read for the persisted-cooldown gate.
  * `fresh: false` (first attempt) uses the 5s readCache. `fresh: true`
  * (every retry) goes straight to SQLite.
+ *
+ * Task 2 call sites pass `false` — same as combo.ts executeTarget today.
+ * Retry-path `fresh: true` is Task 4 wiring, not this extract.
  */
 export async function readConnectionForCooldownGate(
   connectionId: string,
@@ -63,6 +66,8 @@ export async function evaluateExecuteTargetGates(opts: {
       : null;
   };
 
+  // Lift-as-is from combo.ts executeTarget: only count a fallback when
+  // this is not the first ordered target. Do not change the condition.
   const bumpFallback = () => {
     if (i > 0) state.fallbackCount++;
   };
@@ -134,6 +139,7 @@ export async function evaluateExecuteTargetGates(opts: {
       allowRateLimitedConnection
     );
     if (persistedSkip) {
+      // Lift-as-is: combo.ts skips without observeFailure / stopProtectedPriorityTarget.
       deps.log.info("COMBO", persistedSkip);
       deps.clearStaleLKGP(deps.combo.name, target.executionKey, deps.combo.id, deps.log, "COMBO");
       bumpFallback();
@@ -216,6 +222,7 @@ export async function evaluateExecuteTargetGates(opts: {
     }
   }
 
+  // Lift-as-is: combo.ts reads the env flag inline, not via AttemptLoopDeps.
   if (process.env.OMNIROUTE_QUOTA_AWARE_ROUTING === "1" && provider && target.connectionId) {
     const quotaDecision = canAffordRequest(
       target.connectionId,
@@ -255,6 +262,7 @@ export async function evaluateExecuteTargetGates(opts: {
     }
   }
 
+  // Lift-as-is: combo.ts uses the same `as string | undefined` cast.
   const connectionId = target.connectionId as string | undefined;
   if (connectionId) {
     const gateResult = checkCredentialGate(connectionId, provider, modelStr);
