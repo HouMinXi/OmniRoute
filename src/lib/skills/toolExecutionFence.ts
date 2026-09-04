@@ -1,5 +1,9 @@
 import { canonicalJsonSha256 } from "./stableJson";
-import { claimServerToolExecution, finalizeServerToolExecution } from "../db/skillExecutionFence";
+import {
+  claimServerToolExecution,
+  finalizeServerToolExecution,
+  readRow,
+} from "../db/skillExecutionFence";
 import type { SqliteAdapter } from "../db/adapters/types";
 import { getDbInstance } from "../db/core";
 
@@ -65,31 +69,33 @@ export async function runWithServerToolFence<T>(
   switch (claim.kind) {
     case "claimed": {
       const key = buildExecutionKey(input.apiKeyId, input.requestIdentity, input.toolCallId);
+      const claimStartTime = now();
       const wrapperPromise = (async () => {
         try {
           const value = await input.execute(claim.executionId);
+          const durationMs = now() - claimStartTime;
           finalizeServerToolExecution(
             {
               executionId: claim.executionId,
               status: "success",
               output: value,
               errorMessage: null,
-              durationMs: 0,
+              durationMs,
             },
             db
           );
           return value;
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : String(err);
-          // Sanitize error message before persisting
           const safeMessage = message.replace(/\bat\s+\/[^\s"']+/g, "[stack-redacted]");
+          const durationMs = now() - claimStartTime;
           finalizeServerToolExecution(
             {
               executionId: claim.executionId,
               status: "error",
               output: null,
               errorMessage: safeMessage,
-              durationMs: 0,
+              durationMs,
             },
             db
           );
@@ -121,20 +127,38 @@ export async function runWithServerToolFence<T>(
     }
 
     case "in_progress": {
-      // Poll: check if the running process completes within MAX_POLL_MS
       const key = buildExecutionKey(input.apiKeyId, input.requestIdentity, input.toolCallId);
       const deadline = now() + MAX_POLL_MS;
       while (now() < deadline) {
-        // Check process-internal promise
+        // Check process-internal promise first
         const active = activePromises.get(key);
         if (active && active.status === "resolved") {
-          // Wait for the promise to settle and get the value
           try {
             const value = await active.promise;
             return { kind: "replayed", value };
           } catch {
             return { kind: "unknown" };
           }
+        }
+        // Also check DB — another process may have finalized
+        const row = readRow(db, claim.executionId);
+        if (row && row.status !== "running") {
+          if (
+            row.status === "success" ||
+            row.status === "error" ||
+            row.status === "timeout"
+          ) {
+            let parsedOutput: unknown = null;
+            if (row.output !== null) {
+              try {
+                parsedOutput = JSON.parse(row.output);
+              } catch {
+                parsedOutput = row.output;
+              }
+            }
+            return { kind: "replayed", value: parsedOutput as T };
+          }
+          return { kind: "unknown" };
         }
         await sleep(POLL_INTERVAL_MS);
       }

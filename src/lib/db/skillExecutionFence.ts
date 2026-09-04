@@ -45,7 +45,7 @@ function sanitizeAndBounded(value: unknown, maxChars: number): string | null {
   return sanitized.length > maxChars ? sanitized.slice(0, maxChars) : sanitized;
 }
 
-function readRow(
+export function readRow(
   db: SqliteAdapter,
   executionId: string
 ): {
