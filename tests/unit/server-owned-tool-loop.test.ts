@@ -14,13 +14,8 @@ import type {
   ChatCoreErrorResult,
   ToolCall,
 } from "../../src/lib/skills/toolLoopTypes.ts";
-import {
-  ServerOwnedExecutionError,
-  extractToolCalls,
-} from "../../src/lib/skills/interception.ts";
-import {
-  buildFollowUpSourceBody,
-} from "../../src/lib/skills/followUpTranscript.ts";
+import { ServerOwnedExecutionError, extractToolCalls } from "../../src/lib/skills/interception.ts";
+import { buildFollowUpSourceBody } from "../../src/lib/skills/followUpTranscript.ts";
 
 // ─── Fix 6: serializedResultTextById verbatim use ────────────────────────────
 
