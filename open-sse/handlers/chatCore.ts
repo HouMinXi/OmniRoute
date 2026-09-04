@@ -950,6 +950,33 @@ export async function handleChatCore({
   // native-bypass defaults below when the operator explicitly configured it for this
   // provider/model pair; undefined falls through to the existing bypass logic.
   const interceptSearchOverride = resolveInterceptSearch(provider, effectiveModel);
+
+  // Capture client tool names BEFORE fallback injection so the owner-provenance
+  // merge can distinguish tools the client already declared from synthetic tools
+  // added by the fallback preparer. Without this, a client function named
+  // `omniroute_web_search` (colliding with the fallback tool name) would be
+  // marked server-owned even though the client owns it.
+  const preConversionClientToolNames: string[] = (
+    Array.isArray((body as Record<string, unknown>).tools)
+      ? ((body as Record<string, unknown>).tools as unknown[])
+      : []
+  )
+    .map((tool) => {
+      if (!tool || typeof tool !== "object") return "";
+      const record = tool as Record<string, unknown>;
+      if (typeof record.name === "string") return record.name;
+      const fn = record.function;
+      if (
+        fn &&
+        typeof fn === "object" &&
+        typeof (fn as Record<string, unknown>).name === "string"
+      ) {
+        return (fn as Record<string, unknown>).name as string;
+      }
+      return "";
+    })
+    .filter(Boolean);
+
   const { body: bodyWithWebSearchFallback, fallback: webSearchFallbackPlan } =
     prepareWebSearchFallbackBody(body as Record<string, unknown>, {
       provider,
@@ -1323,10 +1350,11 @@ export async function handleChatCore({
   // injectMemoryAndSkills only tracks memory tools; the fallback names were
   // injected into body.tools by prepareWebSearchFallbackBody/prepareWebFetchFallbackBody
   // above, so they must be carried into the owner provenance chain here.
-  const mergedOwnerNames = mergeInjectedFallbackOwnerNames(injectionResult, [
-    webSearchFallbackPlan,
-    webFetchFallbackPlan,
-  ]);
+  const mergedOwnerNames = mergeInjectedFallbackOwnerNames(
+    injectionResult,
+    [webSearchFallbackPlan, webFetchFallbackPlan],
+    preConversionClientToolNames
+  );
   injectionResult.builtinToolNames = mergedOwnerNames.builtinToolNames;
 
   // Translate request (pass reqLogger for intermediate logging)

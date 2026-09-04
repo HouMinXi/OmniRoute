@@ -907,49 +907,228 @@ test("ServerOwnedExecutionError is an exported class with code and httpStatus", 
   assert.equal(err.message, "test");
 });
 
-test("executeServerOwned: in_progress fence state → throws ServerOwnedExecutionError, never returns tool result", async () => {
-  // Verify source-level: executeServerOwned's switch statement throws for in_progress
-  const fs = await import("node:fs");
-  const sourceCode = fs.readFileSync(
-    new URL("../../src/lib/skills/interception.ts", import.meta.url),
-    "utf8"
-  );
-  // The switch must throw ServerOwnedExecutionError for in_progress, not push a tool result
-  assert.ok(
-    sourceCode.includes('case "in_progress":') &&
-      sourceCode.includes("throw new ServerOwnedExecutionError") &&
-      sourceCode.includes('"TOOL_IN_PROGRESS"'),
-    "in_progress case must throw ServerOwnedExecutionError(TOOL_IN_PROGRESS)"
-  );
-  assert.ok(
-    !sourceCode.includes('case "in_progress":') ||
-      !sourceCode.includes('result: { error: "Tool execution in progress" }'),
-    "in_progress must not return {error:...} tool result"
-  );
+test("executeServerOwned: in_progress fence state → throws ServerOwnedExecutionError with TOOL_IN_PROGRESS (409)", async () => {
+  const { setFenceFnForTesting } = await import("../../src/lib/skills/interception.ts");
+  const mockFence = async () => ({ kind: "in_progress" as const });
+  setFenceFnForTesting(mockFence);
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    const context = {
+      apiKeyId: "key-fence",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      executionFenceEnabled: true,
+      requestIdentity: "identity-1",
+    };
+
+    try {
+      await executeServerOwned(calls, context);
+      assert.fail("must throw");
+    } catch (e: unknown) {
+      assert.ok(e instanceof ServerOwnedExecutionError);
+      assert.equal(e.code, "TOOL_IN_PROGRESS");
+      assert.equal(e.httpStatus, 409);
+    }
+  } finally {
+    setFenceFnForTesting(null);
+  }
 });
 
-test("executeServerOwned: unknown fence state → throws ServerOwnedExecutionError with TOOL_STATE_UNKNOWN", async () => {
-  const fs = await import("node:fs");
-  const sourceCode = fs.readFileSync(
-    new URL("../../src/lib/skills/interception.ts", import.meta.url),
-    "utf8"
-  );
-  assert.ok(
-    sourceCode.includes('case "unknown":') && sourceCode.includes('"TOOL_STATE_UNKNOWN"'),
-    "unknown case must throw ServerOwnedExecutionError(TOOL_STATE_UNKNOWN)"
-  );
+test("executeServerOwned: unknown fence state → throws ServerOwnedExecutionError with TOOL_STATE_UNKNOWN (500)", async () => {
+  const { setFenceFnForTesting } = await import("../../src/lib/skills/interception.ts");
+  const mockFence = async () => ({ kind: "unknown" as const });
+  setFenceFnForTesting(mockFence);
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    const context = {
+      apiKeyId: "key-fence",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      executionFenceEnabled: true,
+      requestIdentity: "identity-1",
+    };
+
+    try {
+      await executeServerOwned(calls, context);
+      assert.fail("must throw");
+    } catch (e: unknown) {
+      assert.ok(e instanceof ServerOwnedExecutionError);
+      assert.equal(e.code, "TOOL_STATE_UNKNOWN");
+      assert.equal(e.httpStatus, 500);
+    }
+  } finally {
+    setFenceFnForTesting(null);
+  }
 });
 
-test("executeServerOwned: identity_conflict fence state → throws ServerOwnedExecutionError with IDENTITY_CONFLICT", async () => {
-  const fs = await import("node:fs");
-  const sourceCode = fs.readFileSync(
-    new URL("../../src/lib/skills/interception.ts", import.meta.url),
-    "utf8"
-  );
-  assert.ok(
-    sourceCode.includes('case "identity_conflict":') && sourceCode.includes('"IDENTITY_CONFLICT"'),
-    "identity_conflict case must throw ServerOwnedExecutionError(IDENTITY_CONFLICT)"
-  );
+test("executeServerOwned: identity_conflict fence state → throws ServerOwnedExecutionError with IDENTITY_CONFLICT (409)", async () => {
+  const { setFenceFnForTesting } = await import("../../src/lib/skills/interception.ts");
+  const mockFence = async () => ({ kind: "identity_conflict" as const });
+  setFenceFnForTesting(mockFence);
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    const context = {
+      apiKeyId: "key-fence",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      executionFenceEnabled: true,
+      requestIdentity: "identity-1",
+    };
+
+    try {
+      await executeServerOwned(calls, context);
+      assert.fail("must throw");
+    } catch (e: unknown) {
+      assert.ok(e instanceof ServerOwnedExecutionError);
+      assert.equal(e.code, "IDENTITY_CONFLICT");
+      assert.equal(e.httpStatus, 409);
+    }
+  } finally {
+    setFenceFnForTesting(null);
+  }
+});
+
+// ─── Fix Round 3: Defect 1 — replay error/timeout detection ───────────────
+
+test("executeServerOwned: error replay → throws ServerOwnedExecutionError with TOOL_EXECUTION_ERROR (500)", async () => {
+  const { setFenceFnForTesting } = await import("../../src/lib/skills/interception.ts");
+  const mockFence = async () => ({
+    kind: "replayed" as const,
+    value: null,
+    status: "error" as const,
+    errorMessage: "handler crashed",
+  });
+  setFenceFnForTesting(mockFence);
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    const context = {
+      apiKeyId: "key-fence",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      executionFenceEnabled: true,
+      requestIdentity: "identity-1",
+    };
+
+    try {
+      await executeServerOwned(calls, context);
+      assert.fail("must throw");
+    } catch (e: unknown) {
+      assert.ok(e instanceof ServerOwnedExecutionError);
+      assert.equal(e.code, "TOOL_EXECUTION_ERROR");
+      assert.equal(e.httpStatus, 500);
+      assert.equal(e.message, "handler crashed");
+    }
+  } finally {
+    setFenceFnForTesting(null);
+  }
+});
+
+test("executeServerOwned: timeout replay → throws ServerOwnedExecutionError with TOOL_EXECUTION_TIMEOUT (504)", async () => {
+  const { setFenceFnForTesting } = await import("../../src/lib/skills/interception.ts");
+  const mockFence = async () => ({
+    kind: "replayed" as const,
+    value: null,
+    status: "timeout" as const,
+    errorMessage: "execution exceeded deadline",
+  });
+  setFenceFnForTesting(mockFence);
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    const context = {
+      apiKeyId: "key-fence",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      executionFenceEnabled: true,
+      requestIdentity: "identity-1",
+    };
+
+    try {
+      await executeServerOwned(calls, context);
+      assert.fail("must throw");
+    } catch (e: unknown) {
+      assert.ok(e instanceof ServerOwnedExecutionError);
+      assert.equal(e.code, "TOOL_EXECUTION_TIMEOUT");
+      assert.equal(e.httpStatus, 504);
+      assert.equal(e.message, "execution exceeded deadline");
+    }
+  } finally {
+    setFenceFnForTesting(null);
+  }
+});
+
+test("executeServerOwned: success replay → returns ExecutedToolResult with replayed:true", async () => {
+  const { setFenceFnForTesting } = await import("../../src/lib/skills/interception.ts");
+  const mockFence = async () => ({
+    kind: "replayed" as const,
+    value: { cached: true },
+    status: "success" as const,
+    errorMessage: null,
+  });
+  setFenceFnForTesting(mockFence);
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    const context = {
+      apiKeyId: "key-fence",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      executionFenceEnabled: true,
+      requestIdentity: "identity-1",
+    };
+
+    const results = await executeServerOwned(calls, context);
+    assert.equal(results.length, 1);
+    assert.equal(results[0].id, "c1");
+    assert.equal(results[0].replayed, true);
+    assert.deepEqual(results[0].result, { cached: true });
+  } finally {
+    setFenceFnForTesting(null);
+  }
+});
+
+test("executeServerOwned: error replay with null errorMessage → uses default message", async () => {
+  const { setFenceFnForTesting } = await import("../../src/lib/skills/interception.ts");
+  const mockFence = async () => ({
+    kind: "replayed" as const,
+    value: null,
+    status: "error" as const,
+    errorMessage: null,
+  });
+  setFenceFnForTesting(mockFence);
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    const context = {
+      apiKeyId: "key-fence",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      executionFenceEnabled: true,
+      requestIdentity: "identity-1",
+    };
+
+    try {
+      await executeServerOwned(calls, context);
+      assert.fail("must throw");
+    } catch (e: unknown) {
+      assert.ok(e instanceof ServerOwnedExecutionError);
+      assert.equal(e.code, "TOOL_EXECUTION_ERROR");
+      assert.equal(e.message, "Tool execution failed");
+    }
+  } finally {
+    setFenceFnForTesting(null);
+  }
 });
 
 // ─── Fix Round 2: Defect 2 — executeClaimed non-success throws ──────────────

@@ -274,14 +274,21 @@ interface FallbackPlan {
  * Pure helper: merge web-search/web-fetch fallback tool names into the
  * builtin owner set. Adds a name only when plan.enabled===true,
  * plan.convertedToolCount>0, plan.toolName is non-null, and that name
- * did not already exist in the pre-conversion client tools (builtinToolNames).
+ * did not already exist in the pre-conversion client tools (builtinToolNames)
+ * OR in the original client tool names captured before fallback injection.
  * Does not mutate its input; returns a new result.
  */
 export function mergeInjectedFallbackOwnerNames(
   injectionResult: { builtinToolNames: string[] },
-  plans: FallbackPlan[]
+  plans: FallbackPlan[],
+  preConversionClientToolNames?: string[]
 ): { builtinToolNames: string[] } {
   const existing = new Set(injectionResult.builtinToolNames);
+  if (preConversionClientToolNames) {
+    for (const name of preConversionClientToolNames) {
+      existing.add(name);
+    }
+  }
   const extraNames: string[] = [];
   for (const plan of plans) {
     if (

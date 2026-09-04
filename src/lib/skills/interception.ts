@@ -498,9 +498,21 @@ export async function classifyServerOwnedCalls(
 
 const LEASE_DURATION_MS = 120_000;
 
+/**
+ * Runtime seam: overridable fence function for testing.
+ * When null, the real `runWithServerToolFence` is used.
+ * Tests may set this to inject controlled fence outcomes.
+ */
+let _fenceFn: typeof runWithServerToolFence | null = null;
+
+export function setFenceFnForTesting(fn: typeof runWithServerToolFence | null): void {
+  _fenceFn = fn;
+}
+
 export async function executeServerOwned(
   calls: ToolCall[],
-  context: ExecutionContext
+  context: ExecutionContext,
+  fenceFn?: typeof runWithServerToolFence
 ): Promise<ExecutedToolResult[]> {
   if (context.executionFenceEnabled && !context.requestIdentity) {
     throw new Error(
@@ -562,7 +574,8 @@ export async function executeServerOwned(
     };
 
     if (context.executionFenceEnabled && context.requestIdentity) {
-      const fenceResult = await runWithServerToolFence({
+      const activeFenceFn = fenceFn ?? _fenceFn ?? runWithServerToolFence;
+      const fenceResult = await activeFenceFn({
         apiKeyId: context.apiKeyId,
         requestIdentity: context.requestIdentity,
         toolCallId: call.id,
@@ -581,7 +594,21 @@ export async function executeServerOwned(
             replayed: false,
           });
           break;
-        case "replayed":
+        case "replayed": {
+          if (fenceResult.status === "error") {
+            throw new ServerOwnedExecutionError(
+              fenceResult.errorMessage ?? "Tool execution failed",
+              "TOOL_EXECUTION_ERROR",
+              500
+            );
+          }
+          if (fenceResult.status === "timeout") {
+            throw new ServerOwnedExecutionError(
+              fenceResult.errorMessage ?? "Tool execution timed out",
+              "TOOL_EXECUTION_TIMEOUT",
+              504
+            );
+          }
           results.push({
             id: call.id,
             name: call.name,
@@ -589,6 +616,7 @@ export async function executeServerOwned(
             replayed: true,
           });
           break;
+        }
         case "in_progress":
           throw new ServerOwnedExecutionError(
             "Tool execution in progress",
