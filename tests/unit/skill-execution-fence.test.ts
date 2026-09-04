@@ -284,10 +284,9 @@ test("fence: cross-handle poll — B sees in_progress, then A finalizes, then B 
     db: adapterB,
   });
 
-  // Let B poll a few times to observe in_progress
-  await new Promise((r) => setTimeout(r, 5));
-
-  // Signal B has observed in_progress, allowing A to finalize
+  // Injected sleep proves B entered polling before A may finalize.
+  await new Promise<void>((resolve) => setImmediate(resolve));
+  assert.ok(fakeTime > 1_000_000, "B must poll before A finalizes");
   bObservedResolve();
 
   const [, fenceResult] = await Promise.all([pA, pB]);
