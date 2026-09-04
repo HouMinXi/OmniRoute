@@ -236,7 +236,7 @@ if (!isCloud && !fs.existsSync(DATA_DIR)) {
 
 // ──────────────── Schema ────────────────
 
-export const SCHEMA_SQL = `
+const SCHEMA_SQL = `
   CREATE TABLE IF NOT EXISTS provider_connections (
     id TEXT PRIMARY KEY,
     provider TEXT NOT NULL,

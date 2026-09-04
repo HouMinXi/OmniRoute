@@ -9,7 +9,13 @@ import { getDbInstance } from "../db/core";
 
 export type RunWithServerToolFenceResult<T> =
   | { kind: "executed"; value: T }
-  | { kind: "replayed"; value: T }
+  | { kind: "replayed"; value: T; status: "success"; errorMessage: null }
+  | {
+      kind: "replayed";
+      value: unknown | null;
+      status: "error" | "timeout";
+      errorMessage: string | null;
+    }
   | { kind: "in_progress" }
   | { kind: "unknown" }
   | { kind: "identity_conflict" };
@@ -63,7 +69,8 @@ export async function runWithServerToolFence<T>(
       inputDigest,
       leaseExpiresAt,
     },
-    db
+    db,
+    now()
   );
 
   switch (claim.kind) {
@@ -84,7 +91,7 @@ export async function runWithServerToolFence<T>(
             },
             db
           );
-          return value;
+          return { kind: "success" as const, value, errorMessage: null };
         } catch (err: unknown) {
           const message = err instanceof Error ? err.message : String(err);
           const safeMessage = message.replace(/\bat\s+\/[^\s"']+/g, "[stack-redacted]");
@@ -99,7 +106,7 @@ export async function runWithServerToolFence<T>(
             },
             db
           );
-          throw err;
+          return { kind: "error" as const, value: null, errorMessage: safeMessage };
         }
       })();
 
@@ -115,15 +122,32 @@ export async function runWithServerToolFence<T>(
       );
 
       try {
-        const value = await wrapperPromise;
-        return { kind: "executed", value };
+        const result = await wrapperPromise;
+        if (result.kind === "success") {
+          return { kind: "executed", value: result.value as T };
+        }
+        // Handler errored — finalize already done, propagate
+        throw new Error(result.errorMessage ?? "tool execution failed");
       } finally {
         activePromises.delete(key);
       }
     }
 
     case "replay": {
-      return { kind: "replayed", value: claim.output as T };
+      if (claim.status === "success") {
+        return {
+          kind: "replayed",
+          value: claim.output as T,
+          status: "success",
+          errorMessage: null,
+        };
+      }
+      return {
+        kind: "replayed",
+        value: claim.output ?? null,
+        status: claim.status,
+        errorMessage: claim.errorMessage,
+      };
     }
 
     case "in_progress": {
@@ -132,22 +156,46 @@ export async function runWithServerToolFence<T>(
       while (now() < deadline) {
         // Check process-internal promise first
         const active = activePromises.get(key);
-        if (active && active.status === "resolved") {
-          try {
-            const value = await active.promise;
-            return { kind: "replayed", value };
-          } catch {
+        if (active) {
+          if (active.status === "resolved") {
+            try {
+              const result = await active.promise;
+              if (result && typeof result === "object" && "status" in result) {
+                const r = result as { value: unknown; status: string; errorMessage: string | null };
+                if (r.status === "success") {
+                  return {
+                    kind: "replayed",
+                    value: r.value as T,
+                    status: "success",
+                    errorMessage: null,
+                  };
+                }
+                return {
+                  kind: "replayed",
+                  value: r.value ?? null,
+                  status: r.status as "error" | "timeout",
+                  errorMessage: r.errorMessage,
+                };
+              }
+              return {
+                kind: "replayed",
+                value: result as T,
+                status: "success",
+                errorMessage: null,
+              };
+            } catch {
+              return { kind: "unknown" };
+            }
+          }
+          if (active.status === "rejected") {
+            // Rejected in-process promise — handler failed, return unknown
             return { kind: "unknown" };
           }
         }
         // Also check DB — another process may have finalized
         const row = readRow(db, claim.executionId);
         if (row && row.status !== "running") {
-          if (
-            row.status === "success" ||
-            row.status === "error" ||
-            row.status === "timeout"
-          ) {
+          if (row.status === "success" || row.status === "error" || row.status === "timeout") {
             let parsedOutput: unknown = null;
             if (row.output !== null) {
               try {
@@ -156,7 +204,20 @@ export async function runWithServerToolFence<T>(
                 parsedOutput = row.output;
               }
             }
-            return { kind: "replayed", value: parsedOutput as T };
+            if (row.status === "success") {
+              return {
+                kind: "replayed",
+                value: parsedOutput as T,
+                status: "success",
+                errorMessage: null,
+              };
+            }
+            return {
+              kind: "replayed",
+              value: parsedOutput ?? null,
+              status: row.status as "error" | "timeout",
+              errorMessage: row.error_message,
+            };
           }
           return { kind: "unknown" };
         }

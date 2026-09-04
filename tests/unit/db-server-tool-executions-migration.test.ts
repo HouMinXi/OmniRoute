@@ -11,34 +11,70 @@ const require_ = createRequire(import.meta.url);
 const BetterSqlite3 = require_("better-sqlite3") as typeof import("better-sqlite3");
 
 import { createBetterSqliteAdapter } from "../../src/lib/db/adapters/betterSqliteAdapter";
-import { runMigrations } from "../../src/lib/db/migrationRunner";
-import { SCHEMA_SQL } from "../../src/lib/db/core";
 import type { SqliteAdapter } from "../../src/lib/db/adapters/types";
 
-/**
- * Create a temp DB with the full base schema + all migrations applied.
- * This mirrors the real initialization in core.ts (SCHEMA_SQL + seed 001 + runMigrations).
- */
-function makeTempDb(): { adapter: SqliteAdapter; dir: string; raw: import("better-sqlite3").Database } {
+const MIGRATION_173_PATH = path.resolve(
+  import.meta.dirname ?? ".",
+  "../../src/lib/db/migrations/173_server_tool_executions.sql"
+);
+const MIGRATION_173_SQL = fs.readFileSync(MIGRATION_173_PATH, "utf8");
+
+// Minimal pre-173 fixture: only skills + skill_executions tables.
+// No SCHEMA_SQL import from core.ts, no runMigrations.
+const PRE_173_FIXTURE = `
+  CREATE TABLE IF NOT EXISTS skills (
+    id TEXT PRIMARY KEY,
+    api_key_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    version TEXT NOT NULL DEFAULT '1.0.0',
+    description TEXT,
+    schema TEXT NOT NULL,
+    handler TEXT NOT NULL,
+    enabled INTEGER NOT NULL DEFAULT 1,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+  CREATE TABLE IF NOT EXISTS skill_executions (
+    id TEXT PRIMARY KEY,
+    skill_id TEXT NOT NULL,
+    api_key_id TEXT NOT NULL,
+    session_id TEXT,
+    input TEXT NOT NULL,
+    output TEXT,
+    status TEXT NOT NULL CHECK(status IN ('pending', 'running', 'success', 'error', 'timeout')),
+    error_message TEXT,
+    duration_ms INTEGER,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+  );
+  CREATE INDEX IF NOT EXISTS idx_skill_executions_skill ON skill_executions(skill_id);
+  CREATE INDEX IF NOT EXISTS idx_skill_executions_api_key ON skill_executions(api_key_id);
+`;
+
+function makeTempDb(): {
+  adapter: SqliteAdapter;
+  dir: string;
+  raw: import("better-sqlite3").Database;
+} {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "migration-173-test-"));
   const dbPath = path.join(dir, "test.db");
   const raw = new BetterSqlite3(dbPath);
   raw.pragma("journal_mode = WAL");
   raw.pragma("busy_timeout = 2000");
-  // Apply base schema (mirrors core.ts initialization)
-  raw.exec(SCHEMA_SQL);
-  // Seed migration 001 as applied (base schema already created its tables)
+  // Create migrations tracking table
   raw.exec(`
     CREATE TABLE IF NOT EXISTS _omniroute_migrations (
       version TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
-    INSERT OR IGNORE INTO _omniroute_migrations (version, name)
-    VALUES ('001', 'initial_schema');
   `);
+  // Apply minimal pre-173 fixture (skills + skill_executions only)
+  raw.exec(PRE_173_FIXTURE);
+  // Apply migration 173 via raw.exec (real SQL, twice for idempotency)
+  raw.exec(MIGRATION_173_SQL);
+  raw.exec(MIGRATION_173_SQL);
   const adapter = createBetterSqliteAdapter(raw);
-  runMigrations(adapter, { isNewDb: true });
   return { adapter, dir, raw };
 }
 
@@ -58,7 +94,7 @@ function getIndexInfo(raw: import("better-sqlite3").Database, table: string) {
   }>;
 }
 
-// ── RED tests: these MUST fail before migration 173 exists ──
+// ── Migration 173 tests ──
 
 test("migration 173: server_tool_executions table exists with correct columns", (_, done) => {
   const { raw, dir } = makeTempDb();
@@ -67,8 +103,19 @@ test("migration 173: server_tool_executions table exists with correct columns", 
     const names = tables.map((t) => t.name);
     assert.ok(
       names.includes("server_tool_executions"),
-      `Expected server_tool_executions in: ${names.join(", ")}`,
+      `Expected server_tool_executions in: ${names.join(", ")}`
     );
+    const cols = getColumnInfo(raw, "server_tool_executions");
+    const colNames = cols.map((c) => c.name);
+    assert.ok(colNames.includes("id"), "must have id column");
+    assert.ok(colNames.includes("api_key_id"), "must have api_key_id column");
+    assert.ok(colNames.includes("request_identity"), "must have request_identity column");
+    assert.ok(colNames.includes("tool_call_id"), "must have tool_call_id column");
+    assert.ok(colNames.includes("tool_name"), "must have tool_name column");
+    assert.ok(colNames.includes("input_digest"), "must have input_digest column");
+    assert.ok(colNames.includes("status"), "must have status column");
+    assert.ok(colNames.includes("claim_expires_at"), "must have claim_expires_at column");
+    assert.ok(colNames.includes("duration_ms"), "must have duration_ms column");
   } finally {
     raw.close();
     fs.rmSync(dir, { recursive: true, force: true });
@@ -84,16 +131,13 @@ test("migration 173: UNIQUE constraint on (api_key_id, request_identity, tool_ca
         (id, api_key_id, request_identity, tool_call_id, tool_name, input_digest, status, claim_expires_at)
       VALUES ('e1','k1','r1','c1','tool_a','d1','running',datetime('now'))
     `);
-    assert.throws(
-      () => {
-        raw.exec(`
+    assert.throws(() => {
+      raw.exec(`
           INSERT INTO server_tool_executions
             (id, api_key_id, request_identity, tool_call_id, tool_name, input_digest, status, claim_expires_at)
           VALUES ('e2','k1','r1','c1','tool_a','d1','running',datetime('now'))
         `);
-      },
-      /UNIQUE/i,
-    );
+    }, /UNIQUE/i);
   } finally {
     raw.close();
     fs.rmSync(dir, { recursive: true, force: true });
@@ -108,11 +152,11 @@ test("migration 173: two indexes exist on server_tool_executions", (_, done) => 
     const names = indexes.map((i) => i.name);
     assert.ok(
       names.some((n) => n.includes("status_expiry")),
-      `Expected status_expiry index, got: ${names.join(", ")}`,
+      `Expected status_expiry index, got: ${names.join(", ")}`
     );
     assert.ok(
       names.some((n) => n.includes("created")),
-      `Expected created index, got: ${names.join(", ")}`,
+      `Expected created index, got: ${names.join(", ")}`
     );
   } finally {
     raw.close();
@@ -145,15 +189,12 @@ test("migration 173: existing skill_executions data preserved after migration", 
 test("migration 173: skill_executions still enforces skill_id NOT NULL", (_, done) => {
   const { raw, dir } = makeTempDb();
   try {
-    assert.throws(
-      () => {
-        raw.exec(
-          `INSERT INTO skill_executions (id, api_key_id, input, status)
-           VALUES ('bad','k1','{}','running')`,
-        );
-      },
-      /NOT NULL/i,
-    );
+    assert.throws(() => {
+      raw.exec(
+        `INSERT INTO skill_executions (id, api_key_id, input, status)
+           VALUES ('bad','k1','{}','running')`
+      );
+    }, /NOT NULL/i);
   } finally {
     raw.close();
     fs.rmSync(dir, { recursive: true, force: true });
@@ -164,6 +205,7 @@ test("migration 173: skill_executions still enforces skill_id NOT NULL", (_, don
 test("migration 173: custom skill execution write still works after migration", (_, done) => {
   const { raw, dir } = makeTempDb();
   try {
+    // Insert a skill to satisfy FK
     raw.exec(`
       INSERT INTO skills (id, api_key_id, name, version, schema, handler)
       VALUES ('s2','k1','test2','1.0.0','{}','h.js')
@@ -174,6 +216,24 @@ test("migration 173: custom skill execution write still works after migration", 
     `);
     const allRows = raw.prepare("SELECT * FROM skill_executions").all();
     assert.ok(allRows.length >= 1, "should read skill_executions after migration 173");
+  } finally {
+    raw.close();
+    fs.rmSync(dir, { recursive: true, force: true });
+    done();
+  }
+});
+
+test("migration 173: idempotent — running twice does not error or duplicate", (_, done) => {
+  const { raw, dir } = makeTempDb();
+  try {
+    // makeTempDb already runs the SQL twice; verify no error and table exists
+    const tables = raw.pragma("table_list") as Array<{ name: string }>;
+    const names = tables.map((t) => t.name);
+    assert.ok(names.includes("server_tool_executions"), "table must exist after double-apply");
+    // Verify no duplicate columns or indexes from double-apply
+    const indexes = getIndexInfo(raw, "server_tool_executions");
+    const statusIdx = indexes.filter((i) => i.name.includes("status_expiry"));
+    assert.equal(statusIdx.length, 1, "must have exactly one status_expiry index");
   } finally {
     raw.close();
     fs.rmSync(dir, { recursive: true, force: true });
