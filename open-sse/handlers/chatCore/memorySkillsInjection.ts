@@ -5,7 +5,7 @@ import {
   toMemoryRetrievalConfig,
 } from "@/lib/memory/settings";
 import { injectMemory, shouldInjectMemory } from "@/lib/memory/injection";
-import { injectSkills } from "@/lib/skills/injection";
+import { injectSkillsWithMetadata } from "@/lib/skills/injection";
 import { buildMemoryToolsForProvider } from "@/lib/skills/memoryBuiltins";
 import { skillRegistry } from "@/lib/skills/registry";
 import { FORMATS } from "../../translator/formats.ts";
@@ -64,6 +64,9 @@ export async function injectMemoryAndSkills({
   const memorySettings = memoryOwnerId
     ? await getMemorySettings().catch(() => DEFAULT_MEMORY_SETTINGS)
     : null;
+
+  const builtinOwnerSet: string[] = [];
+  const injectedCustomSkillNames: string[] = [];
 
   if (
     memoryOwnerId &&
@@ -178,34 +181,48 @@ export async function injectMemoryAndSkills({
         return [];
       })
     );
-    const memoryTools = buildMemoryToolsForProvider(
+    const newMemoryTools = buildMemoryToolsForProvider(
       getSkillsProviderForFormat(sourceFormat)
     ).filter((tool) => {
       const record = tool as Record<string, unknown>;
       const name = (record.function as Record<string, unknown> | undefined)?.name ?? record.name;
       return typeof name === "string" && !existingToolNames.has(name);
     });
-    if (memoryTools.length > 0) {
+    if (newMemoryTools.length > 0) {
       body = {
         ...body,
-        tools: [...existingTools, ...memoryTools],
+        tools: [...existingTools, ...newMemoryTools],
       };
+      // Track the names of newly injected memory tools for the owner set.
+      builtinOwnerSet.push(
+        ...newMemoryTools
+          .map((tool) => {
+            const record = tool as Record<string, unknown>;
+            const name =
+              (record.function as Record<string, unknown> | undefined)?.name ?? record.name;
+            return typeof name === "string" ? name : "";
+          })
+          .filter(Boolean)
+      );
       log?.debug?.(
         "MEMORY",
-        `Injected ${memoryTools.length} memory tool(s) for key=${memoryOwnerId}`
+        `Injected ${newMemoryTools.length} memory tool(s) for key=${memoryOwnerId}`
       );
     }
   }
 
-  if (memoryOwnerId && memorySettings?.skillsEnabled) {
+  if (memoryOwnerId && memorySettings?.skillsEnabled && body.stream !== true) {
     // Ensure the registry cache is warm before listing: on a cold/fresh
     // process skills that exist only in the DB would be missed (false
     // negative -> silent skip). loadFromDatabase() is a no-op when the cache
     // is already warm (TTL = 60 s), so repeated calls are cheap. Mirrors the
     // pattern in src/lib/skills/interception.ts (#2815).
+    // Memory builtins and registered Skills are only executed by the
+    // non-streaming server-owned tool loop; stream clients execute tools
+    // client-side, so we skip injection for stream requests.
     await skillRegistry.loadFromDatabase(memoryOwnerId);
     const existingTools = Array.isArray(body.tools) ? body.tools : [];
-    const mergedTools = injectSkills({
+    const { tools: mergedTools, injectedNames } = injectSkillsWithMetadata({
       provider: getSkillsProviderForFormat(sourceFormat),
       existingTools,
       apiKeyId: memoryOwnerId,
@@ -225,6 +242,7 @@ export async function injectMemoryAndSkills({
         ...body,
         tools: mergedTools,
       };
+      injectedCustomSkillNames.push(...injectedNames);
       log?.debug?.("SKILLS", `Injected ${mergedTools.length - existingTools.length} skills`);
     }
   }
@@ -236,5 +254,5 @@ export async function injectMemoryAndSkills({
     };
   }
 
-  return { body, memorySettings };
+  return { body, memorySettings, builtinToolNames: builtinOwnerSet, injectedCustomSkillNames };
 }

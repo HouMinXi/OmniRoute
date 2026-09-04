@@ -35,7 +35,9 @@ interface ExecutionContext {
   sessionId: string;
   requestId: string;
   builtinToolNames?: string[];
+  injectedCustomSkillNames?: string[];
   customSkillExecutionEnabled?: boolean;
+  requestIdentity?: string;
   // #7339: threaded through to the web_fetch builtin so it can resolve a per-model
   // pinned fetch backend (interceptionRules.fetchBackend). Optional — every other
   // builtin/skill ignores these.
@@ -445,4 +447,170 @@ export async function handleToolCallExecution(
     default:
       return response;
   }
+}
+
+// ─── Task 3: ownership classifier ────────────────────────────────────────────
+
+export async function classifyServerOwnedCalls(
+  toolCalls: ToolCall[],
+  context: ExecutionContext
+): Promise<{ serverOwned: ToolCall[]; clientNative: ToolCall[] }> {
+  const builtinSet = new Set(context.builtinToolNames || []);
+  const customSet = new Set(context.injectedCustomSkillNames || []);
+
+  const serverOwned: ToolCall[] = [];
+  const clientNative: ToolCall[] = [];
+
+  for (const call of toolCalls) {
+    if (builtinSet.has(call.name)) {
+      serverOwned.push(call);
+    } else if (context.customSkillExecutionEnabled && customSet.has(call.name)) {
+      serverOwned.push(call);
+    } else {
+      clientNative.push(call);
+    }
+  }
+
+  return { serverOwned, clientNative };
+}
+
+// ─── Task 3: pure escape formatter ───────────────────────────────────────────
+
+function extractOpenAIToolCalls(
+  response: Record<string, unknown>
+): Array<{ id: string; function: { name: string; arguments: string } }> {
+  const rootToolCalls = Array.isArray(response.tool_calls) ? response.tool_calls : [];
+  const choiceToolCalls = Array.isArray(response.choices)
+    ? (response.choices as any[]).flatMap((choice: any) =>
+        Array.isArray(choice?.message?.tool_calls) ? choice.message.tool_calls : []
+      )
+    : [];
+  return rootToolCalls.length > 0 ? rootToolCalls : choiceToolCalls;
+}
+
+function getOpenAIResponseOutput(
+  response: Record<string, unknown>
+): { root: Record<string, unknown>; output: unknown[] } | null {
+  if (Array.isArray(response.output)) {
+    return { root: response, output: response.output };
+  }
+  if (
+    response.response &&
+    typeof response.response === "object" &&
+    !Array.isArray(response.response) &&
+    Array.isArray((response.response as Record<string, unknown>).output)
+  ) {
+    return {
+      root: response,
+      output: (response.response as Record<string, unknown>).output as unknown[],
+    };
+  }
+  return null;
+}
+
+export function formatEscapeHatchResponse(
+  response: Record<string, unknown>,
+  serverCalls: ToolCall[],
+  results: ExecutedToolResult[],
+  clientCalls: ToolCall[],
+  sourceFormat: "openai" | "claude"
+): Record<string, unknown> {
+  const serverIds = new Set(serverCalls.map((c) => c.id));
+
+  if (sourceFormat === "openai") {
+    // Check for Responses API format.
+    const responsesOutput = getOpenAIResponseOutput(response);
+    if (responsesOutput) {
+      // For Responses, append function_call_output for server calls.
+      const functionOutputs = results
+        .filter((r) => serverIds.has(r.id))
+        .map((r) => ({
+          type: "function_call_output",
+          call_id: r.id,
+          output: JSON.stringify(r.result),
+        }));
+      return {
+        ...response,
+        output: [...responsesOutput.output, ...functionOutputs],
+      };
+    }
+
+    // Chat Completions format.
+    const originalToolCalls = extractOpenAIToolCalls(response);
+    const remainingToolCalls = originalToolCalls.filter(
+      (tc: any) => !serverIds.has(tc.id || tc.call_id)
+    );
+
+    // Build result text from server results.
+    const resultTexts = results
+      .filter((r) => serverIds.has(r.id))
+      .map((r) => `[${r.name} result]\n${JSON.stringify(r.result)}`)
+      .join("\n\n");
+
+    const existingContent =
+      typeof response.choices?.[0]?.message?.content === "string"
+        ? response.choices[0].message.content
+        : "";
+    const newContent = existingContent ? `${existingContent}\n\n${resultTexts}` : resultTexts;
+
+    // Clone response to avoid mutation.
+    const formatted = JSON.parse(JSON.stringify(response));
+    if (formatted.choices?.[0]?.message) {
+      formatted.choices[0].message.content = newContent;
+      formatted.choices[0].message.tool_calls =
+        remainingToolCalls.length > 0 ? remainingToolCalls : undefined;
+    }
+
+    // Mixed → keep tool_calls finish_reason; all-server → stop.
+    if (remainingToolCalls.length === 0 && clientCalls.length === 0) {
+      formatted.choices[0].finish_reason = "stop";
+    }
+
+    return formatted;
+  }
+
+  if (sourceFormat === "claude") {
+    const remainingContent = (Array.isArray(response.content) ? response.content : []).filter(
+      (block: any) => !(block?.type === "tool_use" && serverIds.has(block.id))
+    );
+
+    // Build result text blocks.
+    const resultTextBlocks = results
+      .filter((r) => serverIds.has(r.id))
+      .map((r) => ({
+        type: "text",
+        text: `[${r.name} result]\n${JSON.stringify(r.result)}`,
+      }));
+
+    // Insert result text blocks before the first remaining tool_use.
+    const firstRemainingIndex = remainingContent.findIndex(
+      (block: any) => block?.type === "tool_use"
+    );
+
+    let newContent: unknown[];
+    if (firstRemainingIndex === -1) {
+      newContent = [...remainingContent, ...resultTextBlocks];
+    } else {
+      newContent = [
+        ...remainingContent.slice(0, firstRemainingIndex),
+        ...resultTextBlocks,
+        ...remainingContent.slice(firstRemainingIndex),
+      ];
+    }
+
+    const formatted = { ...response, content: newContent };
+
+    // All-server → end_turn; mixed → keep original stop_reason.
+    const remainingToolUseCount = remainingContent.filter(
+      (b: any) => b?.type === "tool_use"
+    ).length;
+    if (remainingToolUseCount === 0 && clientCalls.length === 0) {
+      formatted.stop_reason = "end_turn";
+      formatted.stop_sequence = null;
+    }
+
+    return formatted;
+  }
+
+  return response;
 }

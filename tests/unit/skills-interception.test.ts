@@ -491,3 +491,289 @@ test("handleToolCallExecution loads registry from DB on cold cache (covers loadF
   assert.equal(result.stop_reason, "end_turn");
   assert.equal(result.stop_sequence, null);
 });
+
+// ─── Task 3: classifyServerOwnedCalls + formatEscapeHatchResponse RED tests ──
+
+test("classifyServerOwnedCalls: owner set builtin/custom → serverOwned; registry-registered but not in owner set → clientNative", async () => {
+  // These exports do not exist yet — RED.
+  const { classifyServerOwnedCalls } = await import("../../src/lib/skills/interception.ts");
+
+  const calls = [
+    { id: "c1", name: "http_request", arguments: {} },
+    { id: "c2", name: "lookup@1.0.0", arguments: {} },
+    { id: "c3", name: "Bash", arguments: {} },
+  ];
+
+  const result = await classifyServerOwnedCalls(calls, {
+    apiKeyId: "key-a",
+    sessionId: "s1",
+    requestId: "r1",
+    builtinToolNames: ["http_request"],
+    injectedCustomSkillNames: ["lookup@1.0.0"],
+    customSkillExecutionEnabled: true,
+  });
+
+  assert.equal(result.serverOwned.length, 2);
+  assert.equal(result.serverOwned[0].id, "c1");
+  assert.equal(result.serverOwned[1].id, "c2");
+  assert.equal(result.clientNative.length, 1);
+  assert.equal(result.clientNative[0].id, "c3");
+});
+
+test("classifyServerOwnedCalls: client same-name memory_search → not server-owned", async () => {
+  const { classifyServerOwnedCalls } = await import("../../src/lib/skills/interception.ts");
+
+  const calls = [
+    { id: "c1", name: "memory_search", arguments: {} },
+    { id: "c2", name: "http_request", arguments: {} },
+  ];
+
+  const result = await classifyServerOwnedCalls(calls, {
+    apiKeyId: "key-a",
+    sessionId: "s1",
+    requestId: "r1",
+    builtinToolNames: ["http_request"],
+    // memory_search NOT in builtinToolNames (client owns it)
+    injectedCustomSkillNames: [],
+    customSkillExecutionEnabled: true,
+  });
+
+  // memory_search is client-native because it's not in any owner set.
+  assert.equal(result.clientNative.length, 1);
+  assert.equal(result.clientNative[0].id, "c1");
+  assert.equal(result.serverOwned.length, 1);
+  assert.equal(result.serverOwned[0].id, "c2");
+});
+
+test("classifyServerOwnedCalls: registered skill with client same-name → client-native (not server-owned)", async () => {
+  const { classifyServerOwnedCalls } = await import("../../src/lib/skills/interception.ts");
+
+  // Register a skill that the client also declares with the same encoded name.
+  await skillRegistry.register({
+    name: "collision-check",
+    version: "1.0.0",
+    description: "collision test",
+    schema: { input: {}, output: {} },
+    handler: "collision-handler",
+    enabled: true,
+    apiKeyId: "key-a",
+    mode: "on",
+  });
+
+  const encodedName = (await import("../../src/lib/skills/injection.ts")).encodeSkillToolName(
+    "collision-check",
+    "1.0.0"
+  );
+
+  // Client declares a tool with the same encoded name.
+  const calls = [
+    { id: "c1", name: encodedName, arguments: {} },
+    { id: "c2", name: "http_request", arguments: {} },
+  ];
+
+  const result = await classifyServerOwnedCalls(calls, {
+    apiKeyId: "key-a",
+    sessionId: "s1",
+    requestId: "r1",
+    builtinToolNames: ["http_request"],
+    injectedCustomSkillNames: [], // empty: client collision prevented injection
+    customSkillExecutionEnabled: true,
+  });
+
+  // The registered skill with client same-name must be client-native.
+  assert.equal(result.clientNative.length, 1);
+  assert.equal(result.clientNative[0].id, "c1");
+  assert.equal(result.serverOwned.length, 1);
+  assert.equal(result.serverOwned[0].id, "c2");
+
+  skillRegistry["registeredSkills"].clear();
+  skillRegistry["versionCache"].clear();
+});
+
+test("formatEscapeHatchResponse: mixed OpenAI — strip server calls, append results to content, keep client calls, finish_reason:tool_calls", async () => {
+  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
+
+  const response = {
+    choices: [
+      {
+        message: {
+          content: null,
+          tool_calls: [
+            { id: "srv1", function: { name: "http_request", arguments: "{}" } },
+            { id: "cli1", function: { name: "Bash", arguments: '{"cmd":"ls"}' } },
+          ],
+        },
+        finish_reason: "tool_calls",
+      },
+    ],
+  };
+
+  const serverCalls = [{ id: "srv1", name: "http_request", arguments: {} }];
+  const clientCalls = [{ id: "cli1", name: "Bash", arguments: { cmd: "ls" } }];
+  const results = [{ id: "srv1", name: "http_request", result: { status: 200 }, replayed: false }];
+
+  const formatted = formatEscapeHatchResponse(
+    response,
+    serverCalls,
+    results,
+    clientCalls,
+    "openai"
+  );
+
+  const choice = (formatted as any).choices[0];
+  // Server call stripped from tool_calls, client call kept.
+  assert.equal(choice.message.tool_calls.length, 1);
+  assert.equal(choice.message.tool_calls[0].id, "cli1");
+  // Server result appended to content.
+  assert.ok(typeof choice.message.content === "string");
+  assert.ok(choice.message.content.includes("200"));
+  // finish_reason stays tool_calls (mixed).
+  assert.equal(choice.finish_reason, "tool_calls");
+});
+
+test("formatEscapeHatchResponse: all-server OpenAI — strip tool calls, append results, finish_reason:stop", async () => {
+  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
+
+  const response = {
+    choices: [
+      {
+        message: {
+          content: null,
+          tool_calls: [{ id: "srv1", function: { name: "http_request", arguments: "{}" } }],
+        },
+        finish_reason: "tool_calls",
+      },
+    ],
+  };
+
+  const serverCalls = [{ id: "srv1", name: "http_request", arguments: {} }];
+  const results = [{ id: "srv1", name: "http_request", result: { ok: true }, replayed: false }];
+
+  const formatted = formatEscapeHatchResponse(response, serverCalls, results, [], "openai");
+
+  const choice = (formatted as any).choices[0];
+  assert.ok(
+    !choice.message.tool_calls || choice.message.tool_calls.length === 0,
+    "all-server must have no remaining tool_calls"
+  );
+  assert.ok(typeof choice.message.content === "string");
+  assert.ok(choice.message.content.includes("ok"));
+  assert.equal(choice.finish_reason, "stop");
+});
+
+test("formatEscapeHatchResponse: Claude mixed — strip server tool_use, keep client tool_use, end_turn stays", async () => {
+  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
+
+  const response = {
+    content: [
+      { type: "tool_use", id: "srv1", name: "http_request", input: {} },
+      { type: "tool_use", id: "cli1", name: "Bash", input: { cmd: "ls" } },
+    ],
+    stop_reason: "tool_use",
+  };
+
+  const serverCalls = [{ id: "srv1", name: "http_request", arguments: {} }];
+  const clientCalls = [{ id: "cli1", name: "Bash", arguments: { cmd: "ls" } }];
+  const results = [{ id: "srv1", name: "http_request", result: { ok: true }, replayed: false }];
+
+  const formatted = formatEscapeHatchResponse(
+    response,
+    serverCalls,
+    results,
+    clientCalls,
+    "claude"
+  );
+
+  const content = (formatted as any).content as Array<{ type: string; id?: string }>;
+  // Server tool_use removed, client tool_use kept.
+  const toolUses = content.filter((b) => b.type === "tool_use");
+  assert.equal(toolUses.length, 1);
+  assert.equal(toolUses[0].id, "cli1");
+  // stop_reason stays tool_use (mixed).
+  assert.equal((formatted as any).stop_reason, "tool_use");
+});
+
+test("formatEscapeHatchResponse: Claude all-server — strip tool_use, append text, end_turn", async () => {
+  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
+
+  const response = {
+    content: [{ type: "tool_use", id: "srv1", name: "http_request", input: {} }],
+    stop_reason: "tool_use",
+  };
+
+  const serverCalls = [{ id: "srv1", name: "http_request", arguments: {} }];
+  const results = [{ id: "srv1", name: "http_request", result: { ok: true }, replayed: false }];
+
+  const formatted = formatEscapeHatchResponse(response, serverCalls, results, [], "claude");
+
+  const content = (formatted as any).content as Array<{ type: string }>;
+  const toolUses = content.filter((b) => b.type === "tool_use");
+  assert.equal(toolUses.length, 0);
+  const textBlocks = content.filter((b) => b.type === "text");
+  assert.ok(textBlocks.length > 0);
+  assert.equal((formatted as any).stop_reason, "end_turn");
+});
+
+test("formatEscapeHatchResponse: formatter does not call interceptToolCalls or any handler (purity)", async () => {
+  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
+
+  // Purity proof: the formatter is synchronous and its source must not contain
+  // calls to interceptToolCalls, skillExecutor, or handler invocations.
+  const fnSource = formatEscapeHatchResponse.toString();
+  assert.ok(
+    !fnSource.includes("interceptToolCalls"),
+    "formatter source must not reference interceptToolCalls"
+  );
+  assert.ok(
+    !fnSource.includes("skillExecutor"),
+    "formatter source must not reference skillExecutor"
+  );
+  assert.ok(!fnSource.includes("await"), "formatter must be synchronous (no await)");
+
+  // Also verify it returns immediately without side effects.
+  const response = {
+    choices: [
+      {
+        message: {
+          content: null,
+          tool_calls: [{ id: "srv1", function: { name: "http_request", arguments: "{}" } }],
+        },
+        finish_reason: "tool_calls",
+      },
+    ],
+  };
+
+  const result = formatEscapeHatchResponse(
+    response,
+    [{ id: "srv1", name: "http_request", arguments: {} }],
+    [{ id: "srv1", name: "http_request", result: { ok: true }, replayed: false }],
+    [],
+    "openai"
+  );
+
+  assert.ok(result, "formatter returns a result");
+  assert.ok(result.choices[0].message.content, "formatter populates content");
+});
+
+test("formatEscapeHatchResponse: Responses wrapper is byte-identical for function_call_output", async () => {
+  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
+
+  const response = {
+    object: "response",
+    output: [{ type: "function_call", call_id: "call1", name: "lookup@1.0.0", arguments: "{}" }],
+  };
+
+  const serverCalls = [{ id: "call1", name: "lookup@1.0.0", arguments: {} }];
+  const results = [
+    { id: "call1", name: "lookup@1.0.0", result: { record: "42" }, replayed: false },
+  ];
+
+  const formatted = formatEscapeHatchResponse(response, serverCalls, results, [], "openai");
+
+  // Responses format: original output + function_call_output appended.
+  const output = (formatted as any).output;
+  assert.equal(output.length, 2);
+  assert.equal(output[0].type, "function_call");
+  assert.equal(output[1].type, "function_call_output");
+  assert.equal(output[1].call_id, "call1");
+});

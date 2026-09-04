@@ -13,8 +13,16 @@ const { getSkillsProviderForFormat, injectMemoryAndSkills, sortToolsByName } =
   await import("../../open-sse/handlers/chatCore/memorySkillsInjection.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 const core = await import("../../src/lib/db/core.ts");
+const { skillRegistry } = await import("../../src/lib/skills/registry.ts");
+
+function resetSkillsRegistry() {
+  skillRegistry["registeredSkills"].clear();
+  skillRegistry["versionCache"].clear();
+  skillRegistry.invalidateCache();
+}
 
 test.after(() => {
+  resetSkillsRegistry();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
@@ -257,4 +265,256 @@ test("injectMemoryAndSkills does not inject memory tools when memory is disabled
   }
 
   invalidateMemorySettingsCache();
+});
+
+// ─── Task 3: owner-set provenance + stream gate RED tests ────────────────────
+
+test("stream:true + skills enabled + registry has items → no custom skill tool injected, injectedCustomSkillNames=[]", async () => {
+  const { updateSettings } = await import("../../src/lib/db/settings.ts");
+  const { invalidateMemorySettingsCache: inv2 } = await import("../../src/lib/memory/settings.ts");
+
+  await updateSettings({ memoryEnabled: true, memoryMaxTokens: 2000, skillsEnabled: true });
+  inv2();
+  resetSkillsRegistry();
+
+  await skillRegistry.register({
+    name: "test-skill",
+    version: "1.0.0",
+    description: "test skill for stream gate",
+    schema: { input: {}, output: {} },
+    handler: "test-handler",
+    enabled: true,
+    apiKeyId: "owner-stream-skills",
+    mode: "on",
+  });
+
+  const body: Record<string, unknown> = {
+    model: "gpt-4o",
+    stream: true,
+    messages: [{ role: "user", content: "hello" }],
+  };
+
+  const result = await injectMemoryAndSkills({
+    body,
+    memoryOwnerId: "owner-stream-skills",
+    provider: "openai",
+    effectiveModel: "gpt-4o",
+    sourceFormat: FORMATS.OPENAI,
+    targetFormat: FORMATS.OPENAI,
+    backgroundReason: null,
+    log: { debug: () => {} },
+  });
+
+  const toolNames = (
+    (result.body.tools as { function?: { name?: string }; name?: string }[] | undefined) ?? []
+  ).map((t) => t.function?.name ?? t.name);
+  const hasCustomSkill = toolNames.some(
+    (n) => typeof n === "string" && (n.includes("test-skill") || n.startsWith("omr_skill_"))
+  );
+  assert.equal(hasCustomSkill, false, "stream:true must not inject custom skill tools");
+
+  assert.deepEqual(
+    (result as Record<string, unknown>).injectedCustomSkillNames,
+    [],
+    "injectedCustomSkillNames must be empty for stream requests"
+  );
+
+  resetSkillsRegistry();
+  inv2();
+});
+
+test("memory actual injection → builtinToolNames equals exactly the newly added memory tool names", async () => {
+  const { updateSettings } = await import("../../src/lib/db/settings.ts");
+  const { invalidateMemorySettingsCache: inv3 } = await import("../../src/lib/memory/settings.ts");
+  const { MEMORY_BUILTIN_TOOL_NAMES } = await import("../../src/lib/skills/memoryBuiltins.ts");
+
+  await updateSettings({ memoryEnabled: true, memoryMaxTokens: 2000 });
+  inv3();
+  resetSkillsRegistry();
+
+  const body: Record<string, unknown> = {
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "hello" }],
+    tools: [{ type: "function", function: { name: "some_client_tool", description: "x" } }],
+  };
+
+  const result = await injectMemoryAndSkills({
+    body,
+    memoryOwnerId: "owner-builtin-own",
+    provider: "openai",
+    effectiveModel: "gpt-4o",
+    sourceFormat: FORMATS.OPENAI,
+    targetFormat: FORMATS.OPENAI,
+    backgroundReason: null,
+    log: { debug: () => {} },
+  });
+
+  const builtinToolNames = (result as Record<string, unknown>).builtinToolNames as
+    string[] | undefined;
+  assert.ok(builtinToolNames, "builtinToolNames must be present in result");
+
+  const expectedNewMemoryNames = [...MEMORY_BUILTIN_TOOL_NAMES];
+  assert.deepEqual(
+    builtinToolNames.sort(),
+    expectedNewMemoryNames.sort(),
+    "builtinToolNames must equal exactly the newly added memory tool names"
+  );
+
+  resetSkillsRegistry();
+  inv3();
+});
+
+test("client already has memory_search → not injected, not in builtinToolNames", async () => {
+  const { updateSettings } = await import("../../src/lib/db/settings.ts");
+  const { invalidateMemorySettingsCache: inv4 } = await import("../../src/lib/memory/settings.ts");
+  const { MEMORY_SEARCH_TOOL_NAME } = await import("../../src/lib/skills/memoryBuiltins.ts");
+
+  await updateSettings({ memoryEnabled: true, memoryMaxTokens: 2000 });
+  inv4();
+  resetSkillsRegistry();
+
+  const body: Record<string, unknown> = {
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "hello" }],
+    tools: [
+      {
+        type: "function",
+        function: { name: MEMORY_SEARCH_TOOL_NAME, description: "client memory" },
+      },
+    ],
+  };
+
+  const result = await injectMemoryAndSkills({
+    body,
+    memoryOwnerId: "owner-client-mem",
+    provider: "openai",
+    effectiveModel: "gpt-4o",
+    sourceFormat: FORMATS.OPENAI,
+    targetFormat: FORMATS.OPENAI,
+    backgroundReason: null,
+    log: { debug: () => {} },
+  });
+
+  const toolNames = (
+    (result.body.tools as { function?: { name?: string }[] | undefined }) ?? []
+  ).map((t: { function?: { name?: string } }) => t.function?.name);
+
+  const memorySearchCount = toolNames.filter((n) => n === MEMORY_SEARCH_TOOL_NAME).length;
+  assert.equal(memorySearchCount, 1, "only one memory_search (client's) must exist");
+
+  const builtinToolNames = (result as Record<string, unknown>).builtinToolNames as
+    string[] | undefined;
+  assert.ok(builtinToolNames, "builtinToolNames must be present");
+  assert.equal(
+    builtinToolNames.includes(MEMORY_SEARCH_TOOL_NAME),
+    false,
+    "client-owned memory_search must NOT be in builtinToolNames"
+  );
+
+  resetSkillsRegistry();
+  inv4();
+});
+
+test("custom skill client collision: client has same encoded skill name → not injected, not in injectedCustomSkillNames", async () => {
+  const { updateSettings } = await import("../../src/lib/db/settings.ts");
+  const { invalidateMemorySettingsCache: inv5 } = await import("../../src/lib/memory/settings.ts");
+  const { encodeSkillToolName } = await import("../../src/lib/skills/injection.ts");
+
+  await updateSettings({ memoryEnabled: true, memoryMaxTokens: 2000, skillsEnabled: true });
+  inv5();
+  resetSkillsRegistry();
+
+  await skillRegistry.register({
+    name: "collision-skill",
+    version: "1.0.0",
+    description: "skill that collides",
+    schema: { input: {}, output: {} },
+    handler: "collision-handler",
+    enabled: true,
+    apiKeyId: "owner-collision",
+    mode: "on",
+  });
+
+  const encodedName = encodeSkillToolName("collision-skill", "1.0.0");
+
+  const body: Record<string, unknown> = {
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "hello" }],
+    tools: [{ type: "function", function: { name: encodedName, description: "client collision" } }],
+  };
+
+  const result = await injectMemoryAndSkills({
+    body,
+    memoryOwnerId: "owner-collision",
+    provider: "openai",
+    effectiveModel: "gpt-4o",
+    sourceFormat: FORMATS.OPENAI,
+    targetFormat: FORMATS.OPENAI,
+    backgroundReason: null,
+    log: { debug: () => {} },
+  });
+
+  const toolNames = (
+    (result.body.tools as { function?: { name?: string }[] | undefined }) ?? []
+  ).map((t: { function?: { name?: string } }) => t.function?.name);
+
+  const count = toolNames.filter((n) => n === encodedName).length;
+  assert.equal(count, 1, "only one instance of encoded name must exist (client's)");
+
+  const injectedCustomSkillNames = (result as Record<string, unknown>).injectedCustomSkillNames as
+    string[] | undefined;
+  assert.ok(injectedCustomSkillNames, "injectedCustomSkillNames must be present");
+  assert.equal(
+    injectedCustomSkillNames.includes(encodedName),
+    false,
+    "client-owned skill name must NOT be in injectedCustomSkillNames"
+  );
+
+  resetSkillsRegistry();
+  inv5();
+});
+
+test("web-search fallback: client has same tool name → not added to builtinToolNames", async () => {
+  const { updateSettings } = await import("../../src/lib/db/settings.ts");
+  const { invalidateMemorySettingsCache: inv6 } = await import("../../src/lib/memory/settings.ts");
+  const { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } =
+    await import("../../open-sse/services/webSearchFallback.ts");
+
+  await updateSettings({ memoryEnabled: true, memoryMaxTokens: 2000 });
+  inv6();
+  resetSkillsRegistry();
+
+  const body: Record<string, unknown> = {
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "hello" }],
+    tools: [
+      {
+        type: "function",
+        function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME, description: "client search" },
+      },
+    ],
+  };
+
+  const result = await injectMemoryAndSkills({
+    body,
+    memoryOwnerId: "owner-websearch",
+    provider: "openai",
+    effectiveModel: "gpt-4o",
+    sourceFormat: FORMATS.OPENAI,
+    targetFormat: FORMATS.OPENAI,
+    backgroundReason: null,
+    log: { debug: () => {} },
+  });
+
+  const builtinToolNames = (result as Record<string, unknown>).builtinToolNames as
+    string[] | undefined;
+  assert.ok(builtinToolNames, "builtinToolNames must be present");
+  assert.equal(
+    builtinToolNames.includes(OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME),
+    false,
+    "client-owned web search tool must NOT be in builtinToolNames"
+  );
+
+  resetSkillsRegistry();
+  inv6();
 });
