@@ -670,6 +670,30 @@ test("Claude: assistant content filters unmatched tool_use but keeps text", () =
   assert.strictEqual(assistantBlocks[2].id, "toolu_2");
 });
 
+test("Claude: strips text after first tool_use but preserves later thinking blocks", () => {
+  const input = claudeInput();
+  (input.previousResponse as UnknownRecord).content = [
+    { type: "text", text: "before" },
+    { type: "tool_use", id: "toolu_1", name: "memory_search", input: { query: "foo" } },
+    { type: "text", text: "after — must be stripped" },
+    { type: "thinking", thinking: "signed thought", signature: "sig_after" },
+    { type: "tool_use", id: "toolu_2", name: "memory_save", input: { key: "k" } },
+  ];
+
+  const out = buildFollowUpSourceBody(input);
+  const assistantBlocks = (out.messages as UnknownRecord[])[1].content as UnknownRecord[];
+  assert.deepEqual(
+    assistantBlocks.map((block) => block.type),
+    ["text", "tool_use", "thinking", "tool_use"]
+  );
+  assert.equal(
+    assistantBlocks.some(
+      (block) => block.type === "text" && block.text === "after — must be stripped"
+    ),
+    false
+  );
+});
+
 test("Claude: mismatched IDs fail closed even when response content would filter them", () => {
   const input = claudeInput({
     toolCalls: [

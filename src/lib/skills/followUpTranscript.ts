@@ -294,16 +294,24 @@ function resolveClaudeToolUseBlocks(
       }
     }
 
-    // Preserve non-tool blocks (text, thinking, reasoning) in original order.
-    // Filter tool_use blocks to only those with a matching result ID.
-    return blocks.filter((block) => {
-      if (!block || typeof block !== "object") return false;
+    // Match prepareClaudeRequest: keep all thinking/signature blocks, keep
+    // ordinary content only before the first tool_use, and retain only the
+    // tool_use blocks whose results are being replayed.
+    let foundToolUse = false;
+    const replayBlocks: unknown[] = [];
+    for (const block of blocks) {
+      if (!block || typeof block !== "object") continue;
       const rec = block as Record<string, unknown>;
       if (rec.type === "tool_use") {
-        return typeof rec.id === "string" && matchedIds.has(rec.id);
+        foundToolUse = true;
+        if (typeof rec.id === "string" && matchedIds.has(rec.id)) replayBlocks.push(block);
+        continue;
       }
-      return true;
-    });
+      if (rec.type === "thinking" || rec.type === "redacted_thinking" || !foundToolUse) {
+        replayBlocks.push(block);
+      }
+    }
+    return replayBlocks;
   }
 
   return toolCalls.map((call) => ({
