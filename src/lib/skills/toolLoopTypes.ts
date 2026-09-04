@@ -81,7 +81,8 @@ export interface ServerOwnedToolLoopOptions {
     deadlineAtMs: number
   ) => Promise<NonStreamingProviderLegResult>;
   maxFollowUps?: number;
-  maxResultChars?: number;
+  maxResultBytes?: number;
+  maxTotalResultBytes?: number;
   deadlineAtMs: number;
 }
 
@@ -144,13 +145,14 @@ export interface BuildFollowUpTranscriptInput {
   toolCalls: ToolCall[];
   results: ExecutedToolResult[];
   sourceFormat: "openai" | "claude";
-  maxResultChars: number;
+  maxResultBytes: number;
+  maxTotalResultBytes?: number;
 }
 
 export interface BoundedToolResult {
   text: string;
   truncated: boolean;
-  originalChars: number;
+  originalBytes: number;
 }
 
 // ─── §5.3 Client Translate ─────────────────────────────────────────────────
