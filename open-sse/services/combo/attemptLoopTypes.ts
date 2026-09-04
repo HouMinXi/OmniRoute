@@ -6,6 +6,7 @@
  *
  * @internal — not part of the public combo.ts barrel.
  */
+import type { PerTargetAdmissionHook } from "../admission/types.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import type { ComboErrorEntry } from "./comboErrorAggregation.ts";
 import type { ResetWindowConfig } from "./quotaScoring.ts";
@@ -37,6 +38,8 @@ export type AttemptLoopState = {
   dispatchedTargets: Set<string>;
   targetFailureTrust: Map<string, { allObservedFailuresQuota: boolean }>;
   comboAttemptOrder: Array<{ provider: string; model: string }>;
+  skippedForCircuitOpen: boolean;
+  earliestCircuitOpenRetryMs: number;
   observeFailure(quotaExhausted: boolean, targetExecutionKey?: string): void;
 };
 
@@ -60,6 +63,7 @@ export type AttemptLoopDeps = {
   clientRequestedStream: boolean;
   handleSingleModelWithTimeout: HandleSingleModel;
   isModelAvailable?: IsModelAvailable;
+  perTargetAdmission?: PerTargetAdmissionHook | null;
   signal?: AbortSignal | null;
   body: Record<string, unknown>;
   startTime: number;
