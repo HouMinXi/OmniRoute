@@ -1,11 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 import {
   canonicalJson,
   canonicalJsonSha256,
   deriveToolRequestIdentity,
 } from "../../src/lib/skills/stableJson.ts";
-import type { ServerOwnedToolLoopResult } from "../../src/lib/skills/toolLoopTypes.ts";
 
 test("canonicalJson sorts nested object keys and preserves array order", () => {
   const a = { z: [{ b: 2, a: 1 }], a: true };
@@ -184,8 +188,30 @@ test("canonicalJson rejects objects with getters without invoking the getter", (
   );
 });
 
-test("ServerOwnedToolLoopResult.termination includes connection_mismatch", () => {
-  const TERMINATION_VALUES = [
+test("termination union in toolLoopTypes.ts source matches expected set", () => {
+  const src = fs.readFileSync(
+    path.resolve(__dirname, "../../src/lib/skills/toolLoopTypes.ts"),
+    "utf8"
+  );
+
+  // Extract the termination union block from ServerOwnedToolLoopResult
+  const loopResultStart = src.indexOf("interface ServerOwnedToolLoopResult");
+  assert.ok(loopResultStart !== -1, "ServerOwnedToolLoopResult must exist in toolLoopTypes.ts");
+  const afterLoopResult = src.slice(loopResultStart);
+  const termStart = afterLoopResult.indexOf("termination:");
+  assert.ok(termStart !== -1, "termination must exist in ServerOwnedToolLoopResult");
+  const afterTerm = afterLoopResult.slice(termStart);
+  // Match until the closing brace of the interface
+  const closingBrace = afterTerm.indexOf("\n}");
+  assert.ok(closingBrace !== -1, "closing brace must follow termination union");
+  const unionText = afterTerm.slice(0, closingBrace);
+
+  const actual = new Set<string>();
+  for (const m of unionText.matchAll(/"([^"]+)"/g)) {
+    actual.add(m[1]);
+  }
+
+  const expected = new Set([
     "completed",
     "client_tools",
     "mixed_tools",
@@ -195,16 +221,14 @@ test("ServerOwnedToolLoopResult.termination includes connection_mismatch", () =>
     "provider_error",
     "execution_unknown",
     "connection_mismatch",
-  ] as const;
+  ]);
 
-  // Compile-time: "connection_mismatch" must be assignable to Termination.
-  // If Termination omits "connection_mismatch", this line is a type error.
-  type Termination = ServerOwnedToolLoopResult["termination"];
-  const _mustInclude: Termination = "connection_mismatch";
-
-  // Runtime: connection_mismatch is present
-  assert.ok(
-    (TERMINATION_VALUES as readonly string[]).includes("connection_mismatch"),
-    "TERMINATION_VALUES must include connection_mismatch"
-  );
+  // Every expected member must appear in source
+  for (const val of expected) {
+    assert.ok(actual.has(val), `termination union in source must include "${val}"`);
+  }
+  // No extra unexpected members
+  for (const val of actual) {
+    assert.ok(expected.has(val), `unexpected termination member "${val}" in source`);
+  }
 });
