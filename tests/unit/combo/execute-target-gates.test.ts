@@ -36,6 +36,7 @@ function emptyState(overrides: Partial<AttemptLoopState> = {}): AttemptLoopState
     comboAttemptOrder: [],
     skippedForCircuitOpen: false,
     earliestCircuitOpenRetryMs: 0,
+    globalAttempts: 0,
     observeFailure() {},
     ...overrides,
   };

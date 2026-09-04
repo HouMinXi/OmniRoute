@@ -8,8 +8,10 @@
  */
 import type { PerTargetAdmissionHook } from "../admission/types.ts";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
+import type { ContextRelayConfig, UniversalHandoffConfig } from "../contextHandoff.ts";
 import type { ComboErrorEntry } from "./comboErrorAggregation.ts";
 import type { ResetWindowConfig } from "./quotaScoring.ts";
+import type { ResponseValidationConfig } from "./responseValidation.ts";
 import type { ApplyStickinessResult } from "./sessionStickiness.ts";
 import type {
   ComboLike,
@@ -36,10 +38,12 @@ export type AttemptLoopState = {
   transientRateLimitedProviders: Set<string>;
   abortControllers: Map<number, AbortController>;
   dispatchedTargets: Set<string>;
-  targetFailureTrust: Map<string, { allObservedFailuresQuota: boolean }>;
+  targetFailureTrust: Map<string, { observedFailure: boolean; allObservedFailuresQuota: boolean }>;
   comboAttemptOrder: Array<{ provider: string; model: string }>;
   skippedForCircuitOpen: boolean;
   earliestCircuitOpenRetryMs: number;
+  /** Mutable attempt budget shared with dispatchWithCooldownRetry (Task 4). */
+  globalAttempts: number;
   observeFailure(quotaExhausted: boolean, targetExecutionKey?: string): void;
 };
 
@@ -48,8 +52,15 @@ export type AttemptLoopDeps = {
   combo: ComboLike;
   config: Record<string, unknown> & {
     zeroLatencyOptimizationsEnabled?: boolean;
-    responseValidation?: unknown;
+    responseValidation?: ResponseValidationConfig | null;
     failoverBeforeRetryExplicit?: boolean;
+    failoverBeforeRetry?: boolean;
+    predictiveTtftMs?: number;
+    fallbackCompressionMode?: string;
+    fallbackCompressionThreshold?: number;
+    retryDelayMs?: number;
+    fallbackDelayMs?: number;
+    maxGlobalAttempts?: unknown;
   };
   log: ComboLogger;
   settings: Record<string, unknown> | null;
@@ -78,6 +89,17 @@ export type AttemptLoopDeps = {
     log: ComboLogger,
     tag: string
   ) => void;
+  /**
+   * Closed-over setup values from handleComboChatInner. Optional so Task 2
+   * gate tests keep compiling; attempt uses defaults when absent.
+   */
+  clientManagedResponsesContext?: boolean;
+  reasoningTokenBufferEnabled?: boolean;
+  stickyWeightedLimit?: number;
+  getWeightedStepKeyForTarget?: (target: ResolvedComboTarget) => string | null;
+  universalHandoffConfig?: UniversalHandoffConfig;
+  relayOptions?: { sessionId?: string | null } | null;
+  relayConfig?: ContextRelayConfig | null;
 };
 
 export type GateDecision =
