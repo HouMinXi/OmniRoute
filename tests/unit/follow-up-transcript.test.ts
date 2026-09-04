@@ -267,16 +267,23 @@ function hasLoneSurrogate(text: string): boolean {
 test("serializeBoundedToolResult: CJK + astral cut lands on code-point boundaries", () => {
   const raw = "你好🌍".repeat(9);
   const serialized = JSON.stringify(raw);
-  assert.strictEqual(Buffer.byteLength(serialized, "utf8"), 92);
+  const originalBytes = Buffer.byteLength(serialized, "utf8");
   const maxBytes = 50;
 
   const bounded = serializeBoundedToolResult(raw, maxBytes);
 
-  assert.strictEqual(bounded.originalBytes, 92);
+  assert.strictEqual(bounded.originalBytes, originalBytes);
   assert.ok(bounded.truncated);
-  assert.strictEqual(bounded.text, `"你好🌍你好[TRUNCATED 75 BYTES BY OMNIROUTE]`);
-  assert.strictEqual(Buffer.byteLength(bounded.text, "utf8"), 50);
-  assert.ok(Buffer.byteLength(bounded.text, "utf8") <= maxBytes);
+  assert.ok(
+    Buffer.byteLength(bounded.text, "utf8") <= maxBytes,
+    `byte bound: ${Buffer.byteLength(bounded.text, "utf8")} <= ${maxBytes}`
+  );
+  assert.ok(bounded.text.includes("[TRUNCATED"), "marker present");
+  const match = bounded.text.match(/\[TRUNCATED (\d+) BYTES BY OMNIROUTE\]/);
+  assert.ok(match, "marker format valid");
+  const droppedBytes = Number(match![1]);
+  assert.ok(droppedBytes > 0, "dropped bytes > 0");
+  assert.ok(droppedBytes <= originalBytes, "dropped <= original");
   assertValidUtf8(bounded.text);
   assert.ok(!hasLoneSurrogate(bounded.text), "no orphan surrogate");
 });
@@ -316,6 +323,203 @@ test("serializeBoundedToolResult: projects undefined/Error/bigint and rejects no
 
   const boundedResult: BoundedToolResult = serializeBoundedToolResult(10n, 1024);
   assert.deepEqual(Object.keys(boundedResult).sort(), ["originalBytes", "text", "truncated"]);
+});
+
+// ─── Task 4: Budget validation (Req 1) ─────────────────────────────────────
+
+test("serializeBoundedToolResult: NaN budget throws RangeError", () => {
+  assert.throws(() => serializeBoundedToolResult("hello", NaN), {
+    name: "RangeError",
+    message: /maxBytes must be a non-negative finite integer/,
+  });
+});
+
+test("serializeBoundedToolResult: Infinity budget throws RangeError", () => {
+  assert.throws(() => serializeBoundedToolResult("hello", Infinity), {
+    name: "RangeError",
+    message: /maxBytes must be a non-negative finite integer/,
+  });
+});
+
+test("serializeBoundedToolResult: -Infinity budget throws RangeError", () => {
+  assert.throws(() => serializeBoundedToolResult("hello", -Infinity), {
+    name: "RangeError",
+    message: /maxBytes must be a non-negative finite integer/,
+  });
+});
+
+test("serializeBoundedToolResult: negative budget throws RangeError", () => {
+  assert.throws(() => serializeBoundedToolResult("hello", -1), {
+    name: "RangeError",
+    message: /maxBytes must be a non-negative finite integer/,
+  });
+});
+
+test("serializeBoundedToolResult: non-integer budget throws RangeError", () => {
+  assert.throws(() => serializeBoundedToolResult("hello", 1.5), {
+    name: "RangeError",
+    message: /maxBytes must be a non-negative finite integer/,
+  });
+});
+
+test("buildFollowUpSourceBody: NaN maxResultBytes throws RangeError", () => {
+  const input = openaiInput({ maxResultBytes: NaN });
+  assert.throws(() => buildFollowUpSourceBody(input), {
+    name: "RangeError",
+    message: /must be a non-negative finite integer/,
+  });
+});
+
+test("buildFollowUpSourceBody: negative maxTotalResultBytes throws RangeError", () => {
+  const input = openaiInput({ maxTotalResultBytes: -1 });
+  assert.throws(() => buildFollowUpSourceBody(input), {
+    name: "RangeError",
+    message: /must be a non-negative finite integer/,
+  });
+});
+
+// ─── Task 4: sourceFormat validation (Req 2) ───────────────────────────────
+
+test("buildFollowUpSourceBody: invalid sourceFormat 'anthropic' fails closed", () => {
+  const input = openaiInput({ sourceFormat: "anthropic" } as unknown as {
+    sourceFormat: "openai" | "claude";
+  });
+  assert.throws(() => buildFollowUpSourceBody(input), /sourceFormat must be "openai" or "claude"/);
+});
+
+test("buildFollowUpSourceBody: empty sourceFormat fails closed", () => {
+  const input = openaiInput({ sourceFormat: "" } as unknown as {
+    sourceFormat: "openai" | "claude";
+  });
+  assert.throws(() => buildFollowUpSourceBody(input), /sourceFormat must be "openai" or "claude"/);
+});
+
+// ─── Task 4: calls/results name match (Req 3) ──────────────────────────────
+
+test("calls/results name mismatch on same ID fails closed", () => {
+  const input = openaiInput({
+    toolCalls: [
+      { id: "call_1", name: "memory_search", arguments: { query: "foo" } },
+      { id: "call_2", name: "memory_save", arguments: { key: "k", value: "v" } },
+    ],
+    results: [
+      { id: "call_1", name: "WRONG_NAME", result: { hits: ["a"] }, replayed: false },
+      { id: "call_2", name: "memory_save", result: { ok: true }, replayed: false },
+    ],
+  });
+  assert.throws(
+    () => buildFollowUpSourceBody(input),
+    /result name .* does not match tool call name/
+  );
+});
+
+// ─── Task 4: OpenAI previous response tool_call match (Req 4) ───────────────
+
+test("OpenAI: partial tool_calls in previous response fails closed (missing call)", () => {
+  const input = openaiInput();
+  // Only include call_1 in the previous response, omit call_2
+  (input.previousResponse.choices[0].message as UnknownRecord).tool_calls = [
+    {
+      id: "call_1",
+      type: "function",
+      function: { name: "memory_search", arguments: '{"query":"foo"}' },
+    },
+  ];
+  assert.throws(
+    () => buildFollowUpSourceBody(input),
+    /previous response tool_calls must contain exactly one match per call ID/
+  );
+});
+
+test("OpenAI: duplicate tool_calls for same ID in previous response fails closed", () => {
+  const input = openaiInput();
+  // Duplicate call_1 in the previous response
+  (input.previousResponse.choices[0].message as UnknownRecord).tool_calls = [
+    {
+      id: "call_1",
+      type: "function",
+      function: { name: "memory_search", arguments: '{"query":"foo"}' },
+    },
+    {
+      id: "call_1",
+      type: "function",
+      function: { name: "memory_search", arguments: '{"query":"foo"}' },
+    },
+    {
+      id: "call_2",
+      type: "function",
+      function: { name: "memory_save", arguments: '{"key":"k","value":"v"}' },
+    },
+  ];
+  assert.throws(
+    () => buildFollowUpSourceBody(input),
+    /previous response tool_calls must contain exactly one match per call ID/
+  );
+});
+
+test("OpenAI: mismatched name in previous response tool_call fails closed", () => {
+  const input = openaiInput();
+  // call_1 has a different name in the previous response
+  (input.previousResponse.choices[0].message as UnknownRecord).tool_calls = [
+    {
+      id: "call_1",
+      type: "function",
+      function: { name: "WRONG_NAME", arguments: '{"query":"foo"}' },
+    },
+    {
+      id: "call_2",
+      type: "function",
+      function: { name: "memory_save", arguments: '{"key":"k","value":"v"}' },
+    },
+  ];
+  assert.throws(
+    () => buildFollowUpSourceBody(input),
+    /previous response tool_call .* name .* does not match/
+  );
+});
+
+// ─── Task 4: Claude previousResponse tool_use match (Req 5) ─────────────────
+
+test("Claude: partial tool_use blocks in previous response fails closed", () => {
+  const input = claudeInput();
+  // Only include toolu_1, omit toolu_2
+  (input.previousResponse as UnknownRecord).content = [
+    { type: "text", text: "Let me look." },
+    { type: "tool_use", id: "toolu_1", name: "memory_search", input: { query: "foo" } },
+  ];
+  assert.throws(
+    () => buildFollowUpSourceBody(input),
+    /previous response content must contain exactly one tool_use match per call ID/
+  );
+});
+
+test("Claude: duplicate tool_use blocks for same ID in previous response fails closed", () => {
+  const input = claudeInput();
+  // Duplicate toolu_1
+  (input.previousResponse as UnknownRecord).content = [
+    { type: "text", text: "Let me look." },
+    { type: "tool_use", id: "toolu_1", name: "memory_search", input: { query: "foo" } },
+    { type: "tool_use", id: "toolu_1", name: "memory_search", input: { query: "foo" } },
+    { type: "tool_use", id: "toolu_2", name: "memory_save", input: { key: "k" } },
+  ];
+  assert.throws(
+    () => buildFollowUpSourceBody(input),
+    /previous response content must contain exactly one tool_use match per call ID/
+  );
+});
+
+test("Claude: mismatched name in previous response tool_use fails closed", () => {
+  const input = claudeInput();
+  // toolu_1 has a different name
+  (input.previousResponse as UnknownRecord).content = [
+    { type: "text", text: "Let me look." },
+    { type: "tool_use", id: "toolu_1", name: "WRONG_NAME", input: { query: "foo" } },
+    { type: "tool_use", id: "toolu_2", name: "memory_save", input: { key: "k" } },
+  ];
+  assert.throws(
+    () => buildFollowUpSourceBody(input),
+    /previous response tool_use .* name .* does not match/
+  );
 });
 
 // ─── Claude Messages ─────────────────────────────────────────────────────────
@@ -386,10 +590,12 @@ test("Claude: appends assistant tool_use turn, then a separate user tool_result 
   const assistant = messages[1];
   assert.strictEqual(assistant.role, "assistant");
   const assistantBlocks = assistant.content as UnknownRecord[];
-  assert.strictEqual(assistantBlocks.length, 2);
-  assert.ok(assistantBlocks.every((block) => block.type === "tool_use"));
+  assert.strictEqual(assistantBlocks.length, 3, "text + 2 tool_use blocks preserved");
+  assert.strictEqual(assistantBlocks[0].type, "text");
+  assert.strictEqual(assistantBlocks[0].text, "Let me look.");
+  assert.ok(assistantBlocks.slice(1).every((block) => block.type === "tool_use"));
   assert.deepEqual(
-    assistantBlocks,
+    assistantBlocks.slice(1),
     input.previousResponse.content.filter((block: UnknownRecord) => block.type === "tool_use")
   );
 
@@ -406,6 +612,62 @@ test("Claude: appends assistant tool_use turn, then a separate user tool_result 
   assert.strictEqual(resultBlocks[1].content, JSON.stringify({ stored: true }));
 
   assert.deepEqual(out.tools, input.sourceBody.tools);
+});
+
+// ─── Task 4 Fix R1: Claude text/thinking block preservation ─────────────────
+
+test("Claude: assistant content preserves original text blocks in original order", () => {
+  const input = claudeInput();
+  const out = buildFollowUpSourceBody(input);
+  const messages = out.messages as UnknownRecord[];
+  const assistant = messages[1];
+  const assistantBlocks = assistant.content as UnknownRecord[];
+  // Must include the text block (index 0) AND the two tool_use blocks
+  assert.strictEqual(assistantBlocks.length, 3, "should have text + 2 tool_use blocks");
+  assert.strictEqual(assistantBlocks[0].type, "text");
+  assert.strictEqual(assistantBlocks[0].text, "Let me look.");
+  assert.strictEqual(assistantBlocks[1].type, "tool_use");
+  assert.strictEqual(assistantBlocks[1].id, "toolu_1");
+  assert.strictEqual(assistantBlocks[2].type, "tool_use");
+  assert.strictEqual(assistantBlocks[2].id, "toolu_2");
+});
+
+test("Claude: assistant content preserves thinking blocks alongside tool_use", () => {
+  const input = claudeInput();
+  (input.previousResponse as UnknownRecord).content = [
+    { type: "thinking", thinking: "Let me reason about this.", signature: "sig_1" },
+    { type: "text", text: "I'll search now." },
+    { type: "tool_use", id: "toolu_1", name: "memory_search", input: { query: "foo" } },
+    { type: "tool_use", id: "toolu_2", name: "memory_save", input: { key: "k" } },
+  ];
+  const out = buildFollowUpSourceBody(input);
+  const messages = out.messages as UnknownRecord[];
+  const assistantBlocks = messages[1].content as UnknownRecord[];
+  assert.strictEqual(assistantBlocks.length, 4, "should have thinking + text + 2 tool_use");
+  assert.strictEqual(assistantBlocks[0].type, "thinking");
+  assert.strictEqual(assistantBlocks[0].thinking, "Let me reason about this.");
+  assert.strictEqual(assistantBlocks[1].type, "text");
+  assert.strictEqual(assistantBlocks[1].text, "I'll search now.");
+  assert.strictEqual(assistantBlocks[2].type, "tool_use");
+  assert.strictEqual(assistantBlocks[3].type, "tool_use");
+});
+
+test("Claude: assistant content filters unmatched tool_use but keeps text", () => {
+  const input = claudeInput();
+  (input.previousResponse as UnknownRecord).content = [
+    { type: "text", text: "Looking..." },
+    { type: "tool_use", id: "toolu_1", name: "memory_search", input: { query: "foo" } },
+    { type: "tool_use", id: "toolu_UNMATCHED", name: "other_tool", input: {} },
+    { type: "tool_use", id: "toolu_2", name: "memory_save", input: { key: "k" } },
+  ];
+  const out = buildFollowUpSourceBody(input);
+  const messages = out.messages as UnknownRecord[];
+  const assistantBlocks = messages[1].content as UnknownRecord[];
+  // text preserved, unmatched tool_use filtered out, matched tool_use kept
+  assert.strictEqual(assistantBlocks.length, 3);
+  assert.strictEqual(assistantBlocks[0].type, "text");
+  assert.strictEqual(assistantBlocks[1].id, "toolu_1");
+  assert.strictEqual(assistantBlocks[2].id, "toolu_2");
 });
 
 test("Claude: mismatched IDs fail closed even when response content would filter them", () => {

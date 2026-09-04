@@ -24,6 +24,12 @@ export const MAX_RESULT_BYTES_TOTAL = 65_536;
 
 const NON_SERIALIZABLE_ERROR = "Tool result is not JSON-serializable";
 
+function assertValidBudget(name: string, value: number): void {
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+    throw new RangeError(`${name} must be a non-negative finite integer, got ${value}`);
+  }
+}
+
 function markerFor(droppedBytes: number): string {
   return `[TRUNCATED ${droppedBytes} BYTES BY OMNIROUTE]`;
 }
@@ -54,6 +60,8 @@ function projectSerializable(value: unknown): unknown {
 }
 
 export function serializeBoundedToolResult(value: unknown, maxBytes: number): BoundedToolResult {
+  assertValidBudget("maxBytes", maxBytes);
+
   const projected = projectSerializable(value);
 
   let serialized: string | undefined;
@@ -137,6 +145,15 @@ function validateCallsAndResults(toolCalls: ToolCall[], results: ExecutedToolRes
       );
     }
   }
+
+  for (const result of results) {
+    const call = toolCalls.find((c) => c.id === result.id);
+    if (call && call.name !== result.name) {
+      throw new Error(
+        `buildFollowUpSourceBody: result name "${result.name}" for id "${result.id}" does not match tool call name "${call.name}"`
+      );
+    }
+  }
 }
 
 function extractOpenAIMessage(response: Record<string, unknown>): Record<string, unknown> | null {
@@ -162,6 +179,10 @@ function extractOpenAIMessage(response: Record<string, unknown>): Record<string,
  * them (provenance preserved), restricted to calls with a matching result.
  * Falls back to reconstructing the OpenAI wire shape from the parsed
  * `toolCalls` when the response has no tool_calls of its own.
+ *
+ * When the previous response does carry tool_calls, validates that each
+ * call ID appears exactly once with the correct name (fails closed on
+ * partial, duplicate, or mismatched entries).
  */
 function resolveOpenAIAssistantToolCalls(
   previousResponse: Record<string, unknown>,
@@ -181,6 +202,45 @@ function resolveOpenAIAssistantToolCalls(
     }));
   }
 
+  // Validate when previous response carries its own tool_calls.
+  const hasOwnToolCalls =
+    prevMessage && Array.isArray(prevMessage.tool_calls) && prevMessage.tool_calls.length > 0;
+  if (hasOwnToolCalls) {
+    const idCounts = new Map<string, number>();
+    const idNames = new Map<string, string>();
+    for (const raw of originalToolCalls) {
+      if (!raw || typeof raw !== "object") continue;
+      const rec = raw as Record<string, unknown>;
+      const id = typeof rec.id === "string" ? rec.id : undefined;
+      if (id === undefined) continue;
+      idCounts.set(id, (idCounts.get(id) ?? 0) + 1);
+      if (idNames.has(id)) continue;
+      const fn = rec.function;
+      if (
+        fn &&
+        typeof fn === "object" &&
+        typeof (fn as Record<string, unknown>).name === "string"
+      ) {
+        idNames.set(id, (fn as Record<string, unknown>).name as string);
+      }
+    }
+    for (const call of toolCalls) {
+      if (!matchedIds.has(call.id)) continue;
+      const count = idCounts.get(call.id) ?? 0;
+      if (count !== 1) {
+        throw new Error(
+          `buildFollowUpSourceBody: previous response tool_calls must contain exactly one match per call ID (id "${call.id}" has ${count})`
+        );
+      }
+      const prevName = idNames.get(call.id);
+      if (prevName !== undefined && prevName !== call.name) {
+        throw new Error(
+          `buildFollowUpSourceBody: previous response tool_call "${call.id}" name "${prevName}" does not match tool call name "${call.name}"`
+        );
+      }
+    }
+  }
+
   return originalToolCalls.filter((call) => {
     if (!call || typeof call !== "object") return false;
     const record = call as Record<string, unknown>;
@@ -189,18 +249,60 @@ function resolveOpenAIAssistantToolCalls(
   });
 }
 
+/**
+ * Resolves tool_use blocks from the Claude previous response. When content
+ * blocks are present, validates that each call ID appears exactly once with
+ * the correct name (fails closed on partial, duplicate, or mismatched).
+ * Non-tool content blocks (text, thinking, reasoning) are preserved in their
+ * original order; only tool_use blocks are filtered to matched IDs.
+ */
 function resolveClaudeToolUseBlocks(
   previousResponse: Record<string, unknown>,
   toolCalls: ToolCall[],
   matchedIds: Set<string>
 ): unknown[] {
   if (Array.isArray(previousResponse.content)) {
-    return (previousResponse.content as unknown[]).filter((block) => {
+    const blocks = previousResponse.content as unknown[];
+
+    // Validate when content has tool_use blocks for matched IDs.
+    const idCounts = new Map<string, number>();
+    const idNames = new Map<string, string>();
+    for (const block of blocks) {
+      if (!block || typeof block !== "object") continue;
+      const rec = block as Record<string, unknown>;
+      if (rec.type !== "tool_use" || typeof rec.id !== "string") continue;
+      if (!matchedIds.has(rec.id)) continue;
+      idCounts.set(rec.id, (idCounts.get(rec.id) ?? 0) + 1);
+      if (idNames.has(rec.id)) continue;
+      if (typeof rec.name === "string") {
+        idNames.set(rec.id, rec.name);
+      }
+    }
+    for (const call of toolCalls) {
+      if (!matchedIds.has(call.id)) continue;
+      const count = idCounts.get(call.id) ?? 0;
+      if (count !== 1) {
+        throw new Error(
+          `buildFollowUpSourceBody: previous response content must contain exactly one tool_use match per call ID (id "${call.id}" has ${count})`
+        );
+      }
+      const prevName = idNames.get(call.id);
+      if (prevName !== undefined && prevName !== call.name) {
+        throw new Error(
+          `buildFollowUpSourceBody: previous response tool_use "${call.id}" name "${prevName}" does not match tool call name "${call.name}"`
+        );
+      }
+    }
+
+    // Preserve non-tool blocks (text, thinking, reasoning) in original order.
+    // Filter tool_use blocks to only those with a matching result ID.
+    return blocks.filter((block) => {
       if (!block || typeof block !== "object") return false;
-      const record = block as Record<string, unknown>;
-      return (
-        record.type === "tool_use" && typeof record.id === "string" && matchedIds.has(record.id)
-      );
+      const rec = block as Record<string, unknown>;
+      if (rec.type === "tool_use") {
+        return typeof rec.id === "string" && matchedIds.has(rec.id);
+      }
+      return true;
     });
   }
 
@@ -218,6 +320,13 @@ export function buildFollowUpSourceBody(
   const { sourceBody, previousResponse, toolCalls, results, sourceFormat } = input;
   const maxResultBytes = input.maxResultBytes ?? MAX_RESULT_BYTES_PER_TOOL;
   const maxTotalResultBytes = input.maxTotalResultBytes ?? MAX_RESULT_BYTES_TOTAL;
+
+  if (sourceFormat !== "openai" && sourceFormat !== "claude") {
+    throw new Error('sourceFormat must be "openai" or "claude"');
+  }
+
+  assertValidBudget("maxResultBytes", maxResultBytes);
+  assertValidBudget("maxTotalResultBytes", maxTotalResultBytes);
 
   if (!Array.isArray(sourceBody.messages)) {
     throw new Error("buildFollowUpSourceBody requires sourceBody.messages array");
