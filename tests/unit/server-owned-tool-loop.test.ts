@@ -621,8 +621,8 @@ test("provider_error: resumeUpstream returns error → termination=provider_erro
   });
 
   const origExec = opts.executeServerOwned;
-  opts.executeServerOwned = async (calls) => {
-    const results = await origExec(calls);
+  opts.executeServerOwned = async (calls, context) => {
+    const results = await origExec(calls, context);
     return results;
   };
 
@@ -778,6 +778,7 @@ test("provider_error: error result is same object identity as resumeUpstream ret
         kind: "error",
         result: errorResult,
         receipt: makeReceipt({ index: 1, httpStatus: 502 }),
+        usage: null,
       };
     },
   });
@@ -1089,6 +1090,7 @@ test("failed leg receipt still enters receipts array with usage and cost", async
         usage: { prompt_tokens: 50, completion_tokens: 0, total_tokens: 50 },
         computedCostUsd: 0.0005,
       }),
+      usage: { prompt_tokens: 50, completion_tokens: 0, total_tokens: 50 },
     }),
   });
 
