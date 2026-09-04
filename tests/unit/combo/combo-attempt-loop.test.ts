@@ -30,3 +30,37 @@ test("dispatchWithCooldownRetry calls evaluateGates then executeAttempt, not inl
   assert.doesNotMatch(src, /getCircuitBreaker\(provider\)/);
   assert.doesNotMatch(src, /for \(let retry = 0; retry <= deps\.maxRetries/);
 });
+
+test("attempt budget lives on state.globalAttempts, not extra.globalAttempts box", async () => {
+  const loopSrc = readFileSync(
+    resolve(here, "../../../open-sse/services/combo/comboAttemptLoop.ts"),
+    "utf8"
+  );
+  const comboSrc = readFileSync(resolve(here, "../../../open-sse/services/combo.ts"), "utf8");
+  const attemptSrc = readFileSync(
+    resolve(here, "../../../open-sse/services/combo/executeTargetAttempt.ts"),
+    "utf8"
+  );
+  assert.match(attemptSrc, /state\.globalAttempts\+\+/);
+  assert.doesNotMatch(loopSrc, /globalAttempts:\s*\{\s*current:\s*number\s*\}/);
+  assert.doesNotMatch(comboSrc, /globalAttempts:\s*\{\s*current:\s*0\s*\}/);
+});
+
+test("handleComboChatInner does not leave unused delay locals or unused failureTracker import", async () => {
+  const comboSrc = readFileSync(resolve(here, "../../../open-sse/services/combo.ts"), "utf8");
+  const inner = comboSrc.slice(
+    comboSrc.indexOf("async function handleComboChatInner"),
+    comboSrc.indexOf("async function handleRoundRobinCombo")
+  );
+  assert.doesNotMatch(inner, /const retryDelayMs = resolveDelayMs/);
+  assert.doesNotMatch(inner, /const fallbackDelayMs = resolveDelayMs/);
+  assert.doesNotMatch(comboSrc, /clearComboFailureTracking/);
+});
+
+test("hedge delay does not declare unused timeoutResolve", async () => {
+  const loopSrc = readFileSync(
+    resolve(here, "../../../open-sse/services/combo/comboAttemptLoop.ts"),
+    "utf8"
+  );
+  assert.doesNotMatch(loopSrc, /let timeoutResolve/);
+});

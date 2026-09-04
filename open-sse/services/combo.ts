@@ -30,7 +30,7 @@ import {
   errorResponseWithComboDiagnostics,
 } from "../utils/error.ts";
 import type { ComboDiagnostics } from "../utils/error.ts";
-import { clearComboFailureTracking, recordComboFailure } from "./combo/failureTracker.ts";
+import { recordComboFailure } from "./combo/failureTracker.ts";
 import { buildRecoveryHint } from "./combo/pinRecovery.ts";
 import { formatExhaustedConnectionKey } from "./combo/comboDiagFormat.ts";
 import { buildTargetTimeoutRunner } from "./combo/targetTimeoutRunner.ts";
@@ -933,8 +933,6 @@ async function handleComboChatInner({
   }
 
   const maxRetries = activeNativeTurnPin ? 0 : (config.maxRetries ?? 1);
-  const retryDelayMs = resolveDelayMs(config.retryDelayMs, 2000);
-  const fallbackDelayMs = resolveDelayMs(config.fallbackDelayMs, 0);
   const maxSetRetries = activeNativeTurnPin ? 0 : (config.maxSetRetries ?? 0);
   const setRetryDelayMs = resolveDelayMs(config.setRetryDelayMs, 2000);
 
@@ -1043,7 +1041,6 @@ async function handleComboChatInner({
   // We snapshot them now so cleanup can happen after the attempt loop finishes.
   const _registeredExecutionKeys = orderedTargets.map((t) => t.executionKey).filter(Boolean);
 
-  const maxGlobalAttempts = clampGlobalAttempts(config.maxGlobalAttempts);
   const comboCooldownWaitEnabled = isComboCooldownWaitEligible(
     strategy,
     resilienceSettings.comboCooldownWait
@@ -1127,8 +1124,6 @@ async function handleComboChatInner({
     comboCooldownWaitEnabled,
     comboCooldownAttempt,
     comboCooldownBudgetLeftMs,
-    maxGlobalAttempts,
-    globalAttempts: { current: 0 },
     evaluateGates: evaluateExecuteTargetGates,
     executeAttempt: executeTargetAttempt,
   };

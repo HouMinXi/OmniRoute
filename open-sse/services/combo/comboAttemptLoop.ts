@@ -52,8 +52,6 @@ export type DispatchWithCooldownRetryExtra = {
   comboCooldownWaitEnabled: boolean;
   comboCooldownAttempt: { current: number };
   comboCooldownBudgetLeftMs: { current: number };
-  maxGlobalAttempts: number;
-  globalAttempts: { current: number };
   evaluateGates: typeof evaluateExecuteTargetGates;
   executeAttempt: typeof executeTargetAttempt;
 };
@@ -256,9 +254,7 @@ export async function dispatchWithCooldownRetry(opts: {
           i + 1 < state.orderedTargets.length
         ) {
           const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
-          let timeoutResolve: () => void;
           const timeoutPromise = new Promise<void>((r) => {
-            timeoutResolve = r;
             setTimeout(r, hedgeDelay);
           });
           await Promise.race([task, globalPromise, timeoutPromise, loopSafetyPromise]);
