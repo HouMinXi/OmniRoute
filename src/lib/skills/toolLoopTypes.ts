@@ -104,9 +104,14 @@ export interface ServerOwnedToolLoopResult {
     | "max_followups"
     | "tool_output_budget"
     | "deadline"
+    | "client_abort"
     | "provider_error"
+    | "connection_mismatch"
+    | "execution_in_progress"
     | "execution_unknown"
-    | "connection_mismatch";
+    | "execution_identity_conflict"
+    | "execution_error"
+    | "execution_timeout";
 }
 
 // ─── §5.1 Shared Context ───────────────────────────────────────────────────

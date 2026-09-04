@@ -699,7 +699,8 @@ export function formatEscapeHatchResponse(
   serverCalls: ToolCall[],
   results: ExecutedToolResult[],
   clientCalls: ToolCall[],
-  sourceFormat: "openai" | "claude"
+  sourceFormat: "openai" | "claude",
+  serializedResultTextById?: Map<string, string>
 ): Record<string, unknown> {
   const serverIds = new Set(serverCalls.map((c) => c.id));
 
@@ -713,7 +714,7 @@ export function formatEscapeHatchResponse(
         .map((r) => ({
           type: "function_call_output",
           call_id: r.id,
-          output: JSON.stringify(r.result),
+          output: serializedResultTextById?.get(r.id) ?? JSON.stringify(r.result),
         }));
       return {
         ...response,
@@ -740,7 +741,10 @@ export function formatEscapeHatchResponse(
     // Build result text from server results.
     const resultTexts = results
       .filter((r) => serverIds.has(r.id))
-      .map((r) => `[${r.name} result]\n${JSON.stringify(r.result)}`)
+      .map(
+        (r) =>
+          `[${r.name} result]\n${serializedResultTextById?.get(r.id) ?? JSON.stringify(r.result)}`
+      )
       .join("\n\n");
 
     const existingContent =
@@ -775,7 +779,7 @@ export function formatEscapeHatchResponse(
       .filter((r) => serverIds.has(r.id))
       .map((r) => ({
         type: "text",
-        text: `[${r.name} result]\n${JSON.stringify(r.result)}`,
+        text: `[${r.name} result]\n${serializedResultTextById?.get(r.id) ?? JSON.stringify(r.result)}`,
       }));
 
     // Insert result text blocks before the first remaining tool_use.

@@ -71,7 +71,7 @@ test("canonicalJson normalizes -0 to 0", () => {
 });
 
 test("canonicalJson rejects sparse arrays", () => {
-  const sparse = [1, , 3]; // eslint-disable-line no-sparse-arrays
+  const sparse = [1, , 3];
   assert.throws(() => canonicalJson(sparse), /canonical JSON/i);
 });
 
@@ -218,9 +218,14 @@ test("termination union in toolLoopTypes.ts source matches expected set", () => 
     "max_followups",
     "tool_output_budget",
     "deadline",
+    "client_abort",
     "provider_error",
-    "execution_unknown",
     "connection_mismatch",
+    "execution_in_progress",
+    "execution_unknown",
+    "execution_identity_conflict",
+    "execution_error",
+    "execution_timeout",
   ]);
 
   // Every expected member must appear in source
