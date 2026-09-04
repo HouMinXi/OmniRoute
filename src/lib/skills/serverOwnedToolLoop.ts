@@ -16,8 +16,6 @@ import type {
   ProviderLegUsage,
   ProviderLegReceipt,
   ChatCoreErrorResult,
-  ExecutionContext,
-  ToolCall,
   ExecutedToolResult,
 } from "./toolLoopTypes.ts";
 import {
@@ -87,6 +85,12 @@ export function aggregateProviderLegUsage(
   };
 }
 
+function aggregateUsageOrNull(usages: Array<ProviderLegUsage | null>): ProviderLegUsage | null {
+  const hasNonNull = usages.some((u) => u !== null);
+  if (!hasNonNull) return null;
+  return aggregateProviderLegUsage(usages);
+}
+
 // ─── Execution error → errorResult mapping ────────────────────────────────────
 
 function mapExecutionError(err: ServerOwnedExecutionError): ChatCoreErrorResult {
@@ -130,7 +134,7 @@ export async function runServerOwnedToolLoop(
   ) => ({
     kind: "error",
     errorResult: createErrorResult(status, msg, null, code) as unknown as ChatCoreErrorResult,
-    cumulativeUsage: aggregateProviderLegUsage(usages),
+    cumulativeUsage: aggregateUsageOrNull(usages),
     totalCostUsd,
     receipts,
     followUps,
@@ -145,9 +149,8 @@ export async function runServerOwnedToolLoop(
       return errorResult("No response from provider leg");
     }
 
-    // Detect provider from skillsModelId
-    const provider = detectProviderFromModel(options.skillsModelId);
-    const toolCalls = extractToolCalls(response, provider);
+    // Extract tool calls by actual source format, not model alias heuristic
+    const toolCalls = extractToolCalls(response, options.sourceFormat);
 
     // Classify ownership
     const { serverOwned, clientNative } = await classifyServerOwnedCalls(
@@ -165,7 +168,7 @@ export async function runServerOwnedToolLoop(
           currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
         finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
         finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps,
@@ -175,12 +178,27 @@ export async function runServerOwnedToolLoop(
 
     // Mixed tools → escape hatch, no follow-up
     if (clientNative.length > 0) {
+      // Check abort before execute
+      if (options.abortSignal?.aborted) {
+        return {
+          kind: "error",
+          errorResult: createErrorResult(
+            499,
+            "Client closed request",
+            null,
+            "client_closed_request",
+            "invalid_request_error"
+          ) as unknown as ChatCoreErrorResult,
+          cumulativeUsage: aggregateUsageOrNull(usages),
+          totalCostUsd,
+          receipts,
+          followUps,
+          termination: "client_abort",
+        };
+      }
+
       // Execute server calls, then format with bounded serialization
-      const execResults = await executeWithAbortCheck(
-        options,
-        serverOwned,
-        options.executionContext
-      );
+      const execResults = await options.executeServerOwned(serverOwned, options.executionContext);
 
       // Build serialized text map using bounded serialization
       const serMap = new Map<string, string>();
@@ -208,7 +226,7 @@ export async function runServerOwnedToolLoop(
           currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
         finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
         finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps,
@@ -227,7 +245,7 @@ export async function runServerOwnedToolLoop(
           "client_closed_request",
           "invalid_request_error"
         ) as unknown as ChatCoreErrorResult,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps,
@@ -252,7 +270,7 @@ export async function runServerOwnedToolLoop(
         return {
           kind: "error",
           errorResult: mapExecutionError(err),
-          cumulativeUsage: aggregateProviderLegUsage(usages),
+          cumulativeUsage: aggregateUsageOrNull(usages),
           totalCostUsd,
           receipts,
           followUps,
@@ -264,7 +282,7 @@ export async function runServerOwnedToolLoop(
 
     // Serialize results with cumulative UTF-8 budget
     const serMap = new Map<string, string>();
-    let budgetExhausted = false;
+    let anyTruncated = false;
     let remainingBytes = maxTotalResultBytes - cumulativeOutputBytes;
     if (remainingBytes < 0) remainingBytes = 0;
 
@@ -275,13 +293,13 @@ export async function runServerOwnedToolLoop(
       const bytes = Buffer.byteLength(bounded.text, "utf8");
       cumulativeOutputBytes += bytes;
       remainingBytes -= bytes;
-      if (remainingBytes <= 0) {
-        budgetExhausted = true;
+      if (bounded.truncated) {
+        anyTruncated = true;
       }
     }
 
-    // Check budget exhaustion
-    if (budgetExhausted || cumulativeOutputBytes >= maxTotalResultBytes) {
+    // Check budget exhaustion — any truncated result terminates
+    if (anyTruncated || cumulativeOutputBytes >= maxTotalResultBytes) {
       const formatted = formatEscapeHatchResponse(
         response,
         serverOwned,
@@ -298,7 +316,7 @@ export async function runServerOwnedToolLoop(
           currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
         finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
         finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps,
@@ -324,7 +342,7 @@ export async function runServerOwnedToolLoop(
           currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
         finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
         finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps,
@@ -351,7 +369,7 @@ export async function runServerOwnedToolLoop(
           currentLeg.kind === "ok" ? currentLeg.responseForMemoryExtraction : undefined,
         finalProviderBody: currentLeg.kind === "ok" ? currentLeg.providerBody : undefined,
         finalProviderRequest: currentLeg.kind === "ok" ? currentLeg.providerRequest : undefined,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps,
@@ -370,7 +388,7 @@ export async function runServerOwnedToolLoop(
           "client_closed_request",
           "invalid_request_error"
         ) as unknown as ChatCoreErrorResult,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps,
@@ -387,6 +405,7 @@ export async function runServerOwnedToolLoop(
       sourceFormat: options.sourceFormat,
       maxResultBytes,
       maxTotalResultBytes: maxTotalResultBytes - cumulativeOutputBytes,
+      serializedResultTextById: serMap,
     });
 
     // Resume upstream
@@ -405,7 +424,7 @@ export async function runServerOwnedToolLoop(
       return {
         kind: "error",
         errorResult: nextLeg.result,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps: followUps + 1,
@@ -428,7 +447,7 @@ export async function runServerOwnedToolLoop(
           "LEASE_CONNECTION_MISMATCH",
           "lease_error"
         ) as unknown as ChatCoreErrorResult,
-        cumulativeUsage: aggregateProviderLegUsage(usages),
+        cumulativeUsage: aggregateUsageOrNull(usages),
         totalCostUsd,
         receipts,
         followUps: followUps + 1,
@@ -444,21 +463,4 @@ export async function runServerOwnedToolLoop(
     usages.push(nextLeg.usage);
     totalCostUsd += nextLeg.receipt.computedCostUsd ?? 0;
   }
-}
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function detectProviderFromModel(modelId: string): string {
-  const lower = modelId.toLowerCase();
-  if (lower.includes("claude") || lower.includes("anthropic")) return "anthropic";
-  if (lower.includes("gemini") || lower.includes("google")) return "google";
-  return "openai";
-}
-
-async function executeWithAbortCheck(
-  options: ServerOwnedToolLoopOptions,
-  calls: ToolCall[],
-  context: ExecutionContext
-): Promise<ExecutedToolResult[]> {
-  return options.executeServerOwned(calls, context);
 }

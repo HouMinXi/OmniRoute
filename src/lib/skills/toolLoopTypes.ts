@@ -61,6 +61,7 @@ export type NonStreamingProviderLegResult =
       kind: "error";
       result: ChatCoreErrorResult;
       receipt: ProviderLegReceipt;
+      usage?: ProviderLegUsage | null;
     };
 
 // ─── §5.5 Tool Loop ────────────────────────────────────────────────────────
@@ -71,6 +72,8 @@ export interface ServerOwnedToolLoopOptions {
   sourceFormat: "openai" | "claude";
   skillsModelId: string;
   executionContext: ExecutionContext;
+  abortSignal?: AbortSignal;
+  now?: () => number;
   executeServerOwned: (
     calls: ToolCall[],
     context: ExecutionContext
@@ -152,6 +155,7 @@ export interface BuildFollowUpTranscriptInput {
   sourceFormat: "openai" | "claude";
   maxResultBytes: number;
   maxTotalResultBytes?: number;
+  serializedResultTextById?: Map<string, string>;
 }
 
 export interface BoundedToolResult {

@@ -222,8 +222,19 @@ export async function interceptToolCalls(
   return results;
 }
 
-export function extractToolCalls(response: any, modelId: string): ToolCall[] {
-  const provider = detectProvider(modelId);
+export function extractToolCalls(response: any, modelIdOrSourceFormat: string): ToolCall[] {
+  // Accept either a sourceFormat ("openai" | "claude") or a model ID string.
+  // Map known sourceFormat values; fall back to detectProvider for model IDs.
+  const format =
+    modelIdOrSourceFormat === "openai" || modelIdOrSourceFormat === "claude"
+      ? modelIdOrSourceFormat
+      : undefined;
+  const provider =
+    format === "claude"
+      ? "anthropic"
+      : format === "openai"
+        ? "openai"
+        : detectProvider(modelIdOrSourceFormat);
 
   switch (provider) {
     case "openai": {
@@ -798,7 +809,7 @@ export function formatEscapeHatchResponse(
       ];
     }
 
-    const formatted = { ...response, content: newContent };
+    const formatted: Record<string, unknown> = { ...response, content: newContent };
 
     // All-server → end_turn; mixed → keep original stop_reason.
     const remainingToolUseCount = remainingContent.filter(

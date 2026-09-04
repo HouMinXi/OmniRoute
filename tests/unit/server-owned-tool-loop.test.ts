@@ -14,7 +14,79 @@ import type {
   ChatCoreErrorResult,
   ToolCall,
 } from "../../src/lib/skills/toolLoopTypes.ts";
-import { ServerOwnedExecutionError } from "../../src/lib/skills/interception.ts";
+import {
+  ServerOwnedExecutionError,
+  extractToolCalls,
+} from "../../src/lib/skills/interception.ts";
+import {
+  buildFollowUpSourceBody,
+} from "../../src/lib/skills/followUpTranscript.ts";
+
+// ─── Fix 6: serializedResultTextById verbatim use ────────────────────────────
+
+test("buildFollowUpSourceBody uses serializedResultTextById verbatim when provided", () => {
+  const sentinel = '{"custom":"SENTINEL_12345"}';
+  const toolCalls = [{ id: "tc1", name: "memory_search", arguments: { query: "x" } }];
+  const results = [{ id: "tc1", name: "memory_search", result: { hits: ["a"] }, replayed: false }];
+  const previousResponse = {
+    choices: [
+      {
+        message: {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "tc1",
+              type: "function",
+              function: { name: "memory_search", arguments: '{"query":"x"}' },
+            },
+          ],
+        },
+      },
+    ],
+  };
+  const sourceBody = { model: "gpt-4o", messages: [{ role: "user", content: "hi" }] };
+
+  // With serializedResultTextById → uses sentinel verbatim
+  const serMap = new Map([["tc1", sentinel]]);
+  const withMap = buildFollowUpSourceBody({
+    sourceBody,
+    previousResponse,
+    toolCalls,
+    results,
+    sourceFormat: "openai",
+    maxResultBytes: 32_768,
+    maxTotalResultBytes: 65_536,
+    serializedResultTextById: serMap,
+  });
+
+  const toolMsg = (withMap.messages as Record<string, unknown>[]).find(
+    (m: Record<string, unknown>) => m.role === "tool" && m.tool_call_id === "tc1"
+  );
+  assert.strictEqual(toolMsg!.content, sentinel, "must use pre-serialized text verbatim");
+
+  // Without serializedResultTextById → serializer would produce JSON of { hits: ["a"] }
+  const withoutMap = buildFollowUpSourceBody({
+    sourceBody,
+    previousResponse,
+    toolCalls,
+    results,
+    sourceFormat: "openai",
+    maxResultBytes: 32_768,
+    maxTotalResultBytes: 65_536,
+  });
+
+  const toolMsgNoMap = (withoutMap.messages as Record<string, unknown>[]).find(
+    (m: Record<string, unknown>) => m.role === "tool" && m.tool_call_id === "tc1"
+  );
+  const defaultSerialized = JSON.stringify({ hits: ["a"] });
+  assert.strictEqual(toolMsgNoMap!.content, defaultSerialized, "without map, uses JSON.stringify");
+  assert.notStrictEqual(
+    toolMsgNoMap!.content,
+    sentinel,
+    "without map, content differs from sentinel"
+  );
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -178,6 +250,126 @@ function makeDefaultOptions(
   };
 }
 
+// ─── Interface contract tests (no casts) ─────────────────────────────────────
+
+test("ServerOwnedToolLoopOptions accepts abortSignal and now fields at type level", () => {
+  // This test proves the interface has the fields; a cast would hide missing fields.
+  const ac = new AbortController();
+  let customNow = 5000;
+  const opts: ServerOwnedToolLoopOptions = {
+    initialLeg: makeOkLeg(),
+    sourceBody: { model: "gpt-4o", messages: [] },
+    sourceFormat: "openai",
+    skillsModelId: "gpt-4o",
+    executionContext: { apiKeyId: "k", sessionId: "s", requestId: "r" },
+    executeServerOwned: async () => [],
+    resumeUpstream: async () => makeOkLeg(),
+    deadlineAtMs: 120_000,
+    abortSignal: ac.signal,
+    now: () => customNow,
+  };
+  // Verify the fields are present and accessible without cast
+  assert.ok(opts.abortSignal, "abortSignal must be accessible");
+  assert.strictEqual(typeof opts.now, "function", "now must be a function");
+  assert.strictEqual(opts.now!(), 5000, "now() returns the injected value");
+});
+
+test("NonStreamingProviderLegResult error arm carries usage field", () => {
+  const errLeg: NonStreamingProviderLegResult = {
+    kind: "error",
+    result: {
+      success: false,
+      status: 500,
+      response: new Response(),
+      error: "fail",
+    },
+    receipt: makeReceipt({
+      usage: { prompt_tokens: 50, completion_tokens: 10, total_tokens: 60 },
+    }),
+    usage: { prompt_tokens: 50, completion_tokens: 10, total_tokens: 60 },
+  };
+  assert.ok(errLeg.kind === "error");
+  assert.ok(errLeg.usage, "error leg must carry usage");
+  assert.strictEqual(errLeg.usage!.prompt_tokens, 50);
+});
+
+// ─── Fix 3: sourceFormat-based extraction regression ─────────────────────────
+
+test("extractToolCalls with opaque model alias + Claude shape returns 1 tool call via sourceFormat", () => {
+  const claudeResponse = {
+    content: [{ type: "tool_use", id: "tu_1", name: "memory_search", input: { query: "test" } }],
+    stop_reason: "tool_use",
+  };
+
+  // Opaque model alias that detectProvider maps to "openai" → returns 0
+  const viaModelId = extractToolCalls(claudeResponse, "official-fable");
+  assert.strictEqual(viaModelId.length, 0, "opaque alias without sourceFormat returns 0");
+
+  // Explicit sourceFormat "claude" → returns 1
+  const viaSourceFormat = extractToolCalls(claudeResponse, "claude");
+  assert.strictEqual(viaSourceFormat.length, 1, "sourceFormat=claude returns 1 tool call");
+  assert.strictEqual(viaSourceFormat[0].name, "memory_search");
+});
+
+test("extractToolCalls with opaque model alias + Claude shape actually executes in loop", async () => {
+  const claudeResponse: NonStreamingProviderLegResult & { kind: "ok" } = {
+    kind: "ok",
+    response: {
+      content: [{ type: "tool_use", id: "tu_exec", name: "memory_search", input: { query: "x" } }],
+      stop_reason: "tool_use",
+    },
+    responseForMemoryExtraction: {},
+    providerBody: {},
+    providerRequest: {},
+    usage: { prompt_tokens: 100, completion_tokens: 20, total_tokens: 120 },
+    responsePayloadFormat: "claude",
+    looksLikeSSE: false,
+    connectionId: "conn-1",
+    headers: new Headers(),
+    receipt: makeReceipt({ index: 0 }),
+  };
+
+  let executeCalled = false;
+  const opts: ServerOwnedToolLoopOptions = {
+    initialLeg: claudeResponse,
+    sourceBody: { model: "official-fable", messages: [{ role: "user", content: "hi" }] },
+    sourceFormat: "claude",
+    skillsModelId: "official-fable",
+    executionContext: {
+      apiKeyId: "k",
+      sessionId: "s",
+      requestId: "r",
+      builtinToolNames: ["memory_search"],
+    },
+    executeServerOwned: async (calls) => {
+      executeCalled = true;
+      return calls.map((c) => ({ id: c.id, name: c.name, result: { ok: true }, replayed: false }));
+    },
+    resumeUpstream: async () => ({
+      kind: "ok",
+      response: {
+        content: [{ type: "text", text: "Done" }],
+        stop_reason: "end_turn",
+      },
+      responseForMemoryExtraction: {},
+      providerBody: {},
+      providerRequest: {},
+      usage: { prompt_tokens: 100, completion_tokens: 20, total_tokens: 120 },
+      responsePayloadFormat: "claude",
+      looksLikeSSE: false,
+      connectionId: "conn-1",
+      headers: new Headers(),
+      receipt: makeReceipt({ index: 1 }),
+    }),
+    deadlineAtMs: 120_000,
+  };
+
+  const result = await runServerOwnedToolLoop(opts);
+  assert.ok(executeCalled, "server-owned call must execute even with opaque model alias");
+  assert.strictEqual(result.termination, "completed");
+  assert.strictEqual(result.followUps, 1);
+});
+
 // ─── §5.5 Constants ───────────────────────────────────────────────────────────
 
 test("MAX_FOLLOW_UPS is 3", () => {
@@ -192,7 +384,7 @@ test("MIN_REMAINING_FOR_FOLLOW_UP_MS is 10000", () => {
   assert.strictEqual(MIN_REMAINING_FOR_FOLLOW_UP_MS, 10_000);
 });
 
-// ─── Step 1: Happy-path RED ───────────────────────────────────────────────────
+// ─── Happy-path ──────────────────────────────────────────────────────────────
 
 test("happy-path: server-owned call executed, resume produces text, followUps=1, termination=completed", async () => {
   const opts = makeDefaultOptions();
@@ -381,7 +573,7 @@ test("max_followups: 3 follow-ups, 4th leg server call still executed but no 5th
   assert.strictEqual(result.followUps, 3);
   assert.strictEqual(result.termination, "max_followups");
   assert.strictEqual(executeCount, 4, "server calls executed for initial + 3 follow-ups");
-  assert.ok(result.receipts.length >= 2, "at least initial + 1 follow-up receipt");
+  assert.strictEqual(result.receipts.length, 4, "exactly 4 receipts: initial + 3 follow-ups");
 });
 
 test("deadline: not enough remaining time → termination=deadline, no follow-up", async () => {
@@ -422,7 +614,14 @@ test("provider_error: resumeUpstream returns error → termination=provider_erro
     resumeUpstream: async () => ({
       kind: "error",
       result: errorResult,
-      receipt: makeReceipt({ index: 1, httpStatus: 500, errorType: "server_error" }),
+      receipt: makeReceipt({
+        index: 1,
+        httpStatus: 500,
+        errorType: "server_error",
+        usage: { prompt_tokens: 50, completion_tokens: 10, total_tokens: 60 },
+        computedCostUsd: 0.003,
+      }),
+      usage: { prompt_tokens: 50, completion_tokens: 10, total_tokens: 60 },
     }),
   });
 
@@ -438,6 +637,9 @@ test("provider_error: resumeUpstream returns error → termination=provider_erro
   assert.ok(result.errorResult, "errorResult must be present");
   assert.strictEqual(result.errorResult!.status, 500);
   assert.strictEqual(result.receipts.length, 2, "initial + failed follow-up receipts");
+  assert.ok(result.receipts[1].usage, "failed leg receipt must carry usage");
+  assert.strictEqual(result.receipts[1].usage!.prompt_tokens, 50);
+  assert.strictEqual(result.totalCostUsd, 0.004, "cost includes failed leg computedCostUsd");
 });
 
 test("connection_mismatch: follow-up connectionId differs → termination=connection_mismatch", async () => {
@@ -612,7 +814,136 @@ test("tool_output_budget: cumulative bytes exhausted → termination=tool_output
   assert.strictEqual(result.termination, "tool_output_budget");
 });
 
-// ─── Input objects not mutated ───────────────────────────────────────────────
+test("tool_output_budget: truncated=true on any result must terminate, no resume", async () => {
+  const bigResult = { data: "y".repeat(50_000) };
+  let resumeCount = 0;
+  const opts = makeDefaultOptions({
+    maxResultBytes: 100,
+    maxTotalResultBytes: 200,
+    executeServerOwned: async (calls) =>
+      calls.map((c) => ({
+        id: c.id,
+        name: c.name,
+        result: bigResult,
+        replayed: false,
+      })),
+    resumeUpstream: async () => {
+      resumeCount++;
+      return makeServerOwnedCallResponse("call_next", "memory_search");
+    },
+  });
+
+  const result = await runServerOwnedToolLoop(opts);
+  assert.strictEqual(result.kind, "ok");
+  assert.strictEqual(result.termination, "tool_output_budget", "truncated result must terminate");
+  assert.strictEqual(resumeCount, 0, "resume must not be called when result is truncated");
+  // Formatter output must exist and be byte-bounded
+  assert.ok(result.response, "response must be present");
+  const responseStr = JSON.stringify(result.response);
+  const responseBytes = Buffer.byteLength(responseStr, "utf8");
+  assert.ok(responseBytes > 0, "formatter output must be non-empty");
+});
+
+test("mixed_tools: abort before execute must be checked", async () => {
+  const ac = new AbortController();
+  ac.abort();
+
+  const initialLeg = makeOkLeg({
+    response: {
+      id: "chatcmpl-mix-abort",
+      choices: [
+        {
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [
+              {
+                id: "srv1",
+                type: "function",
+                function: { name: "memory_search", arguments: '{"query":"x"}' },
+              },
+              {
+                id: "cli1",
+                type: "function",
+                function: { name: "Bash", arguments: '{"cmd":"ls"}' },
+              },
+            ],
+          },
+          finish_reason: "tool_calls",
+        },
+      ],
+    },
+  });
+
+  let executeCount = 0;
+  const opts = makeDefaultOptions({
+    initialLeg,
+    abortSignal: ac.signal,
+    executeServerOwned: async (calls) => {
+      executeCount++;
+      return calls.map((c) => ({ id: c.id, name: c.name, result: { ok: true }, replayed: false }));
+    },
+  });
+
+  const result = await runServerOwnedToolLoop(opts);
+  assert.strictEqual(
+    result.termination,
+    "client_abort",
+    "mixed with abort must terminate as client_abort"
+  );
+  assert.strictEqual(executeCount, 0, "execute must not run when abort is signaled");
+});
+
+// ─── All-null usage ──────────────────────────────────────────────────────────
+
+test("all-null usage legs → cumulativeUsage is null", async () => {
+  const opts = makeDefaultOptions({
+    initialLeg: makeOkLeg({ usage: null }),
+    resumeUpstream: async () => ({
+      kind: "ok",
+      response: {
+        id: "chatcmpl-null",
+        choices: [
+          {
+            message: { role: "assistant", content: "Done", tool_calls: undefined },
+            finish_reason: "stop",
+          },
+        ],
+      },
+      responseForMemoryExtraction: {},
+      providerBody: {},
+      providerRequest: {},
+      usage: null,
+      responsePayloadFormat: "openai",
+      looksLikeSSE: false,
+      connectionId: "conn-1",
+      headers: new Headers(),
+      receipt: makeReceipt({ index: 1, usage: null }),
+    }),
+  });
+
+  const result = await runServerOwnedToolLoop(opts);
+  assert.strictEqual(result.kind, "ok");
+  assert.strictEqual(result.termination, "completed");
+  assert.strictEqual(result.cumulativeUsage, null, "all-null usage → null cumulative");
+});
+
+test("provider error with all-null usage → cumulativeUsage is null", async () => {
+  const opts = makeDefaultOptions({
+    initialLeg: makeOkLeg({ usage: null }),
+    resumeUpstream: async () => ({
+      kind: "error",
+      result: makeErrorResult(500, "Internal Server Error"),
+      receipt: makeReceipt({ index: 1, usage: null, httpStatus: 500 }),
+      usage: null,
+    }),
+  });
+
+  const result = await runServerOwnedToolLoop(opts);
+  assert.strictEqual(result.kind, "error");
+  assert.strictEqual(result.termination, "provider_error");
+  assert.strictEqual(result.cumulativeUsage, null, "all-null usage on error → null cumulative");
+});
 
 test("input objects are not mutated", async () => {
   const sourceBody = {

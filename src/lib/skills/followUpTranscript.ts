@@ -342,15 +342,25 @@ export function buildFollowUpSourceBody(
 
   validateCallsAndResults(toolCalls, results);
 
-  // Consume the total budget in result order. A per-item cap of 0 yields empty
-  // text; the serializer never appends an over-budget marker.
-  let remainingBytes = maxTotalResultBytes;
-  const boundedResults = results.map((result) => {
-    const itemMaxBytes = Math.min(maxResultBytes, remainingBytes);
-    const bounded = serializeBoundedToolResult(result.result, itemMaxBytes);
-    remainingBytes -= Buffer.byteLength(bounded.text, "utf8");
-    return bounded;
-  });
+  // When a pre-serialized map is provided (from the loop's own budget pass),
+  // use its text verbatim instead of re-serializing. Otherwise serialize with
+  // the standard budget logic.
+  const serializedResultTextById = input.serializedResultTextById;
+  let boundedResults: BoundedToolResult[];
+  if (serializedResultTextById) {
+    boundedResults = results.map((result) => {
+      const text = serializedResultTextById.get(result.id) ?? "";
+      return { text, truncated: false, originalBytes: Buffer.byteLength(text, "utf8") };
+    });
+  } else {
+    let remainingBytes = maxTotalResultBytes;
+    boundedResults = results.map((result) => {
+      const itemMaxBytes = Math.min(maxResultBytes, remainingBytes);
+      const bounded = serializeBoundedToolResult(result.result, itemMaxBytes);
+      remainingBytes -= Buffer.byteLength(bounded.text, "utf8");
+      return bounded;
+    });
+  }
 
   const matchedIds = new Set(results.map((result) => result.id));
   const messages = [...(sourceBody.messages as unknown[])];
