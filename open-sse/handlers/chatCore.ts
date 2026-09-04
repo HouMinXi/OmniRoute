@@ -2,7 +2,10 @@ import {
   extractRequestToolIdentityMap,
   resolveResponseToolNameMap,
 } from "./chatCore/requestToolIdentity.ts";
-import { injectMemoryAndSkills } from "./chatCore/memorySkillsInjection.ts";
+import {
+  injectMemoryAndSkills,
+  mergeInjectedFallbackOwnerNames,
+} from "./chatCore/memorySkillsInjection.ts";
 import { resolveChatCoreRequestSetup } from "./chatCore/requestSetup.ts";
 import { normalizeOpenAICompatibleTools } from "./chatCore/openAICompatibleTools.ts";
 import { buildFailureUsageRecord, projectFailureUsageErrorCode } from "./chatCore/failureUsage.ts";
@@ -1320,12 +1323,11 @@ export async function handleChatCore({
   // injectMemoryAndSkills only tracks memory tools; the fallback names were
   // injected into body.tools by prepareWebSearchFallbackBody/prepareWebFetchFallbackBody
   // above, so they must be carried into the owner provenance chain here.
-  if (webSearchFallbackPlan.toolName || webFetchFallbackPlan.toolName) {
-    const extraNames: string[] = [];
-    if (webSearchFallbackPlan.toolName) extraNames.push(webSearchFallbackPlan.toolName);
-    if (webFetchFallbackPlan.toolName) extraNames.push(webFetchFallbackPlan.toolName);
-    injectionResult.builtinToolNames = [...injectionResult.builtinToolNames, ...extraNames];
-  }
+  const mergedOwnerNames = mergeInjectedFallbackOwnerNames(injectionResult, [
+    webSearchFallbackPlan,
+    webFetchFallbackPlan,
+  ]);
+  injectionResult.builtinToolNames = mergedOwnerNames.builtinToolNames;
 
   // Translate request (pass reqLogger for intermediate logging)
   // ── Proactive Context Compression (Phase 4) ──

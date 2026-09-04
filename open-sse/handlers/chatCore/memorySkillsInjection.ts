@@ -263,3 +263,36 @@ export async function injectMemoryAndSkills({
 
   return { body, memorySettings, builtinToolNames: builtinOwnerSet, injectedCustomSkillNames };
 }
+
+interface FallbackPlan {
+  enabled: boolean;
+  toolName: string | null;
+  convertedToolCount: number;
+}
+
+/**
+ * Pure helper: merge web-search/web-fetch fallback tool names into the
+ * builtin owner set. Adds a name only when plan.enabled===true,
+ * plan.convertedToolCount>0, plan.toolName is non-null, and that name
+ * did not already exist in the pre-conversion client tools (builtinToolNames).
+ * Does not mutate its input; returns a new result.
+ */
+export function mergeInjectedFallbackOwnerNames(
+  injectionResult: { builtinToolNames: string[] },
+  plans: FallbackPlan[]
+): { builtinToolNames: string[] } {
+  const existing = new Set(injectionResult.builtinToolNames);
+  const extraNames: string[] = [];
+  for (const plan of plans) {
+    if (
+      plan.enabled &&
+      plan.convertedToolCount > 0 &&
+      plan.toolName &&
+      !existing.has(plan.toolName)
+    ) {
+      extraNames.push(plan.toolName);
+      existing.add(plan.toolName);
+    }
+  }
+  return { builtinToolNames: [...injectionResult.builtinToolNames, ...extraNames] };
+}

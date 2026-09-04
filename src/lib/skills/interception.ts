@@ -12,6 +12,23 @@ import { logger } from "../../../open-sse/utils/logger.ts";
 
 const log = logger("SKILLS_INTERCEPTION");
 
+/**
+ * Typed error for server-owned tool execution control-flow states
+ * (in_progress, unknown, identity_conflict). These must never be fed
+ * back to the model as tool results — they represent infrastructure
+ * conditions that should surface as HTTP-level errors.
+ */
+export class ServerOwnedExecutionError extends Error {
+  readonly code: string;
+  readonly httpStatus: number;
+  constructor(message: string, code: string, httpStatus: number) {
+    super(message);
+    this.name = "ServerOwnedExecutionError";
+    this.code = code;
+    this.httpStatus = httpStatus;
+  }
+}
+
 function toSafeSkillErrorMessage(value: unknown): string {
   try {
     const raw = value instanceof Error ? value.message : value;
@@ -458,10 +475,6 @@ export async function classifyServerOwnedCalls(
   toolCalls: ToolCall[],
   context: ExecutionContext
 ): Promise<{ serverOwned: ToolCall[]; clientNative: ToolCall[] }> {
-  // Ensure the registry cache is warm so owner-set classification sees all
-  // registered skills (mirrors handleToolCallExecution pattern — #2815).
-  await skillRegistry.loadFromDatabase(context.apiKeyId);
-
   const builtinSet = new Set(context.builtinToolNames || []);
   const customSet = new Set(context.injectedCustomSkillNames || []);
 
@@ -483,7 +496,7 @@ export async function classifyServerOwnedCalls(
 
 // ─── Task 3: executeServerOwned — fence-gated execution callback ────────────
 
-const LEASE_DURATION_MS = 30_000;
+const LEASE_DURATION_MS = 120_000;
 
 export async function executeServerOwned(
   calls: ToolCall[],
@@ -577,29 +590,23 @@ export async function executeServerOwned(
           });
           break;
         case "in_progress":
-          results.push({
-            id: call.id,
-            name: call.name,
-            result: { error: "Tool execution in progress" },
-            replayed: false,
-          });
-          break;
+          throw new ServerOwnedExecutionError(
+            "Tool execution in progress",
+            "TOOL_IN_PROGRESS",
+            409
+          );
         case "unknown":
-          results.push({
-            id: call.id,
-            name: call.name,
-            result: { error: "Tool execution state unknown" },
-            replayed: false,
-          });
-          break;
+          throw new ServerOwnedExecutionError(
+            "Tool execution state unknown",
+            "TOOL_STATE_UNKNOWN",
+            500
+          );
         case "identity_conflict":
-          results.push({
-            id: call.id,
-            name: call.name,
-            result: { error: "Tool execution identity conflict" },
-            replayed: false,
-          });
-          break;
+          throw new ServerOwnedExecutionError(
+            "Tool execution identity conflict",
+            "IDENTITY_CONFLICT",
+            409
+          );
       }
     } else {
       // Flag-off path: no fence, dispatch directly.

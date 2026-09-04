@@ -36,8 +36,16 @@ const coreDb = await import("../../src/lib/db/core.ts");
 const { skillRegistry } = await import("../../src/lib/skills/registry.ts");
 const { skillExecutor } = await import("../../src/lib/skills/executor.ts");
 const { builtinSkills } = await import("../../src/lib/skills/builtins.ts");
-const { interceptToolCalls, extractToolCalls, handleToolCallExecution, buildWebSearchCallItem } =
-  await import("../../src/lib/skills/interception.ts");
+const {
+  interceptToolCalls,
+  extractToolCalls,
+  handleToolCallExecution,
+  buildWebSearchCallItem,
+  classifyServerOwnedCalls,
+  formatEscapeHatchResponse,
+  executeServerOwned,
+  ServerOwnedExecutionError,
+} = await import("../../src/lib/skills/interception.ts");
 const { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } =
   await import("../../open-sse/services/webSearchFallback.ts");
 
@@ -513,9 +521,6 @@ test("handleToolCallExecution loads registry from DB on cold cache (covers loadF
 // ─── Task 3: classifyServerOwnedCalls + formatEscapeHatchResponse RED tests ──
 
 test("classifyServerOwnedCalls: owner set builtin/custom → serverOwned; registry-registered but not in owner set → clientNative", async () => {
-  // These exports do not exist yet — RED.
-  const { classifyServerOwnedCalls } = await import("../../src/lib/skills/interception.ts");
-
   const calls = [
     { id: "c1", name: "http_request", arguments: {} },
     { id: "c2", name: "lookup@1.0.0", arguments: {} },
@@ -539,8 +544,6 @@ test("classifyServerOwnedCalls: owner set builtin/custom → serverOwned; regist
 });
 
 test("classifyServerOwnedCalls: client same-name memory_search → not server-owned", async () => {
-  const { classifyServerOwnedCalls } = await import("../../src/lib/skills/interception.ts");
-
   const calls = [
     { id: "c1", name: "memory_search", arguments: {} },
     { id: "c2", name: "http_request", arguments: {} },
@@ -564,8 +567,6 @@ test("classifyServerOwnedCalls: client same-name memory_search → not server-ow
 });
 
 test("classifyServerOwnedCalls: registered skill with client same-name → client-native (not server-owned)", async () => {
-  const { classifyServerOwnedCalls } = await import("../../src/lib/skills/interception.ts");
-
   // Register a skill that the client also declares with the same encoded name.
   await skillRegistry.register({
     name: "collision-check",
@@ -609,8 +610,6 @@ test("classifyServerOwnedCalls: registered skill with client same-name → clien
 });
 
 test("formatEscapeHatchResponse: mixed OpenAI — strip server calls, append results to content, keep client calls, finish_reason:tool_calls", async () => {
-  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
-
   const response = {
     choices: [
       {
@@ -650,8 +649,6 @@ test("formatEscapeHatchResponse: mixed OpenAI — strip server calls, append res
 });
 
 test("formatEscapeHatchResponse: all-server OpenAI — strip tool calls, append results, finish_reason:stop", async () => {
-  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
-
   const response = {
     choices: [
       {
@@ -680,8 +677,6 @@ test("formatEscapeHatchResponse: all-server OpenAI — strip tool calls, append 
 });
 
 test("formatEscapeHatchResponse: Claude mixed — strip server tool_use, keep client tool_use, end_turn stays", async () => {
-  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
-
   const response = {
     content: [
       { type: "tool_use", id: "srv1", name: "http_request", input: {} },
@@ -712,8 +707,6 @@ test("formatEscapeHatchResponse: Claude mixed — strip server tool_use, keep cl
 });
 
 test("formatEscapeHatchResponse: Claude all-server — strip tool_use, append text, end_turn", async () => {
-  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
-
   const response = {
     content: [{ type: "tool_use", id: "srv1", name: "http_request", input: {} }],
     stop_reason: "tool_use",
@@ -733,8 +726,6 @@ test("formatEscapeHatchResponse: Claude all-server — strip tool_use, append te
 });
 
 test("formatEscapeHatchResponse: formatter does not call interceptToolCalls or any handler (purity)", async () => {
-  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
-
   // Purity proof: the formatter is synchronous and its source must not contain
   // calls to interceptToolCalls, skillExecutor, or handler invocations.
   const fnSource = formatEscapeHatchResponse.toString();
@@ -774,8 +765,6 @@ test("formatEscapeHatchResponse: formatter does not call interceptToolCalls or a
 });
 
 test("formatEscapeHatchResponse: Responses wrapper is byte-identical for function_call_output", async () => {
-  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
-
   const response = {
     object: "response",
     output: [{ type: "function_call", call_id: "call1", name: "lookup@1.0.0", arguments: "{}" }],
@@ -799,8 +788,6 @@ test("formatEscapeHatchResponse: Responses wrapper is byte-identical for functio
 // ─── F3: nested Responses output formatter ──────────────────────────────────
 
 test("formatEscapeHatchResponse: nested {response:{output}} appends function_call_output to nested output, not top-level", async () => {
-  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
-
   const nestedResponse = {
     object: "response",
     response: {
@@ -834,8 +821,6 @@ test("formatEscapeHatchResponse: nested {response:{output}} appends function_cal
 // ─── F1: executeServerOwned RED tests ───────────────────────────────────────
 
 test("executeServerOwned: requires requestIdentity when executionFenceEnabled", async () => {
-  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
-
   const calls = [{ id: "c1", name: "http_request", arguments: { url: "https://example.com" } }];
   const context = {
     apiKeyId: "key-fence",
@@ -854,8 +839,6 @@ test("executeServerOwned: requires requestIdentity when executionFenceEnabled", 
 });
 
 test("executeServerOwned: dispatches memory builtin and returns ExecutedToolResult", async () => {
-  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
-
   const calls = [{ id: "c1", name: "memory_search", arguments: { query: "test" } }];
   const context = {
     apiKeyId: "key-mem",
@@ -874,8 +857,6 @@ test("executeServerOwned: dispatches memory builtin and returns ExecutedToolResu
 });
 
 test("executeServerOwned: dispatches ordinary builtin (http_request)", async () => {
-  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
-
   const calls = [{ id: "c1", name: "http_request", arguments: { url: "https://example.com" } }];
   const context = {
     apiKeyId: "key-builtin",
@@ -893,8 +874,6 @@ test("executeServerOwned: dispatches ordinary builtin (http_request)", async () 
 });
 
 test("executeServerOwned: surfaces identity_conflict as typed error, never feeds to model", async () => {
-  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
-
   // Custom skill call with no matching handler — should surface as error
   const calls = [{ id: "c1", name: "missing-skill@1.0.0", arguments: {} }];
   const context = {
@@ -916,4 +895,139 @@ test("executeServerOwned: surfaces identity_conflict as typed error, never feeds
     resultRecord && (resultRecord.error || resultRecord.status),
     "result must contain error indicator"
   );
+});
+
+// ─── Fix Round 2: Defect 1 — typed errors for fence control-flow states ────
+
+test("ServerOwnedExecutionError is an exported class with code and httpStatus", () => {
+  const err = new ServerOwnedExecutionError("test", "TEST_CODE", 409);
+  assert.ok(err instanceof Error);
+  assert.equal(err.code, "TEST_CODE");
+  assert.equal(err.httpStatus, 409);
+  assert.equal(err.message, "test");
+});
+
+test("executeServerOwned: in_progress fence state → throws ServerOwnedExecutionError, never returns tool result", async () => {
+  // Verify source-level: executeServerOwned's switch statement throws for in_progress
+  const fs = await import("node:fs");
+  const sourceCode = fs.readFileSync(
+    new URL("../../src/lib/skills/interception.ts", import.meta.url),
+    "utf8"
+  );
+  // The switch must throw ServerOwnedExecutionError for in_progress, not push a tool result
+  assert.ok(
+    sourceCode.includes('case "in_progress":') &&
+      sourceCode.includes("throw new ServerOwnedExecutionError") &&
+      sourceCode.includes('"TOOL_IN_PROGRESS"'),
+    "in_progress case must throw ServerOwnedExecutionError(TOOL_IN_PROGRESS)"
+  );
+  assert.ok(
+    !sourceCode.includes('case "in_progress":') ||
+      !sourceCode.includes('result: { error: "Tool execution in progress" }'),
+    "in_progress must not return {error:...} tool result"
+  );
+});
+
+test("executeServerOwned: unknown fence state → throws ServerOwnedExecutionError with TOOL_STATE_UNKNOWN", async () => {
+  const fs = await import("node:fs");
+  const sourceCode = fs.readFileSync(
+    new URL("../../src/lib/skills/interception.ts", import.meta.url),
+    "utf8"
+  );
+  assert.ok(
+    sourceCode.includes('case "unknown":') && sourceCode.includes('"TOOL_STATE_UNKNOWN"'),
+    "unknown case must throw ServerOwnedExecutionError(TOOL_STATE_UNKNOWN)"
+  );
+});
+
+test("executeServerOwned: identity_conflict fence state → throws ServerOwnedExecutionError with IDENTITY_CONFLICT", async () => {
+  const fs = await import("node:fs");
+  const sourceCode = fs.readFileSync(
+    new URL("../../src/lib/skills/interception.ts", import.meta.url),
+    "utf8"
+  );
+  assert.ok(
+    sourceCode.includes('case "identity_conflict":') && sourceCode.includes('"IDENTITY_CONFLICT"'),
+    "identity_conflict case must throw ServerOwnedExecutionError(IDENTITY_CONFLICT)"
+  );
+});
+
+// ─── Fix Round 2: Defect 2 — executeClaimed non-success throws ──────────────
+
+test("executeClaimed: custom skill handler returns non-success status → executeClaimed throws safe error", async () => {
+  // Register a custom skill whose handler returns a failure output
+  await skillRegistry.register({
+    name: "fail-skill",
+    version: "1.0.0",
+    description: "always returns failure status",
+    schema: { input: {}, output: {} },
+    handler: "fail-handler",
+    enabled: true,
+    apiKeyId: "key-a",
+  });
+
+  skillExecutor.registerHandler("fail-handler", async () => ({
+    status: "failed",
+    message: "something went wrong",
+  }));
+
+  await assert.rejects(
+    () =>
+      skillExecutor.executeClaimed(
+        "fail-skill",
+        {},
+        { apiKeyId: "key-a", sessionId: "s1" },
+        "exec-fail"
+      ),
+    /Skill execution failed/,
+    "executeClaimed must throw when handler returns non-success status"
+  );
+
+  skillRegistry["registeredSkills"].clear();
+  skillRegistry["versionCache"].clear();
+});
+
+// ─── Fix Round 2: Defect 3 — LEASE_DURATION_MS = 120000 ─────────────────────
+
+test("LEASE_DURATION_MS is 120000 to match loop wall-clock upper bound", async () => {
+  const fs = await import("node:fs");
+  const sourceCode = fs.readFileSync(
+    new URL("../../src/lib/skills/interception.ts", import.meta.url),
+    "utf8"
+  );
+  const match = sourceCode.match(/const\s+LEASE_DURATION_MS\s*=\s*([\d_]+)/);
+  assert.ok(match, "LEASE_DURATION_MS must be defined in interception.ts");
+  const value = Number(match[1].replace(/_/g, ""));
+  assert.equal(value, 120_000, "LEASE_DURATION_MS must be 120000 (not 30000)");
+});
+
+// ─── Fix Round 2: Defect 4 — classifyServerOwnedCalls no DB load ─────────────
+
+test("classifyServerOwnedCalls does not call skillRegistry.loadFromDatabase (ownership from owner sets only)", async () => {
+  let loadFromDatabaseCalled = false;
+  const origLoad = skillRegistry.loadFromDatabase.bind(skillRegistry);
+  skillRegistry.loadFromDatabase = async (..._args: unknown[]) => {
+    loadFromDatabaseCalled = true;
+    return origLoad(...(_args as [string]));
+  };
+
+  try {
+    const calls = [{ id: "c1", name: "http_request", arguments: {} }];
+    await classifyServerOwnedCalls(calls, {
+      apiKeyId: "key-a",
+      sessionId: "s1",
+      requestId: "r1",
+      builtinToolNames: ["http_request"],
+      injectedCustomSkillNames: [],
+      customSkillExecutionEnabled: false,
+    });
+
+    assert.equal(
+      loadFromDatabaseCalled,
+      false,
+      "classifyServerOwnedCalls must NOT call loadFromDatabase — owner sets are sufficient"
+    );
+  } finally {
+    skillRegistry.loadFromDatabase = origLoad;
+  }
 });

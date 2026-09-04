@@ -382,6 +382,10 @@ class SkillExecutor {
     const { output, errorMessage, status } = await this.runHandler(skillName, input, context);
     const durationMs = Date.now() - startTime;
 
+    if (status !== SkillStatus.SUCCESS) {
+      throw new Error(`Skill execution failed: ${errorMessage ?? "unknown error"}`);
+    }
+
     log.info("skills.executor.claimed_complete", {
       skillId: skill.id,
       success: status === SkillStatus.SUCCESS,

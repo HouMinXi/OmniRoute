@@ -9,8 +9,12 @@ import path from "node:path";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-mem-skills-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
-const { getSkillsProviderForFormat, injectMemoryAndSkills, sortToolsByName } =
-  await import("../../open-sse/handlers/chatCore/memorySkillsInjection.ts");
+const {
+  getSkillsProviderForFormat,
+  injectMemoryAndSkills,
+  sortToolsByName,
+  mergeInjectedFallbackOwnerNames,
+} = await import("../../open-sse/handlers/chatCore/memorySkillsInjection.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 const core = await import("../../src/lib/db/core.ts");
 const { skillRegistry } = await import("../../src/lib/skills/registry.ts");
@@ -517,4 +521,38 @@ test("web-search fallback: client has same tool name → not added to builtinToo
 
   resetSkillsRegistry();
   inv6();
+});
+
+// ─── Fix Round 2: Defect 5 — mergeInjectedFallbackOwnerNames + provenance ───
+
+test("mergeInjectedFallbackOwnerNames: adds name only when enabled=true, convertedToolCount>0, toolName non-null, and not already in client tools", () => {
+  const result = mergeInjectedFallbackOwnerNames({ builtinToolNames: ["memory_search"] }, [
+    { enabled: true, toolName: "omniroute_web_search", convertedToolCount: 2 },
+    { enabled: true, toolName: null, convertedToolCount: 1 },
+    { enabled: false, toolName: "omniroute_web_fetch", convertedToolCount: 3 },
+    { enabled: true, toolName: "omniroute_web_fetch", convertedToolCount: 0 },
+  ]);
+
+  assert.deepEqual(result.builtinToolNames, ["memory_search", "omniroute_web_search"]);
+});
+
+test("mergeInjectedFallbackOwnerNames: does not mutate input injectionResult", () => {
+  const input = { builtinToolNames: ["original"] };
+  const plans = [{ enabled: true, toolName: "omniroute_web_search", convertedToolCount: 1 }];
+  const result = mergeInjectedFallbackOwnerNames(input, plans);
+
+  // input must be unchanged
+  assert.deepEqual(input.builtinToolNames, ["original"]);
+  // result is a new object
+  assert.notEqual(result, input);
+  assert.deepEqual(result.builtinToolNames, ["original", "omniroute_web_search"]);
+});
+
+test("mergeInjectedFallbackOwnerNames: skips name already present in pre-conversion client tools", () => {
+  const result = mergeInjectedFallbackOwnerNames({ builtinToolNames: ["omniroute_web_search"] }, [
+    { enabled: true, toolName: "omniroute_web_search", convertedToolCount: 2 },
+  ]);
+
+  // Must not duplicate — omniroute_web_search already present
+  assert.deepEqual(result.builtinToolNames, ["omniroute_web_search"]);
 });
