@@ -213,3 +213,23 @@ test("comboPinAllowlist does not invent an allowlist for header-forced pins", as
   assert.deepEqual(comboPinAllowlist(false, "header-pin", ["a"]), ["a"]);
   assert.deepEqual(comboPinAllowlist(true, "combo-pin", undefined), ["combo-pin"]);
 });
+
+test("checkModelAvailable applies comboPinAllowlist before credential preflight", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { fileURLToPath } = await import("node:url");
+  const { resolve } = await import("node:path");
+  const repoRoot = resolve(fileURLToPath(new URL("../../", import.meta.url)));
+  const src = readFileSync(resolve(repoRoot, "src/sse/handlers/chat.ts"), "utf8");
+  const start = src.indexOf("const checkModelAvailable = async");
+  const end = src.indexOf("isModelAvailable: checkModelAvailable");
+  assert.ok(start >= 0 && end > start, "checkModelAvailable body must be locatable");
+  const body = src.slice(start, end);
+  assert.match(
+    body,
+    /comboPinAllowlist/,
+    "combo preflight caches credentials; a pin without allowlist must not scan the pool"
+  );
+  const pinAt = body.search(/comboPinAllowlist\s*\(/);
+  const credsAt = body.search(/getProviderCredentialsWithQuotaPreflight\s*\(/);
+  assert.ok(pinAt >= 0 && credsAt > pinAt, "pin allowlist must be computed before preflight lookup");
+});

@@ -1042,9 +1042,16 @@ async function handleChatImplementation(
       const resolvedModel = modelInfo.model || modelString;
       const githubGate = await ghComboGate(comboPreselectedCredentials, provider, resolvedModel);
       if (githubGate !== null) return githubGate;
+      // Same pin-fail-closed as handleSingleModelChat: preflight caches the
+      // selected creds, so a pin without allowlist must not scan the pool.
+      const pinAllowlist = comboPinAllowlist(
+        true,
+        target?.connectionId ?? null,
+        target?.allowedConnectionIds ?? null
+      );
       let allowedConnections = intersectAllowedConnectionIds(
         apiKeyInfo?.allowedConnections ?? null,
-        target?.allowedConnectionIds ?? null
+        pinAllowlist
       );
 
       // A4: quota-exclusive keys must only use the pool's connection(s).
