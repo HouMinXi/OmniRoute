@@ -6,6 +6,8 @@ import { detectProvider, decodeSkillToolName } from "./injection";
 import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "@omniroute/open-sse/services/webSearchFallback.ts";
 import { OMNIROUTE_WEB_FETCH_FALLBACK_TOOL_NAME } from "@omniroute/open-sse/services/webFetchInterception.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
+import { runWithServerToolFence } from "./toolExecutionFence";
+import type { ExecutedToolResult } from "./toolLoopTypes";
 import { logger } from "../../../open-sse/utils/logger.ts";
 
 const log = logger("SKILLS_INTERCEPTION");
@@ -38,6 +40,7 @@ interface ExecutionContext {
   injectedCustomSkillNames?: string[];
   customSkillExecutionEnabled?: boolean;
   requestIdentity?: string;
+  executionFenceEnabled?: boolean;
   // #7339: threaded through to the web_fetch builtin so it can resolve a per-model
   // pinned fetch backend (interceptionRules.fetchBackend). Optional — every other
   // builtin/skill ignores these.
@@ -455,6 +458,10 @@ export async function classifyServerOwnedCalls(
   toolCalls: ToolCall[],
   context: ExecutionContext
 ): Promise<{ serverOwned: ToolCall[]; clientNative: ToolCall[] }> {
+  // Ensure the registry cache is warm so owner-set classification sees all
+  // registered skills (mirrors handleToolCallExecution pattern — #2815).
+  await skillRegistry.loadFromDatabase(context.apiKeyId);
+
   const builtinSet = new Set(context.builtinToolNames || []);
   const customSet = new Set(context.injectedCustomSkillNames || []);
 
@@ -474,6 +481,150 @@ export async function classifyServerOwnedCalls(
   return { serverOwned, clientNative };
 }
 
+// ─── Task 3: executeServerOwned — fence-gated execution callback ────────────
+
+const LEASE_DURATION_MS = 30_000;
+
+export async function executeServerOwned(
+  calls: ToolCall[],
+  context: ExecutionContext
+): Promise<ExecutedToolResult[]> {
+  if (context.executionFenceEnabled && !context.requestIdentity) {
+    throw new Error(
+      "executeServerOwned requires context.requestIdentity when executionFenceEnabled is true"
+    );
+  }
+
+  const results: ExecutedToolResult[] = [];
+
+  for (const call of calls) {
+    const builtinHandlerName = resolveBuiltinHandlerName(call.name, context);
+    const isMemoryBuiltin = builtinHandlerName && MEMORY_TOOL_NAMES.has(builtinHandlerName);
+    const isOrdinaryBuiltin = builtinHandlerName && builtinHandlerName in builtinSkills;
+    const isCustomSkill =
+      !builtinHandlerName &&
+      context.customSkillExecutionEnabled &&
+      context.injectedCustomSkillNames?.includes(call.name);
+
+    const executeFn = async (executionId: string): Promise<unknown> => {
+      if (isMemoryBuiltin) {
+        const handlerName = builtinHandlerName as keyof typeof memoryBuiltinHandlers;
+        return memoryBuiltinHandlers[handlerName](call.arguments, {
+          apiKeyId: context.apiKeyId,
+          sessionId: context.sessionId,
+        });
+      }
+      if (isOrdinaryBuiltin) {
+        const handlerName = builtinHandlerName as keyof typeof builtinSkills;
+        return builtinSkills[handlerName](call.arguments, {
+          apiKeyId: context.apiKeyId,
+          sessionId: context.sessionId,
+          provider: context.provider,
+          model: context.model,
+        });
+      }
+      if (isCustomSkill) {
+        const decodedName = decodeSkillToolName(call.name);
+        const [name, version] = decodedName.includes("@")
+          ? decodedName.split("@", 2)
+          : [decodedName, "latest"];
+        const skillName = version === "latest" ? name : `${name}@${version}`;
+        const execution = await skillExecutor.executeClaimed(
+          skillName,
+          call.arguments,
+          {
+            apiKeyId: context.apiKeyId,
+            sessionId: context.sessionId,
+          },
+          executionId
+        );
+        return (
+          execution.output ??
+          (execution.errorMessage
+            ? { error: toSafeSkillErrorMessage(execution.errorMessage) }
+            : { error: "Skill execution returned no output" })
+        );
+      }
+      throw new Error(`No handler for tool: ${call.name}`);
+    };
+
+    if (context.executionFenceEnabled && context.requestIdentity) {
+      const fenceResult = await runWithServerToolFence({
+        apiKeyId: context.apiKeyId,
+        requestIdentity: context.requestIdentity,
+        toolCallId: call.id,
+        toolName: call.name,
+        arguments: call.arguments,
+        leaseDurationMs: LEASE_DURATION_MS,
+        execute: executeFn,
+      });
+
+      switch (fenceResult.kind) {
+        case "executed":
+          results.push({
+            id: call.id,
+            name: call.name,
+            result: projectSkillResultForPublicResponse(fenceResult.value),
+            replayed: false,
+          });
+          break;
+        case "replayed":
+          results.push({
+            id: call.id,
+            name: call.name,
+            result: projectSkillResultForPublicResponse(fenceResult.value),
+            replayed: true,
+          });
+          break;
+        case "in_progress":
+          results.push({
+            id: call.id,
+            name: call.name,
+            result: { error: "Tool execution in progress" },
+            replayed: false,
+          });
+          break;
+        case "unknown":
+          results.push({
+            id: call.id,
+            name: call.name,
+            result: { error: "Tool execution state unknown" },
+            replayed: false,
+          });
+          break;
+        case "identity_conflict":
+          results.push({
+            id: call.id,
+            name: call.name,
+            result: { error: "Tool execution identity conflict" },
+            replayed: false,
+          });
+          break;
+      }
+    } else {
+      // Flag-off path: no fence, dispatch directly.
+      try {
+        const value = await executeFn("");
+        results.push({
+          id: call.id,
+          name: call.name,
+          result: projectSkillResultForPublicResponse(value),
+          replayed: false,
+        });
+      } catch (err) {
+        results.push({
+          id: call.id,
+          name: call.name,
+          result: { error: toSafeSkillErrorMessage(err) },
+          replayed: false,
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
 // ─── Task 3: pure escape formatter ───────────────────────────────────────────
 
 function extractOpenAIToolCalls(
@@ -490,9 +641,9 @@ function extractOpenAIToolCalls(
 
 function getOpenAIResponseOutput(
   response: Record<string, unknown>
-): { root: Record<string, unknown>; output: unknown[] } | null {
+): { target: Record<string, unknown>; output: unknown[] } | null {
   if (Array.isArray(response.output)) {
-    return { root: response, output: response.output };
+    return { target: response, output: response.output };
   }
   if (
     response.response &&
@@ -501,7 +652,7 @@ function getOpenAIResponseOutput(
     Array.isArray((response.response as Record<string, unknown>).output)
   ) {
     return {
-      root: response,
+      target: response.response as Record<string, unknown>,
       output: (response.response as Record<string, unknown>).output as unknown[],
     };
   }
@@ -531,7 +682,17 @@ export function formatEscapeHatchResponse(
         }));
       return {
         ...response,
-        output: [...responsesOutput.output, ...functionOutputs],
+        response:
+          responsesOutput.target !== response
+            ? {
+                ...(response.response as Record<string, unknown>),
+                output: [...responsesOutput.output, ...functionOutputs],
+              }
+            : undefined,
+        output:
+          responsesOutput.target === response
+            ? [...responsesOutput.output, ...functionOutputs]
+            : response.output,
       };
     }
 

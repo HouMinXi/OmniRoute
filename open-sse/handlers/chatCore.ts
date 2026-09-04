@@ -1316,6 +1316,17 @@ export async function handleChatCore({
   body = injectionResult.body;
   const memorySettings = injectionResult.memorySettings;
 
+  // Merge web-search/web-fetch fallback tool names into the builtin owner set.
+  // injectMemoryAndSkills only tracks memory tools; the fallback names were
+  // injected into body.tools by prepareWebSearchFallbackBody/prepareWebFetchFallbackBody
+  // above, so they must be carried into the owner provenance chain here.
+  if (webSearchFallbackPlan.toolName || webFetchFallbackPlan.toolName) {
+    const extraNames: string[] = [];
+    if (webSearchFallbackPlan.toolName) extraNames.push(webSearchFallbackPlan.toolName);
+    if (webFetchFallbackPlan.toolName) extraNames.push(webFetchFallbackPlan.toolName);
+    injectionResult.builtinToolNames = [...injectionResult.builtinToolNames, ...extraNames];
+  }
+
   // Translate request (pass reqLogger for intermediate logging)
   // ── Proactive Context Compression (Phase 4) ──
   // Check if context exceeds 70% of limit and compress proactively before sending to provider.

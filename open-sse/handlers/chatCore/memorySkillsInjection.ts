@@ -13,6 +13,13 @@ import { detectCachingContext } from "../../services/compression/cachingAware.ts
 
 type MemorySkillsLogger = { debug?: (...args: unknown[]) => void } | null | undefined;
 
+export interface MemorySkillsInjectionResult {
+  body: Record<string, unknown>;
+  memorySettings: { enabled: boolean; skillsEnabled: boolean; maxTokens: number } | null;
+  builtinToolNames: string[];
+  injectedCustomSkillNames: string[];
+}
+
 function getToolName(tool: unknown): string {
   if (!tool || typeof tool !== "object") return "";
   const r = tool as Record<string, unknown>;
@@ -60,7 +67,7 @@ export async function injectMemoryAndSkills({
   targetFormat: string;
   backgroundReason: string | null;
   log: MemorySkillsLogger;
-}) {
+}): Promise<MemorySkillsInjectionResult> {
   const memorySettings = memoryOwnerId
     ? await getMemorySettings().catch(() => DEFAULT_MEMORY_SETTINGS)
     : null;

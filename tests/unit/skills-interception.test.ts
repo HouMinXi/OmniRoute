@@ -4,6 +4,24 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+// Local shape for formatter return values — avoids explicit any in assertions.
+type FormattedResponse = {
+  choices?: Array<{
+    message: {
+      content: string | null;
+      tool_calls?: Array<{ id: string; function: { name: string; arguments: string } }>;
+    };
+    finish_reason: string;
+  }>;
+  content?: Array<{ type: string; id?: string; text?: string }>;
+  stop_reason?: string;
+  stop_sequence?: string | null;
+  output?: Array<{ type: string; call_id?: string; name?: string; arguments?: string }>;
+  response?: {
+    output?: Array<{ type: string; call_id?: string; name?: string; arguments?: string }>;
+  };
+};
+
 const TEST_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-skills-interception-"));
 const TEST_DATA_DIR = path.join(TEST_ROOT, "data");
 const TEST_PLUGINS_DIR = path.join(TEST_ROOT, "plugins");
@@ -620,7 +638,7 @@ test("formatEscapeHatchResponse: mixed OpenAI — strip server calls, append res
     "openai"
   );
 
-  const choice = (formatted as any).choices[0];
+  const choice = (formatted as FormattedResponse).choices[0];
   // Server call stripped from tool_calls, client call kept.
   assert.equal(choice.message.tool_calls.length, 1);
   assert.equal(choice.message.tool_calls[0].id, "cli1");
@@ -651,7 +669,7 @@ test("formatEscapeHatchResponse: all-server OpenAI — strip tool calls, append 
 
   const formatted = formatEscapeHatchResponse(response, serverCalls, results, [], "openai");
 
-  const choice = (formatted as any).choices[0];
+  const choice = (formatted as FormattedResponse).choices[0];
   assert.ok(
     !choice.message.tool_calls || choice.message.tool_calls.length === 0,
     "all-server must have no remaining tool_calls"
@@ -684,13 +702,13 @@ test("formatEscapeHatchResponse: Claude mixed — strip server tool_use, keep cl
     "claude"
   );
 
-  const content = (formatted as any).content as Array<{ type: string; id?: string }>;
+  const content = (formatted as FormattedResponse).content as Array<{ type: string; id?: string }>;
   // Server tool_use removed, client tool_use kept.
   const toolUses = content.filter((b) => b.type === "tool_use");
   assert.equal(toolUses.length, 1);
   assert.equal(toolUses[0].id, "cli1");
   // stop_reason stays tool_use (mixed).
-  assert.equal((formatted as any).stop_reason, "tool_use");
+  assert.equal((formatted as FormattedResponse).stop_reason, "tool_use");
 });
 
 test("formatEscapeHatchResponse: Claude all-server — strip tool_use, append text, end_turn", async () => {
@@ -706,12 +724,12 @@ test("formatEscapeHatchResponse: Claude all-server — strip tool_use, append te
 
   const formatted = formatEscapeHatchResponse(response, serverCalls, results, [], "claude");
 
-  const content = (formatted as any).content as Array<{ type: string }>;
+  const content = (formatted as FormattedResponse).content as Array<{ type: string }>;
   const toolUses = content.filter((b) => b.type === "tool_use");
   assert.equal(toolUses.length, 0);
   const textBlocks = content.filter((b) => b.type === "text");
   assert.ok(textBlocks.length > 0);
-  assert.equal((formatted as any).stop_reason, "end_turn");
+  assert.equal((formatted as FormattedResponse).stop_reason, "end_turn");
 });
 
 test("formatEscapeHatchResponse: formatter does not call interceptToolCalls or any handler (purity)", async () => {
@@ -771,9 +789,131 @@ test("formatEscapeHatchResponse: Responses wrapper is byte-identical for functio
   const formatted = formatEscapeHatchResponse(response, serverCalls, results, [], "openai");
 
   // Responses format: original output + function_call_output appended.
-  const output = (formatted as any).output;
+  const output = (formatted as FormattedResponse).output;
   assert.equal(output.length, 2);
   assert.equal(output[0].type, "function_call");
   assert.equal(output[1].type, "function_call_output");
   assert.equal(output[1].call_id, "call1");
+});
+
+// ─── F3: nested Responses output formatter ──────────────────────────────────
+
+test("formatEscapeHatchResponse: nested {response:{output}} appends function_call_output to nested output, not top-level", async () => {
+  const { formatEscapeHatchResponse } = await import("../../src/lib/skills/interception.ts");
+
+  const nestedResponse = {
+    object: "response",
+    response: {
+      output: [{ type: "function_call", call_id: "nc1", name: "lookup@1.0.0", arguments: "{}" }],
+    },
+  };
+
+  const serverCalls = [{ id: "nc1", name: "lookup@1.0.0", arguments: {} }];
+  const results = [
+    { id: "nc1", name: "lookup@1.0.0", result: { record: "nested-42" }, replayed: false },
+  ];
+
+  const formatted = formatEscapeHatchResponse(nestedResponse, serverCalls, results, [], "openai");
+
+  // Must append to nested response.output, not top-level output.
+  const nestedOutput = (formatted as { response?: { output?: unknown[] } }).response?.output;
+  assert.ok(Array.isArray(nestedOutput), "nested response.output must be an array");
+  assert.equal(nestedOutput.length, 2, "nested output must have original + appended");
+  assert.equal(nestedOutput[0].type, "function_call");
+  assert.equal(nestedOutput[1].type, "function_call_output");
+  assert.equal((nestedOutput[1] as { call_id: string }).call_id, "nc1");
+
+  // Top-level must NOT have an output array.
+  assert.equal(
+    Array.isArray((formatted as { output?: unknown[] }).output),
+    false,
+    "top-level output must not exist"
+  );
+});
+
+// ─── F1: executeServerOwned RED tests ───────────────────────────────────────
+
+test("executeServerOwned: requires requestIdentity when executionFenceEnabled", async () => {
+  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
+
+  const calls = [{ id: "c1", name: "http_request", arguments: { url: "https://example.com" } }];
+  const context = {
+    apiKeyId: "key-fence",
+    sessionId: "s1",
+    requestId: "r1",
+    builtinToolNames: ["http_request"],
+    executionFenceEnabled: true,
+    // requestIdentity is deliberately missing
+  };
+
+  await assert.rejects(
+    () => executeServerOwned(calls, context),
+    /requestIdentity/,
+    "must require requestIdentity when executionFenceEnabled"
+  );
+});
+
+test("executeServerOwned: dispatches memory builtin and returns ExecutedToolResult", async () => {
+  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
+
+  const calls = [{ id: "c1", name: "memory_search", arguments: { query: "test" } }];
+  const context = {
+    apiKeyId: "key-mem",
+    sessionId: "s1",
+    requestId: "r1",
+    builtinToolNames: ["memory_search"],
+    executionFenceEnabled: false,
+  };
+
+  const results = await executeServerOwned(calls, context);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].id, "c1");
+  assert.equal(results[0].name, "memory_search");
+  assert.equal(results[0].replayed, false);
+  assert.ok(results[0].result !== undefined, "result must be present");
+});
+
+test("executeServerOwned: dispatches ordinary builtin (http_request)", async () => {
+  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
+
+  const calls = [{ id: "c1", name: "http_request", arguments: { url: "https://example.com" } }];
+  const context = {
+    apiKeyId: "key-builtin",
+    sessionId: "s1",
+    requestId: "r1",
+    builtinToolNames: ["http_request"],
+    executionFenceEnabled: false,
+  };
+
+  const results = await executeServerOwned(calls, context);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].id, "c1");
+  assert.equal(results[0].name, "http_request");
+  assert.equal(results[0].replayed, false);
+});
+
+test("executeServerOwned: surfaces identity_conflict as typed error, never feeds to model", async () => {
+  const { executeServerOwned } = await import("../../src/lib/skills/interception.ts");
+
+  // Custom skill call with no matching handler — should surface as error
+  const calls = [{ id: "c1", name: "missing-skill@1.0.0", arguments: {} }];
+  const context = {
+    apiKeyId: "key-err",
+    sessionId: "s1",
+    requestId: "r1",
+    injectedCustomSkillNames: ["missing-skill@1.0.0"],
+    customSkillExecutionEnabled: true,
+    executionFenceEnabled: false,
+  };
+
+  const results = await executeServerOwned(calls, context);
+  assert.equal(results.length, 1);
+  assert.equal(results[0].id, "c1");
+  assert.equal(results[0].replayed, false);
+  // Result must contain an error indicator
+  const resultRecord = results[0].result as Record<string, unknown>;
+  assert.ok(
+    resultRecord && (resultRecord.error || resultRecord.status),
+    "result must contain error indicator"
+  );
 });

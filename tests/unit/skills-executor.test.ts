@@ -297,14 +297,13 @@ test("skillExecutor turns handler errors and timeouts into error executions", as
 // ─── Task 3: executeClaimed separation from execute RED tests ─────────────────
 
 test("executeClaimed executes registered handler and returns SkillExecution without writing skill_executions row", async () => {
-  const skill = await registerEchoSkill();
+  await registerEchoSkill();
 
   skillExecutor.registerHandler("echo-handler", async (input, context) => ({
     echoed: `${input.value}:${context.apiKeyId}`,
   }));
 
-  // executeClaimed does not exist yet — RED.
-  const execution = await (skillExecutor as any).executeClaimed(
+  const execution = await skillExecutor.executeClaimed(
     "echo@1.0.0",
     { value: "claimed" },
     { apiKeyId: "key-a", sessionId: "session-claimed" },
