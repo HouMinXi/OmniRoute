@@ -176,7 +176,10 @@ import { registerBailianCodingPlanQuotaFetcher } from "@omniroute/open-sse/servi
 import { registerQwenTokenPlanQuotaFetcher } from "@omniroute/open-sse/services/qwenTokenPlanQuotaFetcher.ts";
 import { registerCrofUsageFetcher } from "@omniroute/open-sse/services/crofUsageFetcher.ts";
 import { registerDeepseekQuotaFetcher } from "@omniroute/open-sse/services/deepseekQuotaFetcher.ts";
-import { registerMoonshotQuotaFetcher, registerMoonshotFetchersForNodes } from "@omniroute/open-sse/services/moonshotQuotaFetcher.ts";
+import {
+  registerMoonshotQuotaFetcher,
+  registerMoonshotFetchersForNodes,
+} from "@omniroute/open-sse/services/moonshotQuotaFetcher.ts";
 import { registerOpenrouterQuotaFetcher } from "@omniroute/open-sse/services/openrouterQuotaFetcher.ts";
 import { registerOpencodeQuotaFetcher } from "@omniroute/open-sse/services/opencodeQuotaFetcher.ts";
 import { registerGrokWebQuotaFetcher } from "@omniroute/open-sse/services/grokQuotaFetcher.ts";
@@ -233,7 +236,7 @@ void import("@/lib/db/providers")
         id: typeof node.id === "string" ? node.id : null,
         prefix: typeof node.prefix === "string" ? node.prefix : null,
         baseUrl: typeof node.baseUrl === "string" ? node.baseUrl : null,
-      })),
+      }))
     );
   })
   .catch((error) => {
@@ -1042,16 +1045,9 @@ async function handleChatImplementation(
       const resolvedModel = modelInfo.model || modelString;
       const githubGate = await ghComboGate(comboPreselectedCredentials, provider, resolvedModel);
       if (githubGate !== null) return githubGate;
-      // Same pin-fail-closed as handleSingleModelChat: preflight caches the
-      // selected creds, so a pin without allowlist must not scan the pool.
-      const pinAllowlist = comboPinAllowlist(
-        true,
-        target?.connectionId ?? null,
-        target?.allowedConnectionIds ?? null
-      );
       let allowedConnections = intersectAllowedConnectionIds(
         apiKeyInfo?.allowedConnections ?? null,
-        pinAllowlist
+        comboPinAllowlist(true, target?.connectionId ?? null, target?.allowedConnectionIds ?? null)
       );
 
       // A4: quota-exclusive keys must only use the pool's connection(s).
@@ -1529,18 +1525,9 @@ async function handleSingleModelChat(
       ? runtimeOptions.forcedConnectionId.trim()
       : "";
   const hasForcedConnection = forcedConnectionId.length > 0;
-  // Combo pins are operator instructions. If the step omitted
-  // allowedConnectionIds, treat connectionId as implicit [id] so a 502/429
-  // pin-drop cannot scan the rest of the provider pool. Header-forced
-  // connections (isCombo=false) keep sibling fallback.
-  const pinAllowlist = comboPinAllowlist(
-    isCombo,
-    forcedConnectionId || null,
-    runtimeOptions.allowedConnectionIds
-  );
   let effectiveAllowedConnections = intersectAllowedConnectionIds(
     apiKeyInfo?.allowedConnections ?? null,
-    pinAllowlist
+    comboPinAllowlist(isCombo, forcedConnectionId || null, runtimeOptions.allowedConnectionIds)
   );
 
   // A4: quota-exclusive keys must only use the pool's connection(s).
