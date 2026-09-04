@@ -44,6 +44,9 @@ export type AttemptLoopState = {
   earliestCircuitOpenRetryMs: number;
   /** Mutable attempt budget shared with dispatchWithCooldownRetry (Task 4). */
   globalAttempts: number;
+  /** Quota-trust accumulators; persist across set retries and cooldown re-dispatch. */
+  observedFailure: boolean;
+  allObservedFailuresQuota: boolean;
   observeFailure(quotaExhausted: boolean, targetExecutionKey?: string): void;
 };
 
@@ -61,6 +64,8 @@ export type AttemptLoopDeps = {
     retryDelayMs?: number;
     fallbackDelayMs?: number;
     maxGlobalAttempts?: unknown;
+    hedging?: boolean;
+    hedgeDelayMs?: unknown;
   };
   log: ComboLogger;
   settings: Record<string, unknown> | null;

@@ -33,6 +33,8 @@ function emptyState(overrides: Partial<AttemptLoopState> = {}): AttemptLoopState
     skippedForCircuitOpen: false,
     earliestCircuitOpenRetryMs: 0,
     globalAttempts: 0,
+    observedFailure: false,
+    allObservedFailuresQuota: true,
     observeFailure() {},
     ...overrides,
   };
