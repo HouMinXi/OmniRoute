@@ -13,6 +13,24 @@ export type ActiveSyncedCatalog = {
   models: SyncedAvailableModel[];
 };
 
+/**
+ * Fail-open membership check for explicit combo members against a live catalog.
+ * `null` means no authoritative catalog is synced yet (unchanged behavior).
+ */
+export function catalogContainsModel(
+  catalog: ActiveSyncedCatalog,
+  modelId: string
+): boolean | null {
+  if (!catalog.authoritative) return null;
+  const trimmed = modelId.trim();
+  if (!trimmed) return false;
+  const ids = new Set(catalog.models.map((model) => model.id));
+  if (ids.has(trimmed)) return true;
+  const slash = trimmed.indexOf("/");
+  if (slash > 0 && ids.has(trimmed.slice(slash + 1))) return true;
+  return false;
+}
+
 export type ProviderCatalogReconciliation = {
   providers: string[];
   excludedProviders: string[];

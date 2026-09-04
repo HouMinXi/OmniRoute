@@ -567,19 +567,23 @@ External Postgres / multi-writer HA is **not** a documented stock path. If you n
 
 ## Scale-out: N independent processes
 
-One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling -- it already scales itself to the process's real memory, so overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
+One Node process is **one V8 heap**. Two overlapping ~3 MiB / ~750k-token coding-agent `POST /v1/responses` (RTK + Caveman) abort that heap at ~12 Gi (`FATAL ERROR: Reached heap limit`) and can OOM a 16 Gi cgroup. See [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). That measurement is a **memory-budget** warning, not a product hard-max of two concurrent long `/v1/responses`. Heavyweight chat admission is gated by an auto-derived ingest byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) sized from that same V8/cgroup ceiling — overriding it upward (or setting the legacy `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` request-count cap) on an already-sized process reintroduces the abort. Small chats, `/healthz`, `/v1/models`, and MCP are **not** in that cap.
 
-To go beyond two concurrent **large** jobs **today**:
+### One-process: more than two long `/v1/responses`
 
-| Do                                                                                           | Do not                                               |
-| -------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Run **N containers/pods**, each with its **own** `DATA_DIR` / volume                         | Set `replicas > 1` against one SQLite file           |
-| Keep each instance at 1–2 heavy in-flight and 12–16 Gi cgroup                                | Give one process 8× RAM and `max=8`                  |
-| Optional: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for **shared quota counters** | Treat Redis as shared SQLite — it is not             |
-| Duplicate provider secrets into each instance (or accept partitioned dashboards)             | Expect one dashboard / one call-log across instances |
-| Front with any load balancer; sticky by API key or session is enough                         | Require a vendor-specific size-aware middleware      |
+A **healthy** process (heap below `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, default `0.75`) **may** run more than two concurrent long `POST /v1/responses` when the process-wide inflight-byte budget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) still has room. Bodies at or above `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (default 256 KiB) take the same heavyweight lease as structure-heavy requests and use the same [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tens of concurrent long SSE clients (operators often need 40–50) is a **memory-budget** question — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — not a hard “max 2” product limit. A pressured heap still sheds with retryable `503` so #7849 does not return.
 
-Hardware: `concurrent_large ≈ N × 2` at ~8–12 Gi heap / ~12–16 Gi cgroup **per instance**. Host RAM must cover `N × cgroup`, not “one 16 Gi pod with N=8.”
+To **multiply heaps** (independent V8 old-spaces) **today**:
+
+| Do                                                                                                                                      | Do not                                               |
+| --------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Run **N containers/pods**, each with its **own** `DATA_DIR` / volume                                                                    | Set `replicas > 1` against one SQLite file           |
+| Size heavy in-flight + healthy-headroom from heap / inflight-byte budget; 1–2 is the conservative #7849 default, not a hard product max | Give one process 8× RAM and an unbounded count cap   |
+| Optional: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` for **shared quota counters**                                            | Treat Redis as shared SQLite — it is not             |
+| Duplicate provider secrets into each instance (or accept partitioned dashboards)                                                        | Expect one dashboard / one call-log across instances |
+| Front with any load balancer; sticky by API key or session is enough                                                                    | Require a vendor-specific size-aware middleware      |
+
+Hardware: per-instance concurrent long `/v1/responses` is a **memory-budget** question (heap + inflight-byte / #10110). `N` independent `DATA_DIR`s still multiply heaps: host RAM must cover `N × cgroup`, not “one 16 Gi pod with N=8.” Never `replicas > 1` on one SQLite file.
 
 Compose sketch (two heaps, two volumes — not `deploy.replicas: 2`):
 

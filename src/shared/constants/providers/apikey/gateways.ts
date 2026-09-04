@@ -15,7 +15,8 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     color: "#6366F1",
     textIcon: "1M",
     website: "https://1min.ai",
-    authHint: "Create an API key at https://docs.1min.ai/docs/api/create-api-key, then paste it here.",
+    authHint:
+      "Create an API key at https://docs.1min.ai/docs/api/create-api-key, then paste it here.",
     apiHint:
       "1min.ai uses a proprietary chat API (single prompt string + SSE) instead of OpenAI chat/completions. OmniRoute flattens OpenAI messages into a labeled prompt and translates the SSE stream.",
     passthroughModels: true,
@@ -47,7 +48,8 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     website: "https://freebuff.com",
     hasFree: true,
     serviceKinds: ["llm"],
-    authHint: "Enter Freebuff / Codebuff Auth Token (obtained via CLI login or automated harvester).",
+    authHint:
+      "Enter Freebuff / Codebuff Auth Token (obtained via CLI login or automated harvester).",
     freeNote: "Free Codebuff / Freebuff AI models.",
     apiHint: "Token is authenticated against Codebuff upstream session pool.",
     passthroughModels: true,
@@ -1327,9 +1329,10 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     passthroughModels: true,
     website: "https://bynara.id",
     hasFree: true,
-    freeNote: "Free tier is a shared 5M tokens/day pool; some models are gated behind credit/plan.",
+    freeNote:
+      "Free plan: one 7M tokens/day bucket per account (15 req/min) across the plan's 8 models; others need credit.",
     authHint:
-      "Get a free API key via NaraRouter's Telegram channel, then paste it here as a Bearer token.",
+      "Create a free NaraRouter account, link your Telegram (required before /v1 answers), then paste the key here as a Bearer token.",
     apiHint:
       "OpenAI-compatible endpoint at https://router.bynara.id/v1. Free-tier models are pinned; others need credit.",
   },
