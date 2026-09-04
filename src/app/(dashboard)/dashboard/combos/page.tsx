@@ -2868,7 +2868,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
     { model: "if/qwen3-coder-plus", weight: 0 },
     { model: "if/deepseek-v3.2", weight: 0 },
     { model: "nvidia/llama-3.3-70b-instruct", weight: 0 },
-    { model: "groq/llama-3.3-70b-versatile", weight: 0 },
+    { model: "groq/openai/gpt-oss-120b", weight: 0 },
   ];
 
   const PAID_PREMIUM_PRESET_MODELS = [
