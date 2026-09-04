@@ -61,7 +61,7 @@ export type NonStreamingProviderLegResult =
       kind: "error";
       result: ChatCoreErrorResult;
       receipt: ProviderLegReceipt;
-      usage?: ProviderLegUsage | null;
+      usage: ProviderLegUsage | null;
     };
 
 // ─── §5.5 Tool Loop ────────────────────────────────────────────────────────
