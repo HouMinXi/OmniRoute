@@ -40,4 +40,13 @@ describe("round-robin extract guards", () => {
     assert.match(rr, /rrLoopSafetyTimer = setTimeout\(/);
     assert.match(rr, /finally\s*\{[^}]*clearTimeout\(rrLoopSafetyTimer\)/s);
   });
+
+  it("calls releaseStickyPinOnFailure (injection: deleting the call goes red)", () => {
+    const rr = readFileSync(rrPath, "utf8");
+    assert.match(
+      rr,
+      /releaseStickyPinOnFailure\(/,
+      "#6692 quality/exhaustion path must still release the sticky pin"
+    );
+  });
 });
