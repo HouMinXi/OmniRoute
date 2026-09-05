@@ -27,7 +27,6 @@ import {
   detectClassifierFormat,
   buildDefaultAllowClaudeMessage,
 } from "./chatCore/claudeClassifierCompat.ts";
-import { applyClientUsageBuffer } from "./chatCore/clientUsageBuffer.ts";
 import { buildPostCallGuardrailContext } from "./chatCore/postCallGuardrailContext.ts";
 import { storeSemanticCacheResponse } from "./chatCore/semanticCacheStore.ts";
 import { buildNonStreamingResponseHeaders } from "./chatCore/nonStreamingResponseHeaders.ts";
@@ -78,8 +77,11 @@ import {
   getHeaderValueCaseInsensitive,
   isNoMemoryRequested,
   resolveCompressionHeader,
-  isStripReasoningRequested,
 } from "./chatCore/headers.ts";
+import {
+  runNonStreamingProviderLeg,
+  type ChatCoreExecutorResult,
+} from "./chatCore/nonStreamingProviderLeg.ts";
 import { markCodexScopeRateLimited } from "./chatCore/codexFailover.ts";
 import {
   getCodexClientSessionId,
@@ -128,7 +130,6 @@ export {
   stripStaleForwardingHeaders,
 };
 import { resolveMemoryOwnerId, runMemoryExtractionGate } from "./chatCore/memoryExtraction.ts";
-import { CORS_HEADERS } from "../utils/cors.ts";
 import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
 import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
@@ -147,7 +148,6 @@ import {
   createSSETransformStreamWithLogger,
   createPassthroughStreamWithLogger,
   COLORS,
-  withBodyTimeout,
 } from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
 import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../utils/thinkCloseMarker.ts";
@@ -155,14 +155,7 @@ import { resolveStreamReadinessTimeout } from "../utils/streamReadinessPolicy.ts
 import { resolveAgentGoalPolicy } from "../utils/agentGoalPolicy.ts";
 import { createStreamController } from "../utils/streamHandler.ts";
 import * as streamFailure from "../utils/streamFailureFinalization.ts";
-import { createSseHeartbeatTransform, shapeForClientFormat } from "../utils/sseHeartbeat.ts";
-import {
-  addBufferToUsage,
-  filterUsageForFormat,
-  estimateUsage,
-  normalizeUsage,
-  sanitizeUsagePayloadForRequest,
-} from "../utils/usageTracking.ts";
+import { normalizeUsage } from "../utils/usageTracking.ts";
 import {
   refreshWithRetry,
   isUnrecoverableRefreshError,
@@ -235,16 +228,11 @@ import {
   detectMalformedNonStream,
   describeMalformedNonStream,
 } from "../utils/diagnostics.ts";
-import {
-  checkTokenLimits,
-  recordTokenUsage,
-} from "@omniroute/open-sse/services/tokenLimitCounter.ts";
+import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 import {
   COOLDOWN_MS,
   HTTP_STATUS,
-  FETCH_BODY_TIMEOUT_MS,
   PROVIDER_MAX_TOKENS,
-  STREAM_IDLE_TIMEOUT_MS,
   STREAM_READINESS_MAX_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
   ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
@@ -258,11 +246,7 @@ import {
   resolveResilienceSettings,
   isStreamRecoveryExplicitlyConfigured,
 } from "@/lib/resilience/settings";
-import {
-  classifyProviderError,
-  PROVIDER_ERROR_TYPES,
-  isEmptyContentResponse,
-} from "../services/errorClassifier.ts";
+import { classifyProviderError, PROVIDER_ERROR_TYPES } from "../services/errorClassifier.ts";
 import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/providers";
 import { wasRefreshTokenRotated } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { connectionHasExtraKeys } from "../services/apiKeyRotator.ts";
@@ -307,8 +291,6 @@ import { calculateCost } from "@/lib/usage/costCalculator";
 import {
   buildClaudePassthroughToolNameMap,
   mergeResponseToolNameMap,
-  normalizeOpenAIToolFinishReasons,
-  restoreNonStreamingToolNames,
 } from "./chatCore/passthroughToolNames.ts";
 import {
   createDisabledCompressionConfig,
@@ -339,20 +321,9 @@ import {
 import { scheduleStreamingQuotaShareConsumption } from "./chatCore/streamingQuotaShare.ts";
 import { recordStreamingUsageStats } from "./chatCore/streamingUsageStats.ts";
 import { recordStreamingCost } from "./chatCore/streamingCost.ts";
-import {
-  appendNonStreamingSseTerminalSignal,
-  type NonStreamingSseTerminalState,
-} from "./chatCore/nonStreamingSse.ts";
-import {
-  isJsonRecord,
-  parseNonStreamingResponseBody,
-} from "./chatCore/nonStreamingResponseParse.ts";
-import { unwrapClinepassEnvelope } from "../utils/clinepassEnvelope.ts";
+import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
 import {
-  createBodyTimeoutError,
-  readStreamChunkWithTimeout,
-  computeBillableTokens,
   normalizeExecutorResult,
   executeWithUpstreamStartTimeout,
   resolveConnectionTimeoutMs,
@@ -384,20 +355,13 @@ import {
   cacheReasoningFromAssistantMessage,
   requiresReasoningReplay,
 } from "../services/reasoningCache.ts";
-import { sanitizeOpenAITool } from "../services/toolSchemaSanitizer.ts";
 import { isCompactResponsesEndpoint } from "../executors/codex.ts";
 import { persistCodexChildQuotaResponse } from "../services/codexAccount/index.ts";
 import { invalidateCodexQuotaCache } from "../services/codexQuotaFetcher.ts";
 import { invalidateGenericQuotaCacheOnStatus } from "../services/genericQuotaFetcher.ts";
 import { translateNonStreamingResponse } from "./responseTranslator.ts";
 import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
-import { unwrapClineNonStreamingEnvelope } from "./chatCore/clineResponseEnvelope.ts";
 import { extractUsageFromResponse } from "./usageExtractor.ts";
-import {
-  sanitizeOpenAIResponse,
-  sanitizeResponsesApiResponse,
-  shouldParseTextualReasoningTags,
-} from "./responseSanitizer.ts";
 import {
   withRateLimit,
   updateFromHeaders,
@@ -415,13 +379,6 @@ import {
   recordCoreOwnedAntigravityQuotaState,
   shouldDeferAntigravityQuotaStateToCaller,
 } from "../services/accountFallback.ts";
-import {
-  generateSignature,
-  getCachedResponse,
-  setCachedResponse,
-  isCacheableForRead,
-  isCacheableForWrite,
-} from "@/lib/semanticCache";
 import { saveIdempotency } from "@/lib/idempotencyLayer";
 import {
   isModelUnavailableError,
@@ -448,11 +405,7 @@ import { generateSessionId } from "../services/sessionManager.ts";
 import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
 import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
 import { resolveInterceptSearch, resolveInterceptFetch } from "@/lib/db/interceptionRules";
-import {
-  resolveExplicitStreamAlias,
-  resolveStreamFlag,
-  stripMarkdownCodeFence,
-} from "../utils/aiSdkCompat.ts";
+import { resolveExplicitStreamAlias, resolveStreamFlag } from "../utils/aiSdkCompat.ts";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
@@ -460,7 +413,6 @@ import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 import { extractFacts } from "@/lib/memory/extraction";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
-import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
 import {
@@ -468,8 +420,6 @@ import {
   resolveClaudeCodeCompatibleSessionId,
 } from "../services/claudeCodeCompatible.ts";
 import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";
-import { fetchLiveProviderLimits } from "@/lib/usage/providerLimits";
-import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
 import {
   classifyModelScope429,
   getModelScopeRetryDelayMs,
@@ -479,9 +429,7 @@ import {
   incrementRequestCount,
   incrementTokenUsage,
   isTpmExhausted,
-  isRpmExhausted,
 } from "../services/geminiRateLimitTracker.ts";
-import { isSmallEnoughForSemanticCache } from "../utils/estimateSize.ts";
 import { getProactiveCompressionRatio } from "@/lib/db/compression";
 
 type ChatCoreExecutorResult = ReturnType<typeof normalizeExecutorResult> & {
@@ -3081,7 +3029,11 @@ export async function handleChatCore({
   // leak (GHSA-6c7w-56xp-wpc6).
   const dedupHash = dedupEnabled ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id) : null;
 
-  const executeProviderRequest = async (modelToCall = effectiveModel, allowDedup = false) => {
+  const executeProviderRequest = async (
+    modelToCall = effectiveModel,
+    allowDedup = false,
+    rotationPolicy?: { allowAccountRotation?: boolean }
+  ) => {
     const execute = async () => {
       // Upstream body preparation extracted to chatCore/upstreamBody.ts (#3501 — first internal
       // sub-slice of executeProviderRequest); produces the body sent upstream (payload rules +
@@ -3321,6 +3273,7 @@ export async function handleChatCore({
                 comboStrategy !== "context-relay" &&
                 res.response.status === 429 &&
                 attempts < maxAttempts - 1 &&
+                rotationPolicy?.allowAccountRotation !== false &&
                 // Probe-origin (test-all) 429 must not rotate accounts or persist
                 // cooldowns — routing state untouched (#9817).
                 !(await shouldIsolateProbeFailures())
@@ -3422,7 +3375,11 @@ export async function handleChatCore({
               // without user action. When no sibling exists (or all are BYOP),
               // fall through: the error-state block excludes the connection
               // and the actionable 422 is surfaced.
-              if (provider === "antigravity" && res.response.status === 422) {
+              if (
+                provider === "antigravity" &&
+                res.response.status === 422 &&
+                rotationPolicy?.allowAccountRotation !== false
+              ) {
                 const byopBody = await res.response
                   .clone()
                   .text()
@@ -4824,218 +4781,107 @@ export async function handleChatCore({
     // ── End T5 ───────────────────────────────────────────────────────────────
   }
 
-  // Non-streaming response
+  // Non-streaming response — delegated to runNonStreamingProviderLeg
   if (!stream) {
-    const parsed = await parseNonStreamingResponseBody({
-      providerResponse,
-      upstreamStream,
-      providerHeaders,
-      finalBody,
+    const legResult = await runNonStreamingProviderLeg({
+      phase: "initial",
+      sourceBody: (translatedBody ?? body) as Record<string, unknown>,
+      expectedConnectionId: undefined,
+      allowAccountRotation: true,
+      allowModelFallback: true,
+      executeProviderRequest: async (modelToCall, allowDedup, rotationPolicy) => {
+        const result = await executeProviderRequest(modelToCall, allowDedup, rotationPolicy);
+        return result as ChatCoreExecutorResult;
+      },
+      setRequestWireState: (state) => {
+        translatedBody.model = state.effectiveModel;
+        Object.assign(translatedBody, state.translatedBody);
+      },
+      sourceFormat,
       targetFormat,
+      clientResponseFormat,
+      provider,
       model,
+      connectionId,
+      getCurrentConnectionId,
+      effectiveModel,
+      translatedBody: translatedBody as Record<string, unknown>,
+      toolNameMap: toolNameMap ?? null,
+      requestToolIdentityMap: requestToolIdentityMap ?? null,
+      reasoningCacheScope,
+      clientHeaders: buildExecutorClientHeaders(clientRawRequest?.headers, userAgent),
+      isClaudeCodeCompatible,
       log,
     });
-    const normalizedProviderPayload = parsed.normalizedProviderPayload;
-    const looksLikeSSE = parsed.looksLikeSSE;
 
-    if (parsed.kind === "invalid_sse") {
-      appendRequestLog({
-        model,
-        provider,
-        connectionId,
-        status: `FAILED ${HTTP_STATUS.BAD_GATEWAY}`,
-      }).catch(() => {});
-      const invalidSseMessage = parsed.message;
-      persistAttemptLogs({
-        status: HTTP_STATUS.BAD_GATEWAY,
-        error: invalidSseMessage,
-        providerRequest: finalBody || translatedBody,
-        providerResponse: normalizedProviderPayload,
-        clientResponse: buildErrorBody(HTTP_STATUS.BAD_GATEWAY, invalidSseMessage),
-        cacheSource: "upstream",
-      });
-      persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "invalid_sse_payload");
-      trackPendingRequest(model, provider, pendingConnId, false);
-      return createErrorResult(HTTP_STATUS.BAD_GATEWAY, invalidSseMessage);
-    }
+    if (legResult.kind === "error") {
+      const { receipt } = legResult;
+      const status = receipt.httpStatus;
+      const code = legResult.result.errorCode;
+      const errType = legResult.result.errorType;
+      const termination = receipt.termination;
 
-    if (parsed.kind === "invalid_json") {
-      appendRequestLog({
-        model,
-        provider,
-        connectionId,
-        status: `FAILED ${HTTP_STATUS.BAD_GATEWAY}`,
-      }).catch(() => {});
-      const detailedError = parsed.detailedError;
-      const invalidJsonMessage = parsed.message;
-      persistAttemptLogs({
-        status: HTTP_STATUS.BAD_GATEWAY,
-        error: detailedError,
-        providerRequest: finalBody || translatedBody,
-        providerResponse: normalizedProviderPayload,
-        clientResponse: buildErrorBody(HTTP_STATUS.BAD_GATEWAY, invalidJsonMessage),
-        cacheSource: "upstream",
-      });
-      persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "invalid_json_payload");
-      trackPendingRequest(model, provider, connectionId, false);
-      return createErrorResult(HTTP_STATUS.BAD_GATEWAY, invalidJsonMessage);
-    }
-
-    let responseBody = parsed.responseBody;
-    let responsePayloadFormat = parsed.responsePayloadFormat;
-
-    // ── ClinePass {success,data} envelope unwrap (before translation) ──────────
-    // ClinePass wraps non-streaming JSON in a {success, data} envelope; errors
-    // use {success:false, error}. Transient {success:false, error:"empty..."}
-    // responses get one 2s retry before surfacing. CLINEPASS-GATED — untouched
-    // for every other provider. Envelope errors route through createErrorResult
-    // (→ buildErrorBody/sanitizeErrorMessage, Rule #12).
-    if (provider === "clinepass") {
-      let { body: unwrapped, error: envError } = unwrapClinepassEnvelope(responseBody, provider);
-      if (envError && /empty/i.test(envError.message || "")) {
-        log?.warn?.("RETRY", "clinepass returned empty content, retrying once after 2s");
-        await new Promise((r) => setTimeout(r, 2000));
-        try {
-          const retryResult = await executeProviderRequest(effectiveModel, false);
-          if (retryResult?.response?.ok) {
-            const retryParsed = await parseNonStreamingResponseBody({
-              providerResponse: retryResult.response,
-              upstreamStream: undefined,
-              providerHeaders: retryResult.headers,
-              finalBody: retryResult.transformedBody,
-              targetFormat,
-              model,
-              log,
-            });
-            if (retryParsed.kind !== "invalid_sse" && retryParsed.kind !== "invalid_json") {
-              providerResponse = retryResult.response;
-              providerUrl = retryResult.url;
-              providerHeaders = retryResult.headers;
-              finalBody = providerRequestCapture.body(retryResult.transformedBody);
-              ({ body: unwrapped, error: envError } = unwrapClinepassEnvelope(
-                retryParsed.responseBody,
-                provider
-              ));
-            }
-          }
-        } catch (retryErr) {
-          log?.warn?.(
-            "RETRY",
-            `clinepass retry failed: ${
-              retryErr instanceof Error ? retryErr.message : String(retryErr)
-            }`
-          );
-        }
-      }
-      if (envError) {
-        appendRequestLog({
-          model,
-          provider,
-          connectionId,
-          status: `FAILED ${HTTP_STATUS.BAD_GATEWAY}`,
-        }).catch(() => {});
-        persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "clinepass_envelope_error");
+      if (termination === "connection_mismatch") {
+        appendRequestLog({ model, provider, connectionId, status: `FAILED 409` }).catch(() => {});
+        persistAttemptLogs({
+          status: 409,
+          error: legResult.result.error,
+          providerRequest: finalBody || translatedBody,
+          clientResponse: buildErrorBody(409, legResult.result.error || "connection mismatch"),
+          claudeCacheMeta: claudePromptCacheLogMeta,
+          cacheSource: "upstream",
+        });
+        persistFailureUsage(409, code || "LEASE_CONNECTION_MISMATCH");
         trackPendingRequest(model, provider, connectionId, false);
-        return createErrorResult(HTTP_STATUS.BAD_GATEWAY, envError.message);
+        return legResult.result;
       }
-      if (!isJsonRecord(unwrapped)) {
-        const invalidEnvelopeMessage = "Invalid JSON response from provider";
-        persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "clinepass_envelope_error");
-        trackPendingRequest(model, provider, connectionId, false);
-        return createErrorResult(HTTP_STATUS.BAD_GATEWAY, invalidEnvelopeMessage);
-      }
-      responseBody = unwrapped;
-    }
-    responseBody = unwrapClineNonStreamingEnvelope(provider, responseBody);
 
-    // Check for empty content response (fake success) - trigger fallback
-    if (isEmptyContentResponse(responseBody)) {
-      appendRequestLog({
-        model,
-        provider,
-        connectionId,
-        status: `FAILED ${HTTP_STATUS.BAD_GATEWAY}`,
-      }).catch(() => {});
-      const emptyContentMessage = "Provider returned empty content";
-      persistAttemptLogs({
-        status: HTTP_STATUS.BAD_GATEWAY,
-        error: emptyContentMessage,
-        providerRequest: finalBody || translatedBody,
-        providerResponse: normalizedProviderPayload,
-        clientResponse: buildErrorBody(HTTP_STATUS.BAD_GATEWAY, emptyContentMessage),
-        cacheSource: "upstream",
-      });
-      persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "empty_content");
-
-      // Trigger non-recursive fallback for empty content
-      const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
-      if (nextModel) {
-        triedModels.add(nextModel);
-        currentModel = nextModel;
-        translatedBody.model = nextModel;
-        log?.info?.(
-          "EMPTY_CONTENT_FALLBACK",
-          `${model} returned empty content → trying ${nextModel}`
+      // Provider HTTP errors (4xx/5xx from upstream)
+      if (status >= 400) {
+        appendRequestLog({ model, provider, connectionId, status: `FAILED ${status}` }).catch(
+          () => {}
         );
-        try {
-          const fallbackResult = await executeProviderRequest(nextModel, false);
-          if (fallbackResult.response.ok) {
-            const fallbackRaw = await withBodyTimeout<string>(fallbackResult.response.text());
-            try {
-              responseBody = fallbackRaw ? JSON.parse(fallbackRaw) : {};
-              providerUrl = fallbackResult.url;
-              providerHeaders = fallbackResult.headers;
-              finalBody = providerRequestCapture.body(fallbackResult.transformedBody);
-              reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-              log?.info?.(
-                "EMPTY_CONTENT_FALLBACK",
-                `Serving ${nextModel} as fallback for ${model}`
-              );
-              // Fall through — continue processing with the new responseBody
-            } catch {
-              trackPendingRequest(model, provider, connectionId, false);
-              return createErrorResult(HTTP_STATUS.BAD_GATEWAY, emptyContentMessage);
-            }
-          } else {
-            trackPendingRequest(model, provider, connectionId, false);
-            return createErrorResult(HTTP_STATUS.BAD_GATEWAY, emptyContentMessage);
-          }
-        } catch {
-          trackPendingRequest(model, provider, connectionId, false);
-          return createErrorResult(HTTP_STATUS.BAD_GATEWAY, emptyContentMessage);
-        }
-      } else {
+        persistAttemptLogs({
+          status,
+          error: legResult.result.error,
+          providerRequest: finalBody || translatedBody,
+          clientResponse: buildErrorBody(status, legResult.result.error || "Provider error"),
+          claudeCacheMeta: claudePromptCacheLogMeta,
+          cacheSource: "upstream",
+        });
+        const errCode = projectFailureUsageErrorCode({
+          statusCode: status,
+          message: legResult.result.error || "",
+          errorCode: code || "upstream_error",
+          errorType: errType,
+        });
+        persistFailureUsage(status, errCode);
         trackPendingRequest(model, provider, connectionId, false);
-        return createErrorResult(HTTP_STATUS.BAD_GATEWAY, emptyContentMessage);
+        return legResult.result;
       }
+
+      // Parse / ClinePass / empty content errors (502)
+      appendRequestLog({ model, provider, connectionId, status: `FAILED ${status}` }).catch(
+        () => {}
+      );
+      persistAttemptLogs({
+        status,
+        error: legResult.result.error,
+        providerRequest: finalBody || translatedBody,
+        clientResponse: buildErrorBody(status, legResult.result.error || "Provider error"),
+        claudeCacheMeta: claudePromptCacheLogMeta,
+        cacheSource: "upstream",
+      });
+      persistFailureUsage(status, code || "provider_error");
+      trackPendingRequest(model, provider, connectionId, false);
+      return legResult.result;
     }
 
-    const restoreClaudeNames = sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE;
-    let responseToolNameMap: Map<string, string> | null;
-    [responseBody, responseToolNameMap] = restoreNonStreamingToolNames(
-      responseBody,
-      toolNameMap,
-      finalBody,
-      restoreClaudeNames
-    );
-    reqLogger.logProviderResponse(
-      providerResponse.status,
-      providerResponse.statusText,
-      providerResponse.headers,
-      looksLikeSSE
-        ? {
-            _streamed: true,
-            _format: "sse-json",
-            summary: responseBody,
-          }
-        : responseBody
-    );
-    sanitizeUsagePayloadForRequest(
-      responseBody,
-      finalBody || translatedBody || body,
-      responsePayloadFormat
-    );
-    effectiveServiceTier = resolveReportedServiceTier(responseBody) ?? effectiveServiceTier;
+    // Success path — extract values from leg result
+    let responseBody = legResult.providerBody;
+    const responsePayloadFormat = legResult.responsePayloadFormat;
+    const looksLikeSSE = legResult.looksLikeSSE;
+
     // Notify success - caller can clear error status if needed
     if (onRequestSuccess) {
       await onRequestSuccess();
@@ -5049,7 +4895,7 @@ export async function handleChatCore({
     });
 
     // Log usage for non-streaming responses
-    const usage = extractUsageFromResponse(responseBody, provider);
+    const usage = legResult.usage ?? extractUsageFromResponse(responseBody, provider);
     if (usage && typeof usage === "object") {
       attachCompressionUsageReceiptAfterAnalytics(usage as Record<string, unknown>, "provider");
       // Track Gemini token consumption for TPM rate-limit pre-check
@@ -5062,9 +4908,7 @@ export async function handleChatCore({
       }
     }
 
-    // Context Editing telemetry: when the delegated server-side clear actually ran,
-    // record the provider's cleared-token receipt under engine "context-editing" so
-    // it surfaces in compression analytics. Best-effort, Claude-only, non-streaming.
+    // Context Editing telemetry
     recordContextEditingTelemetryHook({
       contextEditingEnabled,
       provider,
@@ -5095,103 +4939,9 @@ export async function handleChatCore({
       endpoint: endpointPath,
     });
 
-    // Translate response to client's expected format (usually OpenAI)
-    // Pass toolNameMap so Claude OAuth proxy_ prefix is stripped in tool_use blocks (#605)
-    const responseToolSchemas = extractToolSchemaMap(finalBody || translatedBody || body);
-    let translatedResponse = needsTranslation(responsePayloadFormat, clientResponseFormat)
-      ? translateNonStreamingResponse(
-          responseBody,
-          responsePayloadFormat,
-          clientResponseFormat,
-          responseToolNameMap,
-          responseToolSchemas
-        )
-      : responseBody;
-    const memoryExtractionResponse = translatedResponse;
-
-    // T26: Strip markdown code blocks if provider format is Claude
-    if (sourceFormat === "claude" && !stream) {
-      if (typeof translatedResponse?.choices?.[0]?.message?.content === "string") {
-        translatedResponse.choices[0].message.content = stripMarkdownCodeFence(
-          translatedResponse.choices[0].message.content
-        ) as string;
-      }
-    }
-
-    // T18: Normalize finish_reason to 'tool_calls' if tool calls are present
-    normalizeOpenAIToolFinishReasons(translatedResponse);
-
-    // Reasoning Replay Cache (#1628): Capture reasoning_content from non-streaming responses
-    // with tool_calls so it can be replayed on subsequent turns (DeepSeek V4, Kimi K2, etc.)
-    try {
-      const cacheResponse = translatedResponse?.choices?.[0]
-        ? translatedResponse
-        : needsTranslation(responsePayloadFormat, FORMATS.OPENAI)
-          ? translateNonStreamingResponse(
-              responseBody,
-              responsePayloadFormat,
-              FORMATS.OPENAI,
-              responseToolNameMap,
-              responseToolSchemas
-            )
-          : responseBody;
-      const firstChoice = cacheResponse?.choices?.[0];
-      const msg = firstChoice?.message;
-      const historyMessages = (translatedBody as { messages?: unknown[] } | null | undefined)
-        ?.messages;
-      if (requiresReasoningReplay({ provider, model })) {
-        cacheReasoningFromAssistantMessage(msg, provider, model, {
-          scope: reasoningCacheScope,
-          historyMessages: Array.isArray(historyMessages) ? historyMessages : [],
-        });
-      }
-    } catch {
-      // Cache capture is non-critical — never block the response
-    }
-    // Sanitize response for OpenAI SDK compatibility
-    // Strips non-standard fields (x_groq, usage_breakdown, service_tier, etc.)
-    // Extracts <think> and <thinking> tags into reasoning_content
-    // Source format determines output shape. If we are outputting OpenAI shape or pseudo-OpenAI shape, sanitize.
-    if (clientResponseFormat === FORMATS.OPENAI_RESPONSES) {
-      translatedResponse = sanitizeResponsesApiResponse(translatedResponse);
-      // Responses-API non-stream path: restore `{namespace, name}` on every
-      // `function_call` item that was flattened from a namespace sub-tool on
-      // the request side (#7936 round-trip closure).
-      const responseOutput = translatedResponse?.output;
-      if (requestToolIdentityMap && Array.isArray(responseOutput)) {
-        for (const item of responseOutput) {
-          if (item?.type !== "function_call") continue;
-          const identity = requestToolIdentityMap.get(item.name);
-          if (identity) {
-            item.namespace = identity.namespace;
-            item.name = identity.name;
-          }
-        }
-      }
-    } else if (clientResponseFormat === FORMATS.OPENAI) {
-      // Port of decolua/9router#517: opt-in `x-omniroute-strip-reasoning` header
-      // unconditionally drops `reasoning_content` from the final non-streaming
-      // JSON for clients (e.g. Firecrawl AI SDK) whose JSON parsers break on
-      // that non-standard field. Reasoning replay cache is captured above this
-      // sanitize step, so the cache feature is unaffected.
-      const stripReasoning = isStripReasoningRequested(clientRawRequest?.headers ?? null);
-      translatedResponse = sanitizeOpenAIResponse(translatedResponse, {
-        stripReasoning,
-        parseTextualReasoningTags: shouldParseTextualReasoningTags(provider, model),
-      });
-    }
-
-    // #8331: keep the client-visible metering fields real everywhere except Claude-Code-compatible
-    // providers, where Claude Code's own context accounting relies on the buffered number — see
-    // clientUsageBuffer.ts module docstring.
-    applyClientUsageBuffer(
-      translatedResponse,
-      finalBody || translatedBody || body,
-      clientResponseFormat,
-      {
-        preserveContextBudgetInVisibleUsage: isClaudeCodeCompatible,
-      }
-    );
+    // Use leg's translated response
+    let translatedResponse = legResult.response;
+    const memoryExtractionResponse = legResult.responseForMemoryExtraction;
 
     // #12150 P1b surface 3 (fix round 1): a video-bridge-observed request's
     // request- AND response-derived text both carry the full transcript (the
@@ -5631,7 +5381,7 @@ export async function handleChatCore({
     errorCode: streamErrorCode,
     ttft,
     itlMs: streamItlMs,
-    interrupted: streamInterrupted,
+    interrupted: _streamInterrupted,
   }) => {
     const normalizedStreamStatus = streamStatus || 200;
     if (streamCompletionRecorded) return;

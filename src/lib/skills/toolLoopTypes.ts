@@ -41,6 +41,7 @@ export interface ChatCoreErrorResult {
   error?: string;
   errorCode?: string;
   errorType?: string;
+  originalError?: unknown;
 }
 
 export type NonStreamingProviderLegResult =
