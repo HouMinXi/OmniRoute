@@ -2,19 +2,26 @@
  * quota-weighted: skip empty accounts, weighted-draw the rest.
  * Spec: _tasks/superpowers/specs/2026-09-04-quota-weighted-routing-design.md
  */
-import test, { after } from "node:test";
+import test, { after, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { randomUUID } from "node:crypto";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-quota-weighted-"));
 const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const dbCore = await import("../../../src/lib/db/core.ts");
+const quotaCache = await import("../../../src/domain/quotaCache.ts");
 const { getResetAwareRemainingPercent } =
   await import("../../../open-sse/services/combo/quotaScoring.ts");
+const { registerQuotaFetcher } = await import("../../../open-sse/services/quotaPreflight.ts");
+const { expandTargetsByQuotaAwareConnections } =
+  await import("../../../open-sse/services/combo/quotaStrategies.ts");
+const { resetAllCircuitBreakers } = await import("../../../src/shared/utils/circuitBreaker.ts");
+const { _setSecureRandomFloatSource } = await import("../../../src/shared/utils/secureRandom.ts");
 
 after(() => {
   dbCore.resetDbInstance();
@@ -22,6 +29,48 @@ after(() => {
   if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
 });
+
+afterEach(() => {
+  _setSecureRandomFloatSource(null);
+  quotaCache.__clearForTests();
+  resetAllCircuitBreakers();
+});
+
+const iso = (ms = 86_400_000) => new Date(Date.now() + ms).toISOString();
+
+function quotaAt(percentUsed: number, extra: Record<string, unknown> = {}) {
+  return {
+    used: percentUsed * 100,
+    total: 100,
+    percentUsed,
+    resetAt: iso(),
+    window5h: { percentUsed, resetAt: iso(3 * 3600_000) },
+    window7d: { percentUsed, resetAt: iso() },
+    limitReached: false,
+    ...extra,
+  };
+}
+
+function makeTarget(provider: string, connectionId: string, model = "gemini-3.8-flash-high") {
+  return {
+    kind: "model" as const,
+    stepId: `step-${connectionId}`,
+    executionKey: `${provider}/${model}@${connectionId}`,
+    modelStr: `${provider}/${model}`,
+    provider,
+    providerId: provider,
+    connectionId,
+    weight: 1,
+    label: null,
+  };
+}
+
+function seedAgyCache(connectionId: string, remainingPercentage: number) {
+  quotaCache.setQuotaCache(connectionId, "agy", {
+    "gemini-3.8-flash-high": { remainingPercentage, resetAt: iso() },
+    gemini_weekly: { remainingPercentage, resetAt: iso() },
+  });
+}
 
 test("getResetAwareRemainingPercent: null / non-object → 100", () => {
   assert.equal(getResetAwareRemainingPercent(null), 100);
@@ -45,4 +94,48 @@ test("getResetAwareRemainingPercent: min(session, weekly) * 100", () => {
 
 test("getResetAwareRemainingPercent: missing windows fall back to overall percentUsed", () => {
   assert.equal(getResetAwareRemainingPercent({ percentUsed: 0.7 }), 30);
+});
+
+test("dual: default expand drops 0.5% agy via 99% kick; skipExhaustionFilter keeps it", async () => {
+  const provider = "agy";
+  const low = `low-${randomUUID()}`;
+  const healthy = `ok-${randomUUID()}`;
+  registerQuotaFetcher(provider, async (connectionId) =>
+    connectionId === low ? quotaAt(0.995) : quotaAt(0.6)
+  );
+  seedAgyCache(low, 0.5);
+  seedAgyCache(healthy, 40);
+
+  const targets = [makeTarget(provider, low), makeTarget(provider, healthy)];
+  const dropped = await expandTargetsByQuotaAwareConnections(
+    targets,
+    "dual-default",
+    { warn() {} },
+    null
+  );
+  assert.equal(
+    dropped.expandedTargets.some((t) => t.connectionId === low),
+    false,
+    "0.5% remaining must be treated as exhausted by the 99% dashboard kick"
+  );
+  assert.equal(
+    dropped.expandedTargets.some((t) => t.connectionId === healthy),
+    true
+  );
+
+  const kept = await expandTargetsByQuotaAwareConnections(
+    targets,
+    "dual-skip",
+    { warn() {} },
+    null,
+    { skipExhaustionFilter: true }
+  );
+  assert.equal(
+    kept.expandedTargets.some((t) => t.connectionId === low),
+    true
+  );
+  assert.equal(
+    kept.expandedTargets.some((t) => t.connectionId === healthy),
+    true
+  );
 });
