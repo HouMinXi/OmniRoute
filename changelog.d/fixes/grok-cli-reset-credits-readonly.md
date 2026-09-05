@@ -1,0 +1,1 @@
+- **feat(grok-cli):** Provider Limits now shows grok-cli banked reset credits from `GetRemainingResets`, including a real zero inventory; a failed RPC omits the row instead of faking 0, and grok-cli still does not get the Codex redeem button
