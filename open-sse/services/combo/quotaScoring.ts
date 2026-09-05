@@ -348,6 +348,17 @@ export function scoreResetAwareQuota(
   return { score };
 }
 
+export function getResetAwareRemainingPercent(quota: unknown): number {
+  if (!quota || !isRecord(quota)) return 100;
+  if (quota.limitReached === true) return 0;
+  const overallPercentUsed = clamp01(finiteNumberOrNull(quota.percentUsed) ?? 0.5);
+  const sessionWindow = resolveQuotaWindowByName(quota, "session");
+  const weeklyWindow = resolveQuotaWindowByName(quota, "weekly");
+  const sessionRemaining = clamp01(1 - (sessionWindow?.percentUsed ?? overallPercentUsed));
+  const weeklyRemaining = clamp01(1 - (weeklyWindow?.percentUsed ?? overallPercentUsed));
+  return Number((Math.min(sessionRemaining, weeklyRemaining) * 100).toFixed(6));
+}
+
 /**
  * Absolute epoch-ms instant at which the configured quota window next resets,
  * or `Infinity` when the snapshot exposes no parseable reset (which sorts the
