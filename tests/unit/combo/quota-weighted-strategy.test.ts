@@ -15,12 +15,21 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const dbCore = await import("../../../src/lib/db/core.ts");
 const quotaCache = await import("../../../src/domain/quotaCache.ts");
-const { getResetAwareRemainingPercent } =
+const { getResetAwareRemainingPercent, resolveResetAwareConfig, scoreResetAwareQuota } =
   await import("../../../open-sse/services/combo/quotaScoring.ts");
 const { registerQuotaFetcher } = await import("../../../open-sse/services/quotaPreflight.ts");
-const { expandTargetsByQuotaAwareConnections, orderTargetsByQuotaWeighted } =
-  await import("../../../open-sse/services/combo/quotaStrategies.ts");
-const { resetAllCircuitBreakers } = await import("../../../src/shared/utils/circuitBreaker.ts");
+const {
+  expandTargetsByQuotaAwareConnections,
+  orderTargetsByQuotaWeighted,
+  _pickWeightedIndexForTests,
+} = await import("../../../open-sse/services/combo/quotaStrategies.ts");
+const { getCircuitBreaker, resetAllCircuitBreakers } =
+  await import("../../../src/shared/utils/circuitBreaker.ts");
+const { applyStrategyOrdering } =
+  await import("../../../open-sse/services/combo/applyStrategyOrdering.ts");
+const { HANDLED_COMBO_STRATEGIES } =
+  await import("../../../open-sse/services/combo/strategyDispatch.ts");
+const { comboStrategySchema } = await import("../../../src/shared/validation/schemas.ts");
 const { _setSecureRandomFloatSource } = await import("../../../src/shared/utils/secureRandom.ts");
 
 after(() => {
@@ -39,13 +48,15 @@ afterEach(() => {
 const iso = (ms = 86_400_000) => new Date(Date.now() + ms).toISOString();
 
 function quotaAt(percentUsed: number, extra: Record<string, unknown> = {}) {
+  // Far-future resets keep reset-pressure near 0 so score tracks remaining.
+  // A 1-day weekly reset inverts that (more-used accounts score higher).
   return {
     used: percentUsed * 100,
     total: 100,
     percentUsed,
-    resetAt: iso(),
-    window5h: { percentUsed, resetAt: iso(3 * 3600_000) },
-    window7d: { percentUsed, resetAt: iso() },
+    resetAt: iso(7 * 86_400_000),
+    window5h: { percentUsed, resetAt: iso(5 * 3600_000) },
+    window7d: { percentUsed, resetAt: iso(7 * 86_400_000) },
     limitReached: false,
     ...extra,
   };
@@ -196,4 +207,307 @@ test("7 empty + 3 healthy → length 3, no hard-empty", async () => {
   assert.equal(ordered.length, 3);
   for (const id of dead) assert.equal(ordered.some((t) => t.connectionId === id), false);
   for (const id of ok) assert.equal(ordered.some((t) => t.connectionId === id), true);
+});
+
+test("pickWeightedIndex skips non-positive weights", () => {
+  assert.equal(_pickWeightedIndexForTests([0, 10], 0), 1);
+  assert.equal(_pickWeightedIndexForTests([0, 10], 9.9), 1);
+  assert.equal(_pickWeightedIndexForTests([0, 0, 0], 0), null);
+});
+
+test("pickWeightedIndex half-open boundary acc > r", () => {
+  assert.equal(_pickWeightedIndexForTests([40, 20], 0), 0);
+  assert.equal(_pickWeightedIndexForTests([40, 20], 39.999), 0);
+  assert.equal(_pickWeightedIndexForTests([40, 20], 40), 1);
+  assert.equal(_pickWeightedIndexForTests([40, 20], 59.999), 1);
+});
+
+test("weighted draw float 0 hits first pool member, ~1 hits last", async () => {
+  const provider = "agy";
+  const a1 = `a1-${randomUUID()}`;
+  const a2 = `a2-${randomUUID()}`;
+  registerQuotaFetcher(provider, async (connectionId) =>
+    connectionId === a1 ? quotaAt(0.2) : quotaAt(0.6)
+  );
+  const targets = [makeTarget(provider, a1), makeTarget(provider, a2)];
+
+  _setSecureRandomFloatSource(() => 0);
+  const first = await orderTargetsByQuotaWeighted(targets, "bound0", {}, { warn() {} }, null);
+  assert.equal(first[0]?.connectionId, a1);
+
+  _setSecureRandomFloatSource(() => 0.999);
+  const last = await orderTargetsByQuotaWeighted(targets, "bound1", {}, { warn() {} }, null);
+  assert.equal(last[0]?.connectionId, a2);
+});
+
+test("tail is unused selected-pool by score desc then B", async () => {
+  const provider = "agy";
+  const a30 = `a30-${randomUUID()}`;
+  const a20 = `a20-${randomUUID()}`;
+  const a10 = `a10-${randomUUID()}`;
+  const b08 = `b08-${randomUUID()}`;
+  const b04 = `b04-${randomUUID()}`;
+  const table: Record<string, number> = {
+    [a30]: 0.7,
+    [a20]: 0.8,
+    [a10]: 0.9,
+    [b08]: 0.992,
+    [b04]: 0.996,
+  };
+  registerQuotaFetcher(provider, async (id) => quotaAt(table[id]));
+  const targets = [a30, a20, a10, b08, b04].map((id) => makeTarget(provider, id));
+  const cfg = resolveResetAwareConfig({});
+  const s20 = scoreResetAwareQuota(quotaAt(0.8), cfg).score;
+  const s30 = scoreResetAwareQuota(quotaAt(0.7), cfg).score;
+  const s10 = scoreResetAwareQuota(quotaAt(0.9), cfg).score;
+  assert.ok(s30 > s20 && s20 > s10);
+  const sumA = s30 + s20 + s10;
+  const float = (s30 + s20 / 2) / sumA;
+  _setSecureRandomFloatSource(() => float);
+  const ordered = await orderTargetsByQuotaWeighted(
+    targets,
+    "tail",
+    { quotaWeightedFloorPercent: 1 },
+    { warn() {} },
+    null
+  );
+  assert.deepEqual(
+    ordered.map((t) => t.connectionId),
+    [a20, a30, a10, b08, b04]
+  );
+});
+
+test("floor=0 puts 0.5% in the main pool", async () => {
+  const provider = "agy";
+  const low = `low-${randomUUID()}`;
+  const ok = `ok-${randomUUID()}`;
+  registerQuotaFetcher(provider, async (id) => (id === low ? quotaAt(0.995) : quotaAt(0.6)));
+  _setSecureRandomFloatSource(() => 0);
+  const ordered = await orderTargetsByQuotaWeighted(
+    [makeTarget(provider, low), makeTarget(provider, ok)],
+    "f0",
+    { quotaWeightedFloorPercent: 0 },
+    { warn() {} },
+    null
+  );
+  assert.equal(ordered.length, 2);
+  assert.equal(
+    ordered.some((t) => t.connectionId === low),
+    true
+  );
+});
+
+test("only two 0.5% accounts still serve, never 404", async () => {
+  const provider = "agy";
+  const low = [`low-${randomUUID()}`, `low-${randomUUID()}`];
+  registerQuotaFetcher(provider, async () => quotaAt(0.995));
+  const targets = low.map((id) => makeTarget(provider, id));
+  _setSecureRandomFloatSource(() => 0);
+  const first = await orderTargetsByQuotaWeighted(targets, "only-low-0", {}, { warn() {} }, null);
+  _setSecureRandomFloatSource(() => 0.999);
+  const second = await orderTargetsByQuotaWeighted(targets, "only-low-1", {}, { warn() {} }, null);
+  assert.equal(first.length, 2);
+  assert.equal(second.length, 2);
+  assert.ok(low.includes(first[0]?.connectionId ?? ""));
+  assert.ok(low.includes(second[0]?.connectionId ?? ""));
+});
+
+test("pinned hard-empty connection stays dropped", async () => {
+  const provider = "agy";
+  const dead = `dead-${randomUUID()}`;
+  registerQuotaFetcher(provider, async () => quotaAt(1, { limitReached: true }));
+  const ordered = await orderTargetsByQuotaWeighted(
+    [makeTarget(provider, dead)],
+    "pin-dead",
+    {},
+    { warn() {} },
+    null
+  );
+  assert.deepEqual(ordered, []);
+});
+
+test("family filter: gemini request ignores Claude-empty windows", async () => {
+  const provider = "agy";
+  const conn = `fam-${randomUUID()}`;
+  registerQuotaFetcher(provider, async (_id, connection) => {
+    const model = String(connection?.requestedModel || "");
+    assert.equal(model.includes("claude"), false, "gemini request must not fetch Claude snapshot");
+    return quotaAt(0.2);
+  });
+  _setSecureRandomFloatSource(() => 0);
+  const ordered = await orderTargetsByQuotaWeighted(
+    [makeTarget(provider, conn, "gemini-3.8-flash-high")],
+    "family",
+    {},
+    { warn() {} },
+    null
+  );
+  assert.equal(ordered[0]?.connectionId, conn);
+
+  registerQuotaFetcher(provider, async () => quotaAt(1, { limitReached: true }));
+  const dropped = await orderTargetsByQuotaWeighted(
+    [makeTarget(provider, conn, "gemini-3.8-flash-high")],
+    "family-dead",
+    {},
+    { warn() {} },
+    null
+  );
+  assert.equal(dropped.length, 0);
+});
+
+test("missing snapshot stays in A at score 0.5", async () => {
+  const provider = "agy";
+  const conn = `miss-${randomUUID()}`;
+  registerQuotaFetcher(provider, async () => null);
+  _setSecureRandomFloatSource(() => 0);
+  const ordered = await orderTargetsByQuotaWeighted(
+    [makeTarget(provider, conn)],
+    "missing",
+    {},
+    { warn() {} },
+    null
+  );
+  assert.equal(ordered.length, 1);
+  assert.equal(ordered[0]?.connectionId, conn);
+});
+
+test("OPEN breaker targets are dropped; all OPEN → []", async () => {
+  const openProv = `open-${randomUUID()}`;
+  const closedProv = `closed-${randomUUID()}`;
+  registerQuotaFetcher(openProv, async () => quotaAt(0.2));
+  registerQuotaFetcher(closedProv, async () => quotaAt(0.2));
+  const cb = getCircuitBreaker(openProv, { failureThreshold: 1, resetTimeout: 60_000 });
+  cb._onFailure();
+  assert.equal(cb.getStatus().state, "OPEN");
+  _setSecureRandomFloatSource(() => 0);
+  const mixed = await orderTargetsByQuotaWeighted(
+    [makeTarget(openProv, `c-${randomUUID()}`), makeTarget(closedProv, `c-${randomUUID()}`)],
+    "brk",
+    {},
+    { warn() {} },
+    null
+  );
+  assert.equal(mixed.length, 1);
+  assert.equal(mixed[0]?.provider, closedProv);
+
+  const empty = await orderTargetsByQuotaWeighted(
+    [makeTarget(openProv, `c2-${randomUUID()}`)],
+    "brk-all",
+    {},
+    { warn() {} },
+    null
+  );
+  assert.deepEqual(empty, []);
+});
+
+test("floor NaN/undefined → 1; -1 → 0; 101 → 100", async () => {
+  const provider = "agy";
+  const low = `low-${randomUUID()}`;
+  const ok = `ok-${randomUUID()}`;
+  registerQuotaFetcher(provider, async (id) => (id === low ? quotaAt(0.995) : quotaAt(0.6)));
+  const targets = [makeTarget(provider, low), makeTarget(provider, ok)];
+  _setSecureRandomFloatSource(() => 0);
+
+  const def = await orderTargetsByQuotaWeighted(targets, "f1", {}, { warn() {} }, null);
+  assert.equal(def[0]?.connectionId, ok);
+  assert.equal(def.length, 2);
+
+  const nan = await orderTargetsByQuotaWeighted(
+    targets,
+    "fnan",
+    { quotaWeightedFloorPercent: Number.NaN },
+    { warn() {} },
+    null
+  );
+  assert.equal(nan[0]?.connectionId, ok);
+
+  const abc = await orderTargetsByQuotaWeighted(
+    targets,
+    "fabc",
+    { quotaWeightedFloorPercent: "abc" },
+    { warn() {} },
+    null
+  );
+  assert.equal(abc[0]?.connectionId, ok);
+
+  const zero = await orderTargetsByQuotaWeighted(
+    targets,
+    "f0clamp",
+    { quotaWeightedFloorPercent: -1 },
+    { warn() {} },
+    null
+  );
+  assert.equal(zero.length, 2);
+  assert.equal(
+    zero.some((t) => t.connectionId === low),
+    true
+  );
+
+  const hundred = await orderTargetsByQuotaWeighted(
+    targets,
+    "f100",
+    { quotaWeightedFloorPercent: 101 },
+    { warn() {} },
+    null
+  );
+  assert.equal(hundred.length, 2);
+});
+
+test("pinned connectionId outside apiKeyAllowedConnectionIds is dropped", async () => {
+  const provider = "agy";
+  const pinned = `pin-${randomUUID()}`;
+  const other = `oth-${randomUUID()}`;
+  registerQuotaFetcher(provider, async () => quotaAt(0.2));
+  const ordered = await orderTargetsByQuotaWeighted(
+    [makeTarget(provider, pinned)],
+    "allow",
+    {},
+    { warn() {} },
+    [other]
+  );
+  assert.deepEqual(ordered, []);
+});
+
+test("floor=100 puts remaining in (0,100] into B", async () => {
+  const provider = "agy";
+  const low = `low-${randomUUID()}`;
+  const ok = `ok-${randomUUID()}`;
+  registerQuotaFetcher(provider, async (id) => (id === low ? quotaAt(0.995) : quotaAt(0.6)));
+  _setSecureRandomFloatSource(() => 0);
+  const ordered = await orderTargetsByQuotaWeighted(
+    [makeTarget(provider, low), makeTarget(provider, ok)],
+    "f100-pool",
+    { quotaWeightedFloorPercent: 100 },
+    { warn() {} },
+    null
+  );
+  assert.equal(ordered.length, 2);
+});
+
+test("comboStrategySchema and HANDLED accept quota-weighted", () => {
+  assert.equal(comboStrategySchema.safeParse("quota-weighted").success, true);
+  assert.equal(HANDLED_COMBO_STRATEGIES.includes("quota-weighted"), true);
+});
+
+test("applyStrategyOrdering(quota-weighted) uses the orderer", async () => {
+  const provider = "agy";
+  const ok = `ok-${randomUUID()}`;
+  const dead = `dead-${randomUUID()}`;
+  registerQuotaFetcher(provider, async (id) =>
+    id === dead ? quotaAt(1, { limitReached: true }) : quotaAt(0.2)
+  );
+  _setSecureRandomFloatSource(() => 0);
+  const out = await applyStrategyOrdering(
+    "quota-weighted",
+    [makeTarget(provider, dead), makeTarget(provider, ok)],
+    {
+      combo: { id: "c", name: "c", models: [], config: {} },
+      config: {},
+      body: { messages: [] },
+      log: { info() {}, warn() {}, error() {}, debug() {} },
+      apiKeyAllowedConnections: null,
+    }
+  );
+  assert.equal(out.orderedTargets[0]?.connectionId, ok);
+  assert.equal(out.quotaShareRelease, null);
 });

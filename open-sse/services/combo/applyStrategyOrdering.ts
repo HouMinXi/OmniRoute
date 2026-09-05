@@ -10,6 +10,7 @@ import {
 } from "./promptCacheAffinity.ts";
 import {
   orderTargetsByHeadroom,
+  orderTargetsByQuotaWeighted,
   orderTargetsByResetAwareQuota,
   orderTargetsByResetWindow,
 } from "./quotaStrategies.ts";
@@ -238,6 +239,18 @@ export async function applyStrategyOrdering(
     log.info(
       "COMBO",
       `Headroom ordering: ${orderedTargets[0]?.modelStr}${orderedTargets[0]?.connectionId ? ` (${orderedTargets[0].connectionId})` : ""} has most free capacity`
+    );
+  } else if (strategy === "quota-weighted") {
+    orderedTargets = await orderTargetsByQuotaWeighted(
+      orderedTargets,
+      combo.name,
+      config,
+      log,
+      apiKeyAllowedConnections
+    );
+    log.info(
+      "COMBO",
+      `Quota-weighted ordering: ${orderedTargets[0]?.modelStr}${orderedTargets[0]?.connectionId ? ` (${orderedTargets[0].connectionId})` : ""} first`
     );
   } else if (strategy === "quota-share") {
     // Internal quota-share combos (qtSd/): delegate to the dedicated module (DRR +
