@@ -745,7 +745,15 @@ function sortByScoreThenIndex(a: QuotaWeightedScored, b: QuotaWeightedScored): n
 }
 
 function resolveQuotaWeightedFloor(configSource: Record<string, unknown> | null | undefined): number {
-  const raw = Number(configSource?.quotaWeightedFloorPercent);
+  // Number(null) and Number("") are both 0, so an unset or blank key would
+  // switch the floor off instead of taking the default. Only a value that is
+  // actually a number, or a non-empty numeric string, gets to move it.
+  const configured = configSource?.quotaWeightedFloorPercent;
+  const raw =
+    typeof configured === "number" ||
+    (typeof configured === "string" && configured.trim() !== "")
+      ? Number(configured)
+      : Number.NaN;
   return Number.isFinite(raw) ? Math.max(0, Math.min(100, raw)) : 1;
 }
 

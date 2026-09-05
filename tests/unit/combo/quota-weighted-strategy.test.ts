@@ -451,6 +451,19 @@ test("floor NaN/undefined → 1; -1 → 0; 101 → 100", async () => {
     null
   );
   assert.equal(hundred.length, 2);
+
+  // Number(null) and Number("") both coerce to 0, so an unset or blank key
+  // would silently switch the floor off and let the 0.5% account lead.
+  for (const blank of [null, ""]) {
+    const res = await orderTargetsByQuotaWeighted(
+      targets,
+      `fblank-${String(blank)}`,
+      { quotaWeightedFloorPercent: blank },
+      { warn() {} },
+      null
+    );
+    assert.equal(res[0]?.connectionId, ok, `floor=${JSON.stringify(blank)} must fall back to 1`);
+  }
 });
 
 test("pinned connectionId outside apiKeyAllowedConnectionIds is dropped", async () => {
