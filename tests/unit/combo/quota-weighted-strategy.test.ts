@@ -21,7 +21,7 @@ const { registerQuotaFetcher } = await import("../../../open-sse/services/quotaP
 const {
   expandTargetsByQuotaAwareConnections,
   orderTargetsByQuotaWeighted,
-  _pickWeightedIndexForTests,
+  pickWeightedIndex,
 } = await import("../../../open-sse/services/combo/quotaStrategies.ts");
 const { getCircuitBreaker, resetAllCircuitBreakers } =
   await import("../../../src/shared/utils/circuitBreaker.ts");
@@ -210,16 +210,16 @@ test("7 empty + 3 healthy → length 3, no hard-empty", async () => {
 });
 
 test("pickWeightedIndex skips non-positive weights", () => {
-  assert.equal(_pickWeightedIndexForTests([0, 10], 0), 1);
-  assert.equal(_pickWeightedIndexForTests([0, 10], 9.9), 1);
-  assert.equal(_pickWeightedIndexForTests([0, 0, 0], 0), null);
+  assert.equal(pickWeightedIndex([0, 10], 0), 1);
+  assert.equal(pickWeightedIndex([0, 10], 9.9), 1);
+  assert.equal(pickWeightedIndex([0, 0, 0], 0), null);
 });
 
 test("pickWeightedIndex half-open boundary acc > r", () => {
-  assert.equal(_pickWeightedIndexForTests([40, 20], 0), 0);
-  assert.equal(_pickWeightedIndexForTests([40, 20], 39.999), 0);
-  assert.equal(_pickWeightedIndexForTests([40, 20], 40), 1);
-  assert.equal(_pickWeightedIndexForTests([40, 20], 59.999), 1);
+  assert.equal(pickWeightedIndex([40, 20], 0), 0);
+  assert.equal(pickWeightedIndex([40, 20], 39.999), 0);
+  assert.equal(pickWeightedIndex([40, 20], 40), 1);
+  assert.equal(pickWeightedIndex([40, 20], 59.999), 1);
 });
 
 test("weighted draw float 0 hits first pool member, ~1 hits last", async () => {

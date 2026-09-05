@@ -720,7 +720,7 @@ type QuotaWeightedScored = {
  * negative weights are skipped so `r === 0` cannot land on a zero-weight
  * leading slot. Returns null when every weight is non-positive.
  */
-export function _pickWeightedIndexForTests(weights: number[], r: number): number | null {
+export function pickWeightedIndex(weights: number[], r: number): number | null {
   const positive: Array<{ i: number; w: number }> = [];
   let sum = 0;
   for (let i = 0; i < weights.length; i++) {
@@ -805,7 +805,7 @@ export async function orderTargetsByQuotaWeighted(
   const sum = weights.reduce((acc, w) => acc + w, 0);
   let pickIndex: number | null = null;
   if (sum > 0) {
-    pickIndex = _pickWeightedIndexForTests(weights, secureRandomFloat() * sum);
+    pickIndex = pickWeightedIndex(weights, secureRandomFloat() * sum);
   }
   if (pickIndex === null) {
     pickIndex = secureRandomInt(selected.length);
