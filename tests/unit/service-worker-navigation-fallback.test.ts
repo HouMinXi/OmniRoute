@@ -126,6 +126,34 @@ test("#11779: API and Next assets still go through the worker", async () => {
   assert.equal(await (await asset.response!).text(), "ok");
 });
 
+test("#11779: /dashboardfoo is not treated as a dashboard path", async () => {
+  const harness = createServiceWorkerHarness();
+  harness.setFetch(async () => new Response("ok", { status: 200 }));
+  const result = await harness.dispatchFetch({
+    url: "https://app.example/dashboardfoo",
+    method: "GET",
+    mode: "cors",
+    destination: "script",
+  });
+  assert.equal(result.intercepted, true, "prefix match must not swallow /dashboardfoo");
+
+  const dash = await harness.dispatchFetch({
+    url: "https://app.example/dashboard",
+    method: "GET",
+    mode: "cors",
+    destination: "script",
+  });
+  assert.equal(dash.intercepted, false, "/dashboard exact must stay excluded");
+
+  const nested = await harness.dispatchFetch({
+    url: "https://app.example/dashboard/quota",
+    method: "GET",
+    mode: "cors",
+    destination: "script",
+  });
+  assert.equal(nested.intercepted, false, "/dashboard/quota must stay excluded");
+});
+
 test("#5165: static assets stay cache-first; navigations do not", async () => {
   const harness = createServiceWorkerHarness();
   const icon = {

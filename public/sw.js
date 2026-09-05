@@ -7,6 +7,13 @@ const APP_SHELL = [
 ];
 const EXCLUDED_PATH_PREFIXES = ["/api/", "/a2a", "/dashboard"];
 
+function pathIsExcluded(pathname) {
+  return EXCLUDED_PATH_PREFIXES.some((prefix) => {
+    const base = prefix.endsWith("/") ? prefix.slice(0, -1) : prefix;
+    return pathname === base || pathname.startsWith(`${base}/`);
+  });
+}
+
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches
@@ -37,9 +44,7 @@ self.addEventListener("fetch", (event) => {
 
   const requestUrl = new URL(event.request.url);
   const isSameOrigin = requestUrl.origin === self.location.origin;
-  const isExcludedPath = EXCLUDED_PATH_PREFIXES.some((prefix) =>
-    requestUrl.pathname.startsWith(prefix)
-  );
+  const excluded = pathIsExcluded(requestUrl.pathname);
   const isNextAsset = requestUrl.pathname.startsWith("/_next/");
   const destination = event.request.destination;
   const isStaticAsset = ["style", "script", "image", "font"].includes(destination);
@@ -49,7 +54,7 @@ self.addEventListener("fetch", (event) => {
   // stale Alt-Svc advertisement; respondWith(Response.error()) on a dead QUIC
   // socket made F5 hang until a new tab opened a fresh connection.
   // Never cache API/dashboard traffic with potentially auth-sensitive content.
-  if (!isSameOrigin || isExcludedPath || isNavigateRequest) {
+  if (!isSameOrigin || excluded || isNavigateRequest) {
     return;
   }
 
