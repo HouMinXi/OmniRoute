@@ -1,6 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { decodeGrokResetCreditsFrame } from "../../open-sse/services/grokResetCreditsFrame.ts";
+import {
+  decodeGrokResetCreditsFrame,
+  encodeRedeemResetRequest,
+} from "../../open-sse/services/grokResetCreditsFrame.ts";
 
 const GRANTED = 1786560540;
 const EXPIRES = 1789238940;
@@ -69,6 +72,9 @@ test("one unexpired field-10 token counts as 1", () => {
   if (!decoded.ok) return;
   assert.equal(decoded.snapshot.count, 1);
   assert.equal(decoded.snapshot.nextExpiresAt, new Date(EXPIRES * 1000).toISOString());
+  assert.equal(decoded.tokens.length, 1);
+  assert.equal(decoded.tokens[0]?.tokenId, TOKEN_ID);
+  assert.equal(decoded.tokens[0]?.expiresAt, new Date(EXPIRES * 1000).toISOString());
 });
 
 test("repeated field-10 is not collapsed by a Map walker", () => {
@@ -81,6 +87,10 @@ test("repeated field-10 is not collapsed by a Map walker", () => {
   if (!decoded.ok) return;
   assert.equal(decoded.snapshot.count, 2);
   assert.equal(decoded.snapshot.nextExpiresAt, new Date(EXPIRES * 1000).toISOString());
+  assert.deepEqual(
+    decoded.tokens.map((token) => token.tokenId),
+    ["test-token-aa", "test-token-bb"]
+  );
 });
 
 test("expired tokens are dropped from the count", () => {
@@ -124,4 +134,15 @@ test("13-byte token id is a string, not a nested protobuf message", () => {
   assert.equal(decoded.ok, true);
   if (!decoded.ok) return;
   assert.equal(decoded.snapshot.count, 1);
+  assert.equal(decoded.tokens[0]?.tokenId, TOKEN_ID);
+  assert.equal(decoded.tokens[0]?.tokenId.length, 13);
+});
+
+test("RedeemReset request encodes token_id as protobuf field 10", () => {
+  const encoded = encodeRedeemResetRequest(TOKEN_ID);
+  const tag = encoded[0];
+  const length = encoded[1];
+  assert.equal(tag, (10 << 3) | 2);
+  assert.equal(length, TOKEN_ID.length);
+  assert.equal(encoded.subarray(2).toString("utf8"), TOKEN_ID);
 });

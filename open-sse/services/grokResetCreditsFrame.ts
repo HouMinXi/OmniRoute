@@ -4,7 +4,7 @@
  *
  * Live shape (X500, 2026-09-05): empty DATA + grpc-status 0 = inventory 0;
  * otherwise repeated top-level field 10, each a ConsumerResetToken:
- *   field 1 (bytes) token id — never exported
+ *   field 1 (bytes) token id — server-side redeem only, never logged
  *   field 2 (varint) granted unix seconds
  *   field 3 (varint) expires unix seconds
  *
@@ -21,7 +21,9 @@ const GRPC_WEB_TRAILER_FLAG_BIT = 0x80;
 const MAX_VARINT_SHIFT_BITS = 70n;
 
 const FIELD_RESET_TOKEN = 10;
+const TOKEN_FIELD_ID = 1;
 const TOKEN_FIELD_EXPIRES = 3;
+const REDEEM_REQUEST_TOKEN_ID_FIELD = 10;
 
 type ProtoField =
   | { wireType: typeof WIRE_TYPE_VARINT; value: number }
@@ -37,9 +39,45 @@ export type GrokResetCreditsSnapshot = {
   nextExpiresAt: string | null;
 };
 
+export type GrokResetCreditToken = {
+  tokenId: string;
+  expiresAt: string | null;
+};
+
 export type GrokResetCreditsDecode =
-  | { ok: true; snapshot: GrokResetCreditsSnapshot }
+  | { ok: true; snapshot: GrokResetCreditsSnapshot; tokens: GrokResetCreditToken[] }
   | { ok: false; reason: "empty-buffer" | "no-data-frame" | "malformed" | "trailer-nonzero" };
+
+function encodeVarint(value: number): Buffer {
+  const bytes: number[] = [];
+  let n = Math.floor(value);
+  while (n > 0x7f) {
+    bytes.push((n & 0x7f) | 0x80);
+    n = Math.floor(n / 128);
+  }
+  bytes.push(n);
+  return Buffer.from(bytes);
+}
+
+/**
+ * ConsumerRedeemResetReq.token_id is field 10 (live X500 2026-09-05:
+ * fake field-10 id → grpc-status 9 "does not exist"; field 1 / empty →
+ * grpc-status 3 "Invalid token_id").
+ */
+export function encodeRedeemResetRequest(tokenId: string): Buffer {
+  const body = Buffer.from(tokenId, "utf8");
+  return Buffer.concat([
+    encodeVarint((REDEEM_REQUEST_TOKEN_ID_FIELD << 3) | WIRE_TYPE_LENGTH_DELIMITED),
+    encodeVarint(body.length),
+    body,
+  ]);
+}
+
+export function encodeGrpcWebRequest(payload: Buffer): Buffer {
+  const header = Buffer.alloc(5);
+  header.writeUInt32BE(payload.length, 1);
+  return Buffer.concat([header, payload]);
+}
 
 function readVarint(buffer: Buffer, offset: number): { value: number; next: number } | null {
   let result = 0n;
@@ -120,11 +158,49 @@ function walkFields(buffer: Buffer): TaggedField[] | null {
   return fields;
 }
 
-function parseGrpcStatus(trailerBody: Buffer): number | null {
+function decodeTrailerMessage(raw: string | null): string | null {
+  if (!raw) return null;
+  try {
+    return decodeURIComponent(raw.replace(/\+/g, " "));
+  } catch {
+    return raw;
+  }
+}
+
+function parseTrailer(trailerBody: Buffer): { status: number | null; message: string | null } {
   const text = trailerBody.toString("utf8");
-  const match = text.match(/grpc-status:\s*(\d+)/);
-  if (!match) return null;
-  return Number(match[1]);
+  const statusMatch = text.match(/grpc-status:\s*(\d+)/);
+  const messageMatch = text.match(/grpc-message:\s*([^\r\n]+)/);
+  return {
+    status: statusMatch ? Number(statusMatch[1]) : null,
+    message: decodeTrailerMessage(messageMatch?.[1] ?? null),
+  };
+}
+
+export function decodeGrokGrpcWebRpc(
+  buffer: Buffer,
+  headerStatus?: string | null,
+  headerMessage?: string | null
+): { grpcStatus: string; grpcMessage: string | null } {
+  let trailerStatus: number | null = null;
+  let trailerMessage: string | null = null;
+  let offset = 0;
+  while (offset < buffer.length) {
+    const frame = probeFrameHeader(buffer, offset);
+    if (!frame) break;
+    const frameEnd = frame.payloadStart + frame.payloadLength;
+    const body = buffer.subarray(frame.payloadStart, frameEnd);
+    if ((frame.flag & GRPC_WEB_TRAILER_FLAG_BIT) !== 0) {
+      const parsed = parseTrailer(body);
+      if (parsed.status !== null) trailerStatus = parsed.status;
+      if (parsed.message) trailerMessage = parsed.message;
+    }
+    offset = frameEnd;
+  }
+  const grpcStatus =
+    trailerStatus !== null ? String(trailerStatus) : headerStatus && headerStatus.trim() ? headerStatus.trim() : "13";
+  const grpcMessage = trailerMessage ?? decodeTrailerMessage(headerMessage ?? null);
+  return { grpcStatus, grpcMessage };
 }
 
 function splitFrames(buffer: Buffer): {
@@ -143,7 +219,7 @@ function splitFrames(buffer: Buffer): {
     const frameEnd = frame.payloadStart + frame.payloadLength;
     const body = buffer.subarray(frame.payloadStart, frameEnd);
     if ((frame.flag & GRPC_WEB_TRAILER_FLAG_BIT) !== 0) {
-      const status = parseGrpcStatus(body);
+      const status = parseTrailer(body).status;
       if (status !== null) trailerStatus = status;
     } else if (!sawData) {
       sawData = true;
@@ -164,32 +240,53 @@ function tokenExpiresAtMs(tokenFields: TaggedField[]): number | null {
   return expires.field.value * 1000;
 }
 
-function snapshotFromPayload(payload: Buffer, nowMs: number): GrokResetCreditsSnapshot | null {
+function tokenIdFromFields(tokenFields: TaggedField[]): string | null {
+  const id = tokenFields.find(
+    (field) =>
+      field.fieldNumber === TOKEN_FIELD_ID && field.field.wireType === WIRE_TYPE_LENGTH_DELIMITED
+  );
+  if (!id || id.field.wireType !== WIRE_TYPE_LENGTH_DELIMITED) return null;
+  const tokenId = id.field.bytes.toString("utf8").trim();
+  return tokenId.length > 0 ? tokenId : null;
+}
+
+function inventoryFromPayload(
+  payload: Buffer,
+  nowMs: number
+): { snapshot: GrokResetCreditsSnapshot; tokens: GrokResetCreditToken[] } | null {
   if (payload.length === 0) {
-    return { count: 0, nextExpiresAt: null };
+    return { snapshot: { count: 0, nextExpiresAt: null }, tokens: [] };
   }
 
   const top = walkFields(payload);
   if (!top) return null;
 
+  const tokens: GrokResetCreditToken[] = [];
   const expiresMs: number[] = [];
-  let count = 0;
 
   for (const tagged of top) {
     if (tagged.fieldNumber !== FIELD_RESET_TOKEN) continue;
     if (tagged.field.wireType !== WIRE_TYPE_LENGTH_DELIMITED) return null;
     const tokenFields = walkFields(tagged.field.bytes);
     if (!tokenFields) return null;
+    const tokenId = tokenIdFromFields(tokenFields);
+    if (!tokenId) return null;
     const expires = tokenExpiresAtMs(tokenFields);
     if (expires !== null && expires < nowMs) continue;
-    count += 1;
+    tokens.push({
+      tokenId,
+      expiresAt: expires === null ? null : new Date(expires).toISOString(),
+    });
     if (expires !== null) expiresMs.push(expires);
   }
 
   const next = expiresMs.length > 0 ? Math.min(...expiresMs) : null;
   return {
-    count,
-    nextExpiresAt: next === null ? null : new Date(next).toISOString(),
+    snapshot: {
+      count: tokens.length,
+      nextExpiresAt: next === null ? null : new Date(next).toISOString(),
+    },
+    tokens,
   };
 }
 
@@ -204,9 +301,9 @@ export function decodeGrokResetCreditsFrame(
   try {
     const framed = probeFrameHeader(buffer, 0) !== null;
     if (!framed) {
-      const snapshot = snapshotFromPayload(buffer, nowMs);
-      if (!snapshot) return { ok: false, reason: "malformed" };
-      return { ok: true, snapshot };
+      const inventory = inventoryFromPayload(buffer, nowMs);
+      if (!inventory) return { ok: false, reason: "malformed" };
+      return { ok: true, ...inventory };
     }
 
     const { dataPayload, sawData, trailerStatus } = splitFrames(buffer);
@@ -217,9 +314,9 @@ export function decodeGrokResetCreditsFrame(
       return { ok: false, reason: "no-data-frame" };
     }
 
-    const snapshot = snapshotFromPayload(dataPayload, nowMs);
-    if (!snapshot) return { ok: false, reason: "malformed" };
-    return { ok: true, snapshot };
+    const inventory = inventoryFromPayload(dataPayload, nowMs);
+    if (!inventory) return { ok: false, reason: "malformed" };
+    return { ok: true, ...inventory };
   } catch {
     return { ok: false, reason: "malformed" };
   }

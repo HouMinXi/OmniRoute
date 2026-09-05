@@ -451,11 +451,12 @@ test("grok-cli omits the reset-credit row when bankedResetCredits is absent", ()
   );
 });
 
-test("grok-cli never exposes the Codex redeem button", () => {
+test("grok-cli exposes the redeem button when banked reset credits are present", () => {
   const parsed = providerLimitUtils.parseQuotaData("grok-cli", {
     quotas: { weekly: { used: 0, total: 100, remainingPercentage: 100 } },
     bankedResetCredits: 2,
   });
-  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("grok-cli", parsed), false);
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("grok-cli", parsed), true);
   assert.equal(providerLimitUtils.computeCanRedeemResetCredit("codex", parsed), true);
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("claude", parsed), false);
 });
