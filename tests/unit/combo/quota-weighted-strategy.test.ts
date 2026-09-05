@@ -18,7 +18,7 @@ const quotaCache = await import("../../../src/domain/quotaCache.ts");
 const { getResetAwareRemainingPercent } =
   await import("../../../open-sse/services/combo/quotaScoring.ts");
 const { registerQuotaFetcher } = await import("../../../open-sse/services/quotaPreflight.ts");
-const { expandTargetsByQuotaAwareConnections } =
+const { expandTargetsByQuotaAwareConnections, orderTargetsByQuotaWeighted } =
   await import("../../../open-sse/services/combo/quotaStrategies.ts");
 const { resetAllCircuitBreakers } = await import("../../../src/shared/utils/circuitBreaker.ts");
 const { _setSecureRandomFloatSource } = await import("../../../src/shared/utils/secureRandom.ts");
@@ -138,4 +138,62 @@ test("dual: default expand drops 0.5% agy via 99% kick; skipExhaustionFilter kee
     kept.expandedTargets.some((t) => t.connectionId === healthy),
     true
   );
+});
+
+test("empty targets → []", async () => {
+  const out = await orderTargetsByQuotaWeighted([], "empty", {}, { warn() {} }, null);
+  assert.deepEqual(out, []);
+});
+
+test("A/B isolation: 7 hard-empty + 2 at 0.5% + 1 at 40%, floor=1", async () => {
+  const provider = "agy";
+  registerQuotaFetcher(provider, async (connectionId) => {
+    if (connectionId.startsWith("dead-")) return quotaAt(1, { limitReached: true });
+    if (connectionId.startsWith("low-")) return quotaAt(0.995);
+    return quotaAt(0.6);
+  });
+  const dead = Array.from({ length: 7 }, () => `dead-${randomUUID()}`);
+  const low = [`low-${randomUUID()}`, `low-${randomUUID()}`];
+  const healthy = `ok-${randomUUID()}`;
+  const ids = [...dead, ...low, healthy];
+  const targets = ids.map((id) => makeTarget(provider, id));
+
+  _setSecureRandomFloatSource(() => 0);
+  const ordered = await orderTargetsByQuotaWeighted(
+    targets,
+    "ab-iso",
+    { quotaWeightedFloorPercent: 1 },
+    { warn() {} },
+    null
+  );
+
+  assert.equal(ordered[0]?.connectionId, healthy);
+  assert.equal(ordered.length, 3);
+  assert.deepEqual(
+    ordered.slice(1).map((t) => t.connectionId),
+    low
+  );
+  for (const id of dead) {
+    assert.equal(ordered.some((t) => t.connectionId === id), false);
+  }
+});
+
+test("7 empty + 3 healthy → length 3, no hard-empty", async () => {
+  const provider = "agy";
+  registerQuotaFetcher(provider, async (connectionId) =>
+    connectionId.startsWith("dead-") ? quotaAt(1, { limitReached: true }) : quotaAt(0.2)
+  );
+  const dead = Array.from({ length: 7 }, () => `dead-${randomUUID()}`);
+  const ok = Array.from({ length: 3 }, () => `ok-${randomUUID()}`);
+  _setSecureRandomFloatSource(() => 0);
+  const ordered = await orderTargetsByQuotaWeighted(
+    [...dead, ...ok].map((id) => makeTarget(provider, id)),
+    "seven-three",
+    {},
+    { warn() {} },
+    null
+  );
+  assert.equal(ordered.length, 3);
+  for (const id of dead) assert.equal(ordered.some((t) => t.connectionId === id), false);
+  for (const id of ok) assert.equal(ordered.some((t) => t.connectionId === id), true);
 });
