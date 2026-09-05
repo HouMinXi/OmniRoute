@@ -48,10 +48,9 @@ test("attempt budget lives on state.globalAttempts, not extra.globalAttempts box
 
 test("handleComboChatInner does not leave unused delay locals or unused failureTracker import", async () => {
   const comboSrc = readFileSync(resolve(here, "../../../open-sse/services/combo.ts"), "utf8");
-  const inner = comboSrc.slice(
-    comboSrc.indexOf("async function handleComboChatInner"),
-    comboSrc.indexOf("async function handleRoundRobinCombo")
-  );
+  const innerStart = comboSrc.indexOf("async function handleComboChatInner");
+  const rrStart = comboSrc.indexOf("async function handleRoundRobinCombo");
+  const inner = comboSrc.slice(innerStart, rrStart === -1 ? comboSrc.length : rrStart);
   assert.doesNotMatch(inner, /const retryDelayMs = resolveDelayMs/);
   assert.doesNotMatch(inner, /const fallbackDelayMs = resolveDelayMs/);
   assert.doesNotMatch(comboSrc, /clearComboFailureTracking/);
