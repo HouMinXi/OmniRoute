@@ -18,9 +18,103 @@ interface DbLike {
 type CodexScopedQuotaPatch = {
   quotaState?: JsonRecord;
   exhaustedWindow?: "5h" | "7d" | null;
-  rateLimitedUntil?: string;
+  rateLimitedUntil?: string | null;
   rateLimitSource?: "fallback" | "quota_reset";
 };
+
+const CODEX_CHILD_COOLDOWN_KEYS = [
+  "codexScopeRateLimitedUntil",
+  "codexScopeRateLimitSource",
+] as const;
+
+function omitEmptyRecord(record: JsonRecord): JsonRecord | undefined {
+  return Object.keys(record).length > 0 ? record : undefined;
+}
+
+/** Drop nested Codex child cooldowns; keep quota snapshots and unrelated keys. */
+export function stripCodexChildCooldownFields(psd: JsonRecord): JsonRecord {
+  if (!connectionHasCodexChildCooldown(psd)) return psd;
+  const next = { ...psd };
+  for (const key of CODEX_CHILD_COOLDOWN_KEYS) delete next[key];
+  return next;
+}
+
+/** PUT/CAS payload that clears the parent column must also drop nested maps. */
+export function applyCodexChildCooldownClearOnUpdate(
+  data: JsonRecord,
+  psd: JsonRecord
+): JsonRecord {
+  if (!Object.hasOwn(data, "rateLimitedUntil")) return psd;
+  if (data.rateLimitedUntil != null && data.rateLimitedUntil !== "") return psd;
+  return stripCodexChildCooldownFields(psd);
+}
+
+function connectionHasCodexChildCooldown(psd: JsonRecord): boolean {
+  return "codexScopeRateLimitedUntil" in psd || "codexScopeRateLimitSource" in psd;
+}
+
+/**
+ * Persist a full-parent cooldown lift into the nested Codex child maps.
+ * When `alsoClearTopLevel` is set, the parent `rate_limited_until` column is
+ * nulled in the same transaction so a crash between the two writes cannot
+ * leave a nested child map behind a cleared parent column.
+ */
+export function stripCodexChildCooldownsFromConnection(
+  id: string,
+  options?: { alsoClearTopLevel?: boolean }
+): void {
+  if (typeof id !== "string" || id.length === 0) return;
+  const db = getDbInstance() as unknown as DbLike;
+  const alsoClearTopLevel = options?.alsoClearTopLevel === true;
+  const candidate = db
+    .prepare("SELECT provider FROM provider_connections WHERE id = ?")
+    .get(id);
+  const isCodex = toRecord(candidate).provider === "codex";
+  if (!alsoClearTopLevel && !isCodex) return;
+
+  backupDbFile("pre-write");
+  const wrote = db.transaction(() => {
+    const existing = db
+      .prepare(
+        "SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?"
+      )
+      .get(id);
+    if (!existing) return false;
+    const existingRecord = toRecord(rowToCamel(existing));
+    const providerSpecificData = toRecord(existingRecord.providerSpecificData);
+    const stripNested =
+      existingRecord.provider === "codex" &&
+      connectionHasCodexChildCooldown(providerSpecificData);
+    if (!alsoClearTopLevel && !stripNested) return false;
+
+    const now = new Date().toISOString();
+    if (alsoClearTopLevel && stripNested) {
+      db.prepare(
+        `UPDATE provider_connections
+         SET rate_limited_until = NULL,
+             provider_specific_data = ?,
+             updated_at = ?
+         WHERE id = ?`
+      ).run(JSON.stringify(stripCodexChildCooldownFields(providerSpecificData)), now, id);
+      return true;
+    }
+    if (alsoClearTopLevel) {
+      db.prepare(
+        `UPDATE provider_connections
+         SET rate_limited_until = NULL, updated_at = ?
+         WHERE id = ?`
+      ).run(now, id);
+      return true;
+    }
+    db.prepare(
+      `UPDATE provider_connections
+       SET provider_specific_data = ?, updated_at = ?
+       WHERE id = ?`
+    ).run(JSON.stringify(stripCodexChildCooldownFields(providerSpecificData)), now, id);
+    return true;
+  })();
+  if (wrote) invalidateDbCache("connections");
+}
 
 /**
  * Atomically merge one virtual Codex child's quota evidence into its persisted parent.
@@ -70,28 +164,35 @@ export async function updateCodexScopedQuotaState(
       }
     }
 
-    if (patch.rateLimitedUntil) {
-      const scopeCooldowns = toRecord(providerSpecificData.codexScopeRateLimitedUntil);
-      const sourceByScope = toRecord(providerSpecificData.codexScopeRateLimitSource);
-      const existingCooldownMs =
-        typeof scopeCooldowns[scope] === "string"
-          ? new Date(scopeCooldowns[scope] as string).getTime()
-          : NaN;
-      const existingIsAuthoritative =
-        sourceByScope[scope] === "quota_reset" &&
-        patch.rateLimitSource !== "quota_reset" &&
-        Number.isFinite(existingCooldownMs) &&
-        existingCooldownMs > Date.now();
-      nextProviderSpecificData.codexScopeRateLimitedUntil = {
-        ...scopeCooldowns,
-        [scope]: existingIsAuthoritative ? scopeCooldowns[scope] : patch.rateLimitedUntil,
-      };
-      nextProviderSpecificData.codexScopeRateLimitSource = {
-        ...sourceByScope,
-        [scope]: existingIsAuthoritative
+    if (patch.rateLimitedUntil !== undefined) {
+      const scopeCooldowns = { ...toRecord(providerSpecificData.codexScopeRateLimitedUntil) };
+      const sourceByScope = { ...toRecord(providerSpecificData.codexScopeRateLimitSource) };
+      if (patch.rateLimitedUntil) {
+        const existingCooldownMs =
+          typeof scopeCooldowns[scope] === "string"
+            ? new Date(scopeCooldowns[scope] as string).getTime()
+            : NaN;
+        const existingIsAuthoritative =
+          sourceByScope[scope] === "quota_reset" &&
+          patch.rateLimitSource !== "quota_reset" &&
+          Number.isFinite(existingCooldownMs) &&
+          existingCooldownMs > Date.now();
+        scopeCooldowns[scope] = existingIsAuthoritative
+          ? scopeCooldowns[scope]
+          : patch.rateLimitedUntil;
+        sourceByScope[scope] = existingIsAuthoritative
           ? sourceByScope[scope]
-          : (patch.rateLimitSource ?? "fallback"),
-      };
+          : (patch.rateLimitSource ?? "fallback");
+      } else {
+        delete scopeCooldowns[scope];
+        delete sourceByScope[scope];
+      }
+      const nextCooldowns = omitEmptyRecord(scopeCooldowns);
+      const nextSources = omitEmptyRecord(sourceByScope);
+      if (nextCooldowns) nextProviderSpecificData.codexScopeRateLimitedUntil = nextCooldowns;
+      else delete nextProviderSpecificData.codexScopeRateLimitedUntil;
+      if (nextSources) nextProviderSpecificData.codexScopeRateLimitSource = nextSources;
+      else delete nextProviderSpecificData.codexScopeRateLimitSource;
     }
 
     db.prepare(
