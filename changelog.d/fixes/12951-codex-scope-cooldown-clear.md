@@ -1,0 +1,1 @@
+- **fix(codex):** dashboard "clear cooldown" and the CAS recovery path now drop nested `codexScopeRateLimitedUntil` maps in the same write that nulls `rate_limited_until`, so a Codex account is no longer skipped after quota is back ([#12817](https://github.com/diegosouzapw/OmniRoute/issues/12817), [#12951](https://github.com/diegosouzapw/OmniRoute/pull/12951))
