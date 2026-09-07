@@ -1031,6 +1031,8 @@ export {
   applyCodexChildCooldownClearOnUpdate,
   stripCodexChildCooldownFields,
   stripCodexChildCooldownsFromConnection,
+  hasCodexScopeCooldown,
+  liftCodexScopeCooldownOnHeadroom,
 } from "./providers/codexAccountState";
 
 /**

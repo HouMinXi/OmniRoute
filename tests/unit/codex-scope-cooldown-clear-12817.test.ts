@@ -12,6 +12,8 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const rateLimit = await import("../../src/lib/db/providers/rateLimit.ts");
 const codexAccount = await import("../../open-sse/services/codexAccount/index.ts");
+const quotaSnapshots = await import("../../src/lib/db/quotaSnapshots.ts");
+const quotaCache = await import("../../src/domain/quotaCache.ts");
 
 async function resetStorage(): Promise<void> {
   core.resetDbInstance();
@@ -226,4 +228,222 @@ test("#12817 clearing a non-Codex cooldown leaves providerSpecificData alone", a
   const after = await readConnection(connection.id);
   assert.equal(after.rateLimitedUntil, undefined);
   assert.equal(psd(after).leftover, "keep-me");
+});
+
+test("#12860 saveQuotaSnapshot with headroom lifts fallback-sourced scope cooldown", async () => {
+  const connection = await seedCodexConnection();
+  await persistBothChildCooldowns(connection.id);
+
+  const before = await readConnection(connection.id);
+  assert.ok(codexAccount.getCodexChildCooldown(before as never, "gpt-5.5"));
+
+  quotaSnapshots.saveQuotaSnapshot({
+    provider: "codex",
+    connection_id: connection.id,
+    window_key: "primary",
+    remaining_percentage: 100,
+    is_exhausted: 0,
+    next_reset_at: futureIso(3600_000),
+    window_duration_ms: 18_000_000,
+    raw_data: null,
+  });
+
+  const after = await readConnection(connection.id);
+  const data = psd(after);
+  const until = data.codexScopeRateLimitedUntil as Record<string, unknown> | undefined;
+  assert.equal(until?.codex, undefined);
+  assert.equal(typeof until?.spark, "string");
+  assert.equal(codexAccount.getCodexChildCooldown(after as never, "gpt-5.5"), null);
+  assert.equal(codexAccount.isCodexChildUnavailable(after as never, "gpt-5.5"), false);
+});
+
+test("#12860 saveQuotaSnapshot with headroom does NOT lift authoritative quota_reset cooldown", async () => {
+  const connection = await seedCodexConnection();
+  const reset5h = futureIso(120_000);
+  const reset7d = futureIso(600_000);
+
+  await codexAccount.persistCodexChildQuotaResponse({
+    connectionId: connection.id,
+    model: "gpt-5.5",
+    headers: quotaHeaders(reset5h, reset7d, "95"),
+    status: 429,
+  });
+
+  const before = await readConnection(connection.id);
+  assert.ok(codexAccount.getCodexChildCooldown(before as never, "gpt-5.5"));
+
+  quotaSnapshots.saveQuotaSnapshot({
+    provider: "codex",
+    connection_id: connection.id,
+    window_key: "session",
+    remaining_percentage: 100,
+    is_exhausted: 0,
+    next_reset_at: futureIso(3600_000),
+    window_duration_ms: 18_000_000,
+    raw_data: null,
+  });
+
+  const after = await readConnection(connection.id);
+  const data = psd(after);
+  const until = data.codexScopeRateLimitedUntil as Record<string, unknown> | undefined;
+  assert.equal(typeof until?.codex, "string");
+  assert.ok(codexAccount.getCodexChildCooldown(after as never, "gpt-5.5"));
+});
+
+test("#12860 saveQuotaSnapshot does NOT lift scope cooldown if another window for that scope is still exhausted", async () => {
+  const connection = await seedCodexConnection();
+  await codexAccount.persistCodexChildCooldown({
+    connectionId: connection.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: futureIso(120_000),
+  });
+
+  // Weekly window is currently exhausted (0% remaining)
+  quotaSnapshots.saveQuotaSnapshot({
+    provider: "codex",
+    connection_id: connection.id,
+    window_key: "weekly",
+    remaining_percentage: 0,
+    is_exhausted: 1,
+    next_reset_at: futureIso(7200_000),
+    window_duration_ms: 604_800_000,
+    raw_data: null,
+  });
+
+  // Session window reports 100% headroom, but weekly is still exhausted
+  quotaSnapshots.saveQuotaSnapshot({
+    provider: "codex",
+    connection_id: connection.id,
+    window_key: "session",
+    remaining_percentage: 100,
+    is_exhausted: 0,
+    next_reset_at: futureIso(3600_000),
+    window_duration_ms: 18_000_000,
+    raw_data: null,
+  });
+
+  let mid = await readConnection(connection.id);
+  assert.ok(codexAccount.getCodexChildCooldown(mid as never, "gpt-5.5"));
+
+  // Now weekly also recovers to 100% headroom
+  quotaSnapshots.saveQuotaSnapshot({
+    provider: "codex",
+    connection_id: connection.id,
+    window_key: "weekly",
+    remaining_percentage: 100,
+    is_exhausted: 0,
+    next_reset_at: futureIso(7200_000),
+    window_duration_ms: 604_800_000,
+    raw_data: null,
+  });
+
+  let after = await readConnection(connection.id);
+  assert.equal(codexAccount.getCodexChildCooldown(after as never, "gpt-5.5"), null);
+  assert.equal(codexAccount.isCodexChildUnavailable(after as never, "gpt-5.5"), false);
+});
+
+test("#12860 saveQuotaSnapshot for spark scope with headroom lifts only spark cooldown", async () => {
+  const connection = await seedCodexConnection();
+  await persistBothChildCooldowns(connection.id);
+
+  quotaSnapshots.saveQuotaSnapshot({
+    provider: "codex",
+    connection_id: connection.id,
+    window_key: "gpt_5_3_codex_spark_session",
+    remaining_percentage: 100,
+    is_exhausted: 0,
+    next_reset_at: futureIso(3600_000),
+    window_duration_ms: 18_000_000,
+    raw_data: null,
+  });
+
+  const after = await readConnection(connection.id);
+  const data = psd(after);
+  const until = data.codexScopeRateLimitedUntil as Record<string, unknown> | undefined;
+  assert.equal(typeof until?.codex, "string");
+  assert.equal(until?.spark, undefined);
+  assert.ok(codexAccount.getCodexChildCooldown(after as never, "gpt-5.5"));
+  assert.equal(codexAccount.getCodexChildCooldown(after as never, "gpt-5.3-codex-spark"), null);
+});
+
+test("#12860 setQuotaCache with fresh usage headroom lifts fallback-sourced scope cooldown", async () => {
+  const connection = await seedCodexConnection();
+  await persistBothChildCooldowns(connection.id);
+
+  const before = await readConnection(connection.id);
+  assert.ok(codexAccount.getCodexChildCooldown(before as never, "gpt-5.5"));
+
+  quotaCache.setQuotaCache(connection.id, "codex", {
+    session: {
+      used: 0,
+      total: 100,
+      remainingPercentage: 100,
+      resetAt: futureIso(3600_000),
+    },
+  });
+
+  const after = await readConnection(connection.id);
+  const data = psd(after);
+  const until = data.codexScopeRateLimitedUntil as Record<string, unknown> | undefined;
+  assert.equal(until?.codex, undefined);
+  assert.equal(typeof until?.spark, "string");
+  assert.equal(codexAccount.getCodexChildCooldown(after as never, "gpt-5.5"), null);
+  assert.equal(codexAccount.isCodexChildUnavailable(after as never, "gpt-5.5"), false);
+});
+
+test("#12860 quota_reset cooldown that just elapsed is still held by the skew grace window", async () => {
+  const connection = await seedCodexConnection();
+  // Reset deadline sits 5s in the past — inside the 30s clock-skew grace, so a
+  // fast local clock must not lift an upstream-authoritative cooldown early.
+  const justElapsed = new Date(Date.now() - 5_000).toISOString();
+
+  await providersDb.updateProviderConnection(connection.id, {
+    providerSpecificData: {
+      codexScopeRateLimitedUntil: { codex: justElapsed },
+      codexScopeRateLimitSource: { codex: "quota_reset" },
+    },
+  });
+
+  const lifted = providersDb.liftCodexScopeCooldownOnHeadroom(connection.id, "codex");
+  assert.equal(lifted, false);
+
+  const after = await readConnection(connection.id);
+  const until = psd(after).codexScopeRateLimitedUntil as Record<string, unknown> | undefined;
+  assert.equal(until?.codex, justElapsed);
+});
+
+test("#12860 quota_reset cooldown past the skew grace window is lifted", async () => {
+  const connection = await seedCodexConnection();
+  const wellElapsed = new Date(Date.now() - 120_000).toISOString();
+
+  await providersDb.updateProviderConnection(connection.id, {
+    providerSpecificData: {
+      codexScopeRateLimitedUntil: { codex: wellElapsed },
+      codexScopeRateLimitSource: { codex: "quota_reset" },
+    },
+  });
+
+  const lifted = providersDb.liftCodexScopeCooldownOnHeadroom(connection.id, "codex");
+  assert.equal(lifted, true);
+
+  const after = await readConnection(connection.id);
+  assert.equal(psd(after).codexScopeRateLimitedUntil, undefined);
+});
+
+test("#12860 hasCodexScopeCooldown short-circuits the snapshot scan when nothing is parked", async () => {
+  const connection = await seedCodexConnection();
+  assert.equal(providersDb.hasCodexScopeCooldown(connection.id, "codex"), false);
+
+  await codexAccount.persistCodexChildCooldown({
+    connectionId: connection.id,
+    model: "gpt-5.5",
+    rateLimitedUntil: futureIso(120_000),
+  });
+
+  assert.equal(providersDb.hasCodexScopeCooldown(connection.id, "codex"), true);
+  assert.equal(providersDb.hasCodexScopeCooldown(connection.id, "spark"), false);
+
+  const glm = await seedGlmConnection();
+  assert.equal(providersDb.hasCodexScopeCooldown(glm.id, "codex"), false);
+  assert.equal(providersDb.hasCodexScopeCooldown("does-not-exist", "codex"), false);
 });
