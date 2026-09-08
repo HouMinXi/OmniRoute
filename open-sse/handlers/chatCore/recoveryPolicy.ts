@@ -37,6 +37,9 @@ export type RecoveryDecision = {
 export type StreamThrowDecision = { action: "terminal" };
 
 export type OnFailureInput = {
+  // view and model are unused in onFailure today. They stay on the
+  // input so a later lock fill in chatCore providerFailure can pass
+  // them through without widening this type.
   view: RecoveryView;
   status: number;
   message: string;
