@@ -1,0 +1,1 @@
+- **fix(sse):** synthesize Responses API SSE stream when streaming requests fall back to server-side non-streaming web search execution, preventing premature stream closes in Codex CLI and other Responses clients.
