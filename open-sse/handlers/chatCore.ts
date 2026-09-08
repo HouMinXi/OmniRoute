@@ -82,8 +82,8 @@ import {
   redactPassthroughThinkingSignatures,
   isClaudeCodeSemanticPassthroughRequest,
 } from "./chatCore/passthroughHelpers.ts";
-import { recoverAnthropicThinkingSignature } from "./chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "./chatCore/providerExecutionPipeline.ts";
+import { onStreamThrow } from "./chatCore/recoveryPolicy.ts";
 import { runNonStreamingProviderLeg } from "./chatCore/nonStreamingProviderLeg.ts";
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import {
@@ -352,7 +352,6 @@ import {
 } from "../services/accountFallback.ts";
 import { saveIdempotency } from "@/lib/idempotencyLayer";
 import {
-  isModelUnavailableError,
   getNextFamilyFallback,
   isContextOverflowError,
   findLargerContextModel,
@@ -3139,7 +3138,6 @@ export async function handleChatCore({
   let finalBody;
   let claudePromptCacheLogMeta = null;
 
-  let pipelineRecovered = false;
   if (stream) {
     try {
       const pipelineOutcome = await runProviderExecutionPipeline({
@@ -3239,7 +3237,6 @@ export async function handleChatCore({
           executeProviderRequest(modelToCall, allowDedup),
       });
 
-      pipelineRecovered = true;
       currentModel = pipelineOutcome.model;
       if (pipelineOutcome.kind === "error") {
         providerResponse = pipelineOutcome.result.response;
@@ -3295,6 +3292,7 @@ export async function handleChatCore({
         // fail-open: saturation signal is best-effort
       }
     } catch (error) {
+      onStreamThrow();
       trackPendingRequest(model, provider, connectionId, false);
       if (isManagedLeaseFenceError(error)) return managedLeaseFenceErrorResult(error);
       if (isSemaphoreCapacityError(error)) {
@@ -3642,47 +3640,6 @@ export async function handleChatCore({
         );
       }
 
-      const signatureRecovery = pipelineRecovered
-        ? { attempted: false, succeeded: false, execution: null, error: null, recoveryBody: null }
-        : await recoverAnthropicThinkingSignature({
-            provider,
-            statusCode,
-            message,
-            body: translatedBody,
-            execute: async (recoveryBody) => {
-              translatedBody = recoveryBody as typeof translatedBody;
-              return executeProviderRequest(currentModel, false);
-            },
-            parseError: (response) => parseUpstreamError(response, provider),
-          });
-      if (!pipelineRecovered && signatureRecovery.attempted && signatureRecovery.execution) {
-        providerResponse = signatureRecovery.execution.response;
-        if (signatureRecovery.succeeded) {
-          providerUrl = signatureRecovery.execution.url;
-          providerHeaders = signatureRecovery.execution.headers;
-          finalBody = providerRequestCapture.body(signatureRecovery.execution.transformedBody);
-          reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-          updatePendingScope(pendingScope, {
-            providerRequest: finalBody,
-            providerUrl,
-            stage: "provider_response_started",
-          });
-          log?.info?.(
-            "THINKING_SIGNATURE",
-            `Recovered ${provider}/${currentModel} after one historical-thinking retry`
-          );
-        } else if (signatureRecovery.error) {
-          statusCode = signatureRecovery.error.statusCode;
-          message = signatureRecovery.error.message;
-          retryAfterMs = signatureRecovery.error.retryAfterMs;
-          upstreamErrorBody = signatureRecovery.error.responseBody;
-          upstreamErrorCode = signatureRecovery.error.errorCode as string | undefined;
-          upstreamErrorType = signatureRecovery.error.errorType as string | undefined;
-        }
-      }
-
-      if (signatureRecovery.succeeded) break providerFailure;
-
       // #10281 — tiny-budget reasoning probes (e.g. Claude Code's `/model` check
       // sends `max_tokens: 1`): the model burns the whole budget on thinking, and
       // some upstreams (e.g. api.cline.bot for deepseek-v4-flash) answer the empty
@@ -4009,12 +3966,6 @@ export async function handleChatCore({
               lastError: persistentMessage,
               errorCode: statusCode,
             });
-            try {
-              const { setConnectionRateLimitUntil } = await import("@/lib/db/providers");
-              setConnectionRateLimitUntil(errorConnectionId, Date.now() + byopCooldownMs);
-            } catch {
-              // best-effort — never break the error path
-            }
             console.warn(
               `[provider] Node ${errorConnectionId} GCP project required (${statusCode}) — excluded for ${Math.ceil(byopCooldownMs / 1000)}s, routing to other accounts (enter a Project ID to restore)`
             );
@@ -4075,100 +4026,7 @@ export async function handleChatCore({
         updateFromResponseBody(provider, errorConnectionId, upstreamErrorBody, statusCode, model);
       }
 
-      // ── T5: Intra-family model fallback ──────────────────────────────────────
-      // Before returning a model-unavailable error upstream, try sibling models
-      // from the same family. This keeps the request alive on the same account
-      // instead of failing the entire combo.
-      if (!pipelineRecovered && isModelUnavailableError(statusCode, message, provider)) {
-        const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
-        if (nextModel) {
-          triedModels.add(nextModel);
-          currentModel = nextModel;
-          translatedBody.model = nextModel;
-          log?.info?.(
-            "MODEL_FALLBACK",
-            `${model} unavailable (${statusCode}) → trying ${nextModel}`
-          );
-          // Re-execute with the fallback model
-          try {
-            const fallbackResult = await executeProviderRequest(nextModel, false);
-            if (fallbackResult.response.ok) {
-              providerResponse = fallbackResult.response;
-              providerUrl = fallbackResult.url;
-              providerHeaders = fallbackResult.headers;
-              finalBody = providerRequestCapture.body(fallbackResult.transformedBody);
-              reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-              updatePendingScope(pendingScope, {
-                providerRequest: finalBody,
-                providerUrl,
-                stage: "provider_response_started",
-              });
-              // Continue processing with the fallback response — skip error return
-              log?.info?.("MODEL_FALLBACK", `Serving ${nextModel} as fallback for ${model}`);
-              // Jump to streaming/non-streaming handling below
-              // We fall through by NOT returning here
-            } else {
-              // Fallback also failed — return original error
-              persistAttemptLogs({
-                status: statusCode,
-                error: errMsg,
-                providerRequest: finalBody || translatedBody,
-                providerResponse: upstreamErrorBody,
-                clientResponse: buildErrorBody(statusCode, errMsg),
-                cacheSource: "upstream",
-              });
-              persistFailureUsage(statusCode, "model_unavailable");
-              return createErrorResult(
-                statusCode,
-                errMsg,
-                retryAfterMs,
-                upstreamErrorCode,
-                upstreamErrorType,
-                upstreamErrorBody,
-                { passthrough: sourceFormat === FORMATS.CLAUDE }
-              );
-            }
-          } catch {
-            persistAttemptLogs({
-              status: statusCode,
-              error: errMsg,
-              providerRequest: finalBody || translatedBody,
-              providerResponse: upstreamErrorBody,
-              clientResponse: buildErrorBody(statusCode, errMsg),
-              cacheSource: "upstream",
-            });
-            persistFailureUsage(statusCode, "model_unavailable");
-            return createErrorResult(
-              statusCode,
-              errMsg,
-              retryAfterMs,
-              upstreamErrorCode,
-              upstreamErrorType,
-              upstreamErrorBody,
-              { passthrough: sourceFormat === FORMATS.CLAUDE }
-            );
-          }
-        } else {
-          persistAttemptLogs({
-            status: statusCode,
-            error: errMsg,
-            providerRequest: finalBody || translatedBody,
-            providerResponse: upstreamErrorBody,
-            clientResponse: buildErrorBody(statusCode, errMsg),
-            cacheSource: "upstream",
-          });
-          persistFailureUsage(statusCode, "model_unavailable");
-          return createErrorResult(
-            statusCode,
-            errMsg,
-            retryAfterMs,
-            upstreamErrorCode,
-            upstreamErrorType,
-            upstreamErrorBody,
-            { passthrough: sourceFormat === FORMATS.CLAUDE }
-          );
-        }
-      } else if (isContextOverflowError(statusCode, message)) {
+      if (isContextOverflowError(statusCode, message)) {
         const familyCandidates = getModelFamily(currentModel, provider).filter(
           (m) => m !== currentModel && !triedModels.has(m)
         );
@@ -4287,7 +4145,6 @@ export async function handleChatCore({
           { passthrough: sourceFormat === FORMATS.CLAUDE }
         );
       }
-      // ── End T5 ───────────────────────────────────────────────────────────────
     }
   }
 
@@ -4472,7 +4329,6 @@ export async function handleChatCore({
         return err;
       }
 
-      pipelineRecovered = true;
       const expectedConn = managedLease
         ? String(getCurrentConnectionId() || connectionId || "") || undefined
         : undefined;
