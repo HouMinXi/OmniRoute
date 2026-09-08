@@ -86,6 +86,12 @@ test("leaf send pins model via prepareUpstreamBody", async () => {
     true,
     "leaf must call prepareUpstreamBody"
   );
+  const destructure = leafSrc.slice(leafSrc.indexOf("const {"), leafSrc.indexOf("} = deps;"));
+  assert.equal(
+    /(?:^|\n)\s*effectiveModel,/.test(destructure) || destructure.includes("\n    effectiveModel,"),
+    false,
+    "effectiveModel is only the default for modelToCall, not a local"
+  );
 });
 
 test.after(() => {
