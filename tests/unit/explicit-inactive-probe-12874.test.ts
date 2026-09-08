@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
 import { EXPIRED_REPROBE_BLOCKLIST } from "../../src/lib/quota/connectionRecovery.ts";
 import {
   EXPLICIT_INACTIVE_PROBE_INTERVAL_MS,
@@ -212,4 +213,37 @@ test("maybeReactivateAfterExplicitProbe no-ops when allowSuppressedConnections",
     }
   );
   assert.equal(called, 0);
+});
+
+test("W-7 chatHelpers onRequestSuccess calls maybeReactivateAfterExplicitProbe", async () => {
+  const src = fs.readFileSync(new URL("../../src/sse/handlers/chatHelpers.ts", import.meta.url), "utf8");
+  assert.match(src, /await maybeReactivateAfterExplicitProbe\(/);
+  assert.match(src, /clearAccountError/);
+});
+
+test("W-3 clearAccountError update payload has no isActive key", () => {
+  const src = fs.readFileSync(new URL("../../src/sse/services/auth.ts", import.meta.url), "utf8");
+  const start = src.indexOf("export async function clearAccountError");
+  assert.ok(start >= 0, "clearAccountError must exist");
+  const next = src.indexOf("\nexport ", start + 1);
+  const body = next >= 0 ? src.slice(start, next) : src.slice(start);
+  const updateStart = body.indexOf("await updateProviderConnection(");
+  assert.ok(updateStart >= 0, "clearAccountError must call updateProviderConnection");
+  const brace = body.indexOf("{", updateStart);
+  assert.ok(brace >= 0);
+  let depth = 0;
+  let end = -1;
+  for (let i = brace; i < body.length; i++) {
+    if (body[i] === "{") depth += 1;
+    else if (body[i] === "}") {
+      depth -= 1;
+      if (depth === 0) {
+        end = i;
+        break;
+      }
+    }
+  }
+  assert.ok(end > brace);
+  const literal = body.slice(brace, end + 1);
+  assert.equal(/\bisActive\b/.test(literal), false);
 });

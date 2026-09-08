@@ -12,7 +12,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "explicit-inactive-w2
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const auth = await import("../../src/sse/services/auth.ts");
-const { resetExplicitProbeMapForTests } = await import(
+const { maybeReactivateAfterExplicitProbe, resetExplicitProbeMapForTests } = await import(
   "../../src/sse/services/explicitInactiveProbe.ts"
 );
 
@@ -70,4 +70,16 @@ test("W-2 pin + credits_exhausted returns credentials after wiring", async () =>
   );
   assert.equal(creds.connectionId, row.id);
   assert.equal(creds.reactivatedFromInactive, true);
+});
+
+test("W-1 successful probe re-enables inactive pin in SQLite", async () => {
+  const row = await seedInactiveSiliconflow("active");
+  const before = await providersDb.getProviderConnectionById(row.id);
+  assert.equal(before?.isActive, false);
+  await maybeReactivateAfterExplicitProbe({
+    reactivatedFromInactive: true,
+    connectionId: row.id,
+  });
+  const after = await providersDb.getProviderConnectionById(row.id);
+  assert.equal(after?.isActive, true);
 });
