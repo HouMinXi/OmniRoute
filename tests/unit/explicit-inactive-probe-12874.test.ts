@@ -2,7 +2,12 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { EXPIRED_REPROBE_BLOCKLIST } from "../../src/lib/quota/connectionRecovery.ts";
 import {
+  EXPLICIT_INACTIVE_PROBE_INTERVAL_MS,
   EXPLICIT_PROBE_BLOCKLIST,
+  lastExplicitProbeTime,
+  maybeReactivateAfterExplicitProbe,
+  noteExplicitProbe,
+  resetExplicitProbeMapForTests,
   selectExplicitInactiveProbe,
 } from "../../src/sse/services/explicitInactiveProbe.ts";
 
@@ -89,4 +94,122 @@ test("P-13 unavailable + elapsed cooldown -> probe", () => {
     }).kind,
     "probe"
   );
+});
+
+test("storm Map note then select within interval is suppressed", () => {
+  resetExplicitProbeMapForTests();
+  noteExplicitProbe("c1", 1e6);
+  assert.equal(lastExplicitProbeTime("c1"), 1e6);
+  assert.equal(
+    select({ lastProbeAtMs: lastExplicitProbeTime("c1"), nowMs: 1e6 + 10_000 }).kind,
+    "suppressed"
+  );
+});
+
+test("storm Map interval constant is 60s", () => {
+  assert.equal(EXPLICIT_INACTIVE_PROBE_INTERVAL_MS, 60_000);
+});
+
+test("storm Map reset clears last probe time", () => {
+  resetExplicitProbeMapForTests();
+  noteExplicitProbe("c1", 1e6);
+  resetExplicitProbeMapForTests();
+  assert.equal(lastExplicitProbeTime("c1"), null);
+});
+
+test("storm Map evicts oldest when over 4096 entries", () => {
+  resetExplicitProbeMapForTests();
+  for (let i = 0; i < 4096; i++) {
+    noteExplicitProbe(`id-${i}`, i);
+  }
+  noteExplicitProbe("overflow", 4096);
+  assert.equal(lastExplicitProbeTime("id-0"), null);
+  assert.equal(lastExplicitProbeTime("id-1"), 1);
+  assert.equal(lastExplicitProbeTime("overflow"), 4096);
+});
+
+test("W-6 openrouter :free does not reactivate", async () => {
+  let called = 0;
+  await maybeReactivateAfterExplicitProbe(
+    {
+      connectionId: "c1",
+      reactivatedFromInactive: true,
+      provider: "openrouter",
+      requestedModel: "openrouter/foo:free",
+    },
+    async () => {
+      called += 1;
+    }
+  );
+  assert.equal(called, 0);
+});
+
+test("maybeReactivateAfterExplicitProbe calls reactivate on recovered pin", async () => {
+  let called = 0;
+  let seenId = "";
+  await maybeReactivateAfterExplicitProbe(
+    {
+      connectionId: "c1",
+      reactivatedFromInactive: true,
+    },
+    async (id) => {
+      called += 1;
+      seenId = id;
+    }
+  );
+  assert.equal(called, 1);
+  assert.equal(seenId, "c1");
+});
+
+test("maybeReactivateAfterExplicitProbe no-ops without reactivatedFromInactive", async () => {
+  let called = 0;
+  await maybeReactivateAfterExplicitProbe({ connectionId: "c1" }, async () => {
+    called += 1;
+  });
+  assert.equal(called, 0);
+});
+
+test("maybeReactivateAfterExplicitProbe no-ops when explicitProbeSuppressed", async () => {
+  let called = 0;
+  await maybeReactivateAfterExplicitProbe(
+    {
+      connectionId: "c1",
+      reactivatedFromInactive: true,
+      explicitProbeSuppressed: true,
+    },
+    async () => {
+      called += 1;
+    }
+  );
+  assert.equal(called, 0);
+});
+
+test("maybeReactivateAfterExplicitProbe no-ops on shadow traffic", async () => {
+  let called = 0;
+  await maybeReactivateAfterExplicitProbe(
+    {
+      connectionId: "c1",
+      reactivatedFromInactive: true,
+      isShadowTraffic: true,
+    },
+    async () => {
+      called += 1;
+    }
+  );
+  assert.equal(called, 0);
+});
+
+test("maybeReactivateAfterExplicitProbe no-ops when allowSuppressedConnections", async () => {
+  let called = 0;
+  await maybeReactivateAfterExplicitProbe(
+    {
+      connectionId: "c1",
+      reactivatedFromInactive: true,
+      allowSuppressedConnections: true,
+    },
+    async () => {
+      called += 1;
+    }
+  );
+  assert.equal(called, 0);
 });

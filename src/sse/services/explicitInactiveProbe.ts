@@ -1,3 +1,4 @@
+import { updateProviderConnection } from "@/lib/db/providers";
 import { EXPIRED_REPROBE_BLOCKLIST } from "@/lib/quota/connectionRecovery";
 
 export const EXPLICIT_PROBE_BLOCKLIST = EXPIRED_REPROBE_BLOCKLIST;
@@ -72,4 +73,54 @@ export function selectExplicitInactiveProbe(params: {
     return { kind: "suppressed" };
   }
   return { kind: "probe" };
+}
+
+export const EXPLICIT_INACTIVE_PROBE_INTERVAL_MS = 60_000;
+const MAX_PROBE_MAP = 4096;
+const lastExplicitProbeAtMs = new Map<string, number>();
+
+export function noteExplicitProbe(id: string, nowMs: number): void {
+  lastExplicitProbeAtMs.set(id, nowMs);
+  if (lastExplicitProbeAtMs.size > MAX_PROBE_MAP) {
+    const oldest = lastExplicitProbeAtMs.keys().next().value;
+    if (oldest !== undefined) lastExplicitProbeAtMs.delete(oldest);
+  }
+}
+
+export function lastExplicitProbeTime(id: string): number | null {
+  return lastExplicitProbeAtMs.get(id) ?? null;
+}
+
+export function resetExplicitProbeMapForTests(): void {
+  lastExplicitProbeAtMs.clear();
+}
+
+export async function reactivateRecoveredConnection(connectionId: string): Promise<void> {
+  await updateProviderConnection(connectionId, { isActive: true });
+}
+
+export async function maybeReactivateAfterExplicitProbe(
+  input: {
+    connectionId: string;
+    reactivatedFromInactive?: boolean;
+    explicitProbeSuppressed?: boolean;
+    isShadowTraffic?: boolean;
+    allowSuppressedConnections?: boolean;
+    requestedModel?: string | null;
+    provider?: string | null;
+  },
+  reactivate: (connectionId: string) => Promise<void> = reactivateRecoveredConnection
+): Promise<void> {
+  if (!input.reactivatedFromInactive) return;
+  if (input.explicitProbeSuppressed) return;
+  if (input.isShadowTraffic) return;
+  if (input.allowSuppressedConnections) return;
+  if (
+    input.provider === "openrouter" &&
+    typeof input.requestedModel === "string" &&
+    input.requestedModel.includes(":free")
+  ) {
+    return;
+  }
+  await reactivate(input.connectionId);
 }
