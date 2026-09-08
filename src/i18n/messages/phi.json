@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Nabigong simulan ang Command Code auth",
     "connectionDeleted": "Nabura ang koneksyon",
     "connectionFallback": "koneksyon",
-    "coolingConnectionsDescription": "Ang mga koneksyong ito ay nagbalik ng 429 (rate-limit) sa kanilang huling kahilingan. Ang OmniRoute ay laktawan ang mga ito hanggang sa mag-expire ang timer — walang kinakailangang manu-manong pag-disable.",
+    "coolingConnectionsDescription": "Ang mga koneksyong ito ay nagpapalamig pagkatapos ng huling kahilingan. Lalaktawan sila ng OmniRoute hanggang mag-expire ang timer — hindi kailangang i-disable nang mano-mano.",
     "coolingConnectionsTitle": "Kasalukuyang nagpapalamig ({count})",
     "failedDeleteAlias": "Nabigong tanggalin ang alias",
     "failedDeleteConnection": "Nabigong tanggalin ang koneksyon",

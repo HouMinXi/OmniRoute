@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Komennon Code auth käynnistys epäonnistui",
     "connectionDeleted": "Yhteys poistettu",
     "connectionFallback": "yhteys",
-    "coolingConnectionsDescription": "Nämä yhteydet palauttivat 429 (nopeusrajoitus) viimeisellä pyynnöllään. OmniRoute ohittaa ne, kunnes ajastin umpeutuu — manuaalista poistamista ei vaadita.",
+    "coolingConnectionsDescription": "Nämä yhteydet jäähtyvät viimeisen pyynnön jälkeen. OmniRoute ohittaa ne, kunnes ajastin umpeutuu — manuaalista poistoa ei tarvita.",
     "coolingConnectionsTitle": "Tällä hetkellä jäähdytys ({count})",
     "failedDeleteAlias": "Aliasn poistaminen epäonnistui",
     "failedDeleteConnection": "Yhteyden poistaminen epäonnistui",

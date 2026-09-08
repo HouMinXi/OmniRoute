@@ -261,6 +261,7 @@ export const OAUTH_INVALID_TOKEN_SIGNALS = [
   "login cookie",
   "valid authentication credential",
   "invalid credentials",
+  "re-authenticate your cline account",
 ];
 
 // A model that upstream has permanently retired — Gemini's deprecated-model 404

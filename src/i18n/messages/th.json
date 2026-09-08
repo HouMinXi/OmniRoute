@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "ไม่สามารถเริ่มคำสั่ง Code auth ได้",
     "connectionDeleted": "การเชื่อมต่อถูกลบแล้ว",
     "connectionFallback": "การเชื่อมต่อ",
-    "coolingConnectionsDescription": "การเชื่อมต่อเหล่านี้ส่งคืน 429 (อัตราการจำกัด) ในคำขอครั้งสุดท้ายของพวกเขา OmniRoute จะข้ามพวกเขาจนกว่าจะหมดเวลา — ไม่ต้องปิดการใช้งานด้วยตนเอง",
+    "coolingConnectionsDescription": "การเชื่อมต่อเหล่านี้กำลังพักหลังคำขอล่าสุด OmniRoute จะข้ามไปจนกว่าตัวจับเวลาจะหมด — ไม่ต้องปิดด้วยมือ",
     "coolingConnectionsTitle": "กำลังทำความเย็นอยู่ ({count})",
     "failedDeleteAlias": "ไม่สามารถลบชื่อเล่นได้",
     "failedDeleteConnection": "ไม่สามารถลบการเชื่อมต่อได้",

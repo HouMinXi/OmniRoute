@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Fehler beim Starten des Befehls Code auth",
     "connectionDeleted": "Verbindung gelöscht",
     "connectionFallback": "Verbindung",
-    "coolingConnectionsDescription": "Diese Verbindungen haben bei ihrer letzten Anfrage einen 429 (Rate-Limit) zurückgegeben. OmniRoute wird sie überspringen, bis der Timer abläuft – eine manuelle Deaktivierung ist nicht erforderlich.",
+    "coolingConnectionsDescription": "Diese Verbindungen kühlen nach der letzten Anfrage ab. OmniRoute überspringt sie, bis der Timer abläuft — keine manuelle Deaktivierung nötig.",
     "coolingConnectionsTitle": "Aktuell kühlen ({count})",
     "failedDeleteAlias": "Alias konnte nicht gelöscht werden",
     "failedDeleteConnection": "Verbindung konnte nicht gelöscht werden",

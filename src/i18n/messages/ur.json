@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "کمانڈ کوڈ کی توثیق شروع کرنے میں ناکامی",
     "connectionDeleted": "کنکشن حذف کر دیا گیا",
     "connectionFallback": "کنکشن",
-    "coolingConnectionsDescription": "یہ کنکشنز نے اپنی آخری درخواست پر 429 (ریٹ-لیمٹ) واپس کیا۔ OmniRoute انہیں اس وقت تک چھوڑ دے گا جب تک کہ ٹائمر ختم نہ ہو جائے — کوئی دستی غیر فعال کرنے کی ضرورت نہیں۔",
+    "coolingConnectionsDescription": "یہ کنکشن آخری درخواست کے بعد ٹھنڈے ہو رہے ہیں۔ ٹائمر ختم ہونے تک OmniRoute انہیں چھوڑ دے گا — ہاتھ سے بند کرنے کی ضرورت نہیں۔",
     "coolingConnectionsTitle": "فی الحال ٹھنڈا کر رہا ہے ({count})",
     "failedDeleteAlias": "ایلیاس کو حذف کرنے میں ناکامی",
     "failedDeleteConnection": "کنکشن کو حذف کرنے میں ناکامی",

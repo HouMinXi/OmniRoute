@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Échec de start Command Code auth",
     "connectionDeleted": "connexions deleted",
     "connectionFallback": "connexions",
-    "coolingConnectionsDescription": "These connexions returned a 429 (rate-limit) on their last request. OmniRoute will skip them until the timer expires — no manual disable required.",
+    "coolingConnectionsDescription": "Ces connexions refroidissent après leur dernière requête. OmniRoute les ignorera jusqu'à l'expiration du minuteur — aucune désactivation manuelle requise.",
     "coolingConnectionsTitle": "Connexions actuellement en refroidissement ({count})",
     "failedDeleteAlias": "Échec de delete alias",
     "failedDeleteConnection": "Échec de delete connexions",

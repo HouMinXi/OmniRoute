@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Gagal memulai Command Code auth",
     "connectionDeleted": "Koneksi dihapus",
     "connectionFallback": "koneksi",
-    "coolingConnectionsDescription": "Koneksi ini mengembalikan 429 (batas-kecepatan) pada permintaan terakhir mereka. OmniRoute akan melewatkan mereka sampai timer berakhir — tidak perlu menonaktifkan secara manual.",
+    "coolingConnectionsDescription": "Koneksi ini sedang mendingin setelah permintaan terakhir. OmniRoute akan melewatinya sampai timer habis — tidak perlu menonaktifkan secara manual.",
     "coolingConnectionsTitle": "Saat ini mendinginkan ({count})",
     "failedDeleteAlias": "Gagal menghapus alias",
     "failedDeleteConnection": "Gagal menghapus koneksi",

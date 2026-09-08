@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Nem sikerült elindítani a Command Code auth-ot",
     "connectionDeleted": "Kapcsolat törölve",
     "connectionFallback": "kapcsolat",
-    "coolingConnectionsDescription": "Ezek a kapcsolatok 429 (rate-limit) választ adtak az utolsó kérésükre. Az OmniRoute kihagyja őket, amíg az időzítő le nem jár — manuális letiltás nem szükséges.",
+    "coolingConnectionsDescription": "Ezek a kapcsolatok az utolsó kérés után hűlnek. Az OmniRoute kihagyja őket, amíg az időzítő le nem jár — nincs szükség kézi tiltásra.",
     "coolingConnectionsTitle": "Jelenleg hűtés ({count})",
     "failedDeleteAlias": "Nem sikerült törölni az alias-t",
     "failedDeleteConnection": "A kapcsolat törlése nem sikerült",

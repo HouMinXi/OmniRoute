@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Kon opdracht Code auth niet starten",
     "connectionDeleted": "Verbinding verwijderd",
     "connectionFallback": "verbinding",
-    "coolingConnectionsDescription": "Deze verbindingen hebben een 429 (rate-limit) geretourneerd bij hun laatste verzoek. OmniRoute zal ze overslaan totdat de timer verloopt — handmatig uitschakelen is niet nodig.",
+    "coolingConnectionsDescription": "Deze verbindingen koelen af na hun laatste verzoek. OmniRoute slaat ze over tot de timer verloopt — handmatig uitschakelen is niet nodig.",
     "coolingConnectionsTitle": "Momenteel aan het koelen ({count})",
     "failedDeleteAlias": "Kon alias niet verwijderen",
     "failedDeleteConnection": "Verbinding verwijderen mislukt",

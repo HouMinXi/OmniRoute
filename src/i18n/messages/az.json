@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Komanda Kodu auth başlamaqda uğursuz oldu",
     "connectionDeleted": "Bağlantı silindi",
     "connectionFallback": "bağlantı",
-    "coolingConnectionsDescription": "Bu bağlantılar son sorğularında 429 (sürət limiti) aldı. OmniRoute onları zamanlayıcı bitənə qədər atlayacaq — əl ilə deaktiv etməyə ehtiyac yoxdur.",
+    "coolingConnectionsDescription": "Bu bağlantılar son sorğudan sonra soyumaqdadır. OmniRoute taymer bitənə qədər onları atlayacaq — əl ilə söndürmək lazım deyil.",
     "coolingConnectionsTitle": "Hazırda soyudulur ({count})",
     "failedDeleteAlias": "Alias silinmədi",
     "failedDeleteConnection": "Bağlantını silmək mümkün olmadı",

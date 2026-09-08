@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Nie udało się uruchomić polecenia Code auth",
     "connectionDeleted": "Połączenie usunięte",
     "connectionFallback": "połączenie",
-    "coolingConnectionsDescription": "Te połączenia zwróciły 429 (limit szybkości) w swoim ostatnim żądaniu. OmniRoute pominie je, aż timer wygaśnie — nie jest wymagana ręczna dezaktywacja.",
+    "coolingConnectionsDescription": "Te połączenia stygną po ostatnim żądaniu. OmniRoute pominie je, aż timer wygaśnie — ręczna dezaktywacja nie jest potrzebna.",
     "coolingConnectionsTitle": "Obecnie chłodzenie ({count})",
     "failedDeleteAlias": "Nie udało się usunąć aliasu",
     "failedDeleteConnection": "Nie udało się usunąć połączenia",

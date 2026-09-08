@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Не удалось запустить команду Code auth",
     "connectionDeleted": "Соединение удалено",
     "connectionFallback": "соединение",
-    "coolingConnectionsDescription": "Эти соединения вернули 429 (лимит частоты) в своем последнем запросе. OmniRoute пропустит их, пока таймер не истечет — отключение вручную не требуется.",
+    "coolingConnectionsDescription": "Эти соединения остывают после последнего запроса. OmniRoute пропустит их, пока не истечёт таймер — отключать вручную не нужно.",
     "coolingConnectionsTitle": "В настоящее время охлаждение ({count})",
     "failedDeleteAlias": "Не удалось удалить псевдоним",
     "failedDeleteConnection": "Не удалось удалить соединение",

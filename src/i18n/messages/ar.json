@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "فشل في بدء الأمر Code auth",
     "connectionDeleted": "تم حذف الاتصال",
     "connectionFallback": "الاتصال",
-    "coolingConnectionsDescription": "أعادت هذه الاتصالات 429 (حد معدل) في آخر طلب لها. ستتخطى OmniRoute هذه الاتصالات حتى تنتهي مدة المؤقت - لا حاجة لتعطيل يدوي.",
+    "coolingConnectionsDescription": "هذه الاتصالات في فترة تبريد بعد آخر طلب. ستتخطاها OmniRoute حتى ينتهي المؤقت — لا حاجة للتعطيل اليدوي.",
     "coolingConnectionsTitle": "التبريد الحالي ({count})",
     "failedDeleteAlias": "فشل في حذف الاسم المستعار",
     "failedDeleteConnection": "فشل في حذف الاتصال",

@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Nu s-a reușit să se pornească Command Code auth",
     "connectionDeleted": "Conexiune ștearsă",
     "connectionFallback": "conexiune",
-    "coolingConnectionsDescription": "Aceste conexiuni au returnat un 429 (limită de rată) la ultima lor solicitare. OmniRoute le va sări peste până când temporizatorul expiră — nu este necesară dezactivarea manuală.",
+    "coolingConnectionsDescription": "Aceste conexiuni se răcesc după ultima solicitare. OmniRoute le va sări până expiră temporizatorul — nu e nevoie de dezactivare manuală.",
     "coolingConnectionsTitle": "În prezent răcire ({count})",
     "failedDeleteAlias": "Nu s-a reușit ștergerea aliasului",
     "failedDeleteConnection": "Nu s-a putut șterge conexiunea",

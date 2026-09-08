@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Command Code auth શરૂ કરવામાં નિષ્ફળ રહ્યું",
     "connectionDeleted": "કનેક્શન કાઢી નાખવામાં આવ્યું",
     "connectionFallback": "સંબંધ",
-    "coolingConnectionsDescription": "આ કનેક્શનોએ તેમના છેલ્લા વિનંતી પર 429 (દર-મર્યાદા) પાછું આપ્યું. ઓમ્નીરૂટ તેમને ટાઈમર સમાપ્ત થાય ત્યાં સુધી છોડી દેશે - કોઈ મેન્યુઅલ નિષ્ક્રિય કરવાની જરૂર નથી.",
+    "coolingConnectionsDescription": "આ કનેક્શનો છેલ્લી વિનંતી પછી ઠંડા થઈ રહ્યાં છે. ટાઈમર પૂરું થાય ત્યાં સુધી OmniRoute તેમને છોડી દેશે — હાથથી બંધ કરવાની જરૂર નથી.",
     "coolingConnectionsTitle": "હાલમાં ઠંડું કરી રહ્યા છીએ ({count})",
     "failedDeleteAlias": "એલિયસ કાઢવામાં નિષ્ફળ થયું",
     "failedDeleteConnection": "કનેક્શન કાઢવામાં નિષ્ફળ થયું",

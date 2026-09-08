@@ -6432,7 +6432,7 @@
     "commandCodeStartFailed": "Không thể bắt đầu xác thực Command Code",
     "connectionDeleted": "Đã xóa kết nối",
     "connectionFallback": "kết nối",
-    "coolingConnectionsDescription": "Các kết nối này trả về 429 (giới hạn tốc độ) trong yêu cầu gần nhất. OmniRoute sẽ bỏ qua chúng cho đến khi bộ hẹn giờ hết hạn — không cần tắt thủ công.",
+    "coolingConnectionsDescription": "Các kết nối này đang nguội sau yêu cầu gần nhất. OmniRoute sẽ bỏ qua chúng đến khi hết giờ — không cần tắt thủ công.",
     "coolingConnectionsTitle": "Các kết nối đang tạm làm mát ({count})",
     "failedDeleteAlias": "Không thể xóa alias",
     "failedDeleteConnection": "Không thể xóa kết nối",

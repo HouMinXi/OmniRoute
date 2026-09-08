@@ -6432,7 +6432,7 @@
     "commandCodeStartFailed": "Falha ao iniciar o comando Code auth",
     "connectionDeleted": "Conexão excluída",
     "connectionFallback": "conexão",
-    "coolingConnectionsDescription": "Essas conexões retornaram um 429 (limite de taxa) na última solicitação. O OmniRoute as ignorará até que o temporizador expire — não é necessário desativação manual.",
+    "coolingConnectionsDescription": "Essas conexões estão esfriando após a última solicitação. O OmniRoute as ignorará até o temporizador expirar — não é necessário desativar manualmente.",
     "coolingConnectionsTitle": "Resfriando atualmente ({count})",
     "failedDeleteAlias": "Falha ao excluir o alias",
     "failedDeleteConnection": "Falha ao excluir a conexão",

@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "נכשל בהפעלה של Command Code auth",
     "connectionDeleted": "החיבור נמחק",
     "connectionFallback": "חיבור",
-    "coolingConnectionsDescription": "חיבורים אלה החזירו 429 (מגבלת קצב) בבקשה האחרונה שלהם. OmniRoute ידלג עליהם עד שהטיימר יפוג — אין צורך להשבית ידנית.",
+    "coolingConnectionsDescription": "החיבורים האלה מתקררים אחרי הבקשה האחרונה. OmniRoute ידלג עליהם עד שיפוג הטיימר — אין צורך לבטל ידנית.",
     "coolingConnectionsTitle": "כרגע מקרר ({count})",
     "failedDeleteAlias": "כישלון במחיקת הכינוי",
     "failedDeleteConnection": "כישלון במחקת החיבור",

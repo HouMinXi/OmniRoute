@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "شروع Command Code auth با شکست مواجه شد",
     "connectionDeleted": "اتصال حذف شد",
     "connectionFallback": "اتصال",
-    "coolingConnectionsDescription": "این اتصالات در آخرین درخواست خود یک ۴۲۹ (محدودیت نرخ) دریافت کردند. OmniRoute تا زمانی که تایمر منقضی شود، آنها را نادیده خواهد گرفت - نیازی به غیرفعال‌سازی دستی نیست.",
+    "coolingConnectionsDescription": "این اتصالات پس از آخرین درخواست در حال خنک‌شدن هستند. OmniRoute تا پایان تایمر از آنها می‌گذرد — نیازی به غیرفعال‌سازی دستی نیست.",
     "coolingConnectionsTitle": "در حال حاضر خنک‌سازی ({count})",
     "failedDeleteAlias": "حذف مستعار ناموفق بود",
     "failedDeleteConnection": "حذف اتصال ناموفق بود",

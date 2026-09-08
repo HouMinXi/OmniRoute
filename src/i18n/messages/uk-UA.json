@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Не вдалося запустити команду Code auth",
     "connectionDeleted": "З'єднання видалено",
     "connectionFallback": "з'єднання",
-    "coolingConnectionsDescription": "Ці з'єднання повернули 429 (обмеження швидкості) у своєму останньому запиті. OmniRoute пропустить їх, поки не закінчиться таймер — вручну вимикати не потрібно.",
+    "coolingConnectionsDescription": "Ці з'єднання остигають після останнього запиту. OmniRoute пропустить їх, поки не скінчиться таймер — вимикати вручну не потрібно.",
     "coolingConnectionsTitle": "Наразі охолодження ({count})",
     "failedDeleteAlias": "Не вдалося видалити псевдонім",
     "failedDeleteConnection": "Не вдалося видалити з'єднання",

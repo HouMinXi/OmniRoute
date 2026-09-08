@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Command Code auth শুরু করতে ব্যর্থ হয়েছে",
     "connectionDeleted": "সংযোগ মুছে ফেলা হয়েছে",
     "connectionFallback": "সংযোগ",
-    "coolingConnectionsDescription": "এই সংযোগগুলি তাদের শেষ অনুরোধে 429 (রেট-লিমিট) ফিরিয়ে দিয়েছে। OmniRoute সেগুলি সময়সীমা শেষ হওয়া পর্যন্ত বাদ দেবে — কোন ম্যানুয়াল নিষ্ক্রিয়করণ প্রয়োজন নেই।",
+    "coolingConnectionsDescription": "এই সংযোগগুলি শেষ অনুরোধের পর ঠান্ডা হচ্ছে। টাইমার শেষ না হওয়া পর্যন্ত OmniRoute সেগুলি এড়িয়ে যাবে — হাতে বন্ধ করার দরকার নেই।",
     "coolingConnectionsTitle": "বর্তমানে শীতলকরণ ({count})",
     "failedDeleteAlias": "অ্যালিয়াস মুছতে ব্যর্থ হয়েছে",
     "failedDeleteConnection": "সংযোগ মুছতে ব্যর্থ হয়েছে",

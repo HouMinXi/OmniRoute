@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Nepodařilo se spustit příkaz Code auth",
     "connectionDeleted": "Připojení bylo smazáno",
     "connectionFallback": "připojení",
-    "coolingConnectionsDescription": "Tyto připojení vrátily 429 (omezení rychlosti) při posledním požadavku. OmniRoute je přeskočí, dokud nevyprší časovač — není potřeba manuální deaktivace.",
+    "coolingConnectionsDescription": "Tato připojení se po posledním požadavku ochlazují. OmniRoute je přeskočí, dokud nevyprší časovač — ruční vypnutí není potřeba.",
     "coolingConnectionsTitle": "Aktuálně chlazení ({count})",
     "failedDeleteAlias": "Nepodařilo se smazat alias",
     "failedDeleteConnection": "Nepodařilo se smazat připojení",

@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Command Code auth ஐ துவங்குவதில் தோல்வி அடைந்தது",
     "connectionDeleted": "இணைப்பு நீக்கப்பட்டது",
     "connectionFallback": "இணைப்பு",
-    "coolingConnectionsDescription": "இந்த இணைப்புகள் அவர்களின் கடைசி கோரிக்கையில் 429 (விகித-கட்டுப்பாடு) ஐ திருப்பின. OmniRoute அவற்றைப் புறக்கணிக்கும், நேரம் முடிவடையும்வரை — கைமுறையால் முடக்க தேவையில்லை.",
+    "coolingConnectionsDescription": "இந்த இணைப்புகள் கடைசி கோரிக்கைக்குப் பிறகு குளிர்கின்றன. நேரம் முடியும் வரை OmniRoute அவற்றைத் தவிர்க்கும் — கைமுறையாக முடக்க வேண்டியதில்லை.",
     "coolingConnectionsTitle": "தற்போது குளிர்ச்சி ({count})",
     "failedDeleteAlias": "அலியாஸ் நீக்குவதில் தோல்வி அடைந்தது",
     "failedDeleteConnection": "இணைப்பை நீக்க முடியவில்லை",

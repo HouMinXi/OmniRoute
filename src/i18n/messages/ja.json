@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Command Code authの起動に失敗しました",
     "connectionDeleted": "接続が削除されました",
     "connectionFallback": "接続",
-    "coolingConnectionsDescription": "これらの接続は、最後のリクエストで429（レート制限）を返しました。OmniRouteは、タイマーが切れるまでそれらをスキップします — 手動での無効化は必要ありません。",
+    "coolingConnectionsDescription": "これらの接続は前回のリクエスト後に冷却中です。タイマーが切れるまで OmniRoute はそれらをスキップします — 手動で無効にする必要はありません。",
     "coolingConnectionsTitle": "現在冷却中 ({count})",
     "failedDeleteAlias": "エイリアスの削除に失敗しました",
     "failedDeleteConnection": "接続の削除に失敗しました",

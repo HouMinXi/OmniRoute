@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Kunne ikke starte Command Code auth",
     "connectionDeleted": "Tilkobling slettet",
     "connectionFallback": "tilkobling",
-    "coolingConnectionsDescription": "Disse tilkoblingene returnerte en 429 (rate-limit) på sin siste forespørsel. OmniRoute vil hoppe over dem til timeren utløper — ingen manuell deaktivering nødvendig.",
+    "coolingConnectionsDescription": "Disse tilkoblingene kjøler ned etter siste forespørsel. OmniRoute hopper over dem til timeren utløper — ingen manuell deaktivering nødvendig.",
     "coolingConnectionsTitle": "For øyeblikket kjøler ({count})",
     "failedDeleteAlias": "Kunne ikke slette aliaset",
     "failedDeleteConnection": "Kunne ikke slette tilkoblingen",

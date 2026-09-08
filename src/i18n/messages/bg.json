@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Неуспешно стартиране на Command Code auth",
     "connectionDeleted": "Връзката е изтрита",
     "connectionFallback": "връзка",
-    "coolingConnectionsDescription": "Тези връзки върнаха 429 (ограничение на скоростта) при последната си заявка. OmniRoute ще ги пропусне, докато таймерът изтече — не е необходимо ръчно деактивиране.",
+    "coolingConnectionsDescription": "Тези връзки се охлаждат след последната заявка. OmniRoute ще ги пропусне, докато таймерът изтече — не е нужно ръчно изключване.",
     "coolingConnectionsTitle": "В момента охлаждане ({count})",
     "failedDeleteAlias": "Неуспешно изтриване на псевдоним",
     "failedDeleteConnection": "Неуспешно изтриване на връзката",

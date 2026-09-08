@@ -6435,7 +6435,7 @@
     "connectionDeleted": "Connection deleted",
     "connectionFallback": "connection",
     "connectionCooldownCleared": "Cooldown cleared — connection rejoined routing",
-    "coolingConnectionsDescription": "These connections returned a 429 (rate-limit) on their last request. OmniRoute will skip them until the timer expires — no manual disable required.",
+    "coolingConnectionsDescription": "These connections are cooling after their last request. OmniRoute will skip them until the timer expires — no manual disable required.",
     "coolingConnectionsTitle": "Currently cooling ({count})",
     "failedClearConnectionCooldown": "Failed to clear cooldown",
     "failedDeleteAlias": "Failed to delete alias",

@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Command Code auth ప్రారంభించడంలో విఫలమైంది",
     "connectionDeleted": "కనెక్షన్ తొలగించబడింది",
     "connectionFallback": "కనెక్షన్",
-    "coolingConnectionsDescription": "ఈ కనెక్షన్లు వారి చివరి అభ్యర్థనపై 429 (రేట్-లిమిట్) ను తిరిగి ఇచ్చాయి. OmniRoute సమయ పరిమితి ముగిసే వరకు వాటిని దాటిస్తుంది — మాన్యువల్ డిసేబుల్ అవసరం లేదు.",
+    "coolingConnectionsDescription": "ఈ కనెక్షన్లు చివరి అభ్యర్థన తర్వాత చల్లబడుతున్నాయి. టైమర్ అయిపోయే వరకు OmniRoute వాటిని దాటవేస్తుంది — చేతితో ఆపాల్సిన అవసరం లేదు.",
     "coolingConnectionsTitle": "ప్రస్తుతం కూలింగ్ ({count})",
     "failedDeleteAlias": "అలియాస్‌ను తొలగించడంలో విఫలమైంది",
     "failedDeleteConnection": "కనెక్షన్ తొలగించడంలో విఫలమైంది",

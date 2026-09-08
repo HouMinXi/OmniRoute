@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Command Code auth를 시작하지 못했습니다.",
     "connectionDeleted": "연결이 삭제되었습니다",
     "connectionFallback": "연결",
-    "coolingConnectionsDescription": "이 연결은 마지막 요청에서 429(요청 한도 초과)를 반환했습니다. OmniRoute는 타이머가 만료될 때까지 이들을 건너뜁니다 — 수동으로 비활성화할 필요가 없습니다.",
+    "coolingConnectionsDescription": "이 연결은 마지막 요청 이후 냉각 중입니다. OmniRoute는 타이머가 끝날 때까지 건너뜁니다 — 수동으로 끌 필요 없습니다.",
     "coolingConnectionsTitle": "현재 냉각 중 ({count})",
     "failedDeleteAlias": "별칭을 삭제하지 못했습니다.",
     "failedDeleteConnection": "연결 삭제에 실패했습니다.",

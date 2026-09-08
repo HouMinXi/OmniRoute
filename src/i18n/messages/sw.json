@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Imeshindikana kuanzisha Command Code auth",
     "connectionDeleted": "Muunganisho umefutwa",
     "connectionFallback": "muunganisho",
-    "coolingConnectionsDescription": "Mawasiliano haya yalirudisha 429 (kikomo cha kiwango) kwenye ombi lao la mwisho. OmniRoute itayaepuka hadi kipima muda kikamilike — hakuna kuzima kwa mikono kunahitajika.",
+    "coolingConnectionsDescription": "Miunganisho hii inapoa baada ya ombi la mwisho. OmniRoute itayaruka hadi kipima muda kiishe — hakuna haja ya kuzima kwa mkono.",
     "coolingConnectionsTitle": "Sasa inapoa ({count})",
     "failedDeleteAlias": "Imeshindikana kufuta jina la utambulisho",
     "failedDeleteConnection": "Imeshindikana kufuta muunganisho",

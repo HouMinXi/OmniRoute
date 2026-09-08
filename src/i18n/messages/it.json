@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Impossibile avviare il comando Code auth",
     "connectionDeleted": "Connessione eliminata",
     "connectionFallback": "connessione",
-    "coolingConnectionsDescription": "Queste connessioni hanno restituito un 429 (limite di frequenza) nell'ultima richiesta. OmniRoute le salterà fino alla scadenza del timer — non è necessaria alcuna disattivazione manuale.",
+    "coolingConnectionsDescription": "Queste connessioni si stanno raffreddando dopo l'ultima richiesta. OmniRoute le salterà fino alla scadenza del timer — nessuna disattivazione manuale richiesta.",
     "coolingConnectionsTitle": "Attualmente raffreddando ({count})",
     "failedDeleteAlias": "Impossibile eliminare l'alias",
     "failedDeleteConnection": "Impossibile eliminare la connessione",

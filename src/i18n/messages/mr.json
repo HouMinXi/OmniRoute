@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "कमांड कोड प्रमाणीकरण सुरू करण्यात अयशस्वी",
     "connectionDeleted": "संपर्क हटवला गेला",
     "connectionFallback": "संपर्क",
-    "coolingConnectionsDescription": "या कनेक्शनने त्यांच्या अंतिम विनंतीवर 429 (दर-सीमा) परत केला. OmniRoute त्यांना टाइमर संपेपर्यंत वगळेल - कोणतीही मॅन्युअल अक्षम करणे आवश्यक नाही.",
+    "coolingConnectionsDescription": "ही कनेक्शन शेवटच्या विनंतीनंतर थंड होत आहेत. टाइमर संपेपर्यंत OmniRoute त्यांना वगळेल — हाताने बंद करण्याची गरज नाही.",
     "coolingConnectionsTitle": "सध्या थंड करणे ({count})",
     "failedDeleteAlias": "अलियास हटवण्यात अयशस्वी",
     "failedDeleteConnection": "संपर्क हटवण्यात अयशस्वी",

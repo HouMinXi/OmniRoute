@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "无法启动命令代码 auth",
     "connectionDeleted": "连接已删除",
     "connectionFallback": "连接",
-    "coolingConnectionsDescription": "这些连接在最后一次请求时返回了429（速率限制）。OmniRoute将在计时器到期之前跳过它们 — 无需手动禁用。",
+    "coolingConnectionsDescription": "这些连接在上次请求后正在冷却。计时器到期前 OmniRoute 会跳过它们 — 无需手动禁用。",
     "coolingConnectionsTitle": "当前冷却中 ({count})",
     "failedDeleteAlias": "删除别名失败",
     "failedDeleteConnection": "无法删除连接",

@@ -6428,7 +6428,7 @@
     "commandCodeStartFailed": "Gagal untuk memulakan Command Code auth",
     "connectionDeleted": "Sambungan dipadamkan",
     "connectionFallback": "sambungan",
-    "coolingConnectionsDescription": "Sambungan ini mengembalikan 429 (had kadar) pada permintaan terakhir mereka. OmniRoute akan mengabaikannya sehingga pemasa tamat — tiada penyahaktifan manual diperlukan.",
+    "coolingConnectionsDescription": "Sambungan ini sedang menyejuk selepas permintaan terakhir. OmniRoute akan langkauinya sehingga pemasa tamat — tidak perlu dinyahaktif secara manual.",
     "coolingConnectionsTitle": "Sedang menyejukkan ({count})",
     "failedDeleteAlias": "Gagal untuk memadam alias",
     "failedDeleteConnection": "Gagal untuk memadam sambungan",
