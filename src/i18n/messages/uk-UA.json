@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "Видалити всі завершені пакети",
     "batchListBatchesTable": "Партії",
     "changelogViewerLoading": "Завантаження журналу змін із GitHub...",
-    "profile": "__MISSING__:Profile",
+    "profile": "Профіль",
     "profileLoading": "Завантаження профілю...",
     "profileHowToEarn": "Як заробити",
     "bootstrapBannerDismiss": "Відхилити",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "Якщо ввімкнено, провайдери зі збоями відстежуються глобально та пропускаються на період кулдауну.",
     "resilienceProviderCooldownMin": "Мінімальний кулдаун",
     "resilienceProviderCooldownMax": "Максимальний кулдаун",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "Перевірка стану облікових даних",
+    "resilienceCredentialHealthScope": "Усі активні підключення з API-ключем і OAuth",
+    "resilienceCredentialHealthTrigger": "Періодично, з фіксованим ритмом",
+    "resilienceCredentialHealthEffect": "Перевіряє облікові дані кожного підключення й позначає його активним/помилкою; невдалі підключення йдуть у експоненційний backoff",
+    "resilienceCredentialHealthDesc": "Фонове сканування, яке перевіряє облікові дані кожного активного підключення, викликаючи його провайдера. Встановіть 0, щоб повністю вимкнути. Значення перевірки стану для окремого підключення (у діалозі редагування) завжди перекривають цей глобальний параметр.",
+    "resilienceCredentialHealthInterval": "Глобальний інтервал перевірки",
+    "resilienceCredentialHealthEveryMinutes": "Кожні {minutes} хв",
+    "resilienceCredentialHealthHint": "0 вимикає фонове сканування (макс. 1440 хв = 24 год). Підключення з власним значенням перевірки стану ігнорують цей глобальний параметр; 0 у конкретного підключення виключає його навіть коли глобальне сканування увімкнено.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Прив'язка сесії",
@@ -11331,11 +11331,11 @@
       "copy": "Копіювати",
       "autoscrollOn": "Автопрокрутка: увімкнено",
       "autoscrollOff": "Автопрокрутка: вимкнено",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "Згорнути все",
+      "collapseOneLevel": "Згорнути на рівень",
+      "currentExpandLevel": "Поточний рівень розгортання",
+      "expandOneLevel": "Розгорнути на рівень",
+      "expandAllLevels": "Розгорнути все",
       "payload": {
         "clientRawRequest": "Сирий запит клієнта",
         "clientRequest": "Запит клієнта",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "Сортувати за",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "Вручну",
+        "provider": "Провайдер",
+        "score": "Оцінка (безкоштовні моделі)",
+        "name": "Назва"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "Сортування за оцінкою діє лише для безкоштовних провайдерів; решта лишаються на місці."
     }
   },
   "comboControl": {

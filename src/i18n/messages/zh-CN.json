@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "删除所有已完成的批次",
     "batchListBatchesTable": "批次",
     "changelogViewerLoading": "正在从 GitHub 加载变更日志...",
-    "profile": "__MISSING__:Profile",
+    "profile": "个人资料",
     "profileLoading": "正在加载个人资料...",
     "profileHowToEarn": "如何赚取",
     "bootstrapBannerDismiss": "解雇",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "启用后，将在全局范围内跟踪失败的服务商，并在冷却期间跳过它们。",
     "resilienceProviderCooldownMin": "最小冷却时间",
     "resilienceProviderCooldownMax": "最大冷却时间",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "凭证健康检查",
+    "resilienceCredentialHealthScope": "所有启用的 API 密钥和 OAuth 连接",
+    "resilienceCredentialHealthTrigger": "按固定节奏定期执行",
+    "resilienceCredentialHealthEffect": "探测每条连接的凭证并标为正常/错误；失败的连接按指数退避",
+    "resilienceCredentialHealthDesc": "后台扫描：调用供应商以校验每条启用连接的凭证。设为 0 则完全关闭。各连接编辑对话框里的健康检查值始终覆盖此全局默认。",
+    "resilienceCredentialHealthInterval": "全局检查间隔",
+    "resilienceCredentialHealthEveryMinutes": "每 {minutes} 分钟",
+    "resilienceCredentialHealthHint": "0 关闭后台扫描（最长 1440 分钟 = 24 小时）。带有自身健康检查值的连接忽略此全局默认；某连接设为 0 时即使全局扫描开启也会跳过它。",
     "forcedFingerprintTitle": "{provider} 始终启用 — OAuth 账户安全所必需；无法关闭。",
     "forcedFingerprintBadge": "必需",
     "sessionAffinityTitle": "会话亲和性",
@@ -11331,11 +11331,11 @@
       "copy": "复制",
       "autoscrollOn": "自动滚动：开启",
       "autoscrollOff": "自动滚动：关闭",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "全部折叠",
+      "collapseOneLevel": "折叠一层",
+      "currentExpandLevel": "当前展开层级",
+      "expandOneLevel": "展开一层",
+      "expandAllLevels": "全部展开",
       "payload": {
         "clientRawRequest": "客户端原始请求",
         "clientRequest": "客户端请求",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "排序方式",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "手动",
+        "provider": "供应商",
+        "score": "评分（免费模型）",
+        "name": "名称"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "按评分排序只对免费供应商生效，其余保持原位。"
     }
   },
   "comboControl": {

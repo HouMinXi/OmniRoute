@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "Futa makundi yote yaliyokamilishwa",
     "batchListBatchesTable": "Makundi",
     "changelogViewerLoading": "Inapakia logi ya mabadiliko kutoka kwa GitHub...",
-    "profile": "__MISSING__:Profile",
+    "profile": "Wasifu",
     "profileLoading": "Inapakia wasifu...",
     "profileHowToEarn": "Jinsi ya kupata",
     "bootstrapBannerDismiss": "Ondoa",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "Ikiwashwa, watoa huduma walioshindwa hufuatiliwa kwa jumla na kupitwa kwa kipindi cha cooldown.",
     "resilienceProviderCooldownMin": "Cooldown ya chini zaidi",
     "resilienceProviderCooldownMax": "Cooldown ya juu zaidi",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "Ukaguzi wa afya ya kitambulisho",
+    "resilienceCredentialHealthScope": "Miunganisho yote hai ya ufunguo wa API na OAuth",
+    "resilienceCredentialHealthTrigger": "Kila mara, kwa mdundo thabiti",
+    "resilienceCredentialHealthEffect": "Hukagua kitambulisho cha kila muunganisho na kukitia hai/kosa; miunganisho iliyoshindwa huingia backoff ya kielelezo",
+    "resilienceCredentialHealthDesc": "Uchunguzi wa nyuma unaothibitisha kitambulisho cha kila muunganisho hai kwa kumpigia mtoa huduma wake. Weka 0 ili kuzima kabisa. Thamani za Ukaguzi wa Afya kwa kila muunganisho (katika kidirisha cha kuhariri) daima zinabatilisha chaguo-msingi hili la kimataifa.",
+    "resilienceCredentialHealthInterval": "Muda wa ukaguzi wa kimataifa",
+    "resilienceCredentialHealthEveryMinutes": "Kila dakika {minutes}",
+    "resilienceCredentialHealthHint": "0 inazima uchunguzi wa nyuma (kiwango cha juu dakika 1440 = saa 24). Miunganisho yenye thamani yake ya Ukaguzi wa Afya hupuuzia chaguo-msingi hili la kimataifa; 0 kwenye muunganisho inautoa hata uchunguzi wa kimataifa ukiwa umewashwa.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Session affinity",
@@ -11331,11 +11331,11 @@
       "copy": "Nakili",
       "autoscrollOn": "Autoscroll: on",
       "autoscrollOff": "Autoscroll: off",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "Kunja zote",
+      "collapseOneLevel": "Kunja kiwango kimoja",
+      "currentExpandLevel": "Kiwango cha sasa cha kupanua",
+      "expandOneLevel": "Panua kiwango kimoja",
+      "expandAllLevels": "Panua zote",
       "payload": {
         "clientRawRequest": "Omba Mbichi ya Mteja",
         "clientRequest": "Omba Mteja",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "Panga kwa",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "Mkono",
+        "provider": "Mtoa huduma",
+        "score": "Alama (modeli za bure)",
+        "name": "Jina"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "Mpangilio wa alama unahusu watoa huduma wa bure tu; wengine wanabaki mahali pao."
     }
   },
   "comboControl": {

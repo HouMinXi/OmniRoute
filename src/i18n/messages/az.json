@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "Bütün tamamlanmış partiyaları silin",
     "batchListBatchesTable": "Partiyalar",
     "changelogViewerLoading": "GitHub-dan dəyişiklik jurnalı yüklənir...",
-    "profile": "__MISSING__:Profile",
+    "profile": "Profil",
     "profileLoading": "Profil yüklənir...",
     "profileHowToEarn": "Necə qazanmaq olar",
     "bootstrapBannerDismiss": "Rədd et",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "Aktivləşdirildikdə, uğursuz provayderlər qlobal olaraq izlənilir və soyuma müddəti ərzində ötürülür.",
     "resilienceProviderCooldownMin": "Minimum soyuma müddəti",
     "resilienceProviderCooldownMax": "Maksimum soyuma müddəti",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "Etibarnamə sağlamlıq yoxlaması",
+    "resilienceCredentialHealthScope": "Bütün aktiv API-açar və OAuth bağlantıları",
+    "resilienceCredentialHealthTrigger": "Dövri, sabit ritmlə",
+    "resilienceCredentialHealthEffect": "Hər bağlantının etibarnaməsini yoxlayır və aktiv/xəta kimi işarələyir; uğursuz bağlantılar eksponensial geriləyir",
+    "resilienceCredentialHealthDesc": "Hər aktiv bağlantının etibarnaməsini provayderə zəng edərək yoxlayan fon tarama. Tamamilə söndürmək üçün 0 təyin edin. Hər bağlantının öz Sağlamlıq Yoxlaması dəyəri (redaktə dialoqunda) həmişə bu qlobal standartı üstələyir.",
+    "resilienceCredentialHealthInterval": "Qlobal yoxlama intervalı",
+    "resilienceCredentialHealthEveryMinutes": "Hər {minutes} dəq",
+    "resilienceCredentialHealthHint": "0 fon taramasını söndürür (maks. 1440 dəq = 24 saat). Öz Sağlamlıq Yoxlaması dəyəri olan bağlantılar bu qlobal standartı nəzərə almır; bir bağlantıda 0 onu qlobal tarama açıq olsa belə çıxarır.",
     "forcedFingerprintTitle": "{provider} üçün həmişə aktivdir — OAuth hesabının təhlükəsizliyi üçün tələb olunur; söndürülə bilməz.",
     "forcedFingerprintBadge": "Tələb olunur",
     "sessionAffinityTitle": "Sessiya yaxınlığı (affinity)",
@@ -11331,11 +11331,11 @@
       "copy": "Kopyala",
       "autoscrollOn": "Avtomatik Sürüş: açıq",
       "autoscrollOff": "Avtomatik Sürüş: söndürüldü",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "Hamısını yığ",
+      "collapseOneLevel": "Bir səviyyə yığ",
+      "currentExpandLevel": "Cari açılma səviyyəsi",
+      "expandOneLevel": "Bir səviyyə aç",
+      "expandAllLevels": "Hamısını aç",
       "payload": {
         "clientRawRequest": "Müştəri Xam Sorğu",
         "clientRequest": "Müştəri Tələbi",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "Sırala",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "Əl ilə",
+        "provider": "Provayder",
+        "score": "Bal (pulsuz modellər)",
+        "name": "Ad"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "Bal sıralaması yalnız pulsuz provayderlərə aiddir; qalanlar yerində qalır."
     }
   },
   "comboControl": {

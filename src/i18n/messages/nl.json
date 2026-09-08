@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "Verwijder alle voltooide batches",
     "batchListBatchesTable": "Batches",
     "changelogViewerLoading": "Wijzigingslogboek laden vanuit GitHub...",
-    "profile": "__MISSING__:Profile",
+    "profile": "Profiel",
     "profileLoading": "Profiel laden...",
     "profileHowToEarn": "Hoe te verdienen",
     "bootstrapBannerDismiss": "Negeren",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "Indien ingeschakeld, worden mislukte providers globaal bijgehouden en overgeslagen gedurende een afkoelperiode.",
     "resilienceProviderCooldownMin": "Minimale afkoelperiode",
     "resilienceProviderCooldownMax": "Maximale afkoelperiode",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "Gezondheidscontrole van inloggegevens",
+    "resilienceCredentialHealthScope": "Alle actieve API-sleutel- en OAuth-verbindingen",
+    "resilienceCredentialHealthTrigger": "Periodiek, in vast ritme",
+    "resilienceCredentialHealthEffect": "Controleert de inloggegevens van elke verbinding en markeert die actief/fout; mislukte verbindingen gaan in exponentiële backoff",
+    "resilienceCredentialHealthDesc": "Achtergrondscan die de inloggegevens van elke actieve verbinding valideert door de aanbieder aan te roepen. Zet 0 om de scan volledig uit te schakelen. Gezondheidscontrolewaarden per verbinding (in het bewerkingsvenster) overschrijven altijd deze globale standaard.",
+    "resilienceCredentialHealthInterval": "Globaal controle-interval",
+    "resilienceCredentialHealthEveryMinutes": "Elke {minutes} min",
+    "resilienceCredentialHealthHint": "0 schakelt de achtergrondscan uit (max. 1440 min = 24 u). Verbindingen met een eigen gezondheidscontrolewaarde negeren deze globale standaard; 0 op een verbinding sluit die uit, ook als de globale scan aanstaat.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Sessie-affiniteit",
@@ -11331,11 +11331,11 @@
       "copy": "Kopieer",
       "autoscrollOn": "Autoscroll: aan",
       "autoscrollOff": "Autoscroll: uit",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "Alles samenvouwen",
+      "collapseOneLevel": "Eén niveau samenvouwen",
+      "currentExpandLevel": "Huidig uitklapniveau",
+      "expandOneLevel": "Eén niveau uitklappen",
+      "expandAllLevels": "Alles uitklappen",
       "payload": {
         "clientRawRequest": "Client Rauwe Verzoek",
         "clientRequest": "Klantverzoek",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "Sorteren op",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "Handmatig",
+        "provider": "Aanbieder",
+        "score": "Score (gratis modellen)",
+        "name": "Naam"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "Scorevolgorde geldt alleen voor gratis aanbieders; de rest blijft staan."
     }
   },
   "comboControl": {

@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "పూర్తయిన అన్ని బ్యాచ్‌లను తొలగించండి",
     "batchListBatchesTable": "బ్యాచ్‌లు",
     "changelogViewerLoading": "GitHub నుండి చేంజ్లాగ్ లోడ్ అవుతోంది...",
-    "profile": "__MISSING__:Profile",
+    "profile": "ప్రొఫైల్",
     "profileLoading": "ప్రొఫైల్ లోడ్ అవుతోంది...",
     "profileHowToEarn": "ఎలా సంపాదించాలి",
     "bootstrapBannerDismiss": "తొలగించు",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "ప్రారంభించినప్పుడు, విఫలమైన ప్రొవైడర్‌లు ప్రపంచవ్యాప్తంగా ట్రాక్ చేయబడతాయి మరియు కూల్‌డౌన్ వ్యవధి కోసం దాటవేయబడతాయి.",
     "resilienceProviderCooldownMin": "కనీస కూల్‌డౌన్",
     "resilienceProviderCooldownMax": "గరిష్ట కూల్‌డౌన్",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "క్రెడెన్షియల్ ఆరోగ్య తనిఖీ",
+    "resilienceCredentialHealthScope": "అన్ని క్రియాశీల API-కీ మరియు OAuth కనెక్షన్లు",
+    "resilienceCredentialHealthTrigger": "నిర్ణీత లయలో కాలానుగుణంగా",
+    "resilienceCredentialHealthEffect": "ప్రతి కనెక్షన్ క్రెడెన్షియల్‌ను పరిశీలించి క్రియాశీల/లోపం అని గుర్తిస్తుంది; విఫలమైన కనెక్షన్లు ఘాతాంక బ్యాకాఫ్‌లోకి వెళ్తాయి",
+    "resilienceCredentialHealthDesc": "ప్రతి క్రియాశీల కనెక్షన్ క్రెడెన్షియల్‌ను దాని ప్రొవైడర్‌ను పిలిచి ధృవీకరించే నేపథ్య స్కాన్. పూర్తిగా ఆపడానికి 0 సెట్ చేయండి. కనెక్షన్ వారీ ఆరోగ్య తనిఖీ విలువలు (సవరణ డైలాగ్‌లో) ఎల్లప్పుడూ ఈ గ్లోబల్ డిఫాల్ట్‌ను ఓవర్‌రైడ్ చేస్తాయి.",
+    "resilienceCredentialHealthInterval": "గ్లోబల్ తనిఖీ విరామం",
+    "resilienceCredentialHealthEveryMinutes": "ప్రతి {minutes} నిమి",
+    "resilienceCredentialHealthHint": "0 నేపథ్య స్కాన్‌ను ఆపుతుంది (గరిష్ఠం 1440 నిమి = 24 గం). స్వంత ఆరోగ్య తనిఖీ విలువ ఉన్న కనెక్షన్లు ఈ గ్లోబల్ డిఫాల్ట్‌ను విస్మరిస్తాయి; ఒక కనెక్షన్‌పై 0 గ్లోబల్ స్కాన్ ఆన్‌లో ఉన్నా దాన్ని మినహాయిస్తుంది.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "సెషన్ అఫినిటీ",
@@ -11331,11 +11331,11 @@
       "copy": "కాపీ",
       "autoscrollOn": "ఆటోస్క్రోల్: ఆన్",
       "autoscrollOff": "ఆటోస్క్రోల్: ఆఫ్",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "అన్నీ కుదించు",
+      "collapseOneLevel": "ఒక స్థాయి కుదించు",
+      "currentExpandLevel": "ప్రస్తుత విస్తరణ స్థాయి",
+      "expandOneLevel": "ఒక స్థాయి విస్తరించు",
+      "expandAllLevels": "అన్నీ విస్తరించు",
       "payload": {
         "clientRawRequest": "క్లయింట్ రా అభ్యర్థన",
         "clientRequest": "క్లయింట్ అభ్యర్థన",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "దీని ప్రకారం క్రమం",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "మాన్యువల్",
+        "provider": "ప్రొవైడర్",
+        "score": "స్కోరు (ఉచిత మోడళ్లు)",
+        "name": "పేరు"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "స్కోరు క్రమం ఉచిత ప్రొవైడర్లకు మాత్రమే; మిగతావి చోటులోనే ఉంటాయి."
     }
   },
   "comboControl": {

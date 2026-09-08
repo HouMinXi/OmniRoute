@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "সমস্ত সমাপ্ত ব্যাচ মুছুন",
     "batchListBatchesTable": "ব্যাচ",
     "changelogViewerLoading": "GitHub থেকে চেঞ্জলগ লোড হচ্ছে...",
-    "profile": "__MISSING__:Profile",
+    "profile": "প্রোফাইল",
     "profileLoading": "প্রোফাইল লোড হচ্ছে...",
     "profileHowToEarn": "কিভাবে আয় করা যায়",
     "bootstrapBannerDismiss": "খারিজ",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "সক্ষম করা হলে, ব্যর্থ প্রোভাইডারগুলিকে বিশ্বব্যাপী ট্র্যাক করা হয় এবং একটি কুলডাউন সময়ের জন্য এড়িয়ে যাওয়া হয়।",
     "resilienceProviderCooldownMin": "সর্বনিম্ন কুলডাউন",
     "resilienceProviderCooldownMax": "সর্বোচ্চ কুলডাউন",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "ক্রেডেনশিয়াল স্বাস্থ্য পরীক্ষা",
+    "resilienceCredentialHealthScope": "সব সক্রিয় API-কি এবং OAuth সংযোগ",
+    "resilienceCredentialHealthTrigger": "নির্দিষ্ট ছন্দে পর্যায়ক্রমে",
+    "resilienceCredentialHealthEffect": "প্রতিটি সংযোগের ক্রেডেনশিয়াল পরীক্ষা করে সক্রিয়/ত্রুটি চিহ্নিত করে; ব্যর্থ সংযোগ সূচকীয় ব্যাকঅফ নেয়",
+    "resilienceCredentialHealthDesc": "পটভূমি স্ক্যান যা প্রতিটি সক্রিয় সংযোগের ক্রেডেনশিয়াল তার প্রদানকারীকে কল করে যাচাই করে। সম্পূর্ণ বন্ধ করতে 0 সেট করুন। প্রতি-সংযোগ স্বাস্থ্য পরীক্ষার মান (সম্পাদনা ডায়ালগে) সবসময় এই বৈশ্বিক ডিফল্টকে ওভাররাইড করে।",
+    "resilienceCredentialHealthInterval": "বৈশ্বিক পরীক্ষার ব্যবধান",
+    "resilienceCredentialHealthEveryMinutes": "প্রতি {minutes} মিনিট",
+    "resilienceCredentialHealthHint": "0 পটভূমি স্ক্যান বন্ধ করে (সর্বোচ্চ 1440 মিনিট = 24 ঘণ্টা)। নিজস্ব স্বাস্থ্য পরীক্ষা মানযুক্ত সংযোগ এই বৈশ্বিক ডিফল্ট উপেক্ষা করে; কোনো সংযোগে 0 সেট করলে বৈশ্বিক স্ক্যান চালু থাকলেও সেটি বাদ পড়ে।",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "সেশন অ্যাফিনিটি",
@@ -11331,11 +11331,11 @@
       "copy": "কপি করুন",
       "autoscrollOn": "অটোস্ক্রল: চালু",
       "autoscrollOff": "অটোস্ক্রোল: বন্ধ",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "সব গুটিয়ে ফেলুন",
+      "collapseOneLevel": "এক স্তর গুটিয়ে ফেলুন",
+      "currentExpandLevel": "বর্তমান প্রসারণ স্তর",
+      "expandOneLevel": "এক স্তর প্রসারিত করুন",
+      "expandAllLevels": "সব প্রসারিত করুন",
       "payload": {
         "clientRawRequest": "ক্লায়েন্ট কাঁচা অনুরোধ",
         "clientRequest": "ক্লায়েন্টের অনুরোধ",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "সাজান",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "ম্যানুয়াল",
+        "provider": "প্রদানকারী",
+        "score": "স্কোর (বিনামূল্যের মডেল)",
+        "name": "নাম"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "স্কোর অনুসারে সাজানো শুধু বিনামূল্যের প্রদানকারীদের জন্য; বাকিরা জায়গায় থাকে।"
     }
   },
   "comboControl": {

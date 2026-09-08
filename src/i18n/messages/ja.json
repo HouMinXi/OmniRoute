@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "完了したバッチをすべて削除する",
     "batchListBatchesTable": "バッチ",
     "changelogViewerLoading": "GitHub から変更ログを読み込んでいます...",
-    "profile": "__MISSING__:Profile",
+    "profile": "プロフィール",
     "profileLoading": "プロファイルを読み込んでいます...",
     "profileHowToEarn": "稼ぎ方",
     "bootstrapBannerDismiss": "解雇する",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "有効にすると、失敗したプロバイダーがグローバルに追跡され、クールダウン期間中スキップされます。",
     "resilienceProviderCooldownMin": "最小クールダウン",
     "resilienceProviderCooldownMax": "最大クールダウン",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "資格情報のヘルスチェック",
+    "resilienceCredentialHealthScope": "すべての有効な API キーおよび OAuth 接続",
+    "resilienceCredentialHealthTrigger": "一定の間隔で定期的に",
+    "resilienceCredentialHealthEffect": "各接続の資格情報を調べ、有効/エラーと記録します。失敗した接続は指数バックオフします",
+    "resilienceCredentialHealthDesc": "各有効接続の資格情報をプロバイダー呼び出しで検証するバックグラウンド掃引です。完全に無効にするには 0 を設定します。接続ごとのヘルスチェック値（編集ダイアログ）は常にこのグローバル既定値より優先されます。",
+    "resilienceCredentialHealthInterval": "グローバル検査間隔",
+    "resilienceCredentialHealthEveryMinutes": "{minutes} 分ごと",
+    "resilienceCredentialHealthHint": "0 はバックグラウンド掃引を無効にします（最大 1440 分 = 24 時間）。独自のヘルスチェック値を持つ接続はこのグローバル既定を無視します。ある接続を 0 にすると、グローバル掃引がオンでも対象外になります。",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "セッションアフィニティ",
@@ -11331,11 +11331,11 @@
       "copy": "コピー",
       "autoscrollOn": "自動スクロール: オン",
       "autoscrollOff": "自動スクロール: オフ",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "すべて折りたたむ",
+      "collapseOneLevel": "1レベル折りたたむ",
+      "currentExpandLevel": "現在の展開レベル",
+      "expandOneLevel": "1レベル展開",
+      "expandAllLevels": "すべて展開",
       "payload": {
         "clientRawRequest": "クライアント生リクエスト",
         "clientRequest": "クライアントリクエスト",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "並べ替え",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "手動",
+        "provider": "プロバイダー",
+        "score": "スコア（無料モデル）",
+        "name": "名前"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "スコア順は無料プロバイダーにのみ適用されます。それ以外はそのままです。"
     }
   },
   "comboControl": {

@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "Törölje az összes befejezett köteget",
     "batchListBatchesTable": "Batches",
     "changelogViewerLoading": "Változásnapló betöltése a GitHubról...",
-    "profile": "__MISSING__:Profile",
+    "profile": "Profil",
     "profileLoading": "Loading profile...",
     "profileHowToEarn": "How to earn",
     "bootstrapBannerDismiss": "Elvetés",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "Ha engedélyezve van, a hibás szolgáltatókat a rendszer globálisan követi, és egy lehűlési időszakra kihagyja őket.",
     "resilienceProviderCooldownMin": "Minimális lehűlési idő",
     "resilienceProviderCooldownMax": "Maximális lehűlési idő",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "Hitelesítőadat-egészségellenőrzés",
+    "resilienceCredentialHealthScope": "Minden aktív API-kulcsos és OAuth kapcsolat",
+    "resilienceCredentialHealthTrigger": "Időszakosan, rögzített ütemben",
+    "resilienceCredentialHealthEffect": "Ellenőrzi minden kapcsolat hitelesítő adatát, és aktív/hiba jelzést ad; a sikertelen kapcsolatok exponenciális várakozásba lépnek",
+    "resilienceCredentialHealthDesc": "Háttérvizsgálat, amely minden aktív kapcsolat hitelesítő adatát a szolgáltatójának hívásával ellenőrzi. Állítsa 0-ra a teljes kikapcsoláshoz. A kapcsolatonkénti egészségellenőrzési értékek (a szerkesztőablakban) mindig felülírják ezt a globális alapértéket.",
+    "resilienceCredentialHealthInterval": "Globális ellenőrzési időköz",
+    "resilienceCredentialHealthEveryMinutes": "Minden {minutes} percben",
+    "resilienceCredentialHealthHint": "0 kikapcsolja a háttérvizsgálatot (max. 1440 perc = 24 óra). Saját egészségellenőrzési értékkel rendelkező kapcsolatok figyelmen kívül hagyják ezt a globális alapértéket; egy kapcsolaton a 0 akkor is kiveszi, ha a globális vizsgálat be van kapcsolva.",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "Munkamenet-affinitás",
@@ -11331,11 +11331,11 @@
       "copy": "Másolás",
       "autoscrollOn": "Automatikus görgetés: be",
       "autoscrollOff": "Automatikus Görgetés: ki",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "Összes összecsukása",
+      "collapseOneLevel": "Egy szint összecsukása",
+      "currentExpandLevel": "Jelenlegi kinyitási szint",
+      "expandOneLevel": "Egy szint kinyitása",
+      "expandAllLevels": "Összes kinyitása",
       "payload": {
         "clientRawRequest": "Kliens Nyers Kérés",
         "clientRequest": "Ügyfél Kérés",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "Rendezés",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "Kézi",
+        "provider": "Szolgáltató",
+        "score": "Pontszám (ingyenes modellek)",
+        "name": "Név"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "A pontszám szerinti sorrend csak az ingyenes szolgáltatókra vonatkozik; a többiek a helyükön maradnak."
     }
   },
   "comboControl": {

@@ -771,7 +771,7 @@
     "batchListDeleteAllCompletedTitle": "सभी पूर्ण बैच हटाएँ",
     "batchListBatchesTable": "बैच",
     "changelogViewerLoading": "GitHub से चेंजलॉग लोड हो रहा है...",
-    "profile": "__MISSING__:Profile",
+    "profile": "प्रोफ़ाइल",
     "profileLoading": "प्रोफ़ाइल लोड हो रही है...",
     "profileHowToEarn": "कैसे कमाए",
     "bootstrapBannerDismiss": "ख़ारिज करें",
@@ -8114,14 +8114,14 @@
     "resilienceProviderCooldownEnabledDesc": "सक्षम होने पर, विफल प्रदाताओं को विश्व स्तर पर ट्रैक किया जाता है और कूलडाउन अवधि के लिए छोड़ दिया जाता है।",
     "resilienceProviderCooldownMin": "न्यूनतम कूलडाउन",
     "resilienceProviderCooldownMax": "अधिकतम कूलडाउन",
-    "resilienceCredentialHealthTitle": "__MISSING__:Credential Health Check",
-    "resilienceCredentialHealthScope": "__MISSING__:All active API-key and OAuth connections",
-    "resilienceCredentialHealthTrigger": "__MISSING__:Periodically, on a fixed cadence",
-    "resilienceCredentialHealthEffect": "__MISSING__:Probes each connection's credential and marks it active/error; failed connections back off exponentially",
-    "resilienceCredentialHealthDesc": "__MISSING__:Background sweep that validates every active connection's credential by calling its provider. Set 0 to disable the sweep entirely. Per-connection Health Check values (on each connection's edit dialog) always override this global default.",
-    "resilienceCredentialHealthInterval": "__MISSING__:Global check interval",
-    "resilienceCredentialHealthEveryMinutes": "__MISSING__:Every {minutes} min",
-    "resilienceCredentialHealthHint": "__MISSING__:0 disables the background sweep (max 1440 min = 24 h). Connections with their own Health Check value ignore this global default; a per-connection 0 opts that connection out even when the global sweep is on.",
+    "resilienceCredentialHealthTitle": "क्रेडेंशियल स्वास्थ्य जाँच",
+    "resilienceCredentialHealthScope": "सभी सक्रिय API-की और OAuth कनेक्शन",
+    "resilienceCredentialHealthTrigger": "निश्चित लय पर समय-समय पर",
+    "resilienceCredentialHealthEffect": "हर कनेक्शन की क्रेडेंशियल जाँचता है और सक्रिय/त्रुटि चिह्नित करता है; विफल कनेक्शन घातांकीय बैकऑफ़ लेते हैं",
+    "resilienceCredentialHealthDesc": "पृष्ठभूमि स्कैन जो हर सक्रिय कनेक्शन की क्रेडेंशियल उसके प्रदाता को कॉल करके सत्यापित करता है। पूरी तरह बंद करने के लिए 0 सेट करें। प्रति-कनेक्शन स्वास्थ्य जाँच मान (संपादन संवाद में) हमेशा इस वैश्विक डिफ़ॉल्ट को ओवरराइड करते हैं।",
+    "resilienceCredentialHealthInterval": "वैश्विक जाँच अंतराल",
+    "resilienceCredentialHealthEveryMinutes": "हर {minutes} मिनट",
+    "resilienceCredentialHealthHint": "0 पृष्ठभूमि स्कैन बंद करता है (अधिकतम 1440 मिनट = 24 घंटे)। अपनी स्वास्थ्य जाँच मान वाले कनेक्शन इस वैश्विक डिफ़ॉल्ट को अनदेखा करते हैं; किसी कनेक्शन पर 0 उसे वैश्विक स्कैन चालू होने पर भी बाहर रखता है।",
     "forcedFingerprintTitle": "Always enabled for {provider} — required for OAuth account safety; cannot be turned off.",
     "forcedFingerprintBadge": "Required",
     "sessionAffinityTitle": "सेशन एफिनिटी",
@@ -11331,11 +11331,11 @@
       "copy": "कॉपी",
       "autoscrollOn": "ऑटोस्क्रॉल: चालू",
       "autoscrollOff": "ऑटोस्क्रॉल: बंद",
-      "collapseAllLevels": "__MISSING__:Collapse all",
-      "collapseOneLevel": "__MISSING__:Collapse one level",
-      "currentExpandLevel": "__MISSING__:Current expand level",
-      "expandOneLevel": "__MISSING__:Expand one level",
-      "expandAllLevels": "__MISSING__:Expand all",
+      "collapseAllLevels": "सब समेटें",
+      "collapseOneLevel": "एक स्तर समेटें",
+      "currentExpandLevel": "वर्तमान विस्तार स्तर",
+      "expandOneLevel": "एक स्तर फैलाएँ",
+      "expandAllLevels": "सब फैलाएँ",
       "payload": {
         "clientRawRequest": "क्लाइंट कच्चा अनुरोध",
         "clientRequest": "क्लाइंट अनुरोध",
@@ -13001,14 +13001,14 @@
   },
   "combo": {
     "sort": {
-      "label": "__MISSING__:Sort by",
+      "label": "इससे छाँटें",
       "method": {
-        "manual": "__MISSING__:Manual",
-        "provider": "__MISSING__:Provider",
-        "score": "__MISSING__:Score (free models)",
-        "name": "__MISSING__:Name"
+        "manual": "मैन्युअल",
+        "provider": "प्रदाता",
+        "score": "स्कोर (मुफ़्त मॉडल)",
+        "name": "नाम"
       },
-      "scoreHint": "__MISSING__:Score ranking applies to free providers only; others stay in place."
+      "scoreHint": "स्कोर क्रम केवल मुफ़्त प्रदाताओं पर लागू होता है; बाकी अपनी जगह रहते हैं।"
     }
   },
   "comboControl": {
