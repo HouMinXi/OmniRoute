@@ -1,1 +1,0 @@
-- **refactor(sse):** move the chat-core provider sender into its own module
