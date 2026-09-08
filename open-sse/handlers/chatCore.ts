@@ -39,18 +39,13 @@ import { enforceOutputTokenBudget } from "./chatCore/outputTokenBudget.ts";
 import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
 import { assembleStreamingResponseHeaders } from "./chatCore/streamingResponseHeaders.ts";
 import { makeOnStreamComplete } from "./chatCore/streamMaterialize.ts";
-import { storeStreamingSemanticCacheResponse } from "./chatCore/streamingSemanticCacheStore.ts";
 import { assembleStreamingPipeline } from "./chatCore/streamingPipeline.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import {
   applyReasoningInputPolicy,
   resolveIncompatibleReasoningAction,
 } from "../services/reasoningInputPolicy.ts";
-import {
-  createRoutingEvent,
-  emitRoutingEvent,
-  outcomeFromStatus,
-} from "../services/routing/index.ts";
+import { createRoutingEvent, emitRoutingEvent } from "../services/routing/index.ts";
 
 import { routingFinishReason } from "./chatCore/routingFinishReason.ts";
 import {
@@ -296,13 +291,7 @@ import { recordCompressionCacheStats } from "./chatCore/compressionCacheStats.ts
 import { writeCavemanOutputAnalytics } from "./chatCore/cavemanOutputAnalytics.ts";
 import { scheduleQuotaShareConsumption } from "./chatCore/quotaShareConsumption.ts";
 import { emitRequestGamificationEvent } from "./chatCore/gamificationEvent.ts";
-import {
-  runPluginOnResponseHook,
-  runPluginOnStreamCompleteHook,
-} from "./chatCore/pluginOnResponse.ts";
-import { scheduleStreamingQuotaShareConsumption } from "./chatCore/streamingQuotaShare.ts";
-import { recordStreamingUsageStats } from "./chatCore/streamingUsageStats.ts";
-import { recordStreamingCost } from "./chatCore/streamingCost.ts";
+import { runPluginOnResponseHook } from "./chatCore/pluginOnResponse.ts";
 import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
 import { normalizeExecutorResult } from "./chatCore/upstreamTimeouts.ts";
@@ -329,13 +318,7 @@ import {
   resolveReportedServiceTier as resolveReportedServiceTierFor,
   type EffectiveServiceTier,
 } from "./chatCore/serviceTier.ts";
-import {
-  cacheReasoningFromAssistantMessage,
-  requiresReasoningReplay,
-} from "../services/reasoningCache.ts";
 import { isCompactResponsesEndpoint } from "../executors/codex.ts";
-import { translateNonStreamingResponse } from "./responseTranslator.ts";
-import { extractToolSchemaMap } from "../translator/response/openai-responses/toolSchemas.ts";
 import { extractUsageFromResponse } from "./usageExtractor.ts";
 import {
   updateFromHeaders,
