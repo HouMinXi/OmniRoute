@@ -1,0 +1,1 @@
+- **build:** root layout no longer loads Inter from `next/font/google`, so a production image build does not need fonts.googleapis.com
