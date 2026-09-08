@@ -443,6 +443,7 @@ export async function executeChatWithBreaker({
   // for every non-video request. Passed straight through to handleChatCore;
   // see its own destructure default for the shape and consumers.
   videoBridgeLog = undefined,
+  fallbackAttempts = undefined,
 }: ExecuteChatWithBreakerOptions): Promise<ExecuteChatWithBreakerResult> {
   let tlsFingerprintUsed = false;
   const normalizedTrafficType: TrafficType =
@@ -503,6 +504,7 @@ export async function executeChatWithBreaker({
             reasoningTransportFallback,
             managedLease,
             videoBridgeLog,
+            fallbackAttempts,
             skipResourcePressureGuard: true,
             onCredentialsRefreshed: async (newCreds: any) => {
               await updateProviderCredentials(credentials.connectionId, {

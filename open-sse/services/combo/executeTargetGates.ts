@@ -129,8 +129,9 @@ export async function evaluateExecuteTargetGates(opts: {
         ...target,
         allowRateLimitedConnection: true,
         modelAbortSignal: abortSignal,
+        fallbackAttempts: i,
       }
-    : { ...target, modelAbortSignal: abortSignal };
+    : { ...target, modelAbortSignal: abortSignal, fallbackAttempts: i };
 
   if (target.connectionId && !allowRateLimitedConnection) {
     const persistedSkip = await resolvePersistedConnectionCooldownSkipReason(
