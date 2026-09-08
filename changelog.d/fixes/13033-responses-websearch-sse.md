@@ -1,1 +1,0 @@
-- **fix(responses):** wrap forced-non-streaming web_search fallback JSON as Responses SSE so Codex still sees `response.completed` ([#13033](https://github.com/diegosouzapw/OmniRoute/issues/13033))
