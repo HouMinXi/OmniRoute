@@ -1291,6 +1291,8 @@ export async function getProviderCredentials(
         connections = [pinnedRow];
       }
     }
+    const probeStamp =
+      explicitProbeKind === "probe" ? { reactivatedFromInactive: true as const } : {};
     const forcedConnectionEligible = connections.some((conn) => conn.id === forcedConnectionId);
     if (options.lease && forcedConnectionId && !forcedConnectionEligible) return null;
     if (options.lease?.mode === "request" && forcedConnectionId) {
@@ -2150,6 +2152,7 @@ export async function getProviderCredentials(
         return materializeConnection(connection, options, {
           commitSelectionSideEffects,
           selectNextLeaseCandidate,
+          ...probeStamp,
         });
       }
       let claim = mutateExclusiveConnectionLease(
@@ -2169,7 +2172,12 @@ export async function getProviderCredentials(
       exclusiveLease = claim.lease;
       await commitSelectionSideEffects?.();
       if (options.materializeCredentials === false) {
-        return { exclusiveLease, connectionId: connection.id, provider: connection.provider };
+        return {
+          exclusiveLease,
+          connectionId: connection.id,
+          provider: connection.provider,
+          ...probeStamp,
+        };
       }
     }
 
@@ -2182,7 +2190,7 @@ export async function getProviderCredentials(
 
     return materializeConnection(connection, options, {
       exclusiveLease,
-      ...(explicitProbeKind === "probe" ? { reactivatedFromInactive: true } : {}),
+      ...probeStamp,
     });
   } finally {
     selectionLock?.release();

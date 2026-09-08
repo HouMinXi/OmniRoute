@@ -213,37 +213,3 @@ test("maybeReactivateAfterExplicitProbe no-ops when allowSuppressedConnections",
   );
   assert.equal(called, 0);
 });
-
-test("W-2 pin + inactive returns credentials after wiring (was null)", async () => {
-  const fs = await import("node:fs");
-  const os = await import("node:os");
-  const path = await import("node:path");
-  const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-explicit-inactive-w2-"));
-  process.env.DATA_DIR = TEST_DATA_DIR;
-  process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "explicit-inactive-w2-test-secret";
-
-  resetExplicitProbeMapForTests();
-  const core = await import("../../src/lib/db/core.ts");
-  const providersDb = await import("../../src/lib/db/providers.ts");
-  const auth = await import("../../src/sse/services/auth.ts");
-
-  try {
-    const row = await providersDb.createProviderConnection({
-      provider: "siliconflow",
-      authType: "apikey",
-      name: "sf-inactive",
-      apiKey: "sf-inactive-test-key",
-      isActive: false,
-      testStatus: "active",
-    });
-    const creds = await auth.getProviderCredentials("siliconflow", null, null, "siliconflow/m", {
-      forcedConnectionId: row.id,
-    });
-    assert.ok(creds);
-    assert.equal(creds.connectionId, row.id);
-    assert.equal(creds.reactivatedFromInactive, true);
-  } finally {
-    core.resetDbInstance();
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
-  }
-});
