@@ -1,0 +1,1 @@
+- **refactor(sse):** move the chat-core provider sender into its own module ([#13065](https://github.com/diegosouzapw/OmniRoute/pull/13065))
