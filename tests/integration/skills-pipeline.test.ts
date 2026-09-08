@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } from "../../open-sse/services/webSearchFallback.ts";
 import { decodeSkillToolName, encodeSkillToolName } from "../../src/lib/skills/injection.ts";
+import { parseSSEToResponsesOutput } from "../../open-sse/handlers/sseParser.ts";
 
 import { createChatPipelineHarness } from "./_chatPipelineHarness.ts";
 
@@ -1057,14 +1058,21 @@ test("web_search fallback executes stream:true responses requests non-streaming 
       },
     })
   );
-  const json = (await response.json()) as {
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("content-type") || "", /text\/event-stream/);
+  const sseText = await response.text();
+  assert.match(sseText, /event: response\.created/);
+  assert.match(sseText, /event: response\.completed/);
+  assert.ok(sseText.endsWith("data: [DONE]\n\n"));
+
+  const json = parseSSEToResponsesOutput(sseText, "gpt-4o-mini") as {
     output: Array<Record<string, unknown>>;
   };
+  assert.ok(json && Array.isArray(json.output));
   const webSearchCall = json.output.find((item) => item.type === "web_search_call");
   const functionCall = json.output.find((item) => item.type === "function_call");
   const functionCallOutput = json.output.find((item) => item.type === "function_call_output");
 
-  assert.equal(response.status, 200);
   // The upstream must have been called non-streaming so interception can run.
   assert.equal(upstreamBodies.length, 1);
   assert.equal(upstreamBodies[0].stream, false);

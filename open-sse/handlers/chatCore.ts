@@ -35,6 +35,7 @@ import { buildPostCallGuardrailContext } from "./chatCore/postCallGuardrailConte
 import { storeSemanticCacheResponse } from "./chatCore/semanticCacheStore.ts";
 import { buildNonStreamingResponseHeaders } from "./chatCore/nonStreamingResponseHeaders.ts";
 import { buildNonStreamingJsonResponse } from "./chatCore/nonStreamingJsonResponse.ts";
+import { buildNonStreamingResponsesSseResponse } from "../utils/responsesJsonToSse.ts";
 import { enforceOutputTokenBudget } from "./chatCore/outputTokenBudget.ts";
 import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
 import { assembleStreamingResponseHeaders } from "./chatCore/streamingResponseHeaders.ts";
@@ -950,19 +951,22 @@ export async function handleChatCore({
       nativeCodexPassthrough: nativeResponsesPassthrough,
       interceptSearchOverride,
     });
+  let forcedNonStreamingResponsesSse = false;
   if (webSearchFallbackPlan.enabled) {
     body = bodyWithWebSearchFallback as typeof body;
     // Server-side web-search execution cannot be injected into an arbitrary
-    // client SSE stream (streaming interception is not implemented — #9725), so
+    // client SSE stream (streaming interception is not implemented -- #9725), so
     // a stream:true OpenAI Responses request whose web_search tool was converted
     // to the fallback is executed non-streaming: the assembled response then
-    // carries the executed results (function_call_output + web_search_call) and
-    // JSON-tolerating Responses clients (pi-web-access) consume it directly.
+    // carries the executed results (function_call_output + web_search_call).
+    // When the client requested a stream, synthesize Responses SSE events from
+    // the completed response (#13033) instead of returning plain JSON.
     if (
       sourceFormat === FORMATS.OPENAI_RESPONSES &&
       (body as Record<string, unknown>).stream === true
     ) {
       (body as Record<string, unknown>).stream = false;
+      forcedNonStreamingResponsesSse = true;
       log?.info?.("TOOLS", `web_search fallback forced non-streaming response for ${provider}`);
     }
     log?.info?.(
@@ -5483,17 +5487,24 @@ export async function handleChatCore({
           retries: 0,
           fallbackUsed: false, // combo-level fallback tracked by decisionTrace
           outcome: "success",
-          status: 200,
-          finishReason: routingFinishReason(translatedResponse),
-          connectionId: credentials?.connectionId ?? null,
-        })
-      );
+        status: 200,
+        finishReason: routingFinishReason(translatedResponse),
+        connectionId: credentials?.connectionId ?? null,
+      })
+    );
 
+    if (forcedNonStreamingResponsesSse && sourceFormat === FORMATS.OPENAI_RESPONSES) {
       return {
         success: true,
-        response: buildNonStreamingJsonResponse(translatedResponse, responseHeaders),
+        response: buildNonStreamingResponsesSseResponse(translatedResponse, responseHeaders),
       };
-    } catch (error) {
+    }
+
+    return {
+      success: true,
+      response: buildNonStreamingJsonResponse(translatedResponse, responseHeaders),
+    };
+  } catch (error) {
       trackPendingRequest(model, provider, connectionId, false);
       if (isManagedLeaseFenceError(error)) return managedLeaseFenceErrorResult(error);
       if (isSemaphoreCapacityError(error)) {
