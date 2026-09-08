@@ -68,7 +68,12 @@ import {
   type CatalogEnrichmentSnapshot,
 } from "@/lib/modelMetadataRegistry";
 import { createModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
-import { getModelsDevPricing, getSyncedCapability } from "@/lib/modelsDevSync";
+import {
+  getModelsDevPricing,
+  getSyncedCapability,
+  upsertSyncedCapabilities,
+} from "@/lib/modelsDevSync";
+import type { ModelCapabilityEntry } from "@/lib/modelsDevSync";
 import { getModelSpec } from "@/shared/constants/modelSpecs";
 import { classifyModelSupportedEndpoints } from "@/shared/constants/modelSupportedEndpoints";
 import { getModelsCatalogPrefixMode } from "@/shared/utils/featureFlags";
@@ -92,7 +97,7 @@ import {
   type ComboTargetCatalogMetadata,
   isPositiveFiniteNumber,
   parseJsonStringArray,
-  intersectStringArrays,
+  intersectKnownStringArrays,
   minKnownNumber,
   maybeOmitCatalogModelName,
   getThinkingCapabilityFields,
@@ -106,6 +111,7 @@ import {
   getOpenRouterModelType,
   isOpenRouterFreeModel,
   getOpenRouterDisplayName,
+  openRouterCapabilityEntry,
 } from "./catalogOpenrouter";
 import { getVisionCapabilityFields, getCustomVisionCapabilityFields } from "./catalogVision";
 import {
@@ -762,17 +768,12 @@ async function buildUnifiedModelsResponseCore(
         knownMetadata.map((metadata) => metadata.maxOutputTokens)
       );
 
-      const inputModalities = knownMetadata.every(
-        (metadata) => Array.isArray(metadata.inputModalities) && metadata.inputModalities.length > 0
-      )
-        ? intersectStringArrays(knownMetadata.map((metadata) => metadata.inputModalities || []))
-        : [];
-      const outputModalities = knownMetadata.every(
-        (metadata) =>
-          Array.isArray(metadata.outputModalities) && metadata.outputModalities.length > 0
-      )
-        ? intersectStringArrays(knownMetadata.map((metadata) => metadata.outputModalities || []))
-        : [];
+      const inputModalities = intersectKnownStringArrays(
+        knownMetadata.map((m) => (Array.isArray(m.inputModalities) ? m.inputModalities : []))
+      );
+      const outputModalities = intersectKnownStringArrays(
+        knownMetadata.map((m) => (Array.isArray(m.outputModalities) ? m.outputModalities : []))
+      );
 
       const capabilities = mergeComboCapabilities(knownMetadata);
       if (targetMetadata.some((metadata) => metadata === null)) {
@@ -887,20 +888,12 @@ async function buildUnifiedModelsResponseCore(
         const knownAutoMeta = autoTargetMetadata.filter(
           (m): m is ComboTargetCatalogMetadata => m !== null
         );
-        const autoInputModalities =
-          knownAutoMeta.length > 0 &&
-          knownAutoMeta.every(
-            (m) => Array.isArray(m.inputModalities) && m.inputModalities.length > 0
-          )
-            ? intersectStringArrays(knownAutoMeta.map((m) => m.inputModalities || []))
-            : [];
-        const autoOutputModalities =
-          knownAutoMeta.length > 0 &&
-          knownAutoMeta.every(
-            (m) => Array.isArray(m.outputModalities) && m.outputModalities.length > 0
-          )
-            ? intersectStringArrays(knownAutoMeta.map((m) => m.outputModalities || []))
-            : [];
+        const autoInputModalities = intersectKnownStringArrays(
+          knownAutoMeta.map((m) => (Array.isArray(m.inputModalities) ? m.inputModalities : []))
+        );
+        const autoOutputModalities = intersectKnownStringArrays(
+          knownAutoMeta.map((m) => (Array.isArray(m.outputModalities) ? m.outputModalities : []))
+        );
         const autoCapabilities: Record<string, boolean | string[]> = {
           tool_calling: true,
           reasoning: true,
@@ -1345,6 +1338,7 @@ async function buildUnifiedModelsResponseCore(
     ) {
       try {
         const openRouterCatalog = await getOpenRouterCatalog();
+        const openRouterCaps: Record<string, ModelCapabilityEntry> = {};
         for (const openRouterModel of openRouterCatalog.data || []) {
           if (!openRouterModel?.id || typeof openRouterModel.id !== "string") continue;
           const qualifiedId = qualifyOpenRouterModelId(openRouterModel.id);
@@ -1402,10 +1396,16 @@ async function buildUnifiedModelsResponseCore(
             ...(outputModalities.length > 0 ? { output_modalities: outputModalities } : {}),
             ...(Object.keys(capabilities).length > 0 ? { capabilities } : {}),
           });
-
-          // #9147: OpenRouter catalog can be large — yield periodically.
+          const capEntry = openRouterCapabilityEntry(
+            openRouterModel,
+            inputModalities,
+            outputModalities,
+            capabilities
+          );
+          if (capEntry) openRouterCaps[openRouterModel.id] = capEntry;
           await maybeYieldCatalogBuild();
         }
+        upsertSyncedCapabilities("openrouter", openRouterCaps);
       } catch (err) {
         console.error("[catalog] Error loading OpenRouter catalog:", err);
       }
