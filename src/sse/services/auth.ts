@@ -75,6 +75,7 @@ import {
   retryHintBypassesMaxCooldownMs,
   isProviderModelUnsupported400,
 } from "@omniroute/open-sse/services/accountFallback.ts";
+import { isSharedWalletCredits402 } from "@omniroute/open-sse/services/accountFallback/sharedWalletCredits.ts";
 import { isLocalProvider } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { COOLDOWN_MS, RateLimitReason } from "@omniroute/open-sse/config/constants.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
@@ -2943,6 +2944,11 @@ export async function markAccountUnavailable(
       return { shouldFallback: true, cooldownMs: lockout.cooldownMs };
     }
     const result = fallbackResult;
+    if (isSharedWalletCredits402(provider, status, errorText)) {
+      result.creditsExhausted = true;
+      result.reason = result.reason || RateLimitReason.QUOTA_EXHAUSTED;
+      result.shouldFallback = true;
+    }
     const { shouldFallback, cooldownMs: rawCooldownMs, newBackoffLevel, reason } = result;
     if (!shouldFallback) return { shouldFallback: false, cooldownMs: 0 };
     const providerErrorType = classifyProviderError(status, errorText, provider);
@@ -3061,6 +3067,7 @@ export async function markAccountUnavailable(
       provider &&
       model &&
       !terminalStatus &&
+      !isSharedWalletCredits402(provider, status, errorText) &&
       !(provider === "vertex" && isVertexConnectionWidePermissionDenied(errorText))
     ) {
       const lockoutReason = status === 402 ? "credits" : "forbidden";
@@ -3182,7 +3189,12 @@ export async function markAccountUnavailable(
       // the DB, but record an in-memory model lockout so credential selection
       // skips this exact provider+connection+model while it cools down — other
       // models on the same connection stay usable.
-      if (provider && model && cooldownMs > 0) {
+      if (
+        provider &&
+        model &&
+        cooldownMs > 0 &&
+        !isSharedWalletCredits402(provider, status, errorText)
+      ) {
         lockModel(provider, connectionId, model, reason || "unknown", cooldownMs);
       }
       await updateProviderConnection(connectionId, {

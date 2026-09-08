@@ -31,6 +31,7 @@ import { isCloudflareFingerprintRejection } from "../errorClassifier.ts";
 // (markAccountUnavailable) so the same-request combo skip and the persisted
 // connection cooldown agree on exactly which fallbackResult shapes qualify.
 import { isAgentrouterConnectionQuotaScope } from "@/sse/services/auth";
+import { isSharedWalletCredits402 } from "../accountFallback/sharedWalletCredits.ts";
 import type { ComboLogger, ResolvedComboTarget } from "./types.ts";
 
 // Connection-level failure statuses: the provider connection itself is likely bad (upstream
@@ -162,6 +163,11 @@ export function applyComboTargetExhaustion(
   // rate-limited sibling account, which is the intended, safer outcome.
   if (isAgentrouterConnectionQuotaScope(provider, opts.fallbackResult)) {
     markAgentrouterConnectionQuotaExhaustion(target, { sets, log, tag });
+    return true;
+  }
+
+  if (isSharedWalletCredits402(provider, result.status, opts.errorText)) {
+    markSharedWalletCreditsExhaustion(target, { sets, log, tag });
     return true;
   }
 
@@ -336,6 +342,28 @@ function markAuthLevelExhaustion(
     log.info(
       tag,
       `Provider ${provider} auth failure (${result.status}) — marking for skip on remaining targets (#8133)`
+    );
+  }
+}
+
+function markSharedWalletCreditsExhaustion(
+  target: ResolvedComboTarget,
+  opts: Pick<ApplyComboTargetExhaustionOptions, "sets" | "log" | "tag">
+): void {
+  const { sets, log, tag } = opts;
+  const provider = target.provider;
+  const connId = target.connectionId ?? undefined;
+  if (connId) {
+    sets.exhaustedConnections.add(`${provider}:${connId}`);
+    log.info(
+      tag,
+      `Provider ${provider} connection ${connId} shared-wallet 402 — marking for skip on remaining targets`
+    );
+  } else {
+    sets.exhaustedProviders.add(provider as string);
+    log.info(
+      tag,
+      `Provider ${provider} shared-wallet 402 (no connectionId) — marking for skip on remaining targets`
     );
   }
 }
