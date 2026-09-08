@@ -49,7 +49,22 @@ import { rankByHeadroom, type HeadroomSaturation } from "./headroomRanking.ts";
 import { getInflight, incrementInflight } from "./quotaShareInflight.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "../antigravityProjectPersist.ts";
 import { getQuotaFetchScope } from "../antigravityQuotaFamily.ts";
-import { isQuotaExhaustedForRequest } from "../../../src/domain/quotaCache.ts";
+import {
+  getQuotaSnapshotFetchedAt,
+  getQuotaWeightedRemainingPercent,
+  isQuotaExhaustedForRequest,
+} from "../../../src/domain/quotaCache.ts";
+
+/**
+ * How long a stored quota snapshot stays good enough to be counted as confident
+ * headroom by the quota-weighted A pool.
+ *
+ * Matches the background refresh cadence for active accounts (quotaCache's
+ * ACTIVE_TTL_MS), doubled to absorb one missed refresh tick. Past that the
+ * snapshot says "unknown", not "empty": the connection drops to the B pool and
+ * is still routed to when nothing fresher has room.
+ */
+export const QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS = 10 * 60 * 1000;
 
 const RESET_AWARE_QUOTA_FETCH_CONCURRENCY = 5;
 const HEADROOM_SATURATION_FETCH_CONCURRENCY = 5;
@@ -785,13 +800,28 @@ export async function orderTargetsByQuotaWeighted(
     }),
   });
 
-  const eligible = scoredTargets.filter((entry) => entry.remainingPercent > 0);
+  // The live snapshot outranks the freshly-scored fetch on two counts: a 402
+  // recorded against this connection zeroes it, and an observation older than
+  // the staleness bound is not confident enough to sit in the A pool.
+  const now = Date.now();
+  const withSnapshot = scoredTargets.map((entry) => {
+    const connectionId = entry.target.connectionId ?? "";
+    const marked = connectionId ? getQuotaWeightedRemainingPercent(connectionId) : null;
+    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
+    return {
+      ...entry,
+      remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
+      stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
+    };
+  });
+
+  const eligible = withSnapshot.filter((entry) => entry.remainingPercent > 0);
   const floor = resolveQuotaWeightedFloor(configSource);
-  const poolA = floor === 0 ? eligible : eligible.filter((entry) => entry.remainingPercent > floor);
-  const poolB =
-    floor === 0
-      ? []
-      : eligible.filter((entry) => entry.remainingPercent > 0 && entry.remainingPercent <= floor);
+  const hasRoom = (entry: (typeof eligible)[number]) =>
+    floor === 0 ? true : entry.remainingPercent > floor;
+  // A holds only connections we both believe have room AND observed recently.
+  const poolA = eligible.filter((entry) => hasRoom(entry) && !entry.stale);
+  const poolB = eligible.filter((entry) => !hasRoom(entry) || entry.stale);
   const selected = poolA.length > 0 ? poolA : poolB;
   if (selected.length === 0) return [];
 
