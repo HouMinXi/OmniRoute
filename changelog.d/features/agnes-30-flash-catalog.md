@@ -1,0 +1,1 @@
+- **feat(providers):** list Agnes 3.0 Flash as the current free chat model, drop retired 1.5 Flash, and add Image 2.0 / 2.5 Flash. `agnes-1.5-flash` now forwards to `agnes-3.0-flash`. Live `/v1/models` (2026-09-09) no longer serves 1.5; wiki marks it deprecated.

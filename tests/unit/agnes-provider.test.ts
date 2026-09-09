@@ -20,6 +20,7 @@ const { handleImageGeneration } = await import("../../open-sse/handlers/imageGen
 const { handleVideoGeneration } = await import("../../open-sse/handlers/videoGeneration.ts");
 const { resolveChatCoreTargetFormat } =
   await import("../../open-sse/handlers/chatCore/targetFormat.ts");
+const { resolveModelAlias } = await import("../../open-sse/services/modelDeprecation.ts");
 const dbCore = await import("../../src/lib/db/core.ts");
 
 test.after(() => {
@@ -72,19 +73,12 @@ test("agnes routes Chat Completions clients through its OpenAI chat upstream", (
   );
 });
 
-test("agnes ships the current public chat models with correct capabilities", () => {
+test("agnes ships the current public chat models with the correct capabilities", () => {
   const entry = providerRegistry.agnes;
   assert.deepEqual(
     entry.models.map((model) => model.id),
-    ["agnes-1.5-flash", "agnes-2.0-flash", "agnes-2.5-flash"]
+    ["agnes-2.0-flash", "agnes-2.5-flash", "agnes-3.0-flash"]
   );
-
-  const flash15 = entry.models.find((m) => m.id === "agnes-1.5-flash");
-  assert.ok(flash15, "agnes-1.5-flash must be defined");
-  assert.equal(flash15.contextLength, 262144);
-  assert.equal(flash15.maxOutputTokens, 65536);
-  assert.equal(flash15.supportsVision, true);
-  assert.equal(flash15.toolCalling, true);
 
   const flash20 = entry.models.find((m) => m.id === "agnes-2.0-flash");
   assert.ok(flash20, "agnes-2.0-flash must be defined");
@@ -98,12 +92,29 @@ test("agnes ships the current public chat models with correct capabilities", () 
   assert.ok(flash25, "agnes-2.5-flash must be defined");
   assert.equal(flash25.contextLength, 524288);
   assert.equal(flash25.maxOutputTokens, 65536);
+
+  const flash30 = entry.models.find((m) => m.id === "agnes-3.0-flash");
+  assert.ok(flash30, "agnes-3.0-flash must be defined");
+  assert.equal(flash30.supportsReasoning, true);
+  assert.equal(flash30.supportsVision, true);
+  assert.equal(flash30.toolCalling, true);
+  assert.equal(flash30.interleavedField, "reasoning_content");
 });
+
+test("agnes-1.5-flash is retired and forwards to agnes-3.0-flash", () => {
+  const entry = providerRegistry.agnes;
+  assert.equal(
+    entry.models.some((model) => model.id === "agnes-1.5-flash"),
+    false
+  );
+  assert.equal(resolveModelAlias("agnes-1.5-flash", "agnes"), "agnes-3.0-flash");
+});
+
 test("agnes free catalog exposes the current free chat models through one shared pool", () => {
   const rows = FREE_MODEL_BUDGETS.filter((model) => model.provider === "agnes");
   assert.deepEqual(
     rows.map((model) => model.modelId),
-    ["agnes-1.5-flash", "agnes-2.0-flash", "agnes-2.5-flash"]
+    ["agnes-2.0-flash", "agnes-2.5-flash", "agnes-3.0-flash"]
   );
   assert.ok(rows.every((model) => model.poolKey === "agnes-free"));
 });
@@ -123,22 +134,19 @@ test("agnes has no collision with zenmux-free sapiens-ai prefixed models", (t) =
   }
 });
 
-test("agnes registers Image 2.1 Flash on the current image-generation contract", () => {
+test("agnes registers Image 2.x Flash models on the current image-generation contract", () => {
   const entry = IMAGE_PROVIDERS.agnes;
   assert.ok(entry, "IMAGE_PROVIDERS.agnes must be defined");
   assert.equal(entry.baseUrl, "https://apihub.agnes-ai.com/v1/images/generations");
   assert.equal(entry.authHeader, "bearer");
   assert.equal(entry.format, "agnes-image");
   assert.deepEqual(entry.supportedSizes, ["1K", "2K", "3K", "4K"]);
-  assert.deepEqual(entry.models, [
-    {
-      id: "agnes-image-2.1-flash",
-      name: "Agnes Image 2.1 Flash",
-      inputModalities: ["text", "image"],
-      description: "Agnes text-to-image, image-to-image, and multi-image composition model",
-    },
-  ]);
+  assert.deepEqual(
+    entry.models.map((model) => model.id),
+    ["agnes-image-2.0-flash", "agnes-image-2.1-flash", "agnes-image-2.5-flash"]
+  );
   assert.ok(getAllImageModels().some((model) => model.id === "agnes/agnes-image-2.1-flash"));
+  assert.ok(getAllImageModels().some((model) => model.id === "agnes/agnes-image-2.5-flash"));
 });
 
 test("agnes Image 2.1 maps standard image inputs into extra_body", async () => {
