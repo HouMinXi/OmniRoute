@@ -220,16 +220,21 @@ test("agnes Image 2.1 requires the current size parameter", async () => {
   assert.equal(result.error, "Size is required for Agnes Image 2.1 Flash");
 });
 
-test("agnes registers Video V2.0 on the current video_id job contract", () => {
+test("agnes registers Video V2.0 and Video 2.5 on the current job contracts", () => {
   const entry = VIDEO_PROVIDERS.agnes;
   assert.ok(entry, "VIDEO_PROVIDERS.agnes must be defined");
   assert.equal(entry.baseUrl, "https://apihub.agnes-ai.com");
   assert.equal(entry.statusUrl, "https://apihub.agnes-ai.com/agnesapi");
   assert.equal(entry.authHeader, "bearer");
   assert.equal(entry.format, "agnes-video-job");
-  assert.deepEqual(entry.models, [{ id: "agnes-video-v2.0", name: "Agnes Video V2.0" }]);
+  assert.deepEqual(
+    entry.models.map((model) => model.id),
+    ["agnes-video-v2.0", "agnes-video-2.5-flash", "agnes-video-2.5"]
+  );
   assert.equal(VIDEO_PROVIDER_IDS.has("agnes"), true);
   assert.ok(getAllVideoModels().some((model) => model.id === "agnes/agnes-video-v2.0"));
+  assert.ok(getAllVideoModels().some((model) => model.id === "agnes/agnes-video-2.5-flash"));
+  assert.ok(getAllVideoModels().some((model) => model.id === "agnes/agnes-video-2.5"));
 });
 
 test("agnes Video V2.0 submits with Bearer auth and polls by video_id", async () => {
@@ -324,6 +329,81 @@ test("agnes Video V2.0 submits with Bearer auth and polls by video_id", async ()
         Authorization: "Bearer agnes-key",
       },
     });
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+});
+
+test("agnes Video 2.5-flash submits Bearer auth and polls /v1/videos/{id}", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const calls: Array<{
+    url: string;
+    method: string;
+    headers: Record<string, string>;
+    body?: Record<string, unknown>;
+  }> = [];
+
+  globalThis.setTimeout = ((callback: (...args: unknown[]) => void, _ms?: number, ...args) => {
+    callback(...args);
+    return 0;
+  }) as typeof setTimeout;
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    const call = {
+      url: String(url),
+      method: init?.method || "GET",
+      headers: (init?.headers || {}) as Record<string, string>,
+      ...(init?.body ? { body: JSON.parse(String(init.body)) as Record<string, unknown> } : {}),
+    };
+    calls.push(call);
+
+    if (call.method === "POST") {
+      return new Response(
+        JSON.stringify({
+          id: "task_nEV6cJjyzWnix1g1O9QHjnHzTstegDGM",
+          status: "queued",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        id: "task_nEV6cJjyzWnix1g1O9QHjnHzTstegDGM",
+        status: "completed",
+        url: "https://platform-outputs.agnes-ai.space/video-25.mp4",
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await handleVideoGeneration({
+      body: {
+        model: "agnes/agnes-video-2.5-flash",
+        prompt: "a red ball rolling on a white floor",
+        seconds: "4",
+        mode: "text",
+        size: "720P",
+        aspect_ratio: "16:9",
+      },
+      credentials: { apiKey: "agnes-key" },
+      log: null,
+    });
+
+    assert.equal(result.success, true);
+    assert.equal(result.data.data[0].url, "https://platform-outputs.agnes-ai.space/video-25.mp4");
+    assert.equal(calls.length, 2);
+    assert.equal(calls[0].url, "https://apihub.agnes-ai.com/v1/videos");
+    assert.equal(calls[0].method, "POST");
+    assert.equal(calls[0].body?.model, "agnes-video-2.5-flash");
+    assert.equal(calls[0].body?.seconds, "4");
+    assert.equal(calls[0].body?.mode, "text");
+    assert.equal(
+      calls[1].url,
+      "https://apihub.agnes-ai.com/v1/videos/task_nEV6cJjyzWnix1g1O9QHjnHzTstegDGM"
+    );
+    assert.equal(calls[1].method, "GET");
   } finally {
     globalThis.fetch = originalFetch;
     globalThis.setTimeout = originalSetTimeout;
