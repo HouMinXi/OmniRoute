@@ -5,6 +5,7 @@ import {
   persistAttemptLogs as persistAttemptLogsFor,
   type PersistAttemptLogsArgs,
 } from "./chatCore/attemptLogging.ts";
+import { getHeaderValueCaseInsensitive } from "./chatCore/headers.ts";
 import {
   projectFailureUsageErrorCode,
   buildFailureUsageRecord,
@@ -522,7 +523,10 @@ export async function handleChatCore({
         conversationId ||
         (typeof clientRawRequest?.headers?.get === "function"
           ? clientRawRequest.headers.get("x-omniroute-session-id")
-          : null),
+          : getHeaderValueCaseInsensitive(
+              clientRawRequest?.headers ?? null,
+              "x-omniroute-session-id"
+            )),
       videoBridgeLogRedaction: (videoBridgeLog as { redaction?: unknown } | undefined)?.redaction,
       videoContentRemoved: videoBridgeObserved,
     });
