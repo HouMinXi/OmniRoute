@@ -17,26 +17,33 @@ test("barrel no longer inlines translatedBody assignment", () => {
   assert.equal(
     src.includes("let translatedBody = body;"),
     false,
-    "request translation must leave barrel"
+    "request translation must leave the barrel"
   );
 });
 
-test("barrel rebinds persistAttemptLogs with compressed tokens before send", () => {
+test("barrel rebinds persistAttemptLogs compressed tokens before send", () => {
   const src = fs.readFileSync(barrelPath, "utf8");
   const sliceCall = src.indexOf("runTranslateAndDedup(");
-  const sendIdx = src.indexOf("const executeProviderRequest = (");
+  const sendIdx = src.indexOf("const executeProviderRequest");
   assert.notEqual(sliceCall, -1, "barrel must call runTranslateAndDedup");
   assert.notEqual(sendIdx, -1, "executeProviderRequest wrapper must remain");
   assert.ok(sliceCall < sendIdx, "translation must run before send");
   const between = src.slice(sliceCall, sendIdx);
+  const bindAt = between.indexOf("persistAttemptLogsFor(");
+  assert.notEqual(bindAt, -1, "rebind must call persistAttemptLogsFor after translation");
+  const objStart = between.indexOf("{", bindAt);
+  const objEnd = between.indexOf("});", objStart);
+  assert.notEqual(objStart, -1, "rebind object must open");
+  assert.notEqual(objEnd, -1, "rebind object must close");
+  const bindObj = between.slice(objStart, objEnd);
   assert.equal(
-    between.includes("persistAttemptLogsFor"),
+    bindObj.includes("body: translatedBody"),
     true,
-    "rebind must call persistAttemptLogsFor after translation"
+    "rebind must persist translatedBody, not the pre-translation body"
   );
   assert.equal(
-    between.includes("tokensCompressed"),
+    bindObj.includes("tokensCompressed"),
     true,
-    "rebind must capture live tokensCompressed"
+    "rebind object must include live tokensCompressed"
   );
 });
