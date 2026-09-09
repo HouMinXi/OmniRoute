@@ -6,11 +6,11 @@ import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
 } from "./chatCore/memorySkillsInjection.ts";
-import { resolveChatCoreRequestSetup } from "./chatCore/requestSetup.ts";
+import { runRequestPrelude } from "./chatCore/requestPrelude.ts";
 import { normalizeOpenAICompatibleTools } from "./chatCore/openAICompatibleTools.ts";
 import {
-  buildFailureUsageRecord,
   projectFailureUsageErrorCode,
+  buildFailureUsageRecord,
   type FailureUsageAggregate,
 } from "./chatCore/failureUsage.ts";
 import { createTranslationFailureResult } from "./chatCore/translationFailure.ts";
@@ -23,14 +23,8 @@ export {
   extractSystemRoleMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
-import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
+
 import { checkSemanticCache } from "./chatCore/semanticCache.ts";
-import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
-import {
-  shouldDefaultAllowClassifier,
-  detectClassifierFormat,
-  buildDefaultAllowClaudeMessage,
-} from "./chatCore/claudeClassifierCompat.ts";
 import { buildPostCallGuardrailContext } from "./chatCore/postCallGuardrailContext.ts";
 import { storeSemanticCacheResponse } from "./chatCore/semanticCacheStore.ts";
 import { buildNonStreamingResponseHeaders } from "./chatCore/nonStreamingResponseHeaders.ts";
@@ -54,16 +48,11 @@ import {
   resolveCompressionHeader,
 } from "./chatCore/headers.ts";
 
-import {
-  getCodexClientSessionId,
-  isCodexOriginatedHeaders,
-  isClaudeCodeOriginatedHeaders,
-} from "../config/codexIdentity.ts";
+import { getCodexClientSessionId } from "../config/codexIdentity.ts";
 import {
   noteCodexTurnStateProvenance,
   readCodexTurnStateHeader,
 } from "../config/codexTurnState.ts";
-import { trackDevice, extractIpFromHeaders } from "../services/deviceTracker.ts";
 import { getCombosCached } from "./chatCore/comboContextCache.ts";
 export { clearCombosCache, clearUpstreamProxyConfigCache } from "./chatCore/comboContextCache.ts";
 import {
@@ -73,7 +62,6 @@ import {
 import {
   shouldUseNativeCodexPassthrough,
   shouldUseNativeXaiResponsesPassthrough,
-  shouldUseNativeOpenAICompatibleResponsesPassthrough,
   stampNativeResponsesPassthroughBody,
   redactPassthroughThinkingSignatures,
   isClaudeCodeSemanticPassthroughRequest,
@@ -109,17 +97,12 @@ export {
   stripStaleForwardingHeaders,
 };
 import { resolveMemoryOwnerId, runMemoryExtractionGate } from "./chatCore/memoryExtraction.ts";
-import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
-import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
-import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
 import { resolveOmniGlyphTransport } from "../services/compression/imageTransportPolicy.ts";
 import { stripStore, usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeClaudeToolsForDispatch } from "./chatCore/claudeToolDefaults.ts";
-import { injectSystemPrompt, injectCustomSystemPrompt } from "../services/systemPrompt.ts";
 import { translateRequest, needsTranslation } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
-import { collectCustomToolNamesForSourceFormat } from "../translator/request/openai-responses/additionalTools.ts";
 import { sanitizeKiroTools } from "../utils/kiroSanitizer.ts";
 import { splitMisplacedToolResults } from "../translator/helpers/claudeHelper.ts";
 import { ensureCacheControlOnLastUserMessage } from "../services/claudeCodeConstraints.ts";
@@ -129,9 +112,8 @@ import {
   COLORS,
 } from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
-import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../utils/thinkCloseMarker.ts";
+import { resolveSuppressThinkClose } from "../utils/thinkCloseMarker.ts";
 import { resolveStreamReadinessTimeout } from "../utils/streamReadinessPolicy.ts";
-import { resolveAgentGoalPolicy } from "../utils/agentGoalPolicy.ts";
 import { createStreamController } from "../utils/streamHandler.ts";
 import * as streamFailure from "../utils/streamFailureFinalization.ts";
 import { normalizeUsage } from "../utils/usageTracking.ts";
@@ -141,11 +123,8 @@ import {
   runWithOnPersist,
   runWithCasGuard,
 } from "../services/tokenRefresh.ts";
-import { createRequestLogger } from "../utils/requestLogger.ts";
-import { createPreparedRequestLogger, runWithCapture } from "../utils/providerRequestLogging.ts";
-import { summarizeToolSources } from "../utils/toolSources.ts";
+import { runWithCapture } from "../utils/providerRequestLogging.ts";
 import { applyResponsesPreviousResponseIdPolicy } from "../utils/responsesStatePolicy.ts";
-import { applyClaudeEffortVariant } from "./chatCore/claudeEffortVariant.ts";
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
 import {
   getStripTypesForProviderModel,
@@ -168,7 +147,7 @@ import {
   stripGpt5SamplingWhenReasoning,
   stripGpt5ReasoningWhenTools,
 } from "../services/gpt5SamplingGuard.ts";
-import { getUnsupportedParams, REGISTRY } from "../config/providerRegistry.ts";
+import { getUnsupportedParams } from "../config/providerRegistry.ts";
 import { stripUnsupportedParams } from "./chatCore/unsupportedParamsStrip.ts";
 import { checkToolCallingRequiredButUnsupported } from "./chatCore/toolCallingRequiredCheck.ts";
 import {
@@ -187,7 +166,6 @@ import {
   isFeatureFlagEnabled,
   isServerOwnedToolLoopEnabled,
 } from "@/shared/utils/featureFlags.ts";
-import { resolveNoAuthEchoModel } from "./chatCore/noAuthEchoModel.ts";
 import {
   REASONING_BUFFER_MIN_TRIGGER,
   buildReasoningProbeTruncatedResponse,
@@ -220,12 +198,10 @@ import {
   STREAM_DISCONNECT_GRACE_PERIOD_MS,
 } from "../config/constants.ts";
 import { applyStatusRestatement } from "../config/upstreamStatusRestatement.ts";
-import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import { classifyProviderError, PROVIDER_ERROR_TYPES } from "../services/errorClassifier.ts";
 import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/providers";
 import { wasRefreshTokenRotated } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { connectionHasExtraKeys } from "../services/apiKeyRotator.ts";
-import { recordKeyHealthStatus as recordKeyHealthStatusFor } from "./chatCore/keyHealth.ts";
 import { getSkillsModelIdForFormat } from "./chatCore/skillsFormat.ts";
 import {
   isSemaphoreCapacityError,
@@ -239,25 +215,14 @@ import { resolveExecutionCredentials as resolveExecutionCredentialsFor } from ".
 import { resolveExecutorWithProxy as resolveExecutorWithProxyFor } from "./chatCore/executorProxy.ts";
 import type { ClaudeMessage } from "./chatCore/claudeMessageTypes.ts";
 import { normalizeClaudeUpstreamMessages as normalizeClaudeUpstreamMessagesFor } from "./chatCore/claudeUpstreamMessages.ts";
-import {
-  persistAttemptLogs as persistAttemptLogsFor,
-  type PersistAttemptLogsArgs,
-} from "./chatCore/attemptLogging.ts";
-import { stageTrace } from "./chatCore/stageTrace.ts";
-import { attachCompressionUsageReceiptAfterAnalytics as attachCompressionUsageReceiptAfterAnalyticsFor } from "./chatCore/compressionUsageReceipt.ts";
 import { executeProviderRequest as executeProviderRequestFromLeaf } from "./chatCore/executeProviderRequest.ts";
 import { getQuotaScopeLabelForProvider } from "../services/antigravityQuotaFamily.ts";
 import { getKimiTemporaryRateLimitResetAt } from "./chatCore/kimiQuotaRecovery.ts";
-import {
-  getCallLogPipelineCaptureStreamChunks,
-  getCallLogPipelineMaxSizeBytes,
-} from "@/lib/logEnv";
 import { logAuditEvent } from "@/lib/compliance";
 import { emit } from "@/lib/events/eventBus";
 import { adaptBodyForCompression } from "../services/compression/bodyAdapter.ts";
 import { ensureEngineBreakdown } from "../services/compression/engineBreakdown.ts";
-import { handleBypassRequest } from "../utils/bypassHandler.ts";
-import { saveRequestUsage, trackPendingRequest, appendRequestLog } from "@/lib/usageDb";
+import { trackPendingRequest, appendRequestLog, saveRequestUsage } from "@/lib/usageDb";
 import { finalizePendingScope, updatePendingScope } from "@/lib/usage/pendingRequestScope";
 import { recordCost } from "@/domain/costRules";
 import { calculateCost } from "@/lib/usage/costCalculator";
@@ -281,10 +246,10 @@ import {
   writeCompressionAnalytics,
   writeCompressionSkip,
 } from "./chatCore/compressionAnalyticsWrite.ts";
-import { runPluginOnRequestHook } from "./chatCore/pluginOnRequest.ts";
 import { recordContextEditingTelemetryHook } from "./chatCore/contextEditingTelemetry.ts";
 import { recordCompressionCacheStats } from "./chatCore/compressionCacheStats.ts";
 import { writeCavemanOutputAnalytics } from "./chatCore/cavemanOutputAnalytics.ts";
+import { attachCompressionUsageReceiptAfterAnalytics as attachCompressionUsageReceiptAfterAnalyticsFor } from "./chatCore/compressionUsageReceipt.ts";
 import { scheduleQuotaShareConsumption } from "./chatCore/quotaShareConsumption.ts";
 import { emitRequestGamificationEvent } from "./chatCore/gamificationEvent.ts";
 import { runPluginOnResponseHook } from "./chatCore/pluginOnResponse.ts";
@@ -293,34 +258,16 @@ import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.
 import { normalizeExecutorResult } from "./chatCore/upstreamTimeouts.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 import { getProviderCredentials, extractSessionAffinityKey } from "@/sse/services/auth";
-import { assertExclusiveConnectionLeaseFence } from "@/lib/db/exclusiveConnectionLeases";
 
 import { getCacheControlSettings } from "@/lib/cacheControlSettings";
 import { guardrailRegistry } from "@/lib/guardrails";
-import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
-import {
-  logClientRawRequestRedacted,
-  redactPendingBody,
-} from "@/lib/guardrails/videoBridgeSnapshotRedaction";
+
 import {
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
-import { getCachedSettings } from "@/lib/db/readCache";
-import { applyCodexGlobalFastServiceTier } from "@/lib/providers/codexFastTier";
-import { buildUpstreamHeadersForExecute as buildUpstreamHeadersForExecuteFor } from "./chatCore/upstreamExecuteHeaders.ts";
-import {
-  resolveEffectiveServiceTier as resolveEffectiveServiceTierFor,
-  resolveReportedServiceTier as resolveReportedServiceTierFor,
-  type EffectiveServiceTier,
-} from "./chatCore/serviceTier.ts";
-import { isCompactResponsesEndpoint } from "../executors/codex.ts";
 import { extractUsageFromResponse } from "./usageExtractor.ts";
-import {
-  updateFromHeaders,
-  updateFromResponseBody,
-  initializeRateLimits,
-} from "../services/rateLimitManager.ts";
+import { updateFromHeaders, updateFromResponseBody } from "../services/rateLimitManager.ts";
 import * as localLimiterErrors from "../services/rateLimitManager/errors.ts";
 import { markBlocked as markAccountSemaphoreBlocked } from "../services/accountSemaphore.ts";
 import {
@@ -344,18 +291,12 @@ import {
   getComboTargetTokenLimit,
   resolveComboContextLimit,
 } from "../services/contextManager.ts";
-import { resolveBackgroundTaskRedirect } from "./chatCore/backgroundRedirect.ts";
 import type {
   CompressionConfig,
   CompressionPipelineStep,
   CompressionResult,
 } from "../services/compression/types.ts";
 import { generateSessionId } from "../services/sessionManager.ts";
-import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
-import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
-import { resolveInterceptSearch, resolveInterceptFetch } from "@/lib/db/interceptionRules";
-import { resolveExplicitStreamAlias, resolveStreamFlag } from "../utils/aiSdkCompat.ts";
-import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
@@ -367,8 +308,7 @@ import {
   buildClaudeCodeCompatibleRequest,
   resolveClaudeCodeCompatibleSessionId,
 } from "../services/claudeCodeCompatible.ts";
-import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";
-import { classifyModelScope429, isModelScopeProvider } from "../services/modelscopePolicy.ts";
+import { classifyModelScope429 } from "../services/modelscopePolicy.ts";
 import { incrementTokenUsage, isTpmExhausted } from "../services/geminiRateLimitTracker.ts";
 import { getProactiveCompressionRatio } from "@/lib/db/compression";
 
@@ -442,169 +382,95 @@ export async function handleChatCore({
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
 }) {
-  let { provider, model, extendedContext } = modelInfo;
-  // #12150 P1b: true iff the video-bridge guardrail rendered >=1 transcript
-  // cue into a replaced part of this request. Gates both request- and
-  // response-derived Memory extraction
-  // (chatCore/memoryExtraction.ts::runMemoryExtractionGate).
-  const videoBridgeObserved: boolean =
-    (videoBridgeLog as VideoBridgeLogParam | undefined)?.observed === true;
-  const resilienceSettings = resolveResilienceSettings(cachedSettings);
-  if (!skipResourcePressureGuard) {
-    try {
-      const pressureGuard = checkResourcePressureGuard();
-      if (pressureGuard) return pressureGuard;
-    } catch {
-      /* fail open */
-    }
-  }
-  // Per-request model-routing metadata (first extracted slice of the request-setup phase).
-  const { apiFormat, customModelTargetFormat, requestedModel } = resolveChatCoreRequestSetup(
+  const prelude = await runRequestPrelude({
+    body,
     modelInfo,
-    body,
-    model
-  );
-  const isModelScope = () => isModelScopeProvider(provider, credentials?.providerSpecificData);
-  const startTime = Date.now();
-  // Per-request trace id + checkpoint helper. Lets us see exactly which await
-  // a hung request was sitting on in `[STAGE_TRACE]` log lines. Uses crypto RNG
-  // (not Math.random) purely to satisfy CodeQL js/insecure-randomness — this id
-  // is a log-correlation token, not a security secret.
-  const traceId = globalThis.crypto.randomUUID().slice(0, 6);
-  // Emit request.started event for real-time dashboard
-  setImmediate(() => {
-    emit("request.started", {
-      id: traceId,
-      model: model || "unknown",
-      provider: provider || "unknown",
-      timestamp: startTime,
-      comboName: comboName || undefined,
-    });
-  });
-  const traceEnabled = process.env.OMNIROUTE_TRACE === "true" || process.env.DEBUG === "true";
-  // Stage trace extracted to chatCore/stageTrace.ts (#3501); bind the per-request inputs once so the
-  // call sites stay byte-identical.
-  const trace = (label: string, extra?: Record<string, unknown>) =>
-    stageTrace(label, extra, { traceEnabled, startTime, traceId, log });
-  const getCurrentConnectionId = () => {
-    const credentialConnectionId =
-      typeof credentials?.connectionId === "string" && credentials.connectionId.trim().length > 0
-        ? credentials.connectionId.trim()
-        : null;
-    return credentialConnectionId || connectionId || null;
-  };
-  const assertManagedLeaseFence = (attemptConnectionId: string | null | undefined) => {
-    if (!managedLease) return;
-    if (!attemptConnectionId) {
-      throw Object.assign(new Error("Managed lease connection is unavailable"), {
-        code: "LEASE_CONNECTION_MISMATCH",
-        status: 409,
-      });
-    }
-    const fence = assertExclusiveConnectionLeaseFence({
-      leaseOwnerId: managedLease.context.leaseOwnerId,
-      generation: managedLease.context.generation,
-      apiKeyId: managedLease.apiKeyId,
-      connectionId: attemptConnectionId,
-    });
-    if (fence.kind === "VALID") return;
-    const code =
-      fence.kind === "REQUIRED"
-        ? "LEASE_REQUIRED"
-        : fence.kind === "STALE"
-          ? "LEASE_FENCE_STALE"
-          : fence.kind === "AUTHORIZATION_MISMATCH"
-            ? "LEASE_AUTHORIZATION_MISMATCH"
-            : "LEASE_CONNECTION_MISMATCH";
-    throw Object.assign(new Error("Managed lease request fence rejected the dispatch"), {
-      code,
-      status: 409,
-    });
-  };
-  const isManagedLeaseFenceError = (error: unknown): boolean =>
-    managedLease !== null &&
-    typeof (error as { code?: unknown })?.code === "string" &&
-    String((error as { code: string }).code).startsWith("LEASE_");
-  const managedLeaseFenceErrorResult = (error: unknown) => {
-    const code = (error as { code: string }).code;
-    return {
-      ...createErrorResult(409, "Managed lease request fence rejected the dispatch", null, code),
-      errorType: "lease_error",
-      errorCode: code,
-    };
-  };
-  let tokensCompressed: number | null = null;
-  body = injectSystemPrompt(body);
-  // ── Per-endpoint custom system prompt (port of upstream #2063) ──
-  // Reads from cachedSettings if available (passed in from combo/chat layer)
-  // to avoid an extra DB read on the hot path. Falls through to getCachedSettings()
-  // only when this function is called outside the normal chat dispatch.
-  {
-    const _s = cachedSettings ?? (await getCachedSettings());
-    if (
-      _s.customSystemPromptEnabled === true &&
-      typeof _s.customSystemPrompt === "string" &&
-      _s.customSystemPrompt
-    ) {
-      body = injectCustomSystemPrompt(body as Record<string, unknown>, _s.customSystemPrompt);
-      log?.debug?.("CUSTOMSP", "custom system prompt injected");
-    }
-  }
-  // ── Plugin onRequest hook ──
-  // Dynamic import cached by Node.js after first call — minimal overhead
-  const pluginGate = await runPluginOnRequestHook({
-    requestId: traceId,
-    body,
-    model,
-    provider,
-    apiKeyInfo,
-    headers: clientRawRequest?.headers,
+    credentials,
     log,
+    clientRawRequest,
+    connectionId,
+    apiKeyInfo,
+    userAgent,
+    comboName,
+    sessionAffinityKey,
+    comboStepId,
+    comboExecutionKey,
+    cachedSettings,
+    correlationId,
+    conversationId,
+    modelPinned,
+    skipResourcePressureGuard,
+    managedLease,
+    videoBridgeLog,
   });
-  if (pluginGate.blocked === true) {
-    return {
-      success: false,
-      status: 403,
-      // Label the source: this 403 is our own policy decision, not the provider
-      // rejecting us. Unlabelled, it is indistinguishable from a real upstream 403
-      // and gets the connection banned. Matches the type already sent to the client
-      // in pluginOnRequest.ts.
-      errorType: "plugin_block",
-      errorCode: "plugin_block",
-      error: "Request blocked by plugin",
-      response: pluginGate.response,
-    };
-  }
-  if (pluginGate.body) {
-    body = pluginGate.body;
-  }
-  // Per-API-key device/connection tracking (port of upstream 9router#931,
-  // thanks @mugnimaestra). In-memory only, never blocks the request path.
-  if (apiKeyInfo?.id) {
-    trackDevice(
-      apiKeyInfo.id,
-      extractIpFromHeaders(clientRawRequest?.headers ?? null),
-      userAgent ?? null
-    );
-  }
-  const agentGoalPolicy = resolveAgentGoalPolicy(body, clientRawRequest?.headers ?? null);
-  if (agentGoalPolicy.detected) {
-    log?.debug?.(
-      "AGENT_GOAL",
-      `long-running goal mode enabled: readinessMax=${agentGoalPolicy.readinessMaxTimeoutMs}ms streamRecovery=${agentGoalPolicy.streamRecoveryEnabled}`
-    );
-  }
-  let effectiveServiceTier: EffectiveServiceTier = "standard";
-  // Codex service-tier resolvers extracted to chatCore/serviceTier.ts (#3501); bind the per-request
-  // provider/credentials once and delegate so the existing call sites stay byte-identical.
-  const resolveEffectiveServiceTier = (requestBody?: unknown): EffectiveServiceTier =>
-    resolveEffectiveServiceTierFor(provider, credentials?.providerSpecificData, requestBody);
-  const resolveReportedServiceTier = (
-    payload?: unknown,
-    maxDepth = 3
-  ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
-  // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
-  // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
+  if (prelude.kind === "return") return prelude.value;
+  const c1 = prelude.continue;
+  body = c1.body;
+  credentials = c1.credentials;
+  let { tokensCompressed, effectiveServiceTier, compressionAnalyticsWritePromise } = c1;
+  const {
+    provider,
+    model,
+    extendedContext,
+    videoBridgeObserved,
+    resilienceSettings,
+    requestedModel,
+    isModelScope,
+    startTime,
+    traceId,
+    traceEnabled,
+    trace,
+    getCurrentConnectionId,
+    assertManagedLeaseFence,
+    isManagedLeaseFenceError,
+    managedLeaseFenceErrorResult,
+    agentGoalPolicy,
+    resolveEffectiveServiceTier,
+    resolveReportedServiceTier,
+    recordKeyHealthStatus,
+    idempotencyKey,
+    endpointPath,
+    sourceFormat,
+    isResponsesEndpoint,
+    nativeCodexPassthrough,
+    nativeXaiResponsesPassthrough,
+    isDroidCLI,
+    isOpencodeClient,
+    copilotCompatibleReasoning,
+    clientResponseFormat,
+    nativeOpenAICompatibleResponsesPassthrough,
+    customToolNames,
+    backgroundReason,
+    effectiveModel,
+    alias,
+    targetFormat,
+    nativeResponsesPassthrough,
+    pendingConnId,
+    pendingRequestId,
+    preConversionClientToolNames,
+    webSearchFallbackPlan,
+    webFetchFallbackPlan,
+    settings,
+    isCodexResponsesEcho,
+    echoModel,
+    skillRequestId,
+    pipelineSessionId,
+    reasoningCacheScope,
+    persistAttemptLogs,
+    buildUpstreamHeadersForExecute,
+    streamUserAgent,
+    thinkingMarkerHeader,
+    providerRequiresStreaming,
+    stream,
+    semanticCacheEnabled,
+    reqLogger,
+    pendingScope,
+    providerRequestCapture,
+    bodyForCacheWrite,
+  } = c1;
+  // Closures created in the prelude capture that slice's locals. Rebind the two
+  // that later lines assign through (`effectiveServiceTier`, compression
+  // analytics write) so call sites after this point still see the live values.
   const persistFailureUsage = (
     statusCode: number,
     errorCode?: string | null,
@@ -969,202 +835,6 @@ export async function handleChatCore({
       pendingWrite: compressionAnalyticsWritePromise,
       skillRequestId,
     });
-  // #8249: raw header value, kept separate from `pipelineSessionId`'s skillRequestId fallback
-  // below so call_logs.session_tag is only ever set when the caller explicitly supplied the
-  // header — never synthesized from the internal per-request skillRequestId.
-  const explicitSessionIdHeader =
-    (clientRawRequest?.headers && typeof clientRawRequest.headers.get === "function"
-      ? clientRawRequest.headers.get("x-omniroute-session-id")
-      : getHeaderValueCaseInsensitive(
-          clientRawRequest?.headers ?? null,
-          "x-omniroute-session-id"
-        )) || null;
-  const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
-  const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
-  const reasoningCacheScope = reasoningReplaySessionKey
-    ? `api-key:${String(apiKeyInfo?.id ?? "local")}\x1f${String(reasoningReplaySessionKey)}`
-    : null;
-  // persistAttemptLogs extracted to chatCore/attemptLogging.ts (#3501); bind the per-request context
-  // once so the 16 call sites keep passing only the per-attempt args (byte-identical).
-  const persistAttemptLogs = (args: PersistAttemptLogsArgs) =>
-    persistAttemptLogsFor(args, {
-      traceId,
-      provider,
-      connectionId,
-      model,
-      skillRequestId,
-      detailedLoggingEnabled,
-      reqLogger,
-      pendingRequestId,
-      clientRawRequest,
-      requestedModel,
-      credentials,
-      startTime,
-      body,
-      sourceFormat,
-      targetFormat,
-      comboName,
-      comboStepId,
-      comboExecutionKey,
-      tokensCompressed,
-      apiKeyInfo,
-      noLogEnabled,
-      correlationId,
-      modelPinned,
-      // Resolved conversationId (open-sse/services/conversationTracker.ts) wins when
-      // present — it's populated for every request now, not just ones where the
-      // client explicitly sent x-omniroute-session-id. The raw header remains a
-      // fallback for any caller that somehow bypassed conversationId resolution.
-      sessionTag: conversationId || explicitSessionIdHeader,
-      // #12150 P1b surface 1: undefined for every non-video request (byte-identical
-      // to before this param existed) — see applyVideoBridgeLogRedaction.
-      videoBridgeLogRedaction: (videoBridgeLog as VideoBridgeLogParam | undefined)?.redaction,
-      // #12150 P2 surface 2: mark the persisted call_logs row so
-      // resolvePreviousResponseState refuses to rehydrate a snapshot whose video
-      // transcript was redacted. false for every non-video request.
-      videoContentRemoved: videoBridgeObserved,
-    });
-
-  // Primary path: merge client model id + alias target so config on either key applies; resolved
-  // id wins on same header name. T5 family fallback uses only (nextModel, resolveModelAlias(next))
-  // so A-model headers are not sent to B — see buildUpstreamHeadersForExecute.
-  const connectionCustomUserAgent =
-    credentials?.providerSpecificData &&
-    typeof credentials.providerSpecificData === "object" &&
-    typeof credentials.providerSpecificData.customUserAgent === "string"
-      ? credentials.providerSpecificData.customUserAgent.trim()
-      : "";
-
-  // #8369: connection-level custom upstream headers from provider_specific_data.
-  const connectionCustomHeaders =
-    credentials?.providerSpecificData &&
-    typeof credentials.providerSpecificData === "object" &&
-    typeof credentials.providerSpecificData.customHeaders === "object" &&
-    !Array.isArray(credentials.providerSpecificData.customHeaders)
-      ? (credentials.providerSpecificData.customHeaders as Record<string, string>)
-      : undefined;
-
-  // Upstream extra-header building extracted to chatCore/upstreamExecuteHeaders.ts (#3501); bind the
-  // per-request inputs once and delegate so the existing call sites stay byte-identical.
-  const buildUpstreamHeadersForExecute = (modelToCall: string): Record<string, string> =>
-    buildUpstreamHeadersForExecuteFor({
-      modelToCall,
-      effectiveModel,
-      provider,
-      model,
-      resolvedModel,
-      sourceFormat,
-      connectionCustomUserAgent,
-      connectionCustomHeaders,
-      settings,
-    });
-
-  // Default to false unless client explicitly sets stream: true (OpenAI spec compliant)
-  const acceptHeader =
-    clientRawRequest?.headers && typeof clientRawRequest.headers.get === "function"
-      ? clientRawRequest.headers.get("accept") || clientRawRequest.headers.get("Accept")
-      : clientRawRequest?.headers?.["accept"] || clientRawRequest?.headers?.["Accept"];
-  const streamUserAgent = [
-    typeof userAgent === "string" ? userAgent : "",
-    getHeaderValueCaseInsensitive(clientRawRequest?.headers ?? null, "user-agent") || "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
-  // Explicit per-request opt-in/out for the `</think>` close marker
-  // (#5312 / #5245): `x-omniroute-thinking-marker: off` suppresses it for
-  // reasoning_content-native clients (e.g. Cursor's OpenAI path) that the UA
-  // allowlist does not cover; absent the header, the UA policy applies.
-  const thinkingMarkerHeader = getHeaderValueCaseInsensitive(
-    clientRawRequest?.headers ?? null,
-    THINKING_MARKER_HEADER
-  );
-
-  const explicitStreamAlias = resolveExplicitStreamAlias(body);
-
-  // Remove non-standard non-stream aliases before provider translation/execution.
-  // They are accepted for compatibility at the OmniRoute API boundary only.
-  if (body && typeof body === "object") {
-    const b = body as Record<string, unknown>;
-    if (explicitStreamAlias !== undefined) {
-      b.stream = explicitStreamAlias;
-    }
-
-    delete b.non_stream;
-    delete b.disable_stream;
-    delete b.disable_streaming;
-    delete b.streaming;
-  }
-
-  // Codex /responses/compact is JSON-only: Codex CLI does not send stream=false,
-  // so route shape must override the usual Accept/header fallback.
-  // sourceFormat="claude" applies the Anthropic Messages spec default (stream=false
-  // when body omits stream), preventing STREAM_EARLY_EOF on /v1/messages when
-  // clients send Accept: */* without an explicit stream flag.
-  // providerRequiresStreaming: providers with forceStream:true (cline/clinepass)
-  // only implement upstream streaming — a non-streaming request returns
-  // "generateText is not implemented" / an empty body. This flag forces the
-  // UPSTREAM request to stream (see `upstreamStream` below), but it MUST NOT
-  // force the client-facing `stream` flag: a stream:false client (e.g. the
-  // model-test button, plain JSON API callers) still expects a JSON response.
-  // The client-side `if (!stream)` branch drains the forced upstream SSE and
-  // converts it back to JSON via readNonStreamingResponseBody. Passing this
-  // flag into resolveStreamFlag would force `stream=true` and skip that
-  // conversion, yielding STREAM_EARLY_EOF for JSON callers. (#2081, #6126)
-  const providerRequiresStreaming = REGISTRY[provider]?.forceStream === true;
-  const stream =
-    nativeCodexPassthrough && isCompactResponsesEndpoint(endpointPath)
-      ? false
-      : resolveStreamFlag(body?.stream, acceptHeader, sourceFormat, {
-          userAgent: streamUserAgent,
-          streamDefaultMode: apiKeyInfo?.streamDefaultMode,
-        });
-
-  // `settings` is already consolidated once near the top of handleChatCore
-  // (the "fetch once, reuse" const). A second `const settings` here was a
-  // duplicate same-scope declaration that broke the esbuild/tsx transform
-  // ("settings has already been declared") and the production build. Reuse it.
-  credentials = applyCodexGlobalFastServiceTier(provider, credentials, settings, {
-    model: requestedModel,
-    body: body && typeof body === "object" ? (body as Record<string, unknown>) : null,
-  });
-  effectiveServiceTier = resolveEffectiveServiceTier(body);
-  setGeminiThoughtSignatureMode(settings.antigravitySignatureCacheMode);
-  const semanticCacheEnabled = settings.semanticCacheEnabled !== false;
-
-  const reqLogger = await createRequestLogger(sourceFormat, targetFormat, model, {
-    enabled: detailedLoggingEnabled,
-    captureStreamChunks: capturePipelineStreamChunks,
-    maxStreamChunkBytes: getCallLogPipelineMaxSizeBytes(),
-    requestId: pendingRequestId,
-    model,
-    provider: provider || undefined,
-    connectionId: connectionId || credentials?.connectionId || undefined,
-  });
-  const pendingScope = { id: pendingRequestId, model, provider, connectionId: pendingConnId };
-  const providerRequestCapture = createPreparedRequestLogger(reqLogger, pendingScope);
-  // 0. Log client raw request (before format conversion) — redacts video transcript
-  // cues in the logged copy only; see videoBridgeSnapshotRedaction.ts.
-  logClientRawRequestRedacted(reqLogger, clientRawRequest, videoBridgeObserved);
-  const reasoningRouteDecision =
-    body && typeof body === "object"
-      ? (body as Record<string, unknown>)._omnirouteReasoningRouteTrace
-      : null;
-  if (reasoningRouteDecision) {
-    reqLogger.logRouteDecision(reasoningRouteDecision);
-    body = { ...(body as Record<string, unknown>) };
-    delete (body as Record<string, unknown>)._omnirouteReasoningRouteTrace;
-  }
-
-  log?.debug?.("FORMAT", `${sourceFormat} → ${targetFormat} | stream=${stream}`);
-
-  // Preserve original body for cache signature — the body variable is mutated
-  // multiple times below (sanitization, memory/skills injection) before the
-  // cache store path runs at Phase 9.1 (non-streaming) / Phase 9.2 (streaming).
-  // Without this snapshot, the write-time signature differs from the read-time
-  // one, producing 0% hit rate. (#cache-signature-asymmetry)
-  const bodyForCacheWrite = body;
-
   // ── Phase 9.1: Semantic cache check (temp=0, any streaming mode) ──
   const cacheHit = await checkSemanticCache({
     semanticCacheEnabled,
@@ -2988,6 +2658,9 @@ export async function handleChatCore({
   // leak (GHSA-6c7w-56xp-wpc6).
   const dedupHash = dedupEnabled ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id) : null;
 
+  // Compression mutates this; persistAttemptLogs is rebound onto the live
+  // value before send in a later extract. Keep the binding live until then.
+  void tokensCompressed;
   const executeProviderRequest = (modelToCall = effectiveModel, allowDedup = false) => {
     const sendDeps = {
       agentGoalPolicy,
