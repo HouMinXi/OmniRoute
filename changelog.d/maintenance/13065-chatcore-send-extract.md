@@ -1,1 +1,1 @@
-- **refactor(sse):** move the chat-core provider sender into its own module ([#13065](https://github.com/diegosouzapw/OmniRoute/pull/13065))
+- **refactor(sse):** split chatCore send, recovery, stream completion, and request prelude into modules ([#13065](https://github.com/diegosouzapw/OmniRoute/pull/13065))
