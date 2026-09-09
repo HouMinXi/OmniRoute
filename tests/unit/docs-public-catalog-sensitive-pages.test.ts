@@ -46,16 +46,23 @@ function catalogRelPaths(): Set<string> {
   return new Set(files.map((f) => `docs/${f.replace(/^\.\//, "")}`));
 }
 
-function parseDockerignore(text: string): { excludes: string[]; includes: string[] } {
+function parseDockerignore(text: string) {
   const excludes: string[] = [];
   const includes: string[] = [];
+  const rules: Array<{ kind: "exclude" | "include"; pattern: string }> = [];
   for (const raw of text.split(/\r?\n/)) {
     const line = raw.trim();
     if (!line || line.startsWith("#")) continue;
-    if (line.startsWith("!")) includes.push(line.slice(1));
-    else excludes.push(line);
+    if (line.startsWith("!")) {
+      const pattern = line.slice(1);
+      includes.push(pattern);
+      rules.push({ kind: "include", pattern });
+    } else {
+      excludes.push(line);
+      rules.push({ kind: "exclude", pattern: line });
+    }
   }
-  return { excludes, includes };
+  return { excludes, includes, rules };
 }
 
 function patternMatches(pattern: string, file: string): boolean {
@@ -86,22 +93,38 @@ function segmentMatches(pattern: string, segment: string): boolean {
   if (pattern === "*") return true;
   if (!pattern.includes("*")) return pattern === segment;
   const parts = pattern.split("*");
-  if (!segment.startsWith(parts[0])) return false;
-  let idx = parts[0].length;
-  for (let i = 1; i < parts.length; i++) {
-    const part = parts[i];
-    if (part === "") {
-      if (i === parts.length - 1) return true;
-      continue;
-    }
-    const found = segment.indexOf(part, idx);
-    if (found === -1) return false;
-    idx = found + part.length;
+  let cursor = 0;
+  const first = parts[0];
+  if (first && !segment.startsWith(first)) return false;
+  cursor = first.length;
+  const last = parts[parts.length - 1];
+  if (last && !segment.endsWith(last)) return false;
+  const endLimit = segment.length - last.length;
+  for (let i = 1; i < parts.length - 1; i++) {
+    const idx = segment.indexOf(parts[i], cursor);
+    if (idx === -1 || idx + parts[i].length > endLimit) return false;
+    cursor = idx + parts[i].length;
   }
   return true;
 }
 
-function isIgnored(file: string, parsed: { excludes: string[]; includes: string[] }): boolean {
+function isIgnored(
+  file: string,
+  parsed: {
+    excludes: string[];
+    includes: string[];
+    rules?: Array<{ kind: "exclude" | "include"; pattern: string }>;
+  }
+): boolean {
+  if (parsed.rules && parsed.rules.length > 0) {
+    let ignored = false;
+    for (const rule of parsed.rules) {
+      if (patternMatches(rule.pattern, file) || file === rule.pattern) {
+        ignored = rule.kind === "exclude";
+      }
+    }
+    return ignored;
+  }
   let ignored = false;
   for (const ex of parsed.excludes) {
     if (patternMatches(ex, file) || file === ex) ignored = true;
@@ -111,6 +134,35 @@ function isIgnored(file: string, parsed: { excludes: string[]; includes: string[
   }
   return ignored;
 }
+
+test("dockerignore last matching rule wins", () => {
+  const laterExclude = parseDockerignore(
+    "!docs/security/STEALTH_GUIDE.md\ndocs/security/STEALTH_GUIDE.md\n"
+  );
+  assert.equal(
+    isIgnored("docs/security/STEALTH_GUIDE.md", laterExclude),
+    true,
+    "a later exact exclude must win over an earlier include"
+  );
+
+  const laterInclude = parseDockerignore(
+    "docs/security/STEALTH_GUIDE.md\n!docs/security/STEALTH_GUIDE.md\n"
+  );
+  assert.equal(
+    isIgnored("docs/security/STEALTH_GUIDE.md", laterInclude),
+    false,
+    "a later exact include must win over an earlier exclude"
+  );
+});
+
+test("segmentMatches anchors the last literal of a * glob", () => {
+  assert.equal(segmentMatches("*.md", "STEALTH_GUIDE.md"), true);
+  assert.equal(
+    segmentMatches("*.md", "STEALTH_GUIDE.md.bak"),
+    false,
+    "*.md must not match a longer suffix"
+  );
+});
 
 test("sensitive security markdown still exists in git for engineers", () => {
   for (const rel of SENSITIVE_PUBLIC_DOCS) {
