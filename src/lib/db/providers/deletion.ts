@@ -191,7 +191,11 @@ export async function deleteProviderConnectionsByProvider(providerId: string) {
   invalidateDbCache("connections");
   invalidateReasoningRoutingRuleCache();
   bumpProxyConfigGeneration();
-  await deleteSyncedAvailableModelsForProvider(providerId);
+  try {
+    await deleteSyncedAvailableModelsForProvider(providerId);
+  } catch {
+    // Rows are already gone. Do not turn a leftover purge into a 500.
+  }
   return result.changes;
 }
 

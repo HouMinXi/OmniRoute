@@ -131,3 +131,14 @@ test("by-provider delete drops this provider's synced models and leaves others",
   assert.equal(kept.length, 1);
   assert.equal(kept[0]?.id, "keep-model");
 });
+
+test("by-provider synced-model purge must not fail the delete", () => {
+  const source = fs.readFileSync(deletionPath, "utf8");
+  const body = extractFunctionBody(source, "deleteProviderConnectionsByProvider");
+  const syncedIdx = body.indexOf("deleteSyncedAvailableModelsForProvider(");
+  assert.ok(syncedIdx >= 0, "by-provider path must purge synced models");
+  const tryIdx = body.lastIndexOf("try {", syncedIdx);
+  const catchIdx = body.indexOf("catch", syncedIdx);
+  assert.ok(tryIdx >= 0 && tryIdx < syncedIdx, "synced purge must sit in try");
+  assert.ok(catchIdx > syncedIdx, "synced purge must be caught so delete still returns");
+});

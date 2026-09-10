@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Card, ConfirmModal } from "@/shared/components";
+import { useNotificationStore } from "@/store/notificationStore";
 
 type ProviderMessageTranslator = ((
   key: string,
@@ -39,6 +40,7 @@ type LeftoverGroup = {
 
 export default function DeprecatedProviderBanner() {
   const t = useTranslations("providers") as ProviderMessageTranslator;
+  const notify = useNotificationStore();
   const [leftovers, setLeftovers] = useState<LeftoverGroup[]>([]);
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
   const [pending, setPending] = useState<LeftoverGroup | null>(null);
@@ -74,7 +76,15 @@ export default function DeprecatedProviderBanner() {
       });
       if (res.ok) {
         setLeftovers((prev) => prev.filter((row) => row.provider !== provider));
+      } else {
+        notify.error(
+          providerText(t, "purgeLeftoversFailed", "Failed to purge leftover connections.")
+        );
       }
+    } catch {
+      notify.error(
+        providerText(t, "purgeLeftoversFailed", "Failed to purge leftover connections.")
+      );
     } finally {
       setPurging(false);
       setPending(null);

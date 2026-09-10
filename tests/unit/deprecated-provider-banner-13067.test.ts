@@ -34,3 +34,16 @@ test("providers page stays frozen at 2025 lines", () => {
   const lines = fs.readFileSync(pagePath, "utf8").split("\n").length;
   assert.equal(lines, 2025);
 });
+
+test("purge surfaces notify.error when POST is not ok", () => {
+  const source = fs.readFileSync(bannerPath, "utf8");
+  assert.match(source, /useNotificationStore/);
+  assert.match(source, /notify\.error\(/);
+  const purgeIdx = source.indexOf("async function purge");
+  assert.ok(purgeIdx >= 0, "purge helper must exist");
+  const purgeBody = source.slice(purgeIdx);
+  const okIdx = purgeBody.indexOf("if (res.ok)");
+  const errIdx = purgeBody.indexOf("notify.error(");
+  assert.ok(okIdx >= 0, "purge must branch on res.ok");
+  assert.ok(errIdx > okIdx, "failed POST must notify after the ok branch");
+});
