@@ -47,3 +47,24 @@ test("purge surfaces notify.error when POST is not ok", () => {
   assert.ok(okIdx >= 0, "purge must branch on res.ok");
   assert.ok(errIdx > okIdx, "failed POST must notify after the ok branch");
 });
+
+test("purge surfaces notify.success when POST is ok", () => {
+  const source = fs.readFileSync(bannerPath, "utf8");
+  const purgeIdx = source.indexOf("async function purge");
+  assert.ok(purgeIdx >= 0, "purge helper must exist");
+  const purgeBody = source.slice(purgeIdx);
+  const okIdx = purgeBody.indexOf("if (res.ok)");
+  const successIdx = purgeBody.indexOf("notify.success(");
+  assert.ok(okIdx >= 0, "purge must branch on res.ok");
+  assert.ok(successIdx > okIdx, "successful POST must notify.success in the ok branch");
+});
+
+test("banner leftover type comes from the classifier module", () => {
+  const source = fs.readFileSync(bannerPath, "utf8");
+  assert.match(source, /DeprecatedProviderLeftoverGroup/);
+  assert.match(
+    source,
+    /from\s+["']@\/lib\/providers\/deprecatedProviderCleanup["']/
+  );
+  assert.equal(source.includes("type LeftoverGroup = {"), false);
+});

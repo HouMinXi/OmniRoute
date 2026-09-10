@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Card, ConfirmModal } from "@/shared/components";
 import { useNotificationStore } from "@/store/notificationStore";
+import type { DeprecatedProviderLeftoverGroup } from "@/lib/providers/deprecatedProviderCleanup";
 
 type ProviderMessageTranslator = ((
   key: string,
@@ -30,27 +31,20 @@ function providerText(
   return fallback;
 }
 
-type LeftoverGroup = {
-  provider: string;
-  migrateTo: string;
-  reason: string;
-  connectionIds: string[];
-  names: string[];
-};
 
 export default function DeprecatedProviderBanner() {
   const t = useTranslations("providers") as ProviderMessageTranslator;
   const notify = useNotificationStore();
-  const [leftovers, setLeftovers] = useState<LeftoverGroup[]>([]);
+  const [leftovers, setLeftovers] = useState<DeprecatedProviderLeftoverGroup[]>([]);
   const [dismissed, setDismissed] = useState<Record<string, boolean>>({});
-  const [pending, setPending] = useState<LeftoverGroup | null>(null);
+  const [pending, setPending] = useState<DeprecatedProviderLeftoverGroup | null>(null);
   const [purging, setPurging] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     void fetch("/api/providers/deprecated", { credentials: "same-origin" })
       .then((res) => (res.ok ? res.json() : { leftovers: [] }))
-      .then((body: { leftovers?: LeftoverGroup[] }) => {
+      .then((body: { leftovers?: DeprecatedProviderLeftoverGroup[] }) => {
         if (cancelled) return;
         setLeftovers(Array.isArray(body?.leftovers) ? body.leftovers : []);
       })
@@ -76,6 +70,9 @@ export default function DeprecatedProviderBanner() {
       });
       if (res.ok) {
         setLeftovers((prev) => prev.filter((row) => row.provider !== provider));
+        notify.success(
+          providerText(t, "purgeLeftoversSuccess", "Leftover connections removed.")
+        );
       } else {
         notify.error(
           providerText(t, "purgeLeftoversFailed", "Failed to purge leftover connections.")
