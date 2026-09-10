@@ -48,16 +48,23 @@ export type StreamMaterializeDeps = {
   getCurrentConnectionId: () => string | null;
   provider: string | null | undefined;
   model: string | null | undefined;
-  credentials: {
-    connectionId?: string | null;
-    providerSpecificData?: unknown;
-  } | null | undefined;
+  credentials:
+    | {
+        connectionId?: string | null;
+        providerSpecificData?: unknown;
+      }
+    | null
+    | undefined;
   log:
-    | { info?: (tag: string, msg: string) => void; debug?: (tag: string, msg: string) => void }
+    | {
+        info?: (tag: string, msg: string) => void;
+        debug?: (tag: string, msg: string) => void;
+        warn?: (...args: unknown[]) => void;
+      }
     | null
     | undefined;
   clientResponseFormat: string;
-  responseToolNameMap: unknown;
+  responseToolNameMap: Map<string, string> | null | undefined;
   finalBody: Record<string, unknown> | null | undefined;
   translatedBody: Record<string, unknown> | null | undefined;
   body: unknown;
@@ -69,22 +76,27 @@ export type StreamMaterializeDeps = {
   };
   pendingRequestId: string;
   startTime: number;
-  apiKeyInfo: { id?: string } | null | undefined;
+  apiKeyInfo: { id?: string | null } | undefined;
   isCombo: boolean;
   comboStrategy: string | null | undefined;
   endpointPath: string | undefined;
   traceId: string;
-  calculateCost: (...args: unknown[]) => unknown;
-  recordCost: (...args: unknown[]) => unknown;
+  calculateCost: (
+    provider: string,
+    model: string,
+    usage: Record<string, number | undefined> | null | undefined,
+    options: { serviceTier?: string }
+  ) => Promise<number>;
+  recordCost: (apiKeyId: string, cost: number) => void;
   memoryOwnerId: string | null | undefined;
-  memorySettings: unknown;
+  memorySettings: { enabled?: boolean | null; maxTokens?: number | null } | null | undefined;
   videoBridgeObserved: boolean;
   pipelineSessionId: string | null | undefined;
-  extractFacts: unknown;
+  extractFacts: (text: string, memoryOwnerId: string, sessionId: string) => void;
   semanticCacheEnabled: boolean;
   bodyForCacheWrite: unknown;
-  clientRawRequest: { headers?: Headers } | null | undefined;
-  claudePromptCacheLogMeta: unknown;
+  clientRawRequest: { headers?: Headers | null | undefined };
+  claudePromptCacheLogMeta: Record<string, unknown> | null | undefined;
   resolveReportedServiceTier: (payload?: unknown, maxDepth?: number) => EffectiveServiceTier | null;
   attachCompressionUsageReceiptAfterAnalytics: (
     usage: Record<string, unknown>,
@@ -166,7 +178,11 @@ export function makeOnStreamComplete(
       if (getStreamFailureCompletionRecorded()) return;
       setStreamFailureCompletionRecorded(true);
     }
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(streamUsage);
+    const cacheUsageLogMeta = buildCacheUsageLogMeta(
+      streamUsage && typeof streamUsage === "object"
+        ? (streamUsage as Record<string, unknown>)
+        : null
+    );
     const streamConnectionId = getCurrentConnectionId();
 
     if (normalizedStreamStatus === 200) {
@@ -315,7 +331,7 @@ export function makeOnStreamComplete(
 
     persistAttemptLogs({
       status: normalizedStreamStatus,
-      error: streamError || undefined,
+      error: typeof streamError === "string" ? streamError : undefined,
       tokens: streamUsage || {},
       responseBody: streamResponseBody ?? undefined,
       providerRequest: finalBody || translatedBody,
@@ -330,7 +346,10 @@ export function makeOnStreamComplete(
       apiKeyId: apiKeyInfo?.id,
       provider,
       model,
-      streamUsage,
+      streamUsage:
+        streamUsage && typeof streamUsage === "object"
+          ? (streamUsage as Record<string, number | undefined>)
+          : null,
       serviceTier: effectiveServiceTier,
       calculateCost,
       recordCost,
@@ -373,12 +392,20 @@ export function makeOnStreamComplete(
     storeStreamingSemanticCacheResponse({
       enabled: semanticCacheEnabled,
       streamStatus,
-      streamResponseBody,
-      body: bodyForCacheWrite,
+      streamResponseBody:
+        streamResponseBody && typeof streamResponseBody === "object"
+          ? (streamResponseBody as Record<string, unknown>)
+          : null,
+      body: (bodyForCacheWrite && typeof bodyForCacheWrite === "object"
+        ? bodyForCacheWrite
+        : {}) as { messages?: unknown; input?: unknown; temperature?: number; top_p?: number },
       headers: clientRawRequest?.headers,
       model,
       apiKeyId: apiKeyInfo?.id ?? undefined,
-      streamUsage,
+      streamUsage:
+        streamUsage && typeof streamUsage === "object"
+          ? (streamUsage as Record<string, unknown>)
+          : null,
       log,
     });
 

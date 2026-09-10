@@ -863,7 +863,11 @@ export async function handleChatCore({
               clientRawRequest?.headers ?? null,
               "x-omniroute-session-id"
             )),
-      videoBridgeLogRedaction: (videoBridgeLog as { redaction?: unknown } | undefined)?.redaction,
+      videoBridgeLogRedaction: (
+        videoBridgeLog as
+          | { redaction?: import("@/lib/guardrails/videoBridge").VideoBridgeLogRedactionEntry[] }
+          | undefined
+      )?.redaction,
       videoContentRemoved: videoBridgeObserved,
     });
 
@@ -906,7 +910,11 @@ export async function handleChatCore({
       upstreamStream,
       userAgent,
     };
-    return executeProviderRequestFromLeaf(sendDeps, modelToCall, allowDedup);
+    return executeProviderRequestFromLeaf(
+      sendDeps as unknown as import("./chatCore/executeProviderRequest.ts").ExecuteProviderRequestDeps,
+      modelToCall,
+      allowDedup
+    );
   };
 
   const registeredProviderRequest =
