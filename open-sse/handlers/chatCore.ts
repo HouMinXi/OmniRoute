@@ -527,7 +527,11 @@ export async function handleChatCore({
               clientRawRequest?.headers ?? null,
               "x-omniroute-session-id"
             )),
-      videoBridgeLogRedaction: (videoBridgeLog as { redaction?: unknown } | undefined)?.redaction,
+      videoBridgeLogRedaction: (
+        videoBridgeLog as
+          | { redaction?: import("@/lib/guardrails/videoBridge").VideoBridgeLogRedactionEntry[] }
+          | undefined
+      )?.redaction,
       videoContentRemoved: videoBridgeObserved,
     });
 
@@ -570,7 +574,11 @@ export async function handleChatCore({
       upstreamStream,
       userAgent,
     };
-    return executeProviderRequestFromLeaf(sendDeps, modelToCall, allowDedup);
+    return executeProviderRequestFromLeaf(
+      sendDeps as unknown as import("./chatCore/executeProviderRequest.ts").ExecuteProviderRequestDeps,
+      modelToCall,
+      allowDedup
+    );
   };
 
   const registeredProviderRequest =
@@ -1197,7 +1205,7 @@ export async function handleChatCore({
 
       // T06/T10/T36: classify provider errors and persist terminal account states.
       let errorType = classifyProviderError(statusCode, message, provider);
-      if (statusCode === 429 && isModelScope()) {
+      if (statusCode === 429 && isModelScope) {
         const decision = classifyModelScope429(message, normalizeHeaders(providerResponse.headers));
         errorType =
           decision.kind === "quota_exhausted"
@@ -1394,7 +1402,7 @@ export async function handleChatCore({
                   console.warn(
                     `[provider] Node ${errorConnectionId} Kimi request window exhausted (${statusCode}) — retrying after ${kimiRateLimitResetAt}`
                   );
-                } else if (isModelScope() && errorConnectionId) {
+                } else if (isModelScope && errorConnectionId) {
                   lockModel(provider, errorConnectionId, model, "quota_exhausted", quotaCooldownMs);
                   console.warn(
                     `[provider] Node ${errorConnectionId} ModelScope model quota exhausted (${statusCode}) for ${model} - ${Math.ceil(quotaCooldownMs / 1000)}s (connection stays active)`

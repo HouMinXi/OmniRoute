@@ -4,6 +4,8 @@
  */
 
 import type { ChatCoreExecutorResult as PipelineChatCoreExecutorResult } from "./providerExecutionPipeline.ts";
+import type { AgentGoalPolicy } from "../../utils/agentGoalPolicy.ts";
+import type { BaseExecutor } from "../../executors/base.ts";
 import { prepareUpstreamBody } from "./upstreamBody.ts";
 import { getExecutionConnectionId } from "./executionCredentials.ts";
 import {
@@ -50,11 +52,13 @@ import {
 import { incrementRequestCount } from "../../services/geminiRateLimitTracker.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { runWithCapture } from "../../utils/providerRequestLogging.ts";
+import type { Capture } from "../../utils/providerRequestLogging.ts";
 import {
   resolveResilienceSettings,
   isStreamRecoveryExplicitlyConfigured,
+  type ResilienceSettings,
 } from "@/lib/resilience/settings";
-import { updatePendingScope } from "@/lib/usage/pendingRequestScope";
+import { updatePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { resolveProviderId } from "@/shared/constants/providers";
 
@@ -68,22 +72,25 @@ export type ChatCoreExecutorResult = PipelineChatCoreExecutorResult & {
 };
 
 export type ExecuteProviderRequestDeps = {
-  agentGoalPolicy: unknown;
+  agentGoalPolicy: AgentGoalPolicy;
   assertManagedLeaseFence: (attemptConnectionId: string | null | undefined) => void;
   buildUpstreamHeadersForExecute: (modelToCall: string) => Record<string, string>;
-  clientRawRequest: { headers?: unknown; signal?: AbortSignal } | null | undefined;
-  clientResponseFormat: unknown;
+  clientRawRequest: {
+    headers?: Headers | Record<string, unknown> | null;
+    signal?: AbortSignal | null | undefined;
+  };
+  clientResponseFormat: string | null | undefined;
   connectionId: string | null | undefined;
   correlationId: string | null | undefined;
-  contextEditingEnabled: unknown;
+  contextEditingEnabled?: boolean;
   credentials: Record<string, unknown> | null | undefined;
   dedupEnabled: boolean;
   dedupHash: string | null;
   effectiveModel: string;
-  executor: unknown;
-  extendedContext: unknown;
+  executor: Pick<BaseExecutor, "execute">;
+  extendedContext?: boolean;
   getExecutionCredentials: () => Record<string, unknown>;
-  isModelScope: () => boolean;
+  isModelScope: boolean;
   isOpencodeClient: boolean;
   log:
     | {
@@ -97,21 +104,21 @@ export type ExecuteProviderRequestDeps = {
   model: string;
   onCredentialsRefreshed:
     ((next: Record<string, unknown>) => void | Promise<void>) | null | undefined;
-  pendingScope: unknown;
+  pendingScope: PendingRequestScope;
   provider: string;
-  providerRequestCapture: { body: (transformed: unknown) => unknown };
+  providerRequestCapture: Capture;
   recordKeyHealthStatus: (...args: unknown[]) => void;
   requestedModel: string;
-  resilienceSettings: unknown;
+  resilienceSettings: ResilienceSettings;
   settings: Record<string, unknown> | null | undefined;
   skipUpstreamRetry: boolean;
   stream: boolean;
-  streamController: unknown;
+  streamController: { signal: AbortSignal };
   targetFormat: string;
   trace: (label: string, extra?: Record<string, unknown>) => void;
   traceId: string;
   translatedBody: Record<string, unknown>;
-  upstreamStream: unknown;
+  upstreamStream: boolean;
   userAgent: string | undefined;
 };
 
@@ -181,7 +188,7 @@ export async function executeProviderRequest(
     try {
       const rawResult: ChatCoreExecutorResult = await (async () => {
         let attempts = 0;
-        const isModelScopeForRequest = isModelScope();
+        const isModelScopeForRequest = isModelScope;
         const maxAttempts = isModelScopeForRequest ? 3 : provider === "codex" ? 3 : 1;
 
         while (attempts < maxAttempts) {
@@ -360,7 +367,7 @@ export async function executeProviderRequest(
               recordKeyHealthStatus(res.response.status, execCreds, res.transport, failureDetail);
             }
 
-            if (isModelScope() && res.response.status === 429 && attempts < maxAttempts - 1) {
+            if (isModelScope && res.response.status === 429 && attempts < maxAttempts - 1) {
               const bodyPeek = await res.response
                 .clone()
                 .text()
@@ -627,7 +634,9 @@ export async function executeProviderRequest(
     if (dedupResult.wasDeduplicated) {
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);
     }
-    return materializeDeduplicatedExecutionResult(dedupResult.result);
+    return materializeDeduplicatedExecutionResult(
+      dedupResult.result as unknown as Record<string, unknown>
+    ) as unknown as ChatCoreExecutorResult;
   }
 
   return execute();
