@@ -9,8 +9,9 @@
  *
  * State cohesion: `resetAwareQuotaCache` and
  * `MAX_RESET_AWARE_CACHE` MUST remain single instances defined once here,
- * alongside their only readers/writers (getQuotaAwareConnectionsForTarget,
- * fetchResetAwareQuotaWithCache) — never duplicate a Map.
+ * alongside their only readers/writers (`fetchResetAwareQuotaWithCache`).
+ * Connection lists go through `getCachedProviderConnections` (5s TTL,
+ * invalidated on connection writes). Do not add a second connection cache.
  *
  * Cross-module state: the tie-band round-robin in orderTargetsByResetAwareQuota
  * and orderTargetsByResetWindow shares the same rrCounters Map from ./rrState.ts
