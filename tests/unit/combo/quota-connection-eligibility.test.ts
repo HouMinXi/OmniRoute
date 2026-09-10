@@ -103,6 +103,13 @@ for (const [strategy, order] of [
       [f.healthy.id]
     );
   });
+  test(`${strategy}: API-key allowlist that matches no eligible row does not fall back`, async () => {
+    const f = await fixture();
+    const emptyPool = [f.disabled.id, f.banned.id];
+    const ordered = await order([target(f.provider, null)], randomUUID(), {}, log, emptyPool);
+    assert.deepEqual(ordered, []);
+    assert.deepEqual(f.fetched, []);
+  });
   test(`${strategy}: a pin cannot borrow another provider's eligible row`, async () => {
     const first = await fixture();
     const second = await fixture();
