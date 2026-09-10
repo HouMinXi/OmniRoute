@@ -23,6 +23,7 @@ const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const dbCore = await import("../../../src/lib/db/core.ts");
+const db = await import("../../../src/lib/db/providers.ts");
 const quotaCache = await import("../../../src/domain/quotaCache.ts");
 const { registerQuotaFetcher } = await import("../../../open-sse/services/quotaPreflight.ts");
 const { orderTargetsByQuotaWeighted, QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS } =
@@ -76,6 +77,17 @@ function makeTarget(provider: string, connectionId: string, model = "gemini-3.8-
   };
 }
 
+async function seedConnection(provider: string, name: string) {
+  const row = await db.createProviderConnection({
+    provider,
+    name,
+    isActive: true,
+    testStatus: "active",
+    authType: "apikey",
+  });
+  return String(row.id);
+}
+
 // ── Hole 1: a 402 must invalidate the snapshot ──────────────────────────────
 
 test("markAccountExhaustedFromCredits: 402 flips the snapshot to exhausted", () => {
@@ -99,8 +111,8 @@ test("markAccountExhaustedFromCredits: 402 flips the snapshot to exhausted", () 
 
 test("a 402-marked connection loses the weighted draw to a healthy peer", async () => {
   const provider = "agy";
-  const dead = `dead-${randomUUID()}`;
-  const healthy = `ok-${randomUUID()}`;
+  const dead = await seedConnection(provider, `dead-${randomUUID()}`);
+  const healthy = await seedConnection(provider, `ok-${randomUUID()}`);
   // Upstream still reports headroom for the dead account — the stale snapshot
   // that caused the incident. Only the 402 mark tells the truth.
   registerQuotaFetcher(provider, async () => quotaAt(0.6));
@@ -162,8 +174,8 @@ test("QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS is exported and shorter than the incide
 
 test("a stale snapshot yields the A pool to a freshly-observed peer", async () => {
   const provider = "agy";
-  const stale = `stale-${randomUUID()}`;
-  const fresh = `fresh-${randomUUID()}`;
+  const stale = await seedConnection(provider, `stale-${randomUUID()}`);
+  const fresh = await seedConnection(provider, `fresh-${randomUUID()}`);
   registerQuotaFetcher(provider, async () => quotaAt(0.6));
 
   quotaCache.setQuotaCache(stale, provider, {
@@ -197,8 +209,8 @@ test("a stale snapshot yields the A pool to a freshly-observed peer", async () =
 
 test("a snapshot exactly at the age bound still counts as fresh", async () => {
   const provider = "agy";
-  const atBound = `at-bound-${randomUUID()}`;
-  const younger = `younger-${randomUUID()}`;
+  const atBound = await seedConnection(provider, `at-bound-${randomUUID()}`);
+  const younger = await seedConnection(provider, `younger-${randomUUID()}`);
   registerQuotaFetcher(provider, async () => quotaAt(0.6));
 
   quotaCache.setQuotaCache(atBound, provider, {
@@ -233,8 +245,8 @@ test("a snapshot exactly at the age bound still counts as fresh", async () => {
 
 test("an all-stale set still routes rather than returning nothing", async () => {
   const provider = "agy";
-  const a = `stale-a-${randomUUID()}`;
-  const b = `stale-b-${randomUUID()}`;
+  const a = await seedConnection(provider, `stale-a-${randomUUID()}`);
+  const b = await seedConnection(provider, `stale-b-${randomUUID()}`);
   registerQuotaFetcher(provider, async () => quotaAt(0.6));
 
   for (const id of [a, b]) {
@@ -260,8 +272,8 @@ test("an all-stale set still routes rather than returning nothing", async () => 
 
 test("a fresh snapshot is unaffected by the staleness bound", async () => {
   const provider = "agy";
-  const high = `high-${randomUUID()}`;
-  const low = `low-${randomUUID()}`;
+  const high = await seedConnection(provider, `high-${randomUUID()}`);
+  const low = await seedConnection(provider, `low-${randomUUID()}`);
   registerQuotaFetcher(provider, async () => quotaAt(0.6));
 
   quotaCache.setQuotaCache(high, provider, {
