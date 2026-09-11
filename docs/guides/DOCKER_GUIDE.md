@@ -162,7 +162,7 @@ with a warning that it will not survive the container.
 > (`COMPOSE_PROFILES=core,redis` or shorter). The other profiles do not
 > mount the Docker socket.
 >
-> See `docs/security/MITM-TPROXY-DECRYPT.md` for the related threat model
+> See `docs/security/MITM-TPROXY-DECRYPT.md` (git; not compiled into `/docs`) for the related threat model
 > around MITM, and `docs/security/SUPPLY_CHAIN.md` for the
 > `codex`/`claude-code`/`droid`/`openclaw` binary provenance chain.
 
