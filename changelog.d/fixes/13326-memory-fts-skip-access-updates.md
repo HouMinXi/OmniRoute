@@ -1,0 +1,1 @@
+- **fix(memory):** stop FTS5 rewrite on access-count updates and merge tombstones after retention deletes (#13326).
