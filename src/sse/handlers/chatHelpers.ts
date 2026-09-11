@@ -3,7 +3,11 @@ import {
   getComboForModel,
   getModelInfoOrRetirementResponse,
 } from "../services/model";
-import { clearAccountError, markAccountUnavailable } from "../services/auth";
+import {
+  clearAccountError,
+  markAccountUnavailable,
+  buildExhaustionOptions,
+} from "../services/auth";
 import { maybeReactivateAfterExplicitProbe } from "../services/explicitInactiveProbe";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { createBuiltinAutoCombo } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
@@ -335,7 +339,15 @@ export async function resolveModelOrError(
     log.info("ROUTING", `Provider: ${provider}, Model: ${model}${ctxTag}`);
   }
 
-  return { provider, model, sourceFormat, targetFormat, extendedContext, apiFormat };
+  return {
+    provider,
+    model,
+    sourceFormat,
+    targetFormat,
+    customModelTargetFormat,
+    extendedContext,
+    apiFormat,
+  };
 }
 
 export async function checkPipelineGates(
@@ -444,6 +456,7 @@ export async function executeChatWithBreaker({
   // for every non-video request. Passed straight through to handleChatCore;
   // see its own destructure default for the shape and consumers.
   videoBridgeLog = undefined,
+  fallbackAttempts = undefined,
 }: ExecuteChatWithBreakerOptions): Promise<ExecuteChatWithBreakerResult> {
   let tlsFingerprintUsed = false;
   const normalizedTrafficType: TrafficType =
@@ -504,6 +517,7 @@ export async function executeChatWithBreaker({
             reasoningTransportFallback,
             managedLease,
             videoBridgeLog,
+            fallbackAttempts,
             skipResourcePressureGuard: true,
             onCredentialsRefreshed: async (newCreds: any) => {
               await updateProviderCredentials(credentials.connectionId, {
@@ -563,7 +577,7 @@ export async function executeChatWithBreaker({
                 provider,
                 model,
                 providerProfile,
-                { isCombo }
+                buildExhaustionOptions(correlationId ?? null, { isCombo })
               );
             },
           })
@@ -739,7 +753,8 @@ export function handleNoCredentials(
   lastStatus: number | null,
   candidateAliases?: readonly string[],
   isCombo: boolean = false,
-  shadowedNode: ShadowedProviderNode | null = null
+  shadowedNode: ShadowedProviderNode | null = null,
+  correlationId?: string | null
 ) {
   if (credentials?.allRateLimited) {
     const errorMsg = lastError || credentials.lastError || "Unavailable";
@@ -780,6 +795,7 @@ export function handleNoCredentials(
       provider,
       model,
       lastStatus,
+      ...(correlationId ? { correlationId } : {}),
     });
     return errorResponse(lastStatus, lastError);
   }
