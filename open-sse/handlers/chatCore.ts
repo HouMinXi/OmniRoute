@@ -188,6 +188,7 @@ import { handleToolCallExecution } from "@/lib/skills/interception";
 import { MEMORY_BUILTIN_TOOL_NAMES } from "@/lib/skills/memoryBuiltins";
 import { classifyModelScope429 } from "../services/modelscopePolicy.ts";
 import { incrementTokenUsage, isTpmExhausted } from "../services/geminiRateLimitTracker.ts";
+import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
 
 /**
  * #12150 P1b: shape of handleChatCore's optional `videoBridgeLog` param — see
