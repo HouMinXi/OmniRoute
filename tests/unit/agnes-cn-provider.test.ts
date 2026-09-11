@@ -184,9 +184,25 @@ test("agnes-cn dashboard card name includes China and is not hidden", () => {
   assert.notEqual(entry.hiddenFromDashboard, true);
 });
 
-// UPDATE_GOLDEN=1 node --test tests/unit/provider-translate-path-golden.test.ts
-// is used after the registry leaf exists. Do not edit snapshots in this task.
-test.skip("agnes-cn translate-path golden waits for UPDATE_GOLDEN=1", () => {});
+test("agnes-cn translate-path golden records China host", () => {
+  const snapshot = JSON.parse(readRepo("tests/snapshots/provider/translate-path.json"));
+  assert.equal(
+    snapshot["agnes-cn"].url.stream,
+    CN_CHAT_URL
+  );
+  assert.equal(
+    snapshot["agnes-cn"].url.nonStream,
+    CN_CHAT_URL
+  );
+  assert.equal(
+    snapshot.agnes.url.stream,
+    INTL_CHAT_URL
+  );
+  assert.equal(
+    snapshot.agnes.url.nonStream,
+    INTL_CHAT_URL
+  );
+});
 
 test("every i18n locale has a nonempty agnes-cn onboarding description", () => {
   const messagesDir = path.join(REPO_ROOT, "src/i18n/messages");
