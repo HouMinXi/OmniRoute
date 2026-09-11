@@ -1,0 +1,1 @@
+- feat(providers): **Added Agnes AI (China) as `agnes-cn` pointed at `https://api.agnes-ai.cn/v1`. Keys issued for `apihub.agnes-ai.com` stay on the existing `agnes` card.**
