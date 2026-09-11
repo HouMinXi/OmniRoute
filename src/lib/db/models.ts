@@ -6,7 +6,6 @@
 
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
 
-import type { SqliteAdapter } from "./adapters/types";
 import { getDbInstance } from "./core";
 import { getProviderConnectionsCount } from "./providers";
 import { type JsonRecord, getKeyValue } from "./models/shared";
@@ -53,6 +52,13 @@ export {
 } from "./models/aliases";
 export { getMitmAlias, setMitmAliasAll } from "./models/mitmAlias";
 export type { SyncedAvailableModel } from "./models/synced";
+export {
+  getCustomModelVisionOverride,
+  listCustomModelVisionOverrides,
+  type CustomModelVisionOverrideMap,
+  type CustomModelVisionDatabase,
+  type CustomModelVisionOverrideReadOptions,
+} from "./models/customVisionOverride";
 
 // ──────────────── Custom Models ────────────────
 
@@ -89,93 +95,6 @@ export async function getAllCustomModels() {
     result[key] = JSON.parse(value);
   }
   return result;
-}
-
-/** Nested provider → model map of explicit custom-model vision overrides. */
-export type CustomModelVisionOverrideMap = ReadonlyMap<string, ReadonlyMap<string, boolean>>;
-export type CustomModelVisionDatabase = Pick<SqliteAdapter, "prepare">;
-
-export interface CustomModelVisionOverrideReadOptions {
-  /** Narrow test seam; production uses the canonical DB singleton. */
-  getDatabase?: () => CustomModelVisionDatabase;
-}
-
-function readVisionOverrideFromModels(value: string | null, modelId: string): boolean | null {
-  if (!value) return null;
-  try {
-    const models = JSON.parse(value) as unknown;
-    if (!Array.isArray(models)) return null;
-    const entry = models.find(
-      (candidate): candidate is { id: string; supportsVision?: boolean } =>
-        candidate !== null &&
-        typeof candidate === "object" &&
-        !Array.isArray(candidate) &&
-        (candidate as { id?: unknown }).id === modelId
-    );
-    return entry && typeof entry.supportsVision === "boolean" ? entry.supportsVision : null;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Resolve one explicit custom-model vision override. A supplied bulk map avoids
- * SQLite reads for request/build-local capability resolution.
- */
-export function getCustomModelVisionOverride(
-  providerId: string,
-  modelId: string,
-  bulk?: CustomModelVisionOverrideMap | null,
-  options: CustomModelVisionOverrideReadOptions = {}
-): boolean | null {
-  try {
-    if (bulk) return bulk.get(providerId)?.get(modelId) ?? null;
-    const db = options.getDatabase?.() ?? getDbInstance();
-    const row = db
-      .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
-      .get(providerId);
-    return readVisionOverrideFromModels(getKeyValue(row).value, modelId);
-  } catch {
-    return null;
-  }
-}
-
-/** Bulk-load explicit custom-model vision overrides with one SQLite query. */
-export function listCustomModelVisionOverrides(
-  options: CustomModelVisionOverrideReadOptions = {}
-): CustomModelVisionOverrideMap {
-  try {
-    const db = options.getDatabase?.() ?? getDbInstance();
-    const rows = db
-      .prepare("SELECT key, value FROM key_value WHERE namespace = 'customModels'")
-      .all();
-    const result = new Map<string, Map<string, boolean>>();
-    for (const row of rows) {
-      const { key, value } = getKeyValue(row);
-      if (!key || !value) continue;
-      try {
-        const models = JSON.parse(value) as unknown;
-        if (!Array.isArray(models)) continue;
-        const byModel = new Map<string, boolean>();
-        for (const candidate of models) {
-          if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) continue;
-          const { id, supportsVision } = candidate as {
-            id?: unknown;
-            supportsVision?: unknown;
-          };
-          if (typeof id === "string" && typeof supportsVision === "boolean") {
-            byModel.set(id, supportsVision);
-          }
-        }
-        if (byModel.size > 0) result.set(key, byModel);
-      } catch {
-        // Malformed custom-model rows do not participate in capability resolution.
-      }
-    }
-    return result;
-  } catch {
-    return new Map<string, Map<string, boolean>>();
-  }
 }
 
 export async function addCustomModel(
