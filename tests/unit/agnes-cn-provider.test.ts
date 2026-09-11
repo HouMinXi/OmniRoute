@@ -38,19 +38,19 @@ test.after(() => {
 });
 
 function extractNamedConstLiteral(source: string, name: string): string {
-  const marker = `const ${name}`;
+  const marker = "const " + name;
   const start = source.indexOf(marker);
   assert.notEqual(start, -1, `${name} declaration missing`);
-  let i = start + marker.length;
+  const eq = source.indexOf("=", start + marker.length);
+  assert.notEqual(eq, -1, `${name} has no initializer`);
+  let i = eq + 1;
   while (i < source.length && source[i] !== "[" && source[i] !== "{") i += 1;
-  const open = source[i];
-  assert.ok(open === "[" || open === "{", `${name} must be an array or object literal`);
-  const close = open === "[" ? "]" : "}";
+  assert.ok(source[i] === "[" || source[i] === "{", `${name} must be an array or object literal`);
   let depth = 0;
   for (let j = i; j < source.length; j += 1) {
     const ch = source[j];
-    if (ch === open) depth += 1;
-    else if (ch === close) {
+    if (ch === "[" || ch === "{") depth += 1;
+    else if (ch === "]" || ch === "}") {
       depth -= 1;
       if (depth === 0) return source.slice(i, j + 1);
     }
@@ -59,11 +59,7 @@ function extractNamedConstLiteral(source: string, name: string): string {
 }
 
 function hasAgnesCnPairing(literal: string): boolean {
-  if (/\[[^\]]*"agnes"[^\]]*"agnes-cn"[^\]]*\]/.test(literal)) return true;
-  if (/\[[^\]]*"agnes-cn"[^\]]*"agnes"[^\]]*\]/.test(literal)) return true;
-  if (/(?:["']agnes["']|agnes)\s*:\s*\[[^\]]*"agnes-cn"/.test(literal)) return true;
-  if (/(?:["']agnes-cn["']|"agnes-cn")\s*:\s*\[[^\]]*"agnes"/.test(literal)) return true;
-  return false;
+  return /["']agnes["']/.test(literal) && /["']agnes-cn["']/.test(literal);
 }
 
 test("agnes-cn registry baseUrl is the China host and agnes stays on apihub", () => {
@@ -133,27 +129,15 @@ test("getProviderCredentials does not return the other Agnes region's connection
     testStatus: "active",
   });
 
-  let cnCreds: { provider?: string; apiKey?: string } | null = null;
-  try {
-    cnCreds = (await getProviderCredentials("agnes-cn")) as typeof cnCreds;
-  } catch {
-    cnCreds = null;
-  }
-  if (cnCreds) {
-    assert.notEqual(cnCreds.provider, "agnes");
-    assert.notEqual(cnCreds.apiKey, "agnes-intl-fixture-key");
-  }
+  const cnCreds = await getProviderCredentials("agnes-cn");
+  assert.ok(cnCreds, "agnes-cn must resolve a credential");
+  assert.equal(cnCreds.provider, "agnes-cn");
+  assert.notEqual(cnCreds.apiKey, "agnes-intl-fixture-key");
 
-  let intlCreds: { provider?: string; apiKey?: string } | null = null;
-  try {
-    intlCreds = (await getProviderCredentials("agnes")) as typeof intlCreds;
-  } catch {
-    intlCreds = null;
-  }
-  if (intlCreds) {
-    assert.notEqual(intlCreds.provider, "agnes-cn");
-    assert.notEqual(intlCreds.apiKey, "agnes-cn-fixture-key");
-  }
+  const intlCreds = await getProviderCredentials("agnes");
+  assert.ok(intlCreds, "agnes must resolve a credential");
+  assert.equal(intlCreds.provider, "agnes");
+  assert.notEqual(intlCreds.apiKey, "agnes-cn-fixture-key");
 });
 
 test("agnes-cn is absent from image and video registries", () => {
