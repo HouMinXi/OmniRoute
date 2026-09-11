@@ -3,7 +3,11 @@ import {
   getComboForModel,
   getModelInfoOrRetirementResponse,
 } from "../services/model";
-import { clearAccountError, markAccountUnavailable } from "../services/auth";
+import {
+  clearAccountError,
+  markAccountUnavailable,
+  buildExhaustionOptions,
+} from "../services/auth";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { createBuiltinAutoCombo } from "@omniroute/open-sse/services/autoCombo/builtinCatalog.ts";
 import * as log from "../utils/logger";
@@ -334,7 +338,15 @@ export async function resolveModelOrError(
     log.info("ROUTING", `Provider: ${provider}, Model: ${model}${ctxTag}`);
   }
 
-  return { provider, model, sourceFormat, targetFormat, extendedContext, apiFormat };
+  return {
+    provider,
+    model,
+    sourceFormat,
+    targetFormat,
+    customModelTargetFormat,
+    extendedContext,
+    apiFormat,
+  };
 }
 
 export async function checkPipelineGates(
@@ -557,7 +569,7 @@ export async function executeChatWithBreaker({
                 provider,
                 model,
                 providerProfile,
-                { isCombo }
+                buildExhaustionOptions(correlationId ?? null, { isCombo })
               );
             },
           })
@@ -733,7 +745,8 @@ export function handleNoCredentials(
   lastStatus: number | null,
   candidateAliases?: readonly string[],
   isCombo: boolean = false,
-  shadowedNode: ShadowedProviderNode | null = null
+  shadowedNode: ShadowedProviderNode | null = null,
+  correlationId?: string | null
 ) {
   if (credentials?.allRateLimited) {
     const errorMsg = lastError || credentials.lastError || "Unavailable";
@@ -774,6 +787,7 @@ export function handleNoCredentials(
       provider,
       model,
       lastStatus,
+      ...(correlationId ? { correlationId } : {}),
     });
     return errorResponse(lastStatus, lastError);
   }
