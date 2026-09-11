@@ -5,7 +5,6 @@ import {
   persistAttemptLogs as persistAttemptLogsFor,
   type PersistAttemptLogsArgs,
 } from "./chatCore/attemptLogging.ts";
-import { getHeaderValueCaseInsensitive } from "./chatCore/headers.ts";
 import {
   projectFailureUsageErrorCode,
   buildFailureUsageRecord,
