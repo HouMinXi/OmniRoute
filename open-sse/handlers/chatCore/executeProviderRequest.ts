@@ -299,7 +299,7 @@ export async function executeProviderRequest(
               remainingAfterGate,
               correlationId ?? undefined,
               {
-                executor: executor as { getTimeoutMs?: unknown },
+                executor: executor as { getTimeoutMs?: () => unknown },
                 providerSpecificData: execCreds?.providerSpecificData,
               }
             );
