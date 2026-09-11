@@ -13,6 +13,7 @@ process.env.APP_LOG_TO_FILE = "false";
 const { MemoryType } = await import("../../src/lib/memory/types.ts");
 const { createMemory, recordMemoryAccess, getMemory } =
   await import("../../src/lib/memory/store.ts");
+const { cleanupMemoryEntries } = await import("../../src/lib/db/cleanup.ts");
 const { getDbInstance, resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 function ftsCounts(db: ReturnType<typeof getDbInstance>): {
@@ -112,4 +113,40 @@ test("new inserts remain searchable after memory_id sync", async () => {
     .prepare("SELECT count(*) AS n FROM memory_fts WHERE memory_fts MATCH ?")
     .get('"needle-insert"') as { n: number };
   assert.ok(hits.n >= 1, "fresh inserts must be in FTS5 after memory_id sync");
+});
+
+test("cleanupMemoryEntries issues FTS5 rebuild even when no rows expire", async () => {
+  await createMemory({
+    apiKeyId: "k-fts-rebuild",
+    sessionId: "s1",
+    type: MemoryType.FACTUAL,
+    key: "rebuild-key",
+    content: "needle-rebuild unique phrase",
+    metadata: {},
+    expiresAt: null,
+  });
+  const db = getDbInstance();
+  const calls: string[] = [];
+  const orig = db.exec.bind(db);
+  db.exec = ((sql: string) => {
+    calls.push(sql);
+    return orig(sql);
+  }) as typeof db.exec;
+
+  const result = await cleanupMemoryEntries();
+  assert.equal(result.deleted, 0, "fresh memories must survive default retention");
+  assert.equal(result.errors, 0);
+  assert.ok(
+    calls.some((sql) => sql.includes("VALUES('rebuild')")),
+    `cleanup must rebuild FTS5, got ${JSON.stringify(calls)}`
+  );
+  assert.equal(
+    calls.some((sql) => sql.includes("VALUES('optimize')")),
+    false,
+    "optimize must not substitute for rebuild"
+  );
+  const hits = db
+    .prepare("SELECT count(*) AS n FROM memory_fts WHERE memory_fts MATCH ?")
+    .get('"needle-rebuild"') as { n: number };
+  assert.ok(hits.n >= 1, "content must stay searchable after rebuild");
 });
