@@ -29,6 +29,8 @@ test.after(() => {
 });
 
 const AGNES_CHAT_URL = "https://apihub.agnes-ai.com/v1/chat/completions";
+const AGNES_MODELS_URL = "https://apihub.agnes-ai.com/v1/models";
+const AGNES_CN_BASE_URL = "https://api.agnes-ai.cn/v1";
 
 test("agnes is registered as an API-key provider with complete metadata", () => {
   const entry = APIKEY_PROVIDERS.agnes;
@@ -95,10 +97,40 @@ test("agnes ships the current public chat models with the correct capabilities",
 
   const flash30 = entry.models.find((m) => m.id === "agnes-3.0-flash");
   assert.ok(flash30, "agnes-3.0-flash must be defined");
+  assert.equal(flash30.contextLength, 524288);
+  assert.equal(flash30.maxOutputTokens, 65536);
   assert.equal(flash30.supportsReasoning, true);
   assert.equal(flash30.supportsVision, true);
   assert.equal(flash30.toolCalling, true);
   assert.equal(flash30.interleavedField, "reasoning_content");
+});
+
+test("agnes registry advertises the live OpenAI-style /models endpoint", () => {
+  const entry = providerRegistry.agnes;
+  assert.equal(entry.modelsUrl, AGNES_MODELS_URL);
+});
+
+test("agnes is classified for live OpenAI-style /models discovery", async () => {
+  const { isNamedOpenAIStyleProvider } = await import(
+    "../../src/app/api/providers/[id]/models/discovery/providerSets.ts"
+  );
+  assert.equal(isNamedOpenAIStyleProvider("agnes"), true);
+});
+
+test("agnes honors per-connection CN base URL override", () => {
+  const url = new DefaultExecutor("agnes").buildUrl("agnes-3.0-flash", true, 0, {
+    providerSpecificData: { baseUrl: AGNES_CN_BASE_URL },
+  });
+  assert.equal(url, `${AGNES_CN_BASE_URL}/chat/completions`);
+});
+
+test("agnes base-URL field is always-on so CN keys can point at api.agnes-ai.cn", async () => {
+  const helpers = await import(
+    "../../src/app/(dashboard)/dashboard/providers/[id]/providerPageHelpers.ts"
+  );
+  assert.equal(helpers.isBaseUrlConfigurableProvider("agnes"), true);
+  assert.equal(helpers.getProviderBaseUrlDefault("agnes"), "https://apihub.agnes-ai.com/v1");
+  assert.equal(helpers.getProviderBaseUrlPlaceholder("agnes"), AGNES_CN_BASE_URL);
 });
 
 test("agnes-1.5-flash is retired and forwards to agnes-3.0-flash", () => {
