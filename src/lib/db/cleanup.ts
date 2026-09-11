@@ -274,7 +274,7 @@ export async function cleanupMemoryEntries(): Promise<CleanupResult> {
 
     if (result.deleted > 0 && tableExists("memory_fts")) {
       try {
-        getDbInstance().exec("INSERT INTO memory_fts(memory_fts) VALUES('optimize')");
+        db.exec("INSERT INTO memory_fts(memory_fts) VALUES('optimize')");
       } catch (err: unknown) {
         console.error("[Cleanup] FTS5 optimize after memory retention failed:", err);
         result.errors++;
