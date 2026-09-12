@@ -182,6 +182,12 @@ test("agnes-cn dashboard card name includes China and is not hidden", () => {
   assert.equal(typeof entry.name, "string");
   assert.match(entry.name, /China/);
   assert.notEqual(entry.hiddenFromDashboard, true);
+  assert.equal(
+    typeof entry.freeNote,
+    "string",
+    "agnes-cn hasFree card must explain the free tier"
+  );
+  assert.ok((entry.freeNote as string).length > 0);
 });
 
 test("agnes-cn translate-path golden records China host", () => {

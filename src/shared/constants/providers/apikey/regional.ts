@@ -479,6 +479,7 @@ export const APIKEY_PROVIDERS_REGIONAL = {
     textIcon: "AC",
     website: "https://api.agnes-ai.cn",
     hasFree: true,
+    freeNote: "Permanently free, no API credit card required.",
     authHint: "Get API key from the Agnes CN site.",
   },
   sealion: {
