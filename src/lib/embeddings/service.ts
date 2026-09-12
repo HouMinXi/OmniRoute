@@ -344,7 +344,7 @@ export async function createEmbeddingResponse(
     ) {
       credentials = localCredentials;
     }
-  } else if (providerConfig.authType === "none") {
+  } else if (!credentials && providerConfig.authType === "none") {
     // #13234: private-host nodes are classified no-auth so a keyless
     // LAN Ollama still works (#6925). A stored API key on that same
     // node must still ride outbound, matching dashboard Check.

@@ -127,3 +127,39 @@ test("#13234: keyless 10.x LAN embeddings node still sends no Authorization", as
     "a keyless LAN provider must not receive a fabricated Authorization header"
   );
 });
+
+test("#13234: LAN node with a keyless connection record still sends no Authorization", async () => {
+  const node = await createProviderNode({
+    type: "openai-compatible-embeddings",
+    name: "LAN empty key",
+    prefix: "lanempty13234",
+    apiType: "embeddings",
+    baseUrl: "http://10.20.0.5:11434/v1",
+  });
+
+  await providersDb.createProviderConnection({
+    provider: node.id,
+    authType: "apikey",
+    name: "LAN empty key conn",
+    apiKey: "",
+    isActive: true,
+  });
+
+  const fetchStub = stubEmbeddingFetch();
+  try {
+    const res = await createEmbeddingResponse({
+      model: "lanempty13234/nomic-embed-text",
+      input: "hello world",
+    });
+    assert.equal(res.status, 200);
+  } finally {
+    fetchStub.restore();
+  }
+
+  assert.ok(fetchStub.captured);
+  assert.equal(
+    fetchStub.captured!.headers.Authorization,
+    undefined,
+    "empty stored key must not fabricate Authorization",
+  );
+});
