@@ -79,44 +79,6 @@ export async function deleteFromTableBeforeInBatches(
   }
 }
 
-export async function deleteFromTableBeforeInBatches(
-  target: DeleteByPeriodTarget,
-  cutoffIso: string
-): Promise<number> {
-  if (!tableExists(target.table)) return 0;
-
-  const cutoff = (() => {
-    switch (target.cutoff) {
-      case "date":
-        return cutoffIso.slice(0, 10);
-      case "dateHour":
-        return `${cutoffIso.slice(0, 10)} ${cutoffIso.slice(11, 13)}:00:00`;
-      case "epochMs":
-        return new Date(cutoffIso).getTime();
-      case "epochSeconds":
-        return Math.floor(new Date(cutoffIso).getTime() / 1000);
-      case "iso":
-      default:
-        return cutoffIso;
-    }
-  })();
-  const statement = getDbInstance().prepare(
-    `DELETE FROM ${target.table}
-     WHERE rowid IN (
-       SELECT rowid FROM ${target.table}
-       WHERE ${target.column} < ?
-       LIMIT 10000
-     )`
-  );
-  let deleted = 0;
-  while (true) {
-    const batch = statement.run(cutoff).changes;
-    deleted += batch;
-    if (batch < 10_000) return deleted;
-    await new Promise<void>((resolve) => setImmediate(resolve));
-  }
-}
-
 export function collectCallLogArtifactsBefore(cutoffIso: string): string[] {
   if (!tableExists("call_logs")) return [];
 
