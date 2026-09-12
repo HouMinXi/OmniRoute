@@ -13,14 +13,6 @@ export const agnes_cnProvider: RegistryEntry = {
   liveCatalogAuthoritative: true,
   models: [
     {
-      id: "agnes-1.5-flash",
-      name: "Agnes 1.5 Flash",
-      contextLength: 262144,
-      maxOutputTokens: 65536,
-      supportsVision: true,
-      toolCalling: true,
-    },
-    {
       id: "agnes-2.0-flash",
       name: "Agnes 2.0 Flash",
       contextLength: 262144,
@@ -32,6 +24,16 @@ export const agnes_cnProvider: RegistryEntry = {
     {
       id: "agnes-2.5-flash",
       name: "Agnes 2.5 Flash",
+      contextLength: 524288,
+      maxOutputTokens: 65536,
+      supportsReasoning: true,
+      supportsVision: true,
+      toolCalling: true,
+      interleavedField: "reasoning_content",
+    },
+    {
+      id: "agnes-3.0-flash",
+      name: "Agnes 3.0 Flash",
       contextLength: 524288,
       maxOutputTokens: 65536,
       supportsReasoning: true,
