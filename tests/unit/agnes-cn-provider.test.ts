@@ -21,6 +21,8 @@ const { APIKEY_PROVIDERS } = await import("../../src/shared/constants/providers.
 const { IMAGE_PROVIDERS } = await import("../../open-sse/config/imageRegistry.ts");
 const { FREE_MODEL_BUDGETS } = await import("../../open-sse/config/freeModelCatalog.ts");
 const { resolveProviderAlias, parseModel } = await import("../../open-sse/services/model.ts");
+const { sanitizeReasoningEffortForProvider } =
+  await import("../../open-sse/executors/base/reasoningEffort.ts");
 const { isNamedOpenAIStyleProvider } = await import(
   "../../src/app/api/providers/[id]/models/discovery/providerSets.ts"
 );
@@ -166,14 +168,65 @@ test("IMAGE_PROVIDERS agnes-cn absence lock can go red", () => {
   assert.equal(VIDEO_PROVIDER_IDS.has("agnes-cn"), false);
 });
 
-test("agnes-cn free catalog has three rows on the agnes-cn-free pool without agnes-3.0-flash", () => {
+test("agnes-cn free catalog three rows agnes-cn-free pool with agnes-3.0-flash", () => {
   const rows = FREE_MODEL_BUDGETS.filter((model) => model.provider === "agnes-cn");
   assert.equal(rows.length, 3);
   assert.ok(rows.every((model) => model.poolKey === "agnes-cn-free"));
   assert.equal(
     rows.some((model) => model.modelId === "agnes-3.0-flash"),
+    true
+  );
+  assert.equal(
+    rows.some((model) => model.modelId === "agnes-1.5-flash"),
     false
   );
+});
+
+test("agnes-cn declares the live effort vocabulary per generation", () => {
+  const models = REGISTRY["agnes-cn"].models;
+  for (const id of ["agnes-2.0-flash", "agnes-2.5-flash"]) {
+    const m = models.find((entry: { id: string }) => entry.id === id);
+    assert.ok(m, id + " must be in the agnes-cn registry");
+    assert.deepEqual(m.supportedThinkingEfforts, ["none", "low", "medium", "high", "max"]);
+  }
+  const flash30 = models.find((entry: { id: string }) => entry.id === "agnes-3.0-flash");
+  assert.ok(flash30, "agnes-3.0-flash must be in the agnes-cn registry");
+  assert.deepEqual(flash30.supportedThinkingEfforts, [
+    "none",
+    "minimal",
+    "low",
+    "medium",
+    "high",
+    "xhigh",
+    "max",
+  ]);
+});
+
+test("agnes-cn sanitizer clamps Hermes xhigh to the ceiling and off to none", () => {
+  const clamp = (model: string, effort: string) =>
+    (
+      sanitizeReasoningEffortForProvider({ reasoning_effort: effort }, "agnes-cn", model) as {
+        reasoning_effort?: string;
+      }
+    ).reasoning_effort;
+
+  assert.equal(clamp("agnes-2.0-flash", "xhigh"), "max");
+  assert.equal(clamp("agnes-2.5-flash", "xhigh"), "max");
+  assert.equal(clamp("agnes-2.0-flash", "off"), "none");
+  assert.equal(clamp("agnes-2.5-flash", "off"), "none");
+  assert.equal(clamp("agnes-2.0-flash", "minimal"), "low");
+  assert.equal(clamp("agnes-2.5-flash", "minimal"), "low");
+  assert.equal(clamp("agnes-3.0-flash", "xhigh"), "xhigh");
+  assert.equal(clamp("agnes-3.0-flash", "minimal"), "minimal");
+  assert.equal(clamp("agnes-3.0-flash", "off"), "none");
+});
+
+test("agnes-cn registry seed lists 3.0 and not retired 1.5", () => {
+  const ids = REGISTRY["agnes-cn"].models.map((model: { id: string }) => model.id);
+  assert.equal(ids.includes("agnes-3.0-flash"), true);
+  assert.equal(ids.includes("agnes-1.5-flash"), false);
+  assert.equal(ids.includes("agnes-2.0-flash"), true);
+  assert.equal(ids.includes("agnes-2.5-flash"), true);
 });
 
 test("agnes-cn dashboard card name includes China and is not hidden", () => {
