@@ -76,7 +76,11 @@ export function gemini38ThinkingLevelFromBudget(
   const resolved = getResolvedModelCapabilities(model);
   const cap = resolved.thinkingBudgetCap ?? 24576;
   const medium = resolved.defaultThinkingBudget || 8192;
-  if (budget <= 0) return "low";
+  if (budget <= 0) {
+    throw new RangeError(
+      "gemini38ThinkingLevelFromBudget: budget must be > 0; use gemini38ThinkingConfig for the off-switch"
+    );
+  }
   if (budget >= cap) return "high";
   if (budget <= 1024) return "low";
   if (budget <= medium) return "medium";

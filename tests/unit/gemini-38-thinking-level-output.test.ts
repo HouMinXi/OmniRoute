@@ -16,6 +16,9 @@ const { openaiToGeminiRequest, openaiToAntigravityRequest } = await import(
 const { claudeToGeminiRequest } = await import(
   "../../open-sse/translator/request/claude-to-gemini.ts"
 );
+const { gemini38ThinkingLevelFromBudget } = await import(
+  "../../open-sse/services/thinkingBudget.ts"
+);
 
 type ThinkingConfig = {
   thinkingBudget?: number;
@@ -179,4 +182,48 @@ test("claude-to-gemini gemini-3.8-flash-high emits thinkingLevel, not includeTho
   assert.equal(result.generationConfig?.thinkingConfig?.thinkingLevel, "high");
   assert.equal(result.generationConfig?.thinkingConfig?.thinkingBudget, undefined);
   assert.equal(result.generationConfig?.thinkingConfig?.includeThoughts, undefined);
+});
+
+test("gemini38ThinkingLevelFromBudget rejects budget <= 0", () => {
+  assert.throws(
+    () => gemini38ThinkingLevelFromBudget("gemini-3.8-flash-high", 0),
+    RangeError
+  );
+  assert.throws(
+    () => gemini38ThinkingLevelFromBudget("gemini-3.8-flash-high", -1),
+    RangeError
+  );
+});
+
+test("gemini38ThinkingLevelFromBudget maps 1 and 1024 to low", () => {
+  assert.equal(
+    gemini38ThinkingLevelFromBudget("gemini-3.8-flash-high", 1),
+    "low"
+  );
+  assert.equal(
+    gemini38ThinkingLevelFromBudget("gemini-3.8-flash-high", 1024),
+    "low"
+  );
+});
+
+test("gemini38ThinkingLevelFromBudget maps 1025 through medium cap to medium", () => {
+  assert.equal(
+    gemini38ThinkingLevelFromBudget("gemini-3.8-flash-medium", 1025),
+    "medium"
+  );
+  assert.equal(
+    gemini38ThinkingLevelFromBudget("gemini-3.8-flash-medium", 8192),
+    "medium"
+  );
+});
+
+test("gemini38ThinkingLevelFromBudget maps above medium cap to high", () => {
+  assert.equal(
+    gemini38ThinkingLevelFromBudget("gemini-3.8-flash-medium", 8193),
+    "high"
+  );
+  assert.equal(
+    gemini38ThinkingLevelFromBudget("gemini-3.8-flash-high", 24576),
+    "high"
+  );
 });
