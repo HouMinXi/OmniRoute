@@ -1,7 +1,8 @@
 ---
 title: "Provider Reference"
 version: 3.8.51
-lastUpdated: 2026-09-11---
+lastUpdated: 2026-09-11
+---
 
 # Provider Reference
 
