@@ -31,15 +31,53 @@ function modelIds(provider: string): string[] {
 }
 
 function extractNamedBlock(src: string, name: string): string {
-  const match = src.match(
-    new RegExp(
-      "(?:const|export const)\\s+" + name + "[\\s\\S]*?=\\s*([\\[{][\\s\\S]*?^[\\]}];)",
-      "m"
-    )
-  );
-  assert.ok(match, `${name} block not found`);
-  return match[1];
+  const marker = "const " + name;
+  const exportMarker = "export const " + name;
+  let at = src.indexOf(exportMarker);
+  if (at < 0) at = src.indexOf(marker);
+  assert.ok(at >= 0, name + " declaration not found");
+  const eq = src.indexOf("=", at);
+  assert.ok(eq >= 0, name + " assignment not found");
+  let i = eq + 1;
+  while (i < src.length && /\s/.test(src[i]!)) i += 1;
+  const open = src[i];
+  assert.ok(open === "{" || open === "[", name + " does not open a block");
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inStr: string | null = null;
+  let escaped = false;
+  for (let j = i; j < src.length; j += 1) {
+    const ch = src[j]!;
+    if (inStr) {
+      if (escaped) {
+        escaped = false;
+        continue;
+      }
+      if (ch === "\\") {
+        escaped = true;
+        continue;
+      }
+      if (ch === inStr) inStr = null;
+      continue;
+    }
+    if (ch === "'" || ch === '"' || ch === "`") {
+      inStr = ch;
+      continue;
+    }
+    if (ch === open) depth += 1;
+    else if (ch === close) {
+      depth -= 1;
+      if (depth === 0) {
+        let k = j + 1;
+        while (k < src.length && /\s/.test(src[k]!)) k += 1;
+        assert.equal(src[k], ";", name + " block missing semicolon");
+        return src.slice(i, k + 1);
+      }
+    }
+  }
+  assert.fail(name + " block not closed");
 }
+
 
 function assertNoXaiFamily(block: string, label: string): void {
   assert.doesNotMatch(block, /["']xai["']/, `${label} must not mention xai`);
