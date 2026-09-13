@@ -446,11 +446,10 @@ export async function executeTargetAttempt(opts: {
         });
         state.observeFailure(false, target.executionKey);
       familyTried.add(modelStr);
-      const familyNext = getNextFamilyFallback(
-        modelStr,
-        familyTried,
-        provider,
-      );
+      const familyNext =
+        provider && provider !== "unknown"
+          ? getNextFamilyFallback(modelStr, familyTried, provider)
+          : null;
       if (familyNext && familyNext !== modelStr) {
         deps.log.info(
           "COMBO",

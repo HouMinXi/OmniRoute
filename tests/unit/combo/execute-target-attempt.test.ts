@@ -400,3 +400,36 @@ test("astra-high quality fail hops same connection to astra-max", async () => {
   assert.equal(seen[1], "codex/gpt-6-astra-max");
   assert.equal(result?.ok, true);
 });
+
+test("quality fail without provider does not hop", async () => {
+  const { executeTargetAttempt } =
+    await import("../../../open-sse/services/combo/executeTargetAttempt.ts");
+  const seen: string[] = [];
+  const target = modelTarget({
+    modelStr: "codex/gpt-6-astra-high",
+    provider: "",
+    connectionId: "c-astra",
+  });
+  const deps = baseDeps({
+    maxRetries: 1,
+    clientRequestedStream: false,
+    handleSingleModelWithTimeout: async (_body, model) => {
+      seen.push(String(model));
+      return emptyContent200("c-astra");
+    },
+  });
+  const state = emptyState({
+    orderedTargets: [target],
+    abortControllers: new Map([[0, new AbortController()]]),
+  });
+  const result = await executeTargetAttempt({
+    index: 0,
+    state,
+    deps,
+    targetForAttempt: target,
+    profile: {},
+    protectedPriorityTarget: false,
+  });
+  assert.equal(seen.length, 1);
+  assert.equal(result, null);
+});
