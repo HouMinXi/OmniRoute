@@ -50,3 +50,19 @@ test("skips already-tried candidates and advances down the Fable chain", () => {
 test("returns null for an unknown family", () => {
   assert.equal(getNextFamilyFallback("cc/not-a-real-model", new Set()), null);
 });
+
+test("gpt-6-astra-high falls back to gpt-6-astra-max first", () => {
+  const next = getNextFamilyFallback(
+    "codex/gpt-6-astra-high",
+    new Set(["codex/gpt-6-astra-high"]),
+  );
+  assert.equal(next, "codex/gpt-6-astra-max");
+});
+
+test("gpt-6-astra-max skips tried high and continues to ultra", () => {
+  const next = getNextFamilyFallback(
+    "codex/gpt-6-astra-high",
+    new Set(["codex/gpt-6-astra-high", "codex/gpt-6-astra-max"]),
+  );
+  assert.equal(next, "codex/gpt-6-astra-ultra");
+});
