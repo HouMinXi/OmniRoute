@@ -78,6 +78,38 @@ const FAMILY_FALLBACK_TEMPLATES: Record<string, readonly string[]> = {
   "gemini-2.5-pro": ["gemini-2.5-pro-preview-06-05", "gemini-2.5-pro-exp-03-25"],
   "gemini-2.5-pro-preview-06-05": ["gemini-2.5-pro", "gemini-2.5-pro-exp-03-25"],
 
+  // GPT-6 Astra family: same Codex OAuth catalog, effort aliases as siblings.
+  // Quality-empty 200 on astra-high (live openai-gpt-sol) should hop max then ultra.
+  "gpt-6-astra-high": [
+    "gpt-6-astra-max",
+    "gpt-6-astra-ultra",
+    "gpt-6-astra-xhigh",
+    "gpt-6-astra",
+  ],
+  "gpt-6-astra-max": [
+    "gpt-6-astra-ultra",
+    "gpt-6-astra-xhigh",
+    "gpt-6-astra-high",
+    "gpt-6-astra",
+  ],
+  "gpt-6-astra-ultra": [
+    "gpt-6-astra-max",
+    "gpt-6-astra-xhigh",
+    "gpt-6-astra-high",
+    "gpt-6-astra",
+  ],
+  "gpt-6-astra-xhigh": [
+    "gpt-6-astra-max",
+    "gpt-6-astra-ultra",
+    "gpt-6-astra-high",
+    "gpt-6-astra",
+  ],
+  "gpt-6-astra": [
+    "gpt-6-astra-max",
+    "gpt-6-astra-ultra",
+    "gpt-6-astra-high",
+  ],
+
   // Claude Mythos family — prefer the previous Fable before falling to Opus
   // tiers and then the cheaper Sonnet, matching the flagship ordering.
   "claude-fable-5-1": ["claude-fable-5", "claude-opus-5", "claude-sonnet-5"],
