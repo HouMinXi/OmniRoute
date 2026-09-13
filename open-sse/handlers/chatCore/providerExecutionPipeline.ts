@@ -131,11 +131,7 @@ function currentConnectionId(connection: PipelineConnectionContext): string {
   return connection.getCurrentConnectionId() ?? connection.initialConnectionId;
 }
 
-function commitWire(
-  wire: PipelineWireState,
-  body: Record<string, unknown>,
-  model: string
-): void {
+function commitWire(wire: PipelineWireState, body: Record<string, unknown>, model: string): void {
   wire.setBodyAndModel(body, model);
   wire.body = body;
   wire.currentModel = model;
@@ -504,14 +500,9 @@ export async function runProviderExecutionPipeline(
         authRefreshPending = true;
         continue;
       }
-  }
     } else if (decision.dispatch.action === "retry-same") {
       if (decision.dispatch.nextBody && typeof decision.dispatch.nextBody === "object") {
-        commitWire(
-          wire,
-          decision.dispatch.nextBody as Record<string, unknown>,
-          wire.currentModel
-        );
+        commitWire(wire, decision.dispatch.nextBody as Record<string, unknown>, wire.currentModel);
       }
       signatureRetryPending = true;
       signatureRetried = true;
@@ -522,7 +513,7 @@ export async function runProviderExecutionPipeline(
       modelFallbackPending = true;
       signatureRetried = false;
       continue;
-  }
+    }
     {
       let signatureMessage = attempt.response.statusText || "upstream error";
       try {

@@ -269,6 +269,7 @@ export async function runRequestPrelude({
     transport?: string,
     failureDetail?: string
   ): void => recordKeyHealthStatusFor(status, creds, log, transport, failureDetail);
+  let clientRequestedResponsesStream = false;
   // ── Phase 9.2: Idempotency check ──
   // Resolve the idempotency key once here and reuse it at the Phase 9.2 save site below,
   // rather than re-deriving it. (#3821-review LEDGER-6)
@@ -523,6 +524,7 @@ export async function runRequestPrelude({
       sourceFormat === FORMATS.OPENAI_RESPONSES &&
       (body as Record<string, unknown>).stream === true
     ) {
+      clientRequestedResponsesStream = true;
       (body as Record<string, unknown>).stream = false;
       log?.info?.("TOOLS", `web_search fallback forced non-streaming response for ${provider}`);
     }
@@ -836,6 +838,7 @@ export async function runRequestPrelude({
       pendingRequestId,
       preConversionClientToolNames,
       webSearchFallbackPlan,
+      clientRequestedResponsesStream,
       webFetchFallbackPlan,
       settings,
       isCodexResponsesEcho,
