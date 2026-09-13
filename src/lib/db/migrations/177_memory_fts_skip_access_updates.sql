@@ -1,4 +1,4 @@
--- 176_memory_fts_skip_access_updates.sql
+-- 177_memory_fts_skip_access_updates.sql
 -- recordMemoryAccess() updates access_count / last_accessed_at on every
 -- retrieval. The AFTER UPDATE trigger from 023 rewrote the FTS5 row for
 -- those telemetry columns too, so memory_fts_data / memory_fts_docsize

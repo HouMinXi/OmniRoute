@@ -63,7 +63,7 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 
   it("OPTIONAL_FTS5_MIGRATION_VERSIONS is exactly {022, 023}", () => {
     assert.ok(OPTIONAL_FTS5_MIGRATION_VERSIONS instanceof Set);
-    assert.deepEqual([...OPTIONAL_FTS5_MIGRATION_VERSIONS].sort(), ["022", "023", "176"]);
+    assert.deepEqual([...OPTIONAL_FTS5_MIGRATION_VERSIONS].sort(), ["022", "023", "177"]);
   });
 });
 
@@ -71,7 +71,7 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 
 describe("migrationRunner/constants — large-table integrity", () => {
   it("RENAMED_MIGRATION_COMPATIBILITY has 32 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 32);
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 33);
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");
