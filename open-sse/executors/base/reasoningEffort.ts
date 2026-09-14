@@ -94,6 +94,19 @@ export function isOpencodeGoProvider(provider: string): boolean {
   );
 }
 
+export function isSenseNovaDeepSeekV4Flash(
+  provider: string,
+  model: string | undefined
+): boolean {
+  const modelStr = (model || "").toLowerCase();
+  const isDeepSeekV4Flash =
+    /(?:^|\/)deepseek-v4-flash(?:$|-)/.test(modelStr) &&
+    !modelStr.includes("vision");
+  if (!isDeepSeekV4Flash) return false;
+  if (provider === "sensenova" || provider === "snova") return true;
+  return /(?:^|\/)snova(?:\/|$)/.test(modelStr);
+}
+
 type ReasoningSanitizeLog = {
   info?: (tag: string, msg: string) => void;
 };
@@ -485,6 +498,17 @@ export function sanitizeReasoningEffortForProvider(
   //   - DeepSeek V4+ (Flash, Pro, Vision, ...)
   //   - Kimi K3+ (Moonshot AI K3, K4, ...)
   // OpenRouter (pi#4055) is excluded because OpenRouter's normalized API expects xhigh.
+    if (
+      isSenseNovaDeepSeekV4Flash(provider, modelStr) &&
+      (effortStr === "xhigh" || effortStr === "max")
+    ) {
+      log?.info?.(
+        "REASONING_SANITIZE",
+        `${provider}/${modelStr}: clamped reasoning_effort ${effortStr} to high (SenseNova DeepSeek V4 Flash ceiling)`
+      );
+      return writeEffortValue(b, "high", c);
+    }
+
   const isMaxTierTarget =
     provider !== "openrouter" &&
     (isCommandCodeProvider(provider) ||
