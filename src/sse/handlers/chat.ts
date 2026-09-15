@@ -1014,7 +1014,15 @@ async function handleChatImplementation(
       if (isComboLiveTest) return true;
       // #12886: combo-name allow-list must not skip inner targets (#9057 still
       // checks auto/* / disableNonPublic via comboTargetPassesKeyModelPolicy).
-      if (!(await comboTargetPassesKeyModelPolicy({ apiKey, apiKeyInfo, requestedModelStr: resolvedModelStr, targetModelStr: modelString, isModelAllowedForKey }))) {
+      if (
+        !(await comboTargetPassesKeyModelPolicy({
+          apiKey,
+          apiKeyInfo,
+          requestedModelStr: resolvedModelStr,
+          targetModelStr: modelString,
+          isModelAllowedForKey,
+        }))
+      ) {
         return false;
       }
 
@@ -1496,11 +1504,10 @@ async function handleSingleModelChat(
     customModelTargetFormat,
     extendedContext,
     apiFormat,
+    resolvedThinkingEffort,
   } = resolved;
-  // Prefer the combo target's providerId when available — the model string's
-  // provider prefix may differ from the credential provider ID (e.g. model
-  // "xiaomi/mimo-v2-flash" resolves to provider "xiaomi" but the combo target
-  // may specify providerId: "opengate" for credential lookup).
+  // A combo can select a credential provider different from the model prefix,
+  // such as opengate credentials for xiaomi/mimo-v2-flash.
   // Guard: if runtimeOptions.providerId is merely the prefix already encoded in
   // the model string (e.g. "p2" from "p2/test-model"), and resolveModelOrError
   // expanded it to a full custom-node ID (e.g. "openai-compatible-chat-e2e-p2"),
@@ -1945,10 +1952,11 @@ async function handleSingleModelChat(
               runtimeOptions.comboExecutionKey ?? runtimeOptions.comboStepId ?? null,
             extendedContext,
             modelApiFormat: apiFormat,
-            // Only a model's explicit DB override may cross this boundary as
-            // modelInfo.targetFormat. The effective targetFormat above was
-            // resolved without credentials; forwarding it would let a stale
-            // provider-id fallback override the credential-aware resolution.
+            resolvedThinkingEffort:
+              effectiveModel === model && provider === resolvedProvider
+                ? resolvedThinkingEffort
+                : undefined,
+            // Forward only the DB override, not the credential-blind format fallback.
             modelTargetFormat: customModelTargetFormat,
             providerProfile,
             cachedSettings: runtimeOptions.cachedSettings,

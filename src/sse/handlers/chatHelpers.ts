@@ -347,6 +347,7 @@ export async function resolveModelOrError(
     customModelTargetFormat,
     extendedContext,
     apiFormat,
+    resolvedThinkingEffort: modelInfo.resolvedThinkingEffort,
   };
 }
 
@@ -441,6 +442,7 @@ export async function executeChatWithBreaker({
   extendedContext,
   modelApiFormat,
   modelTargetFormat,
+  resolvedThinkingEffort,
   providerProfile,
   cachedSettings,
   skipUpstreamRetry = false,
@@ -494,6 +496,7 @@ export async function executeChatWithBreaker({
               extendedContext,
               apiFormat: modelApiFormat,
               targetFormat: modelTargetFormat,
+              resolvedThinkingEffort,
             },
             credentials: refreshedCredentials,
             log: handlerLog,
