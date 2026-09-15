@@ -195,7 +195,7 @@ async function injectPromptCacheKey(
   return bodyToSend;
 }
 
-export async function prepareUpstreamBody(opts: {
+type PrepareUpstreamBodyOptions = {
   translatedBody: Body;
   modelToCall: string;
   provider: string | null | undefined;
@@ -207,18 +207,10 @@ export async function prepareUpstreamBody(opts: {
   bypassDefaultToolLimit?: boolean;
   isOpencodeClient?: boolean;
   log?: LoggerLike;
-}): Promise<Body> {
-  const {
-    translatedBody,
-    modelToCall,
-    provider,
-    targetFormat,
-    credentials,
-    bypassDefaultToolLimit = false,
-    isOpencodeClient = false,
-    log,
-  } = opts;
+};
 
+function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
+  const { translatedBody, modelToCall, provider, targetFormat, log } = opts;
   // Capture intent before constraints remove unsupported fields. Removed explicit
   // choices must not turn into permission to inject automatic defaults.
   const hadExplicitReasoning =
@@ -253,6 +245,21 @@ export async function prepareUpstreamBody(opts: {
   }
   bodyToSend = stripGpt5SamplingWhenReasoning(bodyToSend, provider, modelToCall, log);
   bodyToSend = stripGpt5ReasoningWhenTools(bodyToSend, provider, modelToCall, targetFormat, log);
+  return bodyToSend;
+}
+
+export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Promise<Body> {
+  const {
+    modelToCall,
+    provider,
+    targetFormat,
+    credentials,
+    bypassDefaultToolLimit = false,
+    isOpencodeClient = false,
+    log,
+  } = opts;
+
+  let bodyToSend = normalizeAttemptBody(opts);
   const payloadRuleModel =
     typeof bodyToSend.model === "string" && bodyToSend.model.length > 0
       ? bodyToSend.model
