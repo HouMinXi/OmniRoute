@@ -322,6 +322,12 @@ function repairComboRows(
 
 const QUOTA_SNAPSHOT_PAGE_SIZE = 1000;
 
+function isInvalidQuotaSnapshot(row: QuotaSnapshotRow, connectionStmt: PreparedStatement): boolean {
+  const connectionId = toTrimmedString(row.connection_id);
+  const missingConnection = !!connectionId && !hasProviderConnection(connectionStmt, connectionId);
+  return missingConnection || !isValidIsoTimestamp(row.created_at);
+}
+
 function scanQuotaSnapshots(
   db: SqliteDatabase,
   options: { autoRepair: boolean; beforeRepair: () => void }
@@ -353,10 +359,7 @@ function scanQuotaSnapshots(
 
   while (rows.length > 0) {
     for (const row of rows) {
-      const connectionId = toTrimmedString(row.connection_id);
-      const missingConnection =
-        !!connectionId && !hasProviderConnection(connectionStmt, connectionId);
-      if (missingConnection || !isValidIsoTimestamp(row.created_at)) {
+      if (isInvalidQuotaSnapshot(row, connectionStmt)) {
         issueCount += 1;
         if (deleteByRowId) {
           options.beforeRepair();

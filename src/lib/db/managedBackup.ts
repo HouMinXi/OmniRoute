@@ -19,6 +19,29 @@ interface SqlJsSnapshotDatabase {
 
 type SqlJsSnapshotConstructor = new (data: Uint8Array) => SqlJsSnapshotDatabase;
 
+function exportSqlJsSnapshot(owner: SqlJsSnapshotDatabase): Uint8Array {
+  // Export closes its connection. Copy main into an exclusively allocated
+  // WASM file and export only that disposable connection, never the owner.
+  const Database = owner.constructor as SqlJsSnapshotConstructor;
+  // Supplying bytes makes sql.js create the file exclusively before open.
+  // Omitting them could alias an existing random filename and unlink it.
+  const snapshot = new Database(new Uint8Array());
+  let image: Uint8Array;
+  try {
+    const filename = snapshot
+      .exec("PRAGMA database_list")[0]
+      ?.values.find((row) => row[1] === "main")?.[2];
+    if (typeof filename !== "string" || !filename) {
+      throw new Error("Missing sql.js snapshot filename");
+    }
+    owner.run("VACUUM main INTO ?", [filename]);
+    image = snapshot.export();
+  } finally {
+    snapshot.close();
+  }
+  return image;
+}
+
 export function createManagedDbBackup(
   db: SqliteAdapter,
   reason: string,
@@ -34,26 +57,7 @@ export function createManagedDbBackup(
     const escapedBackupPath = backupPath.replace(/'/g, "''");
 
     if (db.driver === "sql.js") {
-      // Export closes its connection. Copy main into an exclusively allocated
-      // WASM file and export only that disposable connection, never the owner.
-      const owner = db.raw as SqlJsSnapshotDatabase;
-      const Database = owner.constructor as SqlJsSnapshotConstructor;
-      // Supplying bytes makes sql.js create the file exclusively before open.
-      // Omitting them could alias an existing random filename and unlink it.
-      const snapshot = new Database(new Uint8Array());
-      let image: Uint8Array;
-      try {
-        const filename = snapshot
-          .exec("PRAGMA database_list")[0]
-          ?.values.find((row) => row[1] === "main")?.[2];
-        if (typeof filename !== "string" || !filename) {
-          throw new Error("Missing sql.js snapshot filename");
-        }
-        owner.run("VACUUM main INTO ?", [filename]);
-        image = snapshot.export();
-      } finally {
-        snapshot.close();
-      }
+      const image = exportSqlJsSnapshot(db.raw as SqlJsSnapshotDatabase);
       const fd = fs.openSync(backupPath, "wx", 0o600);
       try {
         fs.writeFileSync(fd, image);
