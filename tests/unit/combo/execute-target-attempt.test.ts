@@ -366,7 +366,7 @@ test("astra-high quality fail hops same connection to astra-max", async () => {
   const deps = baseDeps({
     maxRetries: 1,
     clientRequestedStream: false,
-    handleSingleModelWithTimeout: async (_body, model, dispatched) => {
+    handleSingleModelWithTimeout: async (_body, model, _dispatched) => {
       const m = String(model);
       seen.push(m);
       if (m.includes("gpt-6-astra-high")) {
