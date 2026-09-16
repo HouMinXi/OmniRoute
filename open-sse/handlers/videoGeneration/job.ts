@@ -505,10 +505,17 @@ function extractUrl(value: unknown): string | null {
   return null;
 }
 
+const NON_VIDEO_EXTENSION = /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i;
+
 function readResultUrl(data: unknown, resultPath: string): string | null {
   const found = readPath(data, resultPath);
   const direct = extractUrl(found);
   if (direct) return direct;
 
-  return extractUrl(data);
+  // The preset path missed, so scan the rest of the payload. Skip image
+  // extensions: providers park preview thumbnails under the same url keys we
+  // search, and handing one to the caller looks like a finished video.
+  const scanned = extractUrl(data);
+  if (!scanned) return null;
+  return NON_VIDEO_EXTENSION.test(scanned.split(/[?#]/)[0] ?? "") ? null : scanned;
 }
