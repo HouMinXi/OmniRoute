@@ -510,11 +510,13 @@ const NON_VIDEO_EXTENSION = /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i;
 function readResultUrl(data: unknown, resultPath: string): string | null {
   const found = readPath(data, resultPath);
   const direct = extractUrl(found);
+  // No extension filter here on purpose: resultPath is the field the preset
+  // declares as its result, so whatever sits there is the provider's answer.
   if (direct) return direct;
 
-  // The preset path missed, so scan the rest of the payload. Skip image
-  // extensions: providers park preview thumbnails under the same url keys we
-  // search, and handing one to the caller looks like a finished video.
+  // The preset path missed, so scan the rest of the payload. That scan is our
+  // guess rather than the provider's answer, so skip image extensions: the url
+  // keys we search are also where preview thumbnails get parked.
   const scanned = extractUrl(data);
   if (!scanned) return null;
   return NON_VIDEO_EXTENSION.test(scanned.split(/[?#]/)[0] ?? "") ? null : scanned;
