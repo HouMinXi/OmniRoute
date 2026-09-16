@@ -63,7 +63,7 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 
   it("OPTIONAL_FTS5_MIGRATION_VERSIONS is exactly {022, 023}", () => {
     assert.ok(OPTIONAL_FTS5_MIGRATION_VERSIONS instanceof Set);
-    assert.deepEqual([...OPTIONAL_FTS5_MIGRATION_VERSIONS].sort(), ["022", "023", "177"]);
+    assert.deepEqual([...OPTIONAL_FTS5_MIGRATION_VERSIONS].sort(), ["022", "023", "180"]);
   });
 });
 
@@ -170,8 +170,8 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-1), {
       fromVersion: "176",
       fromName: "memory_fts_skip_access_updates",
-      toVersion: "177",
-      toName: "memory_fts_skip_access_updates",
+      toVersion: "180",
+      toName: "memory_fts_au_conditional_memory_id",
     });
   });
 
