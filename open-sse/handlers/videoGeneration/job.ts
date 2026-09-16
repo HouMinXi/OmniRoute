@@ -450,7 +450,10 @@ function extractUrl(value: unknown): string | null {
   if (typeof value === "string") {
     const trimmed = value.trim();
     if (!trimmed) return null;
-    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
       try {
         const parsed = JSON.parse(trimmed) as unknown;
         const fromParsed = extractUrl(parsed);
