@@ -293,6 +293,9 @@ export async function handleVideoJobGeneration({
     return { success: false, status: submitResult.status, error: submitResult.error };
   }
 
+  // preset.taskIdPath comes first; the rest only run when a provider omits the
+  // documented field. "id" is deliberate - it is the real task field for two of
+  // the presets below, so it cannot be dropped or length-validated away.
   const taskId =
     readStringPath(submitResult.data, preset.taskIdPath) ||
     readStringPath(submitResult.data, "video_id") ||
