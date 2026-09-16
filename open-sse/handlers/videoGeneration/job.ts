@@ -61,8 +61,13 @@ function isDoneStatus(
   failed: string[]
 ): "done" | "failed" | "pending" {
   if (typeof status !== "string") return "pending";
-  if (failed.includes(status)) return "failed";
-  if (done.includes(status)) return "done";
+  const normalized = status.trim().toLowerCase();
+  const failedNormalized = failed.map((s) => s.trim().toLowerCase());
+  const doneNormalized = done.map((s) => s.trim().toLowerCase());
+  if (failedNormalized.includes(normalized)) return "failed";
+  if (doneNormalized.includes(normalized)) return "done";
+  if (["failed", "error", "cancelled", "canceled"].includes(normalized)) return "failed";
+  if (["completed", "succeeded", "success", "done"].includes(normalized)) return "done";
   return "pending";
 }
 
@@ -288,7 +293,12 @@ export async function handleVideoJobGeneration({
     return { success: false, status: submitResult.status, error: submitResult.error };
   }
 
-  const taskId = readStringPath(submitResult.data, preset.taskIdPath);
+  const taskId =
+    readStringPath(submitResult.data, preset.taskIdPath) ||
+    readStringPath(submitResult.data, "video_id") ||
+    readStringPath(submitResult.data, "id") ||
+    readStringPath(submitResult.data, "task_id") ||
+    readStringPath(submitResult.data, "request_id");
   if (!taskId) {
     return {
       success: false,
@@ -315,7 +325,11 @@ export async function handleVideoJobGeneration({
       return { success: false, status: pollResult.status, error: pollResult.error };
     }
 
-    const status = readPath(pollResult.data, preset.statusPath);
+    const status =
+      readPath(pollResult.data, preset.statusPath) ??
+      readPath(pollResult.data, "status") ??
+      readPath(pollResult.data, "task_status") ??
+      readPath(pollResult.data, "state");
     const jobState = isDoneStatus(status, preset.statusDone, preset.statusFailed);
     if (jobState === "done") {
       const url = readResultUrl(pollResult.data, preset.resultPath);
@@ -432,19 +446,66 @@ async function fetchJson(
   }
 }
 
-function readResultUrl(data: unknown, resultPath: string): string | null {
-  const found = readPath(data, resultPath);
-  if (typeof found === "string" && found.trim()) return found.trim();
-  if (Array.isArray(found)) {
-    const first = found[0];
-    // muapi-style: resultPath "outputs" resolves to ["https://…"].
-    if (typeof first === "string" && first.trim()) return first.trim();
-    // sora-style: resultPath "data" resolves to [{ url: "https://…" }].
-    if (first && typeof first === "object" && !Array.isArray(first)) {
-      const urlEntry = (first as Record<string, unknown>).url;
-      if (typeof urlEntry === "string" && urlEntry.trim()) return urlEntry.trim();
+function extractUrl(value: unknown): string | null {
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) return null;
+    if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+      try {
+        const parsed = JSON.parse(trimmed) as unknown;
+        const fromParsed = extractUrl(parsed);
+        if (fromParsed) return fromParsed;
+      } catch {
+        // Not valid JSON, fall through
+      }
+    }
+    if (
+      /^(https?:\/\/|data:video\/|\/)/i.test(trimmed) ||
+      (!trimmed.includes(" ") && trimmed.includes("/"))
+    ) {
+      return trimmed;
     }
     return null;
   }
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const url = extractUrl(item);
+      if (url) return url;
+    }
+    return null;
+  }
+  if (value && typeof value === "object") {
+    const rec = value as Record<string, unknown>;
+    for (const key of [
+      "url",
+      "video_url",
+      "videoUrl",
+      "download_url",
+      "downloadUrl",
+      "output_url",
+      "outputUrl",
+      "file_url",
+      "fileUrl",
+    ]) {
+      if (typeof rec[key] === "string" && (rec[key] as string).trim()) {
+        const extracted = extractUrl(rec[key]);
+        if (extracted) return extracted;
+      }
+    }
+    for (const key of ["metadata", "data", "outputs", "output", "result", "video"]) {
+      if (rec[key] !== undefined && rec[key] !== null) {
+        const extracted = extractUrl(rec[key]);
+        if (extracted) return extracted;
+      }
+    }
+  }
   return null;
+}
+
+function readResultUrl(data: unknown, resultPath: string): string | null {
+  const found = readPath(data, resultPath);
+  const direct = extractUrl(found);
+  if (direct) return direct;
+
+  return extractUrl(data);
 }
