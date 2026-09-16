@@ -632,6 +632,64 @@ test("agnes Video V2.0 does not return a JSON-encoded array string as the result
   }
 });
 
+test("agnes Video V2.0 does not mistake a slash-containing non-URL value for the result URL (#13726)", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+
+  globalThis.setTimeout = ((callback: (...args: unknown[]) => void, _ms?: number, ...args) => {
+    callback(...args);
+    return 0;
+  }) as typeof setTimeout;
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    const call = {
+      url: String(url),
+      method: init?.method || "GET",
+      headers: (init?.headers || {}) as Record<string, string>,
+      ...(init?.body ? { body: JSON.parse(String(init.body)) as Record<string, unknown> } : {}),
+    };
+
+    if (call.method === "POST") {
+      return new Response(
+        JSON.stringify({
+          id: "task-slash-1",
+          video_id: "video-slash-1",
+          status: "queued",
+        }),
+        { status: 200, headers: { "content-type": "application/json" } }
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        status: "completed",
+        metadata: { url: "v2/clip" },
+        video_url: "https://platform-outputs.agnes-ai.space/video-real.mp4",
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await handleVideoGeneration({
+      body: {
+        model: "agnes/agnes-video-v2.0",
+        prompt: "A cinematic drone shot over mountains",
+      },
+      credentials: { apiKey: "agnes-key" },
+      log: null,
+    });
+
+    assert.equal(result.error, undefined);
+    assert.equal(result.success, true);
+    assert.equal(
+      result.data.data[0].url,
+      "https://platform-outputs.agnes-ai.space/video-real.mp4"
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+});
+
 test("agnes Video V2.0 extracts result URL from video_url, stringified metadata, data array, and fallback taskId (#13726)", async () => {
   const originalFetch = globalThis.fetch;
   const originalSetTimeout = globalThis.setTimeout;

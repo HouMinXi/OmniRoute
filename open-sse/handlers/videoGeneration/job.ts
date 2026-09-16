@@ -462,10 +462,7 @@ function extractUrl(value: unknown): string | null {
         // Not valid JSON, fall through
       }
     }
-    if (
-      /^(https?:\/\/|data:video\/|\/)/i.test(trimmed) ||
-      (!trimmed.includes(" ") && trimmed.includes("/"))
-    ) {
+    if (/^(https?:\/\/|data:video\/|\/)/i.test(trimmed)) {
       return trimmed;
     }
     return null;
