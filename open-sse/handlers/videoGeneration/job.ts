@@ -294,13 +294,13 @@ export async function handleVideoJobGeneration({
   }
 
   // preset.taskIdPath comes first; the rest only run when a provider omits the
-  // documented field. "id" is deliberate - it is the real task field for two of
-  // the presets below, so it cannot be dropped or length-validated away.
+  // documented field. task_id outranks the generic id because this chain is
+  // shared by every preset, and elsewhere id is often a correlation handle.
   const taskId =
     readStringPath(submitResult.data, preset.taskIdPath) ||
     readStringPath(submitResult.data, "video_id") ||
-    readStringPath(submitResult.data, "id") ||
     readStringPath(submitResult.data, "task_id") ||
+    readStringPath(submitResult.data, "id") ||
     readStringPath(submitResult.data, "request_id");
   if (!taskId) {
     return {
