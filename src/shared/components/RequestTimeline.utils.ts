@@ -1,5 +1,7 @@
 import { getHttpStatusStyle } from "@/shared/constants/colors";
 
+export type TimelineRowKind = "llm" | "mcp";
+
 export interface TimelineLog {
   id: string;
   timestamp: string;
@@ -15,6 +17,13 @@ export interface TimelineLog {
   path?: string | null;
   /** Conversation id (X-ConversationId) — same field as call_logs.session_tag. */
   sessionTag?: string | null;
+  /** Defaults to llm when omitted so older call-log rows keep packing. */
+  kind?: TimelineRowKind;
+  apiKeyId?: string | null;
+  apiKeyName?: string | null;
+  toolName?: string | null;
+  errorCode?: string | null;
+  scopes?: string[];
 }
 
 export interface Lane {
@@ -72,6 +81,129 @@ export function formatTimeAxis(ms: number): string {
 export function getStatusColor(status: number, active: boolean | undefined): string {
   if (active) return "#6366F1";
   return getHttpStatusStyle(status).bg;
+}
+
+/** Teal, distinct from the 2xx green used for LLM bars. */
+export const MCP_BAR_COLOR = "#0F766E";
+
+export function getTimelineBarColor(log: TimelineLog): string {
+  if (log.kind === "mcp" && (log.status || 0) < 400) return MCP_BAR_COLOR;
+  return getStatusColor(log.status, log.active);
+}
+
+export function mcpAuditId(id: number): string {
+  return `mcp:${id}`;
+}
+
+export type McpAuditTimelineEntry = {
+  id: number;
+  toolName: string;
+  durationMs: number;
+  apiKeyId: string | null;
+  success: boolean;
+  errorCode?: string | null;
+  createdAt: string;
+};
+
+export function sqliteTimestampToIso(raw: string): string {
+  if (raw.includes("T")) return raw.endsWith("Z") ? raw : `${raw}Z`;
+  return `${raw.trim().replace(" ", "T")}Z`;
+}
+
+export function mapMcpAuditEntry(
+  entry: McpAuditTimelineEntry,
+  scopeLookup?: (tool: string) => readonly string[] | undefined
+): TimelineLog {
+  const toolName = entry.toolName;
+  const success = entry.success === true;
+  const errorCode = entry.errorCode ?? null;
+  return {
+    id: mcpAuditId(entry.id),
+    timestamp: sqliteTimestampToIso(entry.createdAt),
+    status: success ? 200 : 500,
+    model: toolName,
+    provider: "mcp",
+    account: null,
+    duration: Number(entry.durationMs) || 0,
+    tokens: { in: 0, out: 0 },
+    completed: true,
+    kind: "mcp",
+    apiKeyId: entry.apiKeyId,
+    toolName,
+    error: success ? null : errorCode || "error",
+    errorCode,
+    scopes: [...(scopeLookup?.(toolName) ?? [])],
+  };
+}
+
+export function mergeTimelineLogs(llm: TimelineLog[], mcp: TimelineLog[]): TimelineLog[] {
+  const taggedLlm = llm.map((row) => ({ ...row, kind: row.kind ?? "llm" }));
+  return [...taggedLlm, ...mcp];
+}
+
+export function timelineFetchUrls(selectedApiKey: string): { llm: string; mcp: string } {
+  const llm = new URLSearchParams({ limit: "200" });
+  const mcp = new URLSearchParams({ limit: "200" });
+  if (selectedApiKey) {
+    llm.set("apiKey", selectedApiKey);
+    mcp.set("apiKeyId", selectedApiKey);
+  }
+  return {
+    llm: `/api/usage/call-logs?${llm.toString()}`,
+    mcp: `/api/mcp/audit?${mcp.toString()}`,
+  };
+}
+
+export function uniqueApiKeyOptions(logs: TimelineLog[]): string[] {
+  return [
+    ...new Set(
+      logs
+        .map((row) => row.apiKeyId || row.apiKeyName)
+        .filter((value): value is string => typeof value === "string" && value.length > 0)
+    ),
+  ].sort();
+}
+
+export type TimelineFetch = (url: string) => Promise<{
+  ok: boolean;
+  json: () => Promise<unknown>;
+}>;
+
+function asTimelineLogs(value: unknown): TimelineLog[] {
+  return Array.isArray(value) ? (value as TimelineLog[]) : [];
+}
+
+function asMcpEntries(value: unknown): McpAuditTimelineEntry[] {
+  if (!value || typeof value !== "object") return [];
+  const entries = (value as { entries?: unknown }).entries;
+  if (!Array.isArray(entries)) return [];
+  return entries.filter(
+    (entry): entry is McpAuditTimelineEntry =>
+      Boolean(entry) &&
+      typeof entry === "object" &&
+      typeof (entry as McpAuditTimelineEntry).id === "number" &&
+      typeof (entry as McpAuditTimelineEntry).toolName === "string"
+  );
+}
+
+export async function loadTimelineLogs(
+  fetchImpl: TimelineFetch,
+  selectedApiKey = "",
+  scopeLookup?: (tool: string) => readonly string[] | undefined
+): Promise<TimelineLog[]> {
+  const urls = timelineFetchUrls(selectedApiKey);
+  const [llmResult, mcpResult] = await Promise.all([
+    fetchImpl(urls.llm)
+      .then((res) => (res.ok ? res.json() : []))
+      .catch(() => []),
+    fetchImpl(urls.mcp)
+      .then((res) => (res.ok ? res.json() : { entries: [] }))
+      .catch(() => ({ entries: [] })),
+  ]);
+  return mergeTimelineLogs(
+    asTimelineLogs(llmResult),
+    asMcpEntries(mcpResult).map((entry) => mapMcpAuditEntry(entry, scopeLookup))
+  );
 }
 
 export const DEFAULT_CONVERSATION_LANE_REUSE_WINDOW_MS = 2 * 60 * 1000;
