@@ -449,6 +449,8 @@ async function fetchJson(
   }
 }
 
+const NON_VIDEO_EXTENSION = /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i;
+
 function extractUrl(value: unknown): string | null {
   if (typeof value === "string") {
     const trimmed = value.trim();
@@ -466,7 +468,12 @@ function extractUrl(value: unknown): string | null {
       }
     }
     if (/^(https?:\/\/|data:video\/|\/)/i.test(trimmed)) {
-      return trimmed;
+      // Reject images inside the scan, not at the call site: the walk returns
+      // its first hit, so a post-filter would drop the whole payload instead of
+      // letting the search move on to the real video.
+      return NON_VIDEO_EXTENSION.test(trimmed.split(/[?#]/)[0] ?? "")
+        ? null
+        : trimmed;
     }
     return null;
   }
@@ -505,19 +512,10 @@ function extractUrl(value: unknown): string | null {
   return null;
 }
 
-const NON_VIDEO_EXTENSION = /\.(png|jpe?g|gif|webp|bmp|svg|ico)$/i;
-
 function readResultUrl(data: unknown, resultPath: string): string | null {
-  const found = readPath(data, resultPath);
-  const direct = extractUrl(found);
-  // No extension filter here on purpose: resultPath is the field the preset
-  // declares as its result, so whatever sits there is the provider's answer.
+  const direct = extractUrl(readPath(data, resultPath));
   if (direct) return direct;
 
-  // The preset path missed, so scan the rest of the payload. That scan is our
-  // guess rather than the provider's answer, so skip image extensions: the url
-  // keys we search are also where preview thumbnails get parked.
-  const scanned = extractUrl(data);
-  if (!scanned) return null;
-  return NON_VIDEO_EXTENSION.test(scanned.split(/[?#]/)[0] ?? "") ? null : scanned;
+  // The preset path missed, so scan the rest of the payload for a video url.
+  return extractUrl(data);
 }
