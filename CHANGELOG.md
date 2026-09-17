@@ -4,7 +4,6 @@
 
 ### ✨ New Features
 
-- **feat(dashboard):** request timeline plots MCP tool invocations from `mcp_tool_audit` next to LLM calls, with a per-API-key filter covering both row kinds. MCP rows without `OMNIROUTE_API_KEY_ID` show as no API key. ([#13898](https://github.com/diegosouzapw/OmniRoute/issues/13898))
 - **feat(dashboard):** adaptive context-budget dial on the compression settings panel — mode (`off` / `floor` / `replace-autotrigger`) and policy (`reserve-output` / `percentage` / `absolute`) persist via `PUT /api/settings/compression` `contextBudget`. Completes the dashboard half of #7005 (API + DB already shipped in #7183).
 - **feat(sse): STRICT_ZERO_COST** — opt-in, off-by-default `freeAccessPolicy: "strict"` setting
   that hard-verifies every auto-combo candidate against live quota state and per-connection

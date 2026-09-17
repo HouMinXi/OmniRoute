@@ -1,0 +1,1 @@
+- **feat(dashboard):** request timeline plots MCP tool invocations from `mcp_tool_audit` next to LLM calls, with a per-API-key filter covering both row kinds. MCP rows without `OMNIROUTE_API_KEY_ID` show as no API key. ([#13941](https://github.com/diegosouzapw/OmniRoute/pull/13941) — refs [#13898](https://github.com/diegosouzapw/OmniRoute/issues/13898))
