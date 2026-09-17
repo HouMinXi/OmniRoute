@@ -13,6 +13,7 @@ import {
   applyFinalClaudeRawPassthroughHeaders,
   isConnectionRawPassthrough,
 } from "../../open-sse/utils/claudeRawPassthrough.ts";
+import { DefaultExecutor } from "../../open-sse/executors/default.ts";
 
 describe("isConnectionRawPassthrough", () => {
   it("TC-07: returns false for non-object input", () => {
@@ -171,5 +172,135 @@ describe("applyFinalClaudeRawPassthroughHeaders", () => {
     };
     applyFinalClaudeRawPassthroughHeaders(headers, null);
     assert.deepEqual(headers, { "Content-Type": "application/json" });
+  });
+});
+
+// ── 执行器级（Task 4）：base.ts 守卫接线 ─────────────────────────────────────
+type CapturedCall = { url: string; headers: Record<string, string>; bodyText: string };
+
+/** 驱动真实 execute()，stub 上游 fetch 捕获最终发包。 */
+async function runClaudeOAuthExecute(input: {
+  rawPassthrough?: boolean;
+  isClaudePassthrough?: boolean;
+  extraBodyText?: string;
+}): Promise<CapturedCall> {
+  const executor = new DefaultExecutor("claude");
+  const calls: CapturedCall[] = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
+    calls.push({
+      url: String(url),
+      headers: (init?.headers ?? {}) as Record<string, string>,
+      bodyText: String(init?.body ?? ""),
+    });
+    return new Response(
+      JSON.stringify({
+        id: "msg_test",
+        type: "message",
+        role: "assistant",
+        content: [{ type: "text", text: "ok" }],
+        stop_reason: "end_turn",
+        usage: { input_tokens: 1, output_tokens: 1 },
+      }),
+      { status: 200, headers: { "content-type": "application/json" } }
+    );
+  }) as typeof fetch;
+  try {
+    const psd: Record<string, unknown> = {};
+    if (input.rawPassthrough !== undefined) psd.rawPassthrough = input.rawPassthrough;
+    const body: Record<string, unknown> = {
+      messages: [{ role: "user", content: "hi" }],
+      max_tokens: 16,
+      system: "client-orig-system",
+      tools: [
+        {
+          name: "read_file",
+          input_schema: { type: "object" },
+          cache_control: { type: "ephemeral" },
+        },
+      ],
+    };
+    if (input.extraBodyText) {
+      (body.system as unknown) = [{ type: "text", text: input.extraBodyText }];
+    }
+    await executor.execute({
+      model: "claude-sonnet-4-6",
+      body,
+      stream: false,
+      credentials: {
+        // hasClaudeOAuthToken 门槛要求 sk-ant-oat 前缀（base.ts 执行器内联计算）；占位值仅保留前缀形状。
+        accessToken: "sk-ant-oat-placeholder",
+        providerSpecificData: psd,
+      },
+      isClaudePassthrough: input.isClaudePassthrough,
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  // OAuth 路径会先打 /api/claude_cli/bootstrap 元数据请求，取真正的 messages 发包。
+  const dispatch = calls.find((c) => c.url.includes("/v1/messages"));
+  assert.ok(dispatch, "messages dispatch expected");
+  return dispatch;
+}
+
+describe("executor wiring (Task 4)", () => {
+  it("TC-01: flag off keeps the existing cloak byte behavior", async () => {
+    const call = await runClaudeOAuthExecute({ rawPassthrough: false, isClaudePassthrough: true });
+    const parsed = JSON.parse(call.bodyText) as Record<string, unknown>;
+    const sys = parsed.system as Array<Record<string, unknown>>;
+    assert.ok(
+      sys.some((b) => String(b.text).startsWith("x-anthropic-billing-header:")),
+      "billing line must be prepended when the flag is off"
+    );
+    assert.ok(
+      sys.some((b) => String(b.text).startsWith("You are Claude Code")),
+      "sentinel must be prepended when the flag is off"
+    );
+    assert.ok(!call.bodyText.includes("cch=00000;"), "cch placeholder must be signed");
+    const tools = parsed.tools as Array<Record<string, unknown>>;
+    assert.equal("cache_control" in tools[0], false, "cloak strips tool cache_control");
+    assert.ok(
+      Object.keys(call.headers).some((k) => k.toLowerCase().startsWith("x-stainless-")),
+      "CLI fingerprint headers must be present when the flag is off"
+    );
+  });
+
+  it("TC-02: flag on skips cloak, billing, sentinel, fingerprint and signing", async () => {
+    const call = await runClaudeOAuthExecute({ rawPassthrough: true, isClaudePassthrough: true });
+    const parsed = JSON.parse(call.bodyText) as Record<string, unknown>;
+    assert.equal(parsed.system, "client-orig-system", "system blocks must stay untouched");
+    const tools = parsed.tools as Array<Record<string, unknown>>;
+    assert.deepEqual(tools[0].cache_control, { type: "ephemeral" });
+    assert.equal(tools[0].name, "read_file", "tool name must not be cloaked");
+    const lower = Object.keys(call.headers).map((k) => k.toLowerCase());
+    assert.ok(!lower.some((k) => k.startsWith("x-stainless-")), "no x-stainless-* headers");
+    assert.ok(!lower.includes("x-app"), "no x-app header");
+  });
+
+  it("TC-03: format mismatch silently falls back to the standard cloak", async () => {
+    const call = await runClaudeOAuthExecute({ rawPassthrough: true, isClaudePassthrough: false });
+    const parsed = JSON.parse(call.bodyText) as Record<string, unknown>;
+    const sys = parsed.system as Array<Record<string, unknown>>;
+    assert.ok(
+      Array.isArray(sys) &&
+        sys.some((b) => String(b.text).startsWith("x-anthropic-billing-header:")),
+      "billing line must appear when isClaudePassthrough is false"
+    );
+  });
+
+  it("TC-10: first dispatch leaves a literal cch=00000; pattern untouched", async () => {
+    const call = await runClaudeOAuthExecute({
+      rawPassthrough: true,
+      isClaudePassthrough: true,
+      extraBodyText: "client literal x-anthropic-billing-header: cch=00000;",
+    });
+    assert.ok(
+      call.bodyText.includes("cch=00000;"),
+      "signRequestBody must not recompute the client literal in raw passthrough mode"
+    );
+    // 计数钉：cloak 跳过时不存在计费行自带的第二个 cch=（CCH_PATTERN 无 /g，
+    // 只签第一处——若伪装块仍运行，计费行被签名后此处会看到两个 cch=）。
+    const cchCount = (call.bodyText.match(/cch=/g) ?? []).length;
+    assert.equal(cchCount, 1, "only the client literal cch= may appear; no billing line");
   });
 });
