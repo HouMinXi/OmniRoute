@@ -30,7 +30,9 @@ import {
   truncateModel,
   formatDateLabel,
   loadTimelineLogs,
-  uniqueApiKeyOptions,
+  mergeApiKeyOptions,
+  rememberApiKeysFromPoll,
+  nextTimelineLogs,
   getTimelineBarColor,
   MCP_BAR_COLOR,
 } from "@/shared/components/RequestTimeline.utils";
@@ -84,7 +86,9 @@ export default function RequestTimeline({
     }
   });
   const [selectedApiKey, setSelectedApiKey] = useState("");
-  const [apiKeyOptions, setApiKeyOptions] = useState<string[]>([]);
+  const [seenApiKeyOptions, setSeenApiKeyOptions] = useState<string[]>([]);
+  const knownApiKeyIdsRef = useRef<string[]>([]);
+  const seenApiKeyOptionsRef = useRef<string[]>([]);
   const canvasRef = useRef<HTMLDivElement>(null);
   const animRef = useRef<number>(0);
   // Guards the ?id= deep-link mount effect below. Also armed by any manual
@@ -107,8 +111,23 @@ export default function RequestTimeline({
   useEffect(() => {
     let cancelled = false;
     const refresh = () => {
-      void loadTimelineLogs(fetch, selectedApiKey, (tool) => MCP_TOOL_SCOPES[tool]).then((data) => {
-        if (!cancelled) setLogs(data);
+      void loadTimelineLogs(
+        fetch,
+        selectedApiKey,
+        (tool) => MCP_TOOL_SCOPES[tool],
+        knownApiKeyIdsRef.current
+      ).then((data) => {
+        if (cancelled) return;
+        const remembered = rememberApiKeysFromPoll(
+          knownApiKeyIdsRef.current,
+          seenApiKeyOptionsRef.current,
+          data,
+          selectedApiKey
+        );
+        knownApiKeyIdsRef.current = remembered.knownIds;
+        seenApiKeyOptionsRef.current = remembered.seenOptions;
+        setSeenApiKeyOptions(remembered.seenOptions);
+        setLogs((current) => nextTimelineLogs(current, data));
       });
     };
     refresh();
@@ -122,13 +141,10 @@ export default function RequestTimeline({
     };
   }, [listPollSeconds, selectedApiKey]);
 
-  useEffect(() => {
-    const next = uniqueApiKeyOptions(logs);
-    if (next.length === 0) return;
-    setApiKeyOptions((prev) =>
-      selectedApiKey ? [...new Set([...prev, ...next])].sort() : next
-    );
-  }, [logs, selectedApiKey]);
+  const apiKeyOptions = useMemo(
+    () => mergeApiKeyOptions(seenApiKeyOptions, logs, selectedApiKey),
+    [seenApiKeyOptions, logs, selectedApiKey]
+  );
 
   useEffect(() => {
     if (!canvasRef.current) return undefined;
@@ -568,6 +584,7 @@ export default function RequestTimeline({
           <select
             value={selectedApiKey}
             onChange={(e) => setSelectedApiKey(e.target.value)}
+            aria-label={t("apiKey")}
             className="px-2 py-1 text-[11px] text-text-muted bg-bg-subtle rounded-md border border-border"
             data-testid="timeline-api-key-filter"
           >

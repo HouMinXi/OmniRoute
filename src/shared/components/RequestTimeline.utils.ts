@@ -141,17 +141,25 @@ export function mergeTimelineLogs(llm: TimelineLog[], mcp: TimelineLog[]): Timel
   return [...taggedLlm, ...mcp];
 }
 
-export function timelineFetchUrls(selectedApiKey: string): { llm: string; mcp: string } {
+export type TimelineFetchUrls = { llm: string; mcp: string | null };
+
+export function timelineFetchUrls(
+  selectedApiKey: string,
+  knownApiKeyIds: readonly string[] = []
+): TimelineFetchUrls {
   const llm = new URLSearchParams({ limit: "200" });
-  const mcp = new URLSearchParams({ limit: "200" });
-  if (selectedApiKey) {
-    llm.set("apiKey", selectedApiKey);
-    mcp.set("apiKeyId", selectedApiKey);
+  if (selectedApiKey) llm.set("apiKey", selectedApiKey);
+  const llmUrl = `/api/usage/call-logs?${llm.toString()}`;
+  if (!selectedApiKey) {
+    const mcp = new URLSearchParams({ limit: "200" });
+    return { llm: llmUrl, mcp: `/api/mcp/audit?${mcp.toString()}` };
   }
-  return {
-    llm: `/api/usage/call-logs?${llm.toString()}`,
-    mcp: `/api/mcp/audit?${mcp.toString()}`,
-  };
+  if (knownApiKeyIds.includes(selectedApiKey)) {
+    const mcp = new URLSearchParams({ limit: "200" });
+    mcp.set("apiKeyId", selectedApiKey);
+    return { llm: llmUrl, mcp: `/api/mcp/audit?${mcp.toString()}` };
+  }
+  return { llm: llmUrl, mcp: null };
 }
 
 export function uniqueApiKeyOptions(logs: TimelineLog[]): string[] {
@@ -162,6 +170,54 @@ export function uniqueApiKeyOptions(logs: TimelineLog[]): string[] {
         .filter((value): value is string => typeof value === "string" && value.length > 0)
     ),
   ].sort();
+}
+
+export function uniqueApiKeyIds(logs: TimelineLog[]): string[] {
+  return [
+    ...new Set(
+      logs
+        .map((row) => row.apiKeyId)
+        .filter((value): value is string => typeof value === "string" && value.length > 0)
+    ),
+  ];
+}
+
+export function mergeApiKeyOptions(
+  seen: readonly string[],
+  logs: TimelineLog[],
+  selectedApiKey = ""
+): string[] {
+  const extra = selectedApiKey ? [selectedApiKey] : [];
+  return [...new Set([...seen, ...uniqueApiKeyOptions(logs), ...extra])]
+    .filter((value) => value.length > 0)
+    .sort();
+}
+
+export type TimelineLoadResult = {
+  logs: TimelineLog[];
+  llmOk: boolean;
+  /**
+   * True when this poll's MCP rows are authoritative: a live MCP fetch
+   * succeeded, or the name-only filter skipped MCP on purpose (empty list).
+   * False only when a live MCP fetch failed; nextTimelineLogs then keeps
+   * the previous MCP bars.
+   */
+  mcpOk: boolean;
+};
+
+export function rememberApiKeysFromPoll(
+  knownIds: readonly string[],
+  seenOptions: readonly string[],
+  result: TimelineLoadResult,
+  selectedApiKey = ""
+): { knownIds: string[]; seenOptions: string[] } {
+  if (!result.llmOk && !result.mcpOk) {
+    return { knownIds: [...knownIds], seenOptions: [...seenOptions] };
+  }
+  return {
+    knownIds: [...new Set([...knownIds, ...uniqueApiKeyIds(result.logs)])],
+    seenOptions: mergeApiKeyOptions(seenOptions, result.logs, selectedApiKey),
+  };
 }
 
 export type TimelineFetch = (url: string) => Promise<{
@@ -186,24 +242,52 @@ function asMcpEntries(value: unknown): McpAuditTimelineEntry[] {
   );
 }
 
+export function nextTimelineLogs(
+  current: TimelineLog[],
+  result: TimelineLoadResult
+): TimelineLog[] {
+  const currentLlm = current.filter((row) => row.kind !== "mcp");
+  const currentMcp = current.filter((row) => row.kind === "mcp");
+  const freshLlm = result.logs.filter((row) => row.kind !== "mcp");
+  const freshMcp = result.logs.filter((row) => row.kind === "mcp");
+  return [
+    ...(result.llmOk ? freshLlm : currentLlm),
+    ...(result.mcpOk ? freshMcp : currentMcp),
+  ];
+}
+
 export async function loadTimelineLogs(
   fetchImpl: TimelineFetch,
   selectedApiKey = "",
-  scopeLookup?: (tool: string) => readonly string[] | undefined
-): Promise<TimelineLog[]> {
-  const urls = timelineFetchUrls(selectedApiKey);
-  const [llmResult, mcpResult] = await Promise.all([
-    fetchImpl(urls.llm)
-      .then((res) => (res.ok ? res.json() : []))
-      .catch(() => []),
-    fetchImpl(urls.mcp)
-      .then((res) => (res.ok ? res.json() : { entries: [] }))
-      .catch(() => ({ entries: [] })),
-  ]);
-  return mergeTimelineLogs(
-    asTimelineLogs(llmResult),
-    asMcpEntries(mcpResult).map((entry) => mapMcpAuditEntry(entry, scopeLookup))
-  );
+  scopeLookup?: (tool: string) => readonly string[] | undefined,
+  knownApiKeyIds: readonly string[] = []
+): Promise<TimelineLoadResult> {
+  const urls = timelineFetchUrls(selectedApiKey, knownApiKeyIds);
+  const llmPromise = fetchImpl(urls.llm)
+    .then(async (res) => {
+      if (!res.ok) return { ok: false as const, logs: [] as TimelineLog[] };
+      return { ok: true as const, logs: asTimelineLogs(await res.json()) };
+    })
+    .catch(() => ({ ok: false as const, logs: [] as TimelineLog[] }));
+  const mcpPromise = urls.mcp
+    ? fetchImpl(urls.mcp)
+        .then(async (res) => {
+          if (!res.ok) return { ok: false as const, logs: [] as TimelineLog[] };
+          return {
+            ok: true as const,
+            logs: asMcpEntries(await res.json()).map((entry) =>
+              mapMcpAuditEntry(entry, scopeLookup)
+            ),
+          };
+        })
+        .catch(() => ({ ok: false as const, logs: [] as TimelineLog[] }))
+    : Promise.resolve({ ok: true as const, logs: [] as TimelineLog[] });
+  const [llm, mcp] = await Promise.all([llmPromise, mcpPromise]);
+  return {
+    logs: mergeTimelineLogs(llm.logs, mcp.logs),
+    llmOk: llm.ok,
+    mcpOk: mcp.ok,
+  };
 }
 
 export const DEFAULT_CONVERSATION_LANE_REUSE_WINDOW_MS = 2 * 60 * 1000;
