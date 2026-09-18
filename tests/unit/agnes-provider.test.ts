@@ -834,7 +834,7 @@ test("agnes Video V2.0 prefers task_id over a generic id when the preset path is
   }) as typeof fetch;
 
   try {
-    const result = await handleVideoGeneration({
+    await handleVideoGeneration({
       body: {
         model: "agnes/agnes-video-v2.0",
         prompt: "A cinematic drone shot over mountains",
