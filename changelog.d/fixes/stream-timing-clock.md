@@ -1,0 +1,1 @@
+- **fix(sse):** `createStreamTiming` accepts an injectable clock so unit tests do not assert `Date.now()` against `setTimeout(15)`. CI runners can fire that timer before the wall clock has moved 15ms, which was failing `Unit Tests (3/8)` once `npm ci` started succeeding on Node 24.

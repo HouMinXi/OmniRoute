@@ -19,7 +19,13 @@
  *
  * The object is cheap to construct, plain mutable state, and safe under the
  * event loop's single thread (each stream owns its own instance).
+ *
+ * Tests may pass a clock so assertions do not depend on wall-clock `setTimeout`
+ * (CI runners can fire a 15ms timer before `Date.now()` advances 15ms).
  */
+/** Milliseconds since epoch; same contract as Date.now. */
+export type StreamClock = () => number;
+
 export interface StreamTiming {
   startedAt: number;
   firstByteAt: number | null;
@@ -43,9 +49,9 @@ export interface StreamTiming {
 /** Max number of inter-chunk samples kept (bounds memory). */
 const MAX_INTER_CHUNK_GAPS = 32;
 
-export function createStreamTiming(): StreamTiming {
+export function createStreamTiming(now: StreamClock = Date.now): StreamTiming {
   const timing: StreamTiming = {
-    startedAt: Date.now(),
+    startedAt: now(),
     firstByteAt: null,
     firstForwardAt: null,
     lastForwardAt: null,
@@ -53,15 +59,15 @@ export function createStreamTiming(): StreamTiming {
     forwardedChunks: 0,
     interrupted: false,
     markByte() {
-      if (this.firstByteAt === null) this.firstByteAt = Date.now();
+      if (this.firstByteAt === null) this.firstByteAt = now();
     },
     markForward() {
-      const now = Date.now();
-      if (this.firstForwardAt === null) this.firstForwardAt = now;
+      const t = now();
+      if (this.firstForwardAt === null) this.firstForwardAt = t;
       if (this.lastForwardAt !== null && this.interChunkGaps.length < MAX_INTER_CHUNK_GAPS) {
-        this.interChunkGaps.push(now - this.lastForwardAt);
+        this.interChunkGaps.push(t - this.lastForwardAt);
       }
-      this.lastForwardAt = now;
+      this.lastForwardAt = t;
       this.forwardedChunks += 1;
     },
     markInterrupted() {
@@ -76,7 +82,7 @@ export function createStreamTiming(): StreamTiming {
       return sum / this.interChunkGaps.length;
     },
     totalMs() {
-      return Date.now() - this.startedAt;
+      return now() - this.startedAt;
     },
   };
   return timing;
