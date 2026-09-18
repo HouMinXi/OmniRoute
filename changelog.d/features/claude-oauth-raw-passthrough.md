@@ -1,0 +1,1 @@
+- **feat(oauth):** per-connection Claude OAuth raw passthrough — skip CLI emulation, fingerprint rewrite, and CCH body signing when `providerSpecificData.rawPassthrough` is true, with a dashboard toggle and nested-alias cleanup on save
