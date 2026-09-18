@@ -480,7 +480,7 @@ export async function executeTargetAttempt(opts: {
           continue;
         }
         return protectedPriorityTarget ? qualityValidationFailure() : null;
-    }
+      }
 
       if (Boolean(deps.clientManagedResponsesContext) && effectiveConnectionId) {
         if (deps.nativeCodexAutoResume) {
