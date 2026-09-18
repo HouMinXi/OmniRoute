@@ -25,6 +25,7 @@ import { getCachedSettings } from "@/lib/db/readCache";
 import { assertMicrosoftDesignerWebProviderAvailable } from "@/shared/constants/designerWebRetirement";
 import { assertCommonChatGptWebProviderAvailable } from "@/shared/constants/chatgptWebRetirement";
 import { getUpstreamProxyConfigCached } from "./comboContextCache.ts";
+import { isConnectionRawPassthrough } from "../../utils/claudeRawPassthrough.ts";
 import type { FallbackBackend } from "@/lib/db/upstreamProxy";
 import { wrapExecutorWithCliproxyapiModelMapping } from "./cliproxyModelMapping.ts";
 import {
@@ -104,6 +105,18 @@ export async function resolveExecutorWithProxy(
   assertMicrosoftDesignerWebProviderAvailable(prov);
   assertRuntimeProviderAvailable(prov);
   assertCommonChatGptWebProviderAvailable(prov);
+
+  // #13893 raw passthrough native fallback: a claude connection with
+  // rawPassthrough=true must bypass proxy executors (CLIProxyAPI / Dario /
+  // upstream proxy modes) that cannot pass the OAuth payload through
+  // untouched — resolve to the native claude executor instead.
+  if (prov === "claude" && isConnectionRawPassthrough(providerSpecificData)) {
+    log?.info?.(
+      "UPSTREAM_PROXY",
+      "[raw_passthrough] Claude OAuth raw passthrough enabled; routing through native executor, bypassing proxy"
+    );
+    return await getExecutor("claude");
+  }
 
   // Per-connection routing override (#6339): the resolved connection can opt itself
   // into the CLIProxyAPI passthrough executor via providerSpecificData.cliproxyapiMode
