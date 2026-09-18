@@ -36,7 +36,7 @@ export type StreamCompletePayload = {
   responseBody?: unknown;
   providerPayload?: unknown;
   clientPayload?: unknown;
-  error?: unknown;
+  error?: string | null;
   errorCode?: string;
   ttft?: number;
   itlMs?: number;
