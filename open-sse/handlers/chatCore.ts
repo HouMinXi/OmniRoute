@@ -38,6 +38,8 @@ import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
 import { assembleStreamingResponseHeaders } from "./chatCore/streamingResponseHeaders.ts";
 import { assembleStreamingPipeline } from "./chatCore/streamingPipeline.ts";
 import { makeOnStreamComplete } from "./chatCore/streamMaterialize.ts";
+import { acquireTurnExecution, createTurnInProgressResult } from "./chatCore/turnExecutionGuard.ts";
+import { wrapReadableStreamWithFinalize } from "./chatCore/streamFinalize.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import {
   applyReasoningInputPolicy,
@@ -4718,6 +4720,7 @@ export async function handleChatCore({
     translatedBody,
     body,
     reasoningCacheScope,
+    reasoningReplayHistory,
     contextEditingEnabled,
     skillRequestId,
     streamFailure,
@@ -4898,16 +4901,16 @@ export async function handleChatCore({
     // ── Gamification event (fire-and-forget) ──
   await emitRequestGamificationEvent({ apiKeyId: apiKeyInfo?.id, model, provider });
 
-  // ── Plugin onResponse hook (fire-and-forget) ──
-  await runPluginOnResponseHook({
-    requestId: traceId,
-    body,
-    model,
-    provider,
-    apiKeyInfo,
-    headers: clientRawRequest?.headers,
-    response: { status: 200, streamed: true },
-  });
+    // ── Plugin onResponse hook (fire-and-forget) ──
+    await runPluginOnResponseHook({
+      requestId: traceId,
+      body,
+      model,
+      provider,
+      apiKeyInfo,
+      headers: clientRawRequest?.headers,
+      response: { status: 200, streamed: true },
+    });
 
     const response = new Response(clientFacingStream, {
       headers: responseHeaders,

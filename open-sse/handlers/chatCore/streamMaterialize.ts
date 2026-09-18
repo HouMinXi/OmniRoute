@@ -69,6 +69,7 @@ export type StreamMaterializeDeps = {
   translatedBody: Record<string, unknown> | null | undefined;
   body: unknown;
   reasoningCacheScope: string | null;
+  reasoningReplayHistory?: unknown[] | null;
   contextEditingEnabled: boolean;
   skillRequestId: string;
   streamFailure: {
@@ -127,6 +128,7 @@ export function makeOnStreamComplete(
     translatedBody,
     body,
     reasoningCacheScope,
+    reasoningReplayHistory,
     contextEditingEnabled,
     skillRequestId,
     streamFailure,
@@ -213,8 +215,9 @@ export function makeOnStreamComplete(
         const choices = cacheStreamBody.choices as
           { message?: Record<string, unknown> }[] | undefined;
         const msg = choices?.[0]?.message;
-        const historyMessages = (translatedBody as { messages?: unknown[] } | null | undefined)
-          ?.messages;
+        const historyMessages =
+          (translatedBody as { messages?: unknown[] } | null | undefined)?.messages ??
+          reasoningReplayHistory;
         if (requiresReasoningReplay({ provider, model })) {
           cacheReasoningFromAssistantMessage(msg, provider, model, {
             scope: reasoningCacheScope,
