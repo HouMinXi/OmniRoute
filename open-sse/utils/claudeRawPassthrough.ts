@@ -148,3 +148,30 @@ export function applyFinalClaudeRawPassthroughHeaders(
     }
   }
 }
+
+/**
+ * Persist the dashboard toggle onto providerSpecificData (spec §3.4 save
+ * normalization). Writes the top-level boolean and strips nested legacy
+ * aliases `passthrough.raw` / `passthrough.rawPassthrough`. An emptied
+ * nested object is deleted wholesale so a later import cannot resurrect it.
+ */
+export function applyClaudeRawPassthroughSave(
+  providerSpecificData: Record<string, unknown>,
+  rawPassthrough: boolean
+): void {
+  providerSpecificData.rawPassthrough = rawPassthrough;
+  if (
+    providerSpecificData.passthrough &&
+    typeof providerSpecificData.passthrough === "object" &&
+    !Array.isArray(providerSpecificData.passthrough)
+  ) {
+    const pt = { ...(providerSpecificData.passthrough as Record<string, unknown>) };
+    delete pt.raw;
+    delete pt.rawPassthrough;
+    if (Object.keys(pt).length === 0) {
+      delete providerSpecificData.passthrough;
+    } else {
+      providerSpecificData.passthrough = pt;
+    }
+  }
+}
