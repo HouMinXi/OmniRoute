@@ -1,0 +1,1 @@
+- **refactor(sse):** add a chat-core recovery policy as effects plus dispatch
