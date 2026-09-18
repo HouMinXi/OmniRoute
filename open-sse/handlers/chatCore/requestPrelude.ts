@@ -4,6 +4,10 @@
  * Search-tool fallback stays with that front door.
  */
 import { resolveChatCoreRequestSetup } from "./requestSetup.ts";
+import { attachCompressionUsageReceiptAfterAnalytics as attachCompressionUsageReceiptAfterAnalyticsFor } from "./compressionUsageReceipt.ts";
+import { buildFailureUsageRecord } from "./failureUsage.ts";
+import type { FailureUsageAggregate } from "./failureUsage.ts";
+import { saveRequestUsage } from "@/lib/usage/usageHistory";
 import { checkIdempotencyCache } from "./idempotency.ts";
 import { checkLifecycle, resolveLifecycle } from "./modelLifecyclePolicy.ts";
 import {

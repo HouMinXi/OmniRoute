@@ -53,7 +53,7 @@ type PostTranslationCompressor =
 export interface ApplyContextCompressionInput {
   body: CompressionBody;
   allMessages: unknown;
-  apiKeyInfo: Record<string, unknown> | null;
+  apiKeyInfo: ({ name?: string } & Record<string, unknown>) | null;
   clientRawRequest: Request | null | undefined;
   comboName: string | null | undefined;
   connectionId: string | null | undefined;
@@ -62,7 +62,15 @@ export interface ApplyContextCompressionInput {
   effectiveServiceTier: string | null | undefined;
   getCurrentConnectionId: () => string | null | undefined;
   isCombo: boolean;
-  log: Record<string, unknown> | null | undefined;
+  log:
+    | {
+        debug?: (...args: unknown[]) => void;
+        info?: (...args: unknown[]) => void;
+        warn?: (...args: unknown[]) => void;
+        error?: (...args: unknown[]) => void;
+      }
+    | null
+    | undefined;
   provider: string;
   routingComboId: string | null;
   skillRequestId: string | null | undefined;
@@ -72,7 +80,7 @@ export interface ApplyContextCompressionInput {
   // mutable carry-ins
   cavemanOutputModeApplied: boolean;
   cavemanOutputModeIntensity: string | null;
-  compressionAnalyticsWritePromise: Promise<unknown> | null;
+  compressionAnalyticsWritePromise: Promise<void> | null;
   compressionResponseMeta: string | null;
   contextEditingEnabled: boolean;
   contextLimit: number;
@@ -87,7 +95,7 @@ export interface ApplyContextCompressionResult {
   body: CompressionBody;
   cavemanOutputModeApplied: boolean;
   cavemanOutputModeIntensity: string | null;
-  compressionAnalyticsWritePromise: Promise<unknown> | null;
+  compressionAnalyticsWritePromise: Promise<void> | null;
   compressionResponseMeta: string | null;
   contextEditingEnabled: boolean;
   contextLimit: number;
@@ -197,8 +205,8 @@ export async function applyContextCompression({
         formatCompressionMeta,
         buildNamedComboLookup,
         formatCompressionAnnotation,
-      } = await import("../services/compression/strategySelector.ts");
-      const { trackCompressionStats } = await import("../services/compression/stats.ts");
+      } = await import("../../services/compression/strategySelector.ts");
+      const { trackCompressionStats } = await import("../../services/compression/stats.ts");
       let config: CompressionConfig = compressionSettings ?? createDisabledCompressionConfig();
       if (compressionExcluded || !apiKeyCompressionEnabled) {
         config = { ...config, enabled: false };
@@ -310,7 +318,7 @@ export async function applyContextCompression({
           ].filter((id): id is string => typeof id === "string" && id.length > 0);
           if (routingComboIds.length > 0) {
             const { getCompressionComboForRoutingCombo } =
-              await import("../../src/lib/db/compressionCombos.ts");
+              await import("../../../src/lib/db/compressionCombos.ts");
             const assignedCompressionCombo =
               routingComboIds
                 .map((id) => getCompressionComboForRoutingCombo(id))
@@ -334,7 +342,7 @@ export async function applyContextCompression({
       }
       let namedCombos: Record<string, CompressionPipelineStep[]> = {};
       try {
-        const { listCompressionCombos } = await import("../../src/lib/db/compressionCombos.ts");
+        const { listCompressionCombos } = await import("../../../src/lib/db/compressionCombos.ts");
         namedCombos = buildNamedComboLookup(listCompressionCombos());
       } catch (err) {
         log?.debug?.(
@@ -374,7 +382,7 @@ export async function applyContextCompression({
       ) {
         try {
           const { getDefaultCompressionCombo } =
-            await import("../../src/lib/db/compressionCombos.ts");
+            await import("../../../src/lib/db/compressionCombos.ts");
           const defaultCompressionCombo = getDefaultCompressionCombo();
           if (
             isStackedCompressionCombo(defaultCompressionCombo as RuntimeCompressionCombo | null) &&
@@ -395,15 +403,15 @@ export async function applyContextCompression({
       }
       // Phase 4A: unified output styles (supersedes cavemanOutputMode via the back-compat shim).
       let outputStyleResult:
-        import("../services/compression/outputStyles/apply.ts").OutputStylesResult | null = null;
+        import("../../services/compression/outputStyles/apply.ts").OutputStylesResult | null = null;
       if (config.enabled && compressionHeader?.trim().toLowerCase() !== "off") {
         try {
           const { resolveOutputStyleSelection } =
-            await import("../services/compression/outputStyles/backCompat.ts");
+            await import("../../services/compression/outputStyles/backCompat.ts");
           const selection = resolveOutputStyleSelection(config);
           if (selection.length > 0) {
             const { applyOutputStyles, resolveOutputStyleLanguage } =
-              await import("../services/compression/outputStyles/apply.ts");
+              await import("../../services/compression/outputStyles/apply.ts");
             const outputStyleLanguage = resolveOutputStyleLanguage(
               config.languageConfig,
               body as Parameters<typeof resolveOutputStyleLanguage>[1]
@@ -447,7 +455,7 @@ export async function applyContextCompression({
           ? ((compressionInputBody as Record<string, unknown>).max_tokens as number)
           : null;
       let adaptiveTelemetry:
-        import("../services/compression/adaptiveCompression/types.ts").AdaptiveTelemetry | null =
+        import("../../services/compression/adaptiveCompression/types.ts").AdaptiveTelemetry | null =
         null;
       const compressionPlan = selectCompressionPlan(
         config,
@@ -569,7 +577,7 @@ export async function applyContextCompression({
         }
         let result: CompressionResult;
         if (compressionConfig.liveZone?.enabled === true) {
-          const { applyLiveZoneCompression } = await import("../services/compression/liveZone.ts");
+          const { applyLiveZoneCompression } = await import("../../services/compression/liveZone.ts");
           const explicitSessionId =
             clientRawRequest?.headers && typeof clientRawRequest.headers.get === "function"
               ? clientRawRequest.headers.get("x-omniroute-session-id")
@@ -762,7 +770,7 @@ export async function applyContextCompression({
       log?.info?.("CONTEXT", `Attempting to resolve combo limits for comboName=${comboName}`);
       try {
         const { getComboByName } = await import("@/lib/db/combos");
-        const { resolveComboTargets } = await import("../services/combo.ts");
+        const { resolveComboTargets } = await import("../../services/combo.ts");
         let comboConfig = await getComboByName(comboName);
         if (!comboConfig && comboName.startsWith("combo/")) {
           comboConfig = await getComboByName(comboName.substring(6));

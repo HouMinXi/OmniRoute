@@ -4,6 +4,7 @@
  */
 
 import type { ChatCoreExecutorResult as PipelineChatCoreExecutorResult } from "./providerExecutionPipeline.ts";
+import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import type { AgentGoalPolicy } from "../../utils/agentGoalPolicy.ts";
 import type { BaseExecutor } from "../../executors/base.ts";
 import { prepareUpstreamBody } from "./upstreamBody.ts";
@@ -93,7 +94,7 @@ export type ExecuteProviderRequestDeps = {
   extendedContext?: boolean;
   getExecutionCredentials: () => Record<string, unknown>;
   isClaudePassthrough?: boolean;
-  isModelScope: boolean;
+  isModelScope: () => boolean;
   isOpencodeClient: boolean;
   log:
     | {
