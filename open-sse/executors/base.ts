@@ -59,10 +59,7 @@ import {
 } from "../services/tokenRefresh.ts";
 import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { signRequestBody } from "../services/claudeCodeCCH.ts";
-import {
-  applyFinalClaudeRawPassthroughHeaders,
-  isConnectionRawPassthrough,
-} from "../utils/claudeRawPassthrough.ts";
+import { isConnectionRawPassthrough } from "../utils/cacheControlPolicy.ts";
 import { normalizeCacheControlTtl } from "../services/claudeCodeConstraints.ts";
 import {
   appendAnthropicBetaHeader,
@@ -1440,12 +1437,17 @@ export class BaseExecutor {
         }
 
         mergeUpstreamExtraHeaders(finalHeaders, upstreamExtraHeaders);
-        // #13893 raw passthrough (spec §3.3 rule 1): final header sanitization —
-        // strip CLI-emulation leftovers and hop-by-hop fields, then merge lawful
-        // client business headers. Gateway credentials are immune to Connection
-        // nomination inside the function.
         if (isRawPassthrough) {
-          applyFinalClaudeRawPassthroughHeaders(finalHeaders, clientHeaders);
+          for (const key of Object.keys(finalHeaders)) {
+            const lower = key.toLowerCase();
+            if (
+              lower === "x-app" ||
+              lower.startsWith("x-stainless-") ||
+              lower === "anthropic-dangerous-direct-browser-access"
+            ) {
+              delete finalHeaders[key];
+            }
+          }
         }
         if (this.provider === "cline" || this.provider === "clinepass") {
           applyClineProtocolHeaders(finalHeaders, {

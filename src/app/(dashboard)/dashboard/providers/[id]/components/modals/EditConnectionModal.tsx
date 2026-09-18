@@ -24,7 +24,7 @@ import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage
 import {
   applyClaudeRawPassthroughSave,
   isConnectionRawPassthrough,
-} from "@omniroute/open-sse/utils/claudeRawPassthrough.ts";
+} from "@omniroute/open-sse/utils/cacheControlPolicy.ts";
 import { resolveDashboardProviderInfo } from "../../../providerPageUtils";
 import {
   isBaseUrlConfigurableProvider,
