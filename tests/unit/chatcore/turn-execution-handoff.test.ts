@@ -135,3 +135,40 @@ test("an upstream stream error also releases the turn slot", async () => {
 
   assert.equal(getTurnExecutionSnapshot(KEY), null, "a stream error releases the slot");
 });
+
+test("a late release from an abandoned stream cannot evict a newer turn", async () => {
+  // The handler wraps the stream before awaiting its response hooks. Those
+  // hooks and the stream wrapper hold two DIFFERENT release callbacks for the
+  // same key once a retry re-acquires it. The stale one must not evict the
+  // newer turn.
+  const first = acquireTurnExecution(KEY);
+  assert.equal(first.acquired, true);
+
+  const source = new ReadableStream<Uint8Array>({
+    start(controller) {
+      controller.enqueue(new Uint8Array([1]));
+      controller.close();
+    },
+  });
+  // The stream keeps its own handle on the first turn's release.
+  const orphan = wrapReadableStreamWithFinalize(source, () => {
+    first.release();
+  });
+
+  // The request fails before handoff; a different code path frees the slot.
+  clearTurnExecutionsForTesting();
+
+  const second = acquireTurnExecution(KEY);
+  assert.equal(second.acquired, true, "the key is free for a new turn");
+
+  const reader = orphan.getReader();
+  while (!(await reader.read()).done) {
+    // drain the abandoned stream, firing its stale release
+  }
+
+  assert.ok(
+    getTurnExecutionSnapshot(KEY),
+    "the stale release must not evict the newer turn holding the same key"
+  );
+  second.release();
+});
