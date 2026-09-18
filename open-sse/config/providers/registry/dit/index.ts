@@ -36,6 +36,8 @@ export const ditProvider: RegistryEntry = {
       toolCalling: true,
       supportsReasoning: true,
       supportsVision: true,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "max"],
     },
   ],
 };

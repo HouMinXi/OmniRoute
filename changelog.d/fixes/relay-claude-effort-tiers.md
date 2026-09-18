@@ -1,0 +1,1 @@
+Declare official Claude thinking-effort tiers on relay/third-party registry entries (Bedrock, Kiro, AgentRouter, GitLab Duo, and Anthropic-Messages relays) so suffixed combo ids fold the same way as first-party claude/anthropic. Extended-thinking-only 4.5/3.x ids stay without an array.
