@@ -89,6 +89,7 @@ import {
 } from "./chatCore/passthroughHelpers.ts";
 import { recoverAnthropicThinkingSignature } from "./chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "./chatCore/providerExecutionPipeline.ts";
+import { onFailure, onStreamThrow } from "./chatCore/recoveryPolicy.ts";
 import { runNonStreamingProviderLeg } from "./chatCore/nonStreamingProviderLeg.ts";
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import {
@@ -347,7 +348,6 @@ import {
 } from "../services/accountFallback.ts";
 import { saveIdempotency } from "@/lib/idempotencyLayer";
 import {
-  isModelUnavailableError,
   getNextFamilyFallback,
   isContextOverflowError,
   findLargerContextModel,
@@ -3734,6 +3734,7 @@ export async function handleChatCore({
         // fail-open: saturation signal is best-effort
       }
     } catch (error) {
+      onStreamThrow();
       trackPendingRequest(model, provider, connectionId, false);
       const errorMetadata = getSafeErrorMetadata(error);
       const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
@@ -4243,8 +4244,21 @@ export async function handleChatCore({
       // Before returning a model-unavailable error upstream, try sibling models
       // from the same family. This keeps the request alive on the same account
       // instead of failing the entire combo.
-      if (!pipelineRecovered && isModelUnavailableError(statusCode, message, provider)) {
-        const nextModel = getNextFamilyFallback(currentModel, triedModels, provider);
+      const familyRecovery = onFailure({
+        view: { kind: "pipeline" },
+        status: statusCode,
+        message,
+        provider,
+        model: currentModel,
+        connectionId: String(getCurrentConnectionId() || connectionId || ""),
+        allowAccountRotation: !managedLease && comboStrategy !== "context-relay",
+        allowModelFallback: !pipelineRecovered,
+        isolateProbe: await shouldIsolateProbeFailures(),
+        nextModel: getNextFamilyFallback(currentModel, triedModels, provider),
+        canRefresh: false,
+      });
+      if (!pipelineRecovered && familyRecovery.dispatch.action === "fallback-model") {
+        const nextModel = familyRecovery.dispatch.nextModel;
         if (nextModel) {
           triedModels.add(nextModel);
           currentModel = nextModel;
