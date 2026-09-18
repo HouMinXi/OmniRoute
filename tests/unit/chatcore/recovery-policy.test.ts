@@ -119,9 +119,11 @@ test("onFailure fallback-model matches isModelUnavailableError", async () => {
   assert.equal(notUnavailable.dispatch.action === "fallback-model", false);
 });
 
-test("barrel onFailure isolateProbe comes from shouldIsolateProbeFailures", () => {
+test("streaming-leg onFailure isolateProbe comes from shouldIsolateProbeFailures", () => {
+  // The callsite moved out of the barrel when the streaming leg was lifted; the
+  // guarantee it encodes (isolateProbe is resolved, never hard-coded) is unchanged.
   const src = fs.readFileSync(
-    new URL("../../../open-sse/handlers/chatCore.ts", import.meta.url),
+    new URL("../../../open-sse/handlers/chatCore/streamingLeg.ts", import.meta.url),
     "utf8"
   );
   const idx = src.indexOf("const familyRecovery = onFailure({");
