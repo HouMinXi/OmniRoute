@@ -10,6 +10,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
+  applyClaudeRawPassthroughSave,
   applyFinalClaudeRawPassthroughHeaders,
   isConnectionRawPassthrough,
 } from "../../open-sse/utils/claudeRawPassthrough.ts";
@@ -515,6 +516,46 @@ describe("retry signing guard, marker plumbing and proxy fallback (Task 5)", () 
     assert.ok(
       logs.some((m) => m.includes("raw_passthrough")),
       "diagnostic log must record the raw_passthrough fallback"
+    );
+  });
+});
+
+describe("applyClaudeRawPassthroughSave (Task 6 / TC-11 save round-trip)", () => {
+  it("TC-11 save: nested passthrough.raw is stripped and top-level false is written", () => {
+    const psd: Record<string, unknown> = {
+      passthrough: { raw: true, keepMe: "yes" },
+      tag: "prod",
+    };
+    applyClaudeRawPassthroughSave(psd, false);
+    assert.equal(psd.rawPassthrough, false);
+    assert.deepEqual(psd.passthrough, { keepMe: "yes" });
+    assert.equal(psd.tag, "prod");
+    assert.equal(isConnectionRawPassthrough(psd), false);
+  });
+
+  it("TC-11 save: empty nested passthrough object is deleted wholesale", () => {
+    const psd: Record<string, unknown> = {
+      passthrough: { raw: true, rawPassthrough: true },
+    };
+    applyClaudeRawPassthroughSave(psd, false);
+    assert.equal(psd.rawPassthrough, false);
+    assert.equal(Object.hasOwn(psd, "passthrough"), false);
+    assert.equal(isConnectionRawPassthrough(psd), false);
+  });
+
+  it("TC-11 save: enabling writes true and still strips nested aliases", () => {
+    const psd: Record<string, unknown> = { passthrough: { raw: false } };
+    applyClaudeRawPassthroughSave(psd, true);
+    assert.equal(psd.rawPassthrough, true);
+    assert.equal(Object.hasOwn(psd, "passthrough"), false);
+    assert.equal(isConnectionRawPassthrough(psd), true);
+  });
+
+  it("TC-11 init: form flag reuses the same parser as the executor", () => {
+    assert.equal(isConnectionRawPassthrough({ passthrough: { raw: true } }), true);
+    assert.equal(
+      isConnectionRawPassthrough({ rawPassthrough: false, passthrough: { raw: true } }),
+      false
     );
   });
 });
