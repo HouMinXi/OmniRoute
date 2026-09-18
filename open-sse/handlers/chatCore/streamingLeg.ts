@@ -264,15 +264,30 @@ export interface StreamingLegDeps {
   userAgent: string | null | undefined;
 }
 
-/** Values the barrel must write back before continuing down the streaming path. */
+/**
+ * Values the barrel must write back before continuing down the streaming path.
+ *
+ * Two kinds of state live here. Most entries are plain values the block assigns
+ * and the streaming response section reads afterwards. `currentModel` and
+ * `pipelineRecovered` are different: the block *rebinds* them during model
+ * fallback and recovery, and a rebind inside this function is invisible to the
+ * caller, so they have to travel back explicitly. `providerUrl` is rebound too
+ * but is deliberately absent -- the barrel never reads it after the call.
+ *
+ * `credentials` is also absent, for the opposite reason: it is only ever
+ * updated via Object.assign, which writes through into the object the barrel
+ * still holds.
+ */
 export interface StreamingLegCarry {
   claudePromptCacheLogMeta: Record<string, unknown> | null | undefined;
+  currentModel: string;
   effectiveServiceTier: import("./serviceTier.js").EffectiveServiceTier;
   // The barrel declares `let finalBody;` -- implicit any under strict:false -- so it
   // can hold either a translated request Record or a ChatCoreExecutorResult. Naming
   // either one here would narrow what upstream deliberately left open.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   finalBody: any;
+  pipelineRecovered: boolean;
   providerHeaders: Record<string, unknown> | Headers | null | undefined;
   providerResponse: (Response & { body?: unknown }) | null | undefined;
   translatedBody: Record<string, unknown>;
@@ -343,8 +358,10 @@ export async function runStreamingLeg(deps: StreamingLegDeps): Promise<Streaming
 
   const carry = (): StreamingLegCarry => ({
     claudePromptCacheLogMeta,
+    currentModel,
     effectiveServiceTier,
     finalBody,
+    pipelineRecovered,
     providerHeaders,
     providerResponse,
     translatedBody,

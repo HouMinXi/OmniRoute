@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import ts from "typescript";
 import { COOLDOWN_MS } from "../../../open-sse/config/errorConfig.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-recovery-policy-"));
@@ -121,14 +122,50 @@ test("onFailure fallback-model matches isModelUnavailableError", async () => {
 
 test("streaming-leg onFailure isolateProbe comes from shouldIsolateProbeFailures", () => {
   // The callsite moved out of the barrel when the streaming leg was lifted; the
-  // guarantee it encodes (isolateProbe is resolved, never hard-coded) is unchanged.
-  const src = fs.readFileSync(
-    new URL("../../../open-sse/handlers/chatCore/streamingLeg.ts", import.meta.url),
-    "utf8"
+  // guarantee it encodes -- isolateProbe is resolved at runtime, never hard-coded
+  // -- is unchanged.
+  //
+  // Read through the parser rather than slicing a fixed window of source text.
+  // A character budget silently stops covering the property it is meant to check
+  // the moment an argument or a line break pushes it past the end, and the test
+  // then passes for the wrong reason.
+  const url = new URL("../../../open-sse/handlers/chatCore/streamingLeg.ts", import.meta.url);
+  const sf = ts.createSourceFile(
+    url.pathname,
+    fs.readFileSync(url, "utf8"),
+    ts.ScriptTarget.ESNext,
+    true
   );
-  const idx = src.indexOf("const familyRecovery = onFailure({");
-  assert.ok(idx >= 0, "familyRecovery callsite must exist");
-  const slice = src.slice(idx, idx + 700);
-  assert.match(slice, /isolateProbe:\s*await shouldIsolateProbeFailures\(\)/);
-  assert.equal(/isolateProbe:\s*false/.test(slice), false);
+
+  let isolateProbe: ts.Expression | null = null;
+  const walk = (node: ts.Node) => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === "familyRecovery" &&
+      node.initializer &&
+      ts.isCallExpression(node.initializer) &&
+      node.initializer.expression.getText() === "onFailure"
+    ) {
+      const arg = node.initializer.arguments[0];
+      if (arg && ts.isObjectLiteralExpression(arg)) {
+        for (const prop of arg.properties) {
+          if (ts.isPropertyAssignment(prop) && prop.name.getText() === "isolateProbe") {
+            isolateProbe = prop.initializer;
+          }
+        }
+      }
+    }
+    ts.forEachChild(node, walk);
+  };
+  walk(sf);
+
+  assert.ok(isolateProbe, "familyRecovery callsite must pass isolateProbe");
+  const expr = isolateProbe as ts.Expression;
+  assert.ok(
+    ts.isAwaitExpression(expr) &&
+      ts.isCallExpression(expr.expression) &&
+      expr.expression.expression.getText() === "shouldIsolateProbeFailures",
+    `isolateProbe must be await shouldIsolateProbeFailures(), got: ${expr.getText()}`
+  );
 });

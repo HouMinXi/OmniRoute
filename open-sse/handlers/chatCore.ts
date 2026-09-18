@@ -2111,8 +2111,10 @@ export async function handleChatCore({
       userAgent,
     });
       claudePromptCacheLogMeta = streamingOutcome.carry.claudePromptCacheLogMeta;
+      currentModel = streamingOutcome.carry.currentModel;
       effectiveServiceTier = streamingOutcome.carry.effectiveServiceTier;
       finalBody = streamingOutcome.carry.finalBody;
+      pipelineRecovered = streamingOutcome.carry.pipelineRecovered;
       providerHeaders = streamingOutcome.carry.providerHeaders;
       providerResponse = streamingOutcome.carry.providerResponse;
       translatedBody = streamingOutcome.carry.translatedBody;
