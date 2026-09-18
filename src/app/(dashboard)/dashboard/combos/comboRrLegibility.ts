@@ -80,8 +80,10 @@ export function persistStickyRoundRobinLimit(
   configToSave: Record<string, unknown>,
   sourceConfig: Record<string, unknown> = configToSave
 ): void {
+  // Leave leftovers on other strategies. sanitizeComboRuntimeConfig already
+  // keeps keys it did not touch; deleting here would drop a value the operator
+  // set while the combo was on round-robin, then lose it on the next save.
   if (strategy !== "round-robin") {
-    delete configToSave.stickyRoundRobinLimit;
     return;
   }
   if (!isPresentLimit(sourceConfig.stickyRoundRobinLimit)) {
@@ -122,8 +124,10 @@ export function persistConnectionAwareExpansion(
   configToSave: Record<string, unknown>,
   sourceConfig: Record<string, unknown> = configToSave
 ): void {
+  // Same as stickyRoundRobinLimit: do not strip a leftover when the current
+  // strategy has no editor for this key. connectionAwareExpansionMaxPerTarget
+  // is already left alone; keep the boolean in the same shape.
   if (!isConnectionAwareExpansionStrategy(strategy)) {
-    delete configToSave.connectionAwareExpansion;
     return;
   }
   if (sourceConfig.connectionAwareExpansion === true) {

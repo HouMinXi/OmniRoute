@@ -75,10 +75,10 @@ test("parseStickyLimitInput clamps 0 to 1 and leaves empty as inherit", () => {
   assert.equal(parseStickyLimitInput("5"), 5);
 });
 
-test("persistStickyRoundRobinLimit clamps 0 to 1 and strips non-round-robin leftovers", () => {
+test("persistStickyRoundRobinLimit clamps 0 to 1 and keeps a leftover on other strategies", () => {
   const autoSave = { stickyRoundRobinLimit: 3 };
   persistStickyRoundRobinLimit("auto", autoSave);
-  assert.equal("stickyRoundRobinLimit" in autoSave, false);
+  assert.equal(autoSave.stickyRoundRobinLimit, 3);
 
   const zeroSave = { stickyRoundRobinLimit: 0 };
   persistStickyRoundRobinLimit("round-robin", zeroSave);
@@ -119,10 +119,10 @@ test("tri-state maps inherit/on/off onto an optional boolean", () => {
   assert.equal(optionalBooleanFromTriState("off"), false);
 });
 
-test("persistConnectionAwareExpansion strips the flag off non-group-B strategies", () => {
+test("persistConnectionAwareExpansion keeps the flag on non-group-B strategies", () => {
   const autoSave = { connectionAwareExpansion: true, timeoutMs: 1 };
   persistConnectionAwareExpansion("auto", autoSave);
-  assert.equal("connectionAwareExpansion" in autoSave, false);
+  assert.equal(autoSave.connectionAwareExpansion, true);
   assert.equal(autoSave.timeoutMs, 1);
 
   const rrSave = { connectionAwareExpansion: true };
