@@ -59,7 +59,6 @@ export const freebuffProvider: RegistryEntry = {
       supportsVision: true,
       supportsReasoning: true,
       contextLength: 131_072,
-      supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
     },
     {

@@ -16,7 +16,7 @@ import { getRegistryModelThinkingEfforts } from "../../open-sse/config/providerR
  *   (#6112). sonnet-5 follows Anthropic's five-tier table. sonnet-4.5 and haiku-4.5
  *   are extended-thinking-only (budget_tokens), so they stay without an effort array.
  * - AWS Bedrock adaptive thinking: https://docs.aws.amazon.com/bedrock/latest/userguide/claude-messages-adaptive-thinking.html
- *   Bedrock's effort table is a subset (xhigh listed only for Opus 5 and Opus 4.6).
+ *   Bedrock's effort table is a subset (xhigh listed for Opus 5 / 4.8 / 4.7, not 4.6).
  *   This registry follows Anthropic's per-model table so a suffixed combo id folds
  *   the same way as the first-party claude/anthropic entries. Relays that speak
  *   Anthropic Messages (agentrouter, tabitoken, uc-direct, poe, cline, orcarouter,
