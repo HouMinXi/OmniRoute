@@ -380,7 +380,7 @@ test("astra-high quality fail hops same connection to astra-max", async () => {
             "content-type": "application/json",
             "x-omniroute-selected-connection-id": "c-astra",
           },
-        },
+        }
       );
     },
   });
