@@ -80,35 +80,11 @@ const FAMILY_FALLBACK_TEMPLATES: Record<string, readonly string[]> = {
 
   // GPT-6 Astra family: same Codex OAuth catalog, effort aliases as siblings.
   // Quality-empty 200 on astra-high (live openai-gpt-sol) should hop max then ultra.
-  "gpt-6-astra-high": [
-    "gpt-6-astra-max",
-    "gpt-6-astra-ultra",
-    "gpt-6-astra-xhigh",
-    "gpt-6-astra",
-  ],
-  "gpt-6-astra-max": [
-    "gpt-6-astra-ultra",
-    "gpt-6-astra-xhigh",
-    "gpt-6-astra-high",
-    "gpt-6-astra",
-  ],
-  "gpt-6-astra-ultra": [
-    "gpt-6-astra-max",
-    "gpt-6-astra-xhigh",
-    "gpt-6-astra-high",
-    "gpt-6-astra",
-  ],
-  "gpt-6-astra-xhigh": [
-    "gpt-6-astra-max",
-    "gpt-6-astra-ultra",
-    "gpt-6-astra-high",
-    "gpt-6-astra",
-  ],
-  "gpt-6-astra": [
-    "gpt-6-astra-max",
-    "gpt-6-astra-ultra",
-    "gpt-6-astra-high",
-  ],
+  "gpt-6-astra-high": ["gpt-6-astra-max", "gpt-6-astra-ultra", "gpt-6-astra-xhigh", "gpt-6-astra"],
+  "gpt-6-astra-max": ["gpt-6-astra-ultra", "gpt-6-astra-xhigh", "gpt-6-astra-high", "gpt-6-astra"],
+  "gpt-6-astra-ultra": ["gpt-6-astra-max", "gpt-6-astra-xhigh", "gpt-6-astra-high", "gpt-6-astra"],
+  "gpt-6-astra-xhigh": ["gpt-6-astra-max", "gpt-6-astra-ultra", "gpt-6-astra-high", "gpt-6-astra"],
+  "gpt-6-astra": ["gpt-6-astra-max", "gpt-6-astra-ultra", "gpt-6-astra-high"],
 
   // Gemini 3.8 Flash effort aliases. Live onmi-gemini3.6 pins
   // agy/gemini-3.8-flash-high; empty-content 502 hops medium then low.
@@ -136,11 +112,7 @@ const FAMILY_FALLBACK_TEMPLATES: Record<string, readonly string[]> = {
     "gemini-3.8-flash-low",
     "gemini-3.8-flash",
   ],
-  "gemini-3.8-flash": [
-    "gemini-3.8-flash-medium",
-    "gemini-3.8-flash-high",
-    "gemini-3.8-flash-low",
-  ],
+  "gemini-3.8-flash": ["gemini-3.8-flash-medium", "gemini-3.8-flash-high", "gemini-3.8-flash-low"],
 
   // Claude Mythos family — prefer the previous Fable before falling to Opus
   // tiers and then the cheaper Sonnet, matching the flagship ordering.
@@ -248,8 +220,7 @@ function resolveFamilyContext(currentModel: string, providerHint?: string | null
   // Alias first: parseModel("agy/gemini-3.8-flash-high") canonicalizes
   // provider to antigravity. Family hop must use the catalog the combo
   // actually named (agy) or the explicit hint.
-  const explicitProvider =
-    providerHint || parsed.providerAlias || parsed.provider || null;
+  const explicitProvider = providerHint || parsed.providerAlias || parsed.provider || null;
   const registryEntry = getRegistryEntry(explicitProvider || "");
   if (!registryEntry) return null;
 

@@ -52,17 +52,14 @@ test("returns null for an unknown family", () => {
 });
 
 test("gpt-6-astra-high falls back to gpt-6-astra-max first", () => {
-  const next = getNextFamilyFallback(
-    "codex/gpt-6-astra-high",
-    new Set(["codex/gpt-6-astra-high"]),
-  );
+  const next = getNextFamilyFallback("codex/gpt-6-astra-high", new Set(["codex/gpt-6-astra-high"]));
   assert.equal(next, "codex/gpt-6-astra-max");
 });
 
 test("gpt-6-astra-max skips tried high and continues to ultra", () => {
   const next = getNextFamilyFallback(
     "codex/gpt-6-astra-high",
-    new Set(["codex/gpt-6-astra-high", "codex/gpt-6-astra-max"]),
+    new Set(["codex/gpt-6-astra-high", "codex/gpt-6-astra-max"])
   );
   assert.equal(next, "codex/gpt-6-astra-ultra");
 });
@@ -70,7 +67,7 @@ test("gpt-6-astra-max skips tried high and continues to ultra", () => {
 test("gemini-3.8-flash-high falls back medium first", () => {
   const next = getNextFamilyFallback(
     "agy/gemini-3.8-flash-high",
-    new Set(["agy/gemini-3.8-flash-high"]),
+    new Set(["agy/gemini-3.8-flash-high"])
   );
   assert.equal(next, "agy/gemini-3.8-flash-medium");
 });
@@ -78,7 +75,7 @@ test("gemini-3.8-flash-high falls back medium first", () => {
 test("gemini-3.8-flash-medium skips tried high continues low", () => {
   const next = getNextFamilyFallback(
     "agy/gemini-3.8-flash-medium",
-    new Set(["agy/gemini-3.8-flash-medium", "agy/gemini-3.8-flash-high"]),
+    new Set(["agy/gemini-3.8-flash-medium", "agy/gemini-3.8-flash-high"])
   );
   assert.equal(next, "agy/gemini-3.8-flash-low");
 });
