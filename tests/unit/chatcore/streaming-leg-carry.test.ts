@@ -341,44 +341,76 @@ test("providerUrl is assigned on every path before it is read", () => {
   // 2454 would silently pass forever.
   const leafSource = readFileSync(leafPath, "utf8");
 
-  // Comment the assignment out entirely rather than splicing around it. An
-  // earlier attempt wrapped it in a short-circuit expression and left the
-  // opening parenthesis unbalanced, so the probe did not parse -- and a file
-  // that fails to parse can report 2454 for reasons that have nothing to do
-  // with the branch under test, which is exactly the false negative this
-  // self-check exists to avoid.
-  const assignment = /^([ \t]*)providerUrl = .*$/m;
-  const match = leafSource.match(assignment);
-  assert.ok(match, "failed to build the self-check probe: no providerUrl assignment matched");
-  const probeSource = leafSource.replace(assignment, "$1// probe: assignment removed");
+  // Locate the assignments with the parser, not a line regex. A regex that
+  // anchors on one line silently skips a multi-line assignment and then probes
+  // some other single-line one instead -- the self-check still goes green while
+  // the branch that changed shape is never exercised.
+  const findAssignments = (src: string) => {
+    const tree = ts.createSourceFile("scan.ts", src, ts.ScriptTarget.ESNext, true);
+    const spans: Array<[number, number]> = [];
+    const walk = (node: ts.Node) => {
+      if (
+        ts.isBinaryExpression(node) &&
+        node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+        ts.isIdentifier(node.left) &&
+        node.left.text === "providerUrl"
+      ) {
+        const statement = node.parent && ts.isExpressionStatement(node.parent) ? node.parent : node;
+        spans.push([statement.getStart(tree), statement.getEnd()]);
+      }
+      node.forEachChild(walk);
+    };
+    walk(tree);
+    return spans;
+  };
 
-  // The probe must still be a valid TypeScript file, and it must genuinely be
-  // missing the assignment -- otherwise a 2454 below would prove nothing.
-  const probeTree = ts.createSourceFile("probe.ts", probeSource, ts.ScriptTarget.ESNext, true);
-  assert.equal(
-    (probeTree as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics?.length ?? 0,
-    0,
-    "self-check probe does not parse, so any diagnostic it produces is meaningless"
-  );
-  assert.equal(
-    (probeSource.match(/^[ \t]*providerUrl = /gm) ?? []).length,
-    (leafSource.match(/^[ \t]*providerUrl = /gm) ?? []).length - 1,
-    "self-check probe did not actually drop an assignment"
-  );
+  const assignments = findAssignments(leafSource);
+  assert.ok(assignments.length > 0, "no providerUrl assignments found to probe");
 
-  const probePath = join(tmpdir(), `streaming-leg-probe-${process.pid}.ts`);
-  writeFileSync(probePath, probeSource);
-  let probeFound = 0;
-  try {
-    const probeProg = ts.createProgram([probePath], programOptions);
-    const probeSf = probeProg.getSourceFile(probePath);
-    probeFound = probeProg.getSemanticDiagnostics(probeSf).filter((d) => d.code === 2454).length;
-  } finally {
-    rmSync(probePath, { force: true });
+  // Probe every assignment so that a multi-line one cannot be skipped, but do
+  // not demand that each removal is an error. Definite assignment only asks
+  // whether some path reaches a read with nothing assigned -- a reassignment
+  // that overwrites an earlier one can be deleted without the compiler
+  // objecting, because the stale value is still a value. The assignment inside
+  // the retry branch is exactly that shape today: dropping it yields a stale
+  // URL, not a TS2454.
+  //
+  // What this must establish is that the configuration is capable of
+  // reporting, so require at least one probe to fire.
+  let probesThatFired = 0;
+  for (const [from, to] of assignments) {
+    const line = leafSource.slice(0, from).split("\n").length;
+    const probeSource =
+      leafSource.slice(0, from) + "// probe: assignment removed" + leafSource.slice(to);
+
+    const probeTree = ts.createSourceFile("probe.ts", probeSource, ts.ScriptTarget.ESNext, true);
+    assert.equal(
+      (probeTree as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics?.length ?? 0,
+      0,
+      `self-check probe for line ${line} does not parse, so any diagnostic it produces is meaningless`
+    );
+    assert.equal(
+      findAssignments(probeSource).length,
+      assignments.length - 1,
+      `self-check probe for line ${line} did not actually drop an assignment`
+    );
+
+    const probePath = join(tmpdir(), `streaming-leg-probe-${process.pid}-${line}.ts`);
+    writeFileSync(probePath, probeSource);
+    let probeFound = 0;
+    try {
+      const probeProg = ts.createProgram([probePath], programOptions);
+      const probeSf = probeProg.getSourceFile(probePath);
+      probeFound = probeProg.getSemanticDiagnostics(probeSf).filter((d) => d.code === 2454).length;
+    } finally {
+      rmSync(probePath, { force: true });
+    }
+    if (probeFound > 0) probesThatFired += 1;
   }
+
   assert.ok(
-    probeFound > 0,
-    "this program configuration no longer reports TS2454, so a clean result below would be meaningless"
+    probesThatFired > 0,
+    "no probe produced a TS2454, so this configuration cannot report the defect and a clean result below would be meaningless"
   );
 
   const usedBeforeAssigned = prog
