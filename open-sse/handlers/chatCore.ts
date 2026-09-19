@@ -1632,7 +1632,6 @@ export async function handleChatCore({
 
   // Execute request using executor (handles URL building, headers, fallback, transform)
   let providerResponse;
-  let providerUrl;
   let providerHeaders;
   let finalBody;
   let claudePromptCacheLogMeta = null;
@@ -2095,7 +2094,6 @@ export async function handleChatCore({
       providerHeaders,
       providerRequestCapture,
       providerResponse,
-      providerUrl,
       reqLogger,
       resolveEffectiveServiceTier,
       sessionAffinityKey,

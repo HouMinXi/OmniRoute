@@ -196,7 +196,6 @@ export interface StreamingLegDeps {
   providerHeaders: Record<string, unknown> | Headers | null | undefined;
   providerRequestCapture: import("../../utils/providerRequestLogging.ts").Capture;
   providerResponse: (Response & { body?: unknown }) | null | undefined;
-  providerUrl: string;
   reqLogger: {
     sessionPath: null;
     logClientRawRequest: (
@@ -340,7 +339,6 @@ export async function runStreamingLeg(deps: StreamingLegDeps): Promise<Streaming
     providerHeaders,
     providerRequestCapture,
     providerResponse,
-    providerUrl,
     reqLogger,
     resolveEffectiveServiceTier,
     sessionAffinityKey,
@@ -355,6 +353,10 @@ export async function runStreamingLeg(deps: StreamingLegDeps): Promise<Streaming
     upstreamStream,
     userAgent,
   } = deps;
+
+  // Assigned on every path through the execution pipeline below before it is
+  // read, and never consumed by the barrel afterwards, so it stays local.
+  let providerUrl: string;
 
   const carry = (): StreamingLegCarry => ({
     claudePromptCacheLogMeta,

@@ -214,3 +214,89 @@ test("credentials is mutated in place, so it is deliberately not carried", () =>
     "credentials was rebound; a rebind does not reach the barrel and needs a carry field"
   );
 });
+
+test("carry() reads the live bindings, so reassignments reach the barrel", () => {
+  // The checks above prove the plumbing is declared; this one pins the part that
+  // makes the plumbing mean anything. A carry that snapshotted its inputs -- say
+  // `const snap = { currentModel }; const carry = () => snap;` -- satisfies every
+  // static check and still hands the barrel the pre-fallback values.
+  //
+  // Two properties together rule that out, and both are decidable from the tree:
+  //
+  //   1. deps is destructured with `let`. A const binding could not be reassigned
+  //      at all, and the reassignments are the whole reason this leg carries state.
+  //   2. the carry factory names those same bindings directly in its returned
+  //      object literal, rather than returning a previously-built object.
+  //
+  // Shorthand `{ currentModel }` inside an arrow evaluates the binding on every
+  // call, so with both properties holding, a reassignment before carry() is
+  // observed by it.
+  const sf = parse(leafPath);
+
+  let depsDecl: ts.VariableDeclaration | null = null;
+  let declList: ts.VariableDeclarationList | null = null;
+  let carryFactory: ts.ArrowFunction | null = null;
+
+  const walk = (node: ts.Node) => {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isObjectBindingPattern(node.name) &&
+      node.initializer &&
+      node.initializer.getText() === "deps"
+    ) {
+      depsDecl = node;
+      if (ts.isVariableDeclarationList(node.parent)) declList = node.parent;
+    }
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.name.text === "carry" &&
+      node.initializer &&
+      ts.isArrowFunction(node.initializer)
+    ) {
+      carryFactory = node.initializer;
+    }
+    ts.forEachChild(node, walk);
+  };
+  walk(sf);
+
+  assert.ok(depsDecl, "failed to find the deps destructure");
+  assert.ok(declList, "failed to find the deps declaration list");
+  assert.ok(carryFactory, "failed to find the carry factory");
+
+  assert.ok(
+    ((declList as ts.VariableDeclarationList).flags & ts.NodeFlags.Let) !== 0,
+    "deps must be destructured with let; a const binding could not carry a reassignment"
+  );
+
+  // The factory must return an object literal built at call time, not a
+  // previously-constructed one.
+  const body = (carryFactory as ts.ArrowFunction).body;
+  const literal = ts.isParenthesizedExpression(body) ? body.expression : body;
+  assert.ok(
+    ts.isObjectLiteralExpression(literal),
+    `carry must return a fresh object literal, got: ${literal.getText().slice(0, 60)}`
+  );
+
+  // And each carried name must be the binding itself, evaluated per call.
+  const bound = new Set<string>();
+  const pattern = (depsDecl as ts.VariableDeclaration).name as ts.ObjectBindingPattern;
+  for (const el of pattern.elements) {
+    if (ts.isIdentifier(el.name)) bound.add(el.name.text);
+  }
+
+  for (const name of ["currentModel", "pipelineRecovered"]) {
+    const prop = (literal as ts.ObjectLiteralExpression).properties.find(
+      (pr) => pr.name?.getText() === name
+    );
+    assert.ok(prop, `${name} must appear on the carry literal`);
+    assert.ok(
+      ts.isShorthandPropertyAssignment(prop) ||
+        (ts.isPropertyAssignment(prop) &&
+          ts.isIdentifier(prop.initializer) &&
+          prop.initializer.text === name),
+      `${name} must be carried as the live binding, not a precomputed value`
+    );
+    assert.ok(bound.has(name), `${name} must be one of the let-bound deps`);
+  }
+});
