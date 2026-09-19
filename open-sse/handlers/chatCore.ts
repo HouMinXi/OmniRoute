@@ -1,3 +1,4 @@
+import { materializeStreamingSuccessResponse } from "./chatCore/streamingSuccessResponse.ts";
 import { runRequestPrelude } from "./chatCore/requestPrelude.ts";
 import { executeProviderRequest as executeProviderRequestFromLeaf } from "./chatCore/executeProviderRequest.ts";
 import {
@@ -25,10 +26,6 @@ import { applyContextCompression } from "./chatCore/contextCompression.ts";
 import { checkSemanticCache } from "./chatCore/semanticCache.ts";
 import { enforceOutputTokenBudget } from "./chatCore/outputTokenBudget.ts";
 import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
-import { assembleStreamingResponseHeaders } from "./chatCore/streamingResponseHeaders.ts";
-import { assembleStreamingPipeline } from "./chatCore/streamingPipeline.ts";
-import { makeOnStreamComplete } from "./chatCore/streamMaterialize.ts";
-import { wrapReadableStreamWithFinalize } from "./chatCore/streamFinalize.ts";
 import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
 import {
   applyReasoningInputPolicy,
@@ -38,11 +35,6 @@ import {
 import { routingFinishReason } from "./chatCore/routingFinishReason.ts";
 import { isNoMemoryRequested } from "./chatCore/headers.ts";
 
-import { getCodexClientSessionId } from "../config/codexIdentity.ts";
-import {
-  noteCodexTurnStateProvenance,
-  readCodexTurnStateHeader,
-} from "../config/codexTurnState.ts";
 export { clearCombosCache, clearUpstreamProxyConfigCache } from "./chatCore/comboContextCache.ts";
 import {
   shouldUseNativeCodexPassthrough,
@@ -72,21 +64,15 @@ import { resolveMemoryOwnerId } from "./chatCore/memoryExtraction.ts";
 import { stripStore, usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeClaudeToolsForDispatch } from "./chatCore/claudeToolDefaults.ts";
 import { injectSystemPromptPreTranslation } from "../services/systemPrompt.ts";
-import { translateRequest, needsTranslation } from "../translator/index.ts";
+import { translateRequest } from "../translator/index.ts";
 import { applyReasoningRuleDirective } from "@/lib/reasoningRouting/policy";
 import { withReasoningRuleContext } from "../utils/reasoningRuleContext.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { sanitizeKiroTools } from "../utils/kiroSanitizer.ts";
 import { splitMisplacedToolResults } from "../translator/helpers/claudeHelper.ts";
 import { ensureCacheControlOnLastUserMessage } from "../services/claudeCodeConstraints.ts";
-import {
-  createSSETransformStreamWithLogger,
-  createPassthroughStreamWithLogger,
-} from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
-import { resolveSuppressThinkClose } from "../utils/thinkCloseMarker.ts";
 import { resolveStreamReadinessTimeout } from "../utils/streamReadinessPolicy.ts";
-import { hasActiveClaudeThinking } from "../utils/thinkingBudget.ts";
 import { createStreamController } from "../utils/streamHandler.ts";
 import * as streamFailure from "../utils/streamFailureFinalization.ts";
 import { refreshWithRetry, runWithOnPersist, runWithCasGuard } from "../services/tokenRefresh.ts";
@@ -140,14 +126,9 @@ import { trackPendingRequest, appendRequestLog, saveRequestUsage } from "@/lib/u
 import { finalizePendingScope, updatePendingScope } from "@/lib/usage/pendingRequestScope";
 import { recordCost } from "@/domain/costRules";
 import { calculateCost } from "@/lib/usage/costCalculator";
-import {
-  buildClaudePassthroughToolNameMap,
-  mergeResponseToolNameMap,
-} from "./chatCore/passthroughToolNames.ts";
+import { buildClaudePassthroughToolNameMap } from "./chatCore/passthroughToolNames.ts";
 import type { EnforceDecision } from "@/lib/quota/types";
 import { writeCompressionAnalytics } from "./chatCore/compressionAnalyticsWrite.ts";
-import { emitRequestGamificationEvent } from "./chatCore/gamificationEvent.ts";
-import { runPluginOnResponseHook } from "./chatCore/pluginOnResponse.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 
 import { getCacheControlSettings } from "@/lib/cacheControlSettings";
@@ -1944,65 +1925,38 @@ export async function handleChatCore({
   }
   providerResponse = streamReadiness.response;
 
-  // Notify success - caller can clear error status if needed
-  if (onRequestSuccess) {
-    await onRequestSuccess();
-  }
-
-  const responseHeaders = assembleStreamingResponseHeaders({
-    providerHeaders: providerResponse.headers,
+  const response = await materializeStreamingSuccessResponse({
+    providerResponse,
+    onRequestSuccess,
     provider,
     model,
+    connectionId,
+    credentials,
     pendingRequestId,
     compressionResponseMeta,
     comboStrategy,
     fallbackAttempts,
-  });
-
-  // The streaming headers (turn-state included, when present) are committed to
-  // the client from here on — record which connection minted the blob so a
-  // later cross-account echo can be stripped (Codex failover guard). The
-  // in-place failover update means `credentials` is the winning account.
-  if (provider === "codex" && readCodexTurnStateHeader(providerResponse.headers)) {
-    noteCodexTurnStateProvenance(
-      getCodexClientSessionId(clientRawRequest?.headers),
-      credentials?.connectionId
-    );
-  }
-
-  // Create transform stream with logger for streaming response
-  let transformStream;
-  const responseToolNameMap = mergeResponseToolNameMap(
+    clientRawRequest,
     toolNameMap,
-    (finalBody as Record<string, unknown> | null | undefined) ?? null
-  );
-
-  let streamCompletionRecorded = false;
-  let streamFailureCompletionRecorded = false;
-
-  // Callback to save call log when stream completes (include responseBody when provided by stream)
-  const onStreamComplete = makeOnStreamComplete({
-    persistAttemptLogs,
-    getCurrentConnectionId,
-    provider,
-    model,
-    credentials,
-    log,
-    clientResponseFormat,
-    responseToolNameMap,
     finalBody,
     translatedBody,
     body,
+    persistAttemptLogs,
+    getCurrentConnectionId,
+    log,
+    reqLogger,
+    clientResponseFormat,
+    targetFormat,
+    isResponsesEndpoint,
+    isDroidCLI,
     reasoningCacheScope,
     reasoningReplayHistory,
     contextEditingEnabled,
     skillRequestId,
     streamFailure,
-    pendingRequestId,
     startTime,
     apiKeyInfo,
     isCombo,
-    comboStrategy,
     endpointPath,
     traceId,
     calculateCost,
@@ -2014,186 +1968,36 @@ export async function handleChatCore({
     extractFacts,
     semanticCacheEnabled,
     bodyForCacheWrite,
-    clientRawRequest,
     claudePromptCacheLogMeta,
     resolveReportedServiceTier,
     attachCompressionUsageReceiptAfterAnalytics,
     routingFinishReason,
-    getStreamCompletionRecorded: () => streamCompletionRecorded,
-    setStreamCompletionRecorded: (v) => {
-      streamCompletionRecorded = v;
-    },
-    getStreamFailureCompletionRecorded: () => streamFailureCompletionRecorded,
-    setStreamFailureCompletionRecorded: (v) => {
-      streamFailureCompletionRecorded = v;
-    },
-    getEffectiveServiceTier: () => effectiveServiceTier,
-    setEffectiveServiceTier: (t) => {
-      effectiveServiceTier = t;
-    },
-  });
-
-
-  const streamFailureFinalizers = streamFailure.createStreamFailureFinalizers({
-    isFailureCompletionRecorded: () => streamFailureCompletionRecorded,
-    isStreamCompletionRecorded: () => streamCompletionRecorded,
-    onStreamComplete,
+    effectiveServiceTier,
     persistFailureUsage,
     onStreamFailure,
+    setOnPipelineStreamError: (fn) => {
+      onPipelineStreamError = fn;
+    },
+    setOnClientDisconnectFinalize: (fn) => {
+      onClientDisconnectFinalize = fn;
+    },
+    streamUserAgent,
+    thinkingMarkerHeader,
+    copilotCompatibleReasoning,
+    customToolNames,
+    requestToolIdentityMap,
+    streamController,
+    createPiiTransform,
+    echoModel,
+    streamReadinessPolicy,
+    releaseTurnExecution,
   });
-  const handleStreamFailure = streamFailureFinalizers.handleStreamFailure;
-  onPipelineStreamError = streamFailureFinalizers.onPipelineStreamError;
-  // #9653: gives a genuine, race-delayed completion a chance to land (see
-  // createClientDisconnectGraceHandler's doc comment) before persisting a false
-  // 499/0-tokens for a request that actually delivered its full response.
-  onClientDisconnectFinalize = streamFailure.createClientDisconnectGraceHandler({
-    isStreamCompletionRecorded: () => streamCompletionRecorded,
-    gracePeriodMs: STREAM_DISCONNECT_GRACE_PERIOD_MS,
-    finalize: (event) =>
-      handleStreamFailure({
-        status: 499,
-        message: `Client disconnected: ${event.reason}`,
-        code: "client_disconnected",
-        type: "client_disconnected",
-      }),
-  });
 
-  // For providers using Responses API format, translate stream back to openai (Chat Completions) format
-  // UNLESS client is Droid CLI which expects openai-responses format back
-  const needsResponsesTranslation =
-    targetFormat === FORMATS.OPENAI_RESPONSES &&
-    clientResponseFormat === FORMATS.OPENAI &&
-    !isResponsesEndpoint &&
-    !isDroidCLI;
-  const streamStateBody = finalBody || body;
-
-  // Client's explicit thinking intent (Anthropic Messages shape). Claude Code
-  // sends `{type:"enabled"}` or `{type:"adaptive"}` to opt into relaying
-  // upstream reasoning_content as Claude thinking blocks; `{type:"disabled"}`
-  // or an omitted `thinking` field opts out. Kept false for every other
-  // client schema (OpenAI / Responses), which never express intent through
-  // `body.thinking`. Mirrors hasActiveClaudeThinking() so the request and
-  // response sides agree on what counts as "thinking requested" — a prior
-  // inline `=== "enabled"` check silently suppressed `adaptive` (the intent
-  // Claude Code actually sends), leaking the mismatch as a broken tool-call
-  // turn (call log 1787566395384-bab9ab: reasoning dropped → model emitted
-  // DSML tool-call markers as plain text → incomplete `stop` finish).
-  const requestedThinking = hasActiveClaudeThinking((body ?? {}) as Record<string, unknown>);
-
-  if (needsResponsesTranslation) {
-    // Provider returns openai-responses, translate to openai (Chat Completions) that clients expect
-    log?.debug?.("STREAM", `Responses translation mode: openai-responses → openai`);
-    transformStream = createSSETransformStreamWithLogger(
-      "openai-responses",
-      "openai",
-      provider,
-      reqLogger,
-      responseToolNameMap,
-      model,
-      connectionId,
-      streamStateBody,
-      onStreamComplete,
-      apiKeyInfo,
-      handleStreamFailure,
-      copilotCompatibleReasoning,
-      false,
-      requestedThinking,
-      customToolNames,
-      // openai-responses → openai translation still wants the namespace identity
-      // map for #7936-style round-trip closure when the client also speaks
-      // Responses (Codex CLI).
-      requestToolIdentityMap
-    );
-  } else if (needsTranslation(targetFormat, clientResponseFormat)) {
-    // Standard translation for other providers
-    log?.debug?.("STREAM", `Translation mode: ${targetFormat} → ${clientResponseFormat}`);
-    transformStream = createSSETransformStreamWithLogger(
-      targetFormat,
-      clientResponseFormat,
-      provider,
-      reqLogger,
-      responseToolNameMap,
-      model,
-      connectionId,
-      streamStateBody,
-      onStreamComplete,
-      apiKeyInfo,
-      handleStreamFailure,
-      copilotCompatibleReasoning,
-      // Suppress the `</think>` close marker for clients that render it verbatim
-      // (e.g. OpenCode by UA; any client via `x-omniroute-thinking-marker: off`);
-      // preserved for Claude Code / Cursor and unknown clients by default (#5245 /
-      // #5312). Responses API clients always suppress it (structured reasoning
-      // items make the marker meaningless); otherwise the header wins over the
-      // UA allowlist.
-      resolveSuppressThinkClose({
-        userAgent: streamUserAgent,
-        thinkingMarkerHeader,
-        clientResponseFormat,
-      }),
-      requestedThinking,
-      customToolNames,
-      requestToolIdentityMap
-    );
-  } else {
-    log?.debug?.("STREAM", `Standard passthrough mode`);
-    transformStream = createPassthroughStreamWithLogger(
-      provider,
-      reqLogger,
-      responseToolNameMap,
-      model,
-      connectionId,
-      streamStateBody,
-      onStreamComplete,
-      apiKeyInfo,
-      handleStreamFailure,
-      clientResponseFormat,
-      requestToolIdentityMap
-    );
-  }
-
-    const finalStream = assembleStreamingPipeline({
-      providerResponse,
-      transformStream,
-      streamController,
-      createPiiTransform,
-      clientRawRequestHeaders: clientRawRequest?.headers,
-      clientResponseFormat,
-      echoModel,
-      responseHeaders,
-      // Same adaptive budget the pre-handoff readiness gate above just used —
-      // reasoning models that legitimately take a while to say anything keep
-      // that same patience for their first REAL content, not just their first
-      // lifecycle frame. See pipeWithDisconnect's own doc comment.
-      contentStallTimeoutMs: streamReadinessPolicy.timeoutMs,
-    });
-    const clientFacingStream = wrapReadableStreamWithFinalize(
-      finalStream,
-      releaseTurnExecution
-    );
-
-    // ── Gamification event (fire-and-forget) ──
-  await emitRequestGamificationEvent({ apiKeyId: apiKeyInfo?.id, model, provider });
-
-    // ── Plugin onResponse hook (fire-and-forget) ──
-    await runPluginOnResponseHook({
-      requestId: traceId,
-      body,
-      model,
-      provider,
-      apiKeyInfo,
-      headers: clientRawRequest?.headers,
-      response: { status: 200, streamed: true },
-    });
-
-    const response = new Response(clientFacingStream, {
-      headers: responseHeaders,
-    });
-    turnExecutionHandedOffToStream = true;
-    return {
-      success: true,
-      response,
-    };
+  turnExecutionHandedOffToStream = true;
+  return {
+    success: true,
+    response,
+  };
   } finally {
     if (!turnExecutionHandedOffToStream) {
       releaseTurnExecution();
