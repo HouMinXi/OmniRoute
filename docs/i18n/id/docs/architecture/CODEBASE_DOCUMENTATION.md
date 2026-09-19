@@ -446,34 +446,34 @@ open-sse/
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Registri penyedia, profil header, identitas, …
-├── handlers/               Penangan permintaan (chat, embeddings, audio, gambar, …)
+├── handlers/               Handler permintaan (obrolan, embedding, audio, gambar, …)
 ├── executors/              108 eksekutor HTTP khusus penyedia
 ├── translator/             Konversi format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Transformer streaming Responses API ↔ Chat Completions
+├── transformer/            Transformer aliran Responses API ↔ Chat Completions
 ├── services/               80+ modul layanan (kombinasi, fallback, kuota, identitas, …)
-├── utils/                  Pembantu streaming, klien TLS, AWS SigV4, pengambilan melalui proksi, …
+├── utils/                  Helper streaming, klien TLS, AWS SigV4, pengambilan proxy, …
 └── mcp-server/             Server MCP (3 transport, 33 cakupan, 110 alat)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Penangan                | Tujuan                                                                        |
-| ----------------------- | ----------------------------------------------------------------------------- |
-| `chatCore.ts`           | Alur utama chat (cache, batas laju, perutean kombinasi, pengiriman eksekutor) |
-| `responsesHandler.ts`   | Titik masuk OpenAI Responses API                                              |
-| `embeddings.ts`         | Embeddings                                                                    |
-| `imageGeneration.ts`    | Pembuatan gambar                                                              |
-| `audioSpeech.ts`        | Teks-ke-ucapan                                                                |
-| `audioTranscription.ts` | Ucapan-ke-teks                                                                |
-| `videoGeneration.ts`    | Pembuatan video                                                               |
-| `musicGeneration.ts`    | Pembuatan musik                                                               |
-| `rerank.ts`             | Pemeringkatan ulang                                                           |
-| `moderations.ts`        | Moderasi                                                                      |
-| `search.ts`             | Pencarian web                                                                 |
-| `sseParser.ts`          | Parser peristiwa SSE                                                          |
-| `usageExtractor.ts`     | Mengekstrak jumlah token dari streaming upstream                              |
-| `responseSanitizer.ts`  | Menghapus derau khusus penyedia                                               |
-| `responseTranslator.ts` | Penghubung antara respons penyedia dan lapisan penerjemah                     |
+| Handler                 | Tujuan                                                                             |
+| ----------------------- | ---------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Pipeline obrolan utama (cache, batas laju, perutean kombinasi, dispatch eksekutor) |
+| `responsesHandler.ts`   | Titik masuk OpenAI Responses API                                                   |
+| `embeddings.ts`         | Embedding                                                                          |
+| `imageGeneration.ts`    | Pembuatan gambar                                                                   |
+| `audioSpeech.ts`        | Teks ke ucapan                                                                     |
+| `audioTranscription.ts` | Ucapan ke teks                                                                     |
+| `videoGeneration.ts`    | Pembuatan video                                                                    |
+| `musicGeneration.ts`    | Pembuatan musik                                                                    |
+| `rerank.ts`             | Pemeringkatan ulang                                                                |
+| `moderations.ts`        | Moderasi                                                                           |
+| `search.ts`             | Pencarian web                                                                      |
+| `sseParser.ts`          | Parser peristiwa SSE                                                               |
+| `usageExtractor.ts`     | Mengambil jumlah token dari aliran upstream                                        |
+| `responseSanitizer.ts`  | Menghapus derau khusus penyedia                                                    |
+| `responseTranslator.ts` | Penghubung antara respons penyedia dan lapisan penerjemah                          |
 
 ### 4.2 `open-sse/executors/`
 
@@ -483,15 +483,15 @@ open-sse/
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, serta `claudeIdentity.ts`
-(pembantu identitas bersama) dan `index.ts` (registri).
+(helper identitas bersama) dan `index.ts` (registri).
 
-> Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan
-> eksekutor generik yang kompatibel dengan OpenAI. Katalog penyedia lengkap (355 penyedia) berada di
+> Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan eksekutor
+> generik yang kompatibel dengan OpenAI. Katalog lengkap penyedia (355 penyedia) berada di
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Penerjemahan hub-and-spoke (OpenAI adalah hub).
+Penerjemahan hub-and-spoke (OpenAI adalah hub-nya).
 
 - **9 penerjemah permintaan** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -501,11 +501,11 @@ Penerjemahan hub-and-spoke (OpenAI adalah hub).
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`.
-- **9 pembantu** (`translator/helpers/`):
+- **9 helper** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, serta
-  pengujian pembantu.
-- **Pembantu gambar** (`translator/image/sizeMapper.ts`).
+  pengujian helper.
+- **Helper gambar** (`translator/image/sizeMapper.ts`).
 - Tingkat teratas: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
@@ -515,18 +515,18 @@ Penerjemahan hub-and-spoke (OpenAI adalah hub).
 
 ### 4.5 `open-sse/services/`
 
-Sorotan (daftar lengkap berada di bawah `open-sse/services/`):
+Sorotan (daftar lengkap di bawah `open-sse/services/`):
 
-| Aspek               | File                                                                                                                                                                                                                                              |
+| Fokus               | File                                                                                                                                                                                                                                              |
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Perutean kombo      | `combo.ts` (19 strategi), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                               |
+| Perutean combo      | `combo.ts` (19 strategi), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                               |
 | Mesin Auto Combo    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`      |
-| Ketahanan           | `accountFallback.ts` (masa tunggu + penguncian), `errorClassifier.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                                        |
+| Ketahanan           | `accountFallback.ts` (masa tunggu + penguncian), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                            |
 | Kuota               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts`                       |
-| Penyimpanan cache   | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                     |
+| Caching             | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                     |
 | Kecerdasan perutean | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                      |
 | Penanganan model    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                       |
-| Kompresi            | `compression/` — seluruh pengintegrasian mesin kompresi                                                                                                                                                                                           |
+| Kompresi            | `compression/` — pengkabelan lengkap mesin kompresi                                                                                                                                                                                               |
 | Token + sesi        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts` |
 | Tingkat / manifes   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                     |
 | IP / jaringan       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                             |
@@ -535,11 +535,11 @@ Sorotan (daftar lengkap berada di bawah `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 alat unik** yang diintegrasikan dalam `server.ts` (45 alat kanonis dalam `schemas/tools.ts` +
+- **110 alat unik** yang dihubungkan di `server.ts` (45 alat kanonis di `schemas/tools.ts` +
   modul memori, keterampilan, keterampilan GitHub, pool, gamifikasi, plugin, Notion, Obsidian,
   korpus lokal, dan kompresi — gabungannya dihitung oleh `countUniqueMcpTools`).
-- **3 transportasi**: stdio, HTTP Streamable, SSE.
-- **33 cakupan** diberlakukan saat runtime — daftar dasar terdapat dalam `src/shared/constants/mcpScopes.ts`, rangkaian lengkapnya merupakan gabungan cakupan yang dideklarasikan oleh setiap modul alat.
+- **3 transpor**: stdio, HTTP Streamable, SSE.
+- **33 cakupan** diberlakukan saat runtime — daftar dasar terdapat di `src/shared/constants/mcpScopes.ts`, sedangkan kumpulan lengkapnya adalah gabungan cakupan yang dideklarasikan oleh setiap modul alat.
 - Tabel audit: `mcp_tool_audit` (diisi oleh `audit.ts`).
 - File: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
@@ -563,7 +563,7 @@ cloud (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 
 ### 4.8 `open-sse/utils/`
 
-Primitif streaming dan helper penyedia: `stream.ts`, `streamHandler.ts`,
+Primitif streaming dan pembantu penyedia: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,

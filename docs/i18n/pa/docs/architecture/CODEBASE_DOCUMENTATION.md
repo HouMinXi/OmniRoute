@@ -436,7 +436,7 @@ server/
 
 ## 4. `open-sse/` — ਸਟ੍ਰੀਮਿੰਗ ਇੰਜਣ ਵਰਕਸਪੇਸ
 
-`@omniroute/open-sse` ਵਜੋਂ ਪ੍ਰਕਾਸ਼ਿਤ ਵੱਖਰਾ npm ਵਰਕਸਪੇਸ। ਇਹ ਬੇਨਤੀ
+`@omniroute/open-sse` ਵਜੋਂ ਪ੍ਰਕਾਸ਼ਿਤ ਇੱਕ ਵੱਖਰਾ npm ਵਰਕਸਪੇਸ। ਇਹ ਬੇਨਤੀ
 ਪ੍ਰੋਸੈਸਿੰਗ, ਐਗਜ਼ਿਕਿਊਟਰਾਂ, ਅਨੁਵਾਦਕਾਂ, ਸੇਵਾਵਾਂ, ਟ੍ਰਾਂਸਫਾਰਮਰ ਅਤੇ MCP ਸਰਵਰ ਦਾ ਪ੍ਰਬੰਧ ਕਰਦਾ ਹੈ।
 
 ```
@@ -445,39 +445,39 @@ open-sse/
 ├── package.json            ਵਰਕਸਪੇਸ ਮੈਨੀਫੈਸਟ
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀਆਂ, ਹੈਡਰ ਪ੍ਰੋਫਾਈਲ, ਪਛਾਣ, …
+├── config/                 ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀਆਂ, ਹੈਡਰ ਪ੍ਰੋਫ਼ਾਈਲ, ਪਛਾਣ, …
 ├── handlers/               ਬੇਨਤੀ ਹੈਂਡਲਰ (ਚੈਟ, ਐਮਬੈਡਿੰਗ, ਆਡੀਓ, ਚਿੱਤਰ, …)
 ├── executors/              108 ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ HTTP ਐਗਜ਼ਿਕਿਊਟਰ
 ├── translator/             ਫਾਰਮੈਟ ਰੂਪਾਂਤਰਨ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ਸਟ੍ਰੀਮ ਟ੍ਰਾਂਸਫਾਰਮਰ
-├── services/               80+ ਸੇਵਾ ਮੋਡੀਊਲ (ਕੌਂਬੋ, ਫਾਲਬੈਕ, ਕੋਟੇ, ਪਛਾਣ, …)
-├── utils/                  ਸਟ੍ਰੀਮਿੰਗ ਸਹਾਇਕ, TLS ਕਲਾਇੰਟ, AWS SigV4, ਪ੍ਰੌਕਸੀ ਫੈਚ, …
+├── services/               80+ ਸੇਵਾ ਮੋਡੀਊਲ (ਕੰਬੋ, ਫਾਲਬੈਕ, ਕੋਟੇ, ਪਛਾਣ, …)
+├── utils/                  ਸਟ੍ਰੀਮਿੰਗ ਸਹਾਇਕ, TLS ਕਲਾਇੰਟ, AWS SigV4, ਪ੍ਰਾਕਸੀ ਫੈਚ, …
 └── mcp-server/             MCP ਸਰਵਰ (3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ, 110 ਟੂਲ)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| ਹੈਂਡਲਰ                  | ਉਦੇਸ਼                                                              |
-| ----------------------- | ------------------------------------------------------------------ |
-| `chatCore.ts`           | ਮੁੱਖ ਚੈਟ ਪਾਈਪਲਾਈਨ (ਕੈਸ਼, ਦਰ ਸੀਮਾ, ਕੌਂਬੋ ਰੂਟਿੰਗ, ਐਗਜ਼ਿਕਿਊਟਰ ਡਿਸਪੈਚ) |
-| `responsesHandler.ts`   | OpenAI Responses API ਐਂਟਰੀ ਪੁਆਇੰਟ                                  |
-| `embeddings.ts`         | ਐਮਬੈਡਿੰਗ                                                           |
-| `imageGeneration.ts`    | ਚਿੱਤਰ ਉਤਪਾਦਨ                                                       |
-| `audioSpeech.ts`        | ਟੈਕਸਟ-ਤੋਂ-ਬੋਲੀ                                                     |
-| `audioTranscription.ts` | ਬੋਲੀ-ਤੋਂ-ਟੈਕਸਟ                                                     |
-| `videoGeneration.ts`    | ਵੀਡੀਓ ਉਤਪਾਦਨ                                                       |
-| `musicGeneration.ts`    | ਸੰਗੀਤ ਉਤਪਾਦਨ                                                       |
-| `rerank.ts`             | ਮੁੜ-ਰੈਂਕਿੰਗ                                                        |
-| `moderations.ts`        | ਸਮੱਗਰੀ ਸੰਚਾਲਨ                                                      |
-| `search.ts`             | ਵੈੱਬ ਖੋਜ                                                           |
-| `sseParser.ts`          | SSE ਇਵੈਂਟ ਪਾਰਸਰ                                                    |
-| `usageExtractor.ts`     | ਅੱਪਸਟ੍ਰੀਮ ਸਟ੍ਰੀਮਾਂ ਵਿੱਚੋਂ ਟੋਕਨ ਗਿਣਤੀਆਂ ਕੱਢਦਾ ਹੈ                    |
-| `responseSanitizer.ts`  | ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਗੈਰ-ਜ਼ਰੂਰੀ ਡਾਟਾ ਹਟਾਉਂਦਾ ਹੈ                         |
-| `responseTranslator.ts` | ਪ੍ਰਦਾਤਾ ਜਵਾਬ ਅਤੇ ਅਨੁਵਾਦਕ ਪਰਤ ਵਿਚਕਾਰ ਜੋੜ                            |
+| ਹੈਂਡਲਰ                  | ਉਦੇਸ਼                                                             |
+| ----------------------- | ----------------------------------------------------------------- |
+| `chatCore.ts`           | ਮੁੱਖ ਚੈਟ ਪਾਈਪਲਾਈਨ (ਕੈਸ਼, ਦਰ ਸੀਮਾ, ਕੰਬੋ ਰੂਟਿੰਗ, ਐਗਜ਼ਿਕਿਊਟਰ ਡਿਸਪੈਚ) |
+| `responsesHandler.ts`   | OpenAI Responses API ਦਾਖ਼ਲਾ ਬਿੰਦੂ                                 |
+| `embeddings.ts`         | ਐਮਬੈਡਿੰਗ                                                          |
+| `imageGeneration.ts`    | ਚਿੱਤਰ ਉਤਪਾਦਨ                                                      |
+| `audioSpeech.ts`        | ਟੈਕਸਟ-ਤੋਂ-ਬੋਲੀ                                                    |
+| `audioTranscription.ts` | ਬੋਲੀ-ਤੋਂ-ਟੈਕਸਟ                                                    |
+| `videoGeneration.ts`    | ਵੀਡੀਓ ਉਤਪਾਦਨ                                                      |
+| `musicGeneration.ts`    | ਸੰਗੀਤ ਉਤਪਾਦਨ                                                      |
+| `rerank.ts`             | ਮੁੜ-ਦਰਜਾਬੰਦੀ                                                      |
+| `moderations.ts`        | ਸਮੱਗਰੀ ਸੰਚਾਲਨ                                                     |
+| `search.ts`             | ਵੈੱਬ ਖੋਜ                                                          |
+| `sseParser.ts`          | SSE ਇਵੈਂਟ ਪਾਰਸਰ                                                   |
+| `usageExtractor.ts`     | ਅੱਪਸਟ੍ਰੀਮ ਸਟ੍ਰੀਮਾਂ ਵਿੱਚੋਂ ਟੋਕਨ ਗਿਣਤੀਆਂ ਕੱਢਦਾ ਹੈ                   |
+| `responseSanitizer.ts`  | ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਗ਼ੈਰ-ਜ਼ਰੂਰੀ ਸਮੱਗਰੀ ਹਟਾਉਂਦਾ ਹੈ                     |
+| `responseTranslator.ts` | ਪ੍ਰਦਾਤਾ ਜਵਾਬ ਅਤੇ ਅਨੁਵਾਦਕ ਪਰਤ ਵਿਚਕਾਰ ਜੋੜਨ ਵਾਲਾ ਹਿੱਸਾ               |
 
 ### 4.2 `open-sse/executors/`
 
-108 ਪ੍ਰਦਾਤਾ ਐਗਜ਼ਿਕਿਊਟਰ, ਜਿਨ੍ਹਾਂ ਵਿੱਚੋਂ ਹਰ ਇੱਕ `BaseExecutor` (`base.ts`) ਨੂੰ ਵਿਸਤਾਰ ਦਿੰਦਾ ਹੈ:
+108 ਪ੍ਰਦਾਤਾ ਐਗਜ਼ਿਕਿਊਟਰ, ਜਿਨ੍ਹਾਂ ਵਿੱਚੋਂ ਹਰ ਇੱਕ `BaseExecutor` (`base.ts`) ਨੂੰ ਵਿਸਤਾਰਦਾ ਹੈ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -485,7 +485,7 @@ open-sse/
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, ਨਾਲ ਹੀ `claudeIdentity.ts`
 (ਸਾਂਝਾ ਪਛਾਣ ਸਹਾਇਕ) ਅਤੇ `index.ts` (ਰਜਿਸਟਰੀ)।
 
-> ਨੋਟ: ਇੱਥੇ ਸੂਚੀਬੱਧ ਨਾ ਕੀਤੇ ਪ੍ਰਦਾਤਿਆਂ ਨੂੰ ਜਨਰਿਕ
+> ਨੋਟ: ਇੱਥੇ ਸੂਚੀਬੱਧ ਨਾ ਕੀਤੇ ਪ੍ਰਦਾਤਿਆਂ ਨੂੰ ਆਮ
 > OpenAI-ਅਨੁਕੂਲ ਐਗਜ਼ਿਕਿਊਟਰ ਦੀ ਵਰਤੋਂ ਕਰਕੇ `default.ts` ਦੁਆਰਾ ਸੇਵਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਪੂਰਾ ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ (355 ਪ੍ਰਦਾਤਾ)
 > `src/shared/constants/providers.ts` ਵਿੱਚ ਮੌਜੂਦ ਹੈ।
 
@@ -496,17 +496,17 @@ open-sse/
 - **9 ਬੇਨਤੀ ਅਨੁਵਾਦਕ** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`।
 - **9 ਜਵਾਬ ਅਨੁਵਾਦਕ** (`translator/response/`):
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`.
+  `openai-to-claude`।
 - **9 ਸਹਾਇਕ** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ਨਾਲ ਹੀ
   ਸਹਾਇਕ ਟੈਸਟ।
 - **ਚਿੱਤਰ ਸਹਾਇਕ** (`translator/image/sizeMapper.ts`)।
-- ਸਿਖਰਲਾ ਪੱਧਰ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`।
+- ਉੱਪਰੀ ਪੱਧਰ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`।
 
 ### 4.4 `open-sse/transformer/`
 
@@ -515,18 +515,18 @@ open-sse/
 
 ### 4.5 `open-sse/services/`
 
-ਮੁੱਖ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ (ਪੂਰੀ ਸੂਚੀ `open-sse/services/` ਅਧੀਨ):
+ਮੁੱਖ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ (ਪੂਰੀ ਸੂਚੀ `open-sse/services/` ਦੇ ਅਧੀਨ):
 
 | ਚਿੰਤਾ ਦਾ ਖੇਤਰ      | ਫ਼ਾਈਲਾਂ                                                                                                                                                                                                                                           |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ਕੌਂਬੋ ਰਾਊਟਿੰਗ      | `combo.ts` (19 ਰਣਨੀਤੀਆਂ), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                               |
 | ਆਟੋ ਕੌਂਬੋ ਇੰਜਣ     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`      |
-| ਲਚੀਲਾਪਣ            | `accountFallback.ts` (ਕੂਲਡਾਊਨ + ਲੌਕਆਉਟ), `errorClassifier.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                                                |
+| ਲਚਕੀਲਾਪਣ           | `accountFallback.ts` (ਕੂਲਡਾਊਨ + ਲੌਕਆਉਟ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                    |
 | ਕੋਟੇ               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts`                       |
 | ਕੈਸ਼ਿੰਗ            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                     |
 | ਰਾਊਟਿੰਗ ਇੰਟੈਲੀਜੈਂਸ | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                      |
 | ਮਾਡਲ ਪ੍ਰਬੰਧਨ       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                       |
-| ਕੰਪਰੈਸ਼ਨ           | `compression/` — ਪੂਰੀ ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ ਵਾਇਰਿੰਗ                                                                                                                                                                                                       |
+| ਕੰਪ੍ਰੈਸ਼ਨ          | `compression/` — ਪੂਰੀ ਕੰਪ੍ਰੈਸ਼ਨ ਇੰਜਣ ਵਾਇਰਿੰਗ                                                                                                                                                                                                      |
 | ਟੋਕਨ + ਸੈਸ਼ਨ       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts` |
 | ਟੀਅਰ / ਮੈਨੀਫੈਸਟ    | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                     |
 | IP / ਨੈੱਟਵਰਕ       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                             |
@@ -535,17 +535,17 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` ਵਿੱਚ ਵਾਇਰ ਕੀਤੇ **110 ਵਿਲੱਖਣ ਟੂਲ** (`schemas/tools.ts` ਵਿੱਚ 45 ਕੈਨੋਨਿਕਲ +
-  ਮੈਮੋਰੀ, ਸਕਿੱਲ, GitHub-ਸਕਿੱਲ, ਪੂਲ, ਗੇਮੀਫਿਕੇਸ਼ਨ, ਪਲੱਗਇਨ, Notion, Obsidian,
-  ਲੋਕਲ-ਕੋਰਪਸ ਅਤੇ ਕੰਪਰੈਸ਼ਨ ਮੋਡੀਊਲ — ਯੂਨੀਅਨ ਦੀ ਗਿਣਤੀ `countUniqueMcpTools` ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ)।
+- `server.ts` ਵਿੱਚ ਵਾਇਰ ਕੀਤੇ **110 ਵਿਲੱਖਣ ਟੂਲ** (`schemas/tools.ts` ਵਿੱਚ 45 ਕੈਨੋਨੀਕਲ +
+  ਮੈਮੋਰੀ, ਸਕਿੱਲਜ਼, GitHub-ਸਕਿੱਲਜ਼, ਪੂਲ, ਗੇਮੀਫਿਕੇਸ਼ਨ, ਪਲੱਗਇਨ, Notion, Obsidian,
+  ਲੋਕਲ-ਕੋਰਪਸ ਅਤੇ ਕੰਪ੍ਰੈਸ਼ਨ ਮੋਡੀਊਲ — ਯੂਨੀਅਨ ਦੀ ਗਿਣਤੀ `countUniqueMcpTools` ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ)।
 - **3 ਟ੍ਰਾਂਸਪੋਰਟ**: stdio, HTTP Streamable, SSE।
-- ਰਨਟਾਈਮ ਦੌਰਾਨ **33 ਸਕੋਪ** ਲਾਗੂ ਕੀਤੇ ਜਾਂਦੇ ਹਨ — ਮੁੱਢਲੀ ਸੂਚੀ `src/shared/constants/mcpScopes.ts` ਵਿੱਚ ਹੈ, ਪੂਰਾ ਸੈੱਟ ਹਰੇਕ ਟੂਲ ਮੋਡੀਊਲ ਦੁਆਰਾ ਘੋਸ਼ਿਤ ਸਕੋਪਾਂ ਦਾ ਯੂਨੀਅਨ ਹੈ।
+- ਰਨਟਾਈਮ ਉੱਤੇ ਲਾਗੂ ਕੀਤੇ **33 ਸਕੋਪ** — ਮੂਲ ਸੂਚੀ `src/shared/constants/mcpScopes.ts` ਵਿੱਚ ਹੈ, ਪੂਰਾ ਸੈੱਟ ਹਰੇਕ ਟੂਲ ਮੋਡੀਊਲ ਦੁਆਰਾ ਘੋਸ਼ਿਤ ਸਕੋਪਾਂ ਦਾ ਯੂਨੀਅਨ ਹੈ।
 - ਆਡਿਟ ਟੇਬਲ: `mcp_tool_audit` (`audit.ts` ਦੁਆਰਾ ਭਰੀ ਜਾਂਦੀ ਹੈ)।
 - ਫ਼ਾਈਲਾਂ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   ਅਤੇ `__tests__/` ਅਧੀਨ ਟੈਸਟ।
-- ਟੂਲਾਂ ਦੇ ਪੂਰੇ ਕੈਟਾਲੌਗ ਲਈ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ਵੇਖੋ।
+- ਪੂਰੇ ਟੂਲ ਕੈਟਾਲੌਗ ਲਈ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ਵੇਖੋ।
 
 ### 4.7 `open-sse/config/`
 
@@ -557,7 +557,7 @@ open-sse/
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
 ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਸਹਾਇਕ (`credentialLoader.ts`, `codexClient.ts`), ਅਤੇ ਕਲਾਊਡ
-ਅਡਾਪਟਰ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+ਅਡੈਪਟਰ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)।
 
@@ -662,25 +662,25 @@ bin/
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
   `validate-pack-artifact.ts`, `postinstall.mjs`, `postinstallSupport.mjs`,
   `uninstall.mjs`, `bootstrap-env.mjs`, `runtime-env.mjs`,
-  `native-binary-compat.mjs`.
+  `native-binary-compat.mjs`।
 - **`scripts/dev/`** — `run-next.mjs`, `run-next-playwright.mjs`,
   `run-standalone.mjs`, `standalone-server-ws.mjs`, `responses-ws-proxy.mjs`,
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs`।
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,
   `check-t11-any-budget.mjs`, `check-pr-test-policy.mjs`,
-  `check-supported-node-runtime.ts`, `test-report-summary.mjs`.
-- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`.
+  `check-supported-node-runtime.ts`, `test-report-summary.mjs`।
+- **`scripts/docs/`** — `generate-docs-index.mjs`, `gen-provider-reference.ts`।
 - **`scripts/i18n/`** — `generate-multilang.mjs`, `run-visual-qa.mjs`,
   `generate-qa-checklist.mjs`, `apply-priority-overrides.mjs`,
   `validate_translation.py`, `check_translations.py`, `i18n_autotranslate.py`,
-  `untranslatable-keys.json`.
+  `untranslatable-keys.json`।
 - **`scripts/ad-hoc/`** — `cursor-tap.cjs`, `sync-cursor-models.mjs`,
-  `migrate-env.mjs`, `dbsetup.js`.
+  `migrate-env.mjs`, `dbsetup.js`।
 
 ---
 

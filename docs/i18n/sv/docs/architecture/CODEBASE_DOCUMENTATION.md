@@ -436,48 +436,48 @@ Uppdelad i fokuserade underkataloger:
 
 ## 4. `open-sse/` — Arbetsyta för strömningsmotorn
 
-Separat npm-arbetsyta publicerad som `@omniroute/open-sse`. Ansvarar för bearbetning av
+Separat npm-arbetsyta som publiceras som `@omniroute/open-sse`. Ansvarar för bearbetning av
 förfrågningar, exekverare, översättare, tjänster, transformeraren och MCP-servern.
 
 ```
 open-sse/
 ├── index.ts                Publika exporter
-├── package.json            Arbetsytemanifest
+├── package.json            Arbetsytans manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Leverantörsregister, rubrikprofiler, identitet, …
+├── config/                 Leverantörsregister, huvudprofiler, identitet, …
 ├── handlers/               Förfrågningshanterare (chatt, inbäddningar, ljud, bild, …)
 ├── executors/              108 leverantörsspecifika HTTP-exekverare
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Strömtransformerare för Responses API ↔ Chat Completions
 ├── services/               Över 80 tjänstemoduler (kombinationer, reservlösningar, kvoter, identitet, …)
 ├── utils/                  Strömningshjälpare, TLS-klient, AWS SigV4, proxyhämtning, …
-└── mcp-server/             MCP-server (3 transporter, 33 omfång, 110 verktyg)
+└── mcp-server/             MCP-server (3 transporter, 33 behörighetsområden, 110 verktyg)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Hanterare               | Syfte                                                                                               |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Huvudsaklig chattpipeline (cache, hastighetsbegränsning, kombinationsdirigering, exekverardispatch) |
-| `responsesHandler.ts`   | Startpunkt för OpenAI Responses API                                                                 |
-| `embeddings.ts`         | Inbäddningar                                                                                        |
-| `imageGeneration.ts`    | Bildgenerering                                                                                      |
-| `audioSpeech.ts`        | Text-till-tal                                                                                       |
-| `audioTranscription.ts` | Tal-till-text                                                                                       |
-| `videoGeneration.ts`    | Videogenerering                                                                                     |
-| `musicGeneration.ts`    | Musikgenerering                                                                                     |
-| `rerank.ts`             | Omrankning                                                                                          |
-| `moderations.ts`        | Moderering                                                                                          |
-| `search.ts`             | Webbsökning                                                                                         |
-| `sseParser.ts`          | SSE-händelseparser                                                                                  |
-| `usageExtractor.ts`     | Hämtar tokenantal från uppströmsflöden                                                              |
-| `responseSanitizer.ts`  | Tar bort leverantörsspecifikt brus                                                                  |
-| `responseTranslator.ts` | Koppling mellan leverantörssvaret och översättningslagret                                           |
+| Hanterare               | Syfte                                                                                                 |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Huvudsaklig chattpipeline (cache, hastighetsbegränsning, kombinationsdirigering, anrop av exekverare) |
+| `responsesHandler.ts`   | Startpunkt för OpenAI Responses API                                                                   |
+| `embeddings.ts`         | Inbäddningar                                                                                          |
+| `imageGeneration.ts`    | Bildgenerering                                                                                        |
+| `audioSpeech.ts`        | Text-till-tal                                                                                         |
+| `audioTranscription.ts` | Tal-till-text                                                                                         |
+| `videoGeneration.ts`    | Videogenerering                                                                                       |
+| `musicGeneration.ts`    | Musikgenerering                                                                                       |
+| `rerank.ts`             | Omrangordning                                                                                         |
+| `moderations.ts`        | Moderering                                                                                            |
+| `search.ts`             | Webbsökning                                                                                           |
+| `sseParser.ts`          | Parser för SSE-händelser                                                                              |
+| `usageExtractor.ts`     | Extraherar tokenantal från uppströmsströmmar                                                          |
+| `responseSanitizer.ts`  | Tar bort leverantörsspecifikt brus                                                                    |
+| `responseTranslator.ts` | Koppling mellan leverantörssvaret och översättningslagret                                             |
 
 ### 4.2 `open-sse/executors/`
 
-108 leverantörsexekverare som var och en utökar `BaseExecutor` (`base.ts`):
+108 leverantörsexekverare, som var och en utökar `BaseExecutor` (`base.ts`):
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -491,7 +491,7 @@ open-sse/
 
 ### 4.3 `open-sse/translator/`
 
-Nav-och-ekrar-översättning (OpenAI är navet).
+Nav-och-eker-översättning (OpenAI är navet).
 
 - **9 förfrågningsöversättare** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -504,14 +504,14 @@ Nav-och-ekrar-översättning (OpenAI är navet).
 - **9 hjälpare** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, samt
-  hjälptester.
+  tester för hjälpare.
 - **Bildhjälpare** (`translator/image/sizeMapper.ts`).
 - På toppnivå: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream`-baserad konverterare för Responses API ↔ Chat
-  Completions (används av reservrutten `responses/`).
+  Completions (används av den generella `responses/`-rutten).
 
 ### 4.5 `open-sse/services/`
 
@@ -521,12 +521,12 @@ Höjdpunkter (fullständig lista under `open-sse/services/`):
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Kombinationsroutning         | `combo.ts` (19 strategier), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                             |
 | Automatisk kombinationsmotor | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`      |
-| Feltålighet                  | `accountFallback.ts` (nedkylning + låsning), `errorClassifier.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                                            |
+| Feltålighet                  | `accountFallback.ts` (nedkylning + låsning), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                |
 | Kvoter                       | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts`                       |
 | Cachelagring                 | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                     |
 | Intelligent routning         | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                      |
 | Modellhantering              | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                       |
-| Komprimering                 | `compression/` — fullständig inkoppling av komprimeringsmotorn                                                                                                                                                                                    |
+| Komprimering                 | `compression/` — fullständig konfiguration av komprimeringsmotorn                                                                                                                                                                                 |
 | Token + session              | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts` |
 | Nivå/manifest                | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                     |
 | IP/nätverk                   | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                             |
@@ -535,9 +535,9 @@ Höjdpunkter (fullständig lista under `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 unika verktyg** inkopplade i `server.ts` (45 kanoniska i `schemas/tools.ts` +
-  minnes-, färdighets-, GitHub-färdighets-, pool-, spelifierings-, plugin-, Notion-, Obsidian-,
-  lokalkorpus- och komprimeringsmoduler — unionen räknas av `countUniqueMcpTools`).
+- **110 unika verktyg** konfigurerade i `server.ts` (45 kanoniska i `schemas/tools.ts` +
+  moduler för minne, färdigheter, GitHub-färdigheter, pool, spelifiering, insticksprogram, Notion, Obsidian,
+  lokalt korpus och komprimering — unionen räknas av `countUniqueMcpTools`).
 - **3 transporter**: stdio, HTTP Streamable, SSE.
 - **33 behörighetsomfång** tillämpas vid körning — baslistan finns i `src/shared/constants/mcpScopes.ts`, och den fullständiga uppsättningen är unionen av de behörighetsomfång som deklareras av varje verktygsmodul.
 - Granskningstabell: `mcp_tool_audit` (fylls i av `audit.ts`).
@@ -553,17 +553,17 @@ Leverantörsregister (`providerRegistry.ts`, `providerModels.ts`,
 `providerHeaderProfiles.ts`), modellspecifika register per format (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-identitetshjälpare (`codexIdentity.ts`, `codexInstructions.ts`,
+identitetshjälpmedel (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-autentiseringsuppgiftshjälpare (`credentialLoader.ts`, `codexClient.ts`) och moln-
+autentiseringshjälpmedel (`credentialLoader.ts`, `codexClient.ts`) och moln-
 adaptrar (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Strömningsprimitiver och leverantörshjälpare: `stream.ts`, `streamHandler.ts`,
+Primitiver för strömning och hjälpfunktioner för leverantörer: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -656,7 +656,7 @@ Vanliga kommandon:
 
 ## 8. `scripts/`
 
-Organiserad i 6 undermappar efter syfte.
+Indelat i 6 undermappar efter syfte.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,

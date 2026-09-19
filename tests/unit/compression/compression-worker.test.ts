@@ -147,11 +147,21 @@ describe("compression worker execution", () => {
     assert.deepEqual(steps, ["rtk", "caveman"]);
   });
 
-  it("fails open without inline compression when a job times out", async () => {
+  it("reports a timeout as a non-retryable fault instead of silently failing open (#13145)", async () => {
+    // The pool no longer swallows a dispatch timeout: it rejects with a typed fault
+    // whose retryInProcess=false tells the caller (strategySelector) that the worker
+    // already burned its budget, so the caller ships the body uncompressed and LOGS
+    // the fault rather than re-running the same heavy pipeline on the event loop.
     const pool = new CompressionWorkerPool({ size: 1, timeoutMs: 1, idleMs: 100 });
     try {
-      const result = await pool.run(body, "stacked", { config });
-      assert.deepEqual(result, { body, compressed: false, stats: null });
+      await assert.rejects(
+        () => pool.run(body, "stacked", { config }),
+        (err: unknown) =>
+          err instanceof Error &&
+          err.name === "CompressionWorkerError" &&
+          (err as { retryInProcess?: boolean }).retryInProcess === false &&
+          /timed out/.test(err.message)
+      );
     } finally {
       await pool.close();
     }

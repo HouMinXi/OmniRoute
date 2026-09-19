@@ -13,23 +13,23 @@
 
 # 🚀 OmniRoute — безкоштовний ШІ-шлюз
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ніколи не припиняйте програмувати. Кожен ШІ-інструмент → 359 провайдерів — понад 150 безкоштовних — через єдину кінцеву точку. Claude Code, Codex, Cursor, Cline, Copilot і Antigravity підключаються до БЕЗКОШТОВНИХ Claude / GPT / Gemini з автоматичним резервним перемиканням. Поєднане стиснення RTK + Caveman заощаджує 15–95% токенів (~89% у середньому) — ви ніколи не досягнете лімітів. 359 ШІ-провайдерів · понад 150 безкоштовних тарифів · ~1,47 млрд безкоштовних токенів/міс. · 19 стратегій маршрутизації · $0 для початку."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ніколи не припиняйте програмувати. Кожен ШІ-інструмент → 359 провайдерів, понад 150 із них безкоштовні, через одну кінцеву точку. Claude Code, Codex, Cursor, Cline, Copilot і Antigravity із доступом до БЕЗКОШТОВНИХ Claude / GPT / Gemini та автоматичним резервним перемиканням. Комбіноване стиснення RTK + Caveman заощаджує 15–95% токенів (~89% у середньому) — більше жодних перевищень лімітів. 359 ШІ-провайдерів · понад 150 безкоштовних рівнів · ~1,62 млрд безкоштовних токенів на місяць · 19 стратегій маршрутизації · $0 для початку."/>
 
 </div>
 
 <div align="center">
 
-## 💰 ~1,47 млрд безкоштовних токенів / місяць
+## 💰 ~1,62 млрд безкоштовних токенів / місяць
 
 </div>
 
-> Об’єднувати безкоштовні тарифи вручну — складно: десятки SDK, десятки обмежень швидкості й жодного розуміння, скільки ресурсів у вас насправді є. OmniRoute каталогізує **452 записи безкоштовних тарифів у 34 ключах регулярних пулів** і обчислює загальну кількість токенів на основі **16 пулів з опублікованим додатним місячним бюджетом та п’яти лімітів Groq для окремих моделей**, усуваючи дублювання спільних пулів. Квоти, що стають доступними лише після регіональної перевірки особи (наразі: ModelScope), відображаються окремо — +~6 млн після регіональної перевірки особи — і ніколи не додаються до загальної кількості. Результат постійно відображається на інформаційній панелі (`/dashboard/free-tiers`).
+> Об’єднувати безкоштовні рівні вручну складно — десятки SDK, десятки обмежень швидкості й жодного розуміння того, скільки ресурсів ви насправді маєте. OmniRoute каталогізує **491 запис безкоштовного рівня для 35 ключів повторюваних пулів** і обчислює загальну кількість токенів на основі **17 пулів з опублікованим додатним місячним бюджетом та п’яти окремих для кожної моделі лімітів Groq**, усуваючи дублювання спільних пулів. Квоти, які стають доступними лише після регіональної перевірки особи (наразі: ModelScope), показуються окремо: +~6 млн після регіональної перевірки особи — і ніколи не додаються до загального показника. Результат постійно відображається на інформаційній панелі (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Картка бюджету безкоштовних тарифів OmniRoute: стабільно ~1,47 млрд безкоштовних токенів на місяць і до ~2,07 млрд у перший місяць із кредитами за реєстрацію, з 34 задокументованих ключів регулярних пулів, які охоплюють 452 каталогізовані записи безкоштовних тарифів за єдиною кінцевою точкою. Чесний розрахунок з усуненням дублювання пулів — кожен спільний пул враховується один раз, включно з 16 регулярними пулами з опублікованим додатним місячним бюджетом токенів та п’ятьма лімітами Groq для окремих моделей; 13 постачальників позначені в каталозі ризиків умов використання як такі, яких варто уникати, тож рішення залишається за вами. Смуга бюджету включає Mistral 1B, Nara 210M, LLM7 150M, Groq 30M (п’ять лімітів для окремих моделей) і менші пули, а також кредити за реєстрацію на перший місяць і постачальників із постійно безкоштовними тарифами без ліміту токенів, які відображаються окремо, щоб вони ніколи не завищували загальну кількість. Актуальні дані про використані та залишкові ресурси доступні на /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Картка бюджету безкоштовного рівня OmniRoute: стабільно ~1,62 млрд безкоштовних токенів на місяць і до ~2,22 млрд у перший місяць із бонусами за реєстрацію, отриманих із 35 задокументованих ключів повторюваних пулів, що охоплюють 491 каталогізований запис безкоштовного рівня за однією кінцевою точкою. Чесний розрахунок з усуненням дублювання пулів — кожен спільний пул враховується один раз, включно із 17 повторюваними пулами з опублікованим додатним місячним бюджетом токенів та п’ятьма окремими для кожної моделі лімітами Groq; у каталозі ризиків умов використання 13 постачальників позначено як небажані, тож вирішувати вам. Смуга бюджету включає Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (п’ять окремих для кожної моделі лімітів) і менші пули, а також бонуси за реєстрацію в перший місяць; постійно безкоштовні постачальники без обмеження кількості токенів показуються окремо, щоб вони ніколи не завищували загальний показник. Актуальні дані про використані та залишкові ресурси доступні на /dashboard/free-tiers."/>
 
-> Анімований огляд актуальної сторінки `/dashboard/free-tiers`. Повна методологія (усунення дублювання пулів, рівні кредитів, умови постачальників): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Анімований огляд актуальної сторінки `/dashboard/free-tiers`. Повна методологія (усунення дублювання пулів, рівні бонусів, умови постачальників): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Ці показники повторно перевіряються кожні два тижні за актуальним каталогом і **можуть змінюватися в обидва боки**: якщо постачальник припиняє дію безкоштовного тарифу, число зменшується; якщо з’являється новий — збільшується. Ми публікуємо саме те, що фактично обчислює каталог, а не округлений у більший бік найкращий сценарій.</sub>
+> <sub>Ці показники повторно перевіряються кожні два тижні за актуальним каталогом і **можуть змінюватися в обидва боки** — якщо постачальник припиняє надавати безкоштовний рівень, число зменшується; якщо з’являється новий, воно зростає. Ми публікуємо саме те, що фактично обчислює каталог, а не округлений у більший бік найкращий можливий результат.</sub>
 
 <br/>
 
@@ -37,7 +37,7 @@
 
 <h3>
 
-⭐ Поставте зірку репозиторію, якщо OMNIROUTE допоміг вам заощадити кошти та спростив вашу роботу.
+⭐ Поставте зірку репозиторію, якщо OMNIROUTE допоміг вам заощадити кошти та спростити роботу.
 
 </h3>
 
@@ -48,10 +48,10 @@
 
 ### 💬 Приєднуйтеся до спільноти
 
-**👋 Підпишіться на супроводжувача — дізнавайтеся першими про нових постачальників, випуски та поради:**
+**👋 Стежте за супровідником проєкту — першими дізнавайтеся про нових постачальників, випуски та поради:**
 
-[![Підписатися на Diego у LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Підписатися на @diegosouzapw у GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Стежити за Diego у LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Стежити за @diegosouzapw у GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
@@ -67,16 +67,16 @@
 
 <div align="center">
 
-|                                  | v3.8.49 |      **v3.8.50**       | `v3.8.51+` |
-| -------------------------------- | :-----: | :--------------------: | :--------: |
-| 🌐 Постачальники                 |   290   |        **352**         | ще в черзі |
-| 🧠 Унікальні ID моделей чату     |  1185   |        **1312**        |     —      |
-| 🖼️ Міст модальностей             |    —    | 🆕 зір + аудіо + відео |     —      |
-| 📡 Безкоштовний каталог Radar    |    —    |     🆕 за бажанням     |     —      |
-| ⚖️ Планування з урахуванням квот |    —    |     🆕 Quota-Share     |     —      |
-| 📊 Телеметрія квот               |    —    |  🆕 у реальному часі   |     —      |
+|                                  | v3.8.49 |       **v3.8.50**        | `v3.8.51+` |
+| -------------------------------- | :-----: | :----------------------: | :--------: |
+| 🌐 Постачальники                 |   290   |         **357**          | ще в черзі |
+| 🧠 Унікальні ID чат-моделей      |  1185   |         **1312**         |     —      |
+| 🖼️ Міст модальностей             |    —    |  🆕 зір + аудіо + відео  |     —      |
+| 📡 Безкоштовний каталог Radar    |    —    | 🆕 за згодою користувача |     —      |
+| ⚖️ Планування з урахуванням квот |    —    |      🆕 Quota-Share      |     —      |
+| 📊 Телеметрія квот               |    —    |   🆕 у реальному часі    |     —      |
 
-**→ [Дорожня карта](ROADMAP.md) — прямуємо до `v3.9.0 LTS`**
+**→ [Дорожня карта](ROADMAP.md) — рухаємося колією до `v3.9.0 LTS`**
 
 </div>
 
@@ -99,15 +99,15 @@
     <td align="center"><a href="#-works-the-second-you-install-it--no-keys-no-config">🆓 Без налаштування</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 Дізнатися більше</b></td>
+    <td align="right"><b>💡 Ознайомлення</b></td>
     <td align="center"><a href="#-the-promise">💥 Обіцянка</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 Чому OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ключові відмінності</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Що вирізняє OmniRoute</a></td>
   </tr>
   <tr>
-    <td align="right"><b>⚙️ Функції</b></td>
+    <td align="right"><b>⚙️ Можливості</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Комбінації</a></td>
-    <td align="center"><a href="#-352-ai-providers--154-catalog-marked-free">🌐 Постачальники</a></td>
+    <td align="center"><a href="#-357-ai-providers--152-catalog-marked-free">🌐 Провайдери</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI та MCP</a></td>
   </tr>
   <tr>
@@ -117,14 +117,14 @@
     <td align="center"><a href="#-private--local-first">🔒 Конфіденційність</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Переглянути</b></td>
+    <td align="right"><b>👀 Демонстрація</b></td>
     <td align="center"><a href="#-omniroute-in-action">🎬 У дії</a></td>
     <td align="center"><a href="#-whats-new">✨ Що нового</a></td>
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Сумісні CLI</a></td>
   </tr>
   <tr>
     <td align="right"><b>💚 Підтримка</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Підтримати / Зробити внесок</a></td>
+    <td align="center"><a href="#-support-omniroute">💚 Підтримати / Зробити пожертву</a></td>
     <td align="center"><a href="#-community--help">💬 Спільнота</a></td>
     <td align="center"><a href="#-sponsors">💖 Спонсори</a></td>
   </tr>
@@ -218,16 +218,16 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Працює одразу після встановлення — без налаштувань. Три кроки: 1. Встановіть — npm i -g omniroute, сервер запускається на localhost:20128. 2. Спрямуйте свій інструмент на http://localhost:20128/v1 — підійде будь-який інструмент, сумісний з OpenAI (Claude Code, Cursor, Cline). 3. Отримайте відповідь — викличте модель auto для миттєвої відповіді без ключа API, реєстрації та налаштувань. Провайдер без ключа OpenCode Free попередньо підключений до комбінації auto, тому щойно встановлений застосунок одразу готовий відповідати."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Працює одразу після встановлення — без налаштувань. Три кроки: 1. Установіть — npm i -g omniroute, сервер запускається на localhost:20128. 2. Спрямуйте свій інструмент на http://localhost:20128/v1 — підійде будь-який OpenAI-сумісний інструмент (Claude Code, Cursor, Cline). 3. Отримайте відповідь — викличте модель auto для миттєвої відповіді без API-ключа, реєстрації та налаштувань. Провайдер OpenCode Free, який не потребує ключа, заздалегідь підключений до комбінації auto, тому щойно встановлений застосунок одразу готовий відповідати."/>
 
 ```bash
-# Свіже встановлення, жодних облікових даних — `auto` вже працює:
+# Щойно встановлено, без облікових даних — `auto` вже працює:
 curl http://localhost:20128/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>Віддаєте перевагу певному безкоштовному бекенду? Викликайте `oc/…` (OpenCode Free) безпосередньо. Потім переходьте на `auto` й дозвольте OmniRoute обирати.</sub>
+<sub>Віддаєте перевагу конкретному безплатному бекенду? Викликайте `oc/…` (OpenCode Free) безпосередньо. Потім переходьте на `auto` й дозвольте OmniRoute вибирати.</sub>
 
 <sub>📦 Готові до копіювання сценарії швидкого старту для **Python, Node.js, PHP і cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
@@ -239,7 +239,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обіцянка — одна кінцева точка та 359 провайдерів. Автоматичне резервування продовжує маршрутизацію, доки доступна інша працездатна ціль. Шість основ: стійке резервування між 359 провайдерами · до 95% економії токенів для відповідних робочих навантажень · початок за $0 завдяки понад 150 безкоштовним тарифам і 53 постійним/безключовим безкоштовним провайдерам назавжди · 36 інтеграцій CLI/агентів через одну конфігурацію · сумісність з OpenAI, Claude, Gemini і Responses API за адресою /v1 · засоби для промислової експлуатації, зокрема автоматичні вимикачі, приховування TLS, MCP зі 110 інструментами, A2A, пам’ять, захисні обмеження, оцінювання та понад 39 000 декларацій статичних тестів у понад 5 100 відстежуваних тестових файлах."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обіцянка — одна кінцева точка та 359 провайдерів. Автоматичне резервне перемикання продовжує маршрутизацію, доки доступна інша справна ціль. Шість основ: стійке резервне перемикання між 359 провайдерами · до 95% економії токенів для відповідних робочих навантажень · старт за $0 завдяки понад 150 безплатним тарифам і 54 постійним/безключовим провайдерам, які назавжди залишаються безплатними · 36 інтеграцій CLI/агентів через одну конфігурацію · сумісність з OpenAI, Claude, Gemini і Responses API за адресою /v1 · засоби для промислової експлуатації, зокрема автоматичні вимикачі, TLS-маскування, MCP зі 110 інструментами, A2A, пам’ять, захисні механізми, оцінювання та понад 39 000 статичних декларацій тестів у понад 5 100 відстежуваних тестових файлах."/>
 
 <br/>
 <br/>
@@ -250,11 +250,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Чому OmniRoute — досить жонглювати 10 панелями керування, недійсними ключами API та неочікуваними рахунками. Десять щоденних проблем і рішень: невикористана квота згорає → максимально використовуйте підписки; обмеження частоти запитів посеред написання коду → 4-рівневе автоматичне резервування (Підписка → API → Дешеві → Безкоштовні); результати інструментів витрачають токени → стиснення RTK + Caveman (15–95%); дорогі API → маршрутизація з оптимізацією вартості; кожен інструмент потребує окремого налаштування → одна кінцева точка, одна панель керування; ШІ заблоковано → 3-рівневий проксі + приховування TLS; недійсні ключі → 3-рівнева відмовостійкість (автоматичні вимикачі, період очікування для ключів, блокування моделі); команда спільно використовує одну підписку → пули ключів із квотами справедливого розподілу; запити проходять через чужу хмару → локальний підхід із ключами, зашифрованими за допомогою AES-256-GCM; немає прозорості витрат → аналітика в реальному часі (використання, квота, економія, затримка p95)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Чому OmniRoute — годі жонглювати 10 панелями керування, неробочими API-ключами та несподіваними рахунками. Десять щоденних проблем і рішень: невикористана квота згорає → максимально використовуйте підписки; обмеження частоти запитів посеред написання коду → 4-рівневе автоматичне резервне перемикання (підписка → API → дешеві → безплатні); результати інструментів витрачають токени → стиснення RTK + Caveman (15–95%); дорогі API → маршрутизація, оптимізована за вартістю; кожен інструмент потребує окремого налаштування → одна кінцева точка, одна панель керування; ШІ заблоковано → 3-рівневий проксі + TLS-маскування; неробочі ключі → 3-рівнева відмовостійкість (автоматичні вимикачі, період очікування для ключів, блокування моделей); команда спільно використовує одну підписку → пули ключів із квотами справедливого розподілу; запити проходять через чужу хмару → локальний підхід із ключами, зашифрованими за допомогою AES-256-GCM; немає прозорості витрат → аналітика в реальному часі (використання, квота, заощадження, затримка p95)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Потік запиту OmniRoute: ваша IDE або CLI (Claude Code, Cursor, Cline…) звертається до однієї локальної кінцевої точки (http://localhost:20128/v1); інтелектуальний маршрутизатор OmniRoute (стиснення RTK + Caveman, 19 стратегій маршрутизації, автоматичні вимикачі, приховування TLS, MCP, A2A, захисні обмеження) може перемикатися між 4 рівнями провайдерів, доки залишається відповідна працездатна ціль — рівень 1: Підписка, рівень 2: Ключ API, рівень 3: Дешеві та рівень 4: Безкоштовні."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Потік запитів OmniRoute: ваша IDE або CLI (Claude Code, Cursor, Cline…) звертається до єдиної локальної кінцевої точки (http://localhost:20128/v1); розумний маршрутизатор OmniRoute (стиснення RTK + Caveman, 19 стратегій маршрутизації, автоматичні вимикачі, TLS-маскування, MCP, A2A, захисні механізми) може виконувати резервне перемикання між 4 рівнями провайдерів, доки залишається відповідна справна ціль — рівень 1: підписка, рівень 2: API-ключ, рівень 3: дешеві та рівень 4: безплатні."/>
 
 </div>
 
@@ -546,13 +546,13 @@ Pix copia-e-cola:
 
 <p><strong>Примітки для розробників:</strong> Під час npm install/postinstall проєкт може створити локальний файл <code>.env</code> для зручності розробників. Цей файл навмисно ігнорується через <code>.gitignore</code> (див. <code>.gitignore</code>), і його в жодному разі не можна додавати до репозиторію — якщо його випадково додано, змініть усі розкриті секрети та видаліть файл з історії. Рекомендації щодо керування локальними файлами середовища та секретами див. у <a href="docs/DEVELOPER-ENVIRONMENT.md">docs/DEVELOPER-ENVIRONMENT.md</a>.</p>
 
-## 📡 Радар OmniRoute
+## 📡 OmniRoute Radar
 
-Головний показник безкоштовного рівня залишається на рівні **~1.47B токенів/місяць** для наведеного вище задокументованого каталогу з усуненням дублювання між пулами. Тимчасові бонусні кредити за реєстрацію в провайдерів можуть окремо збільшити обсяг у перший місяць до **~2.07B**. Radar — це необов’язкове підписане доповнення до каталогу для тих, кому потрібні актуальніші дані про доступність безкоштовних моделей між випусками OmniRoute; каталог спільноти та всі наявні безкоштовні функції залишаються безкоштовними.
+Основний показник безкоштовного рівня залишається на рівні **~1,62 млрд токенів/місяць** згідно з наведеним вище задокументованим каталогом із дедуплікацією пулів. Тимчасові кредити за реєстрацію в постачальників можуть окремо збільшити обсяг у першому місяці до **~2,22 млрд**. Radar — це необов’язкове підписане доповнення до каталогу для тих, хто хоче отримувати актуальніші дані про доступність безкоштовних моделей між випусками OmniRoute; каталог спільноти та всі наявні безкоштовні функції залишаються безкоштовними.
 
-Спонсори можуть отримувати актуальний каталог і додаткові пропозиції від провайдерів. Його окрема змінна верхня межа становить **приблизно 3B токенів/місяць максимум**, залежно від доступності провайдерів. Ця верхня межа не є гарантією: провайдери можуть будь-коли змінювати квоти, критерії відповідності, моделі або регіони.
+Прихильники можуть отримувати актуальний каталог і додаткові пропозиції від постачальників. Його окрема змінна верхня межа становить **щонайбільше приблизно 3 млрд токенів/місяць** залежно від доступності постачальників. Ця верхня межа не є гарантією: постачальники можуть будь-коли змінювати квоти, критерії відповідності, моделі або регіони.
 
-Radar активується за бажанням і використовує лише запити GET. Клієнт OmniRoute не передає запити, трафік, конфігурацію провайдерів, телеметрію використання чи локальний стан приховування оголошень. Дізнайтеся про критерії відповідності та поточний каталог на сторінці **[radar.omniroute.online/planos](https://radar.omniroute.online/planos)**.
+Radar використовується за бажанням і лише через GET-запити. Клієнт OmniRoute не передає запити, трафік, конфігурацію постачальників, телеметрію використання або локальний стан приховування оголошень. Дізнайтеся про критерії відповідності та поточний каталог на сторінці **[radar.omniroute.online/planos](https://radar.omniroute.online/planos)**.
 
 <br/>
 
@@ -665,15 +665,15 @@ omniroute configure codex          # також: claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 352 постачальники ШІ — 152 позначені в каталозі як безкоштовні
+## 🌐 357 постачальників ШІ — 152 позначені в каталозі як безкоштовні
 
 </div>
 
-> **352 зареєстровані постачальники** в канонічних колекціях чатів, медіа, пошуку, локальних і хмарних агентів та систем, зокрема **152 з метаданими виявлення `hasFree: true`**. Реєстр чат-моделей охоплює **229 постачальників / 2 554 унікальні пари постачальник-модель / 1 283 необроблені ідентифікатори моделей**; окремий каталог безкоштовних лімітів містить **443 рядки для окремих моделей**, **34 поновлювані пули** та **53 постачальники з поновлюваним або безключовим безкоштовним назавжди доступом**. Ці знаменники навмисно різняться; визначення та обчислення з усуненням дублікатів пулів наведено в [Довіднику постачальників](docs/reference/PROVIDER_REFERENCE.md) і [Безкоштовних тарифах](docs/reference/FREE_TIERS.md).
+> **357 зареєстрованих постачальників** у канонічних колекціях чатів, медіа, пошуку, локальних і хмарних агентів та систем, зокрема **152 з метаданими виявлення `hasFree: true`**. Реєстр чат-моделей охоплює **229 постачальників / 2 554 унікальні пари «постачальник–модель» / 1 283 необроблені ідентифікатори моделей**; окремий каталог безкоштовних бюджетів містить **491 рядок для окремих моделей**, **35 поновлюваних пулів** і **54 постачальники з поновлюваним або назавжди безкоштовним доступом без ключа**. Ці знаменники навмисно відрізняються; визначення та розрахунки з усуненням дублікатів пулів наведено в [Довіднику постачальників](docs/reference/PROVIDER_REFERENCE.md) і [Безкоштовних рівнях](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Усі провідні лабораторії — через одну кінцеву точку
+### 🏢 Усі провідні лабораторії — через єдину кінцеву точку
 
 <table>
   <tr>
@@ -711,7 +711,7 @@ omniroute configure codex          # також: claude opencode qwen aider goos
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Без обмеження токенів</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Автоматичний маршрутизатор, Tencent Hy3<br/>Безкоштовно назавжди</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Автоматична маршрутизація, Tencent Hy3<br/>Безкоштовно назавжди</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Безкоштовно назавжди</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Безкоштовний рівень</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Безкоштовно назавжди</sub></td>
@@ -720,14 +720,14 @@ omniroute configure codex          # також: claude opencode qwen aider goos
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Необмежено й БЕЗКОШТОВНО</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Ключ не потрібен</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Понад 50 моделей<br/>10 тис. нейронів/день</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 запитів/хв безкоштовно</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>1 млн токенів/день</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Моделі :free<br/>+$10 → більше запитів/хв</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Понад 50 моделей<br/>10 тис. нейронів на день</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM безкоштовно</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>1 млн токенів на день</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>Моделі :free<br/>+$10 → вищий RPM</sub></td>
   </tr>
 </table>
 
-📖 Повний машинозчитуваний каталог → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 Повний машиночитний каталог → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -1296,9 +1296,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Посібник користувача</a></b></td><td>Провайдери, комбінації, інтеграція з CLI, розгортання</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Посібник із налаштування</a></b></td><td>Усі методи встановлення, конфігурації інструментів CLI, налаштування протоколів, оптимізація тайм-аутів</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Посібник з інструментів CLI</a></b></td><td>Налаштування окремих інструментів: Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Віддалений режим</a></b></td><td>Керування віддаленим OmniRoute (VPS) через CLI на ноутбуці за допомогою токенів доступу з обмеженою областю дії</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Конфігурація Claude Code</a></b></td><td>Підключення Claude Code до OmniRoute (локального або віддаленого) за допомогою <code>launch</code> і профілів для окремих моделей</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Швидкий старт</a></b></td><td>3 кроки: встановлення → підключення → налаштування</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Віддалений режим</a></b></td><td>Керуйте віддаленим OmniRoute (VPS) із CLI на своєму ноутбуці за допомогою токенів доступу з обмеженою областю дії</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Конфігурація Claude Code</a></b></td><td>Підключіть Claude Code до OmniRoute (локального/віддаленого) за допомогою <code>launch</code> і окремих профілів для кожної моделі</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Швидкий початок</a></b></td><td>3 кроки: встановлення → підключення → налаштування</td></tr>
 </table>
 
 ### 🔧 Експлуатація та розгортання
@@ -1307,7 +1307,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><th align="left">Документ</th><th align="left">Опис</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Посібник із Docker</a></b></td><td>Docker run, профілі Compose, Caddy HTTPS, тунелі, теги образів</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Посібник із Podman</a></b></td><td>Інтеграція Quadlet із systemd, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Розгортання на віртуальній машині</a></b></td><td>Повний посібник: налаштування віртуальної машини + nginx + Cloudflare</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Розгортання на віртуальній машині</a></b></td><td>Повний посібник: налаштування VM + nginx + Cloudflare</td></tr>
   <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Розгортання на Fly.io</a></b></td><td>Розгортання на Fly.io з постійним сховищем</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Посібник із Termux</a></b></td><td>Запуск OmniRoute на Android через Termux</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">Посібник із PWA</a></b></td><td>Встановлення прогресивного вебзастосунку, кешування, архітектура</td></tr>
@@ -1320,15 +1320,15 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
 <table>
   <tr><th align="left">Документ</th><th align="left">Опис</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Архітектура</a></b></td><td>Архітектура системи, потік даних і внутрішня будова</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Посібник зі стиснення</a></b></td><td>Конвеєр із 7 варіантами: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Посібник зі стиснення</a></b></td><td>Конвеєр із 7 варіантами: вимкнено / легке / стандартне / агресивне / ультра / RTK / комбіноване</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">Стиснення RTK</a></b></td><td>Стиснення виводу команд, фільтри, довіра, перевірка, відновлення необробленого виводу</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Рушії стиснення</a></b></td><td>Caveman, RTK, комбіновані конвеєри, інтерфейси панелі керування/API/MCP</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Формат правил стиснення</a></b></td><td>Схеми пакетів правил JSON для фільтрів Caveman і RTK</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Мовні пакети стиснення</a></b></td><td>Виявлення мови та створення пакетів правил Caveman</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Мовні пакети стиснення</a></b></td><td>Визначення мови та створення пакетів правил Caveman</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Посібник зі стійкості</a></b></td><td>Автоматичні запобіжники, періоди очікування, черга, захист від лавиноподібних запитів, підміна TLS</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Рушій Auto-Combo</a></b></td><td>Оцінювання за 16 факторами, набори режимів, самовідновлення</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Посібник із проксі</a></b></td><td>Трирівнева система проксі, маркетплейс 1proxy, CRUD для реєстру</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Безкоштовні рівні</a></b></td><td>Зведений каталог: 34 задокументовані поновлювані пули / 452 каталогізовані пропозиції безкоштовного рівня</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Рушій автоматичних комбінацій</a></b></td><td>Оцінювання за 16 факторами, пакети режимів, самовідновлення</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Посібник із проксі</a></b></td><td>Трирівнева система проксі, маркетплейс 1proxy, CRUD-операції з реєстром</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Безкоштовні рівні</a></b></td><td>Зведений каталог: 35 задокументованих регулярних пулів / 491 каталогізована пропозиція безкоштовного рівня</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Галерея функцій</a></b></td><td>Візуальний огляд панелі керування зі знімками екрана</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Документація кодової бази</a></b></td><td>Зручний для початківців огляд кодової бази</td></tr>
 </table>
@@ -1349,8 +1349,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
 
 <table>
   <tr><th align="left">Документ</th><th align="left">Опис</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Внесок у проєкт</a></b></td><td>Налаштування середовища розробки та настанови</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Модель розгалуження та випусків</a></b></td><td>На які гілки спрямовуються PR (<code>release/*</code>) і що означають <code>main</code> та теги</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Участь у розробці</a></b></td><td>Налаштування середовища розробки та настанови</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Модель гілок і випусків</a></b></td><td>На які гілки спрямовуються PR (<code>release/*</code>) і що означають <code>main</code> та теги</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Журнал змін</a></b></td><td>Повна історія випусків за версіями</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Політика безпеки</a></b></td><td>Повідомлення про вразливості та практики безпеки</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">Посібник з i18n</a></b></td><td>Підтримка 42 мов, процес перекладу, RTL</td></tr>
@@ -1362,9 +1362,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
 
 <div align="center">
 
-# ⭐ Найкращі учасники
+# ⭐ Провідні учасники
 
-> OmniRoute розвивається завдяки захопленій спільноті відкритого програмного забезпечення. Ці люди зробили винятковий внесок, який безпосередньо впливає на якість, стабільність і поширення проєкту. **Дякуємо.**
+> OmniRoute формується завдяки відданій спільноті відкритого програмного забезпечення. Ці люди зробили винятковий внесок, який безпосередньо впливає на якість, стабільність і поширення проєкту. **Дякуємо.**
 
 ### Зовнішні учасники за кількістю об’єднаних запитів на злиття
 
@@ -1393,7 +1393,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/Prudhvivuda"><b>Prudhvivuda</b></a></td><td align="center">24</td><td align="right">6,312</td></tr>
 </table>
 
-<sub>Зафіксовано на актуальній верхівці <code>release/v3.8.50</code> — <code>dafb4ae808</code>, зі злиттями до 2026-08-24 05:26:03 UTC включно. Посторінковий перепис через GitHub GraphQL містить 5 911 об’єднаних PR: 2 707 від власника репозиторію, 179 від Dependabot і <b>3 025 зовнішніх PR від 535 різних учасників</b>. «Змінені рядки» — це сума доданих і видалених рядків за даними GitHub, що включає згенеровані файли, файли блокування, каталоги, переклади та документацію; це обсяг змін, а не кількість написаних рядків коду. Однакові результати на межі рейтингу збережено.</sub>
+<sub>Зафіксовано на актуальній верхівці <code>release/v3.8.50</code> — <code>dafb4ae808</code>, зі злиттями до 2026-08-24 05:26:03 UTC включно. Посторінковий перепис GitHub GraphQL містить 5,911 об’єднаних PR: 2,707 від власника репозиторію, 179 від Dependabot і <b>3,025 зовнішніх PR від 535 різних учасників</b>. «Змінені рядки» — це сума доданих і видалених рядків за даними GitHub, що охоплює згенеровані файли, файли блокування, каталоги, переклади та документацію; це обсяг змін, а не кількість написаних рядків коду. Учасників з однаковими показниками на межі списку збережено.</sub>
 
 ### Коміти, атрибутовані GitHub
 
@@ -1404,42 +1404,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🥇 220 комітів, зарахованих GitHub</sub>
+      <sub>🥇 220 комітів, пов’язаних із GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥈 219 комітів, зарахованих GitHub</sub>
+      <sub>🥈 219 комітів, пов’язаних із GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🥉 108 комітів, зарахованих GitHub</sub>
+      <sub>🥉 108 комітів, пов’язаних із GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 81 коміт, зарахований GitHub</sub>
+      <sub>🏅 81 коміт, пов’язаний із GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 комітів, зарахованих GitHub</sub>
+      <sub>🏅 70 комітів, пов’язаних із GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 69 комітів, зарахованих GitHub · спільне 6-те місце</sub>
+      <sub>🏅 69 комітів, пов’язаних із GitHub · спільне 6-те місце</sub>
     </td>
   </tr>
   <tr>
@@ -1448,42 +1448,42 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🏅 69 комітів, зарахованих GitHub · спільне 6-те місце</sub>
+      <sub>🏅 69 комітів, пов’язаних із GitHub · спільне 6-те місце</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 64 коміти, зараховані GitHub</sub>
+      <sub>🏅 64 коміти, пов’язані з GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/zen0bit">
         <img src="https://github.com/zen0bit.png" width="40" style="border-radius:50%" alt="zenobit"/><br/>
         <b>zenobit</b>
       </a><br/>
-      <sub>🏅 62 коміти, зараховані GitHub</sub>
+      <sub>🏅 62 коміти, пов’язані з GitHub</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🏅 51 коміт, зарахований GitHub · спільне 10-те місце</sub>
+      <sub>🏅 51 коміт, пов’язаний із GitHub · спільне 10-те місце</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/xz-dev">
         <img src="https://github.com/xz-dev.png" width="40" style="border-radius:50%" alt="Xiangzhe"/><br/>
         <b>Xiangzhe</b>
       </a><br/>
-      <sub>🏅 51 коміт, зарахований GitHub · спільне 10-те місце</sub>
+      <sub>🏅 51 коміт, пов’язаний із GitHub · спільне 10-те місце</sub>
     </td>
   </tr>
 </table>
 
-<sub>Повторно перевірено 2026-08-24 06:14:31 UTC: коміти, зараховані GitHub та отримані через API учасників репозиторію для стандартної гілки <code>release/v3.8.50</code>. API повернув 525 ідентичностей (415 користувачів, 2 ботів, 108 анонімних); ця таблиця не містить супровідника, ботів та анонімних ідентичностей і зберігає спільні місця. Вона відрізняється як від наведеного вище рейтингу об’єднаних PR, так і від наведеного нижче реєстру метаданих Git із 639 осіб.</sub>
+<sub>Повторно перевірено 2026-08-24 06:14:31 UTC: коміти, пов’язані з GitHub, згідно з даними API учасників репозиторію для стандартної гілки <code>release/v3.8.50</code>. API повернув 525 ідентичностей (415 користувачів, 2 боти, 108 анонімних); ця таблиця не містить супроводжувача, ботів та анонімних ідентичностей і зберігає спільні місця в рейтингу. Вона відрізняється як від наведеного вище рейтингу об’єднаних PR, так і від наведеної нижче вибірки метаданих Git, що охоплює 639 осіб.</sub>
 
-> 🙏 Функції, виправлення помилок та вдосконалення інфраструктури від цих учасників є **ключовою складовою** того, що робить OmniRoute надійним і функціонально багатим. Кожен запит на злиття, кожен тестовий випадок і кожен файл перекладу i18n мають значення. Відкритий код створюють такі люди, як вони.
+> 🙏 Функції, виправлення помилок і вдосконалення інфраструктури, створені цими учасниками, є **основною складовою** того, що робить OmniRoute надійним і функціонально багатим. Кожен запит на злиття, кожен тестовий сценарій і кожен файл перекладу i18n мають значення. Відкрите програмне забезпечення створюють такі люди, як вони.
 
 </div>
 

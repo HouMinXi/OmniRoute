@@ -46,7 +46,7 @@ A boolean flag is considered **enabled** when its effective value is `"true"`,
 
 ## Flag Catalog
 
-73 flags across 6 categories. **Default** is the definition default — the value
+74 flags across 6 categories. **Default** is the definition default — the value
 used when neither a DB override nor an environment variable is present.
 
 ### Security (10)
@@ -64,12 +64,13 @@ used when neither a DB override nor an environment variable is present.
 | `AUTH_LOG_INCLUDE_ACCOUNT_ID`           | boolean | `false`  | Include account prefix in AUTH log lines (e.g. "Using <provider> account: abc12345..."). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this. |
 | `OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN` | boolean | `false`  | When OIDC is enabled, disable password login so users can only authenticate via OIDC Single Sign-On. When disabled (default), both password login and OIDC are available.                                                                                      |
 
-### Network (15)
+### Network (16)
 
 | Key                                             | Type    | Default | Restart | Description                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ----------------------------------------------- | ------- | ------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `ENABLE_TLS_FINGERPRINT`                        | boolean | `false` | ✓       | Enable TLS fingerprint stealth mode.                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `AUDIO_REMOTE_PROVIDER_NODES`                   | boolean | `false` |         | Allow the /v1/audio/* routes to use OpenAI-compatible provider nodes hosted outside localhost. Off by default — routing audio to a remote host changes egress identity and must be an explicit operator decision. Loopback nodes are always allowed and unaffected.                                                                                                                                                                                     |
+| `RERANK_REMOTE_PROVIDER_NODES`                  | boolean | `false` |         | Allow POST /v1/rerank (and the memory engine's loopback rerank step) to use OpenAI-compatible provider nodes hosted outside localhost. Off by default — routing to a remote host changes egress identity and must be an explicit operator decision. Loopback nodes are always allowed; remote nodes must also pass the provider outbound URL policy.                                                                                                    |
 | `PROXY_AUTO_SELECT_ENABLED`                     | boolean | `false` |         | When no proxy is assigned to a connection, auto-select the first working proxy from the registry. Off by default (otherwise any registry proxy becomes a global fallback — #3332).                                                                                                                                                                                                                                                                      |
 | `OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK` | boolean | `false` |         | Allow OAuth and provider validation flows to bypass a pinned proxy and connect directly when proxy reachability pre-checks fail. Off by default because this can change egress IP.                                                                                                                                                                                                                                                                      |
 | `NETWORK_ROTATION_SHARED_EGRESS_GUARD`          | boolean | `true`  |         | On a network exception (timeout, connection refused/reset) for a multi-account rotation executor, when the failing account has no dedicated proxy, apply a short cooldown and skip other proxy-less accounts for the rest of the request instead of retrying each one. On by default (safe: no egress IP change, only reduces latency/cooldown risk on shared-egress accounts). Disable to restore immediate propagation on the first proxy-less throw. |
@@ -213,7 +214,7 @@ Returns every flag with its effective value, source, and a summary.
       "requiresRestart": false,
       "warningLevel": "caution",
     },
-    // ... all 72 flags
+    // ... all 74 flags
   ],
   "summary": {
     "total": 56,

@@ -447,81 +447,81 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Մատակարարների ռեեստրներ, վերնագրերի պրոֆիլներ, ինքնություն, …
 ├── handlers/               Հարցումների մշակիչներ (զրույց, ներդրումներ, աուդիո, պատկեր, …)
-├── executors/              Մատակարարներին հատուկ 108 HTTP կատարիչ
-├── translator/             Ձևաչափերի փոխակերպում (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── executors/              Մատակարարներին հատուկ HTTP-ի 108 կատարիչ
+├── translator/             Ձևաչափերի փոխարկում (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions հոսքի փոխակերպիչ
-├── services/               80+ ծառայության մոդուլներ (համակցություններ, պահուստային մշակում, քվոտաներ, ինքնություն, …)
+├── services/               80+ ծառայության մոդուլ (համակցումներ, պահուստային անցում, քվոտաներ, ինքնություն, …)
 ├── utils/                  Հոսքային մշակման օժանդակ գործիքներ, TLS հաճախորդ, AWS SigV4, պրոքսի հարցումներ, …
-└── mcp-server/             MCP սերվեր (3 տրանսպորտ, 33 տիրույթ, 110 գործիք)
+└── mcp-server/             MCP սերվեր (3 փոխադրամիջոց, 33 տիրույթ, 110 գործիք)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Մշակիչ                  | Նպատակ                                                                                                 |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `chatCore.ts`           | Զրույցի հիմնական հոսքաշար (քեշ, հաճախականության սահմանափակում, համակցված երթուղավորում, կատարիչի կանչ) |
-| `responsesHandler.ts`   | OpenAI Responses API-ի մուտքային կետ                                                                   |
-| `embeddings.ts`         | Ներդրումներ                                                                                            |
-| `imageGeneration.ts`    | Պատկերների գեներացում                                                                                  |
-| `audioSpeech.ts`        | Տեքստից խոսքի փոխակերպում                                                                              |
-| `audioTranscription.ts` | Խոսքից տեքստի փոխակերպում                                                                              |
-| `videoGeneration.ts`    | Տեսանյութերի գեներացում                                                                                |
-| `musicGeneration.ts`    | Երաժշտության գեներացում                                                                                |
-| `rerank.ts`             | Վերադասակարգում                                                                                        |
-| `moderations.ts`        | Բովանդակության վերահսկում                                                                              |
-| `search.ts`             | Վեբ որոնում                                                                                            |
-| `sseParser.ts`          | SSE իրադարձությունների վերլուծիչ                                                                       |
-| `usageExtractor.ts`     | Վերադաս հոսքերից տոկենների քանակների դուրսբերում                                                       |
-| `responseSanitizer.ts`  | Մատակարարին հատուկ ավելորդ տվյալների հեռացում                                                          |
-| `responseTranslator.ts` | Մատակարարի պատասխանի և թարգմանիչ շերտի միջև կապակցող բաղադրիչ                                          |
+| Մշակիչ                  | Նպատակ                                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `chatCore.ts`           | Զրույցի հիմնական հոսքաշար (քեշ, հաճախականության սահմանափակում, համակցված երթուղավորում, կատարիչի գործարկում) |
+| `responsesHandler.ts`   | OpenAI Responses API-ի մուտքային կետ                                                                         |
+| `embeddings.ts`         | Ներդրումներ                                                                                                  |
+| `imageGeneration.ts`    | Պատկերների ստեղծում                                                                                          |
+| `audioSpeech.ts`        | Տեքստից խոսքի փոխարկում                                                                                      |
+| `audioTranscription.ts` | Խոսքից տեքստի փոխարկում                                                                                      |
+| `videoGeneration.ts`    | Տեսանյութերի ստեղծում                                                                                        |
+| `musicGeneration.ts`    | Երաժշտության ստեղծում                                                                                        |
+| `rerank.ts`             | Վերադասակարգում                                                                                              |
+| `moderations.ts`        | Բովանդակության վերահսկում                                                                                    |
+| `search.ts`             | Վեբ որոնում                                                                                                  |
+| `sseParser.ts`          | SSE իրադարձությունների վերլուծիչ                                                                             |
+| `usageExtractor.ts`     | Վերին հոսքերից թոքենների քանակի դուրսբերում                                                                  |
+| `responseSanitizer.ts`  | Մատակարարին հատուկ աղմուկի հեռացում                                                                          |
+| `responseTranslator.ts` | Մատակարարի պատասխանի և թարգմանիչների շերտի միջև կապակցող բաղադրիչ                                            |
 
 ### 4.2 `open-sse/executors/`
 
-Մատակարարների 108 կատարիչ, որոնցից յուրաքանչյուրը ընդլայնում է `BaseExecutor`-ը (`base.ts`)՝
+Մատակարարների 108 կատարիչ, որոնցից յուրաքանչյուրն ընդլայնում է `BaseExecutor`-ը (`base.ts`)․
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, ինչպես նաև `claudeIdentity.ts`
-(ինքնության համօգտագործվող օժանդակ գործիք) և `index.ts` (ռեեստր)։
+(ինքնության ընդհանուր օժանդակ բաղադրիչ) և `index.ts` (ռեեստր)։
 
 > Նշում․ այստեղ չթվարկված մատակարարները սպասարկվում են `default.ts`-ի կողմից՝ օգտագործելով ընդհանրական
-> OpenAI-համատեղելի կատարիչը։ Մատակարարների ամբողջական կատալոգը (355 մատակարար) գտնվում է
+> OpenAI-ի հետ համատեղելի կատարիչը։ Մատակարարների ամբողջական կատալոգը (355 մատակարար) գտնվում է
 > `src/shared/constants/providers.ts`-ում։
 
 ### 4.3 `open-sse/translator/`
 
-Հանգույց-և-ճառագայթ թարգմանություն (OpenAI-ը հանգույցն է)։
+Կենտրոն-ճառագայթային թարգմանություն (OpenAI-ը կենտրոնն է)։
 
-- **Հարցումների 9 թարգմանիչ** (`translator/request/`)՝
+- **Հարցումների 9 թարգմանիչ** (`translator/request/`)․
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
   `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
   `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`։
-- **Պատասխանների 9 թարգմանիչ** (`translator/response/`)՝
+- **Պատասխանների 9 թարգմանիչ** (`translator/response/`)․
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`։
-- **9 օժանդակ գործիք** (`translator/helpers/`)՝
+- **9 օժանդակ բաղադրիչ** (`translator/helpers/`)․
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ինչպես նաև
-  օժանդակ գործիքների թեստեր։
-- **Պատկերների օժանդակ գործիքներ** (`translator/image/sizeMapper.ts`)։
+  օժանդակ բաղադրիչների թեստերը։
+- **Պատկերների օժանդակ բաղադրիչներ** (`translator/image/sizeMapper.ts`)։
 - Վերին մակարդակ՝ `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`։
 
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream`-ի վրա հիմնված Responses API ↔ Chat
-  Completions փոխարկիչ (օգտագործվում է `responses/` երթուղու համընդհանուր մշակիչի կողմից)։
+  Completions փոխարկիչ (օգտագործվում է `responses/` երթուղու՝ բոլոր դեպքերը որսացող մշակիչի կողմից)։
 
 ### 4.5 `open-sse/services/`
 
-Կարևոր բաղադրիչներ (ամբողջական ցանկը՝ `open-sse/services/`-ում)․
+Հիմնական բաղադրիչները (ամբողջական ցանկը՝ `open-sse/services/`-ում)․
 
-| Մտահոգության ոլորտ           | Ֆայլեր                                                                                                                                                                                                                                            |
+| Խնդիր                        | Ֆայլեր                                                                                                                                                                                                                                            |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Համակցված երթուղավորում      | `combo.ts` (19 ռազմավարություն), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                        |
-| Ավտոմատ համակցման շարժիչ     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`      |
-| Խափանումակայունություն       | `accountFallback.ts` (սպասման ժամանակահատված + արգելափակում), `errorClassifier.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                           |
+| Combo երթուղավորում          | `combo.ts` (19 ռազմավարություն), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                        |
+| Auto Combo շարժիչ            | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`      |
+| Կայունություն                | `accountFallback.ts` (սպասման շրջան + արգելափակում), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                        |
 | Քվոտաներ                     | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts`                       |
 | Քեշավորում                   | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                     |
 | Երթուղավորման բանականություն | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                      |
@@ -535,17 +535,17 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 եզակի գործիք**՝ կապակցված `server.ts`-ում (45 կանոնական՝ `schemas/tools.ts`-ում +
-  հիշողության, հմտությունների, GitHub հմտությունների, պուլի, գեյմիֆիկացիայի, հավելումների, Notion-ի, Obsidian-ի,
-  տեղային կորպուսի և սեղմման մոդուլներ. միավորումը հաշվարկվում է `countUniqueMcpTools`-ով)։
+- **110 եզակի գործիք**՝ կապակցված `server.ts`-ում (45 կանոնական գործիք՝ `schemas/tools.ts`-ում +
+  հիշողության, հմտությունների, GitHub-հմտությունների, պուլի, խաղայնացման, փլագինների, Notion-ի, Obsidian-ի,
+  տեղային կորպուսի և սեղմման մոդուլներ — միավորումը հաշվարկվում է `countUniqueMcpTools`-ի միջոցով)։
 - **3 փոխադրամիջոց**՝ stdio, HTTP Streamable, SSE։
-- **33 շրջանակ**՝ կիրառվող կատարման ընթացքում. բազային ցանկը գտնվում է `src/shared/constants/mcpScopes.ts`-ում, իսկ ամբողջական բազմությունը յուրաքանչյուր գործիքի մոդուլի կողմից հայտարարված շրջանակների միավորումն է։
+- **33 հասանելիության շրջանակ**, որոնք պարտադրվում են կատարման ժամանակ — հիմնական ցանկը գտնվում է `src/shared/constants/mcpScopes.ts`-ում, իսկ ամբողջական բազմությունը յուրաքանչյուր գործիքային մոդուլի կողմից հայտարարված շրջանակների միավորումն է։
 - Աուդիտի աղյուսակ՝ `mcp_tool_audit` (լրացվում է `audit.ts`-ի միջոցով)։
 - Ֆայլեր՝ `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  ինչպես նաև թեստերը՝ `__tests__/`-ի ներքո։
-- Գործիքների ամբողջական կատալոգի համար տե՛ս [MCP-SERVER.md](../frameworks/MCP-SERVER.md)։
+  ինչպես նաև թեստերը՝ `__tests__/`-ում։
+- Գործիքների ամբողջական կատալոգը տե՛ս [MCP-SERVER.md](../frameworks/MCP-SERVER.md)-ում։
 
 ### 4.7 `open-sse/config/`
 
@@ -553,7 +553,7 @@ open-sse/
 `providerHeaderProfiles.ts`), ըստ ձևաչափի մոդելների ռեեստրներ (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ինքնության օժանդակ գործիքներ (`codexIdentity.ts`, `codexInstructions.ts`,
+նույնականացման օժանդակ գործիքներ (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
 հավատարմագրերի օժանդակ գործիքներ (`credentialLoader.ts`, `codexClient.ts`) և ամպային
@@ -563,7 +563,7 @@ open-sse/
 
 ### 4.8 `open-sse/utils/`
 
-Հոսքային մշակման պրիմիտիվներ և մատակարարների օժանդակ գործիքներ՝ `stream.ts`, `streamHandler.ts`,
+Հոսքային պրիմիտիվներ և մատակարարի օժանդակ գործիքներ՝ `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -571,7 +571,7 @@ open-sse/
 `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
 `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
 `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+`ollamaTransform.ts`։
 
 ---
 
