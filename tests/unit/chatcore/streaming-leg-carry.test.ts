@@ -339,15 +339,32 @@ test("providerUrl is assigned on every path before it is read", () => {
   // not, but the check should demonstrate that rather than rely on the comment.
   // Same for the diagnostic code: if TypeScript ever renumbers it, a hard-coded
   // 2454 would silently pass forever.
-  const probeSource = readFileSync(leafPath, "utf8").replace(
-    /^(\s*)providerUrl = /m,
-    "$1// probe: assignment removed\n$1void 0 && (providerUrl = "
+  const leafSource = readFileSync(leafPath, "utf8");
+
+  // Comment the assignment out entirely rather than splicing around it. An
+  // earlier attempt wrapped it in `void 0 && (...` and left the parenthesis
+  // unbalanced, so the probe did not parse -- and a file that fails to parse can
+  // report 2454 for reasons that have nothing to do with the branch under test,
+  // which is exactly the false negative this self-check exists to avoid.
+  const assignment = /^([ \t]*)providerUrl = .*$/m;
+  const match = leafSource.match(assignment);
+  assert.ok(match, "failed to build the self-check probe: no providerUrl assignment matched");
+  const probeSource = leafSource.replace(assignment, "$1// probe: assignment removed");
+
+  // The probe must still be a valid TypeScript file, and it must genuinely be
+  // missing the assignment -- otherwise a 2454 below would prove nothing.
+  const probeTree = ts.createSourceFile("probe.ts", probeSource, ts.ScriptTarget.ESNext, true);
+  assert.equal(
+    (probeTree as unknown as { parseDiagnostics?: unknown[] }).parseDiagnostics?.length ?? 0,
+    0,
+    "self-check probe does not parse, so any diagnostic it produces is meaningless"
   );
-  assert.notEqual(
-    probeSource,
-    readFileSync(leafPath, "utf8"),
-    "failed to build the self-check probe: no providerUrl assignment matched"
+  assert.equal(
+    (probeSource.match(/^[ \t]*providerUrl = /gm) ?? []).length,
+    (leafSource.match(/^[ \t]*providerUrl = /gm) ?? []).length - 1,
+    "self-check probe did not actually drop an assignment"
   );
+
   const probePath = join(tmpdir(), `streaming-leg-probe-${process.pid}.ts`);
   writeFileSync(probePath, probeSource);
   let probeFound = 0;
