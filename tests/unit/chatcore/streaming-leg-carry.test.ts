@@ -300,3 +300,45 @@ test("carry() reads the live bindings, so reassignments reach the barrel", () =>
     assert.ok(bound.has(name), `${name} must be one of the let-bound deps`);
   }
 });
+
+test("providerUrl is assigned on every path before it is read", () => {
+  // providerUrl became a local when the leg took ownership of it, declared
+  // without an initialiser so that a missing assignment is an error rather than
+  // a silent undefined flowing into logTargetRequest.
+  //
+  // The repo compiles with strict: false, and definite-assignment analysis is a
+  // strictNullChecks feature -- so npm run typecheck:core does NOT enforce this.
+  // An earlier version of this change claimed the compiler guaranteed it; that
+  // was wrong, and commenting out one branch's assignment kept the build green.
+  //
+  // Re-check the single file with the flag on. Scoped to this file, so it does
+  // not drag the rest of the codebase into strict mode.
+  const prog = ts.createProgram([leafPath.pathname], {
+    strictNullChecks: true,
+    noEmit: true,
+    target: ts.ScriptTarget.ESNext,
+    module: ts.ModuleKind.ESNext,
+    moduleResolution: ts.ModuleResolutionKind.Bundler,
+    skipLibCheck: true,
+    // The leg's imports are irrelevant here and resolving them would pull in the
+    // whole graph; definite assignment is a per-function flow question.
+    noResolve: true,
+  });
+
+  const sf = prog.getSourceFile(leafPath.pathname);
+  assert.ok(sf, "failed to load the leaf into a program");
+
+  const usedBeforeAssigned = prog
+    .getSemanticDiagnostics(sf)
+    .filter((d) => d.code === 2454)
+    .map((d) => {
+      const { line } = sf!.getLineAndCharacterOfPosition(d.start ?? 0);
+      return `${line + 1}: ${ts.flattenDiagnosticMessageText(d.messageText, " ")}`;
+    });
+
+  assert.deepEqual(
+    usedBeforeAssigned,
+    [],
+    `variables read before assignment:\n  ${usedBeforeAssigned.join("\n  ")}`
+  );
+});

@@ -356,6 +356,12 @@ export async function runStreamingLeg(deps: StreamingLegDeps): Promise<Streaming
 
   // Assigned on every path through the execution pipeline below before it is
   // read, and never consumed by the barrel afterwards, so it stays local.
+  //
+  // Declared without an initialiser deliberately, but note that typecheck:core
+  // does not enforce that: definite-assignment analysis needs strictNullChecks
+  // and this repo compiles with strict: false. The guarantee is pinned by
+  // tests/unit/chatcore/streaming-leg-carry.test.ts, which re-checks this file
+  // with the flag on.
   let providerUrl: string;
 
   const carry = (): StreamingLegCarry => ({
