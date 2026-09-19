@@ -342,10 +342,11 @@ test("providerUrl is assigned on every path before it is read", () => {
   const leafSource = readFileSync(leafPath, "utf8");
 
   // Comment the assignment out entirely rather than splicing around it. An
-  // earlier attempt wrapped it in `void 0 && (...` and left the parenthesis
-  // unbalanced, so the probe did not parse -- and a file that fails to parse can
-  // report 2454 for reasons that have nothing to do with the branch under test,
-  // which is exactly the false negative this self-check exists to avoid.
+  // earlier attempt wrapped it in a short-circuit expression and left the
+  // opening parenthesis unbalanced, so the probe did not parse -- and a file
+  // that fails to parse can report 2454 for reasons that have nothing to do
+  // with the branch under test, which is exactly the false negative this
+  // self-check exists to avoid.
   const assignment = /^([ \t]*)providerUrl = .*$/m;
   const match = leafSource.match(assignment);
   assert.ok(match, "failed to build the self-check probe: no providerUrl assignment matched");
