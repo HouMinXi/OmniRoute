@@ -177,6 +177,26 @@ describe("applyFinalClaudeRawPassthroughHeaders", () => {
       "anthropic-version": "2023-06-01",
     });
   });
+  it("TC-14d: client-supplied anthropic-version is preserved and not overwritten by default", () => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    applyFinalClaudeRawPassthroughHeaders(headers, {
+      "anthropic-version": "2024-01-01",
+    });
+    assert.equal(headers["anthropic-version"], "2024-01-01");
+  });
+
+  it("TC-14e: non-string values in clientHeaders are ignored", () => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    const malformed = {
+      "x-good": "valid-string",
+      "x-bad-num": 12345 as unknown as string,
+      "x-bad-obj": { foo: "bar" } as unknown as string,
+    };
+    applyFinalClaudeRawPassthroughHeaders(headers, malformed);
+    assert.equal(headers["x-good"], "valid-string");
+    assert.equal("x-bad-num" in headers, false);
+    assert.equal("x-bad-obj" in headers, false);
+  });
 });
 
 // ── 执行器级（Task 4）：base.ts 守卫接线 ─────────────────────────────────────
