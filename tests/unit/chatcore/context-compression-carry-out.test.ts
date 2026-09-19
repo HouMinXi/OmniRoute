@@ -22,7 +22,10 @@ const leafPath = new URL(
   "../../../open-sse/handlers/chatCore/contextCompression.ts",
   import.meta.url
 );
-const barrelPath = new URL("../../../open-sse/handlers/chatCore.ts", import.meta.url);
+const parentLeafPath = new URL(
+  "../../../open-sse/handlers/chatCore/cacheAndCompress.ts",
+  import.meta.url
+);
 
 function parse(path: URL) {
   return ts.createSourceFile(
@@ -70,9 +73,9 @@ function returnedFields(): string[] {
     .sort();
 }
 
-/** `x = compressionOutcome.y;` assignments in the barrel, as [target, source] pairs. */
-function barrelWriteBacks(): Array<[string, string]> {
-  const sf = parse(barrelPath);
+/** `x = compressionOutcome.y;` assignments in the parent leaf / caller, as [target, source] pairs. */
+function callerWriteBacks(): Array<[string, string]> {
+  const sf = parse(parentLeafPath);
   const pairs: Array<[string, string]> = [];
   const walk = (node: ts.Node) => {
     if (
@@ -103,25 +106,25 @@ test("the leaf returns every value it reassigns", () => {
   assert.ok(fields.includes("compressionResponseMeta"));
 });
 
-test("the barrel reseats every field the leaf returns", () => {
-  const reseated = new Set(barrelWriteBacks().map(([, source]) => source));
+test("the caller reseats every field the leaf returns", () => {
+  const reseated = new Set(callerWriteBacks().map(([, source]) => source));
   const missing = returnedFields().filter((field) => !reseated.has(field));
   assert.deepEqual(
     missing,
     [],
-    `the barrel drops these compression results on the floor: ${missing.join(", ")}`
+    "the caller drops these compression results on the floor: " + missing.join(", ")
   );
 });
 
-test("the barrel does not reseat anything the leaf never returns", () => {
+test("the caller does not reseat anything the leaf never returns", () => {
   const returned = new Set(returnedFields());
-  const pairs = barrelWriteBacks();
-  assert.ok(pairs.length > 0, "the barrel must consume the compression result");
+  const pairs = callerWriteBacks();
+  assert.ok(pairs.length > 0, "the caller must consume the compression result");
   for (const [target, source] of pairs) {
     assert.equal(target, source, "a write-back must not cross-wire two fields");
     assert.ok(
       returned.has(source),
-      `the barrel reads compressionOutcome.${source}, which the leaf does not return`
+      `the caller reads compressionOutcome.${source}, which the leaf does not return`
     );
   }
 });
@@ -136,7 +139,7 @@ test("nativeCodexPassthrough stays an input, never a carry-out", () => {
     "nativeCodexPassthrough must not be returned"
   );
   assert.ok(
-    !barrelWriteBacks().some(([, source]) => source === "nativeCodexPassthrough"),
-    "assigning it would throw: it is a const in the barrel"
+    !callerWriteBacks().some(([, source]) => source === "nativeCodexPassthrough"),
+    "assigning it would throw: it is a const in the caller"
   );
 });

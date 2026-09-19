@@ -1,3 +1,4 @@
+import { runCacheAndCompress } from "./chatCore/cacheAndCompress.ts";
 import { materializeStreamingSuccessResponse } from "./chatCore/streamingSuccessResponse.ts";
 import { runRequestPrelude } from "./chatCore/requestPrelude.ts";
 import { executeProviderRequest as executeProviderRequestFromLeaf } from "./chatCore/executeProviderRequest.ts";
@@ -6,34 +7,20 @@ import {
   resolveResponseToolNameMap,
 } from "./chatCore/requestToolIdentity.ts";
 import {
-  injectMemoryAndSkills,
-  mergeInjectedFallbackOwnerNames,
-} from "./chatCore/memorySkillsInjection.ts";
-import {
   normalizeOpenAICompatibleTools,
   shouldNormalizeFunctionToolsOnly,
 } from "./chatCore/openAICompatibleTools.ts";
 import { buildFailureUsageRecord, type FailureUsageAggregate } from "./chatCore/failureUsage.ts";
 import { createTranslationFailureResult } from "./chatCore/translationFailure.ts";
-import { estimateFinalInputTokens } from "./chatCore/contextEstimation.ts";
 import {
   extractSystemRoleMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
 export { extractSystemRoleMessages, relocateDirectiveOnlyMessages };
 import { acquireTurnExecution, createTurnInProgressResult } from "./chatCore/turnExecutionGuard.ts";
-import { applyContextCompression } from "./chatCore/contextCompression.ts";
-import { checkSemanticCache } from "./chatCore/semanticCache.ts";
-import { enforceOutputTokenBudget } from "./chatCore/outputTokenBudget.ts";
 import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
-import { sanitizeChatRequestBody } from "./chatCore/sanitization.ts";
-import {
-  applyReasoningInputPolicy,
-  resolveIncompatibleReasoningAction,
-} from "../services/reasoningInputPolicy.ts";
 
 import { routingFinishReason } from "./chatCore/routingFinishReason.ts";
-import { isNoMemoryRequested } from "./chatCore/headers.ts";
 
 export { clearCombosCache, clearUpstreamProxyConfigCache } from "./chatCore/comboContextCache.ts";
 import {
@@ -60,7 +47,6 @@ export {
   buildStreamingResponseHeaders,
   stripStaleForwardingHeaders,
 };
-import { resolveMemoryOwnerId } from "./chatCore/memoryExtraction.ts";
 import { stripStore, usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeClaudeToolsForDispatch } from "./chatCore/claudeToolDefaults.ts";
 import { injectSystemPromptPreTranslation } from "../services/systemPrompt.ts";
@@ -85,22 +71,13 @@ import {
 import { shouldUseMidConversationSystem } from "../executors/claudeIdentity.ts";
 import { getUnsupportedParams } from "../config/providerRegistry.ts";
 import { checkToolCallingRequiredButUnsupported } from "./chatCore/toolCallingRequiredCheck.ts";
-import {
-  supportsMaxTokens,
-  getResolvedModelCapabilities,
-  getExplicitModelOutputCap,
-  resolveInputTokenCapForGate,
-} from "@/lib/modelCapabilities.ts";
+import { supportsMaxTokens, getResolvedModelCapabilities } from "@/lib/modelCapabilities.ts";
 import {
   checkRequestCapabilityFit,
   deriveRequestCapabilityRequirements,
   buildCapabilityMismatchMessage,
 } from "@/shared/constants/capabilities/capabilityFilter.ts";
-import {
-  areContextWindowChecksDisabled,
-  isFeatureFlagEnabled,
-} from "@/shared/utils/featureFlags.ts";
-import { toPositiveInteger } from "../services/reasoningTokenBuffer.ts";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
 import { buildErrorBody, createErrorResult, sanitizeErrorMessage } from "../utils/error.ts";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 import {
@@ -108,7 +85,6 @@ import {
   PROVIDER_MAX_TOKENS,
   STREAM_READINESS_MAX_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
-  DEFAULT_MAX_TOKENS,
   STREAM_DISCONNECT_GRACE_PERIOD_MS,
 } from "../config/constants.ts";
 import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/providers";
@@ -121,7 +97,6 @@ import {
   type PersistAttemptLogsArgs,
 } from "./chatCore/attemptLogging.ts";
 import { attachCompressionUsageReceiptAfterAnalytics as attachCompressionUsageReceiptAfterAnalyticsFor } from "./chatCore/compressionUsageReceipt.ts";
-import { adaptBodyForCompression } from "../services/compression/bodyAdapter.ts";
 import { trackPendingRequest, appendRequestLog, saveRequestUsage } from "@/lib/usageDb";
 import { finalizePendingScope, updatePendingScope } from "@/lib/usage/pendingRequestScope";
 import { recordCost } from "@/domain/costRules";
@@ -137,8 +112,6 @@ import {
   shouldPreserveCacheControl,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
-import { compressContext, estimateTokens, getTokenLimit } from "../services/contextManager.ts";
-import type { CompressionResult } from "../services/compression/types.ts";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { extractFacts } from "@/lib/memory/extraction";
 import { getClaudeCodeCompatibleRequestDefaults } from "@/lib/providers/requestDefaults";
@@ -362,258 +335,57 @@ export async function handleChatCore({
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
   try {
-  // ── Phase 9.1: Semantic cache check (temp=0, any streaming mode) ──
-  const cacheHit = await checkSemanticCache({
-    semanticCacheEnabled,
+  const cacheAndCompressResult = await runCacheAndCompress({
     body,
+    semanticCacheEnabled,
+    stream: !!stream,
     clientRawRequest,
     model,
+    effectiveModel,
     provider,
-    stream: !!stream,
-    reqLogger,
     effectiveServiceTier,
     pendingScope,
+    reqLogger,
     startTime,
     log,
-    persistAttemptLogs: persistAttemptLogsPrelude,
-    apiKeyId: apiKeyInfo?.id ?? undefined,
-    cacheDefaultMode: (apiKeyInfo as { cacheDefaultMode?: "legacy" | "bypass" } | null)
-      ?.cacheDefaultMode,
-  });
-  if (cacheHit) {
-    return cacheHit;
-  }
-
-  const reasoningInputFormat =
-    sourceFormat === FORMATS.OPENAI_RESPONSES
-      ? "responses"
-      : sourceFormat === FORMATS.OPENAI
-        ? "chat"
-        : null;
-  if (reasoningInputFormat && body && typeof body === "object") {
-    const policy = applyReasoningInputPolicy(
-      body as Record<string, unknown>,
-      reasoningInputFormat,
-      {
-        provider,
-        preserveEncryptedReasoning:
-          credentials?.providerSpecificData?.preserveEncryptedReasoning === true,
-        onIncompatibleReasoning: resolveIncompatibleReasoningAction({
-          reasoningTransportFallback,
-          // #11178 regressed combo steps whose combo record carries no explicit
-          // stepId/executionKey (plain model-list combos): their explicit
-          // `reasoningTransportFallback: "skip"` config was silently degraded to
-          // "drop". `isCombo` is the combo marker; step ids are optional
-          // finer-grained metadata that plain combos never set.
-          isComboStep: Boolean(isCombo) || Boolean(comboStepId || comboExecutionKey),
-          headers: clientRawRequest?.headers ?? null,
-        }),
-      }
-    );
-    if (policy.incompatibleReasoning) {
-      trackPendingRequest(model, provider, connectionId, false);
-      return createErrorResult(
-        HTTP_STATUS.BAD_REQUEST,
-        "Reasoning continuation is not compatible with the selected target"
-      );
-    }
-  }
-
-  body = sanitizeChatRequestBody(body, sourceFormat, targetFormat);
-  // Per-request opt-out: clients that manage their own context send
-  // `x-omniroute-no-memory: true` to skip memory+skills injection (a null owner
-  // disables both branches in injectMemoryAndSkills). See PRD-2026-06-19-no-memory-header.
-  const memoryOwnerId = isNoMemoryRequested(clientRawRequest?.headers ?? null)
-    ? null
-    : resolveMemoryOwnerId(apiKeyInfo as Record<string, unknown> | null);
-  const injectionResult = await injectMemoryAndSkills({
-    body,
-    memoryOwnerId,
-    provider,
-    effectiveModel,
+    persistAttemptLogsPrelude,
+    apiKeyInfo,
     sourceFormat,
     targetFormat,
-    backgroundReason,
-    log,
-  });
-  body = injectionResult.body;
-  const memorySettings = injectionResult.memorySettings;
-
-  // Merge web-search/web-fetch fallback tool names into the builtin owner set.
-  // injectMemoryAndSkills only tracks memory tools; the fallback names were
-  // injected into body.tools by prepareWebSearchFallbackBody/prepareWebFetchFallbackBody
-  // above, so they must be carried into the owner provenance chain here.
-  const mergedOwnerNames = mergeInjectedFallbackOwnerNames(
-    injectionResult,
-    [webSearchFallbackPlan, webFetchFallbackPlan],
-    preConversionClientToolNames
-  );
-  injectionResult.builtinToolNames = mergedOwnerNames.builtinToolNames;
-
-  // Translate request (pass reqLogger for intermediate logging)
-  // ── Proactive Context Compression (Phase 4) ──
-  // Check if context exceeds 70% of limit and compress proactively before sending to provider.
-  // This prevents "prompt too long" errors for large-but-not-full contexts.
-  const compressionBody = body
-    ? adaptBodyForCompression(body as Record<string, unknown>).body
-    : null;
-  const allMessages = compressionBody?.messages || body?.contents || body?.request?.contents || [];
-  let cavemanOutputModeApplied = false;
-  let cavemanOutputModeIntensity: string | null = null;
-  let preCompressionBody: typeof body | null = null;
-  let compressionResponseMeta: string | null = null;
-  // OmniGlyph 1.3.x has native OpenAI Chat/Responses transformers. When the
-  // inbound protocol differs from the provider wire, defer only that engine to
-  // the post-translation body; the text engines still run in their legacy lane.
-  let runPostTranslationCompression:
-    ((input: Record<string, unknown>) => Promise<CompressionResult>) | null = null;
-  // Delegated Context Editing (Claude only): captured at the canonical compression
-  // settings read below, then threaded to executor.execute() further down. Lives at
-  // function scope because the read happens inside the per-message compression block.
-  let contextEditingEnabled = false;
-  // The dashboard's global compression switch must also control the built-in
-  // reactive and last-resort compaction passes. Otherwise an operator selecting
-  // "off" still has large histories rewritten by trim_tools/purify_history.
-  let reactiveContextCompactionEnabled = false;
-  // Hoisted to function scope (not just the compression-block scope below) so the
-  // combo-resolved override survives to the final enforceOutputTokenBudget() call
-  // further down — see #8378 (context limit resolved by the combo was silently
-  // discarded because it only existed inside this `if` block).
-  let contextLimit = getTokenLimit(provider, effectiveModel);
-  const compressionOutcome = await applyContextCompression({
-    body,
-    allMessages,
-    apiKeyInfo,
-    clientRawRequest,
-    comboName,
-    connectionId,
     credentials,
-    effectiveModel,
-    effectiveServiceTier,
-    getCurrentConnectionId,
+    reasoningTransportFallback,
     isCombo,
-    log,
-    provider,
+    comboStepId,
+    comboExecutionKey,
+    connectionId,
+    backgroundReason,
+    webSearchFallbackPlan,
+    webFetchFallbackPlan,
+    preConversionClientToolNames,
+    comboName,
+    getCurrentConnectionId,
     routingComboId,
     skillRequestId,
-    sourceFormat,
-    targetFormat,
     traceId,
-    cavemanOutputModeApplied,
-    cavemanOutputModeIntensity,
-    compressionAnalyticsWritePromise,
-    compressionResponseMeta,
-    contextEditingEnabled,
-    contextLimit,
     nativeCodexPassthrough,
-    preCompressionBody,
-    reactiveContextCompactionEnabled,
-    runPostTranslationCompression,
     tokensCompressed,
+    compressionAnalyticsWritePromise,
   });
-  body = compressionOutcome.body;
-  cavemanOutputModeApplied = compressionOutcome.cavemanOutputModeApplied;
-  cavemanOutputModeIntensity = compressionOutcome.cavemanOutputModeIntensity;
-  compressionAnalyticsWritePromise = compressionOutcome.compressionAnalyticsWritePromise;
-  compressionResponseMeta = compressionOutcome.compressionResponseMeta;
-  contextEditingEnabled = compressionOutcome.contextEditingEnabled;
-  contextLimit = compressionOutcome.contextLimit;
-  preCompressionBody = compressionOutcome.preCompressionBody;
-  reactiveContextCompactionEnabled = compressionOutcome.reactiveContextCompactionEnabled;
-  runPostTranslationCompression = compressionOutcome.runPostTranslationCompression;
-  tokensCompressed = compressionOutcome.tokensCompressed;
-
-  // Re-check the concrete target after all compression passes. Combo compatibility
-  // filtering is advisory and may preserve an all-incompatible pool; this is the
-  // hard boundary that prevents a too-large prompt (or a negative token budget)
-  // from reaching an OpenAI-compatible upstream such as NVIDIA NIM.
-  let finalEstimatedInputTokens = estimateFinalInputTokens(body as Record<string, unknown>);
-  // Reuse the already-resolved `contextLimit` (may have been narrowed to the
-  // per-target combo window above, resolveComboContextLimit) instead of a bare
-  // getTokenLimit(provider, effectiveModel) re-fetch, which would silently
-  // discard that combo-aware override and re-widen the last-resort budget.
-  const finalContextLimit = contextLimit;
-  const toolsReserve = Array.isArray(body?.tools) ? estimateTokens(body.tools) : 0;
-
-  // Last-resort compaction against the concrete input budget (not the 70% threshold).
-  // Covers cases where the proactive pass was skipped or still left the request oversized (#8560).
-  if (
-    reactiveContextCompactionEnabled &&
-    !nativeCodexPassthrough &&
-    finalEstimatedInputTokens >= finalContextLimit &&
-    body
-  ) {
-    const lastResortTarget = Math.max(1, finalContextLimit - toolsReserve - 1);
-    const lastResortAdapter = adaptBodyForCompression(body as Record<string, unknown>);
-    const lastResortResult = compressContext(lastResortAdapter.body, {
-      provider,
-      model: effectiveModel,
-      maxTokens: lastResortTarget,
-      reserveTokens: 0,
-    });
-    if (lastResortResult.compressed && lastResortResult.body) {
-      body = lastResortAdapter.adapted
-        ? lastResortAdapter.restore(lastResortResult.body as Record<string, unknown>, {
-            dropMissingMappedItems: true,
-          })
-        : lastResortResult.body;
-      finalEstimatedInputTokens = estimateFinalInputTokens(body as Record<string, unknown>);
-      log?.info?.(
-        "CONTEXT",
-        `Last-resort context compaction: ${lastResortResult.stats?.original} → ${lastResortResult.stats?.final} tokens ` +
-          `(re-estimated input ${finalEstimatedInputTokens}, limit ${finalContextLimit})`
-      );
-    }
+  if (cacheAndCompressResult.kind === "return") {
+    return cacheAndCompressResult.response as Response | Record<string, unknown>;
   }
-
-  const modelOutputCap = toPositiveInteger(
-    getExplicitModelOutputCap({ provider, model: effectiveModel })
-  );
-  const contextWindowChecksDisabled = areContextWindowChecksDisabled();
-  const outputBudget = enforceOutputTokenBudget(
-    body as Record<string, unknown>,
-    finalEstimatedInputTokens,
-    contextWindowChecksDisabled ? Number.MAX_SAFE_INTEGER : finalContextLimit,
-    targetFormat === FORMATS.CLAUDE && sourceFormat !== FORMATS.CLAUDE ? DEFAULT_MAX_TOKENS : 0,
-    modelOutputCap,
-    contextWindowChecksDisabled
-      ? null
-      : toPositiveInteger(
-          resolveInputTokenCapForGate({ provider, model: effectiveModel }, { isCombo })
-        )
-  );
-  if (outputBudget.ok === false) {
-    const exceededInputCap = outputBudget.maxInputTokens !== undefined;
-    const message =
-      `Input exceeds ${exceededInputCap ? "maximum input tokens" : "context window"} for ${provider}/${effectiveModel}: ` +
-      `estimated ${outputBudget.estimatedInputTokens} input tokens, ${exceededInputCap ? `max input ${outputBudget.maxInputTokens}` : `limit ${outputBudget.contextLimit}`}. ` +
-      `Reduce the prompt or route to a model with a larger ${exceededInputCap ? "input limit" : "context window"}.`;
-    log?.warn?.("CONTEXT", message);
-    trackPendingRequest(model, provider, connectionId, false);
-    return createErrorResult(
-      HTTP_STATUS.BAD_REQUEST,
-      message,
-      null,
-      "context_length_exceeded",
-      "invalid_request_error"
-    );
-  }
-  if (outputBudget.adjustedFields.length > 0) {
-    // A field can also be adjusted by *removal* (invalid/non-positive value), which
-    // the cap did not cause — so state the ceiling in effect rather than claiming
-    // the cap drove this particular adjustment.
-    const modelCapIsBinding =
-      modelOutputCap != null && modelOutputCap < outputBudget.availableOutputTokens;
-    log?.info?.(
-      "CONTEXT",
-      `Adjusted invalid or oversized output token fields (${outputBudget.adjustedFields.join(", ")}); ` +
-        `${outputBudget.availableOutputTokens} tokens remain for output` +
-        (modelCapIsBinding
-          ? ` (output ceiling in effect: ${modelOutputCap}, ${provider}/${effectiveModel}'s own cap)`
-          : "")
-    );
-  }
-  body = outputBudget.body;
+  body = cacheAndCompressResult.body;
+  const memoryOwnerId = cacheAndCompressResult.memoryOwnerId;
+  const memorySettings = cacheAndCompressResult.memorySettings;
+  const injectionResult = cacheAndCompressResult.injectionResult;
+  compressionAnalyticsWritePromise = cacheAndCompressResult.compressionAnalyticsWritePromise;
+  let compressionResponseMeta = cacheAndCompressResult.compressionResponseMeta;
+  let contextEditingEnabled = cacheAndCompressResult.contextEditingEnabled;
+  let preCompressionBody = cacheAndCompressResult.preCompressionBody;
+  // Re-seat post-translation compression callback onto the caller's local variable.
+  // This is invoked downstream (around line 780) on the post-translation body.
+  let runPostTranslationCompression = cacheAndCompressResult.runPostTranslationCompression;
+  tokensCompressed = cacheAndCompressResult.tokensCompressed;
 
   let translatedBody = body;
   const isClaudePassthrough = sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE;
