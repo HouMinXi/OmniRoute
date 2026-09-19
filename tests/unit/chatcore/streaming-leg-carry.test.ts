@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import ts from "typescript";
 
 // The streaming block was lifted out of handleChatCore into its own leaf. Unlike
@@ -313,7 +315,7 @@ test("providerUrl is assigned on every path before it is read", () => {
   //
   // Re-check the single file with the flag on. Scoped to this file, so it does
   // not drag the rest of the codebase into strict mode.
-  const prog = ts.createProgram([leafPath.pathname], {
+  const programOptions: ts.CompilerOptions = {
     strictNullChecks: true,
     noEmit: true,
     target: ts.ScriptTarget.ESNext,
@@ -321,12 +323,45 @@ test("providerUrl is assigned on every path before it is read", () => {
     moduleResolution: ts.ModuleResolutionKind.Bundler,
     skipLibCheck: true,
     // The leg's imports are irrelevant here and resolving them would pull in the
-    // whole graph; definite assignment is a per-function flow question.
+    // whole graph; definite assignment is a per-function flow question. The
+    // self-check below confirms this does not weaken the analysis.
     noResolve: true,
-  });
+  };
+
+  const prog = ts.createProgram([leafPath.pathname], programOptions);
 
   const sf = prog.getSourceFile(leafPath.pathname);
   assert.ok(sf, "failed to load the leaf into a program");
+
+  // Before trusting a zero, prove this configuration can still produce a
+  // non-zero. noResolve skips the import graph, and a reasonable worry is that
+  // it also skips the flow analysis this check depends on -- measured, it does
+  // not, but the check should demonstrate that rather than rely on the comment.
+  // Same for the diagnostic code: if TypeScript ever renumbers it, a hard-coded
+  // 2454 would silently pass forever.
+  const probeSource = readFileSync(leafPath, "utf8").replace(
+    /^(\s*)providerUrl = /m,
+    "$1// probe: assignment removed\n$1void 0 && (providerUrl = "
+  );
+  assert.notEqual(
+    probeSource,
+    readFileSync(leafPath, "utf8"),
+    "failed to build the self-check probe: no providerUrl assignment matched"
+  );
+  const probePath = join(tmpdir(), `streaming-leg-probe-${process.pid}.ts`);
+  writeFileSync(probePath, probeSource);
+  let probeFound = 0;
+  try {
+    const probeProg = ts.createProgram([probePath], programOptions);
+    const probeSf = probeProg.getSourceFile(probePath);
+    probeFound = probeProg.getSemanticDiagnostics(probeSf).filter((d) => d.code === 2454).length;
+  } finally {
+    rmSync(probePath, { force: true });
+  }
+  assert.ok(
+    probeFound > 0,
+    "this program configuration no longer reports TS2454, so a clean result below would be meaningless"
+  );
 
   const usedBeforeAssigned = prog
     .getSemanticDiagnostics(sf)
