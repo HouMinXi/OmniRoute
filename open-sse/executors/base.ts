@@ -59,7 +59,10 @@ import {
 } from "../services/tokenRefresh.ts";
 import type { ProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { signRequestBody } from "../services/claudeCodeCCH.ts";
-import { isConnectionRawPassthrough } from "../utils/cacheControlPolicy.ts";
+import {
+  applyFinalClaudeRawPassthroughHeaders,
+  isConnectionRawPassthrough,
+} from "../utils/cacheControlPolicy.ts";
 import { normalizeCacheControlTtl } from "../services/claudeCodeConstraints.ts";
 import {
   appendAnthropicBetaHeader,
@@ -1438,16 +1441,7 @@ export class BaseExecutor {
 
         mergeUpstreamExtraHeaders(finalHeaders, upstreamExtraHeaders);
         if (isRawPassthrough) {
-          for (const key of Object.keys(finalHeaders)) {
-            const lower = key.toLowerCase();
-            if (
-              lower === "x-app" ||
-              lower.startsWith("x-stainless-") ||
-              lower === "anthropic-dangerous-direct-browser-access"
-            ) {
-              delete finalHeaders[key];
-            }
-          }
+          applyFinalClaudeRawPassthroughHeaders(finalHeaders, clientHeaders);
         }
         if (this.provider === "cline" || this.provider === "clinepass") {
           applyClineProtocolHeaders(finalHeaders, {
