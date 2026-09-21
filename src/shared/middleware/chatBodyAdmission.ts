@@ -19,7 +19,12 @@ import { createLogger } from "../utils/logger";
 import { DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS } from "../../lib/resilience/settings";
 import v8 from "node:v8";
 import { trackRequest } from "../../lib/gracefulShutdown";
-import { resolveIngestByteBudget, type IngestBudgetSource } from "./admissionBudget";
+import {
+  DEFAULT_STREAM_FLOOR_DIVISOR,
+  resolveFlightByteBudget,
+  resolveIngestByteBudget,
+  type IngestBudgetSource,
+} from "./admissionBudget";
 import {
   ADMISSION_BYPASS_HEADER,
   isInternalAdmissionBypass,
@@ -233,6 +238,7 @@ export type ChatAdmissionShedReason =
   | "queued_bytes_budget"
   | "body_exceeds_budget"
   | "inflight_bytes_budget"
+  | "flight_bytes_budget"
   | "resource_pressure";
 
 /**
@@ -341,6 +347,7 @@ export class ChatAdmissionController {
   readonly #onShed: ChatAdmissionShedSink;
 
   readonly #ingestBudget: IngestByteAdmissionController;
+  readonly #flightBudget: IngestByteAdmissionController;
 
   constructor(
     readonly maxHeavyInFlight = 1,
@@ -357,6 +364,10 @@ export class ChatAdmissionController {
       maxInflightBytes?: number;
       budgetSource?: IngestBudgetSource;
       checkPressureSeverity?: () => PressureSeverity;
+    } = {},
+    flightBudget: {
+      maxFlightBytes?: number;
+      budgetSource?: IngestBudgetSource;
     } = {}
   ) {
     if (!Number.isSafeInteger(maxHeavyInFlight) || maxHeavyInFlight < 1) {
@@ -371,6 +382,13 @@ export class ChatAdmissionController {
     this.#onShed = onShed;
     this.#ingestBudget = new IngestByteAdmissionController({
       ...budgetOptions,
+      onShed: (reason, lane) => this.recordShed(reason, lane),
+    });
+    this.#flightBudget = new IngestByteAdmissionController({
+      maxInflightBytes: flightBudget.maxFlightBytes ?? Number.MAX_SAFE_INTEGER,
+      budgetSource: flightBudget.budgetSource,
+      timeoutShedReason: "flight_bytes_budget",
+      maxWaiters: DEFAULT_STREAM_FLOOR_DIVISOR,
       onShed: (reason, lane) => this.recordShed(reason, lane),
     });
     setInterval(() => this.#cleanup(), CHAT_ADMISSION_QUEUE_CLEANUP_INTERVAL_MS).unref();
@@ -703,6 +721,39 @@ export class ChatAdmissionController {
   ): Promise<IngestBudgetAcquireResult> {
     return this.#ingestBudget.acquireWithin(bytes, timeoutMs, signal, sessionKey);
   }
+
+  get flightBytes(): number {
+    return this.#flightBudget.inflightBytes;
+  }
+
+  get maxFlightBytes(): number {
+    return this.#flightBudget.maxInflightBytes;
+  }
+
+  get flightBudgetSource(): IngestBudgetSource {
+    return this.#flightBudget.budgetSource;
+  }
+
+  get flightWaiting(): number {
+    return this.#flightBudget.waitingCount;
+  }
+
+  canFitFlight(bytes: number): boolean {
+    return this.#flightBudget.canFit(bytes);
+  }
+
+  tryAcquireFlight(bytes: number): ChatAdmissionLease | null {
+    return this.#flightBudget.tryAcquire(bytes);
+  }
+
+  acquireFlightWithin(
+    bytes: number,
+    timeoutMs: number,
+    signal?: AbortSignal,
+    sessionKey = "default"
+  ): Promise<IngestBudgetAcquireResult> {
+    return this.#flightBudget.acquireWithin(bytes, timeoutMs, signal, sessionKey);
+  }
 }
 
 const defaultAdmissionController = new ChatAdmissionController(CHAT_MAX_HEAVY_IN_FLIGHT);
@@ -752,6 +803,10 @@ export class PerConnectionAdmissionController {
         budgetSource?: IngestBudgetSource;
         checkPressureSeverity?: () => PressureSeverity;
       };
+      flightBudget?: {
+        maxFlightBytes?: number;
+        budgetSource?: IngestBudgetSource;
+      };
     }
   ) {
     this.#controller = new ChatAdmissionController(
@@ -759,7 +814,8 @@ export class PerConnectionAdmissionController {
       undefined,
       undefined,
       _opts?.onShed,
-      _opts?.budget
+      _opts?.budget,
+      _opts?.flightBudget
     );
   }
 
@@ -792,6 +848,10 @@ export class PerConnectionAdmissionController {
     /** #503-fanout: false on a default deployment — the legacy count cap only
      * binds when the operator explicitly set OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT. */
     countCapEnabled: boolean;
+    flightBytes: number;
+    maxFlightBytes: number;
+    flightBudgetSource: IngestBudgetSource;
+    flightWaiting: number;
   } {
     return {
       activeHeavy: this.#controller.activeHeavy,
@@ -806,6 +866,10 @@ export class PerConnectionAdmissionController {
       budgetSource: this.#controller.budgetSource,
       pressureSeverity: this.#controller.pressureSeverity(),
       countCapEnabled: this.#controller.maxHeavyInFlight < Number.MAX_SAFE_INTEGER,
+      flightBytes: this.#controller.flightBytes,
+      maxFlightBytes: this.#controller.maxFlightBytes,
+      flightBudgetSource: this.#controller.flightBudgetSource,
+      flightWaiting: this.#controller.flightWaiting,
     };
   }
 
@@ -843,6 +907,7 @@ function resolveLegacyCountCap(): number {
 }
 
 const productionIngestBudget = resolveIngestByteBudget();
+const productionFlightBudget = resolveFlightByteBudget();
 
 export const perConnectionAdmissionController = new PerConnectionAdmissionController(
   resolveLegacyCountCap(),
@@ -851,6 +916,10 @@ export const perConnectionAdmissionController = new PerConnectionAdmissionContro
       maxInflightBytes: productionIngestBudget.bytes,
       budgetSource: productionIngestBudget.source,
       checkPressureSeverity: defaultPressureSeverity,
+    },
+    flightBudget: {
+      maxFlightBytes: productionFlightBudget.bytes,
+      budgetSource: productionFlightBudget.source,
     },
   }
 );
