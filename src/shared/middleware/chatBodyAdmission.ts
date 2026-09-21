@@ -42,6 +42,8 @@ import {
   IngestByteAdmissionController,
   type IngestBudgetAcquireResult,
 } from "./ingestByteAdmission";
+import { rebuildRequest, stampRecordedBodyBytes } from "./recordedBodyBytes";
+export { RECORDED_BODY_BYTES_HEADER, recordBodyBytes, readRecordedBodyBytes } from "./recordedBodyBytes";
 import {
   checkResourcePressureGuard,
   getResourcePressureObservation,
@@ -1037,19 +1039,6 @@ function parseContentLength(header: string | null): number | null {
   return Number.isSafeInteger(parsed) ? parsed : null;
 }
 
-function rebuildRequest(request: Request, body: Uint8Array): Request {
-  const headers = new Headers(request.headers);
-  // The inbound value may be absent or dishonest. Let the runtime derive the correct value.
-  headers.delete("content-length");
-  return new Request(request.url, {
-    method: request.method,
-    headers,
-    body,
-    signal: request.signal,
-    duplex: "half",
-  } as RequestInit & { duplex: "half" });
-}
-
 /** Reserve heavyweight capacity and ingest the body with a hard byte bound. */
 export async function admitChatRequest(
   request: Request,
@@ -1104,7 +1093,7 @@ export async function admitChatRequest(
       body.set(chunk, offset);
       offset += chunk.byteLength;
     }
-    return { admit: true, request: rebuildRequest(request, body), lease: NULL_LEASE };
+    return { admit: true, request: stampRecordedBodyBytes(rebuildRequest(request, body), totalBytes), lease: NULL_LEASE };
   }
 
   // #503-fanout: shed before spending any bytes on ingestion when the process
@@ -1216,7 +1205,7 @@ export async function admitChatRequest(
     body.set(chunk, offset);
     offset += chunk.byteLength;
   }
-  return { admit: true, request: rebuildRequest(request, body), lease };
+  return { admit: true, request: stampRecordedBodyBytes(rebuildRequest(request, body), totalBytes), lease };
 }
 
 // Lease release binding lives in ./chatAdmissionRelease. Re-exported here so
