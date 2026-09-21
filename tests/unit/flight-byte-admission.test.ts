@@ -10,6 +10,7 @@ import {
   DEFAULT_STREAM_FLOOR_DIVISOR,
 } from "../../src/shared/middleware/admissionBudget.ts";
 import { IngestByteAdmissionController } from "../../src/shared/middleware/ingestByteAdmission.ts";
+import { ChatAdmissionController } from "../../src/shared/middleware/chatBodyAdmission.ts";
 
 const MiB = 1024 * 1024;
 
@@ -104,4 +105,18 @@ test("maxWaiters sheds the extra waiter immediately", async () => {
   const r2 = await p2;
   assert.equal(r2.status, "acquired");
   if (r2.status === "acquired") r2.lease.release();
+});
+
+test("ChatAdmissionController hang a second ingest ledger as flight budget", () => {
+  const c = new ChatAdmissionController(20, undefined, undefined, undefined, undefined, {
+    maxFlightBytes: 1000,
+  });
+  assert.equal(c.maxFlightBytes, 1000);
+  assert.equal(c.flightBytes, 0);
+  assert.equal(c.canFitFlight(1001), false);
+  const lease = c.tryAcquireFlight(100);
+  assert.ok(lease);
+  assert.equal(c.flightBytes, 100);
+  lease.release();
+  assert.equal(c.flightBytes, 0);
 });
