@@ -42,6 +42,23 @@ test("grok-cli discovery keeps object reasoning tiers, including xhigh", () => {
   assert.deepEqual(models[0].supportedThinkingEfforts, ["xhigh", "high", "medium", "low"]);
 });
 
+test("an empty value string does not hide a usable id", () => {
+  const models = PROVIDER_MODELS_CONFIG["grok-cli"].parseResponse({
+    data: [
+      {
+        id: "grok-4.7",
+        apiBackend: "responses",
+        reasoning_efforts: [
+          { id: "xhigh", value: "" },
+          { id: "high", value: "high" },
+        ],
+      },
+    ],
+  });
+
+  assert.deepEqual(models[0].supportedThinkingEfforts, ["xhigh", "high"]);
+});
+
 test("grok-4.7 without an effort still leaves with the build default", () => {
   const executor = new GrokCliExecutor();
   const out = executor.transformRequest(

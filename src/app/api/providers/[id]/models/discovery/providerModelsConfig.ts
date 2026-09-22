@@ -299,11 +299,9 @@ function getGrokBuildReasoningEfforts(
       if (typeof value === "string") return value;
       if (value && typeof value === "object") {
         const record = value as { value?: unknown; id?: unknown };
-        return typeof record.value === "string"
-          ? record.value
-          : typeof record.id === "string"
-            ? record.id
-            : "";
+        const named = typeof record.value === "string" ? record.value.trim() : "";
+        if (named) return named;
+        return typeof record.id === "string" ? record.id : "";
       }
       return "";
     })
