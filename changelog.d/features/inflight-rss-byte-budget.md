@@ -1,1 +1,0 @@
-- Cap concurrent SSE holds by estimated RSS, not only request count. A full flight ledger returns 503 `flight_bytes_budget` immediately (no queue). Bodies over the stream ceiling return 413 `flight_ceiling`. Local usage commands stay JSON and do not take a hold.
