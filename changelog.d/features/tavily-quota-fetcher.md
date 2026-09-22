@@ -1,0 +1,1 @@
+- **feat(sse):** track Tavily API credit usage — `tavily-search` and `tavily` providers now read plan and account credit usage from `GET https://api.tavily.com/usage`, surfacing monthly credits in Dashboard › Limits and avoiding exhausted connections during search rotation.
