@@ -41,6 +41,8 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
     lower.includes("plan's set usage limit") ||
     lower.includes("plan limit exceeded") ||
     lower.includes("usage limit exceeded") ||
+    lower.includes("insufficient credits") ||
+    lower.includes("out of credits") ||
     // Native Claude OAuth uses this otherwise-generic 429 wording for an
     // exhausted subscription window. Keep it provider-scoped: other upstreams
     // can use the same phrase for a short RPM throttle.

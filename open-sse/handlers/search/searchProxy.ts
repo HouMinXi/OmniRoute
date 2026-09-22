@@ -16,7 +16,7 @@ import { isSubscriptionQuotaText } from "../../services/quotaTextCooldowns.ts";
 import type { SearchProviderConfig } from "../../config/searchRegistry.ts";
 import type { SearchResult } from "../search.ts";
 
-const SEARCH_COOLDOWN_STATUSES = new Set([
+export const SEARCH_COOLDOWN_STATUSES = new Set([
   HTTP_STATUS.PAYMENT_REQUIRED,
   HTTP_STATUS.REQUEST_TIMEOUT,
   HTTP_STATUS.RATE_LIMITED,
