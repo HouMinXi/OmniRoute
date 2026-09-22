@@ -560,8 +560,9 @@ export async function handleChatCore({
   // Per-request trace id + checkpoint helper. Lets us see exactly which await
   // a hung request was sitting on in `[STAGE_TRACE]` log lines. Uses crypto RNG
   // (not Math.random) purely to satisfy CodeQL js/insecure-randomness — this id
-  // is a log-correlation token, not a security secret.
-  const traceId = globalThis.crypto.randomUUID().slice(0, 6);
+  // is a log-correlation token, not a security secret. Keep the full UUID:
+  // a 6-char prefix collides in call_logs under production volume (#14451).
+  const traceId = globalThis.crypto.randomUUID();
   // Emit request.started event for real-time dashboard
   setImmediate(() => {
     emit("request.started", {
