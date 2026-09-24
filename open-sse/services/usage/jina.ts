@@ -7,6 +7,7 @@
 
 import { fetchJinaQuota, type JinaQuotaInfo } from "../jinaQuotaFetcher.ts";
 import { createQuotaFromUsage } from "./quota.ts";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 function createJinaPlanQuota(q: JinaQuotaInfo) {
   const base = createQuotaFromUsage(q.used, q.total, null);
@@ -28,8 +29,7 @@ export async function getJinaUsage(
   }
 
   try {
-    const KEY_FIELD = "apiK" + "ey";
-    const resolvedConnection = apiKey ? { ...(connection || {}), [KEY_FIELD]: apiKey } : connection;
+    const resolvedConnection = apiKey ? { ...(connection || {}), apiKey } : connection;
     const live = await fetchJinaQuota(connectionId, resolvedConnection);
     if (!live) {
       return { message: "Jina API key not available or token balance unavailable." };
@@ -48,6 +48,10 @@ export async function getJinaUsage(
       limitReached: q.limitReached,
     };
   } catch (error) {
-    return { message: `Jina usage error: ${(error as Error).message}` };
+    return {
+      message: `Jina usage error: ${sanitizeErrorMessage(
+        error instanceof Error ? error.message : String(error)
+      )}`,
+    };
   }
 }
