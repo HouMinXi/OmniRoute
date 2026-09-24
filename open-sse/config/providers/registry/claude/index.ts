@@ -45,6 +45,9 @@ export const claudeProvider: RegistryEntry = {
       maxOutputTokens: 128000,
       // Opus 4.7+/Fable 5 reject non-default temperature/top_p/top_k with a 400 (sampling
       // is fixed; reasoning is steered by output_config.effort). Strip them before dispatch.
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+      supportsXHighEffort: true,
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
     {
@@ -60,6 +63,9 @@ export const claudeProvider: RegistryEntry = {
       name: "Claude Opus 4.8",
       contextLength: 1000000,
       maxOutputTokens: 128000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+      supportsXHighEffort: true,
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
     {
@@ -67,6 +73,9 @@ export const claudeProvider: RegistryEntry = {
       name: "Claude Opus 4.7",
       contextLength: 1000000,
       maxOutputTokens: 128000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+      supportsXHighEffort: true,
       unsupportedParams: ["temperature", "top_p", "top_k"],
     },
     {
@@ -75,6 +84,8 @@ export const claudeProvider: RegistryEntry = {
       supportsXHighEffort: false,
       contextLength: 1000000,
       maxOutputTokens: 128000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high", "max"],
     },
     {
       id: "claude-opus-4-5-20251101",
@@ -82,6 +93,8 @@ export const claudeProvider: RegistryEntry = {
       supportsXHighEffort: false,
       contextLength: 200000,
       maxOutputTokens: 64000,
+      supportsReasoning: true,
+      supportedThinkingEfforts: ["low", "medium", "high"],
     },
     {
       id: "claude-sonnet-5",
