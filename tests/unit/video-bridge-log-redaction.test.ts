@@ -283,7 +283,7 @@ test("observed video attempts discard early keepalive bytes instead of retaining
   );
 
   assert.deepEqual(takeEarlyKeepaliveBytes(correlationId), []);
-  const row = await pollForCallLog(id);
+  const row = await pollForCallLog(correlationId);
   assert.ok(row);
   assert.equal(JSON.stringify(row).includes(SECRET), false);
 });
