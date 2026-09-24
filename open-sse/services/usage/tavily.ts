@@ -5,12 +5,9 @@
  * standard `{ plan, quotas }` response.
  */
 
-import {
-  fetchTavilyQuota,
-  getTavilyBaseUrl,
-  type TavilyQuota,
-} from "../tavilyQuotaFetcher.ts";
+import { fetchTavilyQuota, getTavilyBaseUrl, type TavilyQuota } from "../tavilyQuotaFetcher.ts";
 import { createQuotaFromUsage } from "./quota.ts";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 function createTavilyPlanQuota(q: TavilyQuota) {
   const base = createQuotaFromUsage(q.used, q.total, q.resetAt);
@@ -61,6 +58,10 @@ export async function getTavilyUsage(
       limitReached: q.limitReached,
     };
   } catch (error) {
-    return { message: `Tavily usage error: ${(error as Error).message}` };
+    return {
+      message: `Tavily usage error: ${sanitizeErrorMessage(
+        error instanceof Error ? error.message : String(error)
+      )}`,
+    };
   }
 }
