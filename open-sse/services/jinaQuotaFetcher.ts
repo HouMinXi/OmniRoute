@@ -1,8 +1,20 @@
 import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
+import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 
+/**
+ * Jina's wallet-balance endpoint only accepts the key as the `api_key` QUERY
+ * parameter. Verified 2026-09-24: sending `Authorization: Bearer <key>` with
+ * no query param returns HTTP 422 `{"loc":["query","api_key"],"msg":"field
+ * required"}`, while `?api_key=<invalid>` returns 401 "Invalid API key."
+ *
+ * The request URL therefore carries a credential. NEVER log, echo or return
+ * the URL built in `fetchJinaQuota` (or `response.url`) — redact `api_key`
+ * first if a debug log is ever added here.
+ */
 export const JINA_BALANCE_URL = "https://dash.jina.ai/api/v1/api_key/fe_user";
 const JINA_CACHE_TTL_MS = 60 * 1000;
+const REQUEST_TIMEOUT_MS = 8_000;
 
 export interface JinaQuotaInfo {
   used: number;
@@ -19,15 +31,14 @@ const inFlightRequests = new Map<string, Promise<JinaQuotaInfo | null>>();
 export function extractJinaToken(credentials: unknown): string | null {
   if (!credentials || typeof credentials !== "object") return null;
   const c = credentials as Record<string, unknown>;
-  const KEY_FIELD = "apiK" + "ey";
-  if (typeof c[KEY_FIELD] === "string" && (c[KEY_FIELD] as string).trim()) {
-    return (c[KEY_FIELD] as string).trim();
+  if (typeof c.apiKey === "string" && c.apiKey.trim()) {
+    return c.apiKey.trim();
   }
   const nested = c.credentials;
   if (nested && typeof nested === "object") {
     const n = nested as Record<string, unknown>;
-    if (typeof n[KEY_FIELD] === "string" && (n[KEY_FIELD] as string).trim()) {
-      return (n[KEY_FIELD] as string).trim();
+    if (typeof n.apiKey === "string" && n.apiKey.trim()) {
+      return n.apiKey.trim();
     }
   }
   return null;
@@ -73,7 +84,7 @@ export function parseJinaCreditUsage(data: unknown): JinaQuotaInfo | null {
   };
 }
 
-async function throttleQuotaFetch(
+async function dedupeQuotaFetch(
   connectionId: string,
   fetcher: () => Promise<JinaQuotaInfo | null>
 ): Promise<JinaQuotaInfo | null> {
@@ -109,13 +120,16 @@ export async function fetchJinaQuota(
   const token = extractJinaToken(credentials);
   if (!token) return null;
 
-  return throttleQuotaFetch(connectionId, async () => {
+  return dedupeQuotaFetch(connectionId, async () => {
+    await throttleQuotaFetch();
+    // Credential-bearing URL (see module header) — keep it local, never log it.
     const url = `${JINA_BALANCE_URL}?api_key=${encodeURIComponent(token)}`;
     const response = await fetch(url, {
       method: "GET",
       headers: {
         Accept: "application/json",
       },
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
     });
 
     if (!response.ok) {

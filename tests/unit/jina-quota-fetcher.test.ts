@@ -210,3 +210,31 @@ test("registerJinaQuotaFetcher registers all Jina provider aliases for preflight
     invalidateJinaQuotaCache(connId);
   }
 });
+
+test("fetchJinaQuota bounds the balance probe with an abort signal", async () => {
+  const connectionId = `jina-timeout-${Date.now()}`;
+  let signal: AbortSignal | null | undefined;
+  globalThis.fetch = (async (_url: RequestInfo | URL, init?: RequestInit) => {
+    signal = init?.signal;
+    return jinaBalanceResponse(1000);
+  }) as typeof globalThis.fetch;
+
+  await fetchJinaQuota(connectionId, { apiKey: "jina-timeout-key" });
+  assert.ok(signal instanceof AbortSignal, "probe must carry an AbortSignal timeout");
+
+  invalidateJinaQuotaCache(connectionId);
+});
+
+test("fetchJinaQuota never surfaces the credential-bearing URL when fetch rejects", async () => {
+  const connectionId = `jina-reject-${Date.now()}`;
+  const secret = "jina_secret_should_not_leak";
+  globalThis.fetch = (async (url: RequestInfo | URL) => {
+    throw new Error(`request to ${String(url)} failed`);
+  }) as typeof globalThis.fetch;
+
+  const quota = await fetchJinaQuota(connectionId, { apiKey: secret });
+  assert.equal(quota, null);
+  assert.ok(!JSON.stringify(quota ?? {}).includes(secret));
+
+  invalidateJinaQuotaCache(connectionId);
+});
