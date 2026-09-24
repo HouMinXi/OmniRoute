@@ -34,10 +34,16 @@ test("catalog emits effort_tiers for opus 5 even with the canonical fallback ski
 });
 
 test("catalog emits no effort_tiers when the registry entry declares none (fallback skipped)", () => {
-  // claude-opus-4-8 carries no supportedThinkingEfforts in the registry; with the
-  // canonical fallback skipped the helper must not synthesize tiers for it.
-  const declared = getRegistryModelThinkingEfforts("claude", "claude-opus-4-8");
+  // claude-sonnet-4-5-20250929 carries no supportedThinkingEfforts in the registry;
+  // with the canonical fallback skipped the helper must not synthesize tiers for it.
+  const declared = getRegistryModelThinkingEfforts("claude", "claude-sonnet-4-5-20250929");
   assert.equal(declared, undefined);
-  const fields = getThinkingCapabilityFields("claude", "claude-opus-4-8", true, declared, true);
+  const fields = getThinkingCapabilityFields(
+    "claude",
+    "claude-sonnet-4-5-20250929",
+    true,
+    declared,
+    true
+  );
   assert.equal("effort_tiers" in fields, false);
 });
