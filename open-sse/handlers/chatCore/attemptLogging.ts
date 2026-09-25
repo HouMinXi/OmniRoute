@@ -546,8 +546,10 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
 
   // Primary key is a fresh UUID from saveCallLog, not traceId. Attempts share
   // pendingRequestId and must not share the row key. correlationId still
-  // pairs the row with request.started.
+  // pairs the row with request.started. pendingRequestId is NOT the row key: it only
+  // routes token usage to the live in-memory request row (#14324).
   saveCallLog({
+    pendingRequestId: ctx.pendingRequestId,
     method: "POST",
     path: clientRawRequest?.endpoint || "/v1/chat/completions",
     status,
