@@ -28,6 +28,7 @@ import {
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
+import { TRANSLATION_FAILURE_CODE } from "../../handlers/chatCore/translationFailure.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import type { ComboErrorEntry } from "./comboErrorAggregation.ts";
 
@@ -398,6 +399,8 @@ export function shouldSkipConnDisable(
     (result.response ? getTrustedLocalRateLimitResponse(result.response) !== null : false) ||
     result.errorCode === "plugin_block" ||
     result.errorType === "plugin_block" ||
+    // #14815: translation fails locally on the client's body — no account is at fault.
+    result.errorCode === TRANSLATION_FAILURE_CODE ||
     (is401 && hasExtraKeys) ||
     isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
