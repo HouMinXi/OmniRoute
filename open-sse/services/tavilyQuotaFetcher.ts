@@ -76,9 +76,10 @@ export function parseTavilyCreditUsage(data: unknown): TavilyQuota | null {
   const keyObj = toRecord(root.key);
   const accountObj = toRecord(root.account);
 
-  const planName = typeof accountObj.current_plan === "string" && accountObj.current_plan.trim()
-    ? accountObj.current_plan.trim()
-    : "Standard";
+  const planName =
+    typeof accountObj.current_plan === "string" && accountObj.current_plan.trim()
+      ? accountObj.current_plan.trim()
+      : "Standard";
 
   const keyLimit = toNumberOrNull(keyObj.limit);
   const keyUsage = toNumberOrNull(keyObj.usage);
