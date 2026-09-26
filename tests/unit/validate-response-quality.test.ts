@@ -45,7 +45,10 @@ test("returns valid=false for non-JSON non-SSE text", async () => {
 
 test("returns valid=false for Responses API bodies with no output items", async () => {
   const res = await validateResponseQuality(
-    makeResponse(JSON.stringify({ object: "response", status: "completed", output: [] }), "application/json"),
+    makeResponse(
+      JSON.stringify({ object: "response", status: "completed", output: [] }),
+      "application/json"
+    ),
     false,
     {}
   );
@@ -179,6 +182,20 @@ function chatBody(finishReason: string) {
 test("non-streaming chat completion truncated at length with no text is valid", async () => {
   const verdict = await validateResponseQuality(
     makeResponse(chatBody("length"), "application/json"),
+function responsesBody(status: string) {
+  return JSON.stringify({
+    object: "response",
+    status,
+    output: [{ type: "message", content: [{ type: "output_text", text: "partial" }] }],
+  });
+}
+
+// Same terminal set as detectMalformedNonStream. A combo of reasoning models
+// returns status:"incomplete" on a small max_output_tokens; rejecting it
+// fails every target over and the client still sees 502.
+test("non-streaming Responses incomplete with partial text is valid", async () => {
+  const verdict = await validateResponseQuality(
+    makeResponse(responsesBody("incomplete"), "application/json"),
     false,
     {}
   );
@@ -193,4 +210,25 @@ test("non-streaming chat completion that stopped with no text stays invalid", as
   );
   assert.strictEqual(verdict.valid, false);
   assert.match(verdict.reason ?? "", /empty content/);
+test("non-streaming Responses cancelled and the SSE canceled spelling are valid", async () => {
+  for (const status of ["cancelled", "canceled"]) {
+    const verdict = await validateResponseQuality(
+      makeResponse(responsesBody(status), "application/json"),
+      false,
+      {}
+    );
+    assert.strictEqual(verdict.valid, true, status);
+  }
+});
+
+test("non-streaming Responses failed and in_progress stay no_terminal", async () => {
+  for (const status of ["failed", "in_progress", "queued"]) {
+    const verdict = await validateResponseQuality(
+      makeResponse(responsesBody(status), "application/json"),
+      false,
+      {}
+    );
+    assert.strictEqual(verdict.valid, false, status);
+    assert.strictEqual(verdict.reason, "no_terminal", status);
+  }
 });
