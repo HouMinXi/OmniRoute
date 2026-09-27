@@ -321,7 +321,7 @@ function errResponse(status: number, message: string, type = "upstream_error") {
 }
 
 type BridgeController = {
-  start: () => Promise<{ url: string; call?: (challenge: string) => string }>;
+  start: (publicBaseUrl?: string) => Promise<{ url: string; call?: (challenge: string) => string }>;
   stop: () => Promise<void>;
 };
 
@@ -426,8 +426,13 @@ export function createRequestBridgeController(
   let process: BridgeProcess | null = null;
   let toolServer: BridgeToolServer | null = null;
   return {
-    async start() {
+    async start(publicBaseUrl?: string) {
       toolServer = await startToolServer(challenge);
+      if (publicBaseUrl) {
+        const parsed = new URL(publicBaseUrl);
+        if (parsed.protocol !== "https:") throw new Error("Public bridge URL must use HTTPS");
+        return { url: `${publicBaseUrl.replace(/\/$/, "")}/mcp?nonce=${randomUUID()}`, call: toolServer.call };
+      }
       process = await spawn(requestBridgeTunnelCommand(toolServer.url));
       const deadline = Date.now() + 15000;
       let publicUrl: string | null = null;
@@ -536,6 +541,7 @@ export class GrokBotExecutor extends BaseExecutor {
       messages?: unknown[];
       model?: string;
       grokBotBridge?: { url?: string; challenge?: string };
+      tools?: unknown[];
     };
     credentials?: { accessToken?: string; refreshToken?: string; connectionId?: string };
     signal?: AbortSignal | null;
@@ -612,7 +618,11 @@ export class GrokBotExecutor extends BaseExecutor {
       rowId = agent.id ?? null;
       createdOk = true;
 
-      const bridge = input.body?.grokBotBridge;
+      const bridge = input.body?.grokBotBridge ?? (
+        Array.isArray(input.body?.tools) && process.env.GROK_BOT_PUBLIC_BRIDGE_URL
+          ? { url: process.env.GROK_BOT_PUBLIC_BRIDGE_URL, challenge: randomUUID() }
+          : undefined
+      );
       if (bridge && !bridge.url) {
         return errResponse(
           HTTP_STATUS.BAD_GATEWAY ?? 502,
@@ -621,6 +631,7 @@ export class GrokBotExecutor extends BaseExecutor {
       }
       if (
         bridge &&
+        bridge.url !== process.env.GROK_BOT_PUBLIC_BRIDGE_URL &&
         !/^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/.test(bridge.url ?? "")
       ) {
         return errResponse(
@@ -644,7 +655,9 @@ export class GrokBotExecutor extends BaseExecutor {
           let started: Awaited<ReturnType<BridgeController["start"]>> | null = null;
           for (let attempt = 0; attempt < 2 && !started; attempt += 1) {
             try {
-              started = await this.bridgeController.start();
+              started = await this.bridgeController.start(
+                bridge.url === process.env.GROK_BOT_PUBLIC_BRIDGE_URL ? bridge.url : undefined
+              );
             } catch (err) {
               if (attempt === 1) throw err;
               await this.bridgeController.stop();

@@ -246,11 +246,40 @@ describe("GrokBotExecutor", () => {
     });
     try {
       const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
-      assert.equal(res.status, 200);
+      assert.equal((await res.clone().json()).error?.message ?? res.status, 200);
       assert.equal((await res.json()).choices[0].message.content, "OK");
     } finally {
       setGrokBotTransportForTests(null);
       installTransport(t);
+    }
+  });
+
+  it("starts the public bridge for a normal tool request", async () => {
+    const previous = process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://omni.minxihou.site/grok-bridge";
+    let spawned = false;
+    let seenBaseUrl = "";
+    executor.setBridgeControllerForTests({
+      async start(publicBaseUrl?: string) {
+        seenBaseUrl = publicBaseUrl ?? "";
+        return { url: "https://omni.minxihou.site/grok-bridge/mcp?nonce=one", call: () => "bridge-ok" };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("bridge-ok");
+    try {
+      const input = makeInput([{ role: "user", content: "use tool" }]);
+      delete (input.body as { grokBotBridge?: unknown }).grokBotBridge;
+      (input.body as { tools?: unknown[] }).tools = [{ type: "function", function: { name: "lookup" } }];
+      const res = (await executor.execute(input)) as Response;
+      const body = await res.json();
+      assert.equal(body.choices[0].message.content, "bridge-ok");
+      assert.equal(seenBaseUrl, "https://omni.minxihou.site/grok-bridge");
+      assert.equal(spawned, false);
+      assert.equal(t.calls.some((call) => call.method === "ListSandMcpTools"), true);
+    } finally {
+      if (previous === undefined) delete process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
     }
   });
 
@@ -1205,6 +1234,23 @@ describe("GrokBotExecutor", () => {
     assert.equal(spawned, "cloudflared");
     assert.match(startedDefault.url, /^https:\/\/safe-bridge\.trycloudflare\.com\/mcp\?nonce=/);
     await defaultController.stop();
+    let customSpawned = false;
+    const custom = createRequestBridgeController(() => {
+      customSpawned = true;
+      throw new Error("custom public URL must not spawn");
+    }, undefined, "request-challenge");
+    const startedCustom = await custom.start("https://bridge.example.com");
+    assert.equal(customSpawned, false);
+    assert.match(startedCustom.url, /^https:\/\/bridge\.example\.com\/mcp\?nonce=/);
+    assert.match(startedCustom.url, /[?&]nonce=[^&]+/);
+    const shared = createRequestBridgeController(() => {
+      throw new Error("shared bridge must not spawn");
+    }, undefined, "request-challenge");
+    const first = await shared.start("https://omni.minxihou.site/grok-bridge");
+    const second = await shared.start("https://omni.minxihou.site/grok-bridge");
+    assert.notEqual(new URL(first.url).searchParams.get("nonce"), new URL(second.url).searchParams.get("nonce"));
+    await shared.stop();
+    await custom.stop();
     if (globalThis.process.env.GROK_BOT_REAL_TUNNEL === "1") {
       const real = createRequestBridgeController(async (command) => await startRequestBridgeProcess(command));
       const startedReal = await real.start();
