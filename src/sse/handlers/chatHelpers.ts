@@ -781,6 +781,19 @@ export function handleNoCredentials(
     }
 
     log.warn("CHAT", `[${provider}/${model}] ${errorMsg} (${credentials.retryAfterHuman})`);
+    // #14360: the synthesized 429 never reached an upstream, so the normal
+    // failure path never writes a call_logs row. Record it here.
+    import("./rejectedRequestUsage")
+      .then(({ recordRejectedRequestUsage }) =>
+        recordRejectedRequestUsage({
+          status: Number(status),
+          model,
+          provider,
+          error: `[${provider}/${model}] ${errorMsg}`,
+          correlationId,
+        })
+      )
+      .catch(() => {});
     return unavailableResponse(
       status,
       `[${provider}/${model}] ${errorMsg}`,
