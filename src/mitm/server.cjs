@@ -600,7 +600,22 @@ async function intercept(req, res, bodyBuffer, override, sourceModel) {
         if (respBody.length < INGEST_MAX_BODY) respBody += text;
         respSize += value ? value.length : 0;
         if (downstreamClosed || res.closed || res.destroyed) break;
-        res.write(text);
+        // #14528: a slow client must drain before the next upstream read,
+        // otherwise the socket write queue grows without bound. A close
+        // during the wait is caught by the downstreamClosed check above.
+        if (!res.write(text)) {
+          await new Promise((resolve) => {
+            const done = () => {
+              res.off("drain", done);
+              res.off("close", done);
+              res.off("error", done);
+              resolve();
+            };
+            res.once("drain", done);
+            res.once("close", done);
+            res.once("error", done);
+          });
+        }
       }
     } finally {
       res.off("close", onDownstreamClose);
