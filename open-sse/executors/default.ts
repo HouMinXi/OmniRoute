@@ -1105,10 +1105,10 @@ export class DefaultExecutor extends BaseExecutor {
     const tokenKey =
       body.max_completion_tokens !== undefined ? "max_completion_tokens" : "max_tokens";
 
+    // #14888: a positive client budget is a choice. Raising it made reasoning
+    // models spend the whole window on thinking and return empty content.
     if (typeof current !== "number" || current <= 0) {
       body[tokenKey] = target;
-    } else if (current < MIN_TOKENS && current < maxOutput) {
-      body[tokenKey] = MIN_TOKENS;
     }
     return body;
   }
