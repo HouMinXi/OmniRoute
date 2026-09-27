@@ -224,6 +224,36 @@ describe("GrokBotExecutor", () => {
     executor = new GrokBotExecutor();
   });
 
+  it("accepts a measured assistant row when running becomes false", async () => {
+    const events = [
+      { agentState: { live: [{ agentId: "replace", isRunning: true }] } },
+      { rows: { entries: [{ body: Buffer.from(JSON.stringify({ kind: "send-message", clientNonce: null, message: { type: "text", content: "OK" } })).toString("base64") }] } },
+      { agentState: { live: [{ agentId: "replace", isRunning: false }] } },
+    ];
+    setGrokBotTransportForTests({
+      async rpc(method: string, payload: Record<string, unknown>) {
+        t.calls.push({ method, payload });
+        if (method === "CreateGrokBotTemporalAgent") return { agent: { id: "row-1", legacyAgentId: payload.agentId, harness: "temporal" } };
+        return {};
+      },
+      async *watch() {
+        const agentId = String(t.calls.find((call) => call.method === "CreateGrokBotTemporalAgent")?.payload.agentId);
+        for (const event of events) {
+          const encoded = JSON.stringify(event).replaceAll("replace", agentId);
+          yield JSON.parse(encoded);
+        }
+      },
+    });
+    try {
+      const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+      assert.equal(res.status, 200);
+      assert.equal((await res.json()).choices[0].message.content, "OK");
+    } finally {
+      setGrokBotTransportForTests(null);
+      installTransport(t);
+    }
+  });
+
   it("rejects idle without explicit completion", async () => {
     t.watchEvents = [{ agent: { isRunningTurn: true } }, { agent: { isRunningTurn: false } }];
     const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;

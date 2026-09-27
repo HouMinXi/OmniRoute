@@ -846,15 +846,16 @@ export class GrokBotExecutor extends BaseExecutor {
       try {
         const watch = t.watch("WatchGrokBotTranscripts", payload, { signal: link });
         for await (const event of watch) {
-          const settled = this.consumeWatchFrame(event, agentId, messageId, parts, (running) => {
+          const result = this.consumeWatchFrame(event, agentId, messageId, parts, (running) => {
             if (running) seenRunning = true;
             else if (seenRunning) return true;
             return false;
           }, (answer) => {
             submitted = answer;
           });
+          if (typeof result === "string") return result;
           if (submitted !== null) return submitted;
-          if (settled) {
+          if (result) {
             throw Object.assign(new Error("turn became idle without explicit completion"), {
               errorType: "incomplete_turn",
             });
@@ -885,7 +886,7 @@ export class GrokBotExecutor extends BaseExecutor {
     parts: string[],
     onRunning: (running: boolean) => boolean,
     onSubmit: (answer: string) => void
-  ): boolean {
+  ): boolean | string {
     const ev = event as {
       agentState?: { live?: Array<{ agentId?: string; isRunningTurn?: boolean; isRunning?: boolean }> };
       agent?: { agentId?: string; isRunningTurn?: boolean; isRunning?: boolean };
@@ -945,6 +946,7 @@ export class GrokBotExecutor extends BaseExecutor {
         typeof decoded.message.content === "string"
       ) {
         parts.push(decoded.message.content);
+        return parts.join("");
       }
     }
     if (
