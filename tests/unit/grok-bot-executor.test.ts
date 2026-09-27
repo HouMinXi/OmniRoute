@@ -375,10 +375,9 @@ describe("GrokBotExecutor", () => {
     const discoveryIndex = t.calls.findIndex((c) => c.method === "DashboardService/ListSandMcpTools");
     const sendIndex = t.calls.findIndex((c) => c.method === "SendGrokBotUserMessage");
     assert.ok(discoveryIndex >= 0 && discoveryIndex < sendIndex);
-    assert.equal(
-      t.calls[discoveryIndex]?.payload.url,
-      "http://127.0.0.1:9/mcp"
-    );
+    const discoveryConfig = JSON.parse(String(t.calls[discoveryIndex]?.payload.mcpConfigJson));
+    assert.equal(discoveryConfig.mcpServers.bridge.url, "http://127.0.0.1:9/mcp");
+    assert.deepEqual(t.calls[discoveryIndex]?.payload.serverIdentifiers, ["bridge"]);
   });
 
   it("returns the bridge tool result instead of the model text", async () => {
@@ -521,7 +520,8 @@ describe("GrokBotExecutor", () => {
       assert.equal(res.status, 200);
       assert.deepEqual(events, ["start", "stop"]);
       const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
-      assert.equal(started?.payload.url, "https://bridge.example.test/mcp?nonce=one");
+      const startedConfig = JSON.parse(String(started?.payload.mcpConfigJson));
+      assert.equal(startedConfig.mcpServers.bridge.url, "https://bridge.example.test/mcp?nonce=one");
       const sent = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
       const sentConfig = JSON.parse(String(sent?.payload.mcpConfigJson));
       assert.equal(sentConfig.mcpServers.bridge.url, "https://bridge.example.test/mcp?nonce=one");
@@ -619,7 +619,8 @@ describe("GrokBotExecutor", () => {
     )) as Response;
     assert.equal(res.status, 200);
     const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
-    assert.equal(started?.payload.url, "http://127.0.0.1:9/mcp");
+    const startedConfig = JSON.parse(String(started?.payload.mcpConfigJson));
+    assert.equal(startedConfig.mcpServers.bridge.url, "http://127.0.0.1:9/mcp");
   });
 
   it("does not use another executor instance bridge controller", async () => {
@@ -1152,7 +1153,8 @@ describe("GrokBotExecutor", () => {
     )) as Response;
     assert.equal(ok.status, 200);
     const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
-    assert.match(String(started?.payload.url), /^https:\/\/safe-bridge\.trycloudflare\.com\/mcp\?nonce=/);
+    const startedConfig = JSON.parse(String(started?.payload.mcpConfigJson));
+    assert.match(String(startedConfig.mcpServers.bridge.url), /^https:\/\/safe-bridge\.trycloudflare\.com\/mcp\?nonce=/);
     assert.deepEqual(events, ["cloudflared", "stop"]);
     assert.equal(toolStopped, true);
     executor.setBridgeControllerForTests(

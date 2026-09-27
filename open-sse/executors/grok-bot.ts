@@ -686,7 +686,15 @@ export class GrokBotExecutor extends BaseExecutor {
           );
         }
         const discovery = (await t.rpc("DashboardService/ListSandMcpTools", {
-          url: bridgeUrl,
+          serverIdentifiers: ["bridge"],
+          mcpConfigJson: JSON.stringify({
+            mcpServers: {
+              bridge: {
+                url: bridgeUrl,
+                headers: { Authorization: `Bearer ${bridge.challenge}` },
+              },
+            },
+          }),
         })) as {
           tools?: Array<{ name?: string }>;
         };
