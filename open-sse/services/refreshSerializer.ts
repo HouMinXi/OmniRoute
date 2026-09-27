@@ -20,7 +20,7 @@
 
 // Providers mapped to the same string share one serialized lane. Codex and the
 // raw `openai` provider use the same Auth0 backend, so they MUST share a lane.
-const ROTATION_LOCK_GROUP: Record<string, string> = {
+export const ROTATION_LOCK_GROUP: Record<string, string> = {
   codex: "openai-auth0",
   openai: "openai-auth0",
   claude: "anthropic-oauth",
@@ -33,6 +33,11 @@ const ROTATION_LOCK_GROUP: Record<string, string> = {
   // already listed in tokenHealthCheck's ROTATING_REFRESH_PROVIDERS, so sibling
   // connections could refresh concurrently and present superseded tokens.
   cline: "cline",
+  // Grok Bot: the server may or may not rotate the refresh token on any given
+  // refresh (measured both shapes). Serializing sibling refreshes keeps the
+  // product line from racing itself; whether rotation actually happens is a
+  // per-response property, not something this entry asserts.
+  "grok-bot": "grok-bot",
 };
 
 // Protective settle gap (ms) between two consecutive sibling refreshes when the
