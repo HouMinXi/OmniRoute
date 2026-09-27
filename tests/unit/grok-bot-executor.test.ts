@@ -135,7 +135,7 @@ function installTransport(t: FakeTransport) {
         }
         return { agents: t.rosterRows };
       }
-      if (method === "ListSandMcpTools") {
+      if (method === "DashboardService/ListSandMcpTools") {
         return { tools: t.discoveredTools.map((name) => ({ name })) };
       }
       return {};
@@ -276,7 +276,7 @@ describe("GrokBotExecutor", () => {
       assert.equal(body.choices[0].message.content, "bridge-ok");
       assert.equal(seenBaseUrl, "https://omni.minxihou.site/grok-bridge");
       assert.equal(spawned, false);
-      assert.equal(t.calls.some((call) => call.method === "ListSandMcpTools"), true);
+      assert.equal(t.calls.some((call) => call.method === "DashboardService/ListSandMcpTools"), true);
     } finally {
       if (previous === undefined) delete process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
       else process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
@@ -368,11 +368,11 @@ describe("GrokBotExecutor", () => {
     assert.match(String(send.payload.text), /returned value verbatim/);
     assert.match(String(send.payload.text), /TOOL_UNAVAILABLE/);
     assert.equal(
-      t.calls.some((c) => c.method === "ListSandMcpTools"),
+      t.calls.some((c) => c.method === "DashboardService/ListSandMcpTools"),
       true,
       "bridge request must discover tools before sending"
     );
-    const discoveryIndex = t.calls.findIndex((c) => c.method === "ListSandMcpTools");
+    const discoveryIndex = t.calls.findIndex((c) => c.method === "DashboardService/ListSandMcpTools");
     const sendIndex = t.calls.findIndex((c) => c.method === "SendGrokBotUserMessage");
     assert.ok(discoveryIndex >= 0 && discoveryIndex < sendIndex);
     assert.equal(
@@ -520,7 +520,7 @@ describe("GrokBotExecutor", () => {
       )) as Response;
       assert.equal(res.status, 200);
       assert.deepEqual(events, ["start", "stop"]);
-      const started = t.calls.find((c) => c.method === "ListSandMcpTools");
+      const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
       assert.equal(started?.payload.url, "https://bridge.example.test/mcp?nonce=one");
       const sent = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
       const sentConfig = JSON.parse(String(sent?.payload.mcpConfigJson));
@@ -618,7 +618,7 @@ describe("GrokBotExecutor", () => {
       })
     )) as Response;
     assert.equal(res.status, 200);
-    const started = t.calls.find((c) => c.method === "ListSandMcpTools");
+    const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
     assert.equal(started?.payload.url, "http://127.0.0.1:9/mcp");
   });
 
@@ -1151,7 +1151,7 @@ describe("GrokBotExecutor", () => {
       })
     )) as Response;
     assert.equal(ok.status, 200);
-    const started = t.calls.find((c) => c.method === "ListSandMcpTools");
+    const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
     assert.match(String(started?.payload.url), /^https:\/\/safe-bridge\.trycloudflare\.com\/mcp\?nonce=/);
     assert.deepEqual(events, ["cloudflared", "stop"]);
     assert.equal(toolStopped, true);

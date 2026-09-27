@@ -119,7 +119,7 @@ async function connectRpc(
     headers["connect-timeout-ms"] = CONNECT_TIMEOUT_HEADER_MS;
     headers["connect-accept-encoding"] = "identity";
   }
-  return fetch(`${base}/${GROK_BOT_SERVICE}/${method}`, {
+  return fetch(`${base}/${method.includes("/") ? method : `${GROK_BOT_SERVICE}/${method}`}`, {
     method: "POST",
     headers,
     body: framed,
@@ -685,7 +685,7 @@ export class GrokBotExecutor extends BaseExecutor {
             "Request bridge URL must stay on loopback"
           );
         }
-        const discovery = (await t.rpc("ListSandMcpTools", {
+        const discovery = (await t.rpc("DashboardService/ListSandMcpTools", {
           url: bridgeUrl,
         })) as {
           tools?: Array<{ name?: string }>;
