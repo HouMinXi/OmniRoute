@@ -182,6 +182,12 @@ function chatBody(finishReason: string) {
 test("non-streaming chat completion truncated at length with no text is valid", async () => {
   const verdict = await validateResponseQuality(
     makeResponse(chatBody("length"), "application/json"),
+    false,
+    {}
+  );
+  assert.strictEqual(verdict.valid, true);
+});
+
 function responsesBody(status: string) {
   return JSON.stringify({
     object: "response",
@@ -210,6 +216,8 @@ test("non-streaming chat completion that stopped with no text stays invalid", as
   );
   assert.strictEqual(verdict.valid, false);
   assert.match(verdict.reason ?? "", /empty content/);
+});
+
 test("non-streaming Responses cancelled and the SSE canceled spelling are valid", async () => {
   for (const status of ["cancelled", "canceled"]) {
     const verdict = await validateResponseQuality(
