@@ -1303,13 +1303,13 @@ export function recordProviderSuccess(
   // recordProviderCooldown which increments it on each failure.
   resetCooldownFailureCount(provider, connectionId ?? undefined);
 
-  // Clear failure-dedup window so the next genuine failure is not suppressed.
   if (connectionId) {
     lastConnectionFailure.delete(`${provider}:${connectionId}`);
+    const providerBreaker = getProviderBreaker(provider);
+    if (providerBreaker && providerBreaker !== breaker && providerBreaker.canExecute()) {
+      providerBreaker._onSuccess();
+    }
   }
-
-  // Transition breaker on success, matching execute()'s behavior:
-  // HALF_OPEN -> CLOSED (probe success), CLOSED/DEGRADED -> decay failureCount.
   breaker._onSuccess();
 }
 

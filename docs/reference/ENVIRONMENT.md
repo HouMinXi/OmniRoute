@@ -816,6 +816,7 @@ REQUEST_TIMEOUT_MS (global override)
 | `API_BRIDGE_PROXY_TIMEOUT_MS`             | `30000`              | Proxy hop timeout for `/v1` bridge requests.                                                                                                                    |
 | `FIRECRAWL_BASE_URL`                      | `https://api.firecrawl.dev` | Point the Firecrawl web-fetch executor at a self-hosted instance (API key optional off-cloud).                                                          |
 | `FIRECRAWL_TIMEOUT_MS`                    | `30000`              | Per-request timeout for the Firecrawl web-fetch executor.                                                                                                       |
+| `TAVILY_BASE_URL`                         | _(unset)_            | Base URL for the Tavily `/usage` quota fetcher (Provider Limits); ignored when it points at `api.tavily.com`. Unset falls back to the connection's base URL. |
 | `API_BRIDGE_SERVER_REQUEST_TIMEOUT_MS`    | `300000`             | Overall server request timeout for the bridge.                                                                                                                  |
 | `API_BRIDGE_SERVER_HEADERS_TIMEOUT_MS`    | `60000`              | Time to send response headers via the bridge.                                                                                                                   |
 | `API_BRIDGE_SERVER_KEEPALIVE_TIMEOUT_MS`  | `5000`               | Bridge keep-alive idle timeout.                                                                                                                                 |
@@ -941,8 +942,62 @@ The logging system writes to both stdout and rotated log files. All configuratio
 | `SEMANTIC_CACHE_TTL_MS`    | `1800000` (30 min) | Semantic cache entry TTL.                                                                                                                                                                                                                                                         |
 | `OMNIROUTE_CORPUS_CACHE_SIZE` | `5`             | Local-corpus roots that keep a live in-memory index at once (`src/lib/localCorpus/configured.ts`). LRU: at the limit the least-recently-used root's index is evicted and rebuilt on its next query. Clamped to a minimum of `1`; a non-numeric value falls back to the default.     |
 | `STREAM_HISTORY_MAX`       | `50`               | Max recent stream events in the Dashboard live view buffer.                                                                                                                                                                                                                       |
-| `CONTEXT_LENGTH_DEFAULT`   | `128000`           | Global fallback max context length for models without explicit config.                                                                                                                                                                                                            |
+| `CONTEXT_LENGTH_DEFAULT`   | _(unset)_          | Global context-length override (tokens) for every provider that has no `CONTEXT_LENGTH_<PROVIDER>` variable. When set, it **replaces** the catalog, dashboard override and registry values for those providers; when unset, OmniRoute uses its built-in chain, whose last resort is `128000`. See [Per-provider context length](#per-provider-context-length-context_length_provider). |
 | `USAGE_TOKEN_BUFFER`       | `100`              | Extra token headroom reserved when tracking usage quotas.                                                                                                                                                                                                                         |
+
+### Per-provider context length (`CONTEXT_LENGTH_<PROVIDER>`)
+
+`open-sse/services/contextManager.ts` (`getEnvOverride()` / `resolveTokenLimit()`) also reads a
+**per-provider** form whose name is built from the provider ID at runtime, so it cannot be
+listed row by row in the table above or in `.env.example`.
+
+**Name.** `CONTEXT_LENGTH_<PROVIDER>`, where `<PROVIDER>` is the provider ID upper-cased, with
+every character outside `A-Z` / `0-9` replaced by `_`. The provider ID is the canonical one after
+alias resolution (the `provider` part of a `provider/model` string once a short alias has been
+resolved). Custom OpenAI- or Anthropic-compatible nodes use their generated node ID, so the
+UUID is part of the variable name. The value is a positive integer number of tokens; anything
+else (empty, `0`, negative, non-numeric) is ignored and resolution moves on to the next step.
+
+| Provider ID                                                 | Variable name                                                              |
+| ----------------------------------------------------------- | -------------------------------------------------------------------------- |
+| agentrouter                                                 | CONTEXT_LENGTH_AGENTROUTER                                                 |
+| openrouter                                                  | CONTEXT_LENGTH_OPENROUTER                                                  |
+| openai-compatible-chat-0f8e2c1a-5b7d-4e3f-9a6c-2d1b8e4f7a90 | CONTEXT_LENGTH_OPENAI_COMPATIBLE_CHAT_0F8E2C1A_5B7D_4E3F_9A6C_2D1B8E4F7A90 |
+
+**Precedence.** For a `provider/model` pair, the first step that yields a value wins:
+
+1. `CONTEXT_LENGTH_<PROVIDER>` for that provider.
+2. `CONTEXT_LENGTH_DEFAULT` (global environment override).
+3. The per-model window: a persisted context override (set in the dashboard, or auto-pinned by
+   the discovery reconciler, see `CONTEXT_WINDOW_RECONCILE_INTERVAL`), otherwise the synced
+   catalog / models.dev value.
+4. The provider's registry `defaultContextLength`.
+5. Model-name heuristics (`claude` 200000, `gemini` 1000000, `gpt` / `o1` / `o3` / `o4` /
+   `codex` 400000).
+6. Built-in per-provider defaults, then `128000`.
+
+Both environment steps apply to the **whole provider**: every model of that provider gets the
+same limit, and they win over per-model dashboard overrides. When only one model of a provider
+needs a different window, use a per-model override in the dashboard instead.
+
+**Scope.** This chain drives the request-time context-window check (the
+`context_length_exceeded` / "Input exceeds context window" rejection in
+`open-sse/handlers/chatCore.ts`), prompt compression budgets and combo context limits. The
+`context_length` advertised by `GET /v1/models` can still come from catalog or registry
+metadata and is not guaranteed to reflect the environment override.
+
+**Example.** A provider whose model accepts a 1,050,000-token window while the catalog reports
+128,000:
+
+```dotenv
+CONTEXT_LENGTH_AGENTROUTER=1050000
+```
+
+Restart the server after changing it: the value is read from the server process environment.
+On the **desktop app** the server runs as a child process and does not see a system variable
+set after the app was launched; put the line in the `.env` file the app loads (lookup order in
+[Electron Guide: Environment file lookup](../guides/ELECTRON_GUIDE.md#environment-file-lookup)),
+then fully quit and relaunch the app.
 
 ### Compression
 

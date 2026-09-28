@@ -300,8 +300,25 @@ function openaiToGeminiBase(
       // Models not in MODEL_SPECS (thinkingBudgetCap=undefined) default to allowed.
       getModelSpec(model)?.thinkingBudgetCap !== 0
     ) {
+      let defaultBudget = getDefaultThinkingBudget(model) || capThinkingBudget(model, 24576);
+      // Gemini counts thinking tokens against maxOutputTokens. This budget was not
+      // requested by the client, so it must not be allowed to swallow the whole output
+      // cap: with max_tokens 50 and an injected budget of 24576 the model can spend
+      // every token thinking and return an empty `content`. Keep at most half of the
+      // cap for thoughts. Explicit client budgets (paths 1 and 2) are left untouched.
+      // Google documents a minimum budget for some tiers (2.5 Pro 128, 2.5 Flash-Lite
+      // 512) and a value under it may be rejected, so never shrink below that minimum.
+      const outputCap = result.generationConfig.maxOutputTokens;
+      if (typeof outputCap === "number" && outputCap > 0 && defaultBudget >= outputCap) {
+        const tierMinimum = modelLower.includes("flash-lite")
+          ? 512
+          : modelLower.includes("pro")
+            ? 128
+            : 0;
+        defaultBudget = Math.min(defaultBudget, Math.max(Math.floor(outputCap / 2), tierMinimum));
+      }
       result.generationConfig.thinkingConfig = {
-        thinkingBudget: getDefaultThinkingBudget(model) || capThinkingBudget(model, 24576),
+        thinkingBudget: defaultBudget,
         includeThoughts: true,
       };
     }

@@ -1263,21 +1263,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 також про
 <table>
   <tr><th align="left">Рівень</th><th align="left">Технологія</th></tr>
   <tr><td nowrap><b>Середовище виконання</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Мова</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> та <code>open-sse/</code> (нуль <code>any</code> в ядрі з v2.0)</td></tr>
+  <tr><td nowrap><b>Мова</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> та <code>open-sse/</code> (жодного <code>any</code> у ядрі починаючи з v2.0)</td></tr>
   <tr><td nowrap><b>Фреймворк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 122 доменних модулів, 183 міграцій</td></tr>
-  <tr><td nowrap><b>Пам'ять</b></td><td>SQLite FTS5 повнотекстовий + int8-квантовані векторні вбудовування, типізований розпад</td></tr>
-  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — валідація вводу/виводу інструменту MCP + контракти API</td></tr>
+  <tr><td nowrap><b>База даних</b></td><td>better-sqlite3 (SQLite, журналювання WAL) + LowDB (успадкований JSON) — 122 доменні модулі, 190 міграцій</td></tr>
+  <tr><td nowrap><b>Пам’ять</b></td><td>Повнотекстовий пошук SQLite FTS5 + векторні вбудовування з квантуванням int8, типізоване згасання</td></tr>
+  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — валідація вводу/виводу інструментів MCP + контракти API</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Потокова передача</b></td><td>Server-Sent Events (SSE) + міст WebSocket (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Стиснення</b></td><td>конвеєр з 12 рушіїв — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Автентифікація та безпека</b></td><td>OAuth 2.0 (PKCE) + JWT + Ключі API + авторизація MCP за областю дії · AES-256-GCM у стані спокою · DOMPurify</td></tr>
-  <tr><td nowrap><b>Невидимість</b></td><td>wreq-js — імітація відбитка TLS JA3 / JA4, 3-рівневий проксі</td></tr>
-  <tr><td nowrap><b>Стійкість</b></td><td>Автоматичний вимикач, експоненційна затримка, захист від ефекту «стада», автоматичне комбіноване самовідновлення</td></tr>
-  <tr><td nowrap><b>Ведення журналів</b></td><td>pino — структуровані JSON-журнали з контекстом запиту</td></tr>
-  <tr><td nowrap><b>Тестування</b></td><td>Node.js test runner + Vitest — <b>39,000+ статичних оголошень тестів</b> у 5,100+ відстежуваних тестових файлах (модульне, інтеграційне, наскрізне, безпеки, екосистеми)</td></tr>
-  <tr><td nowrap><b>Платформи</b></td><td>Десктоп (Electron) · Android (Termux) · PWA (будь-який браузер)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматична публікація в npm + Docker Hub при релізі</td></tr>
+  <tr><td nowrap><b>Потокове передавання</b></td><td>Server-Sent Events (SSE) + міст WebSocket (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Стиснення</b></td><td>Конвеєр із 12 рушіїв — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Автентифікація та безпека</b></td><td>OAuth 2.0 (PKCE) + JWT + ключі API + автентифікація MCP з областями доступу · AES-256-GCM для збережених даних · DOMPurify</td></tr>
+  <tr><td nowrap><b>Маскування</b></td><td>wreq-js — імітація відбитків TLS JA3 / JA4, трирівневий проксі</td></tr>
+  <tr><td nowrap><b>Відмовостійкість</b></td><td>Запобіжник, експоненційна затримка повторних спроб, захист від ефекту «стада, що біжить», автоматичне комбіноване самовідновлення</td></tr>
+  <tr><td nowrap><b>Журналювання</b></td><td>pino — структуровані журнали JSON із контекстом запиту</td></tr>
+  <tr><td nowrap><b>Тестування</b></td><td>Засіб запуску тестів Node.js + Vitest — <b>понад 39 000 статичних оголошень тестів</b> у понад 5 100 відстежуваних файлах тестів (модульні, інтеграційні, E2E, безпеки, екосистеми)</td></tr>
+  <tr><td nowrap><b>Платформи</b></td><td>Настільні системи (Electron) · Android (Termux) · PWA (будь-який браузер)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматична публікація в npm і Docker Hub під час випуску</td></tr>
   <tr><td nowrap><b>Посилання</b></td><td><a href="https://omniroute.online">Вебсайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

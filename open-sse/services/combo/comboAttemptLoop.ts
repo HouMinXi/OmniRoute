@@ -20,7 +20,11 @@ import {
   unavailableResponse,
 } from "../../utils/error.ts";
 import { COMBO_FAILURE_THRESHOLD, recordComboFailure } from "./failureTracker.ts";
-import { buildNoUpstreamResponseDiagnostics } from "./pinRecovery.ts";
+import {
+  buildAllTargetsCoolingDownResponse,
+  buildNoUpstreamResponseDiagnostics,
+  formatPreDispatchExclusions,
+} from "./pinRecovery.ts";
 import { collectQuotaWindowExclusions, formatQuotaSkipMessage } from "./quotaSkipDiagnostics.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
 import { notifyWebhookEvent } from "../../../src/lib/webhookDispatcher.ts";
@@ -51,7 +55,7 @@ import {
   resolveDelayMs,
   requestScopedReplayKey,
 } from "./comboPredicates.ts";
-import { evaluateExecuteTargetGates } from "./executeTargetGates.ts";
+import { collectCircuitOpenExclusions, evaluateExecuteTargetGates } from "./executeTargetGates.ts";
 import { executeTargetAttempt } from "./executeTargetAttempt.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
@@ -506,6 +510,22 @@ export async function dispatchWithCooldownRetry(opts: {
             latencyMs,
             fallbackCount: state.fallbackCount,
           });
+          // Every target sat behind an OPEN breaker: say so, with the providers and
+          // the time until the next probe, instead of the generic skip whose recovery
+          // hint points at quota and top-ups the breaker has nothing to do with.
+          const circuitOpen = state.skippedForCircuitOpen
+            ? collectCircuitOpenExclusions(state.orderedTargets)
+            : null;
+          const circuitOpenResponse = circuitOpen
+            ? buildAllTargetsCoolingDownResponse(circuitOpen)
+            : null;
+          if (circuitOpenResponse) {
+            deps.log.warn(
+              "COMBO",
+              `All targets skipped: circuit breaker open — ${formatPreDispatchExclusions(circuitOpen!)}`
+            );
+            return circuitOpenResponse;
+          }
           const quotaSkip = formatQuotaSkipMessage(
             collectQuotaWindowExclusions(state.orderedTargets)
           );

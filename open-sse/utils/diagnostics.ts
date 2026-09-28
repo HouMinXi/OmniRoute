@@ -358,7 +358,21 @@ export function detectMalformedNonStream(
     return false;
   });
 
-  if (!anyHasOutput) return "empty_choices";
+  if (!anyHasOutput) {
+    // A finish_reason of "length" is the chat-completions spelling of a
+    // truncated completion: the model hit max_tokens. Claude's translator maps
+    // stop_reason "max_tokens" to it (claude-to-openai.ts), and the Claude
+    // shape already exempts that case (#12968, diagnostics above) because a
+    // thinking model can burn a 1-token probe budget and return no visible
+    // text. Rejecting the translated form reintroduces the 502 the exemption
+    // removed. "stop" with no output stays empty_choices.
+    const truncated = choices.some((choice) => {
+      const c = choice as Record<string, unknown>;
+      return c?.finish_reason === "length";
+    });
+    if (truncated) return null;
+    return "empty_choices";
+  }
 
   // #13461: only for the narrow provider allowlist — see classifyFakeSuccessBody's
   // doc comment for the false-positive guards (short content + dominant signal).
@@ -394,6 +408,15 @@ function extractChatCompletionText(choices: unknown[]): string {
   return parts.join(" ");
 }
 
+/**
+ * `error.type` shared by every non-streaming "malformed 200" failure built by
+ * describeMalformedNonStream(). Its presence means the upstream already
+ * answered HTTP 200 with a body (so the call was most likely billed) and only
+ * the translated result was unusable. Retry layers read it to avoid replaying
+ * the same paid call against the same account.
+ */
+export const UPSTREAM_RESPONDED_ERROR_TYPE = "upstream_response_error";
+
 export function describeMalformedNonStream(
   resp: unknown,
   reason: MalformedReason
@@ -410,14 +433,14 @@ export function describeMalformedNonStream(
         ? `upstream reported a failed response: ${rawMessage}`
         : "upstream reported a failed response without usable output",
       code: "upstream_response_failed",
-      type: "upstream_response_error",
+      type: UPSTREAM_RESPONDED_ERROR_TYPE,
     };
   }
   if (reason === "content_is_upstream_error") {
     return {
       message: "upstream reported a failure disguised as a successful response",
       code: "upstream_fake_success",
-      type: "upstream_response_error",
+      type: UPSTREAM_RESPONDED_ERROR_TYPE,
     };
   }
   return {
@@ -426,7 +449,7 @@ export function describeMalformedNonStream(
         ? "upstream response did not reach a terminal state"
         : "upstream returned an empty response without usable output",
     code: "upstream_empty_response",
-    type: "upstream_response_error",
+    type: UPSTREAM_RESPONDED_ERROR_TYPE,
   };
 }
 

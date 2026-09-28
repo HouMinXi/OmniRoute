@@ -189,40 +189,51 @@ function getSocketPeerAddress(request: RequestLike | Request | null | undefined)
  * `src/server/authz/peerContext.ts::isLoopbackRequest`.
  */
 export function isLoopbackRequest(request: RequestLike | Request | null | undefined): boolean {
-  if (!request || typeof request !== "object") return false;
+  return getRequestPeerLocality(request) === "loopback";
+}
+
+/**
+ * Trusted three-way locality of the caller — the same signals and order as
+ * `isLoopbackRequest()` above, but keeping the LAN verdict so route handlers can apply
+ * the LOCAL_ONLY semantics (loopback OR private LAN, never via a reverse proxy) to a
+ * single capability inside a route that stays reachable remotely. Fails closed to
+ * "remote".
+ */
+export function getRequestPeerLocality(
+  request: RequestLike | Request | null | undefined
+): "loopback" | "lan" | "remote" {
+  if (!request || typeof request !== "object") return "remote";
 
   const stampToken = process.env.OMNIROUTE_PEER_STAMP_TOKEN;
 
   const stampedPeer = getHeaderValue(request, PEER_IP_HEADER);
   if (stampedPeer !== null) {
-    return (
-      classifyStampedPeerLocality(
-        stampedPeer,
-        getHeaderValue(request, VIA_PROXY_HEADER),
-        stampToken
-      ) === "loopback"
+    return classifyStampedPeerLocality(
+      stampedPeer,
+      getHeaderValue(request, VIA_PROXY_HEADER),
+      stampToken
     );
   }
 
   const pipelineVerdict = getHeaderValue(request, AUTHZ_HEADER_PEER_LOCALITY);
   if (pipelineVerdict !== null && stampToken) {
-    return pipelineVerdict === "loopback";
+    return pipelineVerdict === "loopback" || pipelineVerdict === "lan" ? pipelineVerdict : "remote";
   }
 
   const socketPeer = getSocketPeerAddress(request);
-  if (socketPeer) return classifyHostLocality(socketPeer) === "loopback";
+  if (socketPeer) return classifyHostLocality(socketPeer);
 
   // A stamping server is in front (every supported runtime — run-next dev/start and
   // standalone-server-ws for Docker, the npm CLI and Electron — calls
   // ensurePeerStampToken() at boot) but neither trusted signal is on this request:
   // fail closed. The Host header is never consulted in that process.
-  if (stampToken) return false;
+  if (stampToken) return "remote";
 
   // No stamping server in this process at all: route handlers invoked directly (the
   // unit-test harness) or a raw `next` launch that also bypasses every LOCAL_ONLY
   // gate in peerContext. There is no real peer to read, so keep the historical
   // URL/Host verdict rather than turning every direct handler call into a remote one.
-  return isLegacyHostLoopback(request);
+  return isLegacyHostLoopback(request) ? "loopback" : "remote";
 }
 
 function isLegacyHostLoopback(request: RequestLike | Request): boolean {

@@ -1264,28 +1264,28 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 също го п�
 <br/>
 <div align="center">
 
-## 🛠️ Технологичен Стек
+## 🛠️ Технологичен стек
 
 </div>
 
 <table>
   <tr><th align="left">Слой</th><th align="left">Технология</th></tr>
   <tr><td nowrap><b>Среда за изпълнение</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Език</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в `src/` и `open-sse/` (нула `any` в ядрото от v2.0)</td></tr>
-  <tr><td nowrap><b>Фреймуърк</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База данни</b></td><td>better-sqlite3 (SQLite, WAL журналиране) + LowDB (JSON наследство) — 122 домейн модула, 183 миграции</td></tr>
-  <tr><td nowrap><b>Памет</b></td><td>SQLite FTS5 пълнотекстово + int8-квантувани векторни вграждания, типизиран разпад</td></tr>
-  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — MCP валидация на вход/изход на инструменти + API договори</td></tr>
+  <tr><td nowrap><b>Език</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (без нито едно <code>any</code> в ядрото от v2.0 насам)</td></tr>
+  <tr><td nowrap><b>Работна рамка</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>База данни</b></td><td>better-sqlite3 (SQLite, журнализиране чрез WAL) + LowDB (наследен JSON формат) — 122 домейн модула, 190 миграции</td></tr>
+  <tr><td nowrap><b>Памет</b></td><td>Пълнотекстово търсене чрез SQLite FTS5 + int8-квантувани векторни вграждания, типизирано затихване</td></tr>
+  <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — валидиране на входа/изхода на MCP инструменти + API договори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Поточно предаване</b></td><td>Server-Sent Events (SSE) + WebSocket мост (`/v1/ws`)</td></tr>
-  <tr><td nowrap><b>Компресия</b></td><td>12-двигателен конвейер — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Автентикация и сигурност</b></td><td>OAuth 2.0 (PKCE) + JWT + API ключове + MCP обхватна автентикация · AES-256-GCM в покой · DOMPurify</td></tr>
-  <tr><td nowrap><b>Стелт</b></td><td>wreq-js — JA3 / JA4 имитация на TLS отпечатък, 3-нивов прокси</td></tr>
-  <tr><td nowrap><b>Устойчивост</b></td><td>Прекъсвач на веригата, експоненциално отстъпване, защита от "thundering herd", автоматично комбинирано самовъзстановяване</td></tr>
-  <tr><td nowrap><b>Регистриране</b></td><td>pino — структурирани JSON логове с контекст на заявката</td></tr>
-  <tr><td nowrap><b>Тестване</b></td><td>Node.js тестов изпълнител + Vitest — <b>39,000+ статични тестови декларации</b> в 5,100+ проследявани тестови файла (единични, интеграционни, E2E, сигурност, екосистема)</td></tr>
-  <tr><td nowrap><b>Платформи</b></td><td>Настолни (Electron) · Android (Termux) · PWA (всеки браузър)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматично npm публикуване + Docker Hub при пускане на версия</td></tr>
+  <tr><td nowrap><b>Поточно предаване</b></td><td>Server-Sent Events (SSE) + WebSocket мост (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Компресия</b></td><td>Конвейер с 12 механизма — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Удостоверяване &amp; сигурност</b></td><td>OAuth 2.0 (PKCE) + JWT + API ключове + удостоверяване с обхвати за MCP · AES-256-GCM за данни в покой · DOMPurify</td></tr>
+  <tr><td nowrap><b>Прикриване</b></td><td>wreq-js — имитиране на JA3 / JA4 TLS отпечатъци, 3-нивово прокси</td></tr>
+  <tr><td nowrap><b>Устойчивост</b></td><td>Прекъсвач на веригата, експоненциално изчакване, защита срещу лавинообразни едновременни заявки, самовъзстановяване чрез автоматично комбиниране</td></tr>
+  <tr><td nowrap><b>Журнализиране</b></td><td>pino — структурирани JSON регистрационни записи с контекст на заявката</td></tr>
+  <tr><td nowrap><b>Тестване</b></td><td>Инструмент за изпълнение на тестове на Node.js + Vitest — <b>39 000+ декларации на статични тестове</b> в над 5 100 проследявани тестови файла (модулни, интеграционни, E2E, за сигурност и екосистема)</td></tr>
+  <tr><td nowrap><b>Платформи</b></td><td>Настолни системи (Electron) · Android (Termux) · PWA (всеки браузър)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — автоматично публикуване в npm + Docker Hub при издание</td></tr>
   <tr><td nowrap><b>Връзки</b></td><td><a href="https://omniroute.online">Уебсайт</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

@@ -49,6 +49,7 @@ export { classifyFailure, projectProviderRuntimeForPublicResponse } from "./publ
 const OAUTH_TEST_TIMEOUT_MS = 30_000;
 
 import { CLI_RUNTIME_PROVIDER_MAP } from "./cliRuntimeProviderMap";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
 /** POST body is optional; when present, only known fields are validated. */
 const providerConnectionTestBodySchema = z.object({
@@ -68,7 +69,17 @@ function hasQoderToken(connection: any): boolean {
   return false;
 }
 
-async function getProviderRuntimeStatus(connection: any) {
+// GHSA-jmq6-8j86-8xqj: getCliRuntimeStatus() spawns on the host (LOCAL_ONLY capability),
+// but these routes stay remote-reachable — only loopback/LAN callers and the scheduler probe.
+export type ConnectionTestOptions = { allowLocalRuntimeProbe?: boolean };
+
+export async function getProviderRuntimeStatus(
+  connection: any,
+  {
+    allowLocalRuntimeProbe = true,
+    probe = getCliRuntimeStatus,
+  }: ConnectionTestOptions & { probe?: typeof getCliRuntimeStatus } = {}
+) {
   const provider = typeof connection?.provider === "string" ? connection.provider : "";
   let toolId = CLI_RUNTIME_PROVIDER_MAP[provider];
 
@@ -95,9 +106,10 @@ async function getProviderRuntimeStatus(connection: any) {
     toolId = null;
   }
   if (!toolId) return null;
+  if (!allowLocalRuntimeProbe) return null;
 
   try {
-    const runtime = await getCliRuntimeStatus(toolId);
+    const runtime = await probe(toolId);
     if (runtime.installed && runtime.runnable) {
       return runtime;
     }
@@ -924,7 +936,11 @@ async function testApiKeyConnection(connection: any) {
  * @param {string} validationModelId Optional custom model ID to test connection with
  * @returns {Promise<object>} Test result (same shape as the JSON response)
  */
-export async function testSingleConnection(connectionId: string, validationModelId?: string) {
+export async function testSingleConnection(
+  connectionId: string,
+  validationModelId?: string,
+  options: ConnectionTestOptions = {}
+) {
   const connection = await getCachedProviderConnectionById(connectionId);
 
   if (!connection) {
@@ -970,7 +986,7 @@ export async function testSingleConnection(connectionId: string, validationModel
 
   let result;
   const startTime = Date.now();
-  const runtime = await getProviderRuntimeStatus(connection);
+  const runtime = await getProviderRuntimeStatus(connection, options);
 
   // Codex app-server connections carry no validatable OpenAI token (the codex
   // app-server process self-manages its own OAuth). Probe the app-server's
@@ -1215,7 +1231,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
     const { validationModelId } = validation.data;
 
-    const data = await testSingleConnection(id, validationModelId);
+    const data = await testSingleConnection(id, validationModelId, {
+      allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
+    });
 
     if (data.error === "Connection not found") {
       return NextResponse.json({ error: "Connection not found" }, { status: 404 });

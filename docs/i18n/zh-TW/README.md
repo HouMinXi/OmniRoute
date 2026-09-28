@@ -1255,28 +1255,28 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 <br/>
 <div align="center">
 
-## 🛠️ 技術棧
+## 🛠️ 技術堆疊
 
 </div>
 
 <table>
-  <tr><th align="left">層</th><th align="left">技術</th></tr>
+  <tr><th align="left">層級</th><th align="left">技術</th></tr>
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — `src/` 和 `open-sse/` **100% 使用 TypeScript** (自 v2.0 起核心代碼中無 `any`)</td></tr>
+  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — 在 <code>src/</code> 與 <code>open-sse/</code> 中皆為 <b>100% TypeScript</b>（自 v2.0 起，核心中完全沒有 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3 (SQLite, WAL 日誌) + LowDB (JSON 舊版) — 122 個領域模組，183 次遷移</td></tr>
-  <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文檢索 + int8 量化向量嵌入，類型衰減</td></tr>
-  <tr><td nowrap><b>架構</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 契約</td></tr>
-  <tr><td nowrap><b>協定</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>串流</b></td><td>Server-Sent Events (SSE) + WebSocket 橋接 (`/v1/ws`)</td></tr>
-  <tr><td nowrap><b>壓縮</b></td><td>12 引擎管線 — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>認證與安全</b></td><td>OAuth 2.0 (PKCE) + JWT + API Keys + MCP 範圍認證 · 靜態 AES-256-GCM 加密 · DOMPurify</td></tr>
-  <tr><td nowrap><b>隱匿</b></td><td>wreq-js — JA3 / JA4 TLS 指紋偽裝，3 級代理</td></tr>
-  <tr><td nowrap><b>韌性</b></td><td>斷路器，指數退避，防洪，自動組合自我修復</td></tr>
-  <tr><td nowrap><b>日誌</b></td><td>pino — 帶有請求上下文的結構化 JSON 日誌</td></tr>
-  <tr><td nowrap><b>測試</b></td><td>Node.js test runner + Vitest — 跨越 5,100+ 個追蹤測試檔案的 **39,000+ 靜態測試宣告** (單元、整合、E2E、安全、生態系統)</td></tr>
-  <tr><td nowrap><b>平台</b></td><td>桌面 (Electron) · Android (Termux) · PWA (任何瀏覽器)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 自動 npm 發布 + 發布時 Docker Hub</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌模式）+ LowDB（舊版 JSON）— 122 個領域模組、190 次遷移</td></tr>
+  <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文檢索 + int8 量化向量嵌入、類型化衰減</td></tr>
+  <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 合約</td></tr>
+  <tr><td nowrap><b>協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
+  <tr><td nowrap><b>串流</b></td><td>伺服器傳送事件（SSE）+ WebSocket 橋接器（<code>/v1/ws</code>）</td></tr>
+  <tr><td nowrap><b>壓縮</b></td><td>12 引擎管線 — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
+  <tr><td nowrap><b>驗證與安全性</b></td><td>OAuth 2.0（PKCE）+ JWT + API 金鑰 + MCP 範圍式驗證 · 靜態資料採用 AES-256-GCM 加密 · DOMPurify</td></tr>
+  <tr><td nowrap><b>隱匿性</b></td><td>wreq-js — JA3 / JA4 TLS 指紋模擬、3 層代理</td></tr>
+  <tr><td nowrap><b>韌性</b></td><td>斷路器、指數退避、防驚群機制、自動組合自我修復</td></tr>
+  <tr><td nowrap><b>日誌記錄</b></td><td>pino — 包含請求上下文的結構化 JSON 日誌</td></tr>
+  <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 在 5,100 多個受追蹤的測試檔案中包含 <b>39,000 多項靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
+  <tr><td nowrap><b>平台</b></td><td>桌面版（Electron）· Android（Termux）· PWA（任何瀏覽器）</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 發布版本時自動發佈至 npm + Docker Hub</td></tr>
   <tr><td nowrap><b>連結</b></td><td><a href="https://omniroute.online">網站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

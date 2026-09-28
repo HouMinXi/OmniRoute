@@ -60,6 +60,7 @@ import {
 import { isAutoFetchModelsEnabled } from "@/lib/providerModels/modelDiscovery";
 import { testSingleConnection } from "./[id]/test/route";
 import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
 function projectCodexAccountPoolWithRoutingQuota(
   connection: Parameters<typeof projectCodexAccountPool>[0],
@@ -369,7 +370,10 @@ export async function POST(request: Request) {
     // seconds (OAuth refresh, upstream round-trip) and must not block the
     // 201 response. testSingleConnection() persists testStatus/lastError/etc.
     // itself, so nothing further is needed here beyond logging failures.
-    void testSingleConnection(newConnection.id).catch((testError: unknown) => {
+    // GHSA-jmq6-8j86-8xqj: the local CLI probe spawns on the host — only for local callers.
+    void testSingleConnection(newConnection.id, undefined, {
+      allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
+    }).catch((testError: unknown) => {
       console.log(
         `[providers] Auto-test failed for ${newConnection.id}:`,
         (testError as { message?: string })?.message || testError

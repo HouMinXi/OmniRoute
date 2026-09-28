@@ -522,7 +522,11 @@
       "tests/unit/client-abort-propagates-upstream.test.ts",
       "tests/unit/data-dir-private-perms.test.ts",
       "tests/unit/translation-failure-skips-account-cooldown-14815.test.ts",
-      "tests/unit/sudo-password-never-reaches-command-stdin.test.ts"
+      "tests/unit/sudo-password-never-reaches-command-stdin.test.ts",
+      "tests/unit/middleware-hook-realm-isolation.test.ts",
+      "tests/unit/bootstrap-env-private-modes.test.ts",
+      "tests/unit/electron-server-env-private-modes.test.ts",
+      "tests/unit/provider-test-local-runtime-probe.test.ts"
     ],
     "nodeArgs": [
       "--import",

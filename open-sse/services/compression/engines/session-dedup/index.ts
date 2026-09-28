@@ -31,6 +31,7 @@
 import crypto from "node:crypto";
 import { createCompressionStats } from "../../stats.ts";
 import { runFuzzyPass } from "./fuzzy.ts";
+import { callerSupportsCcrRetrieve } from "../ccr/protocolInstruction.ts";
 import type {
   CompressionEngine,
   CompressionEngineApplyOptions,
@@ -125,7 +126,11 @@ function countLiteralOccurrences(text: string, needle: string): number {
   }
 }
 
-function replaceLiteralOccurrencesAfterFirst(text: string, needle: string, replacement: string): string {
+function replaceLiteralOccurrencesAfterFirst(
+  text: string,
+  needle: string,
+  replacement: string
+): string {
   if (!needle) return text;
   const first = text.indexOf(needle);
   if (first === -1) return text;
@@ -394,7 +399,8 @@ function validateSessionDedupConfig(config: Record<string, unknown>): EngineVali
     const f = config["fuzzy"];
     if (typeof f === "object" && f !== null) {
       const fe = (f as Record<string, unknown>)["enabled"];
-      if (fe !== undefined && typeof fe !== "boolean") errors.push("fuzzy.enabled must be a boolean");
+      if (fe !== undefined && typeof fe !== "boolean")
+        errors.push("fuzzy.enabled must be a boolean");
     } else if (typeof f !== "boolean") {
       errors.push("fuzzy must be an object { enabled } or a boolean");
     }
@@ -454,7 +460,8 @@ export const sessionDedupEngine: CompressionEngine = {
       exactMessages,
       stepConfig,
       minBlockChars,
-      options?.principalId
+      options?.principalId,
+      callerSupportsCcrRetrieve(body)
     );
 
     if (dedupCount + fuzzyCount === 0) {
