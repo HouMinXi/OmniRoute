@@ -47,6 +47,13 @@ export interface AuthRequiredOptions {
    * pipeline's own locality header could still be present.
    */
   loopback?: boolean;
+  /**
+   * Judge a public-classified path as if it were a management path. A public route
+   * that does its own management check (`requireManagementAuth`) must not inherit the
+   * "public, no auth needed" shortcut of the fresh-install window, or a remote caller
+   * passes the check before a password exists.
+   */
+  ignorePublicRoute?: boolean;
 }
 
 export function hasConfiguredPassword(settings: Record<string, unknown>): boolean {
@@ -477,7 +484,7 @@ export async function isAuthRequired(
         return false;
       }
 
-      if (pathname && isPublicApiRoute(pathname, method)) {
+      if (!options?.ignorePublicRoute && pathname && isPublicApiRoute(pathname, method)) {
         return false;
       }
 
