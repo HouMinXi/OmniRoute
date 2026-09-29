@@ -13,9 +13,11 @@ const chatCoreSource = readFileSync(
   "utf8"
 );
 
-// The overflow fail-fast gate stayed behind in the barrel.
+// The overflow fail-fast gate moved into the cache/compress leaf with the
+// chatCore decomposition (#13065) — it never lived alongside the threshold
+// gate above, but the two used to share a file.
 const barrelSource = readFileSync(
-  new URL("../../open-sse/handlers/chatCore.ts", import.meta.url),
+  new URL("../../open-sse/handlers/chatCore/cacheAndCompress.ts", import.meta.url),
   "utf8"
 );
 
