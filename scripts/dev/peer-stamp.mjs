@@ -211,3 +211,52 @@ export function wrapRequestListenerWithPeerStamp(listener) {
     return listener.call(this, req, res);
   };
 }
+
+const RELAY_FORWARDING_HEADERS = ["x-forwarded-for", "x-real-ip", "cf-connecting-ip"];
+
+function isPrivateRelayPeer(ip) {
+  if (isIPv4(ip)) {
+    const [a, b] = ip.split(".").map(Number);
+    return (
+      a === 10 ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127)
+    );
+  }
+  return /^(f[cd][0-9a-f]{2}|fe80):/i.test(ip);
+}
+
+/**
+ * Forwarding headers for a call the server makes to itself on behalf of a client that is
+ * connected to one of its WebSocket relays. Those calls leave over loopback, and the app tells a
+ * local caller from a remote one, and applies the IP allow/deny list, from the socket peer plus
+ * the forwarding headers on the call, so the relay has to report who the client really is:
+ *
+ *   loopback peer  a local client or a proxy on this host: its own forwarding headers are passed
+ *                  on, all of them, since any one of them marks the call as proxied.
+ *   trusted proxy  a Cloudflare edge, or a private-network peer when OMNIROUTE_TRUST_PROXY is
+ *                  `private` / `lan`: its headers are passed on with its own address appended to
+ *                  the X-Forwarded-For chain.
+ *   anyone else    what it wrote is dropped and it is reported by the address of its connection.
+ *
+ * `remoteAddress` is `req.socket.remoteAddress` of the upgrade request. A missing one is
+ * reported as "unknown", never as a local client.
+ */
+export function relayForwardingHeaders(remoteAddress, requestHeaders = {}) {
+  const peer = typeof remoteAddress === "string" ? remoteAddress.replace(/^::ffff:/i, "") : "";
+  const own = {};
+  for (const name of RELAY_FORWARDING_HEADERS) {
+    const value = requestHeaders[name];
+    if (typeof value === "string" && value.trim()) own[name] = value;
+  }
+  if (peer === "::1" || peer.startsWith("127.")) return own;
+
+  const trustMode = (process.env.OMNIROUTE_TRUST_PROXY || "").trim().toLowerCase();
+  const trustsPrivate = trustMode === "private" || trustMode === "lan";
+  if (peer && (isCloudflareIP(peer) || (trustsPrivate && isPrivateRelayPeer(peer)))) {
+    const chain = [own["x-forwarded-for"], peer].filter(Boolean).join(", ");
+    return { ...own, "x-forwarded-for": chain };
+  }
+  return { "x-forwarded-for": peer || "unknown" };
+}
