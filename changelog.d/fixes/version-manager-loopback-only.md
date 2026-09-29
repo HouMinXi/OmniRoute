@@ -1,0 +1,1 @@
+- **fix(authz):** the CLIProxyAPI install, start, restart and stop routes under `/api/version-manager/` are loopback-only like `/api/services/cliproxy/*`, and the install route now validates `tool` and `version`

@@ -1,0 +1,1 @@
+- **fix(auth):** the environment passthrough API key and the model-sync internal token are compared in constant time, like the other secrets

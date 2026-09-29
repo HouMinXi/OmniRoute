@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
-import { classifyIpScope } from "@/lib/ipUtils";
 import { getCachedSettings } from "@/lib/db/readCache";
 import {
   ensurePersistentManagementPasswordHash,
@@ -11,6 +10,12 @@ import {
 } from "@/lib/auth/managementPassword";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { checkLoginGuard, clearLoginAttempts, recordLoginFailure } from "@/server/auth/loginGuard";
+import {
+  getLoginLockoutKey,
+  getLoginSourceScope,
+  isHostOperatorRequest,
+} from "@/server/auth/loginPeer";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { createAccessToken } from "@/lib/db/accessTokens";
 import { ACCESS_SCOPES } from "@/lib/accessTokens/scopes";
 
@@ -54,8 +59,12 @@ export async function POST(request: Request) {
     const settings = await getCachedSettings();
     const bruteForceEnabled = settings.bruteForceProtection !== false;
     const clientIp = auditContext.ipAddress || null;
+    // Key the lockout on the socket peer the authz pipeline stamped: any value
+    // taken from forwarding headers is chosen by the caller, so rotating it
+    // would hand out a fresh attempt budget on every request.
+    const lockoutKey = getLoginLockoutKey(request, clientIp);
 
-    const guardCheck = checkLoginGuard(clientIp, { enabled: bruteForceEnabled });
+    const guardCheck = checkLoginGuard(lockoutKey, { enabled: bruteForceEnabled });
     if (!guardCheck.allowed) {
       logAuditEvent({
         action: "cli.connect.locked",
@@ -92,7 +101,7 @@ export async function POST(request: Request) {
 
     const isValid = await verifyManagementPassword(password, storedHash);
     if (!isValid) {
-      const failureDecision = recordLoginFailure(clientIp, { enabled: bruteForceEnabled });
+      const failureDecision = recordLoginFailure(lockoutKey, { enabled: bruteForceEnabled });
       logAuditEvent({
         action: "cli.connect.failed",
         actor: "anonymous",
@@ -124,7 +133,7 @@ export async function POST(request: Request) {
     // .env.example), so without this gate the public default is exchangeable for
     // admin from anywhere the port is reachable. Pair from a local console first,
     // then rotate.
-    if (isKnownInsecureManagementPassword(password) && classifyIpScope(clientIp) !== "loopback") {
+    if (isKnownInsecureManagementPassword(password) && !isHostOperatorRequest(request)) {
       logAuditEvent({
         action: "cli.connect.insecure_default_blocked",
         actor: "anonymous",
@@ -135,7 +144,8 @@ export async function POST(request: Request) {
         requestId: auditContext.requestId,
         metadata: {
           reason: "well_known_default_password_non_loopback",
-          sourceScope: classifyIpScope(clientIp),
+          sourceScope: getLoginSourceScope(request, clientIp),
+          peerLocality: getRequestPeerLocality(request),
         },
       });
       return NextResponse.json(
@@ -148,7 +158,7 @@ export async function POST(request: Request) {
       );
     }
 
-    clearLoginAttempts(clientIp);
+    clearLoginAttempts(lockoutKey);
 
     const tokenScope = scope ?? "admin";
     const tokenName = (name ?? "remote-cli").trim() || "remote-cli";

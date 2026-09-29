@@ -88,11 +88,11 @@ export function createPinnedFetch(address: string, family: number): typeof fetch
         dispatcher,
       })) as unknown as Response;
     } finally {
-      // Not awaited: `close()` waits for the in-flight request to finish, and that includes its
-      // body, which the caller only reads after this returns. Awaiting it here deadlocked every
-      // response larger than the socket buffers (~100 KB) until the caller's timeout fired. The
-      // dispatcher still closes on its own once the body has been consumed.
-      dispatcher.close().catch(() => {});
+      // Not awaited: `close()` resolves once the request has finished, and the response body
+      // cannot finish before the caller starts reading it, so awaiting here stalled every
+      // download larger than about 64 KB. The connection is still closed as soon as the body
+      // has been read.
+      void dispatcher.close().catch(() => undefined);
     }
   }) as typeof fetch;
 }
