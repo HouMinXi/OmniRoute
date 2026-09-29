@@ -23,7 +23,7 @@ export const PEER_IP_HEADER = "x-omniroute-peer-ip";
 
 /**
  * Companion header to PEER_IP_HEADER: `<token>|1` when the inbound TCP request
- * carried forwarding headers (`x-forwarded-for` / `x-real-ip`) or arrived from
+ * carried a forwarding header (see `hasProxyHopHeader`) or arrived from
  * a Cloudflare edge IP with `cf-connecting-ip`, `<token>|0` otherwise. Required
  * so the middleware can tell that a loopback socket is the reverse-proxy hop
  * (nginx / Caddy / Cloudflare Tunnel) and NOT trust it as local — without this,
@@ -171,6 +171,31 @@ export function isCloudflareIP(ip) {
   return false;
 }
 
+/**
+ * True when the request carries a header that a reverse proxy or tunnel adds when it relays a
+ * request: any `x-forwarded-*`, `x-real-ip`, `forwarded` or `via`. A proxy on the same host connects
+ * from loopback, so these headers are the only thing that tells the callers behind it apart from a
+ * local operator. Callers can send them too; that is harmless because the marker only ever
+ * downgrades a loopback or private-network peer to "remote".
+ *
+ * Keep in step with `hasProxyHopHeader` in src/server/authz/proxyHeaders.ts (a test compares them).
+ */
+export function hasProxyHopHeader(headers) {
+  for (const [rawName, value] of Object.entries(headers || {})) {
+    if (!value || (Array.isArray(value) && value.length === 0)) continue;
+    const name = rawName.toLowerCase();
+    if (
+      name.startsWith("x-forwarded-") ||
+      name === "x-real-ip" ||
+      name === "forwarded" ||
+      name === "via"
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 /** Strip any client-supplied PEER_IP_HEADER + VIA_PROXY_HEADER and stamp the
  *  real TCP peer IP plus a token-protected via-proxy marker. Never throws — a
  *  stamping failure must not block a request (it degrades to "locality
@@ -194,7 +219,7 @@ export function stampPeerIp(req) {
       // direct client. Only treat it as a proxy marker when the TCP peer itself
       // is a Cloudflare edge IP; otherwise a direct forger could flip the
       // via-proxy bit and force the middleware to ignore the real peer IP.
-      const hasGenericProxyHeaders = !!(req.headers["x-forwarded-for"] || req.headers["x-real-ip"]);
+      const hasGenericProxyHeaders = hasProxyHopHeader(req.headers);
       const hasCloudflareHeader = !!(req.headers["cf-connecting-ip"] && isCloudflareIP(ip));
       const viaProxy = hasGenericProxyHeaders || hasCloudflareHeader;
       req.headers[VIA_PROXY_HEADER] = `${token}|${viaProxy ? "1" : "0"}`;
