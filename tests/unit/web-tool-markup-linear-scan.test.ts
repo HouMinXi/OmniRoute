@@ -101,7 +101,7 @@ test("parseToolCallsFromText keeps parsing <tool> and <tool_call ...> blocks and
     'hi <tool>{"name":"a","arguments":{}}</tool> and <tool_call name="b">{"name":"b","arguments":{}}</tool_call>'
   );
   assert.deepEqual(
-    good.toolCalls?.map((c: any) => c.function.name),
+    good.toolCalls?.map((c: { function: { name: string } }) => c.function.name),
     ["a", "b"]
   );
 
@@ -110,6 +110,8 @@ test("parseToolCallsFromText keeps parsing <tool> and <tool_call ...> blocks and
     "<tool_call " + " ".repeat(3_000),
     "<tool>".repeat(20_000),
     "<tool_call>".repeat(20_000),
+    // Many opening tags that never reach a `>`: each one used to scan to the end of the text.
+    "<tool_call ".repeat(20_000),
   ]) {
     assert.ok(
       elapsedMs(() => webTools.parseToolCallsFromText(hostile)) < 500,

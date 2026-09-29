@@ -28,7 +28,9 @@ const TOOL_CLOSE_RE = /<\/tool>/g;
 // Some web-cookie models (e.g. ds-web) wrap calls as `<tool_call name="...">{json}</tool_call>`
 // instead of the canonical `<tool>{json}</tool>`. Capture the JSON body — the real tool name
 // lives there, never in the tag's `name="..."` attribute (#3260).
-const TOOL_CALL_OPEN_RE = /<tool_call(?:\s[^>]*)?>/g;
+// The attribute run stops at `<` as well as `>`: with `[^>]*` an unterminated `<tool_call ` scanned
+// to the end of the text from every such tag, so a run of them was quadratic again.
+const TOOL_CALL_OPEN_RE = /<tool_call(?:\s[^<>]*)?>/g;
 const TOOL_CALL_CLOSE_RE = /<\/tool_call>/g;
 
 // Per-request nonce binding for tool envelopes (#9343). Associates a random nonce
