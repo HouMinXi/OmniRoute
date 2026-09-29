@@ -3,7 +3,6 @@ import type { NextRequest } from "next/server";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
 import { classifyIpScope } from "@/lib/ipUtils";
 import { getCachedSettings } from "@/lib/db/settings";
-import { SignJWT } from "jose";
 import { cookies } from "next/headers";
 import {
   ensurePersistentManagementPasswordHash,
@@ -16,7 +15,10 @@ import { loginSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { checkLoginGuard, clearLoginAttempts, recordLoginFailure } from "@/server/auth/loginGuard";
 import { AUTHZ_HEADER_TRUSTED_PEER_IP } from "@/server/authz/headers";
-import { getDashboardJwtSecret } from "@/shared/utils/dashboardSessionToken";
+import {
+  getDashboardJwtSecret,
+  mintDashboardSessionToken,
+} from "@/shared/utils/dashboardSessionToken";
 
 // SECURITY: No hardcoded fallback — JWT_SECRET must be configured.
 if (!process.env.JWT_SECRET) {
@@ -193,10 +195,7 @@ export async function POST(request: NextRequest) {
       const isHttpsRequest = forwardedProto === "https" || request.nextUrl?.protocol === "https:";
       const useSecureCookie = forceSecureCookie || isHttpsRequest;
 
-      const token = await new SignJWT({ authenticated: true })
-        .setProtectedHeader({ alg: "HS256" })
-        .setExpirationTime("30d")
-        .sign(getDashboardJwtSecret()!);
+      const token = await mintDashboardSessionToken(getDashboardJwtSecret()!);
 
       const cookieStore = await authRouteInternals.getCookieStore();
       cookieStore.set("auth_token", token, {
