@@ -21,10 +21,7 @@ import http from "node:http";
 
 import { createPinnedFetch } from "@/shared/network/remoteImageFetch";
 
-async function withHttpServer(
-  handler: http.RequestListener,
-  fn: (port: number) => Promise<void>
-) {
+async function withHttpServer(handler: http.RequestListener, fn: (port: number) => Promise<void>) {
   const server = http.createServer(handler);
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
@@ -53,9 +50,7 @@ test("createPinnedFetch binds the connection to the pinned address, ignoring the
       // broken), this request would fail with an ENOTFOUND-style DNS error
       // instead of reaching the loopback server.
       const pinnedFetch = createPinnedFetch("127.0.0.1", 4);
-      const response = await pinnedFetch(
-        `http://pin-dns-nonexistent-host.invalid:${port}/probe`
-      );
+      const response = await pinnedFetch(`http://pin-dns-nonexistent-host.invalid:${port}/probe`);
       assert.equal(response.status, 200);
       assert.equal(await response.text(), "pinned-response");
     }
@@ -103,6 +98,24 @@ test("createPinnedFetch closes its dispatcher after the request completes (no le
       assert.equal(await first.text(), "ok");
       const second = await pinnedFetch(`http://y.invalid:${port}/`);
       assert.equal(await second.text(), "ok");
+    }
+  );
+});
+
+test("createPinnedFetch returns a response whose body is larger than the socket buffers", async () => {
+  // The dispatcher used to be closed (and awaited) before the response was handed back, and
+  // `close()` waits for the body — which the caller reads only afterwards — so any body past
+  // the socket buffers deadlocked until the caller's timeout fired.
+  const body = "x".repeat(1_000_000);
+  await withHttpServer(
+    (_req, res) => res.end(body),
+    async (port) => {
+      const response = await Promise.race([
+        createPinnedFetch("127.0.0.1", 4)(`http://big.invalid:${port}/`),
+        new Promise<"HUNG">((resolve) => setTimeout(() => resolve("HUNG"), 5000).unref()),
+      ]);
+      assert.notEqual(response, "HUNG", "the pinned fetch returned");
+      assert.equal((await (response as Response).text()).length, body.length);
     }
   );
 });

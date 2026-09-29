@@ -208,25 +208,96 @@ function applyUrlGuard(targetUrl: URL, guard: SafeOutboundFetchGuard, method: st
   }
 }
 
+type PinnedFetchFactory = (address: string, family: number) => typeof fetch;
+let pinnedFetchTestOverride: PinnedFetchFactory | undefined;
+
+/**
+ * Test-only: replace the pinned connection used by `pinDns` (same escape hatch as
+ * `setPinnedFetchTestOverride` in remoteImageFetch.ts, #13883), for callers such as the built-in
+ * HTTP skill that have no `fetchImpl` seam of their own. Production code never calls it.
+ */
+export function setSafeOutboundPinnedFetchTestOverride(factory: PinnedFetchFactory | undefined) {
+  pinnedFetchTestOverride = factory;
+}
+
+/** Upper bound for the `public-only` host lookup; the request's own timeout applies when shorter. */
+const PUBLIC_HOST_LOOKUP_TIMEOUT_MS = 5000;
+
+/** Run a lookup that gives up after `timeoutMs` or when `signal` aborts, whichever comes first. */
+function lookupWithDeadline(
+  host: string,
+  lookup: DnsLookup | undefined,
+  timeoutMs: number,
+  signal: AbortSignal | null | undefined
+): Promise<DnsLookupResult[]> {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const finish = (run: () => void) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      signal?.removeEventListener("abort", onAbort);
+      run();
+    };
+    const onAbort = () => finish(() => reject(new Error(`Lookup of "${host}" was aborted`)));
+    const timer = setTimeout(
+      () => finish(() => reject(new Error(`Lookup of "${host}" timed out`))),
+      timeoutMs
+    );
+    timer.unref?.();
+    if (signal?.aborted) return onAbort();
+    signal?.addEventListener("abort", onAbort, { once: true });
+    resolveHostnameAddresses(host, lookup).then(
+      (addresses) => finish(() => resolve(addresses)),
+      (error) => finish(() => reject(error))
+    );
+  });
+}
+
 /**
  * `public-only` judges the URL's host name, and a name can point at a private address. Resolve it
  * and refuse it when any answer is private, so an attacker-owned name that resolves to loopback,
- * the LAN or a metadata address does not get past a check that only reads the spelling. A lookup
- * that fails is left to the request, which fails the same way.
+ * the LAN or a metadata address does not get past a check that only reads the spelling.
+ *
+ * The lookup is bounded (the request timeout, at most PUBLIC_HOST_LOOKUP_TIMEOUT_MS) and follows
+ * the caller's abort signal, so it never holds a request longer than the request itself would
+ * run. When it fails or times out:
+ * - with `failClosed` (the connection was going to be pinned to the checked address) the request
+ *   is refused, because letting it through unpinned would connect to whatever a second lookup
+ *   returns — the very answer the check exists to judge;
+ * - otherwise the request goes ahead and fails (or not) the way it would have without the check.
  */
 async function resolvePublicHost(
   targetUrl: URL,
   method: string,
-  lookup?: DnsLookup
+  options: {
+    lookup?: DnsLookup;
+    timeoutMs?: number;
+    signal?: AbortSignal | null;
+    failClosed: boolean;
+  }
 ): Promise<DnsLookupResult[] | null> {
   const host = bareHostname(targetUrl.hostname);
   if (!host || isIP(host)) return null;
 
+  const deadline =
+    typeof options.timeoutMs === "number" && options.timeoutMs > 0
+      ? Math.min(options.timeoutMs, PUBLIC_HOST_LOOKUP_TIMEOUT_MS)
+      : PUBLIC_HOST_LOOKUP_TIMEOUT_MS;
+
   let addresses: DnsLookupResult[];
   try {
-    addresses = await resolveHostnameAddresses(host, lookup);
-  } catch {
-    return null;
+    addresses = await lookupWithDeadline(host, options.lookup, deadline, options.signal);
+  } catch (error) {
+    if (!options.failClosed) return null;
+    throw new SafeOutboundFetchError(`Host "${host}" could not be resolved to check it`, {
+      code: "NETWORK_ERROR",
+      url: targetUrl.toString(),
+      method,
+      attempts: 1,
+      isRetryable: false,
+      cause: error,
+    });
   }
 
   for (const { address } of addresses) {
@@ -351,19 +422,28 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
   } = options;
 
   applyUrlGuard(targetUrl, guard, method);
+  // A proxy resolves the name itself and a followed redirect leaves the checked host, so the
+  // connection is only pinned to the checked address for a direct request to that one host.
+  const pinsConnection =
+    guard === "public-only" &&
+    pinDns &&
+    !allowRedirect &&
+    !proxyConfig &&
+    resolveProxyForRequest(targetUrl.toString()).source === "direct";
   const checkedAddresses =
-    guard === "public-only" ? await resolvePublicHost(targetUrl, method, dnsLookup) : null;
+    guard === "public-only"
+      ? await resolvePublicHost(targetUrl, method, {
+          lookup: dnsLookup,
+          timeoutMs,
+          signal,
+          failClosed: pinsConnection,
+        })
+      : null;
 
   const retryConfig = getRetryConfig(retry, method);
   const redirect = allowRedirect ? (fetchOptions.redirect ?? "follow") : "manual";
-  // A proxy resolves the name itself and a followed redirect leaves the checked host, so the
-  // connection is only pinned to the checked address for a direct request to that one host.
   const pinTo =
-    pinDns &&
-    checkedAddresses?.length &&
-    !allowRedirect &&
-    !proxyConfig &&
-    resolveProxyForRequest(targetUrl.toString()).source === "direct"
+    pinsConnection && checkedAddresses?.length
       ? (checkedAddresses.find((entry) => entry.family === 4) ?? checkedAddresses[0])
       : null;
 
@@ -378,7 +458,7 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
           timeoutMs,
           // When bypassing the proxy patch, use the original native fetch directly.
           fetchFn: pinTo
-            ? createPinnedFetch(pinTo.address, pinTo.family)
+            ? (pinnedFetchTestOverride ?? createPinnedFetch)(pinTo.address, pinTo.family)
             : bypassProxyPatch
               ? getOriginalFetch()
               : undefined,

@@ -17,8 +17,19 @@ const ALIASES: Record<string, string> = {
   "lan.alias.test": "10.1.2.3",
 };
 
-const originalLookup = dns.lookup;
-const originalPromisesLookup = dns.promises.lookup;
+type LookupCallback = (...args: unknown[]) => void;
+type LookupOptions = { all?: boolean } | undefined;
+type CallbackLookup = (
+  hostname: string,
+  options: LookupOptions | LookupCallback,
+  callback?: LookupCallback
+) => void;
+type PromiseLookup = (hostname: string, options?: LookupOptions) => Promise<unknown>;
+const dnsModule = dns as unknown as { lookup: CallbackLookup };
+const dnsPromises = dns.promises as unknown as { lookup: PromiseLookup };
+
+const originalLookup = dnsModule.lookup;
+const originalPromisesLookup = dnsPromises.lookup;
 
 function aliased(hostname: string): string | undefined {
   return ALIASES[hostname];
@@ -27,28 +38,28 @@ function aliased(hostname: string): string | undefined {
 test.before(() => {
   // Everything that resolves a name in this process, the guard's lookup and the connection the
   // request makes, sees the aliases; other names go to the real resolver.
-  (dns as any).lookup = (hostname: string, options: any, callback?: any) => {
-    const cb = typeof options === "function" ? options : callback;
+  dnsModule.lookup = (hostname, options, callback) => {
+    const cb = (typeof options === "function" ? options : callback) as LookupCallback;
     const opts = typeof options === "function" ? {} : options || {};
     const address = aliased(hostname);
-    if (!address) return (originalLookup as any)(hostname, options, callback);
+    if (!address) return originalLookup(hostname, options, callback);
     const family = address.includes(":") ? 6 : 4;
     process.nextTick(() =>
       opts.all ? cb(null, [{ address, family }]) : cb(null, address, family)
     );
     return undefined;
   };
-  (dns.promises as any).lookup = async (hostname: string, options: any) => {
+  dnsPromises.lookup = async (hostname, options) => {
     const address = aliased(hostname);
-    if (!address) return (originalPromisesLookup as any)(hostname, options);
+    if (!address) return originalPromisesLookup(hostname, options);
     const entry = { address, family: address.includes(":") ? 6 : 4 };
     return options?.all ? [entry] : entry;
   };
 });
 
 test.after(() => {
-  (dns as any).lookup = originalLookup;
-  (dns.promises as any).lookup = originalPromisesLookup;
+  dnsModule.lookup = originalLookup;
+  dnsPromises.lookup = originalPromisesLookup;
 });
 
 async function withListener<T>(run: (port: number, hits: () => number) => Promise<T>): Promise<T> {
@@ -188,4 +199,41 @@ test("with pinDns the request connects to the address that was checked, not to a
     assert.notEqual(code, null, "the request cannot succeed against the checked address");
     assert.equal(hits(), 0, "nothing reached the loopback listener");
   });
+});
+
+test("with pinDns a lookup that fails refuses the request instead of connecting unpinned", async () => {
+  await withListener(async (port, hits) => {
+    // The guard's lookup fails; the resolver an unpinned connection would use says loopback.
+    const code = await blockedBy(
+      safeOutboundFetch(`http://internal.alias.test:${port}/`, {
+        guard: "public-only",
+        pinDns: true,
+        retry: false,
+        timeoutMs: 800,
+        dnsLookup: async () => {
+          throw new Error("SERVFAIL");
+        },
+      })
+    );
+    assert.equal(code, "NETWORK_ERROR");
+    assert.equal(hits(), 0, "nothing reached the loopback listener");
+  });
+});
+
+test("a lookup that never answers is bounded by the request timeout", async () => {
+  const started = Date.now();
+  const outcome = await Promise.race([
+    blockedBy(
+      safeOutboundFetch("http://hang.alias.test:9/", {
+        guard: "public-only",
+        pinDns: true,
+        retry: false,
+        timeoutMs: 300,
+        dnsLookup: () => new Promise(() => {}),
+      })
+    ),
+    new Promise((resolve) => setTimeout(() => resolve("HUNG"), 4000).unref()),
+  ]);
+  assert.equal(outcome, "NETWORK_ERROR");
+  assert.ok(Date.now() - started < 3000, "the lookup did not hold the request");
 });

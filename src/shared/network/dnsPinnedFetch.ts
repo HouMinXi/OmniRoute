@@ -88,7 +88,11 @@ export function createPinnedFetch(address: string, family: number): typeof fetch
         dispatcher,
       })) as unknown as Response;
     } finally {
-      await dispatcher.close();
+      // Not awaited: `close()` waits for the in-flight request to finish, and that includes its
+      // body, which the caller only reads after this returns. Awaiting it here deadlocked every
+      // response larger than the socket buffers (~100 KB) until the caller's timeout fired. The
+      // dispatcher still closes on its own once the body has been consumed.
+      dispatcher.close().catch(() => {});
     }
   }) as typeof fetch;
 }
