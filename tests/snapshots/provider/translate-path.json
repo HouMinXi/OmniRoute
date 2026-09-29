@@ -5192,8 +5192,8 @@
       }
     },
     "url": {
-      "nonStream": "https://api.regolo.ai",
-      "stream": "https://api.regolo.ai"
+      "nonStream": "https://api.regolo.ai/v1/chat/completions",
+      "stream": "https://api.regolo.ai/v1/chat/completions"
     }
   },
   "reka": {

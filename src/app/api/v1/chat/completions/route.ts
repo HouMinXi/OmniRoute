@@ -16,9 +16,9 @@ import {
   OPENAI_CHAT_ERROR_FRAME,
   OPENAI_KEEPALIVE_FRAME,
   OPENAI_STARTUP_FRAME,
-  withDeadlineSignal,
   withEarlyStreamKeepalive,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
 import {
   admitChatRequest,
@@ -120,13 +120,8 @@ export async function POST(request) {
   // Reserve heavyweight capacity atomically and ingest the body with a hard byte bound
   // BEFORE JSON parsing. Missing or dishonest Content-Length values cannot bypass
   // the actual-byte limit. Capacity exhaustion is retryable rather than process-fatal.
-  // The deadline wrap comes first so every downstream consumer (admission, body
-  // parse, handleChat, lease release) observes the combined signal: a deadline
-  // abort then tears the handler down exactly like a client disconnect.
-  const { wrappedReq: deadlineReq, deadlineController: routeDeadlineController } =
-    withDeadlineSignal(request);
-  request = deadlineReq;
-  const routeDeadlineSignal = request.signal;
+  // The slow-stream deadline is created only after the route knows this is a streaming
+  // request; non-streaming calls keep the framework Request object untouched.
   const sessionId = resolveSessionId(request);
   const admissionResult = await admitChatRequest(request, {
     sessionId,
@@ -296,11 +291,15 @@ export async function POST(request) {
 
     if (wantsStreaming) {
       const reqId = callerCorrelationId ?? generateRequestId();
+      const {
+        signal: routeDeadlineSignal,
+        deadlineController: routeDeadlineController,
+      } = createStreamDeadlineSignal(request.signal);
       // Wrap the real handler response, not the synthetic early-keepalive response. If the
       // client cancels while handleChat is still pending, earlyStreamKeepalive will cancel the
       // eventual handler body; only that confirmed cleanup releases heavyweight capacity.
       const handlerResponse = releaseChatAdmissionAfterHandler(
-        handleChat(request, null, parsedBody, reqId),
+        handleChat(request, null, parsedBody, reqId, routeDeadlineSignal),
         admission.lease,
         { signal: routeDeadlineSignal }
       );

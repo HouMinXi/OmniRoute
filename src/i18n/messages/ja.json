@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "プロバイダーへのディスパッチ用に、テナントごとの適応型仮想受付レーンを有効にします（#9654）：あるテナントのバーストが他のテナントに503を返さなくなります。OMNIROUTE_CHAT_VIRTUAL_LANES環境変数はこのダッシュボード設定より優先されます。変更はサーバー再起動時に反映されます。",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "ダッシュボードのプロバイダーページ：プロバイダーが正式に対応していることを示すシグナルに対してのみ「Free」バッジを表示します。表示名による推測、ブール値ではない無料フィールド、および無料枠が文書化されていない登録済みプロバイダーの「:free」サフィックスは使用しません。オフにすると、従来のバッジ判定ルールが適用されます。",
   "featureFlagProxySkipRecentlyFailedDescription": "プロキシプールと、アカウントごとのopencodeローテーションで、直前に失敗したプロキシ（TCPプローブが拒否された、またはそのプロキシ経由で429を受信したもの）の再使用を、同一プロセス内で一定期間停止します。この期間は失敗を繰り返すたびに倍増し、上限があります。プロキシのステータスは書き込まれません。すべての候補が除外された場合、選択は変更されません。デフォルトではオンです。`false` にすると通常の選択に戻ります。",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "egress アドレス単位でクォータが割り当てられるプロバイダーでは、最近拒否されたメンバーの観測済み egress アドレスを共有する pool メンバーを、正常なメンバーのすぐ下に並べます。順序のみで、除外は決してしません。読み取る拒否シグナルを生成する PROXY_SKIP_RECENTLY_FAILED が必要です。既定ではオフ: 選択順序は通常のローテーションそのままです。",
   "featureFlagProxyPoolEgressObservationDescription": "ダッシュボードのプロキシプールの下に、過去24時間にそのメンバーに使用されたことが観測された送信元IPの数、それらを使用した接続数、および1つのIPの背後で観測された最多のメンバー数を表示します。読み取り専用で、プロキシログから算出され、ルーティングには使用されません。デフォルトではオフです。プールエディターは変更されず、観測ルートはnullを返します。",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "プロキシのヘルススイープで、ターゲットに拒否されたプローブ（401/403/429：プロキシは中継したが、宛先がこの送信元IPを拒否したもの）が、正常に処理されたプローブと同様に、プロキシの連続失敗回数をリセットできるようにします。デフォルトではオフです。拒否は中立のままで、連続失敗回数は維持されます。どちらの場合も5xxは判定不能のままであり、拒否によってプロキシが削除、無効化、または再有効化されることはありません。",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "自動クリーンアップ処理で、OMNIROUTE_BATCH_RETENTION_DAYS より古い終了済み（完了／失敗／キャンセル／期限切れ）の Batch API ジョブを行ごとのチェックポイントとともに削除し、それぞれの expires_at を過ぎたアップロード済みファイルの BLOB コンテンツを消去します。デフォルトではオフです。オペレーターが明示的に有効化するまで、既存のすべてのインストール環境では従来どおりデータが保持されます。オペレーターが実行する DELETE /api/v1/batches/delete-completed ルートは、設定の有効／無効にかかわらず影響を受けません。これは独立した無条件の公開 API 契約です。",
@@ -1202,6 +1203,8 @@
     "batchGroup": "バッチ",
     "homeSubtitle": "ダッシュボード概要",
     "providersSubtitle": "AIプロバイダーを管理",
+    "modelCatalog": "モデルカタログ",
+    "modelCatalogSubtitle": "プロバイダー横断でモデルを閲覧",
     "quotaTrackerSubtitle": "使用量上限を追跡",
     "providerQuotaSubtitle": "プロバイダーの使用量上限を追跡",
     "runtimeSubtitle": "リアルタイムの耐障害性とセッション",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "シャッフルデッキ方式 — 再シャッフルする前に各モデルを1回ずつ使用します",
     "fusion": "フュージョン",
     "fusionDesc": "プロンプトをすべてのパネルモデルに並列で配信し、ジャッジモデルが1つの最終回答を統合します",
+    "pipeline": "パイプライン",
+    "pipelineDesc": "モデルを順番に実行し、各ステップの出力を次のステップに渡します。最終回答のみが返されます",
     "fusionJudgeModel": "ジャッジモデル",
     "fusionJudgeModelHelp": "パネルの回答を1つの最終レスポンスに統合するモデル。最初のパネルモデルを使用する場合は空のままにしてください。",
     "fusionMinPanel": "最小パネル数",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "無料スタック（$0）",
-    "templateFreeStackDesc": "すべての無料プロバイダー間でラウンドロビンします：Kiro (Claude)、Qoder (5モデル)、Qwen (4モデル)。コストはゼロで、コーディングが止まることはありません。",
+    "templateFreeStackDesc": "すべての無料プロバイダー間でラウンドロビンします：Antigravity (Gemini)、Kiro (Claude)、Qoder (3モデル)、NVIDIA、Groq。コストはゼロで、コーディングが止まることはありません。",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP モード",
@@ -4959,6 +4964,7 @@
     "export": "エクスポート",
     "exporting": "エクスポート中...",
     "exportFailed": "エクスポートに失敗しました",
+    "exportTruncated": "エクスポートが切り詰められました: {total} 件のログエントリのうち {exported} 件のみが含まれています。残りをエクスポートするには、より短い期間を選択してください。",
     "cleanHistoryButton": "履歴をクリア",
     "cleanHistoryTitle": "ログ履歴をクリアしますか？",
     "cleanHistoryMessage": "これにより、すべてのリクエストログ行、レガシー詳細行、および DATA_DIR/call_logs 配下のローカルアーティファクトファイルが永久に削除されます。クリーンアップ後にライブページが更新されます。",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "選択した {count} 件を有効化",
     "testPassed": "✓ OK",
     "sweepVerdict": "最終スキャン: {cause} ({code}) {age}",
+    "blockedHistory": "ブロックされた履歴: {count}× {cause} ({code}) {age}",
     "sweepNoData": "起動以降スキャンなし",
     "sweepLabel": {
       "unproven": "ターゲットが拒否",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "除外中:{kind}",
     "poolSetAsideKindProxyUnreachable": "プロキシに到達できません",
     "poolSetAsideKindIpQuota429": "IP レート制限 (429)",
+    "poolSetAsideKindSlow": "遅い応答",
     "poolSetAsideUntil": "{endsAt}にローテーション復帰",
     "poolSetAsideRepeat": "除外{count, plural, one {#回} other {#回}}",
     "poolUnknownAddress": "不明なアドレス",
@@ -11515,6 +11523,7 @@
       "output": "出力",
       "totalOut": "合計出力: {value}",
       "reasoning": "理由: {value}",
+      "reasoningObserved": "{value} · {chars} 文字を検出",
       "requestedModel": "要求されたモデル",
       "requestProtocol": "要求プロトコル",
       "cacheSource": "キャッシュソース",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "接続を継承:{host}",
     "inheritedPool": "接続プールを継承({count})",
     "poolEmptyBlocked": "プールが空—リクエストは失敗します(直接ではありません)",
-    "directEgress": "直接(プロキシなし)"
+    "directEgress": "直接(プロキシなし)",
+    "ownProxy": "独自プロキシ"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "アップストリームステータス",
     "noResponse": "応答なし",
     "egressIp": "イーグレスIP",
+    "headersAfter": "ヘッダーの後",
+    "firstChunkAfter": "最初のチャンクの後",
     "servedBy": "提供元",
     "correlationId": "相関ID"
   },

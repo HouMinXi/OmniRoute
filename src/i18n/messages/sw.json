@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Washa njia za uandikishaji pepe zinazobadilika kwa kila mpangaji (tenant) kwa utumaji wa watoa huduma (#9654): mlipuko wa mpangaji mmoja hautoi tena 503 kwa mwingine. Kigezo cha mazingira cha OMNIROUTE_CHAT_VIRTUAL_LANES kinashinda mpangilio huu wa dashibodi; mabadiliko yanatumika wakati seva inapoanzishwa upya.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Kurasa za watoa huduma kwenye dashibodi: onyesha beji ya Bila Malipo kwenye viashiria ambavyo mtoa huduma anavitambua pekee — huondoa utambuzi wa kukisia kwa kutumia jina la kuonyesha, sehemu zisizo za Boolean zinazoashiria huduma ya bila malipo, na viambishi :free kwa watoa huduma waliosajiliwa ambao hawana kiwango cha huduma ya bila malipo kilichoandikwa. Kuzima huhifadhi kanuni ya awali ya beji.",
   "featureFlagProxySkipRecentlyFailedDescription": "Makundi ya proksi na uzungushaji wa kila akaunti wa opencode huacha kutumia tena proksi iliyoshindwa hivi punde (jaribio la TCP lilikataliwa, au 429 ilipokelewa kupitia proksi hiyo) kwa kipindi maalumu kwa kila mchakato, ambacho huongezeka maradufu kila kushindwa kunaporudiwa, hadi kikomo fulani. Hakuna hali ya proksi inayoandikwa; kila chaguo linalowezekana likiwekwa kando, uteuzi hubaki bila kubadilika. Imewashwa kwa chaguo-msingi; `false` hurejesha uteuzi wa kawaida.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Kwa watoa huduma ambao mgao wao hugawanywa kwa anwani ya egress, humweka mwanachama wa pool anayeshiriki anwani ya egress iliyoonekana ya mwanachama aliyekataliwa hivi karibuni chini kidogo ya wanachama wenye afya. Mpangilio tu, kamwe haondolewi. Inahitaji PROXY_SKIP_RECENTLY_FAILED, ambayo huzalisha ishara ya kukataliwa inayoisoma. Imezimwa kwa chaguomsingi: mpangilio wa uteuzi ni mzunguko wa kawaida kabisa.",
   "featureFlagProxyPoolEgressObservationDescription": "Onyesha, chini ya kundi la proksi kwenye dashibodi, idadi ya anwani za IP za kutoka zilizozingatiwa ambazo zilitumiwa na wanachama wake katika saa 24 zilizopita, idadi ya miunganisho iliyozitumia, na idadi kubwa zaidi iliyoonekana nyuma ya anwani moja ya IP. Ni ya kusoma pekee, huhesabiwa kutoka kwenye kumbukumbu ya proksi, na haitumiki kamwe kuelekeza trafiki. Imezimwa kwa chaguo-msingi: kihariri cha kundi hakibadiliki na njia ya uchunguzi hujibu null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "Katika ukaguzi wa afya ya proksi, ruhusu jaribio lililokataliwa na lengwa (401/403/429: proksi ilisambaza ombi, lakini lengwa lilikataa anwani hii ya IP ya kutoka) liweke upya mfululizo wa kushindwa kwa proksi, kama jaribio lililohudumiwa. Imezimwa kwa chaguo-msingi: kukataliwa hubaki bila upande na hudumisha mfululizo huo. 5xx hubaki bila hitimisho kwa vyovyote vile, na kukataliwa kamwe hakuondoi, hakuzima wala kuwezesha tena proksi.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Ruhusu usafishaji wa kiotomatiki ufute kazi za Batch API zilizo katika hali ya mwisho (zilizokamilika/zilizoshindwa/zilizoghairiwa/zilizopitwa na muda) ambazo ni za zamani kuliko OMNIROUTE_BATCH_RETENTION_DAYS, pamoja na vituo vyake vya ukaguzi vya kila mstari, na ufute maudhui ya BLOB ya faili zilizopakiwa ambazo muda wake wa expires_at umepita. Huzimwa kwa chaguo-msingi: kila usakinishaji uliopo utaendelea kuhifadhi data hii kama hapo awali hadi mwendeshaji atakapochagua kuwasha kipengele hiki. Njia ya DELETE /api/v1/batches/delete-completed inayoanzishwa na mwendeshaji haiathiriwi kwa vyovyote vile — ni mkataba tofauti wa API ya umma usio na masharti.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Kundi",
     "homeSubtitle": "Muhtasari wa dashibodi",
     "providersSubtitle": "Dhibiti watoa huduma wa AI",
+    "modelCatalog": "Katalogi ya miundo",
+    "modelCatalogSubtitle": "Vinjari miundo kutoka kwa watoa huduma wote",
     "quotaTrackerSubtitle": "Fuatilia vikomo vya matumizi",
     "providerQuotaSubtitle": "Fuatilia vikomo vya matumizi vya watoa huduma",
     "runtimeSubtitle": "Ustahimilivu na vipindi vya wakati halisi",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Changanya karata — hutumia kila modeli mara moja kabla ya kuchanganya tena",
     "fusion": "Muunganisho",
     "fusionDesc": "Inasambaza kidokezo kwa kila modeli ya jopo kwa sambamba, kisha modeli ya mwamuzi inasanisi jibu moja la mwisho",
+    "pipeline": "Mtiririko wa Uchakataji",
+    "pipelineDesc": "Huendesha modeli kwa mfuatano, ikipitisha matokeo ya kila hatua kwa inayofuata; jibu la mwisho pekee ndilo hurejeshwa",
     "fusionJudgeModel": "Modeli ya mwamuzi",
     "fusionJudgeModelHelp": "Modeli inayosanisi majibu ya jopo kuwa jibu moja la mwisho. Wacha wazi ili kutumia modeli ya kwanza ya jopo.",
     "fusionMinPanel": "Kiwango cha chini cha jopo",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Mkusanyiko wa Bure ($0)",
-    "templateFreeStackDesc": "Zungusha kwa mpangilio kupitia watoa huduma wote wa bure: Kiro (Claude), Qoder (modeli 5), Qwen (modeli 4). Gharama sifuri, haiachi kamwe kuandika msimbo.",
+    "templateFreeStackDesc": "Zungusha kwa mpangilio kupitia watoa huduma wote wa bure: Antigravity (Gemini), Kiro (Claude), Qoder (modeli 3), NVIDIA, Groq. Gharama sifuri, haiachi kamwe kuandika msimbo.",
     "auto": "Otomatiki Janja",
     "autoDesc": "Kundi mahiri la uelekezaji linalojirekebisha lenye utoaji wa alama kwa vipengele vingi",
     "lkgp": "Hali ya LKGP",
@@ -4959,6 +4964,7 @@
     "export": "Hamisha",
     "exporting": "Inahamisha...",
     "exportFailed": "Uhamishaji umeshindikana",
+    "exportTruncated": "Uhamishaji umekatwa: ni maingizo {exported} tu kati ya {total} ya kumbukumbu yaliyojumuishwa. Chagua kipindi kifupi zaidi ili kuhamisha yaliyobaki.",
     "cleanHistoryButton": "Futa historia",
     "cleanHistoryTitle": "Futa historia ya kumbukumbu?",
     "cleanHistoryMessage": "Hii inafuta kabisa safu mlalo zote za kumbukumbu za maombi, safu mlalo za maelezo ya zamani, na faili za mabaki ya ndani chini ya DATA_DIR/call_logs. Ukurasa wa moja kwa moja utapakiwa upya baada ya kusafisha.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Wezesha {count} zilizochaguliwa",
     "testPassed": "✓ Sawa",
     "sweepVerdict": "Uchunguzi wa mwisho: {cause} ({code}) {age}",
+    "blockedHistory": "Historia iliyozuiliwa: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Hakuna uchunguzi tangu kuanza",
     "sweepLabel": {
       "unproven": "lengo limekataa",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Imewekwa kando: {kind}",
     "poolSetAsideKindProxyUnreachable": "proksi haifikiki",
     "poolSetAsideKindIpQuota429": "kikomo cha kasi cha IP (429)",
+    "poolSetAsideKindSlow": "majibu polepole",
     "poolSetAsideUntil": "Kurudi kwenye mzunguko {endsAt}",
     "poolSetAsideRepeat": "Imewekwa kando {count, plural, one {# mara} other {# mara}}",
     "poolUnknownAddress": "Anwani isiyojulikana",
@@ -11515,6 +11523,7 @@
       "output": "Matokeo",
       "totalOut": "Jumla Ya Kutoka: {value}",
       "reasoning": "Sababu: {value}",
+      "reasoningObserved": "{value} · herufi {chars} zimeonekana",
       "requestedModel": "Mfano Uliyoombwa",
       "requestProtocol": "Itifaki ya Req",
       "cacheSource": "Chanzo cha Kumbukumbu",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Inarithi muunganisho: {host}",
     "inheritedPool": "Inarithi dimbwi la miunganisho ({count})",
     "poolEmptyBlocked": "Dimbwi tupu — maombi yanashindwa (siyo moja kwa moja)",
-    "directEgress": "Moja kwa moja (bila proksi)"
+    "directEgress": "Moja kwa moja (bila proksi)",
+    "ownProxy": "Proksi yako"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Hali ya mwelekeo",
     "noResponse": "Hakuna jibu",
     "egressIp": "IP ya Kutoka",
+    "headersAfter": "Vichwa baada",
+    "firstChunkAfter": "Kipande cha kwanza baada",
     "servedBy": "Inatolewa na",
     "correlationId": "Kitambulisho cha Uhusiano"
   },

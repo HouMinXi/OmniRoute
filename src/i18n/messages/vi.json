@@ -1203,6 +1203,8 @@
     "batchGroup": "Xử lý theo lô",
     "homeSubtitle": "Tổng quan bảng điều khiển",
     "providersSubtitle": "Quản lý nhà cung cấp AI",
+    "modelCatalog": "Danh mục mô hình",
+    "modelCatalogSubtitle": "Duyệt mô hình trên các nhà cung cấp",
     "quotaTrackerSubtitle": "Theo dõi giới hạn mức sử dụng",
     "providerQuotaSubtitle": "Theo dõi giới hạn mức sử dụng của nhà cung cấp",
     "runtimeSubtitle": "Khả năng phục hồi thời gian thực & phiên làm việc",
@@ -3287,6 +3289,8 @@
     "strictRandomDesc": "Trộn bài — sử dụng mỗi mô hình một lần trước khi trộn lại",
     "fusion": "Hợp nhất",
     "fusionDesc": "Gửi prompt song song đến mọi mô hình trong nhóm, sau đó một mô hình giám khảo sẽ tổng hợp thành một phản hồi cuối cùng",
+    "pipeline": "Quy trình",
+    "pipelineDesc": "Chạy các mô hình theo thứ tự, chuyển đầu ra của mỗi bước sang bước tiếp theo; chỉ trả về câu trả lời cuối cùng",
     "fusionJudgeModel": "Mô hình giám khảo",
     "fusionJudgeModelHelp": "Mô hình tổng hợp các phản hồi từ nhóm thành một phản hồi cuối cùng. Để trống để sử dụng mô hình đầu tiên trong nhóm.",
     "fusionMinPanel": "Số mô hình tối thiểu trong nhóm",
@@ -3668,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Bộ miễn phí ($0)",
-    "templateFreeStackDesc": "Định tuyến xoay vòng qua tất cả nhà cung cấp miễn phí: Kiro (Claude), Qoder (5 mô hình), Qwen (4 mô hình). Không tốn chi phí, không bao giờ ngừng lập trình.",
+    "templateFreeStackDesc": "Định tuyến xoay vòng qua tất cả nhà cung cấp miễn phí: Antigravity (Gemini), Kiro (Claude), Qoder (3 mô hình), NVIDIA, Groq. Không tốn chi phí, không bao giờ ngừng lập trình.",
     "auto": "Tự động thông minh",
     "autoDesc": "Nhóm định tuyến thông minh tự phục hồi với tính điểm đa yếu tố",
     "lkgp": "Chế độ LKGP",
@@ -4960,6 +4964,7 @@
     "export": "Xuất",
     "exporting": "Đang xuất...",
     "exportFailed": "Xuất thất bại",
+    "exportTruncated": "Bản xuất đã bị cắt bớt: chỉ có {exported} trên {total} mục nhật ký được đưa vào. Hãy chọn khoảng thời gian ngắn hơn để xuất phần còn lại.",
     "cleanHistoryButton": "Xóa lịch sử",
     "cleanHistoryTitle": "Xóa lịch sử nhật ký?",
     "cleanHistoryMessage": "Thao tác này sẽ xóa vĩnh viễn tất cả các dòng nhật ký yêu cầu, các dòng chi tiết cũ và các tệp tạo tác cục bộ trong DATA_DIR/call_logs. Trang đang mở sẽ làm mới sau khi dọn dẹp.",
@@ -11033,6 +11038,7 @@
     "batchActivateSelected": "Kích hoạt {count} mục đã chọn",
     "testPassed": "✓ OK",
     "sweepVerdict": "Lần quét cuối: {cause} ({code}) {age}",
+    "blockedHistory": "Lịch sử bị chặn: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Chưa có lần quét nào kể từ khi khởi động",
     "sweepLabel": {
       "unproven": "máy chủ từ chối",
@@ -11079,6 +11085,7 @@
     "poolSetAsideReason": "Tạm ngưng: {kind}",
     "poolSetAsideKindProxyUnreachable": "không thể kết nối proxy",
     "poolSetAsideKindIpQuota429": "giới hạn tốc độ theo IP (429)",
+    "poolSetAsideKindSlow": "phản hồi chậm",
     "poolSetAsideUntil": "Trở lại {endsAt}",
     "poolSetAsideRepeat": "Đã tạm ngưng {count} lần",
     "poolUnknownAddress": "Địa chỉ không xác định",
@@ -11516,6 +11523,7 @@
       "output": "Đầu ra",
       "totalOut": "Tổng đầu ra: {value}",
       "reasoning": "Suy luận: {value}",
+      "reasoningObserved": "{value} · quan sát được {chars} ký tự",
       "requestedModel": "Mô hình được yêu cầu",
       "requestProtocol": "Giao thức yêu cầu",
       "cacheSource": "Nguồn cache",
@@ -12862,7 +12870,8 @@
     "inheritedProxy": "Kế thừa kết nối: {host}",
     "inheritedPool": "Kế thừa nhóm proxy của kết nối ({count})",
     "poolEmptyBlocked": "Nhóm proxy trống — yêu cầu thất bại (không phải trực tiếp)",
-    "directEgress": "Kết nối trực tiếp (không dùng proxy)"
+    "directEgress": "Kết nối trực tiếp (không dùng proxy)",
+    "ownProxy": "Proxy riêng"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14195,6 +14204,8 @@
     "upstreamStatus": "Trạng thái nguồn",
     "noResponse": "Không có phản hồi",
     "egressIp": "IP ra",
+    "headersAfter": "Tiêu đề sau",
+    "firstChunkAfter": "Đoạn đầu tiên sau",
     "servedBy": "Được phục vụ bởi",
     "correlationId": "ID tương quan"
   },

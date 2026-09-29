@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Aktiver adaptive virtuelle tilgangsfelt per tenant for leverandørdistribusjon (#9654): et utbrudd fra én tenant gir ikke lenger en annen 503. Miljøvariabelen OMNIROUTE_CHAT_VIRTUAL_LANES overstyrer denne innstillingen i dashbordet; endringer trer i kraft ved omstart av serveren.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Leverandørsider i kontrollpanelet: Vis Gratis-merket bare basert på signaler som leverandøren respekterer — bruker ikke lenger heuristikken for visningsnavn, ikke-boolske gratisfelt eller :free-suffikser for registrerte leverandører uten et dokumentert gratisnivå. Når dette er slått av, brukes den tidligere merkeregelen.",
   "featureFlagProxySkipRecentlyFailedDescription": "Proxygrupper og rotasjonen per konto for opencode slutter midlertidig å bruke en proxy som nettopp sviktet (avvist TCP-sonde eller en 429 mottatt gjennom den), i en prosesspesifikk periode som dobles for hver gjentakelse, opptil en øvre grense. Ingen proxystatus lagres. Hvis alle kandidater settes til side, forblir valget uendret. På som standard; `false` gjenoppretter vanlig valg.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "For leverandører der kvoten fordeles etter egress-adresse, rangeres et pool-medlem som deler den observerte egress-adressen til et nylig avvist medlem rett under de friske medlemmene. Kun rekkefølge, aldri utelatt. Krever PROXY_SKIP_RECENTLY_FAILED, som produserer avvisningssignalet den leser. Av som standard: utvelgelsesrekkefølgen er nøyaktig den vanlige rotasjonen.",
   "featureFlagProxyPoolEgressObservationDescription": "Vis under en proxygruppe i kontrollpanelet hvor mange observerte utgående IP-adresser som betjente medlemmene i løpet av de siste 24 timene, hvor mange tilkoblinger som brukte dem, og det høyeste antallet som ble observert bak én IP-adresse. Skrivebeskyttet, beregnet fra proxyloggen og aldri brukt til ruting. Av som standard: Redigeringen av proxygruppen er uendret, og observasjonsruten returnerer null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "La en sonde som målet avviste (401/403/429: proxyen videresendte forespørselen, men destinasjonen avviste denne utgående IP-adressen), nullstille proxyens rekke av påfølgende feil under helsesjekken av proxyer, på samme måte som en besvart sonde. Av som standard: En avvisning forblir nøytral og beholder rekken. En 5xx forblir ikke-konkluderende i begge tilfeller, og en avvisning fjerner, deaktiverer eller reaktiverer aldri en proxy.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "La den automatiske oppryddingen slette avsluttede (fullførte/mislykkede/avbrutte/utløpte) Batch API-jobber som er eldre enn OMNIROUTE_BATCH_RETENTION_DAYS, sammen med kontrollpunktene deres per linje, og tømme BLOB-innholdet i opplastede filer etter deres respektive expires_at. Av som standard: Alle eksisterende installasjoner beholder disse dataene nøyaktig som før frem til en operatør aktiverer funksjonen. Den operatørutløste ruten DELETE /api/v1/batches/delete-completed påvirkes uansett ikke – den er en separat, ubetinget offentlig API-kontrakt.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Gruppebehandling",
     "homeSubtitle": "Oversikt over kontrollpanelet",
     "providersSubtitle": "Administrer AI-leverandører",
+    "modelCatalog": "Modellkatalog",
+    "modelCatalogSubtitle": "Bla gjennom modeller på tvers av leverandører",
     "quotaTrackerSubtitle": "Spor bruksgrenser",
     "providerQuotaSubtitle": "Spor leverandørenes bruksgrenser",
     "runtimeSubtitle": "Robusthet og økter i sanntid",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Bland kortstokken – bruker hver modell én gang før ny blanding",
     "fusion": "Fusjon",
     "fusionDesc": "Sender prompten til alle panelmodeller parallelt, deretter syntetiserer en dommermodell ett endelig svar",
+    "pipeline": "Prosesslinje",
+    "pipelineDesc": "Kjører modellene i rekkefølge og sender resultatet fra hvert trinn videre til det neste; bare det endelige svaret returneres",
     "fusionJudgeModel": "Dommermodell",
     "fusionJudgeModelHelp": "Modell som syntetiserer panelsvarene til ett endelig svar. La stå tom for å bruke den første panelmodellen.",
     "fusionMinPanel": "Minste panel",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Gratisstakk ($0)",
-    "templateFreeStackDesc": "Round-robin mellom alle gratisleverandører: Kiro (Claude), Qoder (5 modeller), Qwen (4 modeller). Helt gratis og slutter aldri å kode.",
+    "templateFreeStackDesc": "Round-robin mellom alle gratisleverandører: Antigravity (Gemini), Kiro (Claude), Qoder (3 modeller), NVIDIA, Groq. Helt gratis og slutter aldri å kode.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP-modus",
@@ -4959,6 +4964,7 @@
     "export": "Eksporter",
     "exporting": "Eksporterer...",
     "exportFailed": "Eksport mislyktes",
+    "exportTruncated": "Eksporten ble avkortet: bare {exported} av {total} loggoppføringer kom med. Velg et kortere tidsrom for å eksportere resten.",
     "cleanHistoryButton": "Tøm historikk",
     "cleanHistoryTitle": "Tøm logghistorikk?",
     "cleanHistoryMessage": "Dette sletter permanent alle forespørselsloggrader, eldre detaljrader og lokale artefaktfiler under DATA_DIR/call_logs. Live-siden vil oppdateres etter opprydding.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Aktiver {count} valgte",
     "testPassed": "✓ OK",
     "sweepVerdict": "Siste skanning: {cause} ({code}) {age}",
+    "blockedHistory": "Blokkert historie: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ingen skanning ennå siden oppstart",
     "sweepLabel": {
       "unproven": "målet avviste",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Satt til side: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy kan ikke nås",
     "poolSetAsideKindIpQuota429": "IP-hastighetsbegrensning (429)",
+    "poolSetAsideKindSlow": "trege svar",
     "poolSetAsideUntil": "Tilbake i rotasjon {endsAt}",
     "poolSetAsideRepeat": "Satt til side {count, plural, one {# gang} other {# ganger}}",
     "poolUnknownAddress": "Ukjent adresse",
@@ -11515,6 +11523,7 @@
       "output": "Utdata",
       "totalOut": "Total Ut: {value}",
       "reasoning": "Begrunnelse: {value}",
+      "reasoningObserved": "{value} · {chars} tegn observert",
       "requestedModel": "Forespurt Modell",
       "requestProtocol": "Req Protokoll",
       "cacheSource": "Cache Kilde",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Arver tilkobling: {host}",
     "inheritedPool": "Arver tilkoblingspool ({count})",
     "poolEmptyBlocked": "Pool tom — forespørsler mislykkes (ikke direkte)",
-    "directEgress": "Direkte (ingen proxy)"
+    "directEgress": "Direkte (ingen proxy)",
+    "ownProxy": "Egen proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Oppstrømstatus",
     "noResponse": "Ingen respons",
     "egressIp": "Egress IP",
+    "headersAfter": "Overskrifter etter",
+    "firstChunkAfter": "Første del etter",
     "servedBy": "Tjenestet av",
     "correlationId": "Korrelerings-ID"
   },

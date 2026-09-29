@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Omogući adaptivne virtualne trake prijema po tenantu za dispatch provajdera (#9654): burst jednog tenanta više ne uzrokuje 503 grešku drugom. Env varijabla OMNIROUTE_CHAT_VIRTUAL_LANES ima prednost nad ovim override-om na dashboardu; promjene stupaju na snagu nakon ponovnog pokretanja servera.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Stranice provajdera na dashboardu: prikaži Free bedž samo na signalima koje provajder priznaje — uklanja heuristiku display-name-a, ne-boolean free polja i :free sufikse na registrovanim provajderima bez dokumentiranog besplatnog nivoa. Isključeno zadržava historijsko pravilo za bedževe.",
   "featureFlagProxySkipRecentlyFailedDescription": "Proxy pool-ovi i rotacija po računu za opencode prestaju ponovo posluživati proxy koji je upravo zakazao (odbijena TCP proba ili primljeni 429 kroz njega) za period po procesu koji se udvostručuje pri svakom ponavljanju, do određenog limita. Status proxy-ja se ne zapisuje; sa svakim odloženim kandidatom izbor ostaje nepromijenjen. Podrazumijevano uključeno; `false` vraća običnu selekciju.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Za provajdere čija se kvota raspodjeljuje po izlaznoj (egress) adresi, rangira člana poola koji dijeli uočenu egress adresu nedavno odbijenog člana odmah ispod zdravih članova. Samo redoslijed, nikada isključenje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji proizvodi signal odbijanja koji čita. Isključeno po defaultu: redoslijed odabira je tačno obična rotacija.",
   "featureFlagProxyPoolEgressObservationDescription": "Prikaži, unutar proxy pool-a na dashboardu, koliko je opaženih egress IP-ova poslužilo njegove članove u posljednjih 24 h, koliko je konekcija ih koristilo i najviše viđenih iza jednog IP-a. Samo za čitanje, izračunato iz proxy log-a, nikada ne koristi se za rutiranje. Podrazumijevano isključeno: editor pool-a ostaje nepromijenjen, a ruta za opažanje vraća null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "U skeniranju zdravlja proxy-ja, dopusti da proba koju je cilj odbio (401/403/429: proxy je proslijedio, destinacija je odbila ovaj egress IP) resetuje niz uzastopnih neuspjeha proxy-ja, kao i poslužena proba. Podrazumijevano isključeno: odbijanje ostaje neutralno i zadržava niz. 5xx ostaje neodređen u oba slučaja, a odbijanje nikada ne uklanja, onemogućuje ili ponovo aktivira proxy.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Dopusti automatskom skeniranju za čišćenje da obriše terminalne (završene/neuspjele/otkazane/istekle) Batch API poslove starije od OMNIROUTE_BATCH_RETENTION_DAYS, zajedno sa njihovim checkpointima po liniji, i očisti BLOB sadržaj uploadovanih datoteka nakon njihovog expires_at. Podrazumijevano isključeno: svaka postojeća instalacija čuva ove podatke tačno kao i ranije dok operator ne odobri. Ruta DELETE /api/v1/batches/delete-completed pokrenuta od strane operatora nije pogođena u oba slučaja -- to je zaseban, bezuvjetni javni API ugovor.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Paketna obrada",
     "homeSubtitle": "Pregled dashboarda",
     "providersSubtitle": "Upravljanje AI provajderima",
+    "modelCatalog": "Katalog modela",
+    "modelCatalogSubtitle": "Pregledajte modele svih provajdera",
     "quotaTrackerSubtitle": "Praćenje limita korištenja",
     "providerQuotaSubtitle": "Praćenje limita korištenja provajdera",
     "runtimeSubtitle": "Real-time otpornost i sesije",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Promiješaj špil — koristi svaki model jednom prije ponovnog miješanja",
     "fusion": "Fuzija",
     "fusionDesc": "Šalje prompt svakom modelu u panelu paralelno, nakon čega model sudije sintetizuje jedan konačni odgovor",
+    "pipeline": "Cjevovod",
+    "pipelineDesc": "Pokreće modele redom, prosljeđujući izlaz svakog koraka sljedećem; vraća se samo konačni odgovor",
     "fusionJudgeModel": "Model sudije",
     "fusionJudgeModelHelp": "Model koji sintetizuje odgovore panela u jedan konačni odgovor. Ostavite prazno da biste koristili prvi model panela.",
     "fusionMinPanel": "Minimalni panel",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Besplatni Stack ($0)",
-    "templateFreeStackDesc": "Round-robin kroz sve besplatne provajdere: Kiro (Claude), Qoder (5 modela), Qwen (4 modela). Nula troškova, kodiranje nikada ne prestaje.",
+    "templateFreeStackDesc": "Round-robin kroz sve besplatne provajdere: Antigravity (Gemini), Kiro (Claude), Qoder (3 modela), NVIDIA, Groq. Nula troškova, kodiranje nikada ne prestaje.",
     "auto": "Inteligentni automatski odabir",
     "autoDesc": "Samoiscjeljujući smart routing pool sa višefaktorskim bodovanjem",
     "lkgp": "LKGP Mod",
@@ -4959,6 +4964,7 @@
     "export": "Izvezi",
     "exporting": "Izvoz u toku...",
     "exportFailed": "Izvoz nije uspio",
+    "exportTruncated": "Izvoz je skraćen: uključeno je samo {exported} od {total} zapisa dnevnika. Odaberite kraći vremenski raspon da izvezete ostatak.",
     "cleanHistoryButton": "Očisti historiju",
     "cleanHistoryTitle": "Očistiti historiju logova?",
     "cleanHistoryMessage": "Ovo trajno briše sve redove logova zahtjeva, stare redove detalja i lokalne artifact datoteke u DATA_DIR/call_logs. Aktivna stranica će se osvježiti nakon čišćenja.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Omogući {count} odabranih",
     "testPassed": "✓ U redu",
     "sweepVerdict": "Zadnje skeniranje: {cause} ({code}) {age}",
+    "blockedHistory": "Blokirana istorija: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nema skeniranja od pokretanja",
     "sweepLabel": {
       "unproven": "meta odbila",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Sklonjeno: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy nedostupan",
     "poolSetAsideKindIpQuota429": "ograničenje brzine po IP-u (429)",
+    "poolSetAsideKindSlow": "spori odgovori",
     "poolSetAsideUntil": "Nazad u rotaciji {endsAt}",
     "poolSetAsideRepeat": "Sklonjeno {count, plural, one {# put} other {# puta}}",
     "poolUnknownAddress": "Nepoznata adresa",
@@ -11515,6 +11523,7 @@
       "output": "Izlaz",
       "totalOut": "Ukupno izlaz: {value}",
       "reasoning": "Razmišljanje: {value}",
+      "reasoningObserved": "{value} · uočeno {chars} znakova",
       "requestedModel": "Zatraženi model",
       "requestProtocol": "Req protokol",
       "cacheSource": "Izvor keša",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Nasljeđuje konekciju: {host}",
     "inheritedPool": "Nasljeđuje bazen konekcija ({count})",
     "poolEmptyBlocked": "Bazen prazan — zahtjevi ne uspijevaju (ne direktno)",
-    "directEgress": "Direktno (bez proxyja)"
+    "directEgress": "Direktno (bez proxyja)",
+    "ownProxy": "Vlastiti proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Status upravljačkog",
     "noResponse": "Nema odgovora",
     "egressIp": "Egress IP",
+    "headersAfter": "Zaglavlja nakon",
+    "firstChunkAfter": "Prvi dio nakon",
     "servedBy": "Posluženo od",
     "correlationId": "ID korelacije"
   },

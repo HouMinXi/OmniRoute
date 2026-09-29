@@ -1,0 +1,1 @@
+- **fix(sse):** Mark responses served by the budget-exhaustion emergency fallback with `X-OmniRoute-Emergency-Fallback: from=<provider/model>; to=<provider/model>` and log the served reroute, so clients can detect the provider swap directly instead of diffing `X-OmniRoute-Provider` against the request.

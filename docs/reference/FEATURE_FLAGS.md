@@ -276,6 +276,11 @@ dashboard toggle, a DB override, or the `OMNIROUTE_EMERGENCY_FALLBACK`
 environment variable — to disable the behavior and let budget-exhausted requests
 fail. (Surfaced as a dashboard toggle in PRs #3741 / #3752.)
 
+A response served by this fallback carries
+`X-OmniRoute-Emergency-Fallback: from=<provider/model>; to=<provider/model>`, so a
+client can tell it was rerouted without diffing `X-OmniRoute-Provider` against its
+request. The header is absent on every other response.
+
 ---
 
 ## See Also

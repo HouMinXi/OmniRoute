@@ -59,6 +59,11 @@ import {
 } from "@omniroute/open-sse/utils/proxyRefusalMemory";
 import { deleteSweepVerdict, recordSweepVerdict, toSweepVerdict } from "./sweepVerdict.ts";
 import {
+  deleteBlockedHistory,
+  pruneBlockedHistory,
+  recordBlockedObservation,
+} from "./blockedHistory.ts";
+import {
   isProxyHealthBlockedResetsStreakEnabled,
   isProxySkipRecentlyFailedEnabled,
 } from "@/shared/utils/featureFlags";
@@ -312,7 +317,16 @@ async function decideOneResult(
   // after the decision so the screen explains dead/blocked proxies without
   // triggering probes. Uses the final (possibly promoted) outcome, so a
   // promoted fail shows as fail. The cause stays a sidecar: never branched on.
-  recordSweepVerdict(id, toSweepVerdict(outcome, final.status, Date.now()));
+  // The per-sweep tally is intentionally discarded after logging below — the
+  // observable blocked history (blockedHistory.ts) is the persisted aggregate.
+  const verdict = toSweepVerdict(outcome, final.status, Date.now());
+  recordSweepVerdict(id, verdict);
+  if (verdict.verdict === "blocked") {
+    recordBlockedObservation(id, verdict.cause, verdict.status, verdict.at);
+  } else if (verdict.verdict === "ok") {
+    // A healthy sweep ends the refusal streak (see blockedHistory.ts lifecycle).
+    deleteBlockedHistory(id);
+  }
 
   if (decision.clearFailures) ctx.failureMap.delete(id);
   else ctx.failureMap.set(id, decision.failures);
@@ -330,6 +344,7 @@ async function decideOneResult(
     if (await deleteProxyById(id, { force: true }).catch(() => false)) {
       ctx.failureMap.delete(id);
       deleteSweepVerdict(id);
+      deleteBlockedHistory(id);
       tally.removed++;
       try {
         clearDispatcherCache();
@@ -540,6 +555,8 @@ async function sweep(): Promise<void> {
   }
 
   const { items: proxies } = await listProxies({ includeSecrets: true });
+  // Before the empty-registry return, so deleting the last proxy prunes too.
+  pruneBlockedHistory(proxies.map((proxy) => proxy.id));
   if (proxies.length === 0) return;
 
   const failureMap = getFailureMap();

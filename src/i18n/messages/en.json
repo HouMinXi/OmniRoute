@@ -1203,6 +1203,8 @@
     "batchGroup": "Batch",
     "homeSubtitle": "Dashboard overview",
     "providersSubtitle": "Manage AI providers",
+    "modelCatalog": "Model catalog",
+    "modelCatalogSubtitle": "Browse models across providers",
     "quotaTrackerSubtitle": "Track usage limits",
     "providerQuotaSubtitle": "Track provider usage limits",
     "runtimeSubtitle": "Realtime resilience & sessions",
@@ -3287,6 +3289,8 @@
     "strictRandomDesc": "Shuffle deck — uses each model once before reshuffling",
     "fusion": "Fusion",
     "fusionDesc": "Fans the prompt to every panel model in parallel, then a judge model synthesizes one final answer",
+    "pipeline": "Pipeline",
+    "pipelineDesc": "Runs the models in sequence, feeding each step's output into the next; only the final answer is returned",
     "fusionJudgeModel": "Judge model",
     "fusionJudgeModelHelp": "Model that synthesizes the panel answers into one final response. Leave empty to use the first panel model.",
     "fusionMinPanel": "Min panel",
@@ -3668,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Free Stack ($0)",
-    "templateFreeStackDesc": "Round-robin across all free providers: Kiro (Claude), Qoder (5 models), Qwen (4 models). Zero cost, never stops coding.",
+    "templateFreeStackDesc": "Round-robin across free providers: Antigravity (Gemini), Kiro (Claude), Qoder (3 models), NVIDIA and Groq. Zero cost, never stops coding.",
     "auto": "Intelligent Auto",
     "autoDesc": "Self-healing smart routing pool with multi-factor scoring",
     "lkgp": "LKGP Mode",
@@ -4960,6 +4964,7 @@
     "export": "Export",
     "exporting": "Exporting...",
     "exportFailed": "Export failed",
+    "exportTruncated": "Export truncated: only {exported} of {total} log entries were included. Pick a shorter time range to export the rest.",
     "cleanHistoryButton": "Clean history",
     "cleanHistoryTitle": "Clean log history?",
     "cleanHistoryMessage": "This permanently clears all request log rows, legacy detail rows, and local artifact files under DATA_DIR/call_logs. The live page will refresh after cleanup.",
@@ -11033,6 +11038,7 @@
     "batchActivateSelected": "Enable {count} selected",
     "testPassed": "✓ OK",
     "sweepVerdict": "Last sweep: {cause} ({code}) {age}",
+    "blockedHistory": "Blocked history: {count}× {cause} ({code}) {age}",
     "sweepNoData": "No sweep yet since startup",
     "sweepLabel": {
       "unproven": "target refused",
@@ -11079,6 +11085,7 @@
     "poolSetAsideReason": "Set aside: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy unreachable",
     "poolSetAsideKindIpQuota429": "IP rate-limited (429)",
+    "poolSetAsideKindSlow": "slow responses",
     "poolSetAsideUntil": "Back in rotation {endsAt}",
     "poolSetAsideRepeat": "Set aside {count, plural, one {# time} other {# times}}",
     "poolUnknownAddress": "Unknown address",
@@ -11516,6 +11523,7 @@
       "output": "Output",
       "totalOut": "Total Out: {value}",
       "reasoning": "Reasoning: {value}",
+      "reasoningObserved": "{value} · {chars} chars observed",
       "requestedModel": "Requested Model",
       "requestProtocol": "Req Protocol",
       "cacheSource": "Cache Source",
@@ -12862,7 +12870,8 @@
     "inheritedProxy": "Inherits connection: {host}",
     "inheritedPool": "Inherits connection pool ({count})",
     "poolEmptyBlocked": "Pool empty — requests fail (not direct)",
-    "directEgress": "Direct (no proxy)"
+    "directEgress": "Direct (no proxy)",
+    "ownProxy": "Own proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14195,6 +14204,8 @@
     "upstreamStatus": "Upstream status",
     "noResponse": "No response",
     "egressIp": "Egress IP",
+    "headersAfter": "Headers after",
+    "firstChunkAfter": "First chunk after",
     "servedBy": "Served by",
     "correlationId": "Correlation ID"
   },

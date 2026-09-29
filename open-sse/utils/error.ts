@@ -1052,7 +1052,8 @@ export function unavailableResponse(
 
 export function providerCircuitOpenResponse(
   provider: string,
-  retryAfter?: string | number | Date | null
+  retryAfter?: string | number | Date | null,
+  failureKind?: string | null
 ) {
   const retryAfterSec = normalizeRetryAfterSeconds(retryAfter);
   const safeProvider = projectPublicContextLabel(provider) ?? "unknown";
@@ -1064,6 +1065,7 @@ export function providerCircuitOpenResponse(
         code: "provider_circuit_open",
         provider: safeProvider,
         retry_after: retryAfterSec,
+        ...(failureKind ? { failure_kind: failureKind } : {}), // #14960 quota vs rate_limit
       },
     }),
     {

@@ -10,6 +10,7 @@ import {
   STREAM_RECOVERY,
 } from "../../config/constants.ts";
 import { incrementTokenUsage } from "../../services/geminiRateLimitTracker.ts";
+import { requestTtftMs } from "../../utils/streamTiming.ts";
 import {
   createRoutingEvent,
   emitRoutingEvent,
@@ -17,13 +18,7 @@ import {
 } from "../../services/routing/index.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { needsTranslation } from "../../translator/index.ts";
-import {
-  FLUSH_EMPTY_RETRY_MAX_BYTES,
-  formatBufferedVerdictLog,
-  judgeBufferedTurn,
-  readBoundedResponseOutcome,
-} from "../../utils/emptyTurnRetry.ts";
-import { noteBufferedVerdictOutcome } from "./emptyTurnResilienceNotes.ts";
+import { runEmptyTurnRetryLoop } from "./emptyTurnRetryLoop.ts";
 import { buildErrorBody } from "../../utils/error.ts";
 import {
   createPassthroughStreamWithLogger,
@@ -37,7 +32,6 @@ import { captureStreamReasoningForReplay } from "./streamReasoningCapture.ts";
 import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { resolveSuppressThinkClose } from "../../utils/thinkCloseMarker.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
-import { translateNonStreamingResponse } from "../responseTranslator.ts";
 import { buildCacheUsageLogMeta } from "./cacheUsageMeta.ts";
 import { recordContextEditingTelemetryHook } from "./contextEditingTelemetry.ts";
 import { readCpaAuthIndex } from "./failureUsage.ts";
@@ -55,6 +49,7 @@ import { assembleStreamingResponseHeaders } from "./streamingResponseHeaders.ts"
 import { storeStreamingSemanticCacheResponse } from "./streamingSemanticCacheStore.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
+import { getExecutorTimeoutMs, resolveConnectionTimeoutMs } from "./upstreamTimeouts.ts";
 import { recordCost } from "@/domain/costRules";
 import { extractFacts } from "@/lib/memory/extraction";
 import { calculateCost } from "@/lib/usage/costCalculator";
@@ -90,6 +85,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     echoModel,
     endpointPath,
     executeProviderRequest,
+    executor,
     fallbackAttempts,
     getCurrentConnectionId,
     forcedConnectionId,
@@ -97,6 +93,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     isDroidCLI,
     isResponsesEndpoint,
     log,
+    managedLease,
     memoryOwnerId,
     memorySettings,
     model,
@@ -152,9 +149,16 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     provider,
     model,
     body: (finalBody || translatedBody) as Record<string, unknown> | null | undefined,
+    sourceBody: body as Record<string, unknown> | null | undefined,
     maxTimeoutMs: agentGoalPolicy.detected
       ? Math.max(STREAM_READINESS_MAX_TIMEOUT_MS, agentGoalPolicy.readinessMaxTimeoutMs)
       : STREAM_READINESS_MAX_TIMEOUT_MS,
+    cascadeTimeoutMs: getExecutorTimeoutMs(
+      executor,
+      provider,
+      model,
+      resolveConnectionTimeoutMs(credentials?.providerSpecificData)
+    ),
   });
   if (streamReadinessPolicy.timeoutMs !== streamReadinessPolicy.baseTimeoutMs) {
     log?.debug?.(
@@ -261,85 +265,33 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       targetFormat === FORMATS.OPENAI_RESPONSES ||
       needsTranslation(targetFormat, clientResponseFormat);
     if (flushEmptyRetryArmed && isTranslatePath) {
-      for (
-        let emptyTurnRetries = 0;
-        emptyTurnRetries <= STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX;
-        emptyTurnRetries++
-      ) {
-        const verdict = judgeBufferedTurn(
-          await readBoundedResponseOutcome(
-            providerResponse,
-            FLUSH_EMPTY_RETRY_MAX_BYTES,
-            streamReadinessPolicy.timeoutMs
-          ),
-          targetFormat,
-          clientResponseFormat,
-          clientRawRequest?.signal?.aborted === true
-        );
-        if (verdict.kind === "pass") {
-          const v = formatBufferedVerdictLog(verdict, correlationId, traceId);
-          log?.[v.level]?.("FLUSH_EMPTY_RETRY", v.line);
-          noteBufferedVerdictOutcome(verdict, null, false);
-          break;
-        }
-        if (emptyTurnRetries >= STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX) {
-          log?.warn?.(
-            "FLUSH_EMPTY_RETRY",
-            "retry budget exhausted, falling back to current behavior"
-          );
-          noteBufferedVerdictOutcome(verdict, null, true);
-          break;
-        }
-        log?.warn?.(
-          "FLUSH_EMPTY_RETRY",
-          `${verdict.reason}, bounded retry through the normal credential path`
-        );
-        noteBufferedVerdictOutcome(verdict, { level: "warn", line: verdict.reason }, false);
-        const nextCreds = await getProviderCredentials(provider, null, null, currentModel).catch(
-          () => null
-        );
-        if (!nextCreds?.connectionId) break;
-        const retryConnectionId = String(nextCreds.connectionId);
-        Object.assign(credentials, nextCreds);
-        log?.info?.("FLUSH_EMPTY_RETRY", `retrying on ${retryConnectionId}`);
-        await providerResponse.body?.cancel().catch(() => {});
-        let retryResult: unknown = null;
-        try {
-          retryResult = await executeProviderRequest(currentModel, false);
-        } catch {
-          break;
-        }
-        const retryResponse = (retryResult as { response?: Response })?.response;
-        if (!retryResponse?.ok || !retryResponse.body) {
-          if (retryResponse) await retryResponse.body?.cancel().catch(() => {});
-          break;
-        }
-        const prepared = await maybeConvertJsonBodyToSse(retryResponse, {
-          log,
-          provider,
-          model,
-        });
-        const ready = prepared.ok
-          ? await ensureStreamReadiness(prepared, {
-              timeoutMs: streamReadinessPolicy.timeoutMs,
-              maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
-              provider,
-              model,
-              log,
-            })
-          : null;
-        const preparedStream = ready && ready.ok ? ready.response : null;
-        if (!preparedStream) {
-          await retryResponse.body?.cancel().catch(() => {});
-          break;
-        }
-        // Swap BEFORE re-classifying so the next loop iteration reads the retry.
-        providerResponse = preparedStream;
-        finalBody = providerRequestCapture.body(
-          (retryResult as { transformedBody?: unknown })?.transformedBody ?? translatedBody
-        );
-        reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-      }
+      const retried = await runEmptyTurnRetryLoop({
+        providerResponse,
+        credentials,
+        provider,
+        currentModel,
+        model,
+        targetFormat,
+        clientResponseFormat,
+        isAborted: () => clientRawRequest?.signal?.aborted === true,
+        timeoutMs: streamReadinessPolicy.timeoutMs,
+        maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
+        maxRetries: STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX,
+        translatedBody,
+        finalBody,
+        providerUrl,
+        providerHeaders,
+        correlationId,
+        traceId,
+        log,
+        getProviderCredentials,
+        routing: { leased: Boolean(managedLease), forcedConnectionId, apiKey: apiKeyInfo },
+        executeProviderRequest,
+        logTargetRequest: (url, headers, body) => reqLogger.logTargetRequest(url, headers, body),
+        captureBody: (body) => providerRequestCapture.body(body),
+      });
+      providerResponse = retried.providerResponse;
+      if (retried.adopted) finalBody = retried.finalBody;
     }
   }
 
@@ -383,6 +335,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   let streamFailureCompletionRecorded = false;
 
   // Callback to save call log when stream completes (include responseBody when provided by stream)
+  let streamTimingOriginOffsetMs: number | null = null; // startTime → StreamTiming start
   const onStreamComplete = ({
     status: streamStatus,
     usage: streamUsage,
@@ -392,10 +345,11 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     reasoningMeta: streamReasoningMeta,
     error: streamError,
     errorCode: streamErrorCode,
-    ttft,
+    firstOutputMs,
     itlMs: streamItlMs,
     interrupted: _streamInterrupted,
   }) => {
+    const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
     const normalizedStreamStatus = streamStatus || 200;
     if (streamCompletionRecorded) return;
     streamCompletionRecorded = true;
@@ -543,6 +497,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
       cacheSource: "upstream",
+      // #13130: persist TTFT so call_logs.ttft_ms lets the dashboard compute
+      // generation-time TPS instead of wall-clock TPS.
+      ttft,
       reasoningMeta: streamReasoningMeta ?? null,
     });
 
@@ -670,6 +627,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
   // DSML tool-call markers as plain text → incomplete `stop` finish).
   const requestedThinking = hasActiveClaudeThinking((body ?? {}) as Record<string, unknown>);
 
+  streamTimingOriginOffsetMs = Date.now() - startTime;
   if (needsResponsesTranslation) {
     // Provider returns openai-responses, translate to openai (Chat Completions) that clients expect
     log?.debug?.("STREAM", `Responses translation mode: openai-responses → openai`);

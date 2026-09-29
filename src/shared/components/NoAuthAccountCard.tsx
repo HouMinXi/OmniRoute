@@ -135,12 +135,13 @@ export interface EffectiveEgress {
  * a combo row makes the egress not affirmable (`null` → neutral legacy
  * rendering) — neither "direct" nor "pool empty / requests fail".
  */
-const EGRESS_LABEL_KEYS = {
+const EGRESS_LABEL_KEYS: Record<EffectiveEgressKind, string> = {
   "inherited-proxy": "inheritedProxy",
   "inherited-pool": "inheritedPool",
   "pool-empty": "poolEmptyBlocked",
   direct: "directEgress",
-} as const;
+  own: "ownProxy",
+};
 
 export type EgressLabelKind = keyof typeof EGRESS_LABEL_KEYS;
 

@@ -828,7 +828,12 @@ export async function validateResponseQuality(
     if (!responsesApiOutputHasContent(json.output))
       return { valid: false, reason: "empty_choices" };
     const status = typeof json.status === "string" ? json.status : "";
-    if (status && !["completed", "done"].includes(status)) {
+    // Same terminal set as detectMalformedNonStream (diagnostics.ts). A combo
+    // whose members are a reasoning model returns status:"incomplete" on a
+    // small max_output_tokens; rejecting that here fails every target over
+    // and the client still sees 502 after the direct path was fixed.
+    // "canceled" matches the SSE parser fallback spelling.
+    if (status && !["completed", "done", "incomplete", "cancelled", "canceled"].includes(status)) {
       return { valid: false, reason: "no_terminal" };
     }
     return {
@@ -895,6 +900,20 @@ export async function validateResponseQuality(
   }
 
   if (!hasContent && !hasToolCalls) {
+    // finish_reason "length" is a truncated completion (max_tokens hit), the
+    // same case the Claude shape exempts as stop_reason "max_tokens" (#12968).
+    // A thinking model that spends the whole budget before any visible token
+    // is a valid response, not a reason to fail the combo target over.
+    if (firstChoice?.finish_reason === "length") {
+      return {
+        valid: true,
+        clonedResponse: new Response(text, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        }),
+      };
+    }
     return { valid: false, reason: "empty content and no tool_calls in response" };
   }
 
@@ -931,10 +950,12 @@ export async function validateResponseQuality(
         reason: `reasoning truncated at token limit (finish_reason: ${finishReason}) — no content output`,
       };
     }
-    if (usage) {
+    if (usage && finishReason !== "stop") {
       const reasoningTokens = getReasoningTokens(usage);
-      // If reasoning consumed 90%+ of completion tokens, the model ran out of
-      // budget before producing any content output.
+      // finish_reason "stop" means the model ended on its own (OpenAI, Anthropic,
+      // Z.ai all document this). A high reasoning ratio on a clean stop is normal
+      // for models that cannot disable thinking (Claude Opus 4.7+, GLM-5.3). The
+      // 90% check stays as the fallback when the provider reports no finish_reason.
       if (completionTokens > 0 && reasoningTokens >= completionTokens * 0.9) {
         if (isTinyBudgetTruncation(completionTokens)) return { valid: true };
         return {

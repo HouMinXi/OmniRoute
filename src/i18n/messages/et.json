@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Lubage pakkujale edastamiseks rentnikupõhised kohanduvad virtuaalsed vastuvõturajad (#9654): ühe rentniku koormushoog ei põhjusta enam teisele tõrget 503. Keskkonnamuutuja OMNIROUTE_CHAT_VIRTUAL_LANES alistab selle juhtpaneeli sätte; muudatused jõustuvad serveri taaskäivitamisel.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Juhtpaneeli teenusepakkujate lehed: kuva märk „Tasuta” ainult nende tunnuste puhul, mida teenusepakkuja arvestab — loobu kuvatava nime heuristikast, mitte-tõeväärtuslikest tasuta kasutust tähistavatest väljadest ja järelliidetest :free registreeritud teenusepakkujate puhul, kellel puudub dokumenteeritud tasuta pakett. Väljalülitamisel kasutatakse varasemat märgi kuvamise reeglit.",
   "featureFlagProxySkipRecentlyFailedDescription": "Puhverserverite kogumid ja opencode'i kontopõhine roteerimine väldivad äsja nurjunud puhverserveri (TCP-proovist keelduti või selle kaudu saadi vastus 429) uuesti kasutamist protsessipõhise ajavahemiku jooksul, mis iga korduva tõrke korral kahekordistub kuni ülempiirini. Puhverserveri olekut ei salvestata; kui kõik kandidaadid kõrvale jäetakse, valik ei muutu. Vaikimisi sees; `false` taastab tavalise valiku.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Teenusepakkujate puhul, kelle kvoot jagatakse väljuva (egress) aadressi järgi, paigutab pooli liikme, kes jagab hiljuti tagasi lükatud liikme täheldatud egress-aadressi, kohe tervete liikmete alla. Ainult järjestus, kunagi ei välistata. Vajab PROXY_SKIP_RECENTLY_FAILED-i, mis tekitab loetava keeldumissignaali. Vaikimisi väljas: valikujärjestus on täpselt tavaline rotatsioon.",
   "featureFlagProxyPoolEgressObservationDescription": "Kuva juhtpaneelil puhverserverite kogumi all, mitu vaadeldud väljuvat IP-aadressi teenindas selle liikmeid viimase 24 tunni jooksul, mitu ühendust neid kasutas ja kui palju ühendusi täheldati enim ühe IP-aadressi taga. Kirjutuskaitstud, arvutatakse puhverserveri logist ja seda ei kasutata kunagi marsruutimiseks. Vaikimisi väljas: kogumi redaktor ei muutu ja vaatlusmarsruut tagastab null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "Luba puhverserveri seisundi kontrollimisel sihtkoha poolt tagasi lükatud proovil (401/403/429: puhverserver vahendas päringu, sihtkoht keeldus sellest väljuvast IP-aadressist) lähtestada puhverserveri järjestikuste tõrgete jada nagu teenindatud proovi korral. Vaikimisi väljas: tagasilükkamine jääb neutraalseks ja säilitab jada. 5xx jääb mõlemal juhul ebaselgeks ning tagasilükkamine ei eemalda, keela ega taasaktiveeri kunagi puhverserverit.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Luba automaatsel puhastusel kustutada lõplikus olekus (lõpetatud/ebaõnnestunud/tühistatud/aegunud) Batch API tööd, mis on vanemad kui OMNIROUTE_BATCH_RETENTION_DAYS, koos nende reapõhiste kontrollpunktidega, ning kustutada oma expires_at tähtaja ületanud üleslaaditud failide BLOB-sisu. Vaikimisi väljas: kõik olemasolevad paigaldused säilitavad neid andmeid täpselt nagu varem, kuni operaator selle funktsiooni sisse lülitab. Operaatori käivitatavat marsruuti DELETE /api/v1/batches/delete-completed see valik ei mõjuta — tegemist on eraldiseisva ja tingimusteta avaliku API lepinguga.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Pakktöötlus",
     "homeSubtitle": "Töölaua ülevaade",
     "providersSubtitle": "Halda AI-teenusepakkujaid",
+    "modelCatalog": "Mudelite kataloog",
+    "modelCatalogSubtitle": "Sirvi mudeleid kõigi teenusepakkujate lõikes",
     "quotaTrackerSubtitle": "Jälgi kasutuslimiite",
     "providerQuotaSubtitle": "Jälgi teenusepakkuja kasutuslimiite",
     "runtimeSubtitle": "Reaalajas tõrkekindlus ja seansid",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Kaardipaki segamine — kasutab iga mudelit ühe korra enne paki uuesti segamist",
     "fusion": "Fusioon",
     "fusionDesc": "Saadab viiba paralleelselt igale paneelimudelile, seejärel sünteesib hindajamudel ühe lõpliku vastuse",
+    "pipeline": "Töötlusahel",
+    "pipelineDesc": "Käivitab mudelid järjest ja annab iga sammu väljundi edasi järgmisele; tagastatakse ainult lõplik vastus",
     "fusionJudgeModel": "Hindajamudel",
     "fusionJudgeModelHelp": "Mudel, mis sünteesib paneeli vastustest ühe lõpliku vastuse. Esimese paneelimudeli kasutamiseks jätke väli tühjaks.",
     "fusionMinPanel": "Paneeli miinimum",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Tasuta komplekt ($0)",
-    "templateFreeStackDesc": "Ringjaotus kõigi tasuta teenusepakkujate vahel: Kiro (Claude), Qoder (5 mudelit), Qwen (4 mudelit). Nullkulu ja katkematu kodeerimine.",
+    "templateFreeStackDesc": "Ringjaotus kõigi tasuta teenusepakkujate vahel: Antigravity (Gemini), Kiro (Claude), Qoder (3 mudelit), NVIDIA, Groq. Nullkulu ja katkematu kodeerimine.",
     "auto": "Nutikas automaatrežiim",
     "autoDesc": "Isetaastuv nutikas suunamiskogum mitmel teguril põhineva hindamisega",
     "lkgp": "LKGP-režiim",
@@ -4959,6 +4964,7 @@
     "export": "Ekspordi",
     "exporting": "Eksporditakse...",
     "exportFailed": "Eksportimine ebaõnnestus",
+    "exportTruncated": "Eksport kärbiti: kaasati ainult {exported} logikirjet {total}-st. Ülejäänu eksportimiseks valige lühem ajavahemik.",
     "cleanHistoryButton": "Kustuta ajalugu",
     "cleanHistoryTitle": "Kas kustutada logiajalugu?",
     "cleanHistoryMessage": "See kustutab jäädavalt kõik päringulogi read, pärandvormingus detailiread ja kohalikud artefaktifailid kaustas DATA_DIR/call_logs. Pärast puhastamist värskendatakse reaalajavaadet.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Aktiveeri {count} valitut",
     "testPassed": "✓ OK",
     "sweepVerdict": "Viimane kontroll: {cause} ({code}) {age}",
+    "blockedHistory": "Blokeeritud ajalugu: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Käivitamisest saadik kontrolli pole",
     "sweepLabel": {
       "unproven": "sihtmärk keeldus",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Kõrvale pandud: {kind}",
     "poolSetAsideKindProxyUnreachable": "puhverserver pole kättesaadav",
     "poolSetAsideKindIpQuota429": "IP päringupiirang (429)",
+    "poolSetAsideKindSlow": "aeglased vastused",
     "poolSetAsideUntil": "Tagasi rotatsioonis {endsAt}",
     "poolSetAsideRepeat": "Kõrvale pandud {count, plural, one {# kord} other {# korda}}",
     "poolUnknownAddress": "Tundmatu aadress",
@@ -11515,6 +11523,7 @@
       "output": "Väljund",
       "totalOut": "Väljund kokku: {value}",
       "reasoning": "Arutluskäik: {value}",
+      "reasoningObserved": "{value} · täheldatud {chars} märki",
       "requestedModel": "Taotletud mudel",
       "requestProtocol": "Päringu protokoll",
       "cacheSource": "Vahemälu allikas",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Pärib ühenduse: {host}",
     "inheritedPool": "Pärib ühenduste kogumi ({count})",
     "poolEmptyBlocked": "Kogum tühi — päringud ebaõnnestuvad (mitte otse)",
-    "directEgress": "Otse (puhverserverita)"
+    "directEgress": "Otse (puhverserverita)",
+    "ownProxy": "Oma puhverserver"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Ülesvoolu olek",
     "noResponse": "Ei vastata",
     "egressIp": "Väljaminev IP",
+    "headersAfter": "Päised pärast",
+    "firstChunkAfter": "Esimene tükk pärast",
     "servedBy": "Teenindab",
     "correlationId": "Korreleerimise ID"
   },

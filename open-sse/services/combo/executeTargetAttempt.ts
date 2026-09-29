@@ -15,7 +15,6 @@ import {
   recordModelLockoutFailure,
   recordProviderFailure,
   recordProviderSuccess,
-  retryHintBypassesMaxCooldownMs,
   selectLockoutCooldownMs,
 } from "../accountFallback.ts";
 import {
@@ -87,6 +86,7 @@ import {
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
 import { classifyComboOutcome, redactConnectionLabel } from "./comboErrorAggregation.ts";
 import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
+import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   buildComboDiag,
   handlePreContentStreamRetry,
@@ -661,23 +661,15 @@ export async function executeTargetAttempt(opts: {
         recordStickyBinding(deps.sticky.messageHash, target.connectionId); // LKGP (#919):
       if (provider) {
         const connId = effectiveConnectionId || undefined;
-        void (async () => {
-          try {
-            const { setLKGP } = await import("@/lib/db/settings");
-            await Promise.all([
-              setLKGP(deps.combo.name, target.executionKey, provider, connId),
-              setLKGP(deps.combo.name, deps.combo.id || deps.combo.name, provider, connId),
-            ]);
-          } catch (err) {
-            deps.log.warn(
-              "COMBO",
-              "Failed to record Last Known Good Provider. This is non-fatal.",
-              {
-                err,
-              }
-            );
-          }
-        })();
+        recordLkgpPin({
+          comboName: deps.combo.name,
+          executionKey: target.executionKey,
+          comboId: deps.combo.id,
+          provider,
+          connectionId: connId,
+          log: deps.log,
+          tag: "COMBO",
+        });
       }
 
       return { ok: true, response: result };
@@ -861,34 +853,7 @@ export async function executeTargetAttempt(opts: {
       await resolveComboDailyReset(provider)
     );
     const { cooldownMs } = fallbackResult;
-    // #6863: a parsed upstream quota reset (e.g. Antigravity "Resets in 92h27m28s")
-    // arrives in `quotaResetHintMs` — it bypasses the operator-gated
-    // `useUpstreamRetryHints` connection-cooldown setting. Mirror the
-    // single-model path (src/sse/services/auth.ts): when the retry hint was
-    // already honored, `cooldownMs` IS the upstream value; otherwise prefer the
-    // parsed quota reset — even when it is SHORTER than the fallback cooldown
-    // (e.g. subscription-quota 1h default vs a real "resets in 10m").
-    // `selectLockoutCooldownMs` still ignores hints at/below the base cooldown,
-    // so absent/tiny hints keep the #1308 exponential-backoff behavior.
-    const lockoutHintMs =
-      fallbackResult.usedUpstreamRetryHint === true
-        ? cooldownMs
-        : (fallbackResult.quotaResetHintMs ?? 0);
-    // Only a transport header or google.rpc.RetryInfo is authoritative enough
-    // to bypass maxCooldownMs. Prose and generic JSON remain useful exact hints,
-    // but the operator cap still bounds them.
-    const lockoutHintVerified = retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource);
-    const selectedConnectionId =
-      result.headers?.get("X-OmniRoute-Selected-Connection-Id") ||
-      result.headers?.get("x-omniroute-selected-connection-id") ||
-      undefined;
-    const targetWithConnection = selectedConnectionId
-      ? { ...target, connectionId: selectedConnectionId }
-      : target;
-
-    // #1731 / #1731v2: classify the upstream error and update the exhaustion sets
-    // (shared with handleRoundRobinCombo). Returns whether the provider is fully exhausted.
-    const providerExhausted = applyComboTargetExhaustion(targetWithConnection, {
+    const targetFailure = applyComboTargetExhaustion(target, {
       result,
       fallbackResult,
       errorText,
@@ -906,6 +871,15 @@ export async function executeTargetAttempt(opts: {
       exhaustedLogLevel: "info",
       structuredError,
     });
+    const {
+      target: targetWithConnection,
+      providerExhausted,
+      isModelScopedClaudeQuota,
+      isConnectionScopedClaudeQuota,
+      modelScopedClaudeCooldownMs,
+      lockoutHintMs,
+      lockoutHintVerified,
+    } = targetFailure;
     // #6692: this connection was just classified as provider/connection-level
     // exhausted — if it's the currently sticky-bound one, release the pin now
     // rather than waiting for the next turn's lazy headroom/status recheck.
@@ -1097,7 +1071,14 @@ export async function executeTargetAttempt(opts: {
       // once the model is cooling down, retrying it would waste an upstream
       // call and extend the cooldown via exponential backoff.
       let lockoutRecorded = false;
-      if (!protectedPriorityTarget && provider && rawModel && retry === 0 && !scopedFailure) {
+      if (
+        !protectedPriorityTarget &&
+        provider &&
+        rawModel &&
+        retry === 0 &&
+        !scopedFailure &&
+        !isConnectionScopedClaudeQuota
+      ) {
         const mlSettings = resolveModelLockoutSettings(deps.settings);
         if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
           recordModelLockoutFailure(
@@ -1112,8 +1093,9 @@ export async function executeTargetAttempt(opts: {
               // #1308/#6863: honor a long upstream reset (e.g. "Resets in 160h") over
               // the short base cooldown / exponential backoff when present. #7940's
               // maxCooldownMs cap only applies to synthetic values — a verified
-              // upstream reset (lockoutHintVerified) bypasses it.
-              exactCooldownMs: selectLockoutCooldownMs(lockoutHintMs, mlSettings),
+              // upstream reset (including a cached Claude reset) bypasses it.
+              exactCooldownMs:
+                modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
               maxCooldownMs: mlSettings.maxCooldownMs,
               // Preserve authoritative structured/header resets; clamp body prose.
               exactCooldownIsUpstreamReset: lockoutHintVerified,
@@ -1183,7 +1165,7 @@ export async function executeTargetAttempt(opts: {
     if (i > 0) state.fallbackCount++;
     // Wire combo failures into the resilience dashboard (model-level lockout)
     // alongside the provider-level cooldown below — they govern different scopes.
-    if (provider && rawModel && !scopedFailure) {
+    if (provider && rawModel && !scopedFailure && !isConnectionScopedClaudeQuota) {
       const mlSettings = resolveModelLockoutSettings(deps.settings);
       if (mlSettings.enabled && mlSettings.errorCodes.includes(result.status)) {
         recordModelLockoutFailure(
@@ -1197,8 +1179,9 @@ export async function executeTargetAttempt(opts: {
           {
             // #1308/#6863: honor a long upstream reset over base/exponential cooldown.
             // #7940's maxCooldownMs cap only applies to synthetic values — a verified
-            // upstream reset (lockoutHintVerified) bypasses it.
-            exactCooldownMs: selectLockoutCooldownMs(lockoutHintMs, mlSettings),
+            // upstream reset (including a cached Claude reset) bypasses it.
+            exactCooldownMs:
+              modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
             maxCooldownMs: mlSettings.maxCooldownMs,
             // Preserve authoritative structured/header resets; clamp body prose.
             exactCooldownIsUpstreamReset: lockoutHintVerified,
@@ -1220,6 +1203,7 @@ export async function executeTargetAttempt(opts: {
       provider &&
       provider !== "unknown" &&
       !scopedFailure &&
+      !isModelScopedClaudeQuota &&
       !((result.status === 500 || result.status === 429) && hasPerModelQuota(provider, rawModel))
     ) {
       recordProviderCooldown(

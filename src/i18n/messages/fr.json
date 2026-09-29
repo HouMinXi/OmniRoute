@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Activez des voies d'admission virtuelles adaptatives par tenant pour la répartition des fournisseurs (#9654) : le pic d'un tenant ne renvoie plus 503 à un autre. La variable d'environnement OMNIROUTE_CHAT_VIRTUAL_LANES prime sur ce réglage du tableau de bord ; les modifications prennent effet au redémarrage du serveur.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Pages des fournisseurs du tableau de bord : affiche le badge Gratuit uniquement pour les indicateurs reconnus par le fournisseur — abandonne l’heuristique basée sur le nom d’affichage, les champs free non booléens et les suffixes :free pour les fournisseurs enregistrés ne disposant pas d’une offre gratuite documentée. Lorsque cette option est désactivée, la règle historique du badge est conservée.",
   "featureFlagProxySkipRecentlyFailedDescription": "Les pools de proxys et la rotation par compte d’opencode cessent de réutiliser un proxy qui vient d’échouer (sonde TCP refusée ou réponse 429 reçue par son intermédiaire) pendant une durée propre au processus qui double à chaque nouvel échec, jusqu’à une limite maximale. Aucun état de proxy n’est enregistré ; lorsque tous les candidats sont écartés, le choix reste inchangé. Activé par défaut ; `false` rétablit la sélection simple.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Pour les fournisseurs dont le quota est réparti par adresse d'egress, classe un membre du pool partageant l'adresse d'egress observée d'un membre récemment refusé juste en dessous des membres sains. Ordre uniquement, jamais exclu. Nécessite PROXY_SKIP_RECENTLY_FAILED, qui produit le signal de refus qu'il lit. Désactivé par défaut : l'ordre de sélection est exactement la rotation simple.",
   "featureFlagProxyPoolEgressObservationDescription": "Afficher, sous un pool de proxys dans le tableau de bord, combien d’adresses IP de sortie observées ont servi ses membres au cours des dernières 24 h, combien de connexions les ont utilisées et le nombre maximal observé derrière une même adresse IP. En lecture seule, calculé à partir du journal du proxy, jamais utilisé pour le routage. Désactivé par défaut : l’éditeur de pool reste inchangé et la route d’observation renvoie null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "Lors du contrôle d’intégrité des proxys, permettez à une sonde refusée par la cible (401/403/429 : le proxy a relayé la requête, mais la destination a refusé cette adresse IP de sortie) de réinitialiser la série d’échecs consécutifs du proxy, comme une sonde traitée. Désactivé par défaut : un refus reste neutre et maintient la série. Une réponse 5xx reste non concluante dans les deux cas, et un refus ne supprime, ne désactive ni ne réactive jamais un proxy.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Autoriser le nettoyage automatique à supprimer les tâches Batch API dans un état terminal (terminées/échouées/annulées/expirées) datant de plus de OMNIROUTE_BATCH_RETENTION_DAYS, ainsi que leurs points de contrôle par ligne, et à effacer le contenu BLOB des fichiers téléversés dont la valeur expires_at est dépassée. Désactivé par défaut : chaque installation existante conserve ces données exactement comme auparavant jusqu’à ce qu’un opérateur active cette option. La route DELETE /api/v1/batches/delete-completed déclenchée par l’opérateur n’est affectée dans aucun des cas : il s’agit d’un contrat d’API publique distinct et inconditionnel.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Traitement par lots",
     "homeSubtitle": "Vue d’ensemble du tableau de bord",
     "providersSubtitle": "Gérer les fournisseurs d’IA",
+    "modelCatalog": "Catalogue de modèles",
+    "modelCatalogSubtitle": "Parcourir les modèles de tous les fournisseurs",
     "quotaTrackerSubtitle": "Suivre les limites d’utilisation",
     "providerQuotaSubtitle": "Suivre les limites d’utilisation des fournisseurs",
     "runtimeSubtitle": "Résilience en temps réel et sessions",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Paquet mélangé — utilise chaque modèle une fois avant de mélanger à nouveau",
     "fusion": "Fusion",
     "fusionDesc": "Diffuse l'invite à tous les modèles du panel en parallèle, puis un modèle juge synthétise une réponse finale",
+    "pipeline": "Pipeline",
+    "pipelineDesc": "Exécute les modèles en séquence, en transmettant la sortie de chaque étape à la suivante ; seule la réponse finale est renvoyée",
     "fusionJudgeModel": "Modèle juge",
     "fusionJudgeModelHelp": "Modèle qui synthétise les réponses du panel en une réponse finale. Laisser vide pour utiliser le premier modèle du panel.",
     "fusionMinPanel": "Panel min.",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Stack gratuite (0 $)",
-    "templateFreeStackDesc": "Répartition à tour de rôle entre tous les fournisseurs gratuits : Kiro (Claude), Qoder (5 modèles), Qwen (4 modèles). Coût nul, pour coder sans interruption.",
+    "templateFreeStackDesc": "Répartition à tour de rôle entre tous les fournisseurs gratuits : Antigravity (Gemini), Kiro (Claude), Qoder (3 modèles), NVIDIA, Groq. Coût nul, pour coder sans interruption.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "Mode LKGP",
@@ -4959,6 +4964,7 @@
     "export": "Exporter",
     "exporting": "Exportation en cours...",
     "exportFailed": "Échec de l’exportation",
+    "exportTruncated": "Export tronqué : seules {exported} entrées de journal sur {total} ont été incluses. Choisissez une plage horaire plus courte pour exporter le reste.",
     "cleanHistoryButton": "Nettoyer l'historique",
     "cleanHistoryTitle": "Nettoyer l'historique des journaux ?",
     "cleanHistoryMessage": "Cette action efface définitivement toutes les lignes de journal de requêtes, les lignes de détails héritées et les fichiers d'artefacts locaux sous DATA_DIR/call_logs. La page en direct s'actualisera après le nettoyage.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Activer {count} sélectionné(s)",
     "testPassed": "✓ OK",
     "sweepVerdict": "Dernier balayage : {cause} ({code}) {age}",
+    "blockedHistory": "Historique bloqué : {count}× {cause} ({code}) {age}",
     "sweepNoData": "Aucun balayage depuis le démarrage",
     "sweepLabel": {
       "unproven": "cible refusée",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Écarté : {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy injoignable",
     "poolSetAsideKindIpQuota429": "limite de débit par IP (429)",
+    "poolSetAsideKindSlow": "réponses lentes",
     "poolSetAsideUntil": "De retour en rotation {endsAt}",
     "poolSetAsideRepeat": "Écarté {count, plural, one {# fois} other {# fois}}",
     "poolUnknownAddress": "Adresse inconnue",
@@ -11515,6 +11523,7 @@
       "output": "Sortie",
       "totalOut": "Total sortant : {value}",
       "reasoning": "Raisonnement : {value}",
+      "reasoningObserved": "{value} · {chars} caractères observés",
       "requestedModel": "Modèle demandé",
       "requestProtocol": "Protocole de requête",
       "cacheSource": "Source du cache",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Hérite de la connexion : {host}",
     "inheritedPool": "Hérite du pool de connexions ({count})",
     "poolEmptyBlocked": "Pool vide — les requêtes échouent (pas direct)",
-    "directEgress": "Direct (sans proxy)"
+    "directEgress": "Direct (sans proxy)",
+    "ownProxy": "Proxy personnel"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "État amont",
     "noResponse": "Aucune réponse",
     "egressIp": "IP de sortie",
+    "headersAfter": "En-têtes après",
+    "firstChunkAfter": "Premier bloc après",
     "servedBy": "Servi par",
     "correlationId": "ID de corrélation"
   },

@@ -81,12 +81,15 @@ export type TrustedEffortContext = {
   defaultThinkingEffort?: string | null;
 };
 
-type ChatLog = {
-  debug?: (...args: unknown[]) => void;
-  info?: (...args: unknown[]) => void;
-  warn?: (...args: unknown[]) => void;
-  error?: (...args: unknown[]) => void;
-} | null | undefined;
+type ChatLog =
+  | {
+      debug?: (...args: unknown[]) => void;
+      info?: (...args: unknown[]) => void;
+      warn?: (...args: unknown[]) => void;
+      error?: (...args: unknown[]) => void;
+    }
+  | null
+  | undefined;
 
 export type ExecuteProviderRequestDeps = {
   agentGoalPolicy: AgentGoalPolicy;
@@ -113,9 +116,7 @@ export type ExecuteProviderRequestDeps = {
   log: ChatLog;
   model: string;
   onCredentialsRefreshed:
-    | ((next: Record<string, unknown>) => void | Promise<void>)
-    | null
-    | undefined;
+    ((next: Record<string, unknown>) => void | Promise<void>) | null | undefined;
   pendingScope: PendingRequestScope;
   provider: string;
   providerRequestCapture: Capture;
@@ -184,7 +185,7 @@ export async function executeProviderRequest(
     translatedBody,
     trustedEffortContext,
     upstreamStream,
-    userAgent,
+    userAgent: _userAgent,
   } = deps;
   const body = rawBody;
   const execute = async () => {
@@ -247,8 +248,8 @@ export async function executeProviderRequest(
           });
           const canonicalProviderKey = resolveProviderId(String(provider).trim().toLowerCase());
           const providerConcurrency =
-            resilienceSettings.providerQuotaOverrides[canonicalProviderKey]
-              ?.providerConcurrency ?? 0;
+            resilienceSettings.providerQuotaOverrides[canonicalProviderKey]?.providerConcurrency ??
+            0;
 
           trace("pre_semaphore", {
             semaphoreKey: accountSemaphoreKey,
@@ -308,9 +309,7 @@ export async function executeProviderRequest(
                   executor,
                   provider,
                   model: modelToCall,
-                  connectionTimeoutMs: resolveConnectionTimeoutMs(
-                    execCreds?.providerSpecificData
-                  ),
+                  connectionTimeoutMs: resolveConnectionTimeoutMs(execCreds?.providerSpecificData),
                   signal: streamController.signal,
                   log,
                   execute: (signal) =>
@@ -344,6 +343,19 @@ export async function executeProviderRequest(
             );
             const res = normalizeExecutorResult(rawExecutorResult);
             trace("post_executor", { status: res?.response?.status });
+
+            // When a payload override rewrote body.model (custom-model alias →
+            // real upstream id, e.g. `gemini-3.7-flash-high` → `gemini-3.7-flash`),
+            // log and track the WIRE model so dashboards/telemetry reflect what
+            // actually shipped and Gemini rate-limit accounting uses the real id
+            // (the executor already built its URL from the same rewritten model).
+            const wireModel = typeof res.model === "string" && res.model ? res.model : modelToCall;
+            if (wireModel !== modelToCall) {
+              log?.debug?.(
+                "PAYLOAD_RULES",
+                `Payload rules rewrote model for URL: requested=${modelToCall} wire=${wireModel}`
+              );
+            }
 
             if (
               provider === "codex" &&
@@ -382,7 +394,7 @@ export async function executeProviderRequest(
 
             // Track Gemini RPM + RPD request counts for 429 classification
             if (provider === "gemini") {
-              incrementRequestCount(modelToCall);
+              incrementRequestCount(wireModel);
             }
 
             updatePendingScope(pendingScope, {
@@ -570,10 +582,7 @@ export async function executeProviderRequest(
                   }
                 );
               } else {
-                clientBody = wrapReadableStreamWithFinalize(
-                  originalBody,
-                  releaseAccountSemaphore
-                );
+                clientBody = wrapReadableStreamWithFinalize(originalBody, releaseAccountSemaphore);
               }
 
               return {

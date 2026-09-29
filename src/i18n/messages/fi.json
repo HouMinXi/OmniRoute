@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Ota käyttöön mukautuvat virtuaaliset sisäänottokaistat vuokraajaa (tenant) kohti palveluntarjoajien välitystä varten (#9654): yhden vuokraajan kuormapiikki ei enää aiheuta 503-virhettä toiselle. Ympäristömuuttuja OMNIROUTE_CHAT_VIRTUAL_LANES ohittaa tämän hallintapaneelin asetuksen; muutokset tulevat voimaan palvelimen uudelleenkäynnistyksessä.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Palveluntarjoajien koontinäyttösivut: näytä Free-merkki vain niiden signaalien perusteella, joita palveluntarjoaja noudattaa — tämä poistaa näyttönimeen perustuvan heuristiikan, muut kuin totuusarvoiset free-kentät sekä :free-päätteet rekisteröidyiltä palveluntarjoajilta, joilla ei ole dokumentoitua ilmaistasoa. Pois käytöstä aiempi merkkisääntö säilyy.",
   "featureFlagProxySkipRecentlyFailedDescription": "Välityspalvelinpoolit ja opencoden tilikohtainen kierto estävät juuri epäonnistuneen välityspalvelimen (hylätty TCP-tarkistus tai sen kautta saatu 429-vastaus) tarjoamisen uudelleen prosessikohtaisen ajanjakson ajan. Ajanjakso kaksinkertaistuu jokaisen toistuvan epäonnistumisen myötä enimmäisrajaan asti. Välityspalvelimen tilaa ei kirjata; jos kaikki ehdokkaat on siirretty sivuun, valinta pysyy ennallaan. Oletusarvoisesti käytössä; `false` palauttaa tavallisen valinnan.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Palveluntarjoajille, joiden kiintiö jaetaan lähtevän (egress) osoitteen mukaan, sijoittaa poolin jäsenen, joka jakaa äskettäin hylätyn jäsenen havaitun egress-osoitteen, heti terveiden jäsenten alapuolelle. Vain järjestys, ei koskaan poissulkemista. Vaatii PROXY_SKIP_RECENTLY_FAILED-asetuksen, joka tuottaa sen lukeman hylkäyssignaalin. Oletuksena pois päältä: valintajärjestys on täsmälleen tavallinen kierto.",
   "featureFlagProxyPoolEgressObservationDescription": "Näytä hallintapaneelissa välityspalvelinpoolin kohdalla, kuinka monta havaittua lähtevän liikenteen IP-osoitetta sen jäsenet käyttivät viimeisten 24 tunnin aikana, kuinka monta yhteyttä käytti niitä ja kuinka monta yhteyttä enimmillään havaittiin yhden IP-osoitteen takana. Vain luku -tieto, joka lasketaan välityspalvelinlokista ja jota ei koskaan käytetä reititykseen. Oletusarvoisesti poissa käytöstä: poolieditori säilyy ennallaan ja havaintoreitti palauttaa arvon null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "Salli välityspalvelinten kuntotarkistuksessa sellaisen tarkistuksen, jonka kohde hylkäsi (401/403/429: välityspalvelin välitti pyynnön, mutta kohde hylkäsi tämän lähtevän liikenteen IP-osoitteen), nollata välityspalvelimen peräkkäisten epäonnistumisten sarja onnistuneesti palvellun tarkistuksen tavoin. Oletusarvoisesti poissa käytöstä: hylkäys pysyy neutraalina eikä katkaise sarjaa. 5xx-vastaus pysyy kummassakin tapauksessa tuloksettomana, eikä hylkäys koskaan poista välityspalvelinta, poista sitä käytöstä tai aktivoi sitä uudelleen.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Anna automaattisen puhdistuksen poistaa OMNIROUTE_BATCH_RETENTION_DAYS-arvoa vanhemmat päättyneet (valmistuneet/epäonnistuneet/peruutetut/vanhentuneet) Batch API -työt sekä niiden rivikohtaiset tarkistuspisteet ja tyhjentää niiden ladattujen tiedostojen BLOB-sisältö, joiden oma expires_at-ajankohta on ohitettu. Oletusarvoisesti poissa käytöstä: jokainen nykyinen asennus säilyttää nämä tiedot täsmälleen kuten ennenkin, kunnes ylläpitäjä ottaa toiminnon käyttöön. Ylläpitäjän käynnistämään DELETE /api/v1/batches/delete-completed -reittiin tällä ei ole vaikutusta — se on erillinen, ehdoton julkinen API-sopimus.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Eräajo",
     "homeSubtitle": "Koontinäytön yleiskatsaus",
     "providersSubtitle": "Hallinnoi tekoälypalveluntarjoajia",
+    "modelCatalog": "Mallikatalogi",
+    "modelCatalogSubtitle": "Selaa malleja eri palveluntarjoajilta",
     "quotaTrackerSubtitle": "Seuraa käyttörajoja",
     "providerQuotaSubtitle": "Seuraa palveluntarjoajien käyttörajoja",
     "runtimeSubtitle": "Reaaliaikainen vikasietoisuus ja istunnot",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Sekoitettu pakka — käyttää kutakin mallia kerran ennen uudelleensekoitusta",
     "fusion": "Fuusio",
     "fusionDesc": "Jakaa kehotteen rinnakkain kaikille paneelin malleille, minkä jälkeen tuomari-malli syntetisoi yhden lopullisen vastauksen",
+    "pipeline": "Käsittelyketju",
+    "pipelineDesc": "Ajaa mallit peräkkäin ja syöttää kunkin vaiheen tuloksen seuraavalle; vain lopullinen vastaus palautetaan",
     "fusionJudgeModel": "Tuomarimalli",
     "fusionJudgeModelHelp": "Malli, joka syntetisoi paneelin vastaukset yhdeksi lopulliseksi vastaukseksi. Jätä tyhjäksi käyttääksesi ensimmäistä paneelin mallia.",
     "fusionMinPanel": "Paneelin minimi",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Ilmainen pino ($0)",
-    "templateFreeStackDesc": "Vuorottelu kaikkien ilmaisten palveluntarjoajien välillä: Kiro (Claude), Qoder (5 mallia), Qwen (4 mallia). Täysin ilmainen, koodaus ei keskeydy koskaan.",
+    "templateFreeStackDesc": "Vuorottelu kaikkien ilmaisten palveluntarjoajien välillä: Antigravity (Gemini), Kiro (Claude), Qoder (3 mallia), NVIDIA, Groq. Täysin ilmainen, koodaus ei keskeydy koskaan.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP-tila",
@@ -4959,6 +4964,7 @@
     "export": "Vie",
     "exporting": "Viedään...",
     "exportFailed": "Vienti epäonnistui",
+    "exportTruncated": "Vienti katkaistiin: mukaan otettiin vain {exported}/{total} lokimerkintää. Valitse lyhyempi aikaväli viedäksesi loput.",
     "cleanHistoryButton": "Tyhjennä historia",
     "cleanHistoryTitle": "Tyhjennetäänkö lokihistoria?",
     "cleanHistoryMessage": "Tämä poistaa pysyvästi kaikki pyyntölokirivit, vanhat yksityiskohtarivit ja paikalliset artefaktitiedostot polusta DATA_DIR/call_logs. Reaaliaikainen sivu päivittyy puhdistuksen jälkeen.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Ota käyttöön {count} valittua",
     "testPassed": "✓ OK",
     "sweepVerdict": "Viimeisin tarkistus: {cause} ({code}) {age}",
+    "blockedHistory": "Estetty historia: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ei tarkistuksia käynnistyksen jälkeen",
     "sweepLabel": {
       "unproven": "kohde kieltäytyi",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Syrjään: {kind}",
     "poolSetAsideKindProxyUnreachable": "välityspalvelin ei tavoitettavissa",
     "poolSetAsideKindIpQuota429": "IP-nopeusrajoitus (429)",
+    "poolSetAsideKindSlow": "hitaat vastaukset",
     "poolSetAsideUntil": "Takaisin kierrossa {endsAt}",
     "poolSetAsideRepeat": "Syrjään {count, plural, one {# kerran} other {# kertaa}}",
     "poolUnknownAddress": "Tuntematon osoite",
@@ -11515,6 +11523,7 @@
       "output": "Tulostus",
       "totalOut": "Yhteensä ulos: {value}",
       "reasoning": "Pohdinta: {value}",
+      "reasoningObserved": "{value} · havaittu {chars} merkkiä",
       "requestedModel": "Pyydetty Malli",
       "requestProtocol": "Req-protokolla",
       "cacheSource": "Välimuisti Lähde",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Perii yhteyden: {host}",
     "inheritedPool": "Perii yhteyspoolin ({count})",
     "poolEmptyBlocked": "Pooli tyhjä — pyynnöt epäonnistuvat (ei suoraan)",
-    "directEgress": "Suora (ei välityspalvelinta)"
+    "directEgress": "Suora (ei välityspalvelinta)",
+    "ownProxy": "Oma välityspalvelin"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Ylävirran tila",
     "noResponse": "Ei vastausta",
     "egressIp": "Lähtö-IP",
+    "headersAfter": "Otsakkeet jälkeen",
+    "firstChunkAfter": "Ensimmäinen lohko jälkeen",
     "servedBy": "Palvelija",
     "correlationId": "Korrelaatio-ID"
   },

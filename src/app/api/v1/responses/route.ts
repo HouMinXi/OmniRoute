@@ -17,11 +17,10 @@ import { SSE_HEARTBEAT_INTERVAL_MS } from "@omniroute/open-sse/config/constants"
 import { resolveStreamFlag } from "@omniroute/open-sse/utils/aiSdkCompat";
 import { errorResponse } from "@omniroute/open-sse/utils/error";
 import {
-  getDeadlineController,
-  withDeadlineSignal,
   withEarlyStreamKeepalive,
   OPENAI_RESPONSES_ERROR_FRAME,
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
+import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
 import { OPENAI_RESPONSES_IN_PROGRESS_FRAME } from "@omniroute/open-sse/utils/sseHeartbeat";
 
@@ -100,10 +99,8 @@ export async function withCodexPreferredModel(
  * Handled by the unified chat handler (openai-responses format auto-detected).
  */
 async function postHandler(request: any) {
-  // Deadline wrap first so admission, model rewrite, parse, handleChat and lease
-  // release all observe the combined signal (client abort OR deadline abort).
-  const { wrappedReq: deadlineReq } = withDeadlineSignal(request);
-  request = deadlineReq;
+  // Keep the framework Request untouched until the route has parsed enough state
+  // to know this is a streaming response. Deadline lifecycle belongs to that branch.
   const sessionId = resolveSessionId(request);
   const admissionResult = await admitChatRequest(request, {
     sessionId,
@@ -191,13 +188,16 @@ async function postHandler(request: any) {
     if (wantsStreaming) {
       const thresholdMs = resolveKeepaliveThreshold(resolvedBody?.model);
       const correlationId = generateRequestId();
+      const { signal: streamSignal, deadlineController } = createStreamDeadlineSignal(
+        request.signal
+      );
       const handlerResponse = releaseChatAdmissionAfterHandler(
-        handleChat(resolved, null, resolvedBody, correlationId),
+        handleChat(resolved, null, resolvedBody, correlationId, streamSignal),
         admission.lease,
-        { signal: request.signal }
+        { signal: streamSignal }
       );
       return await withEarlyStreamKeepalive(handlerResponse, {
-        signal: request.signal,
+        signal: streamSignal,
         thresholdMs,
         startupFrame: OPENAI_RESPONSES_IN_PROGRESS_FRAME,
         applicationKeepalive: {
@@ -206,7 +206,7 @@ async function postHandler(request: any) {
         },
         errorFrame: OPENAI_RESPONSES_ERROR_FRAME,
         correlationId,
-        deadlineController: getDeadlineController(request),
+        deadlineController,
       });
     }
 

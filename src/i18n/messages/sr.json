@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Омогући адаптивне виртуелне линије пријема по закупцу за слање захтева провајдерима (#9654): нагли скок захтева једног закупца више не изазива 503 грешку код другог. Env варијабла OMNIROUTE_CHAT_VIRTUAL_LANES има приоритет над овим прекидачем у контролној табли; промене се примењују при поновном покретању сервера.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Странице добављача на контролној табли: приказују ознаку „Бесплатно“ само за сигнале које добављач уважава — без претпоставки на основу приказаног назива, небуловских поља за бесплатан приступ и суфикса :free код регистрованих добављача без документованог бесплатног пакета. Када је искључено, задржава се претходно правило за приказ ознаке.",
   "featureFlagProxySkipRecentlyFailedDescription": "Прокси скупови и ротација по налогу у opencode престају да поново користе прокси који је управо отказао (одбијена TCP провера или одговор 429 примљен преко њега) током периода на нивоу процеса који се удвостручује при сваком понављању, до задате горње границе. Статус проксија се не уписује; када су сви кандидати издвојени, избор остаје непромењен. Подразумевано је укључено; `false` враћа обичан избор.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "За провајдере чија се квота расподељује по излазној (egress) адреси, рангира члана pool-а који дели уочену egress адресу недавно одбијеног члана одмах испод здравих чланова. Само редослед, никада искључење. Захтева PROXY_SKIP_RECENTLY_FAILED, који производи сигнал одбијања који чита. Подразумевано искључено: редослед избора је тачно обична ротација.",
   "featureFlagProxyPoolEgressObservationDescription": "У контролној табли, испод прокси скупа, прикажите колико је уочених излазних IP адреса опслуживало његове чланове током последња 24 ч, колико веза их је користило и највећи број веза забележен иза једне IP адресе. Само за читање, израчунава се из евиденције проксија и никада се не користи за усмеравање. Подразумевано је искључено: уређивач скупа остаје непромењен, а рута за посматрање враћа null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "У провери исправности проксија омогућите да провера коју је циљ одбио (401/403/429: прокси је проследио захтев, а одредиште је одбило ову излазну IP адресу) ресетује низ узастопних неуспеха проксија, као и успешно опслужена провера. Подразумевано је искључено: одбијање остаје неутрално и задржава низ. Одговор 5xx у оба случаја остаје неодређен, а одбијање никада не уклања, не онемогућава нити поново активира прокси.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Дозволи аутоматском чишћењу да избрише завршене (успешне/неуспешне/отказане/истекле) Batch API послове старије од вредности OMNIROUTE_BATCH_RETENTION_DAYS, заједно са њиховим контролним тачкама по редовима, и да обрише BLOB садржај отпремљених датотека након њиховог сопственог expires_at. Подразумевано је искључено: свака постојећа инсталација наставља да чува ове податке потпуно исто као раније док оператер не омогући ову опцију. Рута DELETE /api/v1/batches/delete-completed коју покреће оператер ни у једном случају није погођена — она представља засебан, безуслован уговор јавног API-ја.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Пакетна обрада",
     "homeSubtitle": "Преглед контролне табле",
     "providersSubtitle": "Управљање AI провајдерима",
+    "modelCatalog": "Каталог модела",
+    "modelCatalogSubtitle": "Прегледајте моделе свих провајдера",
     "quotaTrackerSubtitle": "Праћење ограничења коришћења",
     "providerQuotaSubtitle": "Праћење ограничења коришћења провајдера",
     "runtimeSubtitle": "Отпорност и сесије у реалном времену",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Мешање шпила — користи сваки модел једном пре поновног мешања",
     "fusion": "Фузија",
     "fusionDesc": "Шаље упит паралелно свим моделима у панелу, затим модел-судија синтетизује један коначан одговор",
+    "pipeline": "Ток обраде",
+    "pipelineDesc": "Покреће моделе редом и прослеђује излаз сваког корака следећем; враћа се само коначни одговор",
     "fusionJudgeModel": "Модел-судија",
     "fusionJudgeModelHelp": "Модел који синтетизује одговоре панела у један коначан одговор. Оставите празно да користите први модел у панелу.",
     "fusionMinPanel": "Мин. број одговора панела",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Бесплатан стек ($0)",
-    "templateFreeStackDesc": "Кружна расподела (round-robin) на све бесплатне провајдере: Kiro (Claude), Qoder (5 модела), Qwen (4 модела). Без трошкова и без прекида кодирања.",
+    "templateFreeStackDesc": "Кружна расподела (round-robin) на све бесплатне провајдере: Antigravity (Gemini), Kiro (Claude), Qoder (3 модела), NVIDIA, Groq. Без трошкова и без прекида кодирања.",
     "auto": "Интелигентно аутоматско рутирање",
     "autoDesc": "Самоопорављајући паметни пул за рутирање са оцењивањем на основу више фактора",
     "lkgp": "LKGP режим",
@@ -4959,6 +4964,7 @@
     "export": "Izvezi",
     "exporting": "Izvoz u toku...",
     "exportFailed": "Izvoz nije uspeo",
+    "exportTruncated": "Извоз је скраћен: укључено је само {exported} од {total} уноса дневника. Изаберите краћи временски опсег да бисте извезли остатак.",
     "cleanHistoryButton": "Očisti istoriju",
     "cleanHistoryTitle": "Očistiti istoriju logova?",
     "cleanHistoryMessage": "Ovo trajno briše sve redove logova zahteva, zastarele redove detalja i lokalne fajlove artefakata u DATA_DIR/call_logs. Aktuelna stranica će se osvežiti nakon čišćenja.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Омогући {count} изабрано",
     "testPassed": "✓ У реду",
     "sweepVerdict": "Poslednje skeniranje: {cause} ({code}) {age}",
+    "blockedHistory": "Блокирана историја: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nema skeniranja od pokretanja",
     "sweepLabel": {
       "unproven": "meta odbila",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "По страни: {kind}",
     "poolSetAsideKindProxyUnreachable": "прокси недоступан",
     "poolSetAsideKindIpQuota429": "ограничење брзине по IP адреси (429)",
+    "poolSetAsideKindSlow": "спори одговори",
     "poolSetAsideUntil": "Назад у ротацији {endsAt}",
     "poolSetAsideRepeat": "По страни {count, plural, one {# пут} other {# пута}}",
     "poolUnknownAddress": "Непозната адреса",
@@ -11515,6 +11523,7 @@
       "output": "Излаз",
       "totalOut": "Укупно на излазу: {value}",
       "reasoning": "Резоновање: {value}",
+      "reasoningObserved": "{value} · уочено {chars} знакова",
       "requestedModel": "Захтевани модел",
       "requestProtocol": "Протокол захтева",
       "cacheSource": "Извор кеша",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Наслеђује везу: {host}",
     "inheritedPool": "Наслеђује базен веза ({count})",
     "poolEmptyBlocked": "Базен празан — захтеви не успевају (не директно)",
-    "directEgress": "Директно (без проксија)"
+    "directEgress": "Директно (без проксија)",
+    "ownProxy": "Сопствени прокси"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Uzvodni status",
     "noResponse": "Nema odgovora",
     "egressIp": "Egress IP",
+    "headersAfter": "Zaglavlja nakon",
+    "firstChunkAfter": "Prvi deo nakon",
     "servedBy": "Poslužuje",
     "correlationId": "ID korelacije"
   },

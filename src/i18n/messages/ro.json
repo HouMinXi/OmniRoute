@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Activați benzile de admitere virtuale adaptive per-tenant pentru expedierea către furnizori (#9654): un vârf de trafic al unui tenant nu mai returnează 503 altui tenant. Variabila de mediu OMNIROUTE_CHAT_VIRTUAL_LANES are prioritate față de această setare din panou; modificările intră în vigoare la repornirea serverului.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Paginile furnizorilor din tabloul de bord: afișează insigna Gratuit numai pe baza indiciilor confirmate de furnizor — elimină euristica bazată pe numele afișat, câmpurile pentru gratuitate care nu au valori booleene și sufixele :free în cazul furnizorilor înregistrați care nu au un nivel gratuit documentat. Opțiunea Dezactivat păstrează regula istorică privind insigna.",
   "featureFlagProxySkipRecentlyFailedDescription": "Pool-urile de proxy-uri și rotația per cont din opencode nu mai reutilizează un proxy care tocmai a eșuat (sondă TCP refuzată sau un răspuns 429 primit prin acesta) pentru o perioadă per proces care se dublează la fiecare repetare, până la o limită maximă. Nu este înregistrată nicio stare a proxy-ului; dacă toți candidații sunt puși deoparte, alegerea rămâne neschimbată. Activat în mod implicit; `false` restabilește selecția simplă.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Pentru furnizorii a căror cotă este împărțită pe adresă de egress, plasează un membru al pool-ului care partajează adresa de egress observată a unui membru refuzat recent imediat sub membrii sănătoși. Doar ordine, niciodată excludere. Necesită PROXY_SKIP_RECENTLY_FAILED, care produce semnalul de refuz pe care îl citește. Dezactivat implicit: ordinea de selecție este exact rotația simplă.",
   "featureFlagProxyPoolEgressObservationDescription": "Afișează, sub un pool de proxy-uri din panoul de control, câte IP-uri de ieșire observate au deservit membrii acestuia în ultimele 24 h, câte conexiuni le-au folosit și numărul maxim de conexiuni observate în spatele unui singur IP. Doar pentru citire, calculat din jurnalul proxy-ului și niciodată utilizat pentru rutare. Dezactivat în mod implicit: editorul pool-ului rămâne neschimbat, iar ruta de observare returnează null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "În verificarea periodică a stării proxy-urilor, permite unei sonde refuzate de destinație (401/403/429: proxy-ul a retransmis, iar destinația a refuzat acest IP de ieșire) să reseteze seria de eșecuri consecutive a proxy-ului, la fel ca o sondă procesată cu succes. Dezactivat în mod implicit: un refuz rămâne neutru și păstrează seria. Un răspuns 5xx rămâne neconcludent în ambele cazuri, iar un refuz nu elimină, nu dezactivează și nu reactivează niciodată un proxy.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Permite procesului automat de curățare să șteargă sarcinile Batch API în stare terminală (finalizate/eșuate/anulate/expirate) mai vechi decât OMNIROUTE_BATCH_RETENTION_DAYS, împreună cu punctele de control pentru fiecare linie, și să golească conținutul BLOB al fișierelor încărcate care și-au depășit propria valoare expires_at. Dezactivată implicit: fiecare instalare existentă păstrează aceste date exact ca înainte, până când un operator activează opțiunea. Ruta DELETE /api/v1/batches/delete-completed declanșată de operator nu este afectată în niciun caz — aceasta este un contract API public separat și necondiționat.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Procesare în lot",
     "homeSubtitle": "Prezentare generală a tabloului de bord",
     "providersSubtitle": "Gestionarea furnizorilor AI",
+    "modelCatalog": "Catalog de modele",
+    "modelCatalogSubtitle": "Răsfoiește modelele tuturor furnizorilor",
     "quotaTrackerSubtitle": "Urmărirea limitelor de utilizare",
     "providerQuotaSubtitle": "Urmărirea limitelor de utilizare ale furnizorului",
     "runtimeSubtitle": "Reziliență și sesiuni în timp real",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Pachet amestecat — folosește fiecare model o dată înainte de a amesteca din nou",
     "fusion": "Fuziune",
     "fusionDesc": "Distribuie promptul în paralel către fiecare model din panel, apoi un model arbitru sintetizează un răspuns final",
+    "pipeline": "Flux de procesare",
+    "pipelineDesc": "Rulează modelele în secvență, transmițând rezultatul fiecărui pas către următorul; se returnează doar răspunsul final",
     "fusionJudgeModel": "Model arbitru",
     "fusionJudgeModelHelp": "Modelul care sintetizează răspunsurile panelului într-un singur răspuns final. Lăsați gol pentru a utiliza primul model din panel.",
     "fusionMinPanel": "Panel minim",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Pachet gratuit ($0)",
-    "templateFreeStackDesc": "Distribuție round-robin între toți furnizorii gratuiți: Kiro (Claude), Qoder (5 modele), Qwen (4 modele). Cost zero, programarea nu se oprește niciodată.",
+    "templateFreeStackDesc": "Distribuție round-robin între toți furnizorii gratuiți: Antigravity (Gemini), Kiro (Claude), Qoder (3 modele), NVIDIA, Groq. Cost zero, programarea nu se oprește niciodată.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "Modul LKGP",
@@ -4959,6 +4964,7 @@
     "export": "Exportă",
     "exporting": "Se exportă...",
     "exportFailed": "Exportul a eșuat",
+    "exportTruncated": "Export trunchiat: au fost incluse doar {exported} din {total} intrări de jurnal. Alegeți un interval de timp mai scurt pentru a exporta restul.",
     "cleanHistoryButton": "Curăță istoricul",
     "cleanHistoryTitle": "Curățați istoricul jurnalelor?",
     "cleanHistoryMessage": "Această acțiune șterge definitiv toate rândurile de jurnal de solicitări, rândurile de detalii moștenite și fișierele de artefacte locale din DATA_DIR/call_logs. Pagina live se va reîmprospăta după curățare.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Activează {count} selectate",
     "testPassed": "✓ OK",
     "sweepVerdict": "Ultima scanare: {cause} ({code}) {age}",
+    "blockedHistory": "Istoric blocat: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Nicio scanare de la pornire",
     "sweepLabel": {
       "unproven": "țintă refuzată",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Pus deoparte: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy inaccesibil",
     "poolSetAsideKindIpQuota429": "limită de rată pe IP (429)",
+    "poolSetAsideKindSlow": "răspunsuri lente",
     "poolSetAsideUntil": "Înapoi în rotație {endsAt}",
     "poolSetAsideRepeat": "Pus deoparte {count, plural, one {# dată} other {# ori}}",
     "poolUnknownAddress": "Adresă necunoscută",
@@ -11515,6 +11523,7 @@
       "output": "Ieșire",
       "totalOut": "Total Ieșire: {value}",
       "reasoning": "Raționament: {value}",
+      "reasoningObserved": "{value} · {chars} caractere observate",
       "requestedModel": "Model Solicitat",
       "requestProtocol": "Protocol Req",
       "cacheSource": "Sursă Cache",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Moștenește conexiunea: {host}",
     "inheritedPool": "Moștenește pool-ul de conexiuni ({count})",
     "poolEmptyBlocked": "Pool gol — cererile eșuează (nu direct)",
-    "directEgress": "Direct (fără proxy)"
+    "directEgress": "Direct (fără proxy)",
+    "ownProxy": "Proxy propriu"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Stare ascendentă",
     "noResponse": "Fără răspuns",
     "egressIp": "IP de ieșire",
+    "headersAfter": "Antete după",
+    "firstChunkAfter": "Primul fragment după",
     "servedBy": "Servit de",
     "correlationId": "ID de corelare"
   },

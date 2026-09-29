@@ -23,14 +23,14 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // the next credential for a bounded empty-turn retry. The retry dispatches through
     // executeProviderRequest(), whose assertManagedLeaseFence(attemptConnectionId) rejects a
     // connection other than the leased one — so it is fenced centrally (class A).
-    // The FLUSH_EMPTY_RETRY credential pick moved into streamingTail.ts with the
-    // response-path split; same call site, same fencing argument as below.
-    "open-sse/handlers/chatCore/streamingTail.ts": 1,
+    // #14914 moved that loop (and its credential rollback) into
+    // chatCore/emptyTurnRetryLoop.ts; the response-path split (chatCore.ts split into
+    // response-path leaves) then moved the call site into streamingTail.ts, which now
+    // passes `getProviderCredentials` in as a dependency (a reference, not a call) to
+    // emptyTurnRetryLoop.ts — still dispatched through executeProviderRequest(), still
+    // fenced centrally (class A).
+    "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts": 1,
     "open-sse/handlers/chatCore/providerExecutionPipeline.ts": 2,
-    // The FLUSH_EMPTY_RETRY bounded retry re-resolves credentials inside the
-    // streaming tail (pre-existing site at the base tip, moved out of
-    // chatCore.ts by the decomposition).
-    "open-sse/handlers/chatCore/streamingTail.ts": 1,
     "open-sse/services/imageCombo.ts": 1,
     "open-sse/services/speechCombo.ts": 1,
     "open-sse/services/videoCombo.ts": 2,
@@ -116,6 +116,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // streak seeder reads the row's lastErrorType/lastErrorAt so a crash loop
     // cannot reset the backoff count on every boot — a state read, not dispatch.
     "open-sse/handlers/chatCore/requestRejectedFailure.ts": 1,
+    // #14958: after a successful search the proxy re-reads the connection row it
+    // just used so clearAccountError() can wipe a stale lastError/testStatus — a
+    // post-dispatch state read, not connection selection, so it stays class C.
+    "open-sse/handlers/search/searchProxy.ts": 1,
     // v3.8.50 back-merge additions (f95b03d7): combo routing infra and the
     // volcengine-plan binding/auto-sync services query connections the same
     // way as their classified siblings.
@@ -131,6 +135,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/cloud/auth/route.ts": 1,
     "src/app/api/cloud/credentials/update/route.ts": 1,
     "src/app/api/models/route.ts": 1,
+    // #13487 (61198da9e): Test-all reads the provider's rows once only to reject
+    // with 409 when every connection is disabled — a state read behind the
+    // management route; the per-model probes it dispatches still go through the
+    // fenced chat pipeline, so it never selects a connection itself (class C).
+    "src/app/api/models/test-all/route.ts": 1,
     "src/app/api/monitoring/health/route.ts": 1,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
     "src/app/api/oauth/codex/import/route.ts": 1,
@@ -149,7 +158,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // Base drift (already present before #11754 boarded, from earlier-merged
     // #11698/#11720 retirement PRs): a third getProviderConnections-family
     // call site landed here without a golden-inventory update at the time.
-    "src/app/api/providers/route.ts": 3,
+    // +1: bulk PATCH reads the row to carry the operator-disable marker in
+    // providerSpecificData next to isActive — a state read, not dispatch.
+    "src/app/api/providers/route.ts": 4,
     "src/app/api/providers/test-batch/route.ts": 2,
     "src/app/api/rate-limits/route.ts": 1,
     "src/app/api/services/dario/admin/import-from-omniroute/route.ts": 2,
@@ -238,7 +249,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
   credential: Object.fromEntries(
     Object.keys(EXPECTED.credential).map((file) => [
       file,
-      file === "open-sse/handlers/chatCore.ts" ||
+      file === "open-sse/handlers/chatCore/emptyTurnRetryLoop.ts" ||
       file === "src/app/api/v1/session-leases/route.ts" ||
       file === "src/sse/handlers/chat.ts" ||
       file === "src/sse/services/auth.ts"
@@ -371,7 +382,6 @@ test("hard-lease credential, executor, and connection-query inventory has no unc
 
 test("managed request surfaces are fenced centrally or rejected before independent dispatch", () => {
   const chat = fs.readFileSync(path.join(REPO_ROOT, "src/sse/handlers/chat.ts"), "utf8");
-  const core = fs.readFileSync(path.join(REPO_ROOT, "open-sse/handlers/chatCore.ts"), "utf8");
   const ws = fs.readFileSync(
     path.join(REPO_ROOT, "src/app/api/internal/codex-responses-ws/route.ts"),
     "utf8"

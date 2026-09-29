@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "為提供者調度啟用按租戶的自適應虛擬准入通道（#9654）：一個租戶的突發流量不再導致另一個租戶收到 503。OMNIROUTE_CHAT_VIRTUAL_LANES 環境變數優先於此儀表板設定；變更在伺服器重新啟動後生效。",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "儀表板提供者頁面：僅根據提供者明確認可的訊號顯示「免費」徽章——不再對沒有文件說明免費方案的已註冊提供者使用顯示名稱啟發法、非布林值免費欄位及 :free 後綴。關閉時會沿用過往的徽章規則。",
   "featureFlagProxySkipRecentlyFailedDescription": "Proxy 集區以及 opencode 的每帳戶輪替機制，會在每個處理程序的一段期間內，停止再次使用剛失敗的 Proxy（TCP 探測遭拒，或透過該 Proxy 收到 429）。每次重複失敗時，這段期間都會加倍，直到達到上限。不會寫入任何 Proxy 狀態；即使所有候選項目都被暫時擱置，選擇結果仍維持不變。預設開啟；設為 `false` 可恢復一般選擇。",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "對於依 egress 位址分配配額的提供者，將與最近被拒絕成員共用已觀測 egress 位址的 pool 成員排在健康成員之後。僅調整順序，絕不排除。需要 PROXY_SKIP_RECENTLY_FAILED，它會產生本功能讀取的拒絕訊號。預設關閉：選擇順序與一般輪替完全相同。",
   "featureFlagProxyPoolEgressObservationDescription": "在儀表板的 Proxy 集區下方，顯示過去 24 小時內觀察到多少個出口 IP 為其成員提供服務、使用這些 IP 的連線數，以及單一 IP 後方觀察到的最高數量。唯讀，根據 Proxy 記錄計算，絕不會用於路由。預設關閉：集區編輯器維持不變，觀察路由會回傳 null。",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "在 Proxy 健康狀態掃描中，讓遭目標拒絕的探測（401/403/429：Proxy 已轉送，但目的地拒絕此出口 IP）能像已提供服務的探測一樣，重設 Proxy 的連續失敗次數。預設關閉：拒絕仍視為中性，並保留目前的連續失敗次數。無論此設定為何，5xx 仍視為無法判定，而且拒絕絕不會移除、停用或重新啟用 Proxy。",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "允許自動清理程序刪除早於 OMNIROUTE_BATCH_RETENTION_DAYS 且處於最終狀態（已完成／失敗／已取消／已過期）的 Batch API 作業及其逐行檢查點，並清除已超過各自 expires_at 的上傳檔案 BLOB 內容。預設關閉：在操作員選擇啟用前，所有現有安裝都會完全比照以往保留這些資料。無論是否啟用，操作員觸發的 DELETE /api/v1/batches/delete-completed 路由都不受影響——它是獨立且無條件的公開 API 合約。",
@@ -1202,6 +1203,8 @@
     "batchGroup": "批處理",
     "homeSubtitle": "儀表盤概覽",
     "providersSubtitle": "管理 AI 提供者",
+    "modelCatalog": "模型目錄",
+    "modelCatalogSubtitle": "瀏覽各提供者的模型",
     "quotaTrackerSubtitle": "跟蹤使用限制",
     "providerQuotaSubtitle": "跟蹤提供者使用限制",
     "runtimeSubtitle": "即時彈性與會話",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "洗牌池模式：每個模型使用一次後再重新洗牌",
     "fusion": "融合",
     "fusionDesc": "將提示並行發送給面板中的每個模型，然後由評判模型綜整出一個最終答案",
+    "pipeline": "流水線",
+    "pipelineDesc": "依序執行各模型，將每一步的輸出作為下一步的輸入；只回傳最終答案",
     "fusionJudgeModel": "評判模型",
     "fusionJudgeModelHelp": "將小組回答整合為最終回應的模型。留空則使用第一個小組模型。",
     "fusionMinPanel": "最少小組",
@@ -3450,7 +3455,7 @@
       "targetTimeoutMs": "選用的個別目標逾時。留空會沿用目前的請求逾時；較大的值將以該逾時為上限。",
       "comboTimeoutMs": "選用的整個組合執行時間上限，涵蓋所有容錯移轉目標。留空會保留 10 分鐘的防卡死限制；正值則會取代此限制。請將此值設為長於目標逾時，讓容錯移轉仍有足夠時間。",
       "disableSessionStickiness": "在每次請求時輪換到不同的連線，而不是根據首則訊息雜湊將整個對話固定到單一連線。覆寫全域預設值。保留為「繼承」以保留多輪對話的提示快取命中效果。",
-      "connectionAwareExpansion": "開啟後，本組合會在輪轉前把每個供應商步驟展開成依帳號的目標。繼承使用全域預設（關）。關閉則保持依供應商輪轉。",
+      "connectionAwareExpansion": "開啟後，本組合會在輪轉前把每個提供者步驟展開成依帳號的目標。繼承使用全域預設（關）。關閉則保持依提供者輪轉。",
       "stickyLimit": "輪詢黏滯批大小：連續成功請求發給同一目標後再切到下一個。留空繼承全域黏滯限制；填 1 即每次請求都輪轉。"
     },
     "templatesTitle": "快捷模板",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "免費棧（$0）",
-    "templateFreeStackDesc": "在所有免費提供者之間進行輪詢：Kiro（Claude）、Qoder（5 個模型）、Qwen（4 個模型）。零成本，編碼不中斷。",
+    "templateFreeStackDesc": "在所有免費提供者之間進行輪詢：Antigravity（Gemini）、Kiro（Claude）、Qoder（3 個模型）、NVIDIA、Groq。零成本，編碼不中斷。",
     "auto": "自動組合",
     "autoDesc": "自愈型智慧路由池（效能最佳化）",
     "lkgp": "LKGP 模式",
@@ -4959,6 +4964,7 @@
     "export": "匯出",
     "exporting": "正在匯出...",
     "exportFailed": "匯出失敗",
+    "exportTruncated": "匯出已截斷：{total} 筆日誌中僅包含 {exported} 筆。請選擇較短的時間範圍以匯出其餘部分。",
     "cleanHistoryButton": "清理歷史記錄",
     "cleanHistoryTitle": "清理記錄歷史？",
     "cleanHistoryMessage": "這會永久清除 DATA_DIR/call_logs 下的所有請求記錄行、舊版詳細資料行和本地工件檔案。清理後即時頁面將重新整理。",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "啟用選取的 {count} 個",
     "testPassed": "✓ 正常",
     "sweepVerdict": "上次掃描：{cause} ({code}) {age}",
+    "blockedHistory": "被阻擋的歷史：{count}× {cause} ({code}) {age}",
     "sweepNoData": "啟動以來尚無掃描",
     "sweepLabel": {
       "unproven": "目標已拒絕",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "已擱置:{kind}",
     "poolSetAsideKindProxyUnreachable": "代理無法連線",
     "poolSetAsideKindIpQuota429": "IP 速率限制 (429)",
+    "poolSetAsideKindSlow": "回應緩慢",
     "poolSetAsideUntil": "{endsAt}恢復輪換",
     "poolSetAsideRepeat": "已擱置{count, plural, one {#次} other {#次}}",
     "poolUnknownAddress": "未知位址",
@@ -11515,6 +11523,7 @@
       "output": "輸出",
       "totalOut": "總支出: {value}",
       "reasoning": "推理：{value}",
+      "reasoningObserved": "{value} · 觀測到 {chars} 個字元",
       "requestedModel": "請求的模型",
       "requestProtocol": "需求協議",
       "cacheSource": "快取來源",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "繼承連線:{host}",
     "inheritedPool": "繼承連線集區({count})",
     "poolEmptyBlocked": "集區為空——請求將失敗(非直連)",
-    "directEgress": "直連(無代理)"
+    "directEgress": "直連(無代理)",
+    "ownProxy": "自有代理"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "上游狀態",
     "noResponse": "無回應",
     "egressIp": "出口 IP",
+    "headersAfter": "標頭之後",
+    "firstChunkAfter": "第一個區塊之後",
     "servedBy": "由...提供",
     "correlationId": "關聯 ID"
   },

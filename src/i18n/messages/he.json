@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "הפעל נתיבי קבלה וירטואליים אדפטיביים לכל דייר (tenant) עבור שליחת ספקים (#9654): פרץ עומס של דייר אחד כבר לא מחזיר 503 לדייר אחר. משתנה הסביבה OMNIROUTE_CHAT_VIRTUAL_LANES גובר על הגדרה זו בלוח הבקרה; השינויים נכנסים לתוקף לאחר הפעלת השרת מחדש.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "דפי הספקים בלוח הבקרה: הצגת תג החינם רק על סמך סימנים שהספק מכיר בהם — ללא היוריסטיקת שם התצוגה, שדות חינמיים שאינם בוליאניים וסיומות :free אצל ספקים רשומים שאין להם שכבה חינמית מתועדת. במצב כבוי, כלל התג ההיסטורי נשמר.",
   "featureFlagProxySkipRecentlyFailedDescription": "מאגרי פרוקסי והתחלופה לפי חשבון של opencode מפסיקים להשתמש מחדש בפרוקסי שזה עתה נכשל (בדיקת TCP נדחתה, או שהתקבלה דרכו תגובת 429) למשך פרק זמן נפרד לכל תהליך, שמוכפל בכל הישנות עד לתקרה. לא נכתב סטטוס לפרוקסי; כאשר כל המועמדים מושהים, הבחירה נשארת ללא שינוי. מופעל כברירת מחדל; `false` מחזיר את הבחירה הרגילה.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "עבור ספקים שהמכסה שלהם מחולקת לפי כתובת יציאה (egress), ממקם חבר pool החולק את כתובת ה-egress שנצפתה של חבר שנדחה לאחרונה מיד מתחת לחברים התקינים. סדר בלבד, לעולם לא החרגה. דורש את PROXY_SKIP_RECENTLY_FAILED, שמפיק את אות הדחייה שהוא קורא. כבוי כברירת מחדל: סדר הבחירה הוא בדיוק הסבב הרגיל.",
   "featureFlagProxyPoolEgressObservationDescription": "הצגת מספר כתובות ה-IP ליציאה שנצפו בקרב חברי מאגר הפרוקסי במהלך 24 השעות האחרונות, מספר החיבורים שהשתמשו בהן ומספר החיבורים המרבי שנצפה מאחורי כתובת IP אחת, מתחת למאגר בלוח הבקרה. לקריאה בלבד, מחושב מיומן הפרוקסי ולעולם אינו משמש לניתוב. מושבת כברירת מחדל: עורך המאגר נשאר ללא שינוי ונתיב התצפית מחזיר null.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "בסריקת תקינות הפרוקסי, יש לאפשר לבדיקה שהיעד דחה (401/403/429: הפרוקסי העביר את הבקשה, והיעד דחה את כתובת ה-IP הזו ליציאה) לאפס את רצף הכשלים העוקבים של הפרוקסי, כמו בדיקה שנענתה. מושבת כברירת מחדל: דחייה נשארת ניטרלית ושומרת על הרצף. תגובת 5xx נשארת בלתי מכרעת בכל מקרה, ודחייה לעולם אינה מסירה, משביתה או מפעילה מחדש פרוקסי.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "לאפשר לסריקת הניקוי האוטומטית למחוק משימות Batch API במצב סופי (שהושלמו/נכשלו/בוטלו/פג תוקפן) שגילן עולה על OMNIROUTE_BATCH_RETENTION_DAYS, יחד עם נקודות הביקורת שלהן לכל שורה, ולנקות את תוכן ה-BLOB של קבצים שהועלו לאחר שעבר מועד ה-expires_at שלהם. האפשרות מושבתת כברירת מחדל: כל התקנה קיימת ממשיכה לשמור את הנתונים האלה בדיוק כמו קודם, עד שמפעיל המערכת בוחר להפעיל אותה. הנתיב DELETE /api/v1/batches/delete-completed, שמופעל על ידי מפעיל המערכת, אינו מושפע בכל מקרה — זהו חוזה API ציבורי נפרד ובלתי מותנה.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "עיבוד באצווה",
     "homeSubtitle": "סקירת לוח הבקרה",
     "providersSubtitle": "ניהול ספקי AI",
+    "modelCatalog": "קטלוג מודלים",
+    "modelCatalogSubtitle": "עיון במודלים מכל הספקים",
     "quotaTrackerSubtitle": "מעקב אחר מגבלות שימוש",
     "providerQuotaSubtitle": "מעקב אחר מגבלות השימוש של ספקים",
     "runtimeSubtitle": "עמידות וסשנים בזמן אמת",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "חפיסה מעורבבת — משתמשת בכל מודל פעם אחת לפני ערבוב מחדש",
     "fusion": "היתוך",
     "fusionDesc": "מפיץ את הפרומפט לכל מודל בפאנל במקביל, ואז מודל שופט מסנתז תשובה סופית אחת",
+    "pipeline": "צינור עיבוד",
+    "pipelineDesc": "מריץ את המודלים ברצף ומעביר את הפלט של כל שלב לשלב הבא; מוחזרת רק התשובה הסופית",
     "fusionJudgeModel": "מודל שופט",
     "fusionJudgeModelHelp": "מודל שמסנתז את תשובות הפאנל לתגובה סופית אחת. השאר ריק כדי להשתמש במודל הפאנל הראשון.",
     "fusionMinPanel": "מינימום פאנל",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "מערך חינמי ($0)",
-    "templateFreeStackDesc": "ניתוב בשיטת סבב בין כל הספקים החינמיים: Kiro (Claude), Qoder (5 מודלים), Qwen (4 מודלים). ללא עלות, ממשיך לכתוב קוד ללא הפסקה.",
+    "templateFreeStackDesc": "ניתוב בשיטת סבב בין כל הספקים החינמיים: Antigravity (Gemini), Kiro (Claude), Qoder (3 מודלים), NVIDIA, Groq. ללא עלות, ממשיך לכתוב קוד ללא הפסקה.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "מצב LKGP",
@@ -4959,6 +4964,7 @@
     "export": "ייצוא",
     "exporting": "מייצא...",
     "exportFailed": "הייצוא נכשל",
+    "exportTruncated": "הייצוא קוצר: נכללו רק {exported} מתוך {total} רשומות יומן. בחרו טווח זמן קצר יותר כדי לייצא את השאר.",
     "cleanHistoryButton": "ניקוי היסטוריה",
     "cleanHistoryTitle": "לנקות את היסטוריית היומן?",
     "cleanHistoryMessage": "פעולה זו תמחק לצמיתות את כל שורות יומן הבקשות, שורות פרטים ישנות וקובצי ארטיפקט מקומיים תחת DATA_DIR/call_logs. הדף הפעיל יתרענן לאחר הניקוי.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "הפעל {count} שנבחרו",
     "testPassed": "✓ תקין",
     "sweepVerdict": "סריקה אחרונה: {cause} ({code}) {age}",
+    "blockedHistory": "היסטוריה חסומה: {count}× {cause} ({code}) {age}",
     "sweepNoData": "אין סריקה עדיין מאז ההפעלה",
     "sweepLabel": {
       "unproven": "היעד סירב",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "הושם בצד: {kind}",
     "poolSetAsideKindProxyUnreachable": "לא ניתן להגיע לפרוקסי",
     "poolSetAsideKindIpQuota429": "הגבלת קצב לפי IP ‏(429)",
+    "poolSetAsideKindSlow": "תגובות איטיות",
     "poolSetAsideUntil": "חוזר לרוטציה {endsAt}",
     "poolSetAsideRepeat": "הושם בצד {count, plural, one {# פעם} other {# פעמים}}",
     "poolUnknownAddress": "כתובת לא ידועה",
@@ -11515,6 +11523,7 @@
       "output": "פלט",
       "totalOut": "סך הכל יוצא: {value}",
       "reasoning": "הנמקה: {value}",
+      "reasoningObserved": "{value} · נצפו {chars} תווים",
       "requestedModel": "מודל שביקשת",
       "requestProtocol": "פרוטוקול Req",
       "cacheSource": "מקור מטמון",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "יורש את החיבור: {host}",
     "inheritedPool": "יורש את מאגר החיבורים ({count})",
     "poolEmptyBlocked": "המאגר ריק — בקשות נכשלות (לא ישיר)",
-    "directEgress": "ישיר (ללא proxy)"
+    "directEgress": "ישיר (ללא proxy)",
+    "ownProxy": "פרוקסי משלך"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "סטטוס מעלה",
     "noResponse": "אין תגובה",
     "egressIp": "כתובת IP יוצאת",
+    "headersAfter": "כותרות אחרי",
+    "firstChunkAfter": "החלק הראשון אחרי",
     "servedBy": "מוגש על ידי",
     "correlationId": "מזהה קורלציה"
   },

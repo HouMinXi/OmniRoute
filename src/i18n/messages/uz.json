@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Provayderga joʻnatish uchun har bir ijarachiga moslashuvchan virtual qabul yoʻlaklarini yoqish (#9654): endi bir ijarachining keskin soʻrovlar oqimi boshqasida 503 xatosini keltirib chiqarmaydi. OMNIROUTE_CHAT_VIRTUAL_LANES muhit oʻzgaruvchisi boshqaruv panelidagi ushbu sozlamadan ustun turadi; oʻzgarishlar server qayta ishga tushirilganda kuchga kiradi.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Boshqaruv panelidagi provayder sahifalari: Bepul nishonini faqat provayder qo‘llab-quvvatlaydigan signallarda ko‘rsating — hujjatlashtirilgan bepul tarifi bo‘lmagan ro‘yxatdan o‘tgan provayderlar uchun ko‘rsatiladigan nomga asoslangan evristika, mantiqiy bo‘lmagan bepul maydonlar va :free suffikslari hisobga olinmaydi. O‘chirilsa, tarixiy nishon qoidasi saqlanadi.",
   "featureFlagProxySkipRecentlyFailedDescription": "Proksi-pullar va opencode’ning har bir hisob bo‘yicha aylantirish mexanizmi hozirgina ishlamay qolgan proksini (TCP tekshiruvini rad etgan yoki u orqali 429 javobi olingan) har bir jarayon uchun takroriy urinish sayin ikki baravar oshib, belgilangan chegaragacha yetadigan muddat davomida qayta taqdim etmaydi. Proksi holati yozib qo‘yilmaydi; barcha nomzodlar chetga surilsa, tanlov o‘zgarmaydi. Standart holatda yoqilgan; `false` oddiy tanlovni tiklaydi.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Kvotasi egress manziliga ko‘ra taqsimlanadigan provayderlar uchun yaqinda rad etilgan a’zoning kuzatilgan egress manzilini baham ko‘radigan pool a’zosini sog‘lom a’zolardan darhol pastga joylashtiradi. Faqat tartib, hech qachon chiqarib tashlanmaydi. U o‘qiydigan rad signalini hosil qiluvchi PROXY_SKIP_RECENTLY_FAILED talab qilinadi. Standart bo‘yicha o‘chiq: tanlash tartibi aynan oddiy rotatsiya.",
   "featureFlagProxyPoolEgressObservationDescription": "Boshqaruv panelida proksi-pul ostida so‘nggi 24 soat ichida uning a’zolariga nechta kuzatilgan chiquvchi IP xizmat ko‘rsatgani, ulardan nechta ulanish foydalangani va bitta IP ortida eng ko‘p nechta a’zo kuzatilganini ko‘rsating. Faqat o‘qish uchun mo‘ljallangan, proksi jurnalidan hisoblanadi va yo‘naltirish uchun hech qachon ishlatilmaydi. Standart holatda o‘chiq: pul muharriri o‘zgarmaydi va kuzatuv marshruti null javobini qaytaradi.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "Proksi holatini tekshirish jarayonida maqsad rad etgan tekshiruv (401/403/429: proksi uzatdi, manzil esa ushbu chiquvchi IP’ni rad etdi) muvaffaqiyatli xizmat ko‘rsatilgan tekshiruv kabi proksining ketma-ket muvaffaqiyatsizliklar hisoblagichini tiklashiga ruxsat bering. Standart holatda o‘chiq: rad etish neytral bo‘lib qoladi va hisoblagichni saqlaydi. 5xx har ikki holatda ham noaniq bo‘lib qoladi, rad etish esa proksini hech qachon olib tashlamaydi, o‘chirib qo‘ymaydi yoki qayta faollashtirmaydi.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Avtomatik tozalash jarayoniga OMNIROUTE_BATCH_RETENTION_DAYS muddatidan eski yakuniy holatdagi (completed/failed/cancelled/expired) Batch API vazifalarini ularning har bir qator uchun nazorat nuqtalari bilan birga oʻchirishga va oʻz expires_at muddatidan oʻtgan yuklangan fayllarning BLOB tarkibini tozalashga ruxsat bering. Odatiy holatda oʻchiq: operator bu imkoniyatni yoqmaguncha, barcha mavjud oʻrnatishlarda bu maʼlumotlar avvalgidek saqlanadi. Operator ishga tushiradigan DELETE /api/v1/batches/delete-completed marshrutiga bundan qatʼi nazar taʼsir qilinmaydi — u alohida, shartsiz ommaviy API shartnomasidir.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Paketli ishlov berish",
     "homeSubtitle": "Boshqaruv panelining umumiy ko‘rinishi",
     "providersSubtitle": "AI provayderlarini boshqarish",
+    "modelCatalog": "Modellar katalogi",
+    "modelCatalogSubtitle": "Provayderlar bo'ylab modellarni ko'rib chiqing",
     "quotaTrackerSubtitle": "Foydalanish limitlarini kuzatish",
     "providerQuotaSubtitle": "Provayderdan foydalanish limitlarini kuzatish",
     "runtimeSubtitle": "Real vaqt rejimidagi barqarorlik va seanslar",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Aralashtirilgan dasta — qayta aralashtirishdan oldin har bir modeldan bir marta foydalanadi",
     "fusion": "Birlashtirish",
     "fusionDesc": "Promptni barcha panel modellariga parallel ravishda yuboradi, so‘ng hakam modeli javoblarni bitta yakuniy javobga birlashtiradi",
+    "pipeline": "Konveyer",
+    "pipelineDesc": "Modellarni ketma-ket ishga tushiradi, har bir qadam natijasini keyingisiga uzatadi; faqat yakuniy javob qaytariladi",
     "fusionJudgeModel": "Hakam modeli",
     "fusionJudgeModelHelp": "Panel javoblarini bitta yakuniy javobga birlashtiradigan model. Birinchi panel modelidan foydalanish uchun bo‘sh qoldiring.",
     "fusionMinPanel": "Minimal panel",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Bepul toʻplam ($0)",
-    "templateFreeStackDesc": "Barcha bepul provayderlar boʻylab navbatma-navbat yoʻnaltirish: Kiro (Claude), Qoder (5 ta model), Qwen (4 ta model). Xarajat yoʻq, kod yozish hech qachon toʻxtamaydi.",
+    "templateFreeStackDesc": "Barcha bepul provayderlar boʻylab navbatma-navbat yoʻnaltirish: Antigravity (Gemini), Kiro (Claude), Qoder (3 ta model), NVIDIA, Groq. Xarajat yoʻq, kod yozish hech qachon toʻxtamaydi.",
     "auto": "Aqlli avtomatik rejim",
     "autoDesc": "Koʻp omilli baholashga ega, oʻzini tiklaydigan aqlli yoʻnaltirish guruhi",
     "lkgp": "LKGP rejimi",
@@ -4959,6 +4964,7 @@
     "export": "Eksport qilish",
     "exporting": "Eksport qilinmoqda...",
     "exportFailed": "Eksport amalga oshmadi",
+    "exportTruncated": "Eksport qisqartirildi: {total} ta jurnal yozuvidan faqat {exported} tasi kiritildi. Qolganini eksport qilish uchun qisqaroq vaqt oralig‘ini tanlang.",
     "cleanHistoryButton": "Tarixni tozalash",
     "cleanHistoryTitle": "Jurnal tarixini tozalaysizmi?",
     "cleanHistoryMessage": "Bu barcha so‘rov jurnali qatorlari, eski tafsilot qatorlari va DATA_DIR/call_logs ichidagi mahalliy artefakt fayllarini butunlay o‘chiradi. Tozalashdan keyin joriy sahifa yangilanadi.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Tanlangan {count} tasini yoqish",
     "testPassed": "✓ OK",
     "sweepVerdict": "So'nggi tekshiruv: {cause} ({code}) {age}",
+    "blockedHistory": "Toʻxtatilgan tarix: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Ishga tushgandan beri tekshiruv yo'q",
     "sweepLabel": {
       "unproven": "nishon rad etdi",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Chetga qo‘yilgan: {kind}",
     "poolSetAsideKindProxyUnreachable": "proksiga ulanib bo'lmadi",
     "poolSetAsideKindIpQuota429": "IP tezlik cheklovi (429)",
+    "poolSetAsideKindSlow": "sekin javoblar",
     "poolSetAsideUntil": "Rotatsiyaga qaytish {endsAt}",
     "poolSetAsideRepeat": "Chetga qo‘yilgan {count, plural, one {# marta} other {# marta}}",
     "poolUnknownAddress": "Noma’lum manzil",
@@ -11515,6 +11523,7 @@
       "output": "Chiqish",
       "totalOut": "Jami chiqish: {value}",
       "reasoning": "Mulohaza yuritish: {value}",
+      "reasoningObserved": "{value} · {chars} ta belgi kuzatildi",
       "requestedModel": "Soʻralgan model",
       "requestProtocol": "Soʻrov protokoli",
       "cacheSource": "Kesh manbasi",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Ulanishni meros oladi: {host}",
     "inheritedPool": "Ulanishlar hovuzini meros oladi ({count})",
     "poolEmptyBlocked": "Hovuz bo‘sh — so‘rovlar muvaffaqiyatsiz (to‘g‘ridan-to‘g‘ri emas)",
-    "directEgress": "To‘g‘ridan-to‘g‘ri (proksisiz)"
+    "directEgress": "To‘g‘ridan-to‘g‘ri (proksisiz)",
+    "ownProxy": "Shaxsiy proksi"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Oqim holati",
     "noResponse": "Javob yo'q",
     "egressIp": "Chiqish IP",
+    "headersAfter": "Sarlavhalar keyin",
+    "firstChunkAfter": "Birinchi bo'lak keyin",
     "servedBy": "Ta'minlovchi",
     "correlationId": "Korelatsiya ID"
   },

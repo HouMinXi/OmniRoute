@@ -994,6 +994,7 @@
   "featureFlagChatVirtualLanesEnabledDescription": "Sağlayıcı gönderimi için kiracı başına uyarlanabilir sanal kabul şeritlerini etkinleştirin (#9654): bir kiracının ani yükü artık diğerinde 503 hatasına neden olmaz. OMNIROUTE_CHAT_VIRTUAL_LANES ortam değişkeni bu panel ayarına göre önceliklidir; değişiklikler sunucu yeniden başlatıldığında geçerli olur.",
   "featureFlagFreeBadgeRequiresProviderFreeTierDescription": "Kontrol paneli sağlayıcı sayfaları: Ücretsiz rozetini yalnızca sağlayıcının dikkate aldığı sinyallere göre gösterir — belgelenmiş bir ücretsiz katmanı olmayan kayıtlı sağlayıcılarda görünen ad sezgisini, Boole türünde olmayan ücretsiz alanlarını ve :free son eklerini kullanmaz. Kapalı olduğunda geçmiş rozet kuralını korur.",
   "featureFlagProxySkipRecentlyFailedDescription": "Proxy havuzları ve opencode'un hesap başına rotasyonu, henüz başarısız olmuş bir proxy'nin (reddedilen TCP yoklaması veya proxy üzerinden alınan 429 yanıtı) süreç başına belirlenen ve her tekrarda üst sınıra kadar iki katına çıkan bir süre boyunca yeniden kullanılmasını engeller. Proxy durumuna hiçbir şey yazılmaz; tüm adaylar kenara ayrıldığında seçim değişmeden kalır. Varsayılan olarak açıktır; `false` normal seçimi geri getirir.",
+  "featureFlagProxyPoolSharedEgressOrderDescription": "Kotası egress adresine göre bölünen sağlayıcılar için, yakın zamanda reddedilmiş bir üyenin gözlemlenen egress adresini paylaşan pool üyesini sağlıklı üyelerin hemen altına yerleştirir. Yalnızca sıralama, asla hariç tutulmaz. Okuduğu ret sinyalini üreten PROXY_SKIP_RECENTLY_FAILED gerekir. Varsayılan olarak kapalı: seçim sırası tam olarak düz rotasyondur.",
   "featureFlagProxyPoolEgressObservationDescription": "Kontrol panelinde bir proxy havuzunun altında, son 24 saatte üyelerine kaç farklı gözlemlenen çıkış IP'sinin hizmet verdiğini, bunları kaç bağlantının kullandığını ve tek bir IP'nin arkasında en fazla kaç bağlantı görüldüğünü gösterir. Salt okunurdur, proxy günlüğünden hesaplanır ve yönlendirme için asla kullanılmaz. Varsayılan olarak kapalıdır: havuz düzenleyicisi değişmeden kalır ve gözlem rotası null yanıtını verir.",
   "featureFlagProxyHealthBlockedResetsStreakDescription": "Proxy sağlık taramasında, hedefin reddettiği bir yoklamanın (401/403/429: proxy isteği iletti, hedef bu çıkış IP'sini reddetti) proxy'nin ardışık başarısızlık serisini, başarıyla iletilen bir yoklamada olduğu gibi sıfırlamasını sağlar. Varsayılan olarak kapalıdır: bir ret nötr kalır ve seriyi korur. 5xx her iki durumda da sonuçsuz kalır ve bir ret hiçbir zaman proxy'yi kaldırmaz, devre dışı bırakmaz veya yeniden etkinleştirmez.",
   "featureFlagBatchAndFileAutoCleanupEnabledDescription": "Otomatik temizleme işleminin, OMNIROUTE_BATCH_RETENTION_DAYS değerinden daha eski olan ve son duruma ulaşmış (tamamlanmış/başarısız/iptal edilmiş/süresi dolmuş) Batch API işlerini satır bazındaki kontrol noktalarıyla birlikte silmesine ve kendi expires_at sürelerini aşmış yüklenen dosyaların BLOB içeriğini temizlemesine izin verin. Varsayılan olarak kapalıdır: operatör etkinleştirene kadar mevcut tüm kurulumlar bu verileri aynen eskisi gibi saklar. Operatör tarafından tetiklenen DELETE /api/v1/batches/delete-completed rotası her iki durumda da etkilenmez; bu, ayrı ve koşulsuz bir genel API sözleşmesidir.",
@@ -1202,6 +1203,8 @@
     "batchGroup": "Toplu İşlem",
     "homeSubtitle": "Pano genel görünümü",
     "providersSubtitle": "Yapay zekâ sağlayıcılarını yönetin",
+    "modelCatalog": "Model kataloğu",
+    "modelCatalogSubtitle": "Sağlayıcılar genelinde modellere göz atın",
     "quotaTrackerSubtitle": "Kullanım sınırlarını izleyin",
     "providerQuotaSubtitle": "Sağlayıcı kullanım sınırlarını izleyin",
     "runtimeSubtitle": "Gerçek zamanlı dayanıklılık ve oturumlar",
@@ -3286,6 +3289,8 @@
     "strictRandomDesc": "Karıştırma destesi: yeniden karıştırmadan önce her modeli bir kez kullanır.",
     "fusion": "Füzyon",
     "fusionDesc": "İstemi tüm panel modellerine paralel olarak dağıtır, ardından bir hakem model tek bir nihai yanıt sentezler",
+    "pipeline": "İşlem Hattı",
+    "pipelineDesc": "Modelleri sırayla çalıştırır, her adımın çıktısını bir sonrakine aktarır; yalnızca son yanıt döndürülür",
     "fusionJudgeModel": "Hakem model",
     "fusionJudgeModelHelp": "Panel yanıtlarını tek bir nihai yanıtta sentezleyen model. İlk panel modelini kullanmak için boş bırakın.",
     "fusionMinPanel": "Minimum panel",
@@ -3667,7 +3672,7 @@
       }
     },
     "templateFreeStack": "Ücretsiz Yığın ($0)",
-    "templateFreeStackDesc": "Tüm ücretsiz sağlayıcılarda round-robin: Kiro (Claude), Qoder (5 model), Qwen (4 model). Sıfır maliyet, kodlama kesintisiz.",
+    "templateFreeStackDesc": "Tüm ücretsiz sağlayıcılarda round-robin: Antigravity (Gemini), Kiro (Claude), Qoder (3 model), NVIDIA, Groq. Sıfır maliyet, kodlama kesintisiz.",
     "auto": "Auto Combo",
     "autoDesc": "Self-healing smart routing pool (Performance optimized)",
     "lkgp": "LKGP Modu",
@@ -4959,6 +4964,7 @@
     "export": "Dışa Aktar",
     "exporting": "Dışa aktarılıyor...",
     "exportFailed": "Dışa aktarma başarısız oldu",
+    "exportTruncated": "Dışa aktarma kısaltıldı: {total} günlük kaydından yalnızca {exported} tanesi dahil edildi. Geri kalanını dışa aktarmak için daha kısa bir zaman aralığı seçin.",
     "cleanHistoryButton": "Geçmişi temizle",
     "cleanHistoryTitle": "Günlük geçmişi temizlensin mi?",
     "cleanHistoryMessage": "Bu işlem; DATA_DIR/call_logs altındaki tüm istek günlüğü satırlarını, eski ayrıntı satırlarını ve yerel artefakt dosyalarını kalıcı olarak temizler. Temizlikten sonra canlı sayfa yenilenecektir.",
@@ -11032,6 +11038,7 @@
     "batchActivateSelected": "Seçilen {count} ögeyi etkinleştir",
     "testPassed": "✓ Tamam",
     "sweepVerdict": "Son tarama: {cause} ({code}) {age}",
+    "blockedHistory": "Engellenen geçmiş: {count}× {cause} ({code}) {age}",
     "sweepNoData": "Başlangıçtan beri tarama yok",
     "sweepLabel": {
       "unproven": "hedef reddetti",
@@ -11078,6 +11085,7 @@
     "poolSetAsideReason": "Kenara ayrıldı: {kind}",
     "poolSetAsideKindProxyUnreachable": "proxy'ye ulaşılamıyor",
     "poolSetAsideKindIpQuota429": "IP hız sınırı (429)",
+    "poolSetAsideKindSlow": "yavaş yanıtlar",
     "poolSetAsideUntil": "Rotasyona geri döndü {endsAt}",
     "poolSetAsideRepeat": "Kenara ayrıldı {count, plural, one {# kez} other {# kez}}",
     "poolUnknownAddress": "Bilinmeyen adres",
@@ -11515,6 +11523,7 @@
       "output": "Çıktı",
       "totalOut": "Toplam Çıkış: {value}",
       "reasoning": "Gerekçe: {value}",
+      "reasoningObserved": "{value} · {chars} karakter gözlemlendi",
       "requestedModel": "İstenen Model",
       "requestProtocol": "İstek Protokolü",
       "cacheSource": "Önbellek Kaynağı",
@@ -12861,7 +12870,8 @@
     "inheritedProxy": "Bağlantıyı devralır: {host}",
     "inheritedPool": "Bağlantı havuzunu devralır ({count})",
     "poolEmptyBlocked": "Havuz boş — istekler başarısız olur (doğrudan değil)",
-    "directEgress": "Doğrudan (proxy yok)"
+    "directEgress": "Doğrudan (proxy yok)",
+    "ownProxy": "Kendi proxy'n"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -14194,6 +14204,8 @@
     "upstreamStatus": "Yukarı Akış Durumu",
     "noResponse": "Yanıt Yok",
     "egressIp": "Çıkış IP'si",
+    "headersAfter": "Başlıklar sonrası",
+    "firstChunkAfter": "İlk parça sonrası",
     "servedBy": "Tarafından Sunuldu",
     "correlationId": "Korelasyon ID"
   },

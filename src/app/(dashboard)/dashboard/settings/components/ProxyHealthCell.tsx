@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, useTranslations } from "next-intl";
+import type { BlockedHistoryEntry } from "@/lib/proxyHealth/blockedHistory";
 import type { SweepVerdict } from "@/lib/proxyHealth/sweepVerdict";
 
 interface TestResult {
@@ -22,6 +23,7 @@ interface HealthInfo {
   connectionTests?: number;
   connectionTestSuccess?: number;
   sweep?: SweepVerdict & { ageMs: number };
+  blockedHistory?: BlockedHistoryEntry & { ageMs: number };
 }
 
 interface ProxyHealthCellProps {
@@ -45,8 +47,8 @@ type SweepLabelKey =
   | "sweepLabel.hang"
   | "sweepLabel.inconclusive";
 
-function sweepLabelKey(sweep: NonNullable<HealthInfo["sweep"]>): SweepLabelKey {
-  if (sweep.verdict !== "blocked") return `sweepLabel.${sweep.verdict}`;
+function sweepLabelKey(sweep: { verdict: string; cause: string }): SweepLabelKey {
+  if (sweep.verdict !== "blocked") return `sweepLabel.${sweep.verdict}` as SweepLabelKey;
   return sweep.cause === "unproven" ? "sweepLabel.unproven" : "sweepLabel.unclassified";
 }
 
@@ -80,6 +82,7 @@ export function ProxyHealthCell({ testResult, health }: ProxyHealthCellProps) {
 
   if (health) {
     const sweep = health.sweep;
+    const blockedHistory = health.blockedHistory;
     const upstreamRefusals = (health.upstream4xx ?? 0) + (health.upstream5xx ?? 0);
     return (
       <div className="flex flex-col gap-0.5">
@@ -101,6 +104,18 @@ export function ProxyHealthCell({ testResult, health }: ProxyHealthCellProps) {
           </span>
         ) : (
           <span>{t("sweepNoData")}</span>
+        )}
+        {blockedHistory && (
+          <span
+            title={`blocked×${blockedHistory.count} ${blockedHistory.lastCause} ${blockedHistory.lastStatus ?? "-"} ${blockedHistory.ageMs}ms`}
+          >
+            {t("blockedHistory", {
+              count: blockedHistory.count,
+              cause: t(sweepLabelKey({ verdict: "blocked", cause: blockedHistory.lastCause })),
+              code: blockedHistory.lastStatus ?? "-",
+              age: formatSweepAge(blockedHistory.ageMs, locale),
+            })}
+          </span>
         )}
       </div>
     );
