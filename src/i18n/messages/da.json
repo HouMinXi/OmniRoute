@@ -1203,6 +1203,8 @@
     "batchGroup": "Batch",
     "homeSubtitle": "Oversigt over dashboard",
     "providersSubtitle": "Administrer AI-udbydere",
+    "modelCatalog": "Modelkatalog",
+    "modelCatalogSubtitle": "Gennemse modeller på tværs af udbydere",
     "quotaTrackerSubtitle": "Spor forbrugsgrænser",
     "providerQuotaSubtitle": "Spor udbydernes forbrugsgrænser",
     "runtimeSubtitle": "Modstandsdygtighed og sessioner i realtid",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Arver forbindelse: {host}",
     "inheritedPool": "Arver forbindelsespulje ({count})",
     "poolEmptyBlocked": "Pulje tom — anmodninger mislykkes (ikke direkte)",
-    "directEgress": "Direkte (ingen proxy)"
+    "directEgress": "Direkte (ingen proxy)",
+    "ownProxy": "Egen proxy"
   },
   "gamification": {
     "leaderboardScopes": {

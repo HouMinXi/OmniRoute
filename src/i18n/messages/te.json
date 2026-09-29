@@ -1203,6 +1203,8 @@
     "batchGroup": "బ్యాచ్",
     "homeSubtitle": "డ్యాష్బోర్డ్ అవలోకనం",
     "providersSubtitle": "AI ప్రొవైడర్లను నిర్వహించండి",
+    "modelCatalog": "మోడల్ కేటలాగ్",
+    "modelCatalogSubtitle": "ప్రొవైడర్లన్నింటిలో మోడల్‌లను బ్రౌజ్ చేయండి",
     "quotaTrackerSubtitle": "వినియోగ పరిమితులను ట్రాక్ చేయండి",
     "providerQuotaSubtitle": "ప్రొవైడర్ వినియోగ పరిమితులను ట్రాక్ చేయండి",
     "runtimeSubtitle": "రియల్టైమ్ రెసిలియన్స్ & సెషన్లు",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "కనెక్షన్ వారసత్వం: {host}",
     "inheritedPool": "కనెక్షన్ పూల్ వారసత్వం ({count})",
     "poolEmptyBlocked": "పూల్ ఖాళీ — అభ్యర్థనలు విఫలమవుతాయి (ప్రత్యక్షం కాదు)",
-    "directEgress": "ప్రత్యక్షం (ప్రాక్సీ లేకుండా)"
+    "directEgress": "ప్రత్యక్షం (ప్రాక్సీ లేకుండా)",
+    "ownProxy": "సొంత ప్రాక్సీ"
   },
   "gamification": {
     "leaderboardScopes": {

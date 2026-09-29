@@ -1203,6 +1203,8 @@
     "batchGroup": "தொகுதி",
     "homeSubtitle": "டாஷ்போர்டு மேலோட்டம்",
     "providersSubtitle": "AI வழங்குநர்களை நிர்வகிக்கவும்",
+    "modelCatalog": "மாடல் பட்டியல்",
+    "modelCatalogSubtitle": "வழங்குநர்கள் முழுவதும் மாடல்களை உலாவுக",
     "quotaTrackerSubtitle": "பயன்பாட்டு வரம்புகளைக் கண்காணிக்கவும்",
     "providerQuotaSubtitle": "வழங்குநரின் பயன்பாட்டு வரம்புகளைக் கண்காணிக்கவும்",
     "runtimeSubtitle": "நிகழ்நேர மீட்சித்திறன் மற்றும் அமர்வுகள்",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "இணைப்பு மரபுரிமை: {host}",
     "inheritedPool": "இணைப்பு தொகுப்பு மரபுரிமை ({count})",
     "poolEmptyBlocked": "தொகுப்பு காலி — கோரிக்கைகள் தோல்வி (நேரடி அல்ல)",
-    "directEgress": "நேரடி (ப்ராக்ஸி இல்லை)"
+    "directEgress": "நேரடி (ப்ராக்ஸி இல்லை)",
+    "ownProxy": "சொந்த ப்ராக்ஸி"
   },
   "gamification": {
     "leaderboardScopes": {

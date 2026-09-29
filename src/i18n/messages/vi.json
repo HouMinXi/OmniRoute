@@ -12870,7 +12870,8 @@
     "inheritedProxy": "Kế thừa kết nối: {host}",
     "inheritedPool": "Kế thừa nhóm proxy của kết nối ({count})",
     "poolEmptyBlocked": "Nhóm proxy trống — yêu cầu thất bại (không phải trực tiếp)",
-    "directEgress": "Kết nối trực tiếp (không dùng proxy)"
+    "directEgress": "Kết nối trực tiếp (không dùng proxy)",
+    "ownProxy": "Proxy riêng"
   },
   "gamification": {
     "leaderboardScopes": {

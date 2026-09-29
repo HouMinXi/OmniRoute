@@ -102,6 +102,39 @@ test("decodeExecServerEvent recognizes read_args (field 7) with path", () => {
   });
 });
 
+test("decodeExecServerEvent keeps read_args offset (4) and limit (5)", () => {
+  // Live capture 2026-09-29: the model asked for lines 1195-1210 of a file.
+  const variant = Buffer.concat([
+    stringField(1, "/repo/service.py"),
+    stringField(2, "call-1"),
+    varintField(4, 1195),
+    varintField(5, 16),
+  ]);
+  const esm = buildExecServerMessage(1, "exec-range", 7, variant);
+  const event = decodeExecServerEvent(buildAgentServerMessage(esm));
+  assert.deepEqual(event, {
+    kind: "exec_read",
+    execMsgId: 1,
+    execId: "exec-range",
+    path: "/repo/service.py",
+    offset: 1195,
+    limit: 16,
+  });
+});
+
+test("decodeExecServerEvent decodes a negative read_args offset as int32", () => {
+  // int32 -5 is sign-extended to a 10-byte varint on the wire.
+  const minusFive = Buffer.from([0xfb, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0x01]);
+  const variant = Buffer.concat([
+    stringField(1, "/repo/log.txt"),
+    Buffer.concat([tag(4, 0), minusFive]),
+  ]);
+  const esm = buildExecServerMessage(1, "exec-tail", 7, variant);
+  const event = decodeExecServerEvent(buildAgentServerMessage(esm));
+  assert.equal(event?.kind, "exec_read");
+  assert.equal((event as { offset?: number }).offset, -5);
+});
+
 test("decodeExecServerEvent recognizes write_args (field 3) with path and file_text", () => {
   // WriteArgs { 1 path, 2 file_text } — the contents are what lets the bridge
   // forward the write to a declared client tool instead of rejecting it.

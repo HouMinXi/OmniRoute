@@ -1203,6 +1203,8 @@
     "batchGroup": "ባች",
     "homeSubtitle": "የዳሽቦርድ አጠቃላይ እይታ",
     "providersSubtitle": "የAI አቅራቢዎችን ያስተዳድሩ",
+    "modelCatalog": "የሞዴል ካታሎግ",
+    "modelCatalogSubtitle": "በአቅራቢዎች መካከል ሞዴሎችን ያስሱ",
     "quotaTrackerSubtitle": "የአጠቃቀም ገደቦችን ይከታተሉ",
     "providerQuotaSubtitle": "የአቅራቢዎችን የአጠቃቀም ገደቦች ይከታተሉ",
     "runtimeSubtitle": "ቅጽበታዊ የመቋቋም ችሎታ እና ክፍለ ጊዜዎች",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "ግንኙነት ይወርሳል: {host}",
     "inheritedPool": "የግንኙነት ፑል ይወርሳል ({count})",
     "poolEmptyBlocked": "ፑል ባዶ — ጥያቄዎች ይሳናሉ (ቀጥተኛ አይደለም)",
-    "directEgress": "ቀጥተኛ (ፕሮክሲ የሌለው)"
+    "directEgress": "ቀጥተኛ (ፕሮክሲ የሌለው)",
+    "ownProxy": "የራስ ፕሮክሲ"
   },
   "gamification": {
     "leaderboardScopes": {

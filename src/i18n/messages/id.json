@@ -1203,6 +1203,8 @@
     "batchGroup": "Batch",
     "homeSubtitle": "Ringkasan dasbor",
     "providersSubtitle": "Kelola penyedia AI",
+    "modelCatalog": "Katalog model",
+    "modelCatalogSubtitle": "Jelajahi model dari berbagai penyedia",
     "quotaTrackerSubtitle": "Lacak batas penggunaan",
     "providerQuotaSubtitle": "Lacak batas penggunaan penyedia",
     "runtimeSubtitle": "Ketahanan dan sesi secara real-time",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Mewarisi koneksi: {host}",
     "inheritedPool": "Mewarisi pool koneksi ({count})",
     "poolEmptyBlocked": "Pool kosong — permintaan gagal (bukan langsung)",
-    "directEgress": "Langsung (tanpa proxy)"
+    "directEgress": "Langsung (tanpa proxy)",
+    "ownProxy": "Proxy sendiri"
   },
   "gamification": {
     "leaderboardScopes": {

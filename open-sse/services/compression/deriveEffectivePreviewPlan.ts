@@ -1,7 +1,7 @@
-import type { CompressionConfig, CompressionPipelineStep } from "./types.ts";
+import type { CompressionPipelineStep } from "./types.ts";
 import type { DerivedPlan } from "./deriveDefaultPlan.ts";
 import { downgradeUnrequestedLossy } from "./lossyRequestPolicy.ts";
-import { deriveDefaultPlanFromConfig } from "./planResolution.ts";
+import { deriveDefaultPlanFromConfig, type DefaultPlanConfig } from "./planResolution.ts";
 
 /** Named-combo map: combo id -> its stacked pipeline (operator-defined profiles). */
 export type NamedCombos = Record<string, CompressionPipelineStep[]>;
@@ -32,7 +32,7 @@ export type NamedCombos = Record<string, CompressionPipelineStep[]>;
  * preview-vs-runtime mismatch #12063 was about).
  */
 export function deriveEffectivePreviewPlan(
-  config: CompressionConfig,
+  config: DefaultPlanConfig,
   combos: NamedCombos = {}
 ): DerivedPlan {
   if (!config.enabled) return { mode: "off", stackedPipeline: [] };

@@ -63,6 +63,8 @@ const PROPERTY_ANNOTATION_KEYS = [
 const SCALAR_PROPERTY_KEYS = new Set(["type", ...PROPERTY_ANNOTATION_KEYS]);
 const ARRAY_PROPERTY_KEYS = new Set(["type", "items", ...PROPERTY_ANNOTATION_KEYS]);
 const TODO_SCALAR_PROPERTY_KEYS = new Set(["type", "enum", ...PROPERTY_ANNOTATION_KEYS]);
+const NUMBER_BOUND_KEYS = ["minimum", "maximum", "exclusiveMinimum", "exclusiveMaximum"] as const;
+const INTEGER_PROPERTY_KEYS = new Set(["type", ...NUMBER_BOUND_KEYS, ...PROPERTY_ANNOTATION_KEYS]);
 
 /** Restrict bridge candidates to the caller's OpenAI tool_choice contract. */
 export function selectCursorBridgeTools(
@@ -273,6 +275,26 @@ function ptySpawnBridge(
   return null;
 }
 
+/**
+ * True when `value` is an integer the property accepts: `integer`/`number`
+ * type, only the bound keywords checked here, and every bound satisfied.
+ */
+function propertyAcceptsInteger(property: unknown, value: number): boolean {
+  if (!Number.isSafeInteger(value) || !isRecord(property)) return false;
+  if (!hasOnlyKeys(property, INTEGER_PROPERTY_KEYS)) return false;
+  if (property.type !== "integer" && property.type !== "number") return false;
+  for (const key of NUMBER_BOUND_KEYS) {
+    const bound = property[key];
+    if (bound === undefined) continue;
+    if (typeof bound !== "number") return false;
+    if (key === "minimum" && value < bound) return false;
+    if (key === "maximum" && value > bound) return false;
+    if (key === "exclusiveMinimum" && value <= bound) return false;
+    if (key === "exclusiveMaximum" && value >= bound) return false;
+  }
+  return true;
+}
+
 function readBridge(
   event: Extract<ExecServerEvent, { kind: "exec_read" }>,
   tools: McpToolDefinition[]
@@ -284,6 +306,23 @@ function readBridge(
     const pathKey = selectProperty(schema, properties, ["filePath", "path", "file_path"], "string");
     if (!pathKey) continue;
     const args: Record<string, unknown> = { [pathKey]: event.path };
+    // A partial read must keep its range. Sending the bare path reads the whole
+    // file instead, and a client that already holds it (Claude Code) answers
+    // "file unchanged", so the model never sees the lines it asked for and
+    // retries forever. A tool that cannot carry the range is not a match.
+    let rangeFits = true;
+    for (const [key, value] of [
+      ["offset", event.offset],
+      ["limit", event.limit],
+    ] as const) {
+      if (value === undefined) continue;
+      if (!propertyAcceptsInteger(properties[key], value)) {
+        rangeFits = false;
+        break;
+      }
+      args[key] = value;
+    }
+    if (!rangeFits) continue;
     if (hasAllRequired(schema, args)) return { toolName: tool.name, arguments: args };
   }
   return null;

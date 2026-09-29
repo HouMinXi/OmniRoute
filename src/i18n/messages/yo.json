@@ -1203,6 +1203,8 @@
     "batchGroup": "Ìdìpọ̀",
     "homeSubtitle": "Àkópò Dashboard",
     "providersSubtitle": "Ṣàkóso àwọn olùpèsè AI",
+    "modelCatalog": "Àkójọ àwọn àwòṣe",
+    "modelCatalogSubtitle": "Wo àwọn àwòṣe láti ọ̀dọ̀ gbogbo olùpèsè",
     "quotaTrackerSubtitle": "Tọpinpin àwọn òpin lílò",
     "providerQuotaSubtitle": "Tọpinpin àwọn òpin lílò olùpèsè",
     "runtimeSubtitle": "Ìfaradà àti àwọn sáà ní àkókò gidi",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Jogun asopọ: {host}",
     "inheritedPool": "Jogun adagun asopọ ({count})",
     "poolEmptyBlocked": "Adagun ṣofo — awọn ibeere kuna (kii ṣe taara)",
-    "directEgress": "Taara (laisi proxy)"
+    "directEgress": "Taara (laisi proxy)",
+    "ownProxy": "Proxy tirẹ"
   },
   "gamification": {
     "leaderboardScopes": {

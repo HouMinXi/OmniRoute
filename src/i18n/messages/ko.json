@@ -1203,6 +1203,8 @@
     "batchGroup": "일괄 처리",
     "homeSubtitle": "대시보드 개요",
     "providersSubtitle": "AI 제공업체 관리",
+    "modelCatalog": "모델 카탈로그",
+    "modelCatalogSubtitle": "여러 제공업체의 모델 둘러보기",
     "quotaTrackerSubtitle": "사용량 한도 추적",
     "providerQuotaSubtitle": "제공업체 사용량 한도 추적",
     "runtimeSubtitle": "실시간 복원력 및 세션",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "연결 상속: {host}",
     "inheritedPool": "연결 풀 상속({count})",
     "poolEmptyBlocked": "풀 비어 있음 — 요청 실패(직접 아님)",
-    "directEgress": "직접(프록시 없음)"
+    "directEgress": "직접(프록시 없음)",
+    "ownProxy": "자체 프록시"
   },
   "gamification": {
     "leaderboardScopes": {

@@ -1203,6 +1203,8 @@
     "batchGroup": "批處理",
     "homeSubtitle": "儀表盤概覽",
     "providersSubtitle": "管理 AI 提供者",
+    "modelCatalog": "模型目錄",
+    "modelCatalogSubtitle": "瀏覽各提供者的模型",
     "quotaTrackerSubtitle": "跟蹤使用限制",
     "providerQuotaSubtitle": "跟蹤提供者使用限制",
     "runtimeSubtitle": "即時彈性與會話",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "繼承連線:{host}",
     "inheritedPool": "繼承連線集區({count})",
     "poolEmptyBlocked": "集區為空——請求將失敗(非直連)",
-    "directEgress": "直連(無代理)"
+    "directEgress": "直連(無代理)",
+    "ownProxy": "自有代理"
   },
   "gamification": {
     "leaderboardScopes": {

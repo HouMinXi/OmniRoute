@@ -1,4 +1,6 @@
 {
+  "_rebaseline_2026_09_29_15036_cursor_read_range": "PR #15036 (QuangBlue) own growth: open-sse/utils/cursorAgentProtobuf.ts 1588->1619 (+31 = ReadArgs offset/limit field constants, the two optional fields on the exec_read event type, and createReadExecEvent, which decodes them next to the shared path-event decoder it reuses and cannot move out without exporting the file's private varint helpers). The bridge-side range check lives in open-sse/executors/cursor/builtinToolBridge.ts (under cap). Covered by tests/unit/cursor-agent-exec-router.test.ts and tests/unit/cursor-builtin-tool-bridge.test.ts.",
+  "_rebaseline_2026_09_29_15050_timing_safe_env_key": "PR #15050 (HouMinXi) own growth: src/sse/services/auth.ts 3622->3623 (+1 = the timingSafeCompare import; the env passthrough-key check in isValidApiKey swaps `===` for the constant-time helper on its existing line). Irreducible. Covered by tests/unit/secret-compare-constant-time.test.ts.",
   "_rebaseline_2026_09_28_14740_self_loop_bearer": "PR #14740 own growth: src/lib/db/apiKeys.ts +2 but no ceiling move: re-measured at 1685 after merging release/v3.8.51 (post #14975), under the 1719 tip ceiling (+2 = the import of the self-loop helpers and one spread of selfLoopKeyOverrides(key) at the end of the synthetic env-key record; validateApiKey and the env-key branch reuse their existing lines). The bearer check and the restricted record (id, name, scope internal:self-loop, allowedEndpoints chat/audio) live in src/lib/db/apiKeys/selfLoopKey.ts, under cap. Irreducible call-site wiring. Covered by tests/unit/self-loop-bearer-auth.test.ts.",
   "_rebaseline_2026_09_27_14919_streamed_ttft": "PR #14919 own growth (streamed TTFT), irreducible call-site lines after moving the first-output probe, the completion timing fields and the request-epoch TTFT math into open-sse/utils/streamTiming.ts and the new open-sse/utils/sseOutputSignal.ts (both under cap): open-sse/handlers/chatCore.ts +2 but no ceiling move: re-measured at 6383 after merging release/v3.8.51, under the 6441 tip ceiling (+2 = the stream-origin offset assignment before the SSE transform is created and the requestTtftMs call in the stream-complete callback; the offset declaration and import are absorbed) and open-sse/utils/stream.ts 3296->3297 (+1 = the firstOutputMs field of StreamCompletePayload; forward() gains one observeOutput call while the passthrough branch's four timing lines collapse into ...timing.completionTiming(), which the translate branch now also reports). Covered by tests/unit/chatcore-streaming-ttft.test.ts, tests/unit/sse-output-signal.test.ts and tests/unit/responses-ws-proxy-turn-timing.test.mjs.",
   "_rebaseline_2026_09_28_13373_tps_generation_time": "PR #13373 (ahmedhosnypro, #13130) own growth, re-measured with split(\"\\n\").length after merging release/v3.8.51 @3a2678f8. The 2026-09-18 merge-train-8 entry had already frozen this PR's growth (RequestLoggerV2 1718->1748, RequestLoggerDetail 1200->1210), but #13373 was ejected from that train and the headroom was consumed by later PRs, so the growth is re-frozen here: src/shared/components/RequestLoggerV2.tsx 1748->1762 (+14 = opt-in TTFT column header + cell + default-hidden flag + import; the TPS tooltip builder was extracted to src/shared/utils/logTps.ts::buildLogTpsTitle to shrink the call site from +30); src/shared/components/RequestLoggerDetail.tsx 1226->1240 (+14 = TTFT tile next to the duration tile). Covered by tests/unit/log-tps-13130.test.ts (6).",
@@ -267,6 +269,7 @@
   "cap": 1200,
   "testCap": 1200,
   "testFrozen": {
+    "_rebaseline_2026_09_29_release_drain_wave": "Release-drain follow-up: tests/unit/response-sanitizer.test.ts 1210->1252 (#14813 object-form content stringify regression tests + #14894 Responses terminal states).",
     "_rebaseline_2026_09_28_merge_batch_wave": "Merge-batch 2026-09-28 follow-up: tests/unit/response-sanitizer.test.ts 1200->1210 (#14987 regression tests for the truncated Claude completion mapped to finish_reason length). Splitting the suite is tracked with the other oversized test files.",
     "_rebaseline_2026_09_17_13947_basereds_drain": "Base-red drain da PR #13947 (Refs #13866). tests/unit/sse-auth.test.ts 1729->1733 (+4): o guard #12080 afirmava `assert.equal(selected, null)` e passou a receber o diagnostico de key-policy que a #13879 introduziu — mesma forma de sentinela que o caminho de estado terminal usa desde #12441. A asserção foi reescrita para a restrição que a #12080 protege (deepEqual exato: nada utilizavel volta, nenhuma conexao vaza) mais o comentario que explica por que o null sumiu; as tres asserções intermediarias foram removidas por serem redundantes com o deepEqual estrito, entao o crescimento liquido e +3 e nao +8. tests/unit/batch_api.test.ts 1348->1353 (+5): NAO e desta PR — chegou nos 13 commits que avancaram o tip durante o trabalho e nunca foi rebaselinado, deixando o cap abaixo do estado mergeado. Registrado aqui contra o estado merged; nenhum outro cap e tocado.",
     "_rebaseline_2026_06_27_5193_antigravity_test": "#5193 own test growth: oauth-providers-config.test.ts 870->873 (+3: antigravity projectId assertion + 50ms tick for the now fire-and-forget onboarding, matching the no-PKCE/no-openid flow).",
@@ -312,7 +315,7 @@
     "tests/unit/usage-service-hardening.test.ts": 1487,
     "tests/unit/vscode-token-routes.test.ts": 1267,
     "tests/unit/tls-client-wreq-migration.test.ts": 1374,
-    "tests/unit/response-sanitizer.test.ts": 1210
+    "tests/unit/response-sanitizer.test.ts": 1252
   },
   "_rebaseline_2026_06_09": "Re-baseline consciente pre-release v3.8.19: 9 arquivos cresceram durante o ciclo (features mergeadas: RequestLoggerV2 +281 request-logger rework, stream +101, combo +73, chatCore +45, catalog +32 fable-5/catalog-flag, callLogs +4, accountFallback +2, usageHistory novo 840) + core.ts +7 (fix resetAllDbModuleState, PR 3536). A catraca segue valendo destes valores — proximo crescimento falha. Decisao: encolher (esp. RequestLoggerV2/chatCore) e a issue #3501 ficam para o ciclo seguinte.",
   "_rebaseline_2026_06_11_phase1f": "Phase 1f (#3501): ProviderDetailPageClient.tsx 4948→4062 (-886 LOC); 3 novos hooks extraídos. useProviderConnections.ts=954 acima do cap=800 — justificado: extração direta do god-component (zero lógica nova), própria redução do cliente supera o custo. useProviderSettings.ts=263 e useProviderModels.ts=154 já abaixo do cap.",
@@ -392,6 +395,7 @@
   "_rebaseline_2026_07_27_3850_relax_filesize_cap": "OWNER-APPROVED TEMPORARY relax for v3.8.50-3.8.54 PREPARE phase (docs/ROADMAP.md). cap 800->900 (+100), testCap 800->900 (+100). Targets: decompose-existing-frozen unchanged (frozen still only-shrink); this only relaxes the cap for NEW files in the decompose/extract-while-PREPARE phase (.51='executor registry in-place' and .52='combo.ts decomposition' create new leaf modules above 800). RE-TIGHTENING MANDATORY in v3.8.51: cap target 850 = 850 once decomposition wave stabilizes. SUPERSEDED by _rebaseline_2026_07_27_3850_relax_filesize_cap_v2_20pct (v1 +20% buffer) — retained for audit. Tracked via same roadmap issue.",
   "_rebaseline_2026_07_27_v3849_train1h": "Merge-train 1H (31 PRs) — owner-approved 2026-07-27. Two distinct causes, kept separate on purpose: (1) GENUINE irreducible growth at existing chokepoints — providerLimits/auth (#8632 Kimi quota-reset recovery), rateLimitManager (#8616 idle wedged limiters), models-catalog-route.test (#8610 OpenCode Go effort aliases); (2) COLLISION with #8585, which banked shrinks measured on the pre-train release tip while 30 sibling PRs in the SAME train grew those files again — chat/accountFallback (#8628), chatCore (#8613), videoGeneration (#8581), imageGeneration. The zero-headroom frozen entries cannot absorb either. Ceilings re-pinned to the post-merge tip; #8612 (also in this train) automates shrink-banking so this self-inflicted drift stops recurring. Detail: src/lib/usage/providerLimits.ts 1006->1013 (#8632); src/sse/services/auth.ts 2492->2508 (#8632); open-sse/services/rateLimitManager.ts 1014->1060 (#8616); src/sse/handlers/chat.ts 1842->1845 (#8628); open-sse/handlers/chatCore.ts 4939->4955 (#8613); open-sse/handlers/imageGeneration.ts 3100->3101 ((sem PR — teto do #8585)); open-sse/handlers/videoGeneration.ts 1038->1063 (#8581); open-sse/services/accountFallback.ts 1965->1966 (#8628); tests/unit/models-catalog-route.test.ts 1608->1636 (#8610)",
   "frozen": {
+    "_rebaseline_2026_09_29_release_drain_wave": "Release-drain merge wave 2026-09-28/29 (~150 PRs into release/v3.8.51) follow-up; each file grew through already-merged PRs, re-measured with split(\"\\n\").length on release/v3.8.51 @b636b6d9: src/app/(dashboard)/dashboard/combos/page.tsx 5099->5110 (#14150/#14280/#14278); src/sse/handlers/chat.ts 2583->2586 (#14209/#13888/#15010); src/sse/services/auth.ts 3617->3622 (#13888 native Claude quota scope); open-sse/executors/default.ts 1207->1209 (#14870 GPT-6 max_completion_tokens); open-sse/handlers/responseSanitizer.ts 1200->1204 (#14813/#14894 (first frozen entry, file crossed the 1200 cap)); open-sse/utils/proxyFetch.ts 1383->1404 (#14315 stale keep-alive dispatcher + #13988 local direct timeout). Covered by the merged PRs' own tests; shrink work tracked with the other frozen files.",
     "_rebaseline_2026_09_28_merge_batch_wave": "Merge-batch 2026-09-28 follow-up (HouMinXi/shipsfromrio/maxmad64bis wave): src/app/(dashboard)/dashboard/settings/components/SystemStorageTab.tsx 1598->1611 (#14951: surface the API error envelope in the storage tab instead of crashing, #14846; covered by tests/unit/ui/system-storage-error-envelope-14846.test.ts + system-storage-backup-auth-envelope-14846.test.tsx). Measured with split(\"\\n\").length on release/v3.8.51 @dc061efc.",
     "_rebaseline_2026_09_25_14659_reselected_proxy_decl_restore": "Hotfix after the #14659 squash (3d8a9a2f): the release-merge conflict resolution dropped the 5-line `let reselectedProxy` declaration (+ comment) while keeping its two uses, leaving open-sse/executors/opencode.ts with TS2304 and a runtime ReferenceError on proxy-less dispatch. Restoring it adds 5 lines over the tip ceiling (1419->1424 at the #14659 tip, 1452->1457 after #14756 grew the file). Covered by tests/unit/opencode-429-pool-reselect.test.ts (0/6 on the broken tip, 6/6 with the fix).",
     "_rebaseline_2026_09_25_14659_pool_reselect_merge_release": "PR #14659 (OPENCODE_POOL_RESELECT, opt-in pool re-selection after a per-address 429, default off) re-measured after merging release/v3.8.51 (post #14688/#14802/#14810 and the served-account tracker) on 2026-09-25 (merge-batch rework). Own growth only, on top of the current tip ceilings: open-sse/executors/opencode.ts 1370->1419 (once-per-request resolver lookup, poolReselectKeyOf dedup, reselect cell and the post-stop/park re-selection block inside the existing retry loop), src/sse/handlers/chatHelpers.ts 1258->1279 (publishPoolReselectResolver helper + one call at the capture site; the tip file is 1233 lines, +45 own), src/sse/handlers/chat.ts 2582->2583 (+1: reselectPoolMember field on the applied-proxy sink literal). open-sse/utils/proxyFetch.ts stays within the tip ceiling. Covered by tests/unit/opencode-429-pool-reselect.test.ts.",
@@ -525,14 +529,14 @@
     "open-sse/services/combo.ts": 4080,
     "open-sse/services/combo/executeTargetAttempt.ts": 1273,
     "open-sse/translator/response/openai-responses.ts": 1536,
-    "open-sse/utils/cursorAgentProtobuf.ts": 1588,
-    "open-sse/utils/proxyFetch.ts": 1383,
+    "open-sse/utils/cursorAgentProtobuf.ts": 1619,
+    "open-sse/utils/proxyFetch.ts": 1404,
     "open-sse/utils/stream.ts": 3297,
     "open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/browser-worker.ts": 4398,
     "open-sse/vendor/codex-chatgpt-web/bridge.ts": 1335,
     "src/app/(dashboard)/dashboard/HomePageClient.tsx": 1344,
     "src/app/(dashboard)/dashboard/api-manager/ApiManagerPageClient.tsx": 3186,
-    "src/app/(dashboard)/dashboard/combos/page.tsx": 5099,
+    "src/app/(dashboard)/dashboard/combos/page.tsx": 5110,
     "src/app/(dashboard)/dashboard/costs/CostOverviewTab.tsx": 1319,
     "src/app/(dashboard)/dashboard/endpoint/EndpointPageClient.tsx": 2493,
     "src/app/(dashboard)/dashboard/providers/[id]/components/modals/EditConnectionModal.tsx": 1631,
@@ -555,8 +559,8 @@
     "src/shared/components/RequestLoggerV2.tsx": 1762,
     "src/shared/constants/providers/apikey/gateways.ts": 1544,
     "src/shared/services/cliRuntime.ts": 1296,
-    "src/sse/handlers/chat.ts": 2583,
-    "src/sse/services/auth.ts": 3617,
+    "src/sse/handlers/chat.ts": 2586,
+    "src/sse/services/auth.ts": 3623,
     "tests/unit/account-fallback-service.test.ts": 2453,
     "tests/unit/provider-validation-specialty.test.ts": 4656,
     "open-sse/services/autoCombo/virtualFactory.ts": 1258,
@@ -564,9 +568,10 @@
     "src/shared/components/RequestLoggerDetail.tsx": 1241,
     "src/shared/middleware/chatBodyAdmission.ts": 1206,
     "open-sse/executors/deepseek-web.ts": 1224,
-    "open-sse/executors/default.ts": 1207,
+    "open-sse/executors/default.ts": 1209,
     "open-sse/services/rateLimitManager.ts": 1329,
-    "open-sse/executors/opencode.ts": 1457
+    "open-sse/executors/opencode.ts": 1457,
+    "open-sse/handlers/responseSanitizer.ts": 1204
   },
   "_rebaseline_2026_09_15_roundrobin_dashboard_events": "Fix #13089 (Combo Studio Live dashboard shows an empty backlog for round-robin combos): open-sse/services/combo/roundRobinCombo.ts 1205->1213. Round-robin is the only combo strategy that bypasses handleComboChat/executeTargetAttempt.ts, the path that publishes the combo.target.attempt/succeeded/failed EventBus events the Live dashboard listens for — so round-robin completions never showed up. The new call-site wiring (createRRDashboardEvents(...) instantiated once per target, one-line .attempt()/.succeeded()/.failed() calls at the 6 existing dispatch/outcome points) is the emitter logic actually extracted into a new module, open-sse/services/combo/rrDashboardEvents.ts — this is the minimum irreducible footprint for wiring 6 required call sites into 6 fixed control-flow points of the frozen file. Covered by tests/unit/issue-13089-roundrobin-live-ws-events.test.ts (2 tests: success + failure paths).",
   "_rebaseline_base_2026_08_10_proxyfetch": "Base-red fix (green-prs sweep, issue #9985): open-sse/utils/proxyFetch.ts 1207 > cap 1000 — new proxied-TLS fetch helper introduced by the Fal reference-image work. Owner-authorized quick rebaseline to green; structural slim tracked for v3.9.0.",

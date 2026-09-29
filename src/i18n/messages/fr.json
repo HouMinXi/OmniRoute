@@ -1203,6 +1203,8 @@
     "batchGroup": "Traitement par lots",
     "homeSubtitle": "Vue d’ensemble du tableau de bord",
     "providersSubtitle": "Gérer les fournisseurs d’IA",
+    "modelCatalog": "Catalogue de modèles",
+    "modelCatalogSubtitle": "Parcourir les modèles de tous les fournisseurs",
     "quotaTrackerSubtitle": "Suivre les limites d’utilisation",
     "providerQuotaSubtitle": "Suivre les limites d’utilisation des fournisseurs",
     "runtimeSubtitle": "Résilience en temps réel et sessions",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Hérite de la connexion : {host}",
     "inheritedPool": "Hérite du pool de connexions ({count})",
     "poolEmptyBlocked": "Pool vide — les requêtes échouent (pas direct)",
-    "directEgress": "Direct (sans proxy)"
+    "directEgress": "Direct (sans proxy)",
+    "ownProxy": "Proxy personnel"
   },
   "gamification": {
     "leaderboardScopes": {

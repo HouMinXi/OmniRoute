@@ -1203,6 +1203,8 @@
     "batchGroup": "პაკეტური დამუშავება",
     "homeSubtitle": "მართვის პანელის მიმოხილვა",
     "providersSubtitle": "AI პროვაიდერების მართვა",
+    "modelCatalog": "მოდელების კატალოგი",
+    "modelCatalogSubtitle": "დაათვალიერეთ მოდელები ყველა პროვაიდერში",
     "quotaTrackerSubtitle": "გამოყენების ლიმიტების თვალყურის დევნება",
     "providerQuotaSubtitle": "პროვაიდერის გამოყენების ლიმიტების თვალყურის დევნება",
     "runtimeSubtitle": "რეალურ დროში მდგრადობა და სესიები",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "მემკვიდრეობს კავშირს: {host}",
     "inheritedPool": "მემკვიდრეობს კავშირების პულს ({count})",
     "poolEmptyBlocked": "პული ცარიელია — მოთხოვნები ვარდება (არა პირდაპირ)",
-    "directEgress": "პირდაპირ (პროქსის გარეშე)"
+    "directEgress": "პირდაპირ (პროქსის გარეშე)",
+    "ownProxy": "საკუთარი პროქსი"
   },
   "gamification": {
     "leaderboardScopes": {

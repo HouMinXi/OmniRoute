@@ -1203,6 +1203,8 @@
     "batchGroup": "Paketna obdelava",
     "homeSubtitle": "Pregled nadzorne plošče",
     "providersSubtitle": "Upravljanje ponudnikov umetne inteligence",
+    "modelCatalog": "Katalog modelov",
+    "modelCatalogSubtitle": "Brskajte po modelih vseh ponudnikov",
     "quotaTrackerSubtitle": "Spremljanje omejitev uporabe",
     "providerQuotaSubtitle": "Spremljanje omejitev uporabe ponudnikov",
     "runtimeSubtitle": "Odpornost in seje v realnem času",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Podeduje povezavo: {host}",
     "inheritedPool": "Podeduje bazen povezav ({count})",
     "poolEmptyBlocked": "Bazen prazen — zahteve ne uspejo (ne neposredno)",
-    "directEgress": "Neposredno (brez proxyja)"
+    "directEgress": "Neposredno (brez proxyja)",
+    "ownProxy": "Lasten posredniški strežnik"
   },
   "gamification": {
     "leaderboardScopes": {

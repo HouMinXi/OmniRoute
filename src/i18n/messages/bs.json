@@ -1203,6 +1203,8 @@
     "batchGroup": "Paketna obrada",
     "homeSubtitle": "Pregled dashboarda",
     "providersSubtitle": "Upravljanje AI provajderima",
+    "modelCatalog": "Katalog modela",
+    "modelCatalogSubtitle": "Pregledajte modele svih provajdera",
     "quotaTrackerSubtitle": "Praćenje limita korištenja",
     "providerQuotaSubtitle": "Praćenje limita korištenja provajdera",
     "runtimeSubtitle": "Real-time otpornost i sesije",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Nasljeđuje konekciju: {host}",
     "inheritedPool": "Nasljeđuje bazen konekcija ({count})",
     "poolEmptyBlocked": "Bazen prazan — zahtjevi ne uspijevaju (ne direktno)",
-    "directEgress": "Direktno (bez proxyja)"
+    "directEgress": "Direktno (bez proxyja)",
+    "ownProxy": "Vlastiti proxy"
   },
   "gamification": {
     "leaderboardScopes": {

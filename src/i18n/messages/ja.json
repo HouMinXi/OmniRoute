@@ -1203,6 +1203,8 @@
     "batchGroup": "バッチ",
     "homeSubtitle": "ダッシュボード概要",
     "providersSubtitle": "AIプロバイダーを管理",
+    "modelCatalog": "モデルカタログ",
+    "modelCatalogSubtitle": "プロバイダー横断でモデルを閲覧",
     "quotaTrackerSubtitle": "使用量上限を追跡",
     "providerQuotaSubtitle": "プロバイダーの使用量上限を追跡",
     "runtimeSubtitle": "リアルタイムの耐障害性とセッション",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "接続を継承:{host}",
     "inheritedPool": "接続プールを継承({count})",
     "poolEmptyBlocked": "プールが空—リクエストは失敗します(直接ではありません)",
-    "directEgress": "直接(プロキシなし)"
+    "directEgress": "直接(プロキシなし)",
+    "ownProxy": "独自プロキシ"
   },
   "gamification": {
     "leaderboardScopes": {

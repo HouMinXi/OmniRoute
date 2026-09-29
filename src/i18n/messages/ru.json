@@ -1203,6 +1203,8 @@
     "batchGroup": "Пакетная обработка",
     "homeSubtitle": "Обзор панели управления",
     "providersSubtitle": "Управление AI-провайдерами",
+    "modelCatalog": "Каталог моделей",
+    "modelCatalogSubtitle": "Просматривайте модели всех провайдеров",
     "quotaTrackerSubtitle": "Отслеживание лимитов использования",
     "providerQuotaSubtitle": "Отслеживание лимитов использования провайдера",
     "runtimeSubtitle": "Отказоустойчивость и сеансы в реальном времени",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Наследует соединение: {host}",
     "inheritedPool": "Наследует пул соединений ({count})",
     "poolEmptyBlocked": "Пул пуст — запросы завершаются ошибкой (не напрямую)",
-    "directEgress": "Напрямую (без прокси)"
+    "directEgress": "Напрямую (без прокси)",
+    "ownProxy": "Собственный прокси"
   },
   "gamification": {
     "leaderboardScopes": {

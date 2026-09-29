@@ -1203,6 +1203,8 @@
     "batchGroup": "Kötegelt feldolgozás",
     "homeSubtitle": "Irányítópult áttekintése",
     "providersSubtitle": "AI-szolgáltatók kezelése",
+    "modelCatalog": "Modellkatalógus",
+    "modelCatalogSubtitle": "Modellek böngészése szolgáltatók között",
     "quotaTrackerSubtitle": "Használati korlátok nyomon követése",
     "providerQuotaSubtitle": "Szolgáltatói használati korlátok nyomon követése",
     "runtimeSubtitle": "Valós idejű hibatűrés és munkamenetek",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Örökölt kapcsolat: {host}",
     "inheritedPool": "Örökölt kapcsolati készlet ({count})",
     "poolEmptyBlocked": "A készlet üres — a kérések meghiúsulnak (nem közvetlen)",
-    "directEgress": "Közvetlen (proxy nélkül)"
+    "directEgress": "Közvetlen (proxy nélkül)",
+    "ownProxy": "Saját proxy"
   },
   "gamification": {
     "leaderboardScopes": {

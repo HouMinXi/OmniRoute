@@ -1203,6 +1203,8 @@
     "batchGroup": "批处理",
     "homeSubtitle": "仪表盘概览",
     "providersSubtitle": "管理 AI 提供者",
+    "modelCatalog": "模型目录",
+    "modelCatalogSubtitle": "浏览各提供者的模型",
     "quotaTrackerSubtitle": "跟踪使用限制",
     "providerQuotaSubtitle": "跟踪提供者使用限制",
     "runtimeSubtitle": "实时弹性与会话",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "继承连接:{host}",
     "inheritedPool": "继承连接池({count})",
     "poolEmptyBlocked": "连接池为空——请求将失败(非直连)",
-    "directEgress": "直连(无代理)"
+    "directEgress": "直连(无代理)",
+    "ownProxy": "自有代理"
   },
   "gamification": {
     "leaderboardScopes": {

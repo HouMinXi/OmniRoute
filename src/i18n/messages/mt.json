@@ -1203,6 +1203,8 @@
     "batchGroup": "Lott",
     "homeSubtitle": "Ħarsa ġenerali tad-dashboard",
     "providersSubtitle": "Immaniġġja l-fornituri tal-IA",
+    "modelCatalog": "Katalgu tal-mudelli",
+    "modelCatalogSubtitle": "Ibbrawżja mudelli minn fornituri differenti",
     "quotaTrackerSubtitle": "Segwi l-limiti tal-użu",
     "providerQuotaSubtitle": "Segwi l-limiti tal-użu tal-fornituri",
     "runtimeSubtitle": "Reżiljenza u sessjonijiet f'ħin reali",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Jiret il-konnessjoni: {host}",
     "inheritedPool": "Jiret il-pool tal-konnessjonijiet ({count})",
     "poolEmptyBlocked": "Pool vojt — it-talbiet ifallu (mhux dirett)",
-    "directEgress": "Dirett (bla proxy)"
+    "directEgress": "Dirett (bla proxy)",
+    "ownProxy": "Proxy proprju"
   },
   "gamification": {
     "leaderboardScopes": {

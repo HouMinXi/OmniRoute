@@ -1203,6 +1203,8 @@
     "batchGroup": "پردازش دستهای",
     "homeSubtitle": "نمای کلی داشبورد",
     "providersSubtitle": "مدیریت ارائهدهندگان هوش مصنوعی",
+    "modelCatalog": "کاتالوگ مدل‌ها",
+    "modelCatalogSubtitle": "مرور مدل‌ها در میان ارائه‌دهندگان",
     "quotaTrackerSubtitle": "پیگیری محدودیتهای مصرف",
     "providerQuotaSubtitle": "پیگیری محدودیتهای مصرف ارائهدهنده",
     "runtimeSubtitle": "تابآوری و نشستهای بلادرنگ",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "اتصال را به ارث می‌برد: {host}",
     "inheritedPool": "استخر اتصال را به ارث می‌برد ({count})",
     "poolEmptyBlocked": "استخر خالی است — درخواست‌ها ناموفق می‌شوند (نه مستقیم)",
-    "directEgress": "مستقیم (بدون پروکسی)"
+    "directEgress": "مستقیم (بدون پروکسی)",
+    "ownProxy": "پراکسی اختصاصی"
   },
   "gamification": {
     "leaderboardScopes": {

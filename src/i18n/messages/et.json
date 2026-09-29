@@ -1203,6 +1203,8 @@
     "batchGroup": "Pakktöötlus",
     "homeSubtitle": "Töölaua ülevaade",
     "providersSubtitle": "Halda AI-teenusepakkujaid",
+    "modelCatalog": "Mudelite kataloog",
+    "modelCatalogSubtitle": "Sirvi mudeleid kõigi teenusepakkujate lõikes",
     "quotaTrackerSubtitle": "Jälgi kasutuslimiite",
     "providerQuotaSubtitle": "Jälgi teenusepakkuja kasutuslimiite",
     "runtimeSubtitle": "Reaalajas tõrkekindlus ja seansid",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Pärib ühenduse: {host}",
     "inheritedPool": "Pärib ühenduste kogumi ({count})",
     "poolEmptyBlocked": "Kogum tühi — päringud ebaõnnestuvad (mitte otse)",
-    "directEgress": "Otse (puhverserverita)"
+    "directEgress": "Otse (puhverserverita)",
+    "ownProxy": "Oma puhverserver"
   },
   "gamification": {
     "leaderboardScopes": {

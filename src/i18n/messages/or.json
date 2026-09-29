@@ -1203,6 +1203,8 @@
     "batchGroup": "ବ୍ୟାଚ୍",
     "homeSubtitle": "ଡ୍ୟାସ୍ବୋର୍ଡ ସାରାଂଶ",
     "providersSubtitle": "AI ପ୍ରଦାନକାରୀମାନଙ୍କୁ ପରିଚାଳନା କରନ୍ତୁ",
+    "modelCatalog": "ମଡେଲ କ୍ୟାଟାଲଗ",
+    "modelCatalogSubtitle": "ପ୍ରଦାନକାରୀଙ୍କ ମଧ୍ୟରେ ମଡେଲ ବ୍ରାଉଜ କରନ୍ତୁ",
     "quotaTrackerSubtitle": "ବ୍ୟବହାର ସୀମାଗୁଡ଼ିକୁ ଟ୍ରାକ୍ କରନ୍ତୁ",
     "providerQuotaSubtitle": "ପ୍ରଦାନକାରୀଙ୍କ ବ୍ୟବହାର ସୀମାଗୁଡ଼ିକୁ ଟ୍ରାକ୍ କରନ୍ତୁ",
     "runtimeSubtitle": "ବାସ୍ତବ-ସମୟ ସ୍ଥିତିସ୍ଥାପକତା ଓ ସେସନ୍ଗୁଡ଼ିକ",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "ସଂଯୋଗ ଉତ୍ତରାଧିକାର: {host}",
     "inheritedPool": "ସଂଯୋଗ ପୁଲ୍ ଉତ୍ତରାଧିକାର ({count})",
     "poolEmptyBlocked": "ପୁଲ୍ ଖାଲି — ଅନୁରୋଧ ବିଫଳ ହୁଏ (ସିଧା ନୁହେଁ)",
-    "directEgress": "ସିଧା (ପ୍ରୋକ୍ସି ବିନା)"
+    "directEgress": "ସିଧା (ପ୍ରୋକ୍ସି ବିନା)",
+    "ownProxy": "ନିଜସ୍ୱ ପ୍ରକ୍ସି"
   },
   "gamification": {
     "leaderboardScopes": {

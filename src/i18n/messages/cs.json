@@ -1203,6 +1203,8 @@
     "batchGroup": "Dávkové zpracování",
     "homeSubtitle": "Přehled řídicího panelu",
     "providersSubtitle": "Správa poskytovatelů AI",
+    "modelCatalog": "Katalog modelů",
+    "modelCatalogSubtitle": "Procházejte modely napříč poskytovateli",
     "quotaTrackerSubtitle": "Sledování limitů využití",
     "providerQuotaSubtitle": "Sledování limitů využití poskytovatelů",
     "runtimeSubtitle": "Odolnost a relace v reálném čase",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Dědí připojení: {host}",
     "inheritedPool": "Dědí fond připojení ({count})",
     "poolEmptyBlocked": "Fond prázdný — požadavky selžou (ne přímo)",
-    "directEgress": "Přímo (bez proxy)"
+    "directEgress": "Přímo (bez proxy)",
+    "ownProxy": "Vlastní proxy"
   },
   "gamification": {
     "leaderboardScopes": {

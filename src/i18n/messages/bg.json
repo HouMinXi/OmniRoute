@@ -1203,6 +1203,8 @@
     "batchGroup": "Пакетна обработка",
     "homeSubtitle": "Общ преглед на таблото",
     "providersSubtitle": "Управление на доставчиците на AI",
+    "modelCatalog": "Каталог с модели",
+    "modelCatalogSubtitle": "Разглеждайте модели от всички доставчици",
     "quotaTrackerSubtitle": "Проследяване на ограниченията за използване",
     "providerQuotaSubtitle": "Проследяване на ограниченията за използване при доставчика",
     "runtimeSubtitle": "Устойчивост в реално време и сесии",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Наследява връзката: {host}",
     "inheritedPool": "Наследява пула от връзки ({count})",
     "poolEmptyBlocked": "Пулът е празен — заявките се провалят (не директно)",
-    "directEgress": "Директно (без прокси)"
+    "directEgress": "Директно (без прокси)",
+    "ownProxy": "Собствено прокси"
   },
   "gamification": {
     "leaderboardScopes": {
