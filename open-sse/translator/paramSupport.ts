@@ -39,6 +39,16 @@ const STRIP_RULES: StripRule[] = [
   { match: /claude-opus-4/i, drop: ["temperature"] },
   // GitHub Copilot gpt-5.4: temperature unsupported.
   { provider: "github", match: /gpt-5\.4/i, drop: ["temperature"] },
+  // OpenAI gpt-5.x reasoning models reject sampling params with HTTP 400
+  // "Unsupported parameter: 'temperature' is not supported with this model"
+  // (same for top_p). Agent clients (Hermes, OpenClaw, ...) send a temperature
+  // on every turn, so each first attempt burned a round trip before the combo
+  // fell back. `gpt-5-chat*` variants still accept sampling and stay untouched.
+  {
+    provider: "openai",
+    match: (m: string) => /^gpt-5(?:[.-]|$)/i.test(m) && !/chat/i.test(m),
+    drop: ["temperature", "top_p"],
+  },
   // Codex /responses (chatgpt.com backend-api) rejects sampling params with
   // FastAPI 400 `{"detail":"Unsupported parameter: temperature"}`. Native
   // Codex passthrough returns before the Responses allowlist, so this rule
@@ -62,6 +72,8 @@ const STRIP_RULES: StripRule[] = [
   // (format:"openai") does not accept the Claude-style `thinking` body field
   // and returns 400 "Unsupported parameter(s): thinking". Upstream #2268.
   { provider: "nvidia", match: /minimax-m2\.7/i, drop: ["thinking"] },
+  // Mistral GLM 5.2 rejects Claude-style thinking payloads.
+  { provider: "mistral", match: /(?:^|\/)zai-glm-5(?:[.-])2\b/i, drop: ["thinking", "reasoning"] },
   // NVIDIA NIM: OpenAI-compatible wrapper 400s on `prompt_cache_key` (Codex CLI
   // injects it natively for its own prompt caching). NIM has no documented
   // support for this field (providerSupportsCaching already treats nvidia as

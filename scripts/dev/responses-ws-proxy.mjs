@@ -121,6 +121,41 @@ function getResponseErrorStatus(error) {
   return null;
 }
 
+const RESPONSES_TOOL_ITEM_TYPES = new Set([
+  "function_call",
+  "custom_tool_call",
+  "local_shell_call",
+  "mcp_call",
+  "computer_call",
+]);
+
+/**
+ * True when an upstream Responses event carries output the user sees: a non-empty text,
+ * reasoning or tool-argument delta, or a tool call item (first-output timing).
+ */
+function responsesEventCarriesOutput(data) {
+  if (
+    typeof data !== "string" ||
+    (!data.includes(".delta") && !data.includes("output_item.added"))
+  ) {
+    return false;
+  }
+  let event;
+  try {
+    event = JSON.parse(data);
+  } catch {
+    return false;
+  }
+  const type = typeof event?.type === "string" ? event.type : "";
+  if (type.startsWith("response.") && type.endsWith(".delta")) {
+    return typeof event.delta === "string" ? event.delta.length > 0 : Boolean(event.delta);
+  }
+  if (type === "response.output_item.added") {
+    return RESPONSES_TOOL_ITEM_TYPES.has(event.item?.type);
+  }
+  return false;
+}
+
 function getTerminalResponseEvent(rawData) {
   const message = parseJsonRecord(rawData);
   if (!message) return null;
@@ -419,6 +454,10 @@ class ResponsesWsSession {
     this.maxMessageBytes = normalizePositiveInteger(maxMessageBytes, DEFAULT_MAX_WS_MESSAGE_BYTES);
     this.sessionId = randomUUID();
     this.startedAt = Date.now();
+    // Per-turn timing. A reused connection serves many response.create turns, so
+    // history must measure each turn from its own request, not from the connection open.
+    this.turnStartedAt = this.startedAt;
+    this.turnFirstOutputAt = null;
     this.closed = false;
     this.buffer = Buffer.alloc(0);
     this.fragmentOpcode = null;
@@ -692,9 +731,16 @@ class ResponsesWsSession {
         if (this.closed) return;
         const data =
           typeof event.data === "string" ? event.data : Buffer.from(event.data).toString("utf8");
+        if (this.turnFirstOutputAt === null && responsesEventCarriesOutput(data)) {
+          this.turnFirstOutputAt = Date.now();
+        }
         const terminalEvent = getTerminalResponseEvent(data);
         if (terminalEvent) {
+          // persistHistory reads the turn timing synchronously before its first await.
           void this.persistHistory(terminalEvent);
+          // The turn is over; a later session-level failure row must not reuse its timing.
+          this.turnStartedAt = null;
+          this.turnFirstOutputAt = null;
         }
         this.sendFrame(0x1, Buffer.from(data, "utf8"));
       };
@@ -736,6 +782,10 @@ class ResponsesWsSession {
   }
 
   async forwardClientMessage(message) {
+    if (getResponseCreatePayload(message) !== null) {
+      this.turnStartedAt = Date.now();
+      this.turnFirstOutputAt = null;
+    }
     try {
       if (!this.upstream) {
         const { upstream, firstMessage } = await this.ensureUpstream(message);
@@ -840,6 +890,11 @@ class ResponsesWsSession {
     this.loggedTurnIds.add(turnId);
 
     const finishedAt = Date.now();
+    // No turn in flight (e.g. upstream closed after the last turn finished): the row covers
+    // no request, so it gets no duration or TTFT instead of the previous turn's.
+    const turnStartedAt = this.turnStartedAt ?? finishedAt;
+    const firstOutputMs =
+      this.turnFirstOutputAt === null ? null : Math.max(0, this.turnFirstOutputAt - turnStartedAt);
     try {
       await callInternal(this.fetchImpl, this.baseUrl, this.bridgeSecret, "log", {
         sessionId: this.sessionId,
@@ -847,9 +902,10 @@ class ResponsesWsSession {
         requestUrl: this.requestUrl,
         headers: getAuthHeaders(this.requestUrl, this.requestHeaders),
         path: new URL(this.requestUrl || "/v1/responses", "http://omniroute.local").pathname,
-        startedAt: new Date(this.startedAt).toISOString(),
+        startedAt: new Date(turnStartedAt).toISOString(),
         completedAt: new Date(finishedAt).toISOString(),
-        durationMs: Math.max(0, finishedAt - this.startedAt),
+        durationMs: Math.max(0, finishedAt - turnStartedAt),
+        firstOutputMs,
         status: toFiniteNumber(status),
         success,
         errorCode,

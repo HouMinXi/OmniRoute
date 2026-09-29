@@ -269,6 +269,56 @@ export function invalidateModelCatalogCache(): void {
 }
 
 /**
+ * Connection fields written by the chat path's error/cooldown machinery.
+ * The unified model catalog builder consumes ONLY `isActive` and
+ * `providerSpecificData.excludedModels` from a connection row (see
+ * src/app/api/v1/models/catalog.ts and hasEligibleConnectionForModel) — none of
+ * the fields below appear anywhere in the catalog build. Writing them is
+ * high-frequency runtime bookkeeping (measured 2026-09-17: ~2.6 writes/min on a
+ * live gateway — 429 cooldowns, markAccountUnavailable, clearAccountError), and
+ * every one of those writes used to bump `modelCatalogCacheVersion` through
+ * `invalidateDbCache("connections")`, dropping the memoized /v1/models body so
+ * the endpoint paid its full ~7 s rebuild on nearly every call.
+ */
+const CONNECTION_RUNTIME_STATE_FIELDS = new Set([
+  "testStatus",
+  "lastError",
+  "lastErrorAt",
+  "lastErrorType",
+  "lastErrorSource",
+  "errorCode",
+  "rateLimitedUntil",
+  "backoffLevel",
+]);
+
+/**
+ * True when an update touches ONLY runtime-state fields, i.e. fields that keep
+ * account selection/cooldown state fresh but cannot change the catalog body.
+ * Fail-closed by construction: an empty update or any field outside the set
+ * (isActive, provider, priority, providerSpecificData, ...) returns false and
+ * the caller falls back to the full catalog invalidation.
+ */
+export function isConnectionRuntimeStateUpdate(data: Record<string, unknown>): boolean {
+  const keys = Object.keys(data);
+  return keys.length > 0 && keys.every((key) => CONNECTION_RUNTIME_STATE_FIELDS.has(key));
+}
+
+/**
+ * Cache invalidation for `updateProviderConnection()`: runtime-state-only
+ * updates (cooldowns, error fields) keep the connection read caches fresh
+ * without dropping the memoized /v1/models catalog — the builder never reads
+ * these fields. Anything else falls back to the full invalidation so config
+ * edits stay immediately visible in the catalog.
+ */
+export function invalidateConnectionUpdate(id: string, data: Record<string, unknown>): void {
+  if (isConnectionRuntimeStateUpdate(data)) {
+    invalidateDbCache("connections", id, { skipModelCatalog: true });
+  } else {
+    invalidateDbCache("connections");
+  }
+}
+
+/**
  * Invalidate caches (call after writes to any of: settings, pricing,
  * connections, combos, nodes, model capability/context metadata).
  *

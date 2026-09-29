@@ -1270,23 +1270,23 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 
 <table>
   <tr><th align="left">அடுக்கு</th><th align="left">தொழில்நுட்பம்</th></tr>
-  <tr><td nowrap><b>இயங்குதளம்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>மொழி</b></td><td>டைப்ஸ்கிரிப்ட் 6.0 — <b>100% டைப்ஸ்கிரிப்ட்</b> முழுவதும் <code>src/</code> மற்றும் <code>open-sse/</code> (v2.0 முதல் மையத்தில் <code>any</code> இல்லை)</td></tr>
+  <tr><td nowrap><b>இயக்கச் சூழல்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் மையத்தில் <code>any</code> எதுவுமில்லை)</td></tr>
   <tr><td nowrap><b>கட்டமைப்பு</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL ஜர்னலிங்) + LowDB (JSON மரபு) — 122 டொமைன் தொகுதிகள், 183 இடம்பெயர்வுகள்</td></tr>
-  <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு உரை + int8-குவாண்டைஸ் செய்யப்பட்ட வெக்டர் உட்பொதிவுகள், டைப் செய்யப்பட்ட சிதைவு</td></tr>
-  <tr><td nowrap><b>திட்டங்கள்</b></td><td>Zod 4 — MCP கருவி I/O சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
+  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL பதிவேட்டாக்கம்) + LowDB (JSON மரபு) — 122 களத் தொகுதிகள், 190 இடமாற்றங்கள்</td></tr>
+  <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு-உரை + int8-அளவுருவாக்கப்பட்ட திசையன் உட்பொதிவுகள், வகையிடப்பட்ட சிதைவு</td></tr>
+  <tr><td nowrap><b>திட்டவடிவங்கள்</b></td><td>Zod 4 — MCP கருவி உள்ளீடு/வெளியீடு சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
   <tr><td nowrap><b>நெறிமுறைகள்</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>ஸ்ட்ரீமிங்</b></td><td>சர்வர்-சென்ட் நிகழ்வுகள் (SSE) + வெப்சாக்கெட் பாலம் (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>சுருக்கம்</b></td><td>12-என்ஜின் பைப்லைன் — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>அங்கீகாரம் &amp; பாதுகாப்பு</b></td><td>OAuth 2.0 (PKCE) + JWT + API விசைகள் + MCP ஸ்கோப் செய்யப்பட்ட அங்கீகாரம் · AES-256-GCM ஓய்வு நிலையில் · DOMPurify</td></tr>
-  <tr><td nowrap><b>மறைநிலை</b></td><td>wreq-js — JA3 / JA4 TLS கைரேகை ஆள்மாறாட்டம், 3-நிலை ப்ராக்ஸி</td></tr>
-  <tr><td nowrap><b>மீள்தன்மை</b></td><td>சர்க்யூட் பிரேக்கர், எக்ஸ்போனென்ஷியல் பேக்ஆஃப், ஆன்டி-தண்டரிங்-ஹெர்ட், ஆட்டோ-காம்ப்ளக்ஸ் சுய-குணப்படுத்துதல்</td></tr>
-  <tr><td nowrap><b>பதிவு செய்தல்</b></td><td>pino — கோரிக்கை சூழலுடன் கட்டமைக்கப்பட்ட JSON பதிவுகள்</td></tr>
-  <tr><td nowrap><b>சோதனை</b></td><td>Node.js டெஸ்ட் ரன்னர் + வைடெஸ்ட் — <b>39,000+ நிலையான சோதனை அறிவிப்புகள்</b> 5,100+ கண்காணிக்கப்பட்ட சோதனை கோப்புகளில் (யூனிட், இன்டெக்ரேஷன், E2E, பாதுகாப்பு, சுற்றுச்சூழல் அமைப்பு)</td></tr>
-  <tr><td nowrap><b>தளங்கள்</b></td><td>டெஸ்க்டாப் (எலக்ட்ரான்) · ஆண்ட்ராய்டு (டெர்மாக்ஸ்) · PWA (எந்த உலாவி)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>கிட்ஹப் ஆக்ஷன்ஸ் — வெளியீட்டில் தானியங்கி npm வெளியீடு + டாக்கர் ஹப்</td></tr>
-  <tr><td nowrap><b>இணைப்புகள்</b></td><td><a href="https://omniroute.online">வலைத்தளம்</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">டாக்கர் ஹப்</a></td></tr>
+  <tr><td nowrap><b>தொடரோட்டம்</b></td><td>சேவையகம் அனுப்பும் நிகழ்வுகள் (SSE) + WebSocket பாலம் (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>சுருக்கம்</b></td><td>12-எந்திரச் செயலாக்கத் தொடர் — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>அங்கீகாரம் &amp; பாதுகாப்பு</b></td><td>OAuth 2.0 (PKCE) + JWT + API விசைகள் + MCP வரம்பிடப்பட்ட அங்கீகாரம் · சேமிப்பில் AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>மறைநிலை</b></td><td>wreq-js — JA3 / JA4 TLS கைரேகை ஆள்மாறாட்டம், 3-நிலை பினையகம்</td></tr>
+  <tr><td nowrap><b>மீட்சித்திறன்</b></td><td>சுற்றுத்தடைப்பான், அடுக்குக்குறி பின்னடைவு, ஒரேநேர கோரிக்கை வெள்ளத் தடுப்பு, தானியங்கி-சேர்க்கை சுய-சீரமைப்பு</td></tr>
+  <tr><td nowrap><b>பதிவாக்கம்</b></td><td>pino — கோரிக்கை சூழலுடன் கட்டமைக்கப்பட்ட JSON பதிவுகள்</td></tr>
+  <tr><td nowrap><b>சோதனை</b></td><td>Node.js சோதனை இயக்கி + Vitest — 5,100+ கண்காணிக்கப்படும் சோதனைக் கோப்புகளில் <b>39,000+ நிலையான சோதனை அறிவிப்புகள்</b> (அலகு, ஒருங்கிணைப்பு, E2E, பாதுகாப்பு, சூழலமைப்பு)</td></tr>
+  <tr><td nowrap><b>தளங்கள்</b></td><td>மேசைக்கணினி (Electron) · Android (Termux) · PWA (எந்த உலாவியிலும்)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — வெளியீட்டின்போது தானியங்கி npm வெளியீடு + Docker Hub</td></tr>
+  <tr><td nowrap><b>இணைப்புகள்</b></td><td><a href="https://omniroute.online">இணையதளம்</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

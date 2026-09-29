@@ -1263,21 +1263,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 نیز از آن 
 <table>
   <tr><th align="left">لایه</th><th align="left">فناوری</th></tr>
   <tr><td nowrap><b>محیط اجرا</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>۱۰۰٪ تایپاسکریپت</b> در سراسر <code>src/</code> و <code>open-sse/</code> (صفر <code>any</code> در هسته از نسخه ۲.۰)</td></tr>
-  <tr><td nowrap><b>فریمورک</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — ۱۲۲ ماژول دامنه، ۱۸۳ مهاجرت</td></tr>
-  <tr><td nowrap><b>حافظه</b></td><td>SQLite FTS5 تماممتن + جاسازیهای برداری کوانتیزه شده int8، واپاشی تایپشده</td></tr>
-  <tr><td nowrap><b>شماتیکها</b></td><td>Zod 4 — اعتبارسنجی ورودی/خروجی ابزار MCP + قراردادهای API</td></tr>
-  <tr><td nowrap><b>پروتکلها</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>جریانسازی</b></td><td>رویدادهای ارسالشده توسط سرور (SSE) + پل WebSocket (`/v1/ws`)</td></tr>
-  <tr><td nowrap><b>فشردهسازی</b></td><td>پایپلاین ۱۲ موتوره — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>احراز هویت و امنیت</b></td><td>OAuth 2.0 (PKCE) + JWT + کلیدهای API + احراز هویت محدود MCP · AES-256-GCM در حالت استراحت · DOMPurify</td></tr>
-  <tr><td nowrap><b>پنهانکاری</b></td><td>wreq-js — جعل اثر انگشت TLS JA3 / JA4، پروکسی ۳ سطحی</td></tr>
-  <tr><td nowrap><b>تابآوری</b></td><td>مدارشکن، بازگشت نمایی، ضد ازدحام، خودترمیمی خودکار ترکیبی</td></tr>
-  <tr><td nowrap><b>ثبت وقایع</b></td><td>pino — لاگهای JSON ساختاریافته با زمینه درخواست</td></tr>
-  <tr><td nowrap><b>آزمایش</b></td><td>Node.js test runner + Vitest — <b>بیش از ۳۹,۰۰۰ اعلان تست استاتیک</b> در بیش از ۵,۱۰۰ فایل تست ردیابی شده (واحد، یکپارچهسازی، E2E، امنیت، اکوسیستم)</td></tr>
-  <tr><td nowrap><b>پلتفرمها</b></td><td>دسکتاپ (Electron) · اندروید (Termux) · PWA (هر مرورگری)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — انتشار خودکار npm + Docker Hub در زمان انتشار</td></tr>
+  <tr><td nowrap><b>زبان</b></td><td>TypeScript 6.0 — <b>صددرصد TypeScript</b> در سراسر <code>src/</code> و <code>open-sse/</code> (از v2.0 تاکنون، بدون هیچ <code>any</code> در هسته)</td></tr>
+  <tr><td nowrap><b>چارچوب</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>پایگاه داده</b></td><td>better-sqlite3 (SQLite، ثبت وقایع WAL) + LowDB (JSON قدیمی) — 122 ماژول دامنه، 190 مهاجرت</td></tr>
+  <tr><td nowrap><b>حافظه</b></td><td>جستوجوی متن کامل SQLite FTS5 + تعبیههای برداری کوانتیزهشده int8، زوال نوعدار</td></tr>
+  <tr><td nowrap><b>شِماها</b></td><td>Zod 4 — اعتبارسنجی ورودی/خروجی ابزار MCP + قراردادهای API</td></tr>
+  <tr><td nowrap><b>پروتکلها</b></td><td>MCP ‏(stdio / HTTP / SSE) + A2A v0.3 ‏(JSON-RPC 2.0 + SSE)</td></tr>
+  <tr><td nowrap><b>استریم</b></td><td>رویدادهای ارسالشده از سرور (SSE) + پل WebSocket ‏(<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>فشردهسازی</b></td><td>خط لوله 12 موتوره — RTK، Caveman، LLMLingua-2 ‏(MobileBERT ONNX)، GCF، OmniGlyph</td></tr>
+  <tr><td nowrap><b>احراز هویت و امنیت</b></td><td>OAuth 2.0 ‏(PKCE) + JWT + کلیدهای API + احراز هویت محدودهبندیشده MCP · رمزنگاری AES-256-GCM برای دادههای ذخیرهشده · DOMPurify</td></tr>
+  <tr><td nowrap><b>اختفا</b></td><td>wreq-js — جعل اثر انگشت TLS از نوع JA3 / JA4، پروکسی سهسطحی</td></tr>
+  <tr><td nowrap><b>تابآوری</b></td><td>قطعکننده مدار، عقبنشینی نمایی، مقابله با هجوم همزمان درخواستها، خودترمیمی خودکار ترکیبها</td></tr>
+  <tr><td nowrap><b>ثبت گزارش</b></td><td>pino — گزارشهای ساختاریافته JSON همراه با زمینه درخواست</td></tr>
+  <tr><td nowrap><b>آزمایش</b></td><td>اجراکننده آزمون Node.js + Vitest — <b>بیش از 39,000 اعلان آزمون ایستا</b> در بیش از 5,100 فایل آزمون ردیابیشده (واحد، یکپارچهسازی، سرتاسری، امنیت، اکوسیستم)</td></tr>
+  <tr><td nowrap><b>پلتفرمها</b></td><td>دسکتاپ (Electron) · Android ‏(Termux) · PWA (هر مرورگری)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — انتشار خودکار در npm + Docker Hub هنگام انتشار نسخه</td></tr>
   <tr><td nowrap><b>پیوندها</b></td><td><a href="https://omniroute.online">وبسایت</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 

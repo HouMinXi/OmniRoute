@@ -4,6 +4,8 @@
  * Handles both response shapes OmniRoute routes emit:
  * - OpenAI-style `{ error: { message, type, code } }` (from `buildErrorBody`)
  * - legacy `{ error: "..." }` string bodies
+ * - validation `{ error: { message: "Invalid request", details: [{ field, message }] } }`,
+ *   where the first detail is surfaced as `field: message`
  *
  * The server already sanitizes these messages (stack traces / absolute paths
  * stripped via `sanitizeErrorMessage`), so surfacing them in the UI is safe.
@@ -16,6 +18,21 @@ export async function readFetchErrorMessage(res: Response, fallback: string): Pr
     const err = (body as { error?: unknown } | null)?.error;
     if (typeof err === "string" && err.trim()) return err.trim();
     if (err && typeof err === "object") {
+      // Validation failures (`validateBody` / `validatedJsonBody`) send the
+      // generic "Invalid request" in `message` and the actual reason in
+      // `details`, e.g. a reserved compatible-node prefix (#13939). Prefer the
+      // first detail so the UI names the offending field instead.
+      const details = (err as { details?: unknown }).details;
+      const first = Array.isArray(details) ? (details[0] as unknown) : null;
+      if (first && typeof first === "object") {
+        const detailMessage = (first as { message?: unknown }).message;
+        const field = (first as { field?: unknown }).field;
+        if (typeof detailMessage === "string" && detailMessage.trim()) {
+          return typeof field === "string" && field.trim()
+            ? `${field.trim()}: ${detailMessage.trim()}`
+            : detailMessage.trim();
+        }
+      }
       const message = (err as { message?: unknown }).message;
       if (typeof message === "string" && message.trim()) return message.trim();
     }

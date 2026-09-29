@@ -49,6 +49,8 @@ export { classifyFailure, projectProviderRuntimeForPublicResponse } from "./publ
 const OAUTH_TEST_TIMEOUT_MS = 30_000;
 
 import { CLI_RUNTIME_PROVIDER_MAP } from "./cliRuntimeProviderMap";
+import { isOperatorDisabled } from "@/lib/providers/operatorDisable";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
 /** POST body is optional; when present, only known fields are validated. */
 const providerConnectionTestBodySchema = z.object({
@@ -68,7 +70,17 @@ function hasQoderToken(connection: any): boolean {
   return false;
 }
 
-async function getProviderRuntimeStatus(connection: any) {
+// GHSA-jmq6-8j86-8xqj: getCliRuntimeStatus() spawns on the host (LOCAL_ONLY capability),
+// but these routes stay remote-reachable — only loopback/LAN callers and the scheduler probe.
+export type ConnectionTestOptions = { allowLocalRuntimeProbe?: boolean };
+
+export async function getProviderRuntimeStatus(
+  connection: any,
+  {
+    allowLocalRuntimeProbe = true,
+    probe = getCliRuntimeStatus,
+  }: ConnectionTestOptions & { probe?: typeof getCliRuntimeStatus } = {}
+) {
   const provider = typeof connection?.provider === "string" ? connection.provider : "";
   let toolId = CLI_RUNTIME_PROVIDER_MAP[provider];
 
@@ -95,9 +107,10 @@ async function getProviderRuntimeStatus(connection: any) {
     toolId = null;
   }
   if (!toolId) return null;
+  if (!allowLocalRuntimeProbe) return null;
 
   try {
-    const runtime = await getCliRuntimeStatus(toolId);
+    const runtime = await probe(toolId);
     if (runtime.installed && runtime.runnable) {
       return runtime;
     }
@@ -924,7 +937,11 @@ async function testApiKeyConnection(connection: any) {
  * @param {string} validationModelId Optional custom model ID to test connection with
  * @returns {Promise<object>} Test result (same shape as the JSON response)
  */
-export async function testSingleConnection(connectionId: string, validationModelId?: string) {
+export async function testSingleConnection(
+  connectionId: string,
+  validationModelId?: string,
+  options: ConnectionTestOptions = {}
+) {
   const connection = await getCachedProviderConnectionById(connectionId);
 
   if (!connection) {
@@ -970,7 +987,7 @@ export async function testSingleConnection(connectionId: string, validationModel
 
   let result;
   const startTime = Date.now();
-  const runtime = await getProviderRuntimeStatus(connection);
+  const runtime = await getProviderRuntimeStatus(connection, options);
 
   // Codex app-server connections carry no validatable OpenAI token (the codex
   // app-server process self-manages its own OAuth). Probe the app-server's
@@ -1035,9 +1052,9 @@ export async function testSingleConnection(connectionId: string, validationModel
   // connection that can never be health-checked would otherwise stay hidden
   // from /v1/models forever under the "only advertise tested connections"
   // default (isActive starts false on creation — see POST /api/providers),
-  // silently regressing every provider without a test surface.
+  // silently regressing every provider without a test surface. Operator-disabled stays off.
   if (result.skipped === true) {
-    if (connection.isActive !== true) {
+    if (connection.isActive !== true && !isOperatorDisabled(connection)) {
       try {
         await updateProviderConnection(connectionId, { isActive: true });
       } catch (activateError) {
@@ -1097,8 +1114,8 @@ export async function testSingleConnection(connectionId: string, validationModel
     // failing test intentionally leaves isActive untouched (a transient
     // failure on an already-active, already-working connection must not take
     // it out of rotation — that's what the cooldown/rateLimitedUntil below is
-    // for), so this never deactivates anything.
-    ...(result.valid ? { isActive: true } : {}),
+    // for), so this never deactivates anything, nor re-enables an operator-disabled one.
+    ...(result.valid && !isOperatorDisabled(connection) ? { isActive: true } : {}),
     lastError: clearErrorState ? null : result.valid ? connection.lastError : result.error,
     lastErrorAt: clearErrorState ? null : result.valid ? connection.lastErrorAt : now,
     lastTested: now,
@@ -1215,7 +1232,9 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
     const { validationModelId } = validation.data;
 
-    const data = await testSingleConnection(id, validationModelId);
+    const data = await testSingleConnection(id, validationModelId, {
+      allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
+    });
 
     if (data.error === "Connection not found") {
       return NextResponse.json({ error: "Connection not found" }, { status: 404 });

@@ -1,5 +1,5 @@
 import {
-  extractRequestToolIdentityMap,
+  extractRequestToolMetadata,
   resolveResponseToolNameMap,
 } from "./chatCore/requestToolIdentity.ts";
 import {
@@ -45,12 +45,9 @@ import { buildNonStreamingResponseHeaders } from "./chatCore/nonStreamingRespons
 import { maybeWrapForcedNonStreamingResponsesJson } from "./chatCore/responsesJsonToSse.ts";
 import { enforceOutputTokenBudget } from "./chatCore/outputTokenBudget.ts";
 import { maybeConvertJsonBodyToSse } from "./chatCore/jsonBodyToSse.ts";
-import {
-  formatBufferedVerdictLog,
-  judgeBufferedTurn,
-  readBoundedResponseOutcome,
-  FLUSH_EMPTY_RETRY_MAX_BYTES,
-} from "../utils/emptyTurnRetry.ts";
+import { withResilienceActionsContext } from "./chatCore/resilienceAttemptContext.ts";
+import { runEmptyTurnRetryLoop } from "./chatCore/emptyTurnRetryLoop.ts";
+import { notePreviousResponseResumed } from "./chatCore/resumedResilienceNotes.ts";
 import { assembleStreamingResponseHeaders } from "./chatCore/streamingResponseHeaders.ts";
 import { storeStreamingSemanticCacheResponse } from "./chatCore/streamingSemanticCacheStore.ts";
 import { captureStreamReasoningForReplay } from "./chatCore/streamReasoningCapture.ts";
@@ -145,6 +142,7 @@ import {
   injectSystemPromptPostTranslation,
   injectSystemPromptPreTranslation,
 } from "../services/systemPrompt.ts";
+import { applyProviderSystemTransforms } from "../services/systemTransforms.ts";
 import { translateRequest, needsTranslation } from "../translator/index.ts";
 import { applyReasoningRuleDirective } from "@/lib/reasoningRouting/policy";
 import { withReasoningRuleContext } from "../utils/reasoningRuleContext.ts";
@@ -159,6 +157,7 @@ import {
   COLORS,
 } from "../utils/stream.ts";
 import { ensureStreamReadiness } from "../utils/streamReadiness.ts";
+import { requestTtftMs } from "../utils/streamTiming.ts";
 import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../utils/thinkCloseMarker.ts";
 import { resolveStreamReadinessTimeout } from "../utils/streamReadinessPolicy.ts";
 import { resolveAgentGoalPolicy } from "../utils/agentGoalPolicy.ts";
@@ -337,6 +336,7 @@ import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.
 import {
   normalizeExecutorResult,
   executeWithUpstreamStartTimeout,
+  getExecutorTimeoutMs,
   resolveConnectionTimeoutMs,
 } from "./chatCore/upstreamTimeouts.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
@@ -474,7 +474,13 @@ type VideoBridgeLogParam = { observed: boolean; redaction: VideoBridgeLogRedacti
  */
 // extractSystemRoleMessages extracted to chatCore/claudeSystemRole.ts (#3501); re-exported above so
 // existing importers (e.g. tests/unit/system-role-extraction.test.ts) keep resolving it from here.
-export async function handleChatCore({
+export async function handleChatCore(args: Parameters<typeof handleChatCoreInner>[0]) {
+  // one implicit resilience store per attempt (combo legs each run
+  // handleChatCore, so each leg gets its own isolated store).
+  return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
+}
+
+async function handleChatCoreInner({
   body,
   modelInfo,
   credentials,
@@ -514,7 +520,9 @@ export async function handleChatCore({
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
   forcedConnectionId = null, // #14116: caller's pinned/requested connection, vs credentials.connectionId below
+  previousResponseResumed = undefined, // rehydrated-continuation flag from chat.ts; noted below, no semantics.
 }) {
+  delete (body as Record<string, unknown>)._omniroutePreviousResponseResumed;
   const {
     model: originModel,
     resolvedThinkingEffort,
@@ -540,6 +548,8 @@ export async function handleChatCore({
   // (chatCore/memoryExtraction.ts::runMemoryExtractionGate).
   const videoBridgeObserved: boolean =
     (videoBridgeLog as VideoBridgeLogParam | undefined)?.observed === true;
+  // resume flag from chat.ts, noted under the attempt store opened above.
+  notePreviousResponseResumed(previousResponseResumed);
   const resilienceSettings = resolveResilienceSettings(cachedSettings);
   if (!skipResourcePressureGuard) {
     try {
@@ -560,8 +570,9 @@ export async function handleChatCore({
   // Per-request trace id + checkpoint helper. Lets us see exactly which await
   // a hung request was sitting on in `[STAGE_TRACE]` log lines. Uses crypto RNG
   // (not Math.random) purely to satisfy CodeQL js/insecure-randomness — this id
-  // is a log-correlation token, not a security secret.
-  const traceId = globalThis.crypto.randomUUID().slice(0, 6);
+  // is a log-correlation token, not a security secret. Keep the full UUID:
+  // a 6-char prefix collides in call_logs under production volume (#14451).
+  const traceId = globalThis.crypto.randomUUID();
   // Emit request.started event for real-time dashboard
   setImmediate(() => {
     emit("request.started", {
@@ -1339,7 +1350,7 @@ export async function handleChatCore({
       }
     );
     if (policy.incompatibleReasoning) {
-      trackPendingRequest(model, provider, connectionId, false);
+      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
       return createErrorResult(
         HTTP_STATUS.BAD_REQUEST,
         "Reasoning continuation is not compatible with the selected target"
@@ -2252,7 +2263,7 @@ export async function handleChatCore({
       `estimated ${outputBudget.estimatedInputTokens} input tokens, ${exceededInputCap ? `max input ${outputBudget.maxInputTokens}` : `limit ${outputBudget.contextLimit}`}. ` +
       `Reduce the prompt or route to a model with a larger ${exceededInputCap ? "input limit" : "context window"}.`;
     log?.warn?.("CONTEXT", message);
-    trackPendingRequest(model, provider, connectionId, false);
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
     return createErrorResult(
       HTTP_STATUS.BAD_REQUEST,
       message,
@@ -2279,6 +2290,28 @@ export async function handleChatCore({
   body = outputBudget.body;
 
   let translatedBody = body;
+
+  // Per-provider system transforms for providers whose executor does not run the
+  // pipeline itself (issue #2260 v2 documents the DSL as covering "any other
+  // provider key", but only the Claude-native and CC-bridge wire paths ever
+  // called it). Applied on the client-shaped body before translation, so the
+  // configured ops see the messages[]/system shape the Settings UI documents.
+  // `applyProviderSystemTransforms` is a no-op for the claude / CC-bridge keys,
+  // which already apply the same config downstream inside their executors.
+  {
+    const systemTransformResult = applyProviderSystemTransforms(
+      provider,
+      translatedBody as Record<string, unknown>
+    );
+    if (systemTransformResult.appliedOpKinds.length > 0) {
+      translatedBody = systemTransformResult.body as typeof translatedBody;
+      log?.debug?.(
+        "SYSTRANSFORMS",
+        `${provider}: ${systemTransformResult.appliedOpKinds.join(", ")}`
+      );
+    }
+  }
+
   const isClaudePassthrough = sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE;
   const isClaudeCodeCompatible = usesClaudeBridge(provider, targetFormat, credentials);
   const isClaudeCodeSemanticPassthrough = isClaudeCodeSemanticPassthroughRequest({
@@ -2658,7 +2691,7 @@ export async function handleChatCore({
     const result = createTranslationFailureResult(statusCode, message, errorType);
     log?.warn?.("TRANSLATE", `Request translation failed: ${result.error}`);
 
-    trackPendingRequest(model, provider, connectionId, false);
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
     return result;
   }
 
@@ -2737,8 +2770,9 @@ export async function handleChatCore({
   // Keep the request translator's namespace identities separate from toolNameMap:
   // the latter is a Kiro/Claude passthrough alias channel with string values,
   // while namespace identities carry `{namespace, name}` for the #7936 response
-  // seam. Extract first because Kiro merge may reuse `_toolNameMap` below.
-  const requestToolIdentityMap = extractRequestToolIdentityMap(translatedBody);
+  // seam. Capture both before stripping their side channels: a Responses ->
+  // Gemini/Antigravity pivot carries both maps, not one recoverable ledger.
+  const { requestToolIdentityMap, toolNameAliasMap } = extractRequestToolMetadata(translatedBody);
 
   // Kiro: sanitize tool schemas before dispatch. Kiro returns 400 "Improperly
   // formed request" for unsupported JSON-Schema keywords (anyOf/$ref/if-then,
@@ -2779,13 +2813,13 @@ export async function handleChatCore({
   }
 
   // Extract toolNameMap for response translation (Claude OAuth)
-  const translatedToolNameMap = translatedBody._toolNameMap;
+  const translatedToolNameMap = translatedBody._toolNameMap ?? toolNameAliasMap;
   const nativeClaudeToolNameMap = isClaudePassthrough
     ? buildClaudePassthroughToolNameMap(body)
     : null;
-  // Resolution order matters: `_toolNameMap` was already deleted by
-  // `extractRequestToolIdentityMap`, so Gemini/Antigravity depend on the
-  // `requestToolIdentityMap` fallback inside this helper (#9568 / #7936).
+  // A later provider-specific ledger (Kiro above) wins; otherwise use the
+  // alias map captured before extraction. Namespace identities are distinct
+  // from aliases and cannot restore sanitized Gemini names on their own.
   const toolNameMap = resolveResponseToolNameMap(
     translatedToolNameMap,
     nativeClaudeToolNameMap,
@@ -2863,7 +2897,7 @@ export async function handleChatCore({
     model
   );
   if (toolCallingCheck.blocked) {
-    trackPendingRequest(model, provider, connectionId, false);
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
     return createErrorResult(400, toolCallingCheck.message!, null, "tool_calling_not_supported");
   }
 
@@ -2965,12 +2999,7 @@ export async function handleChatCore({
         // return path never reaches the upstream, and without the decrement the
         // pending detail lingers as an orphaned status-0 call-log row until the
         // reaper sweeps it (mirrors the other pre-upstream error returns).
-        trackPendingRequest(
-          model,
-          provider,
-          connectionId || credentials?.connectionId || null,
-          false
-        );
+        trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
         const headers: Record<string, string> = { "Content-Type": "application/json" };
         if (decision.retryAfterSeconds) {
           headers["Retry-After"] = String(decision.retryAfterSeconds);
@@ -3018,7 +3047,7 @@ export async function handleChatCore({
     if (!fit.compatible) {
       const msg = buildCapabilityMismatchMessage(fit.terminalReason!, provider, effectiveModel);
       log?.warn?.("CAPABILITY", msg);
-      trackPendingRequest(model, provider, connectionId, false);
+      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
       return createErrorResult(400, msg, null, fit.terminalReason, "invalid_request_error");
     }
   }
@@ -3068,6 +3097,7 @@ export async function handleChatCore({
     provider,
     model,
     connectionId,
+    pendingRequestId,
     clientResponseFormat,
     clientAbortSignal: clientRawRequest?.signal,
     allowCompletedToolHandoffGrace: isCodexResponsesEcho,
@@ -3242,6 +3272,20 @@ export async function handleChatCore({
               const res = normalizeExecutorResult(rawExecutorResult);
               trace("post_executor", { status: res?.response?.status });
 
+              // When a payload override rewrote body.model (custom-model alias →
+              // real upstream id, e.g. `gemini-3.7-flash-high` → `gemini-3.7-flash`),
+              // log and track the WIRE model so dashboards/telemetry reflect what
+              // actually shipped and Gemini rate-limit accounting uses the real id
+              // (the executor already built its URL from the same rewritten model).
+              const wireModel =
+                typeof res.model === "string" && res.model ? res.model : modelToCall;
+              if (wireModel !== modelToCall) {
+                log?.debug?.(
+                  "PAYLOAD_RULES",
+                  `Payload rules rewrote model for URL: requested=${modelToCall} wire=${wireModel}`
+                );
+              }
+
               if (
                 provider === "codex" &&
                 attemptConnectionId &&
@@ -3279,7 +3323,7 @@ export async function handleChatCore({
 
               // Track Gemini RPM + RPD request counts for 429 classification
               if (provider === "gemini") {
-                incrementRequestCount(modelToCall);
+                incrementRequestCount(wireModel);
               }
 
               updatePendingScope(pendingScope, {
@@ -3457,7 +3501,7 @@ export async function handleChatCore({
                           )
                         ),
                       continueStream,
-                      ...buildContinuationLogHooks(log),
+                      ...buildContinuationLogHooks(log, correlationId),
                       throughputWatchdog,
                       onWatchdogAbort: () =>
                         log?.warn?.(
@@ -3624,7 +3668,7 @@ export async function handleChatCore({
             : `${tokenBreach.scopeType} "${tokenBreach.scopeValue}"`;
         // FIX 6: clear the pending request marker before the early return so we do
         // not leak a phantom pending request (start was tracked at line ~1847).
-        trackPendingRequest(model, provider, connectionId, false);
+        trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
         // FIX 5: tag this as a per-API-key token-limit breach (errorCode
         // TOKEN_LIMIT_EXCEEDED) so the combo loop can distinguish it from an
         // upstream 429 and NOT cool shared accounts / retry it transiently.
@@ -3648,7 +3692,7 @@ export async function handleChatCore({
   if (provider === "gemini") {
     try {
       if (isTpmExhausted(effectiveModel)) {
-        trackPendingRequest(model, provider, connectionId, false);
+        trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
         return createErrorResult(
           HTTP_STATUS.RATE_LIMITED,
           `Gemini TPM rate limit reached for ${effectiveModel}. Please try again later.`,
@@ -4246,7 +4290,7 @@ export async function handleChatCore({
         // fail-open: saturation signal is best-effort
       }
     } catch (error) {
-      trackPendingRequest(model, provider, connectionId, false);
+      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
       const errorMetadata = getSafeErrorMetadata(error);
       const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
       if (managedLeaseFenceCode) return managedLeaseFenceErrorResult(managedLeaseFenceCode);
@@ -4596,7 +4640,7 @@ export async function handleChatCore({
 
     // Check provider response - return error info for fallback handling
     providerFailure: if (!providerResponse.ok) {
-      trackPendingRequest(model, provider, connectionId, false);
+      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
 
       let statusCode = providerResponse.status;
       let message = "";
@@ -5164,7 +5208,7 @@ export async function handleChatCore({
           cacheSource: "upstream",
         });
         persistFailureUsage(err.status, err.errorCode || `upstream_${err.status}`);
-        trackPendingRequest(model, provider, connectionId, false);
+        trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
         return err;
       }
 
@@ -5293,11 +5337,12 @@ export async function handleChatCore({
           loop: loopApply.loop,
           model,
           provider,
-          connectionId,
+          connectionId: pendingConnId,
           providerRequest: loopApply.loop.finalProviderRequest || finalBody || translatedBody,
           persistFailureUsage,
           persistAttemptLogs,
           trackPendingRequest,
+          pendingRequestId,
         });
       }
       // `legResult` is declared as the full NonStreamingProviderLegResult union. The
@@ -5563,7 +5608,7 @@ export async function handleChatCore({
           cacheSource: "upstream",
         });
         persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
-        trackPendingRequest(model, provider, pendingConnId, false);
+        trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
         // Routing event (feedback foundation) — record the malformed outcome so
         // the quality tracker de-prioritizes this model over time.
         void emitRoutingEvent(
@@ -5734,7 +5779,7 @@ export async function handleChatCore({
         }),
       };
     } catch (error) {
-      trackPendingRequest(model, provider, connectionId, false);
+      trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
       const errorMetadata = getSafeErrorMetadata(error);
       const managedLeaseFenceCode = getManagedLeaseFenceErrorCode(errorMetadata.code);
       if (managedLeaseFenceCode) return managedLeaseFenceErrorResult(managedLeaseFenceCode);
@@ -5783,9 +5828,16 @@ export async function handleChatCore({
     provider,
     model,
     body: (finalBody || translatedBody) as Record<string, unknown> | null | undefined,
+    sourceBody: body as Record<string, unknown> | null | undefined,
     maxTimeoutMs: agentGoalPolicy.detected
       ? Math.max(STREAM_READINESS_MAX_TIMEOUT_MS, agentGoalPolicy.readinessMaxTimeoutMs)
       : STREAM_READINESS_MAX_TIMEOUT_MS,
+    cascadeTimeoutMs: getExecutorTimeoutMs(
+      executor,
+      provider,
+      model,
+      resolveConnectionTimeoutMs(credentials?.providerSpecificData)
+    ),
   });
   if (streamReadinessPolicy.timeoutMs !== streamReadinessPolicy.baseTimeoutMs) {
     log?.debug?.(
@@ -5827,7 +5879,7 @@ export async function handleChatCore({
   if (streamReadiness.ok === false) {
     const { response: failureResponse, reason } = streamReadiness;
     const { classificationReason, upstreamDiagnostic } = streamReadiness;
-    trackPendingRequest(model, provider, connectionId, false);
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
     appendRequestLog({
       model,
       provider,
@@ -5868,9 +5920,9 @@ export async function handleChatCore({
   // issue bounded retries through the normal credential path BEFORE anything is
   // exposed to the client — in particular before `onRequestSuccess` below.
   // Empty turns are stochastic upstream misses, not account faults, so no
-  // cooldown and no forced exclusion: the round-robin picker may rotate
-  // fingerprint slots opportunistically, a single slot simply replays the same
-  // account. Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
+  // cooldown: the retry prefers another allowed connection, a single slot
+  // replays itself, and a leased or pinned connection never rotates (#14715).
+  // Budget: `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` retries, then fall
   // back to the current behavior. Translate-path streams only (mirror of the
   // empty-stream guard); flag off = byte-for-byte unchanged. Bounded reader
   // (abandon past the cap, never a full `text()` read); the original
@@ -5889,85 +5941,33 @@ export async function handleChatCore({
       targetFormat === FORMATS.OPENAI_RESPONSES ||
       needsTranslation(targetFormat, clientResponseFormat);
     if (flushEmptyRetryArmed && isTranslatePath) {
-      for (
-        let emptyTurnRetries = 0;
-        emptyTurnRetries <= STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX;
-        emptyTurnRetries++
-      ) {
-        const verdict = judgeBufferedTurn(
-          await readBoundedResponseOutcome(
-            providerResponse,
-            FLUSH_EMPTY_RETRY_MAX_BYTES,
-            streamReadinessPolicy.timeoutMs
-          ),
-          targetFormat,
-          clientResponseFormat,
-          clientRawRequest?.signal?.aborted === true
-        );
-        if (verdict.kind === "pass") {
-          const v = formatBufferedVerdictLog(verdict, correlationId, traceId);
-          log?.[v.level]?.("FLUSH_EMPTY_RETRY", v.line);
-          break;
-        }
-        if (emptyTurnRetries >= STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX) {
-          log?.warn?.(
-            "FLUSH_EMPTY_RETRY",
-            "retry budget exhausted, falling back to current behavior"
-          );
-          break;
-        }
-        log?.warn?.(
-          "FLUSH_EMPTY_RETRY",
-          `${verdict.reason}, bounded retry through the normal credential path`
-        );
-        const nextCreds = await getProviderCredentials(
-          provider,
-          null,
-          null,
-          currentModel
-        ).catch(() => null);
-        if (!nextCreds?.connectionId) break;
-        const retryConnectionId = String(nextCreds.connectionId);
-        Object.assign(credentials, nextCreds);
-        log?.info?.("FLUSH_EMPTY_RETRY", `retrying on ${retryConnectionId}`);
-        await providerResponse.body?.cancel().catch(() => {});
-        let retryResult: unknown = null;
-        try {
-          retryResult = await executeProviderRequest(currentModel, false);
-        } catch {
-          break;
-        }
-        const retryResponse = (retryResult as { response?: Response })?.response;
-        if (!retryResponse?.ok || !retryResponse.body) {
-          if (retryResponse) await retryResponse.body?.cancel().catch(() => {});
-          break;
-        }
-        const prepared = await maybeConvertJsonBodyToSse(retryResponse, {
-          log,
-          provider,
-          model,
-        });
-        const ready = prepared.ok
-          ? await ensureStreamReadiness(prepared, {
-              timeoutMs: streamReadinessPolicy.timeoutMs,
-              maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
-              provider,
-              model,
-              log,
-            })
-          : null;
-        const preparedStream = ready && ready.ok ? ready.response : null;
-        if (!preparedStream) {
-          await retryResponse.body?.cancel().catch(() => {});
-          break;
-        }
-        // Swap BEFORE re-classifying so the next loop iteration reads the retry.
-        providerResponse = preparedStream;
-        finalBody = providerRequestCapture.body(
-          (retryResult as { transformedBody?: unknown })?.transformedBody ?? translatedBody
-        );
-        reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-      }
+      const retried = await runEmptyTurnRetryLoop({
+        providerResponse,
+        credentials,
+        provider,
+        currentModel,
+        model,
+        targetFormat,
+        clientResponseFormat,
+        isAborted: () => clientRawRequest?.signal?.aborted === true,
+        timeoutMs: streamReadinessPolicy.timeoutMs,
+        maxTimeoutMs: streamReadinessPolicy.maxTimeoutMs,
+        maxRetries: STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX,
+        translatedBody,
+        finalBody,
+        providerUrl,
+        providerHeaders,
+        correlationId,
+        traceId,
+        log,
+        getProviderCredentials,
+        routing: { leased: Boolean(managedLease), forcedConnectionId, apiKey: apiKeyInfo },
+        executeProviderRequest,
+        logTargetRequest: (url, headers, body) => reqLogger.logTargetRequest(url, headers, body),
+        captureBody: (body) => providerRequestCapture.body(body),
+      });
+      providerResponse = retried.providerResponse;
+      if (retried.adopted) finalBody = retried.finalBody;
     }
   }
 
@@ -6011,6 +6011,7 @@ export async function handleChatCore({
   let streamFailureCompletionRecorded = false;
 
   // Callback to save call log when stream completes (include responseBody when provided by stream)
+  let streamTimingOriginOffsetMs: number | null = null; // startTime → StreamTiming start
   const onStreamComplete = ({
     status: streamStatus,
     usage: streamUsage,
@@ -6020,10 +6021,11 @@ export async function handleChatCore({
     reasoningMeta: streamReasoningMeta,
     error: streamError,
     errorCode: streamErrorCode,
-    ttft,
+    firstOutputMs,
     itlMs: streamItlMs,
     interrupted: _streamInterrupted,
   }) => {
+    const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
     const normalizedStreamStatus = streamStatus || 200;
     if (streamCompletionRecorded) return;
     streamCompletionRecorded = true;
@@ -6170,6 +6172,9 @@ export async function handleChatCore({
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
       cacheSource: "upstream",
+      // #13130: persist TTFT so call_logs.ttft_ms lets the dashboard compute
+      // generation-time TPS instead of wall-clock TPS.
+      ttft,
       reasoningMeta: streamReasoningMeta ?? null,
     });
 
@@ -6297,6 +6302,7 @@ export async function handleChatCore({
   // DSML tool-call markers as plain text → incomplete `stop` finish).
   const requestedThinking = hasActiveClaudeThinking((body ?? {}) as Record<string, unknown>);
 
+  streamTimingOriginOffsetMs = Date.now() - startTime;
   if (needsResponsesTranslation) {
     // Provider returns openai-responses, translate to openai (Chat Completions) that clients expect
     log?.debug?.("STREAM", `Responses translation mode: openai-responses → openai`);

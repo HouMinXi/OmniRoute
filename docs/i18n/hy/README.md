@@ -1256,28 +1256,28 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1-ը նույնպե
 <br/>
 <div align="center">
 
-## 🛠️ Տեխնոլոգիական կույտ
+## 🛠️ Տեխնոլոգիական փաթեթ
 
 </div>
 
 <table>
   <tr><th align="left">Շերտ</th><th align="left">Տեխնոլոգիա</th></tr>
-  <tr><td nowrap><b>Գործարկման միջավայր</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> <code>src/</code> և <code>open-sse/</code>-ի ողջ տարածքում (զրո <code>any</code> հիմնականում v2.0-ից ի վեր)</td></tr>
-  <tr><td nowrap><b>Շրջանակ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 122 դոմենային մոդուլ, 183 միգրացիա</td></tr>
-  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 ամբողջական տեքստ + int8-քվանտացված վեկտորային ներդրումներ, տիպավորված քայքայում</td></tr>
-  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքի I/O վավերացում + API պայմանագրեր</td></tr>
+  <tr><td nowrap><b>Կատարման միջավայր</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
+  <tr><td nowrap><b>Լեզու</b></td><td>TypeScript 6.0 — <code>src/</code>-ում և <code>open-sse/</code>-ում՝ <b>100% TypeScript</b> (v2.0-ից ի վեր միջուկում՝ զրոյական <code>any</code>)</td></tr>
+  <tr><td nowrap><b>Ֆրեյմվորք</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
+  <tr><td nowrap><b>Տվյալների բազա</b></td><td>better-sqlite3 (SQLite, WAL մատենավարում) + LowDB (ժառանգական JSON) — 122 տիրութային մոդուլ, 190 միգրացիա</td></tr>
+  <tr><td nowrap><b>Հիշողություն</b></td><td>SQLite FTS5 լիատեքստային որոնում + int8-քվանտացված վեկտորային ներդրումներ, տիպավորված մարում</td></tr>
+  <tr><td nowrap><b>Սխեմաներ</b></td><td>Zod 4 — MCP գործիքների մուտքի/ելքի վավերացում + API պայմանագրեր</td></tr>
   <tr><td nowrap><b>Արձանագրություններ</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>Հոսքային հաղորդում</b></td><td>Server-Sent Events (SSE) + WebSocket կամուրջ (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Սեղմում</b></td><td>12-շարժիչանոց խողովակաշար — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Նույնականացում և անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API բանալիներ + MCP սահմանափակված նույնականացում · AES-256-GCM հանգիստ վիճակում · DOMPurify</td></tr>
-  <tr><td nowrap><b>Թաքնվածություն</b></td><td>wreq-js — JA3 / JA4 TLS մատնահետքի իմիտացիա, 3-մակարդակի պրոքսի</td></tr>
-  <tr><td nowrap><b>Դիմացկունություն</b></td><td>Circuit breaker, էքսպոնենցիալ հետաձգում, anti-thundering-herd, ավտո-կոմբո ինքնավերականգնում</td></tr>
-  <tr><td nowrap><b>Մուտքագրում</b></td><td>pino — կառուցվածքային JSON մուտքեր հարցման համատեքստով</td></tr>
-  <tr><td nowrap><b>Թեստավորում</b></td><td>Node.js test runner + Vitest — <b>39,000+ ստատիկ թեստային հայտարարություններ</b> 5,100+ հետևվող թեստային ֆայլերում (միավոր, ինտեգրում, E2E, անվտանգություն, էկոհամակարգ)</td></tr>
-  <tr><td nowrap><b>Պլատֆորմներ</b></td><td>Սեղանադիր (Electron) · Android (Termux) · PWA (ցանկացած բրաուզեր)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — ավտոմատ npm հրապարակում + Docker Hub թողարկման ժամանակ</td></tr>
+  <tr><td nowrap><b>Հոսքային փոխանցում</b></td><td>Server-Sent Events (SSE) + WebSocket կամուրջ (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>Սեղմում</b></td><td>12 շարժիչից բաղկացած խողովակաշար — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Նույնականացում և անվտանգություն</b></td><td>OAuth 2.0 (PKCE) + JWT + API բանալիներ + MCP-ի տիրույթներով նույնականացում · AES-256-GCM՝ պահպանված վիճակում · DOMPurify</td></tr>
+  <tr><td nowrap><b>Քողարկում</b></td><td>wreq-js — JA3 / JA4 TLS մատնահետքերի նմանակում, 3-մակարդակ պրոքսի</td></tr>
+  <tr><td nowrap><b>Կայունություն</b></td><td>Շղթայի անջատիչ, էքսպոնենցիալ հետաձգում, զանգվածային միաժամանակյա հարցումների կանխարգելում, ինքնաբուժվող ավտոհամակցում</td></tr>
+  <tr><td nowrap><b>Մատենավարում</b></td><td>pino — կառուցվածքային JSON մատյաններ՝ հարցման համատեքստով</td></tr>
+  <tr><td nowrap><b>Թեստավորում</b></td><td>Node.js թեստերի գործարկիչ + Vitest — <b>39,000+ ստատիկ թեստային հայտարարագրեր</b>՝ 5,100+ վերահսկվող թեստային ֆայլերում (միավորային, ինտեգրացիոն, E2E, անվտանգության, էկոհամակարգի)</td></tr>
+  <tr><td nowrap><b>Հարթակներ</b></td><td>Սեղանադիր համակարգիչ (Electron) · Android (Termux) · PWA (ցանկացած դիտարկիչ)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — թողարկման ժամանակ ավտոմատ հրապարակում npm-ում + Docker Hub-ում</td></tr>
   <tr><td nowrap><b>Հղումներ</b></td><td><a href="https://omniroute.online">Կայք</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
