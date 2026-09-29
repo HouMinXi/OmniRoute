@@ -10296,6 +10296,14 @@ paths:
       responses:
         "200":
           description: OK
+  /api/oauth/trae/authorize-state:
+    post:
+      tags:
+        - Oauth
+      summary: "POST oauth › trae › authorize state"
+      responses:
+        "200":
+          description: OK
   /api/oauth/trae/import:
     get:
       tags:
