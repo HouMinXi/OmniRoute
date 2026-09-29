@@ -23,10 +23,12 @@ import {
 } from "./chatCore/contextEstimation.ts";
 import {
   extractSystemRoleMessages,
+  hoistLeadingTextSystemMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
 export {
   extractSystemRoleMessages,
+  hoistLeadingTextSystemMessages,
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
 import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
@@ -2010,7 +2012,11 @@ async function handleChatCoreInner({
     ) {
       log?.info?.(
         "CONTEXT",
-        `Proactive compression triggered: ${estimatedTokens} tokens > ${threshold} threshold (${contextLimit} limit)`
+        // #14931: X is the MESSAGES-only estimate (tools are accounted
+        // separately as the threshold's reserve), unlike the full-breakdown
+        // number the final guard rejects with — state the basis so the two
+        // lines can be read side by side without a decoder ring.
+        `Proactive compression triggered: ${estimatedTokens} message tokens > ${threshold} threshold (${contextLimit} limit, tools reserve ${reservedTokens})`
       );
 
       // Adapt Responses `input[]` → messages so compressContext can run, then restore.
@@ -2037,7 +2043,7 @@ async function handleChatCoreInner({
 
         log?.info?.(
           "CONTEXT",
-          `Context compressed: ${stats.original} → ${stats.final} tokens${layersInfo}`
+          `Context compressed: ${stats.original} → ${stats.final} message tokens${layersInfo}`
         );
 
         logAuditEvent({
@@ -2374,6 +2380,10 @@ async function handleChatCoreInner({
           // messages[], but a directive-only message (content: [] +
           // output_config) at messages[0] is rejected by Anthropic. Move it past
           // the first real turn; Anthropic accepts the form at any other position.
+          // A text-bearing system message at messages[0] (e.g. the Output Styles
+          // injection) is rejected there too: hoist the leading run into the
+          // top-level `system` parameter first.
+          hoistLeadingTextSystemMessages(translatedBody);
           relocateDirectiveOnlyMessages(translatedBody);
         }
         if (Array.isArray(translatedBody.messages)) {

@@ -38,6 +38,26 @@ const KV_GRACE_MS = (() => {
 // turns the failure into a clean stream error instead of memory exhaustion.
 const CURSOR_MAX_FRAME_BYTES = 16 * 1024 * 1024;
 
+// Connect-RPC ends a server stream with an end-of-stream frame (flag bit 0x02)
+// whose payload is JSON — `{}` on success, `{"error":{"code","message"}}` on
+// failure — not protobuf. It must never reach the protobuf frame handler.
+const CONNECT_END_STREAM_FLAG = 0x02;
+
+/** The error an end-of-stream payload reports, or null when it reports none. */
+export function connectEndStreamError(payload: Buffer): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(payload.toString("utf8"));
+  } catch {
+    return null;
+  }
+  const error = (parsed as { error?: { code?: unknown; message?: unknown } } | null)?.error;
+  if (!error || typeof error !== "object") return null;
+  const code = typeof error.code === "string" ? error.code : "unknown";
+  const message = typeof error.message === "string" ? `: ${error.message.slice(0, 200)}` : "";
+  return `cursor-agent stream ended with error ${code}${message}`;
+}
+
 type DriverContext = {
   endReason: "turn_ended" | "kv_after_text" | "tool_calls" | "server_end" | null;
   leftoverBytes: Buffer;
@@ -205,6 +225,24 @@ export function driveCursorH2(
           if (pos + 5 + length > buf.length) break; // partial frame; wait
           const flag = buf[pos];
           const raw = buf.subarray(pos + 5, pos + 5 + length);
+          if (flag & CONNECT_END_STREAM_FLAG) {
+            let endError: string | null = null;
+            try {
+              endError = connectEndStreamError(flag & 0x1 ? await gunzipAsync(raw) : raw);
+            } catch {
+              endError = null;
+            }
+            if (settled) return;
+            if (endError) {
+              settled = true;
+              teardown();
+              reject(new Error(endError));
+              return;
+            }
+            // A clean end-of-stream: the h2 `end` event that follows ends the turn.
+            pos += 5 + length;
+            continue;
+          }
           // A malformed complete frame can be a blocking exec request. Skipping
           // it leaves Cursor waiting for a reply we never send.
           try {

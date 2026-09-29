@@ -1,3 +1,9 @@
+---
+title: "Local Ollama + Docker OmniRoute"
+version: 3.8.51
+lastUpdated: 2026-09-29
+---
+
 # Local Ollama + Docker OmniRoute
 
 Guide for running **OmniRoute in Docker** while **Ollama runs natively on the host** — the setup used with VS Code OmniCopilot and other OpenAI-compatible clients.

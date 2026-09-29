@@ -192,6 +192,8 @@ const ESM_WRITE_SHELL_STDIN_ARGS = 23;
 
 // Args sub-message field numbers (path and shell variants)
 const ARG_PATH = 1; // ReadArgs.path / WriteArgs.path / DeleteArgs.path / LsArgs.path
+const ARG_READ_OFFSET = 4; // ReadArgs.offset (optional int32)
+const ARG_READ_LIMIT = 5; // ReadArgs.limit (optional uint32)
 const ARG_SHELL_COMMAND = 1; // ShellArgs.command
 const ARG_SHELL_WORKING_DIR = 2; // ShellArgs.working_directory
 const ARG_SHELL_TIMEOUT = 3; // ShellArgs.timeout
@@ -885,7 +887,16 @@ export type ExecServerEvent =
       execId: string;
       serverIdentifiers: string[];
     }
-  | { kind: "exec_read"; execMsgId: number; execId: string; path: string }
+  | {
+      kind: "exec_read";
+      execMsgId: number;
+      execId: string;
+      path: string;
+      /** ReadArgs.offset: first line to read. Absent when the model reads the whole file. */
+      offset?: number;
+      /** ReadArgs.limit: number of lines to read. */
+      limit?: number;
+    }
   | {
       kind: "exec_write";
       execMsgId: number;
@@ -1009,6 +1020,27 @@ function createPathExecEvent(kind: PathExecKind, context: ExecEventContext): Exe
   };
 }
 
+/**
+ * ReadArgs also carries an optional line range. Dropping it turns every partial
+ * read into a whole-file read, which clients such as Claude Code answer with
+ * "file unchanged" — the model then never gets the lines it asked for.
+ */
+function createReadExecEvent(context: ExecEventContext): ExecServerEvent {
+  const event = createPathExecEvent("exec_read", context) as Extract<
+    ExecServerEvent,
+    { kind: "exec_read" }
+  >;
+  for (const field of decodeFields(context.variantBytes)) {
+    if (field.wireType !== WT_VARINT) continue;
+    if (field.fieldNumber === ARG_READ_OFFSET) {
+      event.offset = Number(BigInt.asIntN(32, field.varint));
+    } else if (field.fieldNumber === ARG_READ_LIMIT) {
+      event.limit = Number(BigInt.asUintN(32, field.varint));
+    }
+  }
+  return event;
+}
+
 function createShellExecEvent(kind: ShellExecKind, context: ExecEventContext): ExecServerEvent {
   return {
     kind,
@@ -1053,7 +1085,7 @@ const EXEC_EVENT_DECODERS: Partial<Record<number, ExecEventDecoder>> = {
     execMsgId,
     execId,
   }),
-  [ESM_READ_ARGS]: (context) => createPathExecEvent("exec_read", context),
+  [ESM_READ_ARGS]: (context) => createReadExecEvent(context),
   [ESM_WRITE_ARGS]: (context) => {
     const encodingHint = decodeStringField(context.variantBytes, 6);
     const hasFileBytes = decodeFields(context.variantBytes).some(

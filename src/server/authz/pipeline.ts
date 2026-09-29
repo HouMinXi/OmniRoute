@@ -1,10 +1,10 @@
-import { SignJWT } from "jose";
 import { NextResponse, type NextRequest } from "next/server";
 import { getCachedSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
 import {
   verifyDashboardSessionToken,
+  mintDashboardSessionToken,
   DASHBOARD_SESSION_COOKIE,
   getDashboardJwtSecret,
 } from "@/shared/utils/dashboardSessionToken";
@@ -35,6 +35,7 @@ import {
   CLI_TOKEN_HEADER,
   PEER_IP_HEADER,
   VIA_PROXY_HEADER,
+  CLIENT_IP_HEADER,
 } from "./headers";
 import type { AuthSubject, RouteClass, RouteClassification } from "./types";
 import type { AuthOutcome, RoutePolicy } from "./context";
@@ -153,10 +154,7 @@ async function refreshDashboardSessionIfNeeded(
     const refreshWindowSeconds = 7 * 24 * 60 * 60;
     if (exp - now >= refreshWindowSeconds) return;
 
-    const freshToken = await new SignJWT({ authenticated: true })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("30d")
-      .sign(secret);
+    const freshToken = await mintDashboardSessionToken(secret);
 
     response.cookies.set(DASHBOARD_SESSION_COOKIE, freshToken, {
       httpOnly: true,
@@ -315,6 +313,7 @@ export async function runAuthzPipeline(
   // per-process token never reaches route handlers or upstream providers.
   requestHeaders.delete(PEER_IP_HEADER);
   requestHeaders.delete(VIA_PROXY_HEADER);
+  requestHeaders.delete(CLIENT_IP_HEADER);
 
   requestHeaders.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
   requestHeaders.set(AUTHZ_HEADER_REQUEST_ID, requestId);
@@ -385,7 +384,13 @@ export async function runAuthzPipeline(
       request.headers.get(VIA_PROXY_HEADER),
       process.env.OMNIROUTE_PEER_STAMP_TOKEN
     );
-    const ipVerdict = checkRequestIP(request, viaProxy ? null : trustedPeerIp);
+    // The server stamps the client address to judge (the peer, or what a trusted proxy
+    // reported for it). Requests without that stamp keep the earlier rule.
+    const stampedClientIp = resolveStampedPeer(
+      request.headers.get(CLIENT_IP_HEADER),
+      process.env.OMNIROUTE_PEER_STAMP_TOKEN
+    );
+    const ipVerdict = checkRequestIP(request, stampedClientIp ?? (viaProxy ? null : trustedPeerIp));
     if (!ipVerdict.allowed) {
       const blocked = NextResponse.json(
         { error: ipVerdict.reason || "Access denied" },
