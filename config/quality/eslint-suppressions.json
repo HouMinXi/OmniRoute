@@ -5010,7 +5010,7 @@
   },
   "tests/unit/translator-openai-to-kiro.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 17
+      "count": 14
     }
   },
   "tests/unit/translator-redacted-thinking-model-aware-4479.test.ts": {

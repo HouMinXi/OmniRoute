@@ -1,10 +1,13 @@
 import { NextResponse } from "next/server";
 import { getCachedSettings } from "@/lib/db/readCache";
 import { updateSettings } from "@/lib/db/settings";
-import { SignJWT, jwtVerify, createRemoteJWKSet } from "jose";
+import { jwtVerify, createRemoteJWKSet } from "jose";
 import { cookies } from "next/headers";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
-import { getDashboardJwtSecret } from "@/shared/utils/dashboardSessionToken";
+import {
+  getDashboardJwtSecret,
+  mintDashboardSessionToken,
+} from "@/shared/utils/dashboardSessionToken";
 // Test seam (static) — allows tests to inject a cookie store and capture the minted auth_token.
 // Mirrors the pattern in src/app/api/auth/login/route.ts
 export const oidcCallbackInternals = {
@@ -229,10 +232,7 @@ export async function GET(request: Request) {
   const isHttpsRequest = fp === "https" || reqUrl.protocol === "https:";
   const useSecureCookie = forceSecureCookie || isHttpsRequest;
 
-  const jwt = await new SignJWT({ authenticated: true })
-    .setProtectedHeader({ alg: "HS256" })
-    .setExpirationTime("30d")
-    .sign(secret);
+  const jwt = await mintDashboardSessionToken(secret);
 
   const store = await oidcCallbackInternals.getCookieStore();
   store.set("auth_token", jwt, {

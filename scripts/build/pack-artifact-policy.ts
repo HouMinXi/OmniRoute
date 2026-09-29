@@ -161,6 +161,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "scripts/build/native-binary-compat.mjs",
   "scripts/build/wreqJsNative.mjs",
   "scripts/build/postinstall.mjs",
+  // Imported by scripts/build/postinstall.mjs to pick the better-sqlite3 prebuild target.
+  "scripts/build/betterSqlitePrebuildTarget.mjs",
   "scripts/build/postinstallSupport.mjs",
   "scripts/build/colocateOptionals.mjs",
   // #8859: imported by scripts/build/postinstall.mjs to repair playwright-core's
@@ -174,6 +176,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "scripts/packs/optionalPackManifest.mjs",
   "scripts/build/sync-env.mjs",
   "scripts/dev/responses-ws-proxy.mjs",
+  // Imported by scripts/dev/responses-ws-proxy.mjs.
+  "scripts/dev/peer-stamp.mjs",
   "scripts/dev/sync-env.mjs",
   // #5361: imported at runtime by bin/cli/commands/serve.mjs + the standalone
   // server wrapper for opt-in native HTTPS/TLS serving (kept dependency-light).

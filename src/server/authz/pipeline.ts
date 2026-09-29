@@ -1,10 +1,10 @@
-import { SignJWT } from "jose";
 import { NextResponse, type NextRequest } from "next/server";
 import { getCachedSettings } from "../../lib/db/readCache";
 import { isDraining } from "../../lib/gracefulShutdown";
 import { checkBodySize, getBodySizeLimit } from "../../shared/middleware/bodySizeGuard";
 import {
   verifyDashboardSessionToken,
+  mintDashboardSessionToken,
   DASHBOARD_SESSION_COOKIE,
   getDashboardJwtSecret,
 } from "@/shared/utils/dashboardSessionToken";
@@ -154,10 +154,7 @@ async function refreshDashboardSessionIfNeeded(
     const refreshWindowSeconds = 7 * 24 * 60 * 60;
     if (exp - now >= refreshWindowSeconds) return;
 
-    const freshToken = await new SignJWT({ authenticated: true })
-      .setProtectedHeader({ alg: "HS256" })
-      .setExpirationTime("30d")
-      .sign(secret);
+    const freshToken = await mintDashboardSessionToken(secret);
 
     response.cookies.set(DASHBOARD_SESSION_COOKIE, freshToken, {
       httpOnly: true,

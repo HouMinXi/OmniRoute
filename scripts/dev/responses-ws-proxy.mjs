@@ -832,7 +832,10 @@ class ResponsesWsSession {
       }
       const code = error?.code || "upstream_websocket_connect_failed";
       const messageText = error instanceof Error ? error.message : String(error);
-      const failurePayload = this.sendFailure(code, messageText);
+      // Hard Rule #12: the connect error can carry the upstream proxy URL (with its
+      // credentials) or internal addresses. The client gets a fixed message; the raw text
+      // stays in the server-side request history below.
+      const failurePayload = this.sendFailure(code, "Upstream WebSocket connection failed");
       void this.persistHistory({
         status: Number.isInteger(error?.status) ? error.status : 502,
         success: false,
@@ -1116,12 +1119,18 @@ export function createResponsesWsProxy({
         });
         return true;
       } catch (error) {
+        // Hard Rule #12: the exception text can carry filesystem paths and stack frames —
+        // keep it in the server log and give the client a fixed message.
+        console.error(
+          "[responses-ws-proxy] upgrade failed:",
+          error instanceof Error ? error.message : String(error)
+        );
         writeHttpError(
           socket,
           500,
           JSON.stringify({
             error: {
-              message: error instanceof Error ? error.message : String(error),
+              message: "Responses WebSocket proxy failed",
               code: "responses_websocket_proxy_failed",
             },
           })

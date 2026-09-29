@@ -1803,7 +1803,7 @@
       }
     },
     "CONTRIBUTING.md": {
-      "source_hash": "0da9cb7b6ec091538e7fbafbdf8d7e3a3e7e2c12ea352c56722cec883596f8e1",
+      "source_hash": "491d19cc41c8a7036a4d44f98fc6f487a12f0b9dc212e17e881f948b2c3c0078",
       "locales": {
         "ar": {
           "source_hash": "0da9cb7b6ec091538e7fbafbdf8d7e3a3e7e2c12ea352c56722cec883596f8e1",
@@ -3331,7 +3331,7 @@
       }
     },
     "README.md": {
-      "source_hash": "ac9dd2dadf033818d837f02a550fc3d2eb994771be75b2b553994406d7897423",
+      "source_hash": "de98b417e1deef2482c366c30e7653bda1d7c27a36fa3615b14561fe4fdca66f",
       "locales": {
         "ar": {
           "source_hash": "ac9dd2dadf033818d837f02a550fc3d2eb994771be75b2b553994406d7897423",
@@ -11685,7 +11685,7 @@
       }
     },
     "docs/architecture/AUTHZ_GUIDE.md": {
-      "source_hash": "5e6b907a099e01d06a567790699234791046dc93b806088f36846e237fc93fb9",
+      "source_hash": "4cae38d64a892c3e918c1885d587efc65b1c9ffbc4a67c46dc6da63c68c29b01",
       "locales": {
         "pl": {
           "source_hash": "5e6b907a099e01d06a567790699234791046dc93b806088f36846e237fc93fb9",
@@ -21728,7 +21728,7 @@
       }
     },
     "docs/architecture/admission-lanes.md": {
-      "source_hash": "c6a9c72a1c17605dd67b8b8a9d80d04b3352af3e9235880a97775efbcaaaf0a1",
+      "source_hash": "234462bd2df075fd28c4338fa4e8c318a90428199ad8f3747b041bd6a57dd497",
       "locales": {
         "ar": {
           "source_hash": "c6a9c72a1c17605dd67b8b8a9d80d04b3352af3e9235880a97775efbcaaaf0a1",
@@ -39405,7 +39405,7 @@
       }
     },
     "docs/frameworks/CLOUD_AGENT.md": {
-      "source_hash": "2d629d7d30d8bd516d604ae118cfb916d4c47fff2e3b2168f9844cf48c349117",
+      "source_hash": "77e3f17de9a41057cf05da24abb68bd2f1c8e8831b1b0b455d28e91815bfaf74",
       "locales": {
         "pl": {
           "source_hash": "2d629d7d30d8bd516d604ae118cfb916d4c47fff2e3b2168f9844cf48c349117",
@@ -55001,7 +55001,7 @@
       }
     },
     "docs/frameworks/PLAYGROUND_STUDIO.md": {
-      "source_hash": "05c3636cb4ef384715941a4d8d18d89ef235342398e8601c2c4760bb1177f9c0",
+      "source_hash": "fc8637dabff473b3c31ad2a15c4d0048efeaa74b39d0f8c719d2b0adc9060459",
       "locales": {
         "pl": {
           "source_hash": "05c3636cb4ef384715941a4d8d18d89ef235342398e8601c2c4760bb1177f9c0",
@@ -72529,7 +72529,7 @@
       }
     },
     "docs/guides/CHAOS-MODE.md": {
-      "source_hash": "ba67f26a283e7e522a5fab7fd0b14992ab8a703a25c5568a4b7705b91e2591f0",
+      "source_hash": "8be81dfbcc2ff275a31647510f9ff12f1bd9601e3f4cb5bd28dc774f0c4af7d6",
       "locales": {
         "ar": {
           "source_hash": "ba67f26a283e7e522a5fab7fd0b14992ab8a703a25c5568a4b7705b91e2591f0",
@@ -80447,7 +80447,7 @@
       }
     },
     "docs/guides/ELECTRON_GUIDE.md": {
-      "source_hash": "da2cd2f3c2ad22b07a7bda3392f7d1751c5c27d411589f1f0e85cb53436d9bcf",
+      "source_hash": "4ab8b4fba5351fbcbd7bfecd99e463ccef56ca041477c402439d069acfac09a5",
       "locales": {
         "pl": {
           "source_hash": "da2cd2f3c2ad22b07a7bda3392f7d1751c5c27d411589f1f0e85cb53436d9bcf",
@@ -91521,7 +91521,7 @@
       }
     },
     "docs/guides/TROUBLESHOOTING.md": {
-      "source_hash": "91321747e63aea3c393db9696a185575a6b04314e82af816c44a73c5b5e9942e",
+      "source_hash": "acf8f574a369e81466c72a5aedc118e37c6f84797f45a1169ff8102b91579d56",
       "locales": {
         "ar": {
           "source_hash": "91321747e63aea3c393db9696a185575a6b04314e82af816c44a73c5b5e9942e",
@@ -94493,7 +94493,7 @@
       }
     },
     "docs/guides/USER_GUIDE.md": {
-      "source_hash": "3bc70f92e67d31767a677a11735ed1ad60f5aee28f916ca27a698d63014a994d",
+      "source_hash": "6245286ac637c7e3a0ceae43a9e35b3a06dd45d1833da9b67459d53dc46e3c95",
       "locales": {
         "ar": {
           "source_hash": "3bc70f92e67d31767a677a11735ed1ad60f5aee28f916ca27a698d63014a994d",
@@ -121334,7 +121334,7 @@
       }
     },
     "docs/reference/API_REFERENCE.md": {
-      "source_hash": "5ff1688d1e5739aed8ec87e873e474aa2ee1deaf55cf615cacbade19b587c27c",
+      "source_hash": "2aba9bd8580db1e51a53dec0c43bf06cac79c20f84b26deb945f901e07603079",
       "locales": {
         "ar": {
           "source_hash": "5ff1688d1e5739aed8ec87e873e474aa2ee1deaf55cf615cacbade19b587c27c",
@@ -127025,7 +127025,7 @@
       }
     },
     "docs/reference/ENVIRONMENT.md": {
-      "source_hash": "1621f666556567ecb21855ad4283fe38a2b55694a3a4dae28f0dac01ba364e4d",
+      "source_hash": "39c685799433fd475d24708c87c2d46cb79aa8b1a7df00d278d6934899883fd5",
       "locales": {
         "ar": {
           "source_hash": "1621f666556567ecb21855ad4283fe38a2b55694a3a4dae28f0dac01ba364e4d",
@@ -130000,7 +130000,7 @@
       }
     },
     "docs/reference/FEATURE_FLAGS.md": {
-      "source_hash": "8f4652b90f8b3579fbacf4f930ab6c3cae2bd87c428118028b9aaaf43ed8954e",
+      "source_hash": "4ef1133a2a4d4e7e8288b3a56bbe1310225f56ed5eb39396f31052963e21fe09",
       "locales": {
         "ar": {
           "source_hash": "8f4652b90f8b3579fbacf4f930ab6c3cae2bd87c428118028b9aaaf43ed8954e",
@@ -133782,7 +133782,7 @@
       }
     },
     "docs/reference/PROVIDER_REFERENCE.md": {
-      "source_hash": "7003332d431a2728d8cfe42f8682caa6b09f839ce0751f21dfb7e61e4f6a9c46",
+      "source_hash": "9fe45f59da45f7d383b9f7eaee692609066b17cd343e7c9bbed4d111c3e003d0",
       "locales": {
         "cs": {
           "source_hash": "7003332d431a2728d8cfe42f8682caa6b09f839ce0751f21dfb7e61e4f6a9c46",
@@ -136949,7 +136949,7 @@
       }
     },
     "docs/routing/AUTO-COMBO.md": {
-      "source_hash": "2104fa195589f7604efbd27801a2c0d24c45bde27a7e9e19fa5d06a7505d1f42",
+      "source_hash": "04125c0f794dcbf82dc751be2ba01799feaf3eafcfbc1145113226059176e27b",
       "locales": {
         "ar": {
           "source_hash": "2104fa195589f7604efbd27801a2c0d24c45bde27a7e9e19fa5d06a7505d1f42",
@@ -145797,7 +145797,7 @@
       }
     },
     "docs/security/BAN_DETECTION.md": {
-      "source_hash": "0b700575f344f5f6b7a86d7afe2d7fcff6dda7f93acad8f11da83d05eda163ad",
+      "source_hash": "e093fec3c52df6f36ceee3deb008d60ac62a195436a3df9920cd0181607cdac5",
       "locales": {
         "pl": {
           "source_hash": "0b700575f344f5f6b7a86d7afe2d7fcff6dda7f93acad8f11da83d05eda163ad",
@@ -148892,7 +148892,7 @@
       }
     },
     "docs/security/CORS.md": {
-      "source_hash": "45e1f52053846efd41ef7f156482299945f2515bbb7498a0c31a95b0db38802b",
+      "source_hash": "197c1803b069a9372b800e9d8e8508379217b4b37cb1cb0c74c050c461372f17",
       "locales": {
         "pl": {
           "source_hash": "45e1f52053846efd41ef7f156482299945f2515bbb7498a0c31a95b0db38802b",
@@ -156178,7 +156178,7 @@
       }
     },
     "docs/security/SOCKET_DEV_FINDINGS.md": {
-      "source_hash": "e7948b255dc58eedef2c6c057837214ee63b1dc802ef2337c057357482b2be3d",
+      "source_hash": "b7d3f25cc5e1c336a9a96e0f288b53144e05c5e75f3df9efb2a88ba595c4670e",
       "locales": {
         "pl": {
           "source_hash": "e7948b255dc58eedef2c6c057837214ee63b1dc802ef2337c057357482b2be3d",
