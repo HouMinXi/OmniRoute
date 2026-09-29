@@ -299,7 +299,23 @@ function stripOrphanedCodexFunctionCallOutputs(body: Record<string, unknown>): v
   }
 }
 
+// The subpath comes from the request URL and is appended to the upstream URL verbatim, so
+// anything the upstream (or fetch's URL parser) would read as path traversal or as the end of
+// the path is refused. The caller then falls back to the plain /responses endpoint.
+const UNSAFE_SUBPATH_ESCAPE = /%(?:2e|2f|5c|23|3f|00)/i;
+
+function isSafeResponsesSubpath(subpath: string): boolean {
+  if (subpath === "") return true;
+  if (/[\\?#\u0000]/.test(subpath) || UNSAFE_SUBPATH_ESCAPE.test(subpath)) return false;
+  return !subpath.split("/").some((segment) => segment === "." || segment === "..");
+}
+
 function getResponsesSubpath(endpointPath: unknown): string | null {
+  const subpath = findResponsesSubpath(endpointPath);
+  return subpath !== null && isSafeResponsesSubpath(subpath) ? subpath : null;
+}
+
+function findResponsesSubpath(endpointPath: unknown): string | null {
   let normalizedEndpoint = String(endpointPath || "");
   while (normalizedEndpoint.endsWith("/") && normalizedEndpoint.length > 0) {
     normalizedEndpoint = normalizedEndpoint.slice(0, -1);
