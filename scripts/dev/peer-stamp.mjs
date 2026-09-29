@@ -25,7 +25,7 @@ export const PEER_IP_HEADER = "x-omniroute-peer-ip";
  * Companion header to PEER_IP_HEADER: `<token>|1` when the inbound TCP request
  * came from a peer that may be a reverse proxy (this host, a private-network
  * address, a Cloudflare edge or an address named in OMNIROUTE_TRUSTED_PROXIES)
- * and carried forwarding headers (`x-forwarded-for` / `x-real-ip`), or arrived
+ * and carried a forwarding header (see `hasProxyHopHeader`), or arrived
  * from a Cloudflare edge IP with `cf-connecting-ip`; `<token>|0` otherwise.
  * Required so the middleware can tell that a loopback socket is the
  * reverse-proxy hop (nginx / Caddy / Cloudflare Tunnel) and NOT trust it as
@@ -185,6 +185,31 @@ export function isCloudflareIP(ip) {
   return false;
 }
 
+/**
+ * True when the request carries a header that a reverse proxy or tunnel adds when it relays a
+ * request: any `x-forwarded-*`, `x-real-ip`, `forwarded` or `via`. A proxy on the same host connects
+ * from loopback, so these headers are the only thing that tells the callers behind it apart from a
+ * local operator. Callers can send them too; that is harmless because the marker only ever
+ * downgrades a loopback or private-network peer to "remote".
+ *
+ * Keep in step with `hasProxyHopHeader` in src/server/authz/proxyHeaders.ts (a test compares them).
+ */
+export function hasProxyHopHeader(headers) {
+  for (const [rawName, value] of Object.entries(headers || {})) {
+    if (!value || (Array.isArray(value) && value.length === 0)) continue;
+    const name = rawName.toLowerCase();
+    if (
+      name.startsWith("x-forwarded-") ||
+      name === "x-real-ip" ||
+      name === "forwarded" ||
+      name === "via"
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
 // Same ranges as PRIVATE_LAN_PATTERNS in src/server/authz/routeGuard.ts
 // (tests/unit/authz/peer-stamp.test.ts checks they agree).
 const PRIVATE_LAN_PATTERNS = [
@@ -308,7 +333,7 @@ export function stampPeerIp(req) {
       // trusted as local. Token-prefix the marker so a remote caller cannot
       // forge it (or its absence) on a non-proxied request.
       //
-      // x-forwarded-for / x-real-ip only count from a peer that may be a proxy: from
+      // Forwarding headers (see hasProxyHopHeader) only count from a peer that may be a proxy: from
       // any other peer they are just client-supplied text, and must not flip the marker
       // and make the IP filter judge the header instead of the peer.
       //
@@ -316,7 +341,7 @@ export function stampPeerIp(req) {
       // direct client. Only treat it as a proxy marker when the TCP peer itself
       // is a Cloudflare edge IP; otherwise a direct forger could flip the
       // via-proxy bit and force the middleware to ignore the real peer IP.
-      const hasForwardingHeaders = !!(req.headers["x-forwarded-for"] || req.headers["x-real-ip"]);
+      const hasForwardingHeaders = hasProxyHopHeader(req.headers);
       const viaProxy =
         (hasForwardingHeaders && isTrustedProxyPeer(ip)) ||
         (!!req.headers["cf-connecting-ip"] && isCloudflareIP(ip));
