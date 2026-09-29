@@ -3590,6 +3590,7 @@ async function handleChatCoreInner({
       executor,
       getCurrentConnectionId,
       getExecutionCredentials,
+      getExecutorClientHeaders,
       getManagedLeaseFenceErrorCode,
       handleCredentialsRefreshed,
       isCombo,
