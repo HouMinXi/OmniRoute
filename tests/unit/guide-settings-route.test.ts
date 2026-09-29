@@ -21,7 +21,7 @@ const originalJwtSecret = process.env.JWT_SECRET;
 async function createAuthCookie() {
   process.env.JWT_SECRET = "test-cli-tools-secret";
   const secret = new TextEncoder().encode(process.env.JWT_SECRET);
-  const token = await new SignJWT({ sub: "test-user" })
+  const token = await new SignJWT({ authenticated: true, sub: "test-user" })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("1h")
@@ -55,7 +55,9 @@ test.beforeEach(async () => {
 });
 
 test.afterEach(async () => {
-  await fs.rm(DUMMY_HOME, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }).catch(() => {});
+  await fs
+    .rm(DUMMY_HOME, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
+    .catch(() => {});
   if (originalXDG === undefined) delete process.env.XDG_CONFIG_HOME;
   else process.env.XDG_CONFIG_HOME = originalXDG;
   if (originalAppData === undefined) delete process.env.APPDATA;

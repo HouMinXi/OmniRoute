@@ -79,21 +79,46 @@ test("getMcpModelsCatalog exposes codex default thinking effort when no override
   assert.equal(result.models[0]?.thinkingEffort, "medium");
 });
 
+// #12776 — context_length must be carried through the MCP catalog projection
+test("getMcpModelsCatalog includes context_length when present", async () => {
+  const result = await getMcpModelsCatalog(
+    {},
+    {
+      listProviderConnections: async () => [
+        { id: "conn-1", provider: "openai", isActive: true },
+      ],
+      fetchJson: async () => ({
+        source: "api",
+        models: [
+          { id: "gpt-4.1", owned_by: "openai", context_length: 1048576 },
+          { id: "text-embedding-3-small", owned_by: "openai" },
+        ],
+      }),
+    }
+  );
+
+  const gpt = result.models.find((m) => m.id === "gpt-4.1");
+  const emb = result.models.find((m) => m.id === "text-embedding-3-small");
+
+  assert.equal(gpt?.context_length, 1048576, "context_length carried from upstream");
+  assert.equal(emb?.context_length, undefined, "omitted when upstream has no context_length");
+});
+
 test("getMcpModelsCatalog exposes stored thinking effort overrides", async () => {
   const result = await getMcpModelsCatalog(
-    { provider: "chatgpt-web" },
+    { provider: "gemini-web" },
     {
       listProviderConnections: async () => [
         {
-          id: "conn-chatgpt",
-          provider: "chatgpt-web",
+          id: "conn-gemini-web",
+          provider: "gemini-web",
           isActive: true,
           providerSpecificData: { thinkingEffort: "extended" },
         },
       ],
       fetchJson: async () => ({
         source: "api",
-        models: [{ id: "gpt-5", owned_by: "chatgpt-web", supportedEndpoints: ["chat"] }],
+        models: [{ id: "gemini-3.1-pro", owned_by: "gemini-web", supportedEndpoints: ["chat"] }],
       }),
     }
   );
@@ -132,7 +157,9 @@ test("getMcpModelsCatalog returns empty result when requested provider has no ac
   const result = await getMcpModelsCatalog(
     { provider: "github" },
     {
-      listProviderConnections: async () => [{ id: "conn-codex", provider: "codex", isActive: true }],
+      listProviderConnections: async () => [
+        { id: "conn-codex", provider: "codex", isActive: true },
+      ],
       fetchJson: async () => {
         throw new Error("fetchJson should not be called without a matching active provider");
       },

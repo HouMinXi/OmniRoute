@@ -21,7 +21,6 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../../../src/lib/db/core.ts");
 const route = await import("../../../../src/app/api/settings/compression/route.ts");
 
-
 describe("Compression Settings API Schema Validation", () => {
   const compressionModeValues = [
     "off",

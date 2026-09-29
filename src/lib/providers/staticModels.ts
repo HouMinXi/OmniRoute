@@ -35,6 +35,7 @@ const STATIC_MODEL_PROVIDERS: Record<string, () => Array<{ id: string; name: str
   ],
   antigravity: () => ANTIGRAVITY_PUBLIC_MODELS.map((model) => ({ ...model })),
   claude: () => [
+    { id: "claude-fable-5-1", name: "Claude Fable 5.1" },
     { id: "claude-fable-5", name: "Claude Fable 5" },
     { id: "claude-opus-5", name: "Claude Opus 5" },
     { id: "claude-opus-4-8", name: "Claude Opus 4.8" },
@@ -57,6 +58,11 @@ const STATIC_MODEL_PROVIDERS: Record<string, () => Array<{ id: string; name: str
   gitlab: () => [{ id: "gitlab-duo-code-suggestions", name: "GitLab Duo Code Suggestions" }],
   nlpcloud: () =>
     getModelsByProviderId("nlpcloud").map((model) => ({
+      id: model.id,
+      name: model.name || model.id,
+    })),
+  oneminai: () =>
+    getModelsByProviderId("oneminai").map((model) => ({
       id: model.id,
       name: model.name || model.id,
     })),
@@ -163,6 +169,9 @@ export function getStaticModelsForProvider(provider: string): LocalCatalogModel[
     return searchFallback;
   }
 
+  // "Import from /models" posts these rows to POST /api/provider-models, so each
+  // apiFormat must be a value providerModelMutationSchema accepts — "audio" /
+  // "images" were rejected with 400 and nothing got imported.
   const specialtyModels: LocalCatalogModel[] = [];
   const appendModels = (
     models: Array<{ id: string; name?: string }>,
@@ -204,7 +213,7 @@ export function getStaticModelsForProvider(provider: string): LocalCatalogModel[
   const imageProvider = getImageProvider(provider);
   if (imageProvider && !hasChatRegistry) {
     appendModels(imageProvider.models, {
-      apiFormat: "images",
+      apiFormat: "images-generations",
       supportedEndpoints: ["images"],
     });
   }
@@ -220,7 +229,7 @@ export function getStaticModelsForProvider(provider: string): LocalCatalogModel[
   const speechProvider = getSpeechProvider(provider);
   if (speechProvider) {
     appendModels(speechProvider.models, {
-      apiFormat: "audio",
+      apiFormat: "audio-speech",
       supportedEndpoints: ["audio-speech"],
     });
   }
@@ -228,7 +237,7 @@ export function getStaticModelsForProvider(provider: string): LocalCatalogModel[
   const transcriptionProvider = getTranscriptionProvider(provider);
   if (transcriptionProvider) {
     appendModels(transcriptionProvider.models, {
-      apiFormat: "audio",
+      apiFormat: "audio-transcriptions",
       supportedEndpoints: ["audio-transcriptions"],
     });
   }

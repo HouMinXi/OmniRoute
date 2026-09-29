@@ -25,14 +25,17 @@ import {
   maskAccount,
   stableAccountSuffix,
   formatApiKeyLabel,
+  formatCachePercentage,
 } from "@/shared/utils/formatting";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
+import { buildLogTpsTitle, computeLogTps } from "@/shared/utils/logTps";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import {
   computeLogsSignature,
   shouldAutoRefresh,
   shouldTriggerInfiniteScroll,
 } from "./requestLoggerSignature";
+import { getResilienceBadges } from "./requestLoggerResilience";
 import {
   DEFAULT_REFRESH_INTERVAL_SEC,
   clampRefreshIntervalSec,
@@ -54,15 +57,23 @@ import {
 // Reduced from 300 → 50 to avoid browser freeze and network saturation.
 const PAGE_SIZE = 50;
 
+// Column sort toggle mapping: clicking a column header toggles asc/desc.
+const COLUMN_SORT_MAP = {
+  status: { desc: "status_desc", asc: "status_asc" },
+  model: { desc: "model_desc", asc: "model_asc" },
+  tokens: { desc: "tokens_desc", asc: "tokens_asc" },
+  tps: { desc: "tps_desc", asc: "tps_asc" },
+  duration: { desc: "duration_desc", asc: "duration_asc" },
+  time: { desc: "newest", asc: "oldest" },
+} as const;
+
 function getLogTotalTokens(log) {
   return (log?.tokens?.in || 0) + (log?.tokens?.out || 0);
 }
 
+// #13130: generation-time TPS (duration - TTFT, reasoning-aware); see logTps.ts.
 function getLogTps(log): number {
-  const tokensOut = log?.tokens?.out || 0;
-  const durationMs = log?.duration || 0;
-  if (tokensOut <= 0 || durationMs <= 0) return 0;
-  return tokensOut / (durationMs / 1000);
+  return computeLogTps(log?.tokens?.out, log?.tokens?.reasoning, log?.duration, log?.ttft);
 }
 
 function formatTps(tps: number): string {
@@ -79,7 +90,6 @@ function getCacheSourceMeta(cacheSource: unknown) {
         "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30",
     };
   }
-
   return {
     key: "upstream",
     className: "bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30",
@@ -91,9 +101,13 @@ export interface RequestLoggerV2Handle {
   getSortedLogs: () => any[];
 }
 
-const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: string }>(
+type RequestLoggerV2InitialProps = {
+  initialSelectedId?: string;
+  initialCorrelationId?: string;
+};
+const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2InitialProps>(
   (props, ref) => {
-    const { initialSelectedId } = props as any;
+    const { initialSelectedId, initialCorrelationId } = props;
     const t = useTranslations("requestLogger");
     const tCache = useTranslations("cache");
     const { emailsVisible } = useEmailPrivacyStore();
@@ -123,7 +137,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         { key: "combo", label: t("columns.combo") },
         { key: "tokens", label: t("columns.tokens") },
         { key: "tps", label: t("columns.tps") },
+        { key: "ttft", label: t("columns.ttft") },
         { key: "duration", label: t("columns.duration") },
+        { key: "addedWait", label: t("columns.addedWait") },
         { key: "time", label: t("columns.time") },
         { key: "conversation", label: t("columns.conversation") },
       ],
@@ -141,22 +157,15 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
     const [selectedApiKey, setSelectedApiKey] = useState("");
     const [sortBy, setSortBy] = useState("newest");
     const [selectedLog, setSelectedLog] = useState(null);
-    const [correlationIdFilter, setCorrelationIdFilter] = useState("");
+    const [correlationIdFilter, setCorrelationIdFilter] = useState(
+      () => initialCorrelationId ?? ""
+    );
     const [hoveredCid, setHoveredCid] = useState<string | null>(null);
     const [groupedView, setGroupedView] = useState(false);
     const [detailLoading, setDetailLoading] = useState(false);
 
-    // Column sort toggle: clicking a column header toggles asc/desc
-    const columnSortMap = {
-      status: { desc: "status_desc", asc: "status_asc" },
-      model: { desc: "model_desc", asc: "model_asc" },
-      tokens: { desc: "tokens_desc", asc: "tokens_asc" },
-      tps: { desc: "tps_desc", asc: "tps_asc" },
-      duration: { desc: "duration_desc", asc: "duration_asc" },
-      time: { desc: "newest", asc: "oldest" },
-    };
     const toggleSort = useCallback((column: string) => {
-      const mapping = columnSortMap[column as keyof typeof columnSortMap];
+      const mapping = COLUMN_SORT_MAP[column as keyof typeof COLUMN_SORT_MAP];
       if (!mapping) return;
       setSortBy((prev) => {
         if (prev === mapping.desc) return mapping.asc;
@@ -165,7 +174,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
     }, []);
     const getSortIndicator = useCallback(
       (column: string) => {
-        const mapping = columnSortMap[column as keyof typeof columnSortMap];
+        const mapping = COLUMN_SORT_MAP[column as keyof typeof COLUMN_SORT_MAP];
         if (!mapping) return "";
         if (sortBy === mapping.desc) return " ↓";
         if (sortBy === mapping.asc) return " ↑";
@@ -198,6 +207,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
 
     const [visibleColumns, setVisibleColumns] = useState(() => {
       const defaultVisible = Object.fromEntries(columns.map((c) => [c.key, true]));
+      // #13130: TTFT is only recorded for streaming calls written after the
+      // ttft_ms migration, so most rows show "—"; opt-in column, not default.
+      defaultVisible.ttft = false;
       if (globalThis.window === undefined) return defaultVisible;
       try {
         const saved = localStorage.getItem("loggerVisibleColumns");
@@ -534,89 +546,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
     // endpoint until the row appears.
     const router = useRouter();
 
-    const openDetail = async (logEntry) => {
-      // Guard: if no valid id provided, close instead of opening an empty modal
-      if (!logEntry?.id) {
-        try {
-          closeDetail();
-        } catch {}
-        return;
-      }
-
-      const requestToken = `${logEntry.id}:${Date.now()}:${Math.random()}`;
-      detailRequestRef.current = requestToken;
-      const isCurrentDetailRequest = () => detailRequestRef.current === requestToken;
-
-      setSelectedLog(logEntry);
-      try {
-        const url = new URL(globalThis.location.href);
-        url.searchParams.set("id", logEntry.id);
-        router.replace(url.pathname + url.search, { scroll: false });
-      } catch (e) {
-        // ignore navigation errors
-      }
-      setDetailLoading(true);
-      setDetailData(null);
-      try {
-        const res = await fetch(`/api/logs/${logEntry.id}`, { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (!isCurrentDetailRequest()) return;
-          const dataHasPipeline =
-            data?.pipelinePayloads && Object.keys(data.pipelinePayloads || {}).length > 0;
-          setDetailData((prev: { pipelinePayloads: any }) => ({
-            ...prev,
-            ...data,
-            pipelinePayloads: dataHasPipeline ? data.pipelinePayloads : prev?.pipelinePayloads,
-          }));
-          // ensure the modal summary reflects the fetched call log summary
-          if (data && typeof data === "object") {
-            setSelectedLog((prev: any) => ({
-              ...prev,
-              ...data,
-              active: data.active === true,
-            }));
-          }
-        } else {
-          // A deep-linked id can legitimately 404 while the request is still
-          // finalizing. Keep the modal open and poll /api/logs/[id] instead of
-          // falling back to an in-memory active-request endpoint.
-          if (!isCurrentDetailRequest()) return;
-          if (res.status === 404) {
-            if (logEntry.pendingLookup || logEntry.active) {
-              setSelectedLog((prev: { method: any; path: any }) => ({
-                ...prev,
-                id: logEntry.id,
-                status: 0,
-                method: prev?.method,
-                path: prev?.path || "",
-              }));
-              setDetailData({ detailState: "pending" });
-              return;
-            }
-            try {
-              console.warn("Log not found:", logEntry.id);
-            } catch {}
-            try {
-              closeDetail();
-            } catch {}
-            return;
-          }
-          // other errors: show a minimal error indicator by setting detailData to an error object
-          try {
-            const body = await res.text().catch(() => null);
-            if (!isCurrentDetailRequest()) return;
-            setDetailData({ error: `Failed to fetch log (status ${res.status})`, body });
-          } catch {}
-        }
-      } catch (error) {
-        console.error("Failed to fetch log detail:", error);
-      } finally {
-        if (isCurrentDetailRequest()) setDetailLoading(false);
-      }
-    };
-
-    const closeDetail = () => {
+    const closeDetail = useCallback(() => {
       detailRequestRef.current = "";
       setSelectedLog(null);
       setDetailData(null);
@@ -628,7 +558,92 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
       } catch (e) {
         // ignore navigation errors
       }
-    };
+    }, [router]);
+
+    const openDetail = useCallback(
+      async (logEntry) => {
+        // Guard: if no valid id provided, close instead of opening an empty modal
+        if (!logEntry?.id) {
+          try {
+            closeDetail();
+          } catch {}
+          return;
+        }
+
+        const requestToken = `${logEntry.id}:${Date.now()}:${Math.random()}`;
+        detailRequestRef.current = requestToken;
+        const isCurrentDetailRequest = () => detailRequestRef.current === requestToken;
+
+        setSelectedLog(logEntry);
+        try {
+          const url = new URL(globalThis.location.href);
+          url.searchParams.set("id", logEntry.id);
+          router.replace(url.pathname + url.search, { scroll: false });
+        } catch (e) {
+          // ignore navigation errors
+        }
+        setDetailLoading(true);
+        setDetailData(null);
+        try {
+          const res = await fetch(`/api/logs/${logEntry.id}`, { cache: "no-store" });
+          if (res.ok) {
+            const data = await res.json();
+            if (!isCurrentDetailRequest()) return;
+            const dataHasPipeline =
+              data?.pipelinePayloads && Object.keys(data.pipelinePayloads || {}).length > 0;
+            setDetailData((prev: { pipelinePayloads: any }) => ({
+              ...prev,
+              ...data,
+              pipelinePayloads: dataHasPipeline ? data.pipelinePayloads : prev?.pipelinePayloads,
+            }));
+            // ensure the modal summary reflects the fetched call log summary
+            if (data && typeof data === "object") {
+              setSelectedLog((prev: any) => ({
+                ...prev,
+                ...data,
+                active: data.active === true,
+              }));
+            }
+          } else {
+            // A deep-linked id can legitimately 404 while the request is still
+            // finalizing. Keep the modal open and poll /api/logs/[id] instead of
+            // falling back to an in-memory active-request endpoint.
+            if (!isCurrentDetailRequest()) return;
+            if (res.status === 404) {
+              if (logEntry.pendingLookup || logEntry.active) {
+                setSelectedLog((prev: { method: any; path: any }) => ({
+                  ...prev,
+                  id: logEntry.id,
+                  status: 0,
+                  method: prev?.method,
+                  path: prev?.path || "",
+                }));
+                setDetailData({ detailState: "pending" });
+                return;
+              }
+              try {
+                console.warn("Log not found:", logEntry.id);
+              } catch {}
+              try {
+                closeDetail();
+              } catch {}
+              return;
+            }
+            // other errors: show a minimal error indicator by setting detailData to an error object
+            try {
+              const body = await res.text().catch(() => null);
+              if (!isCurrentDetailRequest()) return;
+              setDetailData({ error: `Failed to fetch log (status ${res.status})`, body });
+            } catch {}
+          }
+        } catch (error) {
+          console.error("Failed to fetch log detail:", error);
+        } finally {
+          if (isCurrentDetailRequest()) setDetailLoading(false);
+        }
+      },
+      [closeDetail, router]
+    );
 
     const sortedLogsForNav = useMemo(() => sortedLogs, [sortedLogs]);
 
@@ -653,7 +668,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
             console.error("Failed to open initial log id:", error_);
           });
       }
-    }, [initialSelectedId]);
+    }, [initialSelectedId, openDetail]);
 
     useEffect(() => {
       const isActive = selectedLog?.active === true;
@@ -764,7 +779,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         pendingBoundaryNavRef.current = "prev";
         fetchLogs(false);
       }
-    }, [currentLogIndex, sortedLogsForNav, fetchLogs]);
+    }, [currentLogIndex, sortedLogsForNav, fetchLogs, openDetail]);
 
     const handleNext = useCallback(() => {
       const idx = currentLogIndex;
@@ -780,7 +795,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
         pendingBoundaryNavRef.current = "next";
         fetchLogs(false);
       }
-    }, [currentLogIndex, sortedLogsForNav, fetchLogs]);
+    }, [currentLogIndex, sortedLogsForNav, fetchLogs, openDetail]);
 
     // Resolves a pending boundary nav (see handlePrev/handleNext) once a
     // triggered fetchLogs() resync has landed in sortedLogsForNav. Only fires
@@ -1269,6 +1284,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
                         {getSortIndicator("tps")}
                       </th>
                     )}
+                    {visibleColumns.ttft && (
+                      <th className={LOG_TABLE_HEADER_CELL_RIGHT_CLASS}>{t("columns.ttft")}</th>
+                    )}
                     {visibleColumns.duration && (
                       <th
                         className={`${LOG_TABLE_HEADER_CELL_RIGHT_CLASS} cursor-pointer select-none`}
@@ -1276,6 +1294,11 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
                       >
                         {t("columns.duration")}
                         {getSortIndicator("duration")}
+                      </th>
+                    )}
+                    {visibleColumns.addedWait && (
+                      <th className={LOG_TABLE_HEADER_CELL_RIGHT_CLASS}>
+                        {t("columns.addedWait")}
                       </th>
                     )}
                     {visibleColumns.time && (
@@ -1394,14 +1417,25 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
                             {isActive ? (
                               <span className="text-text-muted text-[10px]">—</span>
                             ) : (
-                              <span
-                                className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase ${cacheSourceMeta?.className || ""}`}
-                                title={
-                                  isSemanticCache ? t("semanticCacheHit") : t("upstreamResponse")
-                                }
-                              >
-                                {isSemanticCache ? t("semantic") : t("upstream")}
-                              </span>
+                              <>
+                                <span
+                                  className={`inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase ${cacheSourceMeta?.className || ""}`}
+                                  title={
+                                    isSemanticCache ? t("semanticCacheHit") : t("upstreamResponse")
+                                  }
+                                >
+                                  {isSemanticCache ? t("semantic") : t("upstream")}
+                                </span>
+                                {getResilienceBadges(log.resilienceActions, (key, values) =>
+                                  t(`detail.${key}`, values)
+                                ).map((badge) => (
+                                  // Unstyled span: inherits the cache-source
+                                  // badge line; the title carries the detail.
+                                  <span key={badge.key} title={badge.title}>
+                                    [{badge.label}]
+                                  </span>
+                                ))}
+                              </>
                             )}
                           </td>
                         )}
@@ -1572,7 +1606,8 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
                                       className="text-sky-700 dark:text-sky-400"
                                       title={tCache("cachedTokensCol")}
                                     >
-                                      {log.tokens.cacheRead.toLocaleString()}
+                                      {log.tokens.cacheRead.toLocaleString()} (
+                                      {formatCachePercentage(log.tokens.in, log.tokens.cacheRead)}%)
                                     </span>
                                   </>
                                 )}
@@ -1619,7 +1654,10 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
                                         ? "text-sky-600 dark:text-sky-400"
                                         : "text-amber-600 dark:text-amber-400";
                                 return (
-                                  <span className={color} title={`${tps.toFixed(2)} tokens/sec`}>
+                                  <span
+                                    className={color}
+                                    title={buildLogTpsTitle(log, tps, formatDuration)}
+                                  >
                                     {formatTps(tps)}
                                   </span>
                                 );
@@ -1627,9 +1665,21 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, { initialSelectedId?: 
                             )}
                           </td>
                         )}
+                        {visibleColumns.ttft && (
+                          <td className="px-3 py-2 text-right text-text-muted font-mono">
+                            {formatDuration(log.ttft > 0 ? log.ttft : null)}
+                          </td>
+                        )}
                         {visibleColumns.duration && (
                           <td className="px-3 py-2 text-right text-text-muted font-mono">
                             {formatDuration(log.duration)}
+                          </td>
+                        )}
+                        {visibleColumns.addedWait && (
+                          <td className="px-3 py-2 text-right text-text-muted font-mono">
+                            {typeof log.addedWaitMs === "number" && log.addedWaitMs > 0
+                              ? `${formatDuration(log.addedWaitMs)}${log.addedWaitCause ? ` (${log.addedWaitCause})` : ""}`
+                              : "—"}
                           </td>
                         )}
                         {visibleColumns.time && (

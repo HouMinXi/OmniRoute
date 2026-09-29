@@ -13,6 +13,11 @@ test("GHE Copilot registry exposes Claude Opus 5", () => {
     name: "Claude Opus 5",
     contextLength: 1000000,
     maxOutputTokens: 64000,
+    // #14732 declared the thinking-effort tiers on the first-party Claude registries
+    // (GHE Copilot included) — intentional contract change.
+    supportsReasoning: true,
+    supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
+    supportsXHighEffort: true,
     unsupportedParams: ["temperature", "top_p", "top_k"],
   });
 });
@@ -189,4 +194,49 @@ test("isValidGheUrl accepts https enterprise hosts and rejects malformed or non-
   assert.equal(isValidGheUrl("http://github.mycorp.example"), false);
   assert.equal(isValidGheUrl("javascript:alert(1)"), false);
   assert.equal(isValidGheUrl("not a url"), false);
+});
+
+test("GheCopilotExecutor.execute does not trigger identity fallback on 403", async () => {
+  const executor = new GheCopilotExecutor({
+    gheUrl: "https://ghe.company.com",
+    clientId: "test-client",
+    clientSecret: "test-secret",
+  });
+  const originalFetch = globalThis.fetch;
+  let callCount = 0;
+  const seenIntegrationIds: string[] = [];
+
+  globalThis.fetch = async (_url, init: RequestInit = {}) => {
+    callCount++;
+    const headers = init.headers as Record<string, string>;
+    seenIntegrationIds.push(headers["copilot-integration-id"]);
+    return new Response(
+      JSON.stringify({ message: "Access denied: Enterprise Copilot 403 Forbidden" }),
+      { status: 403, headers: { "Content-Type": "application/json" } }
+    );
+  };
+
+  try {
+    const credentials: ProviderCredentials = {
+      accessToken: "ghe-token",
+      providerSpecificData: {
+        gheUrl: "https://ghe.company.com",
+        copilotToken: "copilot-token",
+      },
+    };
+
+    const result = await executor.execute({
+      model: "gpt-4o",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials,
+    });
+
+    assert.equal(callCount, 1, "GHE Copilot must never retry on 403");
+    assert.deepEqual(seenIntegrationIds, ["copilot-developer-cli"]);
+    const res = result as { response: Response };
+    assert.equal(res.response.status, 403);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

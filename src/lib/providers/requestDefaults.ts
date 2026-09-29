@@ -5,6 +5,7 @@ import { normalizeExcludedModelPatterns } from "@/domain/connectionModelRules";
 import { normalizeRoutingTags } from "@/domain/tagRouter";
 import { normalizeOpenRouterPreset } from "@/shared/constants/openRouterPreset";
 import { isForbiddenCustomHeaderName } from "@/shared/constants/upstreamHeaders";
+import { normalizePeakHourProtection } from "@/lib/providers/peakHourProtection";
 
 export const CODEX_REASONING_EFFORT_VALUES = [
   "none",
@@ -214,6 +215,24 @@ export function normalizeProviderSpecificData(
     delete normalized.disableCooling;
   }
 
+  // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only
+  // persist real booleans; both default to off when absent.
+  if ("lowPriorityMode" in normalized && typeof normalized.lowPriorityMode !== "boolean") {
+    delete normalized.lowPriorityMode;
+  }
+  if ("autoLimitReset" in normalized && typeof normalized.autoLimitReset !== "boolean") {
+    delete normalized.autoLimitReset;
+  }
+
+  if ("peakHourProtection" in normalized) {
+    const peakHourProtection = normalizePeakHourProtection(normalized.peakHourProtection);
+    if (peakHourProtection) {
+      normalized.peakHourProtection = peakHourProtection;
+    } else {
+      delete normalized.peakHourProtection;
+    }
+  }
+
   if ("autoFetchModels" in normalized && typeof normalized.autoFetchModels !== "boolean") {
     delete normalized.autoFetchModels;
   }
@@ -326,8 +345,18 @@ export function sanitizeProviderSpecificDataForResponse(value: unknown): JsonRec
   delete sanitized.ollamaCloudUsageCookie;
   delete sanitized.ollamaCloudCookie;
   delete sanitized.usageCookie;
+  // Qwen/Alibaba Token Plan console session — a browser credential for the operator's
+  // cloud-console account, same class as the ollama/opencode cookies above. The edit
+  // modal initializes these fields empty and the PUT merge preserves unsent keys, so
+  // stripping them here cannot clobber the stored values.
+  delete sanitized.qwenCloudCookie;
+  delete sanitized.qwenCloudSecToken;
+  delete sanitized.alibabaConsoleCookie;
+  delete sanitized.alibabaConsoleSecToken;
   delete sanitized.runtimeKey;
   delete sanitized.validationId;
+  delete sanitized.volcConsoleCookie;
+  delete sanitized.volcCsrfToken;
   // System-managed Codex fingerprint seed: never exposed through the API
   // (mirrors sub2api stripping `codex_fingerprint_seed`); the server-side
   // partial-update merge keeps it alive without the client round-tripping it.

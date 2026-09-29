@@ -5,6 +5,7 @@ import {
 
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody } from "./error.ts";
+import { sanitizeErrorMessage } from "./errorSanitization.ts";
 
 export type StreamCompletionPayload = {
   status: number;
@@ -30,6 +31,13 @@ export type PipelineStreamErrorHandler = (event: {
 }) => boolean;
 
 export type ClientDisconnectEvent = { reason: string; duration: number };
+
+function classifyPipelineStreamCode(text: string): string {
+  const lower = text.toLowerCase();
+  if (lower.includes("stream content stall")) return "stream_content_stall";
+  if (lower.includes("terminated")) return "stream_terminated";
+  return "stream_pipeline_error";
+}
 
 /**
  * #9653: a client that closes its connection right after reading a fully-completed
@@ -129,9 +137,7 @@ export function finalizeStreamRequestLog({
       } else {
         console.warn(
           "finalizeMostRecentPendingRequest failed:",
-          error && typeof error === "object" && "message" in error
-            ? (error as { message?: unknown }).message
-            : error
+          sanitizeErrorMessage(error) || "Stream request finalization failed"
         );
       }
     } catch {}
@@ -158,12 +164,12 @@ export function createStreamFailureFinalizers({
 
     const status = failure.status || HTTP_STATUS.BAD_GATEWAY;
     const message = failure.message || "Upstream stream error";
-    const code = failure.code || failure.type || String(status);
     const classification =
       failure.code || failure.type ? { code: failure.code, type: failure.type } : undefined;
+    const errorBody = buildErrorBody(status, message, undefined, classification);
+    const projectedCode = errorBody.error.code || String(status);
 
     if (!isFailureCompletionRecorded()) {
-      const errorBody = buildErrorBody(status, message, undefined, classification);
       onStreamComplete({
         status,
         usage: null,
@@ -171,12 +177,12 @@ export function createStreamFailureFinalizers({
         providerPayload: errorBody,
         clientPayload: errorBody,
         error: message,
-        errorCode: code,
+        errorCode: projectedCode,
         ttft: 0,
       });
     }
 
-    persistFailureUsage(status, code);
+    persistFailureUsage(status, projectedCode);
     try {
       onStreamFailure?.(failure);
     } catch {
@@ -198,6 +204,7 @@ export function createStreamFailureFinalizers({
   };
 
   let pipelineStreamFailureFinalized = false;
+
   const onPipelineStreamError: PipelineStreamErrorHandler = ({ message, statusCode }) => {
     if (pipelineStreamFailureFinalized) return true;
     pipelineStreamFailureFinalized = true;
@@ -211,9 +218,7 @@ export function createStreamFailureFinalizers({
         : HTTP_STATUS.BAD_GATEWAY;
     const code = clientClosed
       ? "client_disconnected"
-      : normalizedMessage.toLowerCase().includes("terminated")
-        ? "stream_terminated"
-        : "stream_pipeline_error";
+      : classifyPipelineStreamCode(normalizedMessage);
     const type = clientClosed ? "client_disconnected" : "stream_error";
 
     handleStreamFailure({

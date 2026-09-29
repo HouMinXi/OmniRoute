@@ -110,7 +110,10 @@ test("GET /api/context/combos/default returns the derived stacked pipeline (refl
   assert.equal(body.mode, "stacked");
   assert.deepEqual(body.pipeline, expected.stackedPipeline);
   const engineIds = body.pipeline.map((s) => s.engine);
-  assert.ok(engineIds.includes("caveman"), `expected caveman in derived pipeline, got: ${engineIds}`);
+  assert.ok(
+    engineIds.includes("caveman"),
+    `expected caveman in derived pipeline, got: ${engineIds}`
+  );
 });
 
 test("GET /api/context/combos/default returns off when master switch is disabled", async () => {

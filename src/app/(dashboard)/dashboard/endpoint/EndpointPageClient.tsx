@@ -168,7 +168,9 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const [ngrokToken, setNgrokToken] = useState("");
   const [showNgrokTunnel, setShowNgrokTunnel] = useState(true);
   const [expandedTunnel, setExpandedTunnel] = useState<string | null>(null);
-  const [localApiUrl, setLocalApiUrl] = useState("http://localhost:20128/v1");
+  const [localApiUrl, setLocalApiUrl] = useState(
+    typeof window !== "undefined" ? `${window.location.origin}/v1` : "http://localhost:20128/v1"
+  );
   const [lanUrls, setLanUrls] = useState<string[]>([]);
   const [tailscaleIpUrl, setTailscaleIpUrl] = useState<string | null>(null);
   const [activeEndpointTab, setActiveEndpointTab] = useState<EndpointTab>("apis");
@@ -298,52 +300,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     },
     [translateOrFallback]
   );
-
-  useEffect(() => {
-    let mounted = true;
-
-    const loadPage = async () => {
-      const tunnelVisibility = await loadCloudSettings(() => mounted);
-
-      if (!mounted) return;
-      setLoading(false);
-
-      runEndpointBackgroundTask("models", fetchModels);
-      runEndpointBackgroundTask("protocol-status", fetchProtocolStatus);
-      runEndpointBackgroundTask("search-providers", fetchSearchProviders);
-      runEndpointBackgroundTask("network-info", async () => {
-        try {
-          const res = await fetch("/api/network/info");
-          if (res.ok) {
-            const data = await res.json();
-            if (mounted) {
-              if (data.localUrl) setLocalApiUrl(data.localUrl);
-              setLanUrls(data.lanUrls ?? []);
-              if (data.tailscaleIpUrl) setTailscaleIpUrl(data.tailscaleIpUrl);
-            }
-          }
-        } catch {
-          // non-critical
-        }
-      });
-
-      if (tunnelVisibility.showCloudflaredTunnel) {
-        runEndpointBackgroundTask("cloudflared-status", () => fetchCloudflaredStatus(true));
-      }
-      if (tunnelVisibility.showTailscaleFunnel) {
-        runEndpointBackgroundTask("tailscale-status", () => fetchTailscaleStatus(true));
-      }
-      if (tunnelVisibility.showNgrokTunnel) {
-        runEndpointBackgroundTask("ngrok-status", () => fetchNgrokStatus(true));
-      }
-    };
-
-    void loadPage();
-
-    return () => {
-      mounted = false;
-    };
-  }, [fetchCloudflaredStatus, fetchTailscaleStatus, fetchNgrokStatus]);
 
   const fetchModels = async () => {
     setModelsLoading(true);
@@ -506,6 +462,55 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
     return DEFAULT_TUNNEL_VISIBILITY;
   };
+
+  // Moved below the loader/fetcher declarations it schedules — referencing them from
+  // an effect declared above their `const` bindings is a TDZ read the compiler rejects
+  // (react-hooks/immutability).
+  useEffect(() => {
+    let mounted = true;
+
+    const loadPage = async () => {
+      const tunnelVisibility = await loadCloudSettings(() => mounted);
+
+      if (!mounted) return;
+      setLoading(false);
+
+      runEndpointBackgroundTask("models", fetchModels);
+      runEndpointBackgroundTask("protocol-status", fetchProtocolStatus);
+      runEndpointBackgroundTask("search-providers", fetchSearchProviders);
+      runEndpointBackgroundTask("network-info", async () => {
+        try {
+          const res = await fetch("/api/network/info");
+          if (res.ok) {
+            const data = await res.json();
+            if (mounted) {
+              if (data.localUrl) setLocalApiUrl(data.localUrl);
+              setLanUrls(data.lanUrls ?? []);
+              if (data.tailscaleIpUrl) setTailscaleIpUrl(data.tailscaleIpUrl);
+            }
+          }
+        } catch {
+          // non-critical
+        }
+      });
+
+      if (tunnelVisibility.showCloudflaredTunnel) {
+        runEndpointBackgroundTask("cloudflared-status", () => fetchCloudflaredStatus(true));
+      }
+      if (tunnelVisibility.showTailscaleFunnel) {
+        runEndpointBackgroundTask("tailscale-status", () => fetchTailscaleStatus(true));
+      }
+      if (tunnelVisibility.showNgrokTunnel) {
+        runEndpointBackgroundTask("ngrok-status", () => fetchNgrokStatus(true));
+      }
+    };
+
+    void loadPage();
+
+    return () => {
+      mounted = false;
+    };
+  }, [fetchCloudflaredStatus, fetchTailscaleStatus, fetchNgrokStatus]);
 
   const handleCustomSystemPromptEnabledChange = (value: boolean) => {
     setCustomSystemPromptEnabled(value);
@@ -2485,4 +2490,3 @@ function EndpointCard({
     </div>
   );
 }
-

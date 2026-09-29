@@ -1,13 +1,13 @@
 ---
 title: "Authorization Guide"
 version: 3.8.40
-lastUpdated: 2026-06-28
+lastUpdated: 2026-09-22
 ---
 
 # Authorization Guide
 
 > **Source of truth:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Last updated:** 2026-06-28 — v3.8.40
+> **Last updated:** 2026-09-22 — scope namespaces point at MCP-SERVER.md
 
 OmniRoute has a route-aware authorization pipeline that gates every API request. Classification is **deterministic** and **fail-closed** — anything that cannot be classified ends up as `MANAGEMENT` and demands a session or management-grade token. This page explains the model for engineers maintaining routes or designing new endpoints.
 
@@ -35,7 +35,17 @@ For dashboard pages and admin operations.
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
+A cookie is a session only when the JWT verifies **and** carries `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Every
+consumer of the cookie (dashboard route guard (`isDashboardSessionAuthenticated()`), authz pipeline refresh, WebSocket handshake, live
+server, `/api/settings/require-login`, `/api/auth/status`) goes through that helper.
+Other JWTs signed with `JWT_SECRET` exist — the Cursor CLI passthrough mints
+`iss "omniroute" / aud "cursor-cli"` tokens for key holders — and are never sessions
+(#13298).
+
 Verified by `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. The pipeline auto-refreshes the JWT when it has fewer than 7 days left in its 30-day lifetime.
+
+A session can also end before its 30 days are up, because every minter goes through `mintDashboardSessionToken` (an issue time `iat` and an id `jti`) and the verifier checks two settings: `sessionsValidAfter`, set by a password change so every session issued before it stops verifying (the browser that changed the password gets a fresh cookie), and `revokedDashboardSessions`, to which `POST /api/auth/logout` adds the signed-out session's `jti`. Sessions minted by an older release carry neither claim and stay valid until the first password change. If the settings cannot be read, the session is not trusted.
 
 Some management routes accept **either** mode: cookie OR `Bearer <key>` when the API key has the `manage` (or `admin`) scope. This is what enables the "configurable via API calls" workflow added in v3.8.
 
@@ -196,26 +206,36 @@ Pick the set by shape, not by convenience. One route goes in `PUBLIC_API_ROUTES_
 
 ## Scopes
 
+Three namespaces. Each checker reads only its own strings. The side-by-side,
+including why `manage` fails `scopeMatches` for `read:compression` and why a
+`read` access token cannot `PATCH /api/keys/{id}`, is
+[Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+
 API keys carry a `scopes` array (stored as JSON in `api_keys.scopes`, see `src/lib/db/apiKeys.ts`).
 
 ### Management scope
 
-- `manage` / `admin` — grants the key access to management API endpoints when sent as Bearer.
+- `manage` / `admin` — `hasManageScope`. Bearer access to management API routes.
+- `mcp:connect`, `self:usage`, `self:account-quota`, and
+  `policy:bypass-provider-quota` are additive exact-match scopes. They sit
+  outside `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` opens only the
+  `/api/mcp/` non-loopback carve-out.
 
-### MCP scopes (`src/shared/constants/mcpScopes.ts`)
+### MCP tool scopes
 
-Each MCP tool requires specific scopes via `MCP_TOOL_SCOPES`. Full list (`MCP_SCOPE_LIST`):
+Catalog and matching rules (identical string, or a granted scope ending in `*`):
+[MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
+`MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` is the original typed
+subset, not that full catalog. Enforcement runs in
+`open-sse/mcp-server/scopeEnforcement.ts` after `resolveCallerScopeContext()`
+resolves scopes from MCP auth info, request metadata, or `OMNIROUTE_MCP_SCOPES`.
+It stays off unless `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+### Access-token scopes
 
-Scope enforcement in `open-sse/mcp-server/server.ts` passes each tool's scope list into
-`evaluateToolScopes()` after `resolveCallerScopeContext()` resolves scopes from MCP auth info,
-request metadata, or `OMNIROUTE_MCP_SCOPES`.
+`read` / `write` / `admin` on `oma_live_…` tokens, ranked by `scopeSatisfies`
+(`src/lib/accessTokens/scopes.ts`). This rank applies to the access-token
+credential only. See [Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
 ## Auth Required Toggle
 
@@ -265,5 +285,5 @@ Use `assertAuth(req, expectedClass)` inside handlers — it throws `AuthzAsserti
 
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — auth marker per endpoint
 - [COMPLIANCE.md](../security/COMPLIANCE.md) — audit log for auth events
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — MCP scope enforcement details
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — three scope namespaces and MCP tool-scope catalog
 - Source: `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`

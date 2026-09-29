@@ -2,11 +2,47 @@ import { FORMATS } from "../../translator/formats.ts";
 import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
 import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
 import { isResponsesEndpointPath } from "../../utils/responsesEndpoint.ts";
+import { mergeClientAnthropicBeta } from "../../config/anthropicHeaders.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
 
 export { isResponsesEndpointPath };
 
 export const XAI_API_PROVIDERS = new Set(["xai", "xai-oauth", "xao"]);
+
+const SAFEGUARDS_PAIRED_BETA = "dangerous-tool-use-2026-09-03";
+
+/**
+ * Top-level fields Claude Code sends that Anthropic accepts only next to their
+ * paired beta. `safeguards` is the auto mode classifier request
+ * (https://code.claude.com/docs/en/auto-mode-classifier-billing); without
+ * `dangerous-tool-use-2026-09-03` on the outbound request, Anthropic rejects
+ * the whole request:
+ *
+ *   400 safeguards: Extra inputs are not permitted
+ *
+ * The executor forwards a client beta only through mergeClientAnthropicBeta, so
+ * the same merge decides here: keep the field when its beta travels with it,
+ * strip it otherwise (the client then falls back to its own classifier).
+ */
+export function unpairedClaudeClientFields(clientAnthropicBeta: string | null | undefined) {
+  const forwarded = mergeClientAnthropicBeta("", clientAnthropicBeta).toLowerCase().split(",");
+  return forwarded.includes(SAFEGUARDS_PAIRED_BETA) ? [] : ["safeguards"];
+}
+
+/**
+ * Drop the top-level fields for which Anthropic's Messages API rejects the
+ * whole request on the native `claude` passthrough, which forwards the client
+ * body verbatim. Third-party Claude-shape gateways are left untouched.
+ */
+export function stripClaudeRejectedTopLevelFields(
+  body: Record<string, unknown>,
+  clientHeaders: Headers | Record<string, unknown> | null | undefined
+): void {
+  // VS Code Claude extension and similar clients send both; Anthropic rejects the pair.
+  if (body.temperature !== undefined && body.top_p !== undefined) delete body.top_p;
+  const clientBeta = getHeaderValueCaseInsensitive(clientHeaders, "anthropic-beta");
+  for (const field of unpairedClaudeClientFields(clientBeta)) delete body[field];
+}
 
 export function shouldUseNativeCodexPassthrough({
   provider,
@@ -53,19 +89,35 @@ export function stampNativeResponsesPassthroughBody(
   return { ...body, _nativeOpenAICompatibleResponsesPassthrough: true };
 }
 
+// A body only qualifies for the native-Responses passthrough fast path when it is
+// actually shaped like a Responses API request (`input`, no `messages`). Endpoint
+// path alone is not sufficient: an internally-synthesized Chat Completions-shaped
+// body (e.g. the context-handoff summary request) can be dispatched through a
+// closure that still carries the original client request's `/responses` endpoint,
+// which otherwise makes `sourceFormat` resolve to "openai-responses" even though
+// the body itself was never translated. See issue #12129.
+function isResponsesShapedBody(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  const candidate = body as Record<string, unknown>;
+  return candidate.input !== undefined && candidate.messages === undefined;
+}
+
 export function shouldUseNativeOpenAICompatibleResponsesPassthrough({
   provider,
   sourceFormat,
   endpointPath,
   providerSpecificData,
+  body,
 }: {
   provider?: string | null;
   sourceFormat?: string | null;
   endpointPath?: string | null;
   providerSpecificData?: unknown;
+  body?: unknown;
 }): boolean {
   if (!provider?.startsWith("openai-compatible-")) return false;
   if (sourceFormat !== FORMATS.OPENAI_RESPONSES) return false;
+  if (body !== undefined && !isResponsesShapedBody(body)) return false;
   if (providerSpecificData && typeof providerSpecificData === "object") {
     const psd = providerSpecificData as Record<string, unknown>;
     if (psd.apiType === "responses" || psd._omnirouteForceResponsesUpstream === true) {

@@ -19,21 +19,16 @@ import {
   decodeExecServerEvent,
   decodeKvServerEvent,
   encodeRequestContextResponse,
+  encodeMcpStateResponse,
+  OMNIROUTE_MCP_SERVER_IDENTIFIER,
   encodeKvGetBlobResult,
   encodeKvSetBlobResult,
-  encodeExecReadRejected,
-  encodeExecWriteRejected,
-  encodeExecDeleteRejected,
-  encodeExecLsRejected,
-  encodeExecShellRejected,
-  encodeExecBackgroundShellSpawnRejected,
-  encodeExecGrepError,
-  encodeExecFetchError,
-  encodeExecWriteShellStdinError,
-  encodeExecDiagnosticsResult,
+  encodeExecListMcpResourcesResult,
   flattenMessages,
+  messageContentToText,
   openAIToolsToMcpDefs,
   type ChatMessage,
+  type CursorTurnUsage,
   type EncodedImage,
   type ExecServerEvent,
   type McpToolDefinition,
@@ -58,6 +53,7 @@ import {
   type StreamingState as ComposerStreamingState,
 } from "../utils/composerToolCalls.ts";
 import { cursorSessionManager, type CursorSession } from "../services/cursorSessionManager.ts";
+import { isPiExecEvent, type PiExecEvent } from "../utils/cursorAgentProtobuf/pi.ts";
 import {
   CursorApiKeyExchangeError,
   invalidateCursorSessionToken,
@@ -66,12 +62,11 @@ import {
   stripCursorOAuthTokenPrefix,
 } from "../services/cursorApiKeyAuth.ts";
 import crypto from "crypto";
-import * as fs from "node:fs";
-import * as zlib from "node:zlib";
-import { promisify } from "node:util";
 import { toolChoiceDirectiveLine, buildCursorOutputConstraints } from "./cursor/prompt.ts";
 import {
   bridgeCursorBuiltinTool,
+  bridgeCursorGitDiff,
+  bridgeCursorPiTool,
   bridgeCursorNativeTodoWrite,
   extractLatestTodoHistory,
   selectCursorBridgeTools,
@@ -84,6 +79,9 @@ import {
   composerReasoningRemainder,
 } from "./cursor/composer.ts";
 import { CursorServerConfigError, resolveCursorAgentUrl } from "./cursor/agentEndpoint.ts";
+import { driveCursorH2 } from "./cursor/streamDriver.ts";
+import { buildExecRejection } from "./cursor/execRejections.ts";
+import { openCursorH2 } from "./cursor/h2AgentStream.ts";
 import {
   classifyCursorError,
   isCursorBenignCancelError,
@@ -91,19 +89,17 @@ import {
   type ClassifiedCursorError,
 } from "./cursor/cursorErrors.ts";
 import { getActiveSyncedCatalog } from "../../src/lib/db/models/activeSyncedCatalog.ts";
+import {
+  createNarrationStreamScrubber,
+  finalizeKimiTurn,
+  type NarrationStreamScrubber,
+} from "../utils/kimiToolCallNarration.ts";
 // Composer helpers re-exported for external importers (tests).
 export {
   isComposerModel,
   visibleComposerContentFromThinking,
   composerReasoningRemainder,
 } from "./cursor/composer.ts";
-
-// Reject reason text aligned with kaitranntt/CLIProxyAPIPlus — proven to
-// keep cursor's model from retrying the same built-in tool indefinitely.
-// The model adapts and either answers from context or uses declared MCP tools.
-const BUILTIN_TOOL_REJECT_REASON =
-  "Tool not available in this environment. Use the MCP tools provided instead.";
-const gunzipAsync = promisify(zlib.gunzip);
 
 // Tool-commit directive — adapted from composer-api's TOOL_SYSTEM_DIRECTIVE.
 // composer-2.5 otherwise narrates intent ("Checking the weather...") and ends
@@ -130,75 +126,22 @@ const TOOL_COMMIT_DIRECTIVE = [
  * to inject MCP tools in Phase 3) and for exec_mcp (model is invoking a
  * declared MCP tool — Phase 5 surfaces this as an OpenAI tool_calls delta).
  */
-function buildExecRejection(event: ExecServerEvent): Buffer | null {
-  switch (event.kind) {
-    case "exec_request_context":
-    case "exec_mcp":
-      return null;
-    case "exec_read":
-      return encodeExecReadRejected(
-        event.execMsgId,
-        event.execId,
-        event.path,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-    case "exec_write":
-      return encodeExecWriteRejected(
-        event.execMsgId,
-        event.execId,
-        event.path,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-    case "exec_delete":
-      return encodeExecDeleteRejected(
-        event.execMsgId,
-        event.execId,
-        event.path,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-    case "exec_ls":
-      return encodeExecLsRejected(
-        event.execMsgId,
-        event.execId,
-        event.path,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-    case "exec_grep":
-      return encodeExecGrepError(event.execMsgId, event.execId, BUILTIN_TOOL_REJECT_REASON);
-    case "exec_diagnostics":
-      // Diagnostics has no rejection variant — return an empty success.
-      return encodeExecDiagnosticsResult(event.execMsgId, event.execId);
-    case "exec_shell":
-    case "exec_shell_stream":
-      return encodeExecShellRejected(
-        event.execMsgId,
-        event.execId,
-        event.command,
-        event.workingDir,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-    case "exec_bg_shell":
-      return encodeExecBackgroundShellSpawnRejected(
-        event.execMsgId,
-        event.execId,
-        event.command,
-        event.workingDir,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-    case "exec_fetch":
-      return encodeExecFetchError(
-        event.execMsgId,
-        event.execId,
-        event.url,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-    case "exec_write_shell_stdin":
-      return encodeExecWriteShellStdinError(
-        event.execMsgId,
-        event.execId,
-        BUILTIN_TOOL_REJECT_REASON
-      );
-  }
+/**
+ * Built-in execs whose result can be expressed as a typed success once the
+ * client answers. Everything else keeps the fail-closed rejection.
+ */
+function heldExecKind(
+  kind: ExecServerEvent["kind"]
+): "read" | "shell" | "shell_stream" | "mini_swe_bash" | "write" | "grep" | "ls" | "fetch" | null {
+  if (kind === "exec_read") return "read";
+  if (kind === "exec_write") return "write";
+  if (kind === "exec_grep") return "grep";
+  if (kind === "exec_ls") return "ls";
+  if (kind === "exec_fetch") return "fetch";
+  if (kind === "exec_shell") return "shell";
+  if (kind === "exec_shell_stream") return "shell_stream";
+  if (kind === "exec_mini_swe_bash") return "mini_swe_bash";
+  return null;
 }
 
 // Detect cloud environment (Edge runtime, Cloudflare Workers, etc.)
@@ -224,30 +167,6 @@ if (!isCloudEnv()) {
 const CURSOR_DEBUG = process.env.CURSOR_DEBUG === "1" || process.env.CURSOR_STREAM_DEBUG === "1";
 const debugLog = (...args: unknown[]) => {
   if (CURSOR_DEBUG) console.log(...args);
-};
-
-// Phase 8: max wall-clock time before we give up on the upstream and abort
-// the stream. Cursor's longest-observed plain chat takes ~90s; tool-using
-// turns can be longer. Five minutes is generous but bounded. A malformed env
-// value (NaN / non-positive) falls back to the default rather than breaking
-// setTimeout.
-const CURSOR_STREAM_TIMEOUT_MS = (() => {
-  const parsed = parseInt(process.env.CURSOR_STREAM_TIMEOUT_MS || "300000", 10);
-  return Number.isInteger(parsed) && parsed > 0 ? parsed : 300000;
-})();
-
-// Upper bound on a single Connect-RPC frame. The 4-byte length prefix can
-// declare up to 4 GiB; a corrupt or hostile upstream could send a huge length
-// that forces driveH2's rolling buffer to grow unbounded (OOM) while it waits
-// for bytes that never arrive. Real cursor frames are well under 1 MiB
-// (largest observed: a ~13 KB KV blob), so 16 MiB is a generous ceiling that
-// turns the failure into a clean stream error instead of memory exhaustion.
-const CURSOR_MAX_FRAME_BYTES = 16 * 1024 * 1024;
-
-type CursorHttpResponse = {
-  status: number;
-  headers: Record<string, unknown>;
-  body: Buffer;
 };
 
 function tryParseJsonError(payload: Buffer): { message: string; status: number } | null {
@@ -301,6 +220,7 @@ export type StreamCtx = {
   totalText: string;
   thinkingText: string;
   tokenDelta: number;
+  turnUsage?: CursorTurnUsage;
   // End-signal tracking (Phase 8 hardens this further).
   receivedText: boolean;
   kvAfterTextSeen: boolean;
@@ -323,6 +243,43 @@ export type StreamCtx = {
   // role:"tool" message can be answered on the open h2 stream via
   // encodeExecMcpResult.
   pendingToolCalls: Map<string, { execMsgId: number; execId: string; toolName: string }>;
+  /**
+   * Bytes received but not yet consumed when the turn settled. Cursor often
+   * puts the start of the next frame in the same TCP segment as the frame that
+   * ends the turn; dropping them made the NEXT run read the stream from the
+   * middle of a frame, so nothing decoded and it stalled until the safety
+   * timeout. Carried into the session and replayed as the next run's prefix.
+   */
+  leftoverBytes: Buffer;
+  /** Field number of the most recent exec variant this build cannot handle. */
+  unknownExecField: number | null;
+  lastUnknownUpdateField: number | null;
+  pendingBuiltinExecs: Map<
+    string,
+    {
+      execMsgId: number;
+      execId: string;
+      kind:
+        | "read"
+        | "shell"
+        | "shell_stream"
+        | "mini_swe_bash"
+        | "git_diff"
+        | "write"
+        | "grep"
+        | "ls"
+        | "fetch"
+        | PiExecEvent["kind"];
+      path: string;
+      command: string;
+      workingDir: string;
+      fileText: string;
+      returnFileContentAfterWrite?: boolean;
+      pattern: string;
+      outputMode?: string;
+      url?: string;
+    }
+  >;
   // Built-in Cursor tools are bridged to external OpenAI tool calls by first
   // rejecting the native request. Their result therefore cannot resume on the
   // same h2 stream and must use the existing full-history cold-resume path.
@@ -339,10 +296,16 @@ export type StreamCtx = {
   // True once we've emitted structured tool_calls from the inline Composer parser
   // (to avoid double-emitting if the block appears in multiple accumulated frames).
   composerInlineToolCallsEmitted: boolean;
+  // History-dialect narration scrubber (PR #12723 follow-up): incrementally
+  // holds back text that could start a flattenMessages dialect construct
+  // ("Assistant called tool …", "Tool result (…):", "User: <tool_result>…")
+  // so mimicry of the gateway's own serialization never streams to the client.
+  // A finalize-time scrub alone cannot retract already-emitted deltas.
+  narrationScrubber: NarrationStreamScrubber;
 };
 
 export function newStreamCtx(model: string, emit: (chunk: string) => void): StreamCtx {
-  return {
+  const ctx: StreamCtx = {
     responseId: `chatcmpl-cursor-${Date.now()}`,
     created: Math.floor(Date.now() / 1000),
     model,
@@ -358,11 +321,36 @@ export function newStreamCtx(model: string, emit: (chunk: string) => void): Stre
     emittedToolCallIndex: 0,
     toolCalls: [],
     pendingToolCalls: new Map(),
+    leftoverBytes: Buffer.alloc(0),
+    unknownExecField: null,
+    lastUnknownUpdateField: null,
+    pendingBuiltinExecs: new Map(),
     requiresColdResume: false,
     composerVisibleEmittedLength: 0,
     composerToolParserState: isComposerModel(model) ? createStreamingState() : null,
     composerInlineToolCallsEmitted: false,
+    // Assigned below (the scrubber's onToolCall callback closes over `ctx`).
+    narrationScrubber: undefined as unknown as NarrationStreamScrubber,
   };
+  ctx.narrationScrubber = createNarrationStreamScrubber((tc) => {
+    // A narrated call surfaced by the scrubber mid-stream is emitted as a
+    // structured tool_calls chunk right away; the finalize path
+    // (applyKimiToolCallRecovery) will not re-add it because ctx.toolCalls
+    // is non-empty by then.
+    const index = ctx.emittedToolCallIndex++;
+    ctx.toolCalls.push({ id: tc.id, name: tc.function.name, argumentsJson: tc.function.arguments });
+    emitChunk(ctx, {
+      tool_calls: [
+        {
+          index,
+          id: tc.id,
+          type: "function",
+          function: { name: tc.function.name, arguments: tc.function.arguments },
+        },
+      ],
+    });
+  });
+  return ctx;
 }
 
 function emitChunk(ctx: StreamCtx, delta: object, finishReason: string | null = null) {
@@ -398,20 +386,38 @@ export function emitCursorSseError(ctx: StreamCtx, classified: ClassifiedCursorE
 }
 
 export function buildCursorUsage(ctx: StreamCtx, body: { messages?: ChatMessage[] }) {
-  const promptTokens = estimateInputTokens(body);
+  const reported = ctx.turnUsage;
+  const promptTokens =
+    reported?.inputTokens !== undefined
+      ? reported.inputTokens + (reported.cacheReadTokens ?? 0) + (reported.cacheWriteTokens ?? 0)
+      : estimateInputTokens(body);
   const completionTokens =
-    ctx.tokenDelta > 0
-      ? ctx.tokenDelta
-      : estimateOutputTokens(ctx.totalText.length + ctx.thinkingText.length);
+    reported?.outputTokens !== undefined
+      ? reported.outputTokens
+      : ctx.tokenDelta > 0
+        ? ctx.tokenDelta
+        : estimateOutputTokens(ctx.totalText.length + ctx.thinkingText.length);
   const usage: Record<string, unknown> = {
     prompt_tokens: promptTokens,
     completion_tokens: completionTokens,
     total_tokens: promptTokens + completionTokens,
-    estimated: true,
+    ...(reported?.inputTokens === undefined || reported.outputTokens === undefined
+      ? { estimated: true }
+      : {}),
   };
-  if (ctx.thinkingText.length > 0) {
+  if (reported?.cacheReadTokens !== undefined || reported?.cacheWriteTokens !== undefined) {
+    usage.prompt_tokens_details = {
+      ...(reported.cacheReadTokens !== undefined
+        ? { cached_tokens: reported.cacheReadTokens }
+        : {}),
+      ...(reported.cacheWriteTokens !== undefined
+        ? { cache_creation_tokens: reported.cacheWriteTokens }
+        : {}),
+    };
+  }
+  if (reported?.reasoningTokens !== undefined || ctx.thinkingText.length > 0) {
     usage.completion_tokens_details = {
-      reasoning_tokens: estimateOutputTokens(ctx.thinkingText.length),
+      reasoning_tokens: reported?.reasoningTokens ?? estimateOutputTokens(ctx.thinkingText.length),
     };
   }
   return addBufferToUsage(usage);
@@ -563,15 +569,66 @@ export function processFrame(
   const dedupKey = event ? `${event.kind}:${event.execId}:${event.execMsgId}` : "";
   if (event && !ackedExecIds.has(dedupKey)) {
     ackedExecIds.add(dedupKey);
+    // An exec event that lands after a composer kv_after_text checkpoint (or a
+    // turn_ended with no text) was previously discarded by the scan loop as
+    // "already ended". Under load the exec_mcp can arrive in the same TCP
+    // segment as the KV checkpoint — the tool call must still be surfaced.
+    const reopensTurn = !!ctx.endReason;
+    debugLog(`[cursor-agent] exec kind=${event.kind} end=${ctx.endReason ?? "none"}`);
     if (event.kind === "exec_request_context") {
       if (opts.h2Req) {
         try {
-          // Cursor receives tools via AgentRunRequest.mcp_tools (request body)
-          // — sending them again in the request_context ack causes the
-          // server to stall silently. Empty ack only.
-          opts.h2Req.write(encodeRequestContextResponse(event.execMsgId, event.execId));
+          // The ack carries the tool set on RequestContext.tools (field 7) plus
+          // the McpMetaToolOptions descriptors that make it discoverable through
+          // Cursor's GetDynamicTools meta tool. An empty ack was previously
+          // required only because the tools were being written to field 2
+          // (`rules`), which the server silently stalled on.
+          opts.h2Req.write(
+            encodeRequestContextResponse(event.execMsgId, event.execId, opts.mcpTools ?? [])
+          );
         } catch (e) {
           console.debug(`[CURSOR] request_context ack write failed:`, e);
+        }
+      }
+    } else if (event.kind === "exec_unknown") {
+      // Name the field so a new Cursor variant shows up as a clear log line
+      // (and, via the idle watchdog below, a 502 that names it) instead of a
+      // five-minute silent hang. Suggested by @QuangBlue on #14737.
+      ctx.unknownExecField = event.variantField;
+      debugLog(
+        `[cursor-agent] unhandled exec variant field=${event.variantField} — no handler in this build`
+      );
+    } else if (event.kind === "exec_list_mcp_resources") {
+      // Blocking exec: answer with an empty success (OmniRoute exposes tools,
+      // not MCP resources) so the turn can finish.
+      if (opts.h2Req) {
+        try {
+          opts.h2Req.write(encodeExecListMcpResourcesResult(event.execMsgId, event.execId));
+        } catch (e) {
+          console.debug(`[CURSOR] list_mcp_resources ack write failed:`, e);
+        }
+      }
+    } else if (event.kind === "exec_mcp_state") {
+      // mcp_state_exec_args (field 36) is a blocking request: the server asks
+      // which MCP servers exist and emits only heartbeats until it is answered.
+      if (opts.h2Req) {
+        try {
+          const serverIdentifier =
+            event.serverIdentifiers.find((id) => id.trim().length > 0) ??
+            OMNIROUTE_MCP_SERVER_IDENTIFIER;
+          opts.h2Req.write(
+            encodeMcpStateResponse(
+              event.execMsgId,
+              event.execId,
+              serverIdentifier,
+              opts.mcpTools ?? []
+            )
+          );
+          debugLog(
+            `[cursor-agent] answered mcp_state server=${serverIdentifier} tools=[${(opts.mcpTools ?? []).map((t) => t.name).join(",")}]`
+          );
+        } catch (e) {
+          console.debug(`[CURSOR] mcp_state ack write failed:`, e);
         }
       }
     } else if (event.kind === "exec_mcp") {
@@ -580,6 +637,12 @@ export function processFrame(
       // tool's id+name+empty args, then a chunk with the JSON-stringified
       // args. Parallel tool calls share one finish chunk (Phase 8 closes).
       const openAIToolCallId = emitStructuredToolCall(ctx, event.toolName, event.args ?? {});
+      if (reopensTurn) {
+        // The turn was already terminated (kv_after_text / turn_ended) before
+        // this frame was processed — re-open it so the scan loop keeps reading
+        // instead of resolving away the buffered tail.
+        ctx.endReason = "tool_calls";
+      }
       // Phase 6: remember the cursor exec ids so a follow-up role:"tool"
       // message can be replied with encodeExecMcpResult on the open h2 stream.
       ctx.pendingToolCalls.set(openAIToolCallId, {
@@ -596,10 +659,36 @@ export function processFrame(
       // Cursor/Fable frequently chooses its native Shell tool even when the
       // OpenAI client declared external tools. If a schema-compatible shell
       // tool exists, surface the native request as a structured OpenAI call.
-      // We still send the typed rejection upstream, then close this h2 stream;
-      // the role:"tool" follow-up is resumed cold from the full history.
-      const bridge = bridgeCursorBuiltinTool(event, opts.mcpTools ?? [], opts.clientPlatform);
-      const rejection = buildExecRejection(event);
+      // Held execs receive the client tool's result on this h2 stream; tools
+      // without a compatible result use a rejection and cold resume.
+      const bridge =
+        event.kind === "exec_git_diff"
+          ? bridgeCursorGitDiff(event, opts.mcpTools ?? [])
+          : isPiExecEvent(event)
+            ? bridgeCursorPiTool(event, opts.mcpTools ?? [])
+            : bridgeCursorBuiltinTool(event, opts.mcpTools ?? [], opts.clientPlatform);
+      const heldKind = bridge
+        ? event.kind === "exec_git_diff"
+          ? "git_diff"
+          : isPiExecEvent(event)
+            ? event.kind
+            : heldExecKind(event.kind)
+        : null;
+      if (
+        (event.kind === "exec_git_diff" && !bridge) ||
+        (event.kind === "exec_execute_hook" && !event.hookField)
+      ) {
+        ctx.unknownExecField = event.kind === "exec_git_diff" ? 44 : 27;
+      }
+      debugLog(
+        `[cursor-agent] builtin kind=${event.kind} bridge=${bridge?.toolName ?? "none"} held=${heldKind ?? "no"}`
+      );
+      if (event.kind === "exec_grep") {
+        debugLog(
+          `[cursor-agent] grep mode=${event.outputMode || "unspecified"} patternLength=${event.pattern.length} pathPresent=${!!event.path}`
+        );
+      }
+      const rejection = heldKind ? null : buildExecRejection(event);
       if (rejection && opts.h2Req) {
         try {
           opts.h2Req.write(rejection);
@@ -608,8 +697,30 @@ export function processFrame(
         }
       }
       if (bridge) {
-        emitStructuredToolCall(ctx, bridge.toolName, bridge.arguments);
-        ctx.requiresColdResume = true;
+        const openAIToolCallId = emitStructuredToolCall(ctx, bridge.toolName, bridge.arguments);
+        if (heldKind) {
+          // Hold the exec open: the client's output comes back as a
+          // role:"tool" message and is returned to Cursor as this exec's
+          // SUCCESS. Telling Cursor the exec was rejected instead makes the
+          // model believe its own tool never ran, so it retries the same step
+          // forever (observed: an agent re-reading a missing file in a loop).
+          ctx.pendingBuiltinExecs.set(openAIToolCallId, {
+            execMsgId: event.execMsgId,
+            execId: event.execId,
+            kind: heldKind,
+            path: "path" in event ? event.path : "",
+            command: "command" in event ? event.command : "",
+            workingDir: "workingDir" in event ? event.workingDir : "",
+            fileText: "fileText" in event ? event.fileText : "",
+            returnFileContentAfterWrite:
+              event.kind === "exec_write" ? event.returnFileContentAfterWrite : undefined,
+            pattern: "pattern" in event ? event.pattern : "",
+            outputMode: event.kind === "exec_grep" ? event.outputMode : undefined,
+            url: event.kind === "exec_fetch" ? event.url : undefined,
+          });
+        } else {
+          ctx.requiresColdResume = true;
+        }
         ctx.endReason = "tool_calls";
       }
     }
@@ -621,7 +732,7 @@ export function processFrame(
     deltas = decodeAgentServerMessage(payload);
   } catch (err) {
     debugLog("[cursor-agent] decode failed:", (err as Error).message);
-    return;
+    throw err;
   }
   for (const d of deltas) {
     if (d.kind === "native_todo_write") {
@@ -640,9 +751,18 @@ export function processFrame(
         emitChunk(ctx, { role: "assistant", content: "" });
         ctx.emittedRoleChunk = true;
       }
-      ctx.totalText += d.text;
+      // History-dialect scrub (PR #12723 follow-up): hold back text that may
+      // start a flattenMessages dialect construct so mimicry of the gateway's
+      // own serialization ("Assistant called tool …", "Tool result (…):",
+      // "User: <tool_result>…") never streams to the client. Only the
+      // scrubber-cleared delta is emitted and accumulated into totalText —
+      // totalText must equal what the client actually received.
+      const safeDelta = ctx.narrationScrubber.feed(d.text);
       ctx.receivedText = true;
-      emitChunk(ctx, { content: d.text });
+      if (safeDelta) {
+        ctx.totalText += safeDelta;
+        emitChunk(ctx, { content: safeDelta });
+      }
     } else if (d.kind === "thinking" && d.text) {
       if (!ctx.emittedRoleChunk) {
         emitChunk(ctx, { role: "assistant", content: "" });
@@ -712,7 +832,13 @@ export function processFrame(
     } else if (d.kind === "token_delta") {
       ctx.tokenDelta += d.tokens;
     } else if (d.kind === "turn_ended") {
+      if (d.usage) ctx.turnUsage = d.usage;
       if (ctx.endReason !== "tool_calls") ctx.endReason = "turn_ended";
+    } else if (d.kind === "unknown") {
+      if (ctx.lastUnknownUpdateField !== d.field) {
+        debugLog(`[cursor-agent] unhandled interaction update field=${d.field}`);
+      }
+      ctx.lastUnknownUpdateField = d.field;
     } else if (d.kind === "tool_call_completed" && ctx.toolCalls.length > 0) {
       // Phase 6: model paused awaiting tool result. driveH2 returns but the
       // h2 stream stays open — the session manager keeps it alive for the
@@ -748,6 +874,22 @@ export function processFrame(
         ctx.endReason = "kv_after_text";
       }
     }
+  }
+}
+
+/** Custom aliases are routing names, not exact wire ids reported by Cursor. */
+export async function loadCursorWireModelIds(
+  provider: string,
+  loadCatalog: (
+    id: string,
+    includeCustomModels: boolean
+  ) => Promise<{ models: Array<{ id: string }> }> = getActiveSyncedCatalog
+): Promise<ReadonlySet<string> | undefined> {
+  try {
+    const catalog = await loadCatalog(provider, false);
+    return catalog.models.length ? new Set(catalog.models.map((model) => model.id)) : undefined;
+  } catch {
+    return undefined;
   }
 }
 
@@ -839,7 +981,10 @@ export class CursorExecutor extends BaseExecutor {
     max_completion_tokens?: unknown;
     stop?: unknown;
     response_format?: unknown;
-  }): { userText: string; tools: OpenAITool[] | undefined } {
+    reasoning_effort?: unknown;
+    reasoning?: { effort?: unknown };
+    output_config?: { effort?: unknown };
+  }): { userText: string; tools: OpenAITool[] | undefined; reasoningEffort?: string } {
     const messages: ChatMessage[] = body.messages || [];
     const declaredTools: OpenAITool[] | undefined = Array.isArray(body.tools)
       ? (body.tools as OpenAITool[])
@@ -866,7 +1011,12 @@ export class CursorExecutor extends BaseExecutor {
     // max_tokens / stop) as trailing prompt constraints.
     userText += buildCursorOutputConstraints(body);
 
-    return { userText, tools };
+    const effort = body.reasoning_effort ?? body.reasoning?.effort ?? body.output_config?.effort;
+    return {
+      userText,
+      tools,
+      reasoningEffort: typeof effort === "string" ? effort : undefined,
+    };
   }
 
   /**
@@ -896,13 +1046,7 @@ export class CursorExecutor extends BaseExecutor {
    * undefined so resolveRequestedModel keeps #7289 offline splitting.
    */
   private async loadLiveCatalogIds(): Promise<ReadonlySet<string> | undefined> {
-    try {
-      const catalog = await getActiveSyncedCatalog(this.provider);
-      if (!catalog.models.length) return undefined;
-      return new Set(catalog.models.map((model) => model.id));
-    } catch {
-      return undefined;
-    }
+    return loadCursorWireModelIds(this.provider);
   }
 
   private async buildRequest(
@@ -916,9 +1060,12 @@ export class CursorExecutor extends BaseExecutor {
       max_completion_tokens?: unknown;
       stop?: unknown;
       response_format?: unknown;
+      reasoning_effort?: unknown;
+      reasoning?: { effort?: unknown };
+      output_config?: { effort?: unknown };
     }
   ): Promise<{ body: Uint8Array; blobStore: Map<string, Buffer> }> {
-    const { userText, tools } = this.assembleTextAndTools(body);
+    const { userText, tools, reasoningEffort } = this.assembleTextAndTools(body);
     const [images, liveCatalogIds] = await Promise.all([
       this.resolveRequestImages(body),
       this.loadLiveCatalogIds(),
@@ -927,6 +1074,7 @@ export class CursorExecutor extends BaseExecutor {
     const blobStore = new Map<string, Buffer>();
     const requestBody = buildAgentRequestBody({
       modelId: model,
+      reasoningEffort,
       userText,
       conversationId: body.conversation_id,
       tools,
@@ -940,28 +1088,17 @@ export class CursorExecutor extends BaseExecutor {
   transformRequest(model, body, _stream, _credentials) {
     // Sync interface method (not used by cursor's own execute() path, which
     // uses the async buildRequest). Text-only — image resolution is async.
-    const { userText, tools } = this.assembleTextAndTools(body);
+    const { userText, tools, reasoningEffort } = this.assembleTextAndTools(body);
     const blobStore = new Map<string, Buffer>();
     return buildAgentRequestBody({
       modelId: model,
+      reasoningEffort,
       userText,
       conversationId: body.conversation_id,
       tools,
       blobStore,
     });
   }
-
-  // ─── h2 lifecycle: open + drive (Phase 4 streaming refactor) ─────────────
-  //
-  // openH2 establishes the bidirectional stream and waits for the response
-  // headers (so we can decide whether to commit to a streaming SSE Response
-  // or return an error). driveH2 then consumes data events incrementally,
-  // dispatching frames through processFrame so SSE chunks land on the
-  // ReadableStream controller as the upstream produces them.
-  //
-  // The fetch fallback (cloud envs without http2) preserves the legacy
-  // buffer-then-decode behavior — Connect-RPC bidirectional ack-on-same-stream
-  // can't run over a one-shot fetch anyway.
 
   private async openH2(
     url: string,
@@ -977,125 +1114,10 @@ export class CursorExecutor extends BaseExecutor {
     consumeError: () => Promise<Buffer>;
   }> {
     if (!http2) throw new Error("http2 module not available");
-
-    return new Promise((resolve, reject) => {
-      const urlObj = new URL(url);
-      const client = http2!.connect(`https://${urlObj.host}`);
-      const earlyChunks: Buffer[] = [];
-      let resolved = false;
-
-      client.on("error", (err) => {
-        if (!resolved) reject(err);
-      });
-
-      const req = client.request({
-        ":method": "POST",
-        ":path": urlObj.pathname,
-        ":authority": urlObj.host,
-        ":scheme": "https",
-        ...headers,
-      });
-
-      const onAbort = () => {
-        try {
-          req.close();
-          client.close();
-        } catch {
-          // Expected: connection may already be closed
-        }
-        if (!resolved) {
-          resolved = true;
-          reject(new Error("aborted"));
-        }
-      };
-      if (signal) signal.addEventListener("abort", onAbort);
-
-      req.on("response", (h) => {
-        if (resolved) return;
-        resolved = true;
-        const status = Number(h[":status"] ?? HTTP_STATUS.SERVER_ERROR);
-        // For non-200 statuses, drain the remaining body for an error message.
-        // The caller calls consumeError() to await the full body.
-        const consumeError = () =>
-          new Promise<Buffer>((res) => {
-            const out = [...earlyChunks];
-            req.on("data", (c) => out.push(Buffer.from(c)));
-            req.on("end", () => {
-              try {
-                req.close();
-                client.close();
-              } catch {
-                // Expected: connection may already be closed
-              }
-              if (signal) signal.removeEventListener("abort", onAbort);
-              res(Buffer.concat(out));
-            });
-            req.on("error", () => {
-              try {
-                req.close();
-                client.close();
-              } catch {
-                // Expected: connection may already be closed
-              }
-              if (signal) signal.removeEventListener("abort", onAbort);
-              res(Buffer.concat(out));
-            });
-          });
-        resolve({
-          status,
-          headers: h as Record<string, string | number>,
-          client,
-          req,
-          initialBytes: Buffer.concat(earlyChunks),
-          consumeError,
-        });
-      });
-
-      // Buffer any data that arrives before the response event resolves.
-      // (In practice the response event fires first, but this guards against
-      // implementation differences in node:http2.)
-      req.on("data", (chunk) => {
-        if (!resolved) earlyChunks.push(Buffer.from(chunk));
-      });
-
-      req.on("error", (err) => {
-        if (!resolved) {
-          resolved = true;
-          if (signal) signal.removeEventListener("abort", onAbort);
-          reject(err);
-        }
-      });
-
-      // Bidirectional streaming: write the init message but DO NOT send
-      // END_STREAM — cursor's server stops responding once we close our side.
-      // Guard the write like every h2Req.write in processFrame: a synchronous
-      // failure here (e.g. stream already torn down) would otherwise leave the
-      // request hung until the safety timeout instead of failing fast.
-      try {
-        req.write(body);
-      } catch (err) {
-        if (!resolved) {
-          resolved = true;
-          if (signal) signal.removeEventListener("abort", onAbort);
-          try {
-            req.close();
-            client.close();
-          } catch {
-            // Expected: connection may already be closed
-          }
-          reject(err instanceof Error ? err : new Error(String(err)));
-        }
-      }
-    });
+    return openCursorH2(http2, url, headers, body, signal);
   }
 
-  /**
-   * Drive an open h2 stream to completion. processFrame populates ctx as
-   * each Connect-RPC frame is decoded; the loop closes when ctx.endReason
-   * is set (turn_ended, kv_after_text, server_end) or the stream errors.
-   *
-   * Phase 8 will add a max-stream safety timeout here.
-   */
+  /** Drive one Cursor turn while retaining the h2 stream for tool-result follow-ups. */
   private driveH2(
     h2: {
       req: import("http2").ClientHttp2Stream;
@@ -1109,147 +1131,19 @@ export class CursorExecutor extends BaseExecutor {
     todoHistory: CursorTodoHistoryItem[] | undefined,
     signal?: AbortSignal
   ): Promise<void> {
-    const ackedExecIds = new Set<string>();
-    // Rolling buffer: chunks arrive on `data`, get appended, and consumed
-    // frames are sliced off so we don't re-scan + re-concat on every event
-    // (avoids O(N²) for long-running streams).
-    let buf: Buffer = h2.initialBytes.length > 0 ? h2.initialBytes : Buffer.alloc(0);
-
-    return new Promise((resolve, reject) => {
-      let scanning = false;
-      let settled = false;
-      // Phase 8: safety timeout. If neither turn_ended, kv_after_text, nor
-      // server-end fires within CURSOR_STREAM_TIMEOUT_MS, abort the stream
-      // so a stuck upstream doesn't keep the response open indefinitely.
-      const safetyTimer = setTimeout(() => {
-        if (ctx.endReason) return;
-        debugLog("[cursor-agent] stream safety timeout fired");
-        teardown();
-        reject(new Error("cursor-agent stream timed out"));
-      }, CURSOR_STREAM_TIMEOUT_MS);
-
-      const onData = (chunk: Buffer) => {
-        if (CURSOR_DEBUG && process.env.CURSOR_DUMP_FILE) {
-          fs.appendFileSync(process.env.CURSOR_DUMP_FILE, chunk);
-        }
-        buf = buf.length === 0 ? Buffer.from(chunk) : Buffer.concat([buf, chunk]);
-        void tryScan();
-      };
-      const onEnd = () => {
-        if (settled) return;
-        settled = true;
-        if (!ctx.endReason) ctx.endReason = "server_end";
-        detachListeners();
-        resolve();
-      };
-      const onErr = (err: Error) => {
-        if (settled) return;
-        settled = true;
-        teardown();
-        reject(err);
-      };
-      const onAbort = () => {
-        if (settled) return;
-        settled = true;
-        teardown();
-        reject(new Error("aborted"));
-      };
-
-      // detachListeners removes data/end/error/abort handlers and clears the
-      // safety timer. Called on successful resolve when the caller keeps the
-      // h2 alive (Phase 6 session reuse).
-      const detachListeners = () => {
-        clearTimeout(safetyTimer);
-        h2.req.off("data", onData);
-        h2.req.off("end", onEnd);
-        h2.req.off("error", onErr);
-        if (signal) signal.removeEventListener("abort", onAbort);
-      };
-      // teardown additionally closes the h2 stream. Used on error / abort /
-      // safety-timeout — the connection isn't worth keeping at that point.
-      const teardown = () => {
-        detachListeners();
-        try {
-          h2.req.close();
-          h2.client.close();
-        } catch {
-          // Expected: connection may already be closed during teardown
-        }
-      };
-
-      if (signal) signal.addEventListener("abort", onAbort);
-
-      const hasCompleteFrame = () => buf.length >= 5 && buf.length >= 5 + buf.readUInt32BE(1);
-
-      const tryScan = async () => {
-        if (scanning || settled) return;
-        scanning = true;
-        try {
-          let pos = 0;
-          while (!settled && pos + 5 <= buf.length) {
-            const length = buf.readUInt32BE(pos + 1);
-            if (length > CURSOR_MAX_FRAME_BYTES) {
-              // Refuse to buffer an implausibly large frame — fail fast instead
-              // of letting the rolling buffer grow toward OOM.
-              settled = true;
-              teardown();
-              reject(new Error(`cursor-agent frame too large (${length} bytes)`));
-              return;
-            }
-            if (pos + 5 + length > buf.length) break; // partial frame; wait
-            const flag = buf[pos];
-            const raw = buf.subarray(pos + 5, pos + 5 + length);
-            // Per-frame error isolation: if gunzip or processFrame throws on
-            // one frame, log and skip past it instead of getting stuck on
-            // the same offset and hanging until the safety timer fires.
-            try {
-              const payload = flag & 0x1 ? await gunzipAsync(raw) : raw;
-              if (settled) return;
-              processFrame(payload, ctx, ackedExecIds, {
-                h2Req: h2.req,
-                mcpTools,
-                blobStore,
-                clientPlatform,
-                todoHistory,
-              });
-            } catch (err) {
-              debugLog(
-                "[cursor-agent] frame decode failed at pos",
-                pos,
-                ":",
-                (err as Error).message
-              );
-            }
-            pos += 5 + length;
-            if (ctx.endReason) {
-              buf = buf.subarray(pos);
-              settled = true;
-              detachListeners();
-              resolve();
-              return;
-            }
-          }
-          // Splice off processed bytes so the buffer stays bounded.
-          if (pos > 0) buf = buf.subarray(pos);
-        } finally {
-          scanning = false;
-        }
-
-        if (!settled && hasCompleteFrame()) {
-          void tryScan();
-        }
-      };
-
-      h2.req.on("data", onData);
-      h2.req.on("end", onEnd);
-      h2.req.on("error", onErr);
-
-      // Process any bytes already buffered from openH2.
-      void tryScan();
+    return driveCursorH2(h2, ctx, {
+      mcpTools,
+      blobStore,
+      clientPlatform,
+      todoHistory,
+      signal,
+      debugEnabled: CURSOR_DEBUG,
+      debugLog,
+      onFrame: (payload, ids, opts) => processFrame(payload, ctx, ids, opts),
     });
   }
 
-  async execute({ model, body, stream, credentials, signal, log, upstreamExtraHeaders }) {
+  async execute({ model, body, stream, credentials, signal, upstreamExtraHeaders }) {
     const fallbackUrl = this.buildUrl();
     const executionCredentials = await this.resolveExecutionCredentials(credentials);
     if (executionCredentials instanceof Response) {
@@ -1294,7 +1188,29 @@ export class CursorExecutor extends BaseExecutor {
         ? body.conversation_id
         : crypto.randomUUID();
     const lastMessage = messages[messages.length - 1];
-    const isToolFollowUp = lastMessage?.role === "tool";
+    // A tool follow-up is "this request carries tool results we may still owe
+    // Cursor", not "the last message happens to be role:tool". The Responses
+    // API path translates function_call_output into a role:"tool" message that
+    // is NOT last (a user turn follows it), so keying off the last message
+    // alone skipped session lookup entirely: every follow-up fell back to a
+    // cold resume, the held exec was never answered, and the model kept
+    // retrying the same built-in tool.
+    const isToolFollowUp =
+      lastMessage?.role === "tool" ||
+      messages.some(
+        (m) => m.role === "tool" && typeof m.tool_call_id === "string" && m.tool_call_id
+      );
+    if (isToolFollowUp) {
+      debugLog(
+        `[cursor-agent] history tail=${messages
+          .slice(-8)
+          .map(
+            (m) =>
+              `${m.role}:${messageContentToText(m.content).length}:${m.tool_call_id ? "tool-id" : "no-id"}`
+          )
+          .join(" ")}`
+      );
+    }
 
     // Tools embedded in the RequestContext ack throughout the turn —
     // synced with mcp_tools in the encoded request body.
@@ -1378,15 +1294,18 @@ export class CursorExecutor extends BaseExecutor {
       for (const msg of messages) {
         if (msg.role !== "tool") continue;
         const id = msg.tool_call_id ?? "";
-        if (!session.pendingToolCalls.has(id)) continue;
-        const content = typeof msg.content === "string" ? msg.content : "";
-        if (cursorSessionManager.sendToolResult(session, id, content, false)) {
+        if (!session.pendingToolCalls.has(id) && !session.pendingBuiltinExecs.has(id)) continue;
+        debugLog(
+          `[cursor-agent] tool result kind=${session.pendingBuiltinExecs.get(id)?.kind ?? "mcp"} contentType=${Array.isArray(msg.content) ? "parts" : typeof msg.content} textLength=${messageContentToText(msg.content).length}`
+        );
+        if (cursorSessionManager.sendToolResult(session, id, msg.content, false)) {
           matched++;
         } else {
           hadFailure = true;
           break;
         }
       }
+      debugLog(`[cursor-agent] resume matched=${matched} failed=${hadFailure}`);
       if (matched === 0 || hadFailure) {
         cursorSessionManager.close(session);
         session = undefined;
@@ -1394,8 +1313,9 @@ export class CursorExecutor extends BaseExecutor {
         h2 = {
           client: session.h2Client,
           req: session.h2Req,
-          initialBytes: Buffer.alloc(0),
+          initialBytes: session.leftoverBytes,
         };
+        session.leftoverBytes = Buffer.alloc(0);
       }
     }
 
@@ -1463,6 +1383,15 @@ export class CursorExecutor extends BaseExecutor {
       for (const [id, info] of ctx.pendingToolCalls) {
         sessionToUse.pendingToolCalls.set(id, info);
       }
+      // Held built-in execs must survive into the session too, or the client's
+      // role:"tool" follow-up has nothing to answer and the exec stays open.
+      for (const [id, info] of ctx.pendingBuiltinExecs) {
+        sessionToUse.pendingBuiltinExecs.set(id, info);
+      }
+      sessionToUse.leftoverBytes = ctx.leftoverBytes;
+      debugLog(
+        `[cursor-agent] finish error=${errored} end=${ctx.endReason ?? "none"} cold=${ctx.requiresColdResume} held=${ctx.pendingBuiltinExecs.size} mcp=${ctx.pendingToolCalls.size}`
+      );
       if (errored || ctx.endReason !== "tool_calls" || ctx.requiresColdResume) {
         cursorSessionManager.close(sessionToUse);
       } else {
@@ -1613,6 +1542,8 @@ export class CursorExecutor extends BaseExecutor {
       }
     }
 
+    finalizeKimiTurn(ctx, (chunk) => emitChunk(ctx, chunk));
+
     // OpenAI finish_reason: "tool_calls" if the model invoked any declared
     // tool, else "stop". A turn with mixed text + tool_calls finishes with
     // "tool_calls" (the tool calls are the actionable signal for the client).
@@ -1682,6 +1613,8 @@ export class CursorExecutor extends BaseExecutor {
         }
       }
     }
+
+    finalizeKimiTurn(ctx);
 
     const usage = buildCursorUsage(ctx, body);
     const finishReason = ctx.toolCalls.length > 0 ? "tool_calls" : "stop";
