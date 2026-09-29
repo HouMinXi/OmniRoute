@@ -24,6 +24,15 @@ const { skillExecutor } = await import("../../src/lib/skills/executor.ts");
 const { memoryTools } = await import("../../open-sse/mcp-server/tools/memoryTools.ts");
 const { skillTools } = await import("../../open-sse/mcp-server/tools/skillTools.ts");
 
+type ToolResult = {
+  data: { memories: Array<{ content: string }> };
+  skills: Array<{ name: string }>;
+  count: number;
+  success: boolean;
+};
+type ToolHandler = (args: Record<string, unknown>, extra?: unknown) => Promise<ToolResult>;
+const handlerOf = (tool: unknown): ToolHandler => (tool as { handler: ToolHandler }).handler;
+
 const callerA = { authInfo: { clientId: "tenant-a", scopes: ["mcp:connect"] } };
 
 function resetSkills() {
@@ -58,25 +67,25 @@ async function seedMemory(apiKeyId: string, key: string, content: string) {
     key,
     content,
     metadata: {},
-  } as any);
+  } as Parameters<typeof createMemory>[0]);
 }
 
 test("memory search as tenant A does not return tenant B's memories, whatever apiKeyId says", async () => {
   await seedMemory("tenant-b", "secret", "tenant B private note");
   await seedMemory("tenant-a", "mine", "tenant A note");
 
-  const result: any = await (memoryTools.omniroute_memory_search as any).handler(
+  const result = await handlerOf(memoryTools.omniroute_memory_search)(
     { apiKeyId: "tenant-b" },
     callerA
   );
 
-  const contents = result.data.memories.map((m: any) => m.content);
+  const contents = result.data.memories.map((m) => m.content);
   assert.ok(!contents.includes("tenant B private note"));
   assert.ok(contents.includes("tenant A note"));
 });
 
 test("memory add stores under the caller, not under the id in the arguments", async () => {
-  await (memoryTools.omniroute_memory_add as any).handler(
+  await handlerOf(memoryTools.omniroute_memory_add)(
     { apiKeyId: "tenant-b", type: "factual", key: "planted", content: "injected into B" },
     callerA
   );
@@ -89,7 +98,7 @@ test("memory clear removes the caller's memories and leaves tenant B's", async (
   await seedMemory("tenant-b", "keep", "B keeps this");
   await seedMemory("tenant-a", "drop", "A drops this");
 
-  await (memoryTools.omniroute_memory_clear as any).handler({ apiKeyId: "tenant-b" }, callerA);
+  await handlerOf(memoryTools.omniroute_memory_clear)({ apiKeyId: "tenant-b" }, callerA);
 
   assert.equal((await listMemories({ apiKeyId: "tenant-b" })).data.length, 1);
   assert.equal((await listMemories({ apiKeyId: "tenant-a" })).data.length, 0);
@@ -98,7 +107,7 @@ test("memory clear removes the caller's memories and leaves tenant B's", async (
 test("a local process with no key and no configured key can still name its owner", async () => {
   await seedMemory("local-owner", "k", "local note");
 
-  const result: any = await (memoryTools.omniroute_memory_search as any).handler(
+  const result = await handlerOf(memoryTools.omniroute_memory_search)(
     { apiKeyId: "local-owner" },
     undefined
   );
@@ -127,7 +136,7 @@ test("skills_enable as tenant A cannot switch on a global or another tenant's sk
     [otherSkill.id, "tenant-b"],
   ]) {
     await assert.rejects(
-      (skillTools.omniroute_skills_enable as any).handler(
+      handlerOf(skillTools.omniroute_skills_enable)(
         { apiKeyId: ownerArg, skillId, enabled: true },
         callerA
       ),
@@ -148,7 +157,7 @@ test("skills_execute as tenant A never runs tenant B's skill", async () => {
   await registerSkill("b-tool", "tenant-b", true, "b-handler");
 
   await assert.rejects(
-    (skillTools.omniroute_skills_execute as any).handler(
+    handlerOf(skillTools.omniroute_skills_execute)(
       { apiKeyId: "tenant-b", skillName: "b-tool", input: {} },
       callerA
     ),
@@ -161,15 +170,15 @@ test("skills_list and skills_executions default to the caller's own tenant", asy
   await registerSkill("a-tool", "tenant-a", true, "a-handler");
   await registerSkill("b-tool", "tenant-b", true, "b-handler");
 
-  const listed: any = await (skillTools.omniroute_skills_list as any).handler(
+  const listed = await handlerOf(skillTools.omniroute_skills_list)(
     { apiKeyId: "tenant-b" },
     callerA
   );
-  const names = listed.skills.map((s: any) => s.name);
+  const names = listed.skills.map((s) => s.name);
   assert.ok(names.includes("a-tool"));
   assert.ok(!names.includes("b-tool"));
 
-  const executions: any = await (skillTools.omniroute_skills_executions as any).handler(
+  const executions = await handlerOf(skillTools.omniroute_skills_executions)(
     { apiKeyId: "tenant-b" },
     callerA
   );
@@ -180,7 +189,7 @@ test("a local process with no key still manages skills by the owner it names", a
   await registerSkill("local-tool", "local-owner", false, "l-handler");
   const skill = skillRegistry.list("local-owner").find((s) => s.name === "local-tool");
 
-  const result: any = await (skillTools.omniroute_skills_enable as any).handler(
+  const result = await handlerOf(skillTools.omniroute_skills_enable)(
     { apiKeyId: "local-owner", skillId: skill!.id, enabled: true },
     undefined
   );
