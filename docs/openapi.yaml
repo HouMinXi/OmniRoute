@@ -13301,6 +13301,7 @@ paths:
       tags:
         - Version manager
       summary: "POST version manager › install"
+      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -13309,6 +13310,7 @@ paths:
       tags:
         - Version manager
       summary: "POST version manager › restart"
+      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -13317,6 +13319,7 @@ paths:
       tags:
         - Version manager
       summary: "POST version manager › start"
+      x-loopback-only: true
       responses:
         "200":
           description: OK
@@ -13333,6 +13336,7 @@ paths:
       tags:
         - Version manager
       summary: "POST version manager › stop"
+      x-loopback-only: true
       responses:
         "200":
           description: OK
