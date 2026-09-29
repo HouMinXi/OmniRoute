@@ -1203,6 +1203,8 @@
     "batchGroup": "Batch",
     "homeSubtitle": "Dashboardoverzicht",
     "providersSubtitle": "AI-providers beheren",
+    "modelCatalog": "Modelcatalogus",
+    "modelCatalogSubtitle": "Blader door modellen van alle providers",
     "quotaTrackerSubtitle": "Gebruikslimieten bijhouden",
     "providerQuotaSubtitle": "Gebruikslimieten van providers bijhouden",
     "runtimeSubtitle": "Realtime veerkracht en sessies",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Erft verbinding: {host}",
     "inheritedPool": "Erft verbindingspool ({count})",
     "poolEmptyBlocked": "Pool leeg — verzoeken mislukken (niet direct)",
-    "directEgress": "Direct (geen proxy)"
+    "directEgress": "Direct (geen proxy)",
+    "ownProxy": "Eigen proxy"
   },
   "gamification": {
     "leaderboardScopes": {

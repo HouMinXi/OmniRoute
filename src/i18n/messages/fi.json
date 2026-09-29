@@ -1203,6 +1203,8 @@
     "batchGroup": "Eräajo",
     "homeSubtitle": "Koontinäytön yleiskatsaus",
     "providersSubtitle": "Hallinnoi tekoälypalveluntarjoajia",
+    "modelCatalog": "Mallikatalogi",
+    "modelCatalogSubtitle": "Selaa malleja eri palveluntarjoajilta",
     "quotaTrackerSubtitle": "Seuraa käyttörajoja",
     "providerQuotaSubtitle": "Seuraa palveluntarjoajien käyttörajoja",
     "runtimeSubtitle": "Reaaliaikainen vikasietoisuus ja istunnot",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Perii yhteyden: {host}",
     "inheritedPool": "Perii yhteyspoolin ({count})",
     "poolEmptyBlocked": "Pooli tyhjä — pyynnöt epäonnistuvat (ei suoraan)",
-    "directEgress": "Suora (ei välityspalvelinta)"
+    "directEgress": "Suora (ei välityspalvelinta)",
+    "ownProxy": "Oma välityspalvelin"
   },
   "gamification": {
     "leaderboardScopes": {

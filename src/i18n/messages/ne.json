@@ -1203,6 +1203,8 @@
     "batchGroup": "ब्याच",
     "homeSubtitle": "ड्यासबोर्ड अवलोकन",
     "providersSubtitle": "AI प्रदायकहरू व्यवस्थापन गर्नुहोस्",
+    "modelCatalog": "मोडेल सूची",
+    "modelCatalogSubtitle": "प्रदायकहरूभरिका मोडेलहरू हेर्नुहोस्",
     "quotaTrackerSubtitle": "प्रयोग सीमाहरू ट्र्याक गर्नुहोस्",
     "providerQuotaSubtitle": "प्रदायकका प्रयोग सीमाहरू ट्र्याक गर्नुहोस्",
     "runtimeSubtitle": "वास्तविक-समयको लचिलोपन र सत्रहरू",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "जडान उत्तराधिकार: {host}",
     "inheritedPool": "जडान पुल उत्तराधिकार ({count})",
     "poolEmptyBlocked": "पुल खाली — अनुरोधहरू असफल हुन्छन् (प्रत्यक्ष होइन)",
-    "directEgress": "प्रत्यक्ष (प्रोक्सी बिना)"
+    "directEgress": "प्रत्यक्ष (प्रोक्सी बिना)",
+    "ownProxy": "आफ्नै प्रोक्सी"
   },
   "gamification": {
     "leaderboardScopes": {

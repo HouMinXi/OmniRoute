@@ -1203,6 +1203,8 @@
     "batchGroup": "Baisc",
     "homeSubtitle": "Forléargas deais",
     "providersSubtitle": "Bainistigh soláthraithe AI",
+    "modelCatalog": "Catalóg samhlacha",
+    "modelCatalogSubtitle": "Brabhsáil samhlacha ó sholáthraithe éagsúla",
     "quotaTrackerSubtitle": "Rianaigh teorainneacha úsáide",
     "providerQuotaSubtitle": "Rianaigh teorainneacha úsáide soláthraí",
     "runtimeSubtitle": "Athléimneacht agus seisiúin fíor-ama",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Oidhreacht nasc: {host}",
     "inheritedPool": "Oidhreacht linn nasc ({count})",
     "poolEmptyBlocked": "Linn folamh — teipeann ar iarratais (ní díreach)",
-    "directEgress": "Díreach (gan seachfhreastalaí)"
+    "directEgress": "Díreach (gan seachfhreastalaí)",
+    "ownProxy": "Seachfhreastalaí féin"
   },
   "gamification": {
     "leaderboardScopes": {

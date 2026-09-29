@@ -1203,6 +1203,8 @@
     "batchGroup": "עיבוד באצווה",
     "homeSubtitle": "סקירת לוח הבקרה",
     "providersSubtitle": "ניהול ספקי AI",
+    "modelCatalog": "קטלוג מודלים",
+    "modelCatalogSubtitle": "עיון במודלים מכל הספקים",
     "quotaTrackerSubtitle": "מעקב אחר מגבלות שימוש",
     "providerQuotaSubtitle": "מעקב אחר מגבלות השימוש של ספקים",
     "runtimeSubtitle": "עמידות וסשנים בזמן אמת",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "יורש את החיבור: {host}",
     "inheritedPool": "יורש את מאגר החיבורים ({count})",
     "poolEmptyBlocked": "המאגר ריק — בקשות נכשלות (לא ישיר)",
-    "directEgress": "ישיר (ללא proxy)"
+    "directEgress": "ישיר (ללא proxy)",
+    "ownProxy": "פרוקסי משלך"
   },
   "gamification": {
     "leaderboardScopes": {

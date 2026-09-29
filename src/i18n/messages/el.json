@@ -1203,6 +1203,8 @@
     "batchGroup": "Μαζική Επεξεργασία",
     "homeSubtitle": "Επισκόπηση πίνακα ελέγχου",
     "providersSubtitle": "Διαχείριση παρόχων AI",
+    "modelCatalog": "Κατάλογος μοντέλων",
+    "modelCatalogSubtitle": "Περιηγηθείτε σε μοντέλα όλων των παρόχων",
     "quotaTrackerSubtitle": "Παρακολούθηση ορίων χρήσης",
     "providerQuotaSubtitle": "Παρακολούθηση ορίων χρήσης παρόχου",
     "runtimeSubtitle": "Ανθεκτικότητα και συνεδρίες σε πραγματικό χρόνο",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Κληρονομεί τη σύνδεση: {host}",
     "inheritedPool": "Κληρονομεί το pool συνδέσεων ({count})",
     "poolEmptyBlocked": "Το pool άδειο — τα αιτήματα αποτυγχάνουν (όχι απευθείας)",
-    "directEgress": "Απευθείας (χωρίς proxy)"
+    "directEgress": "Απευθείας (χωρίς proxy)",
+    "ownProxy": "Δικός σας διακομιστής μεσολάβησης"
   },
   "gamification": {
     "leaderboardScopes": {

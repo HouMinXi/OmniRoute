@@ -1203,6 +1203,8 @@
     "batchGroup": "Paketli ishlov berish",
     "homeSubtitle": "Boshqaruv panelining umumiy ko‘rinishi",
     "providersSubtitle": "AI provayderlarini boshqarish",
+    "modelCatalog": "Modellar katalogi",
+    "modelCatalogSubtitle": "Provayderlar bo'ylab modellarni ko'rib chiqing",
     "quotaTrackerSubtitle": "Foydalanish limitlarini kuzatish",
     "providerQuotaSubtitle": "Provayderdan foydalanish limitlarini kuzatish",
     "runtimeSubtitle": "Real vaqt rejimidagi barqarorlik va seanslar",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Ulanishni meros oladi: {host}",
     "inheritedPool": "Ulanishlar hovuzini meros oladi ({count})",
     "poolEmptyBlocked": "Hovuz bo‘sh — so‘rovlar muvaffaqiyatsiz (to‘g‘ridan-to‘g‘ri emas)",
-    "directEgress": "To‘g‘ridan-to‘g‘ri (proksisiz)"
+    "directEgress": "To‘g‘ridan-to‘g‘ri (proksisiz)",
+    "ownProxy": "Shaxsiy proksi"
   },
   "gamification": {
     "leaderboardScopes": {

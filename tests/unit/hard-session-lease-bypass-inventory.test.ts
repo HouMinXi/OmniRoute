@@ -126,6 +126,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/cloud/auth/route.ts": 1,
     "src/app/api/cloud/credentials/update/route.ts": 1,
     "src/app/api/models/route.ts": 1,
+    // #13487 (61198da9e): Test-all reads the provider's rows once only to reject
+    // with 409 when every connection is disabled — a state read behind the
+    // management route; the per-model probes it dispatches still go through the
+    // fenced chat pipeline, so it never selects a connection itself (class C).
+    "src/app/api/models/test-all/route.ts": 1,
     "src/app/api/monitoring/health/route.ts": 1,
     "src/app/api/oauth/[provider]/[action]/route.ts": 4,
     "src/app/api/oauth/codex/import/route.ts": 1,

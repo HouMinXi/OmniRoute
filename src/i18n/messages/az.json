@@ -1203,6 +1203,8 @@
     "batchGroup": "Dəstə",
     "homeSubtitle": "İdarə panelinə ümumi baxış",
     "providersSubtitle": "Süni intellekt provayderlərini idarə edin",
+    "modelCatalog": "Model kataloqu",
+    "modelCatalogSubtitle": "Provayderlər üzrə modellərə baxın",
     "quotaTrackerSubtitle": "İstifadə limitlərini izləyin",
     "providerQuotaSubtitle": "Provayderlərin istifadə limitlərini izləyin",
     "runtimeSubtitle": "Real vaxt rejimində dayanıqlılıq və sessiyalar",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Bağlantını miras alır: {host}",
     "inheritedPool": "Bağlantı hovuzunu miras alır ({count})",
     "poolEmptyBlocked": "Hovuz boşdur — sorğular uğursuz olur (birbaşa deyil)",
-    "directEgress": "Birbaşa (proksisiz)"
+    "directEgress": "Birbaşa (proksisiz)",
+    "ownProxy": "Öz proksi"
   },
   "gamification": {
     "leaderboardScopes": {

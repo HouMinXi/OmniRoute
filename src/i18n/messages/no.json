@@ -1203,6 +1203,8 @@
     "batchGroup": "Gruppebehandling",
     "homeSubtitle": "Oversikt over kontrollpanelet",
     "providersSubtitle": "Administrer AI-leverandører",
+    "modelCatalog": "Modellkatalog",
+    "modelCatalogSubtitle": "Bla gjennom modeller på tvers av leverandører",
     "quotaTrackerSubtitle": "Spor bruksgrenser",
     "providerQuotaSubtitle": "Spor leverandørenes bruksgrenser",
     "runtimeSubtitle": "Robusthet og økter i sanntid",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Arver tilkobling: {host}",
     "inheritedPool": "Arver tilkoblingspool ({count})",
     "poolEmptyBlocked": "Pool tom — forespørsler mislykkes (ikke direkte)",
-    "directEgress": "Direkte (ingen proxy)"
+    "directEgress": "Direkte (ingen proxy)",
+    "ownProxy": "Egen proxy"
   },
   "gamification": {
     "leaderboardScopes": {

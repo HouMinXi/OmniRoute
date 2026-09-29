@@ -1203,6 +1203,8 @@
     "batchGroup": "Skupna obrada",
     "homeSubtitle": "Pregled nadzorne ploče",
     "providersSubtitle": "Upravljanje AI pružateljima",
+    "modelCatalog": "Katalog modela",
+    "modelCatalogSubtitle": "Pregledajte modele svih pružatelja",
     "quotaTrackerSubtitle": "Praćenje ograničenja korištenja",
     "providerQuotaSubtitle": "Praćenje ograničenja korištenja pružatelja",
     "runtimeSubtitle": "Otpornost i sesije u stvarnom vremenu",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Nasljeđuje vezu: {host}",
     "inheritedPool": "Nasljeđuje bazen veza ({count})",
     "poolEmptyBlocked": "Bazen prazan — zahtjevi ne uspijevaju (ne izravno)",
-    "directEgress": "Izravno (bez proxyja)"
+    "directEgress": "Izravno (bez proxyja)",
+    "ownProxy": "Vlastiti proxy"
   },
   "gamification": {
     "leaderboardScopes": {

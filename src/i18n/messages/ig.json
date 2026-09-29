@@ -1203,6 +1203,8 @@
     "batchGroup": "Ogbe",
     "homeSubtitle": "Nchịkọta dashboard",
     "providersSubtitle": "Jikwaa ndị na-eweta AI",
+    "modelCatalog": "Katalọgụ ụdị",
+    "modelCatalogSubtitle": "Chọgharịa ụdị n'ofe ndị na-eweta",
     "quotaTrackerSubtitle": "Sochie oke ojiji",
     "providerQuotaSubtitle": "Sochie oke ojiji nke onye na-eweta",
     "runtimeSubtitle": "Nkwụsi ike na nnọkọ ozugbo",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Na-eketa njikọ: {host}",
     "inheritedPool": "Na-eketa ọdọ njikọ ({count})",
     "poolEmptyBlocked": "Ọdọ tọgbọrọ — arịrịọ na-ada (ọ bụghị ozugbo)",
-    "directEgress": "Ozugbo (enweghị proxy)"
+    "directEgress": "Ozugbo (enweghị proxy)",
+    "ownProxy": "Proxy nke gị"
   },
   "gamification": {
     "leaderboardScopes": {

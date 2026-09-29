@@ -1203,6 +1203,8 @@
     "batchGroup": "بیچ",
     "homeSubtitle": "ڈیش بورڈ کا جائزہ",
     "providersSubtitle": "AI فراہم کنندگان کا نظم کریں",
+    "modelCatalog": "ماڈل کیٹلاگ",
+    "modelCatalogSubtitle": "فراہم کنندگان میں ماڈلز براؤز کریں",
     "quotaTrackerSubtitle": "استعمال کی حدود ٹریک کریں",
     "providerQuotaSubtitle": "فراہم کنندہ کے استعمال کی حدود ٹریک کریں",
     "runtimeSubtitle": "ریئل ٹائم لچک اور سیشنز",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "کنکشن وراثت میں: {host}",
     "inheritedPool": "کنکشن پول وراثت میں ({count})",
     "poolEmptyBlocked": "پول خالی — درخواستیں ناکام ہوتی ہیں (براہ راست نہیں)",
-    "directEgress": "براہ راست (بغیر پراکسی)"
+    "directEgress": "براہ راست (بغیر پراکسی)",
+    "ownProxy": "اپنی پراکسی"
   },
   "gamification": {
     "leaderboardScopes": {

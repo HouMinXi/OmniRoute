@@ -1203,6 +1203,8 @@
     "batchGroup": "ব্যাচ",
     "homeSubtitle": "ড্যাশবোর্ডের সারসংক্ষেপ",
     "providersSubtitle": "AI প্রোভাইডার পরিচালনা করুন",
+    "modelCatalog": "মডেল ক্যাটালগ",
+    "modelCatalogSubtitle": "প্রদানকারীদের মধ্যে মডেল ব্রাউজ করুন",
     "quotaTrackerSubtitle": "ব্যবহারের সীমা ট্র্যাক করুন",
     "providerQuotaSubtitle": "প্রোভাইডারের ব্যবহারের সীমা ট্র্যাক করুন",
     "runtimeSubtitle": "রিয়েল-টাইম সহনশীলতা ও সেশন",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "সংযোগ থেকে উত্তরাধিকার: {host}",
     "inheritedPool": "সংযোগ পুল থেকে উত্তরাধিকার ({count})",
     "poolEmptyBlocked": "পুল খালি — অনুরোধ ব্যর্থ হয় (সরাসরি নয়)",
-    "directEgress": "সরাসরি (প্রক্সি ছাড়া)"
+    "directEgress": "সরাসরি (প্রক্সি ছাড়া)",
+    "ownProxy": "নিজস্ব প্রক্সি"
   },
   "gamification": {
     "leaderboardScopes": {

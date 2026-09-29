@@ -12870,7 +12870,8 @@
     "inheritedProxy": "Herda a conexão: {host}",
     "inheritedPool": "Herda o pool de conexões ({count})",
     "poolEmptyBlocked": "Pool vazio — as solicitações falham (não direto)",
-    "directEgress": "Direto (sem proxy)"
+    "directEgress": "Direto (sem proxy)",
+    "ownProxy": "Proxy próprio"
   },
   "gamification": {
     "leaderboardScopes": {

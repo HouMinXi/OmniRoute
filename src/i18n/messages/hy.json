@@ -1203,6 +1203,8 @@
     "batchGroup": "Փաթեթային մշակում",
     "homeSubtitle": "Վահանակի ակնարկ",
     "providersSubtitle": "Կառավարել AI մատակարարներին",
+    "modelCatalog": "Մոդելների կատալոգ",
+    "modelCatalogSubtitle": "Դիտեք մոդելները բոլոր մատակարարներից",
     "quotaTrackerSubtitle": "Հետևել օգտագործման սահմանաչափերին",
     "providerQuotaSubtitle": "Հետևել մատակարարների օգտագործման սահմանաչափերին",
     "runtimeSubtitle": "Իրական ժամանակի դիմակայունություն և աշխատաշրջաններ",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Ժառանգում է կապը՝ {host}",
     "inheritedPool": "Ժառանգում է կապերի խումբը ({count})",
     "poolEmptyBlocked": "Խումբը դատարկ է — հարցումները ձախողվում են (ոչ ուղիղ)",
-    "directEgress": "Ուղիղ (առանց պրոքսիի)"
+    "directEgress": "Ուղիղ (առանց պրոքսիի)",
+    "ownProxy": "Սեփական պրոքսի"
   },
   "gamification": {
     "leaderboardScopes": {

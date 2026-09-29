@@ -1203,6 +1203,8 @@
     "batchGroup": "Elaborazione in batch",
     "homeSubtitle": "Panoramica della dashboard",
     "providersSubtitle": "Gestisci i provider di IA",
+    "modelCatalog": "Catalogo modelli",
+    "modelCatalogSubtitle": "Sfoglia i modelli di tutti i provider",
     "quotaTrackerSubtitle": "Monitora i limiti di utilizzo",
     "providerQuotaSubtitle": "Monitora i limiti di utilizzo dei provider",
     "runtimeSubtitle": "Resilienza e sessioni in tempo reale",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Eredita la connessione: {host}",
     "inheritedPool": "Eredita il pool di connessioni ({count})",
     "poolEmptyBlocked": "Pool vuoto — le richieste falliscono (non diretto)",
-    "directEgress": "Diretto (senza proxy)"
+    "directEgress": "Diretto (senza proxy)",
+    "ownProxy": "Proxy proprio"
   },
   "gamification": {
     "leaderboardScopes": {

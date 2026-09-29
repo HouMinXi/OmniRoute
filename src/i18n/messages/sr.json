@@ -1203,6 +1203,8 @@
     "batchGroup": "Пакетна обрада",
     "homeSubtitle": "Преглед контролне табле",
     "providersSubtitle": "Управљање AI провајдерима",
+    "modelCatalog": "Каталог модела",
+    "modelCatalogSubtitle": "Прегледајте моделе свих провајдера",
     "quotaTrackerSubtitle": "Праћење ограничења коришћења",
     "providerQuotaSubtitle": "Праћење ограничења коришћења провајдера",
     "runtimeSubtitle": "Отпорност и сесије у реалном времену",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Наслеђује везу: {host}",
     "inheritedPool": "Наслеђује базен веза ({count})",
     "poolEmptyBlocked": "Базен празан — захтеви не успевају (не директно)",
-    "directEgress": "Директно (без проксија)"
+    "directEgress": "Директно (без проксија)",
+    "ownProxy": "Сопствени прокси"
   },
   "gamification": {
     "leaderboardScopes": {

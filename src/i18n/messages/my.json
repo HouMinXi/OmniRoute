@@ -1203,6 +1203,8 @@
     "batchGroup": "အသုတ်လိုက်",
     "homeSubtitle": "ဒက်ရှ်ဘုတ် ခြုံငုံသုံးသပ်ချက်",
     "providersSubtitle": "AI ဝန်ဆောင်မှုပေးသူများကို စီမံခန့်ခွဲရန်",
+    "modelCatalog": "မော်ဒယ်ကတ်တလောက်",
+    "modelCatalogSubtitle": "ပံ့ပိုးသူများအားလုံးမှ မော်ဒယ်များကို ကြည့်ရှုပါ",
     "quotaTrackerSubtitle": "အသုံးပြုမှု ကန့်သတ်ချက်များကို ခြေရာခံရန်",
     "providerQuotaSubtitle": "ဝန်ဆောင်မှုပေးသူ၏ အသုံးပြုမှု ကန့်သတ်ချက်များကို ခြေရာခံရန်",
     "runtimeSubtitle": "အချိန်နှင့်တစ်ပြေးညီ ခံနိုင်ရည်ရှိမှုနှင့် ဆက်ရှင်များ",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "ချိတ်ဆက်မှုကို အမွေခံသည်: {host}",
     "inheritedPool": "ချိတ်ဆက်မှု pool ကို အမွေခံသည် ({count})",
     "poolEmptyBlocked": "Pool လွတ်နေသည် — တောင်းဆိုမှုများ ကျရှုံးမည် (တိုက်ရိုက်မဟုတ်)",
-    "directEgress": "တိုက်ရိုက် (proxy မပါ)"
+    "directEgress": "တိုက်ရိုက် (proxy မပါ)",
+    "ownProxy": "ကိုယ်ပိုင် proxy"
   },
   "gamification": {
     "leaderboardScopes": {

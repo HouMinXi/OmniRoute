@@ -1203,6 +1203,8 @@
     "batchGroup": "Stapelverarbeitung",
     "homeSubtitle": "Dashboard-Übersicht",
     "providersSubtitle": "KI-Anbieter verwalten",
+    "modelCatalog": "Modellkatalog",
+    "modelCatalogSubtitle": "Modelle aller Anbieter durchsuchen",
     "quotaTrackerSubtitle": "Nutzungslimits verfolgen",
     "providerQuotaSubtitle": "Nutzungslimits der Anbieter verfolgen",
     "runtimeSubtitle": "Ausfallsicherheit und Sitzungen in Echtzeit",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Erbt Verbindung: {host}",
     "inheritedPool": "Erbt Verbindungspool ({count})",
     "poolEmptyBlocked": "Pool leer — Anfragen scheitern (nicht direkt)",
-    "directEgress": "Direkt (kein Proxy)"
+    "directEgress": "Direkt (kein Proxy)",
+    "ownProxy": "Eigener Proxy"
   },
   "gamification": {
     "leaderboardScopes": {

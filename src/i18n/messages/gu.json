@@ -1203,6 +1203,8 @@
     "batchGroup": "બૅચ",
     "homeSubtitle": "ડૅશબોર્ડનું વિહંગાવલોકન",
     "providersSubtitle": "AI પ્રદાતાઓનું સંચાલન કરો",
+    "modelCatalog": "મોડેલ કેટલોગ",
+    "modelCatalogSubtitle": "પ્રદાતાઓમાં મોડેલ બ્રાઉઝ કરો",
     "quotaTrackerSubtitle": "વપરાશ મર્યાદાઓ ટ્રૅક કરો",
     "providerQuotaSubtitle": "પ્રદાતાની વપરાશ મર્યાદાઓ ટ્રૅક કરો",
     "runtimeSubtitle": "રીઅલ-ટાઇમ સ્થિતિસ્થાપકતા અને સત્રો",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "કનેક્શન વારસામાં: {host}",
     "inheritedPool": "કનેક્શન પૂલ વારસામાં ({count})",
     "poolEmptyBlocked": "પૂલ ખાલી — વિનંતીઓ નિષ્ફળ જાય છે (સીધી નહીં)",
-    "directEgress": "સીધું (પ્રોક્સી વિના)"
+    "directEgress": "સીધું (પ્રોક્સી વિના)",
+    "ownProxy": "પોતાનું પ્રોક્સી"
   },
   "gamification": {
     "leaderboardScopes": {

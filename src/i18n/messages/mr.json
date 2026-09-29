@@ -1203,6 +1203,8 @@
     "batchGroup": "बॅच",
     "homeSubtitle": "डॅशबोर्डचा आढावा",
     "providersSubtitle": "AI प्रदाते व्यवस्थापित करा",
+    "modelCatalog": "मॉडेल कॅटलॉग",
+    "modelCatalogSubtitle": "सर्व प्रदात्यांमधील मॉडेल्स ब्राउझ करा",
     "quotaTrackerSubtitle": "वापर मर्यादांचा मागोवा घ्या",
     "providerQuotaSubtitle": "प्रदात्याच्या वापर मर्यादांचा मागोवा घ्या",
     "runtimeSubtitle": "रिअल-टाइम लवचिकता आणि सत्रे",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "कनेक्शन वारशाने: {host}",
     "inheritedPool": "कनेक्शन पूल वारशाने ({count})",
     "poolEmptyBlocked": "पूल रिकामा — विनंत्या अयशस्वी होतात (थेट नाही)",
-    "directEgress": "थेट (प्रॉक्सीशिवाय)"
+    "directEgress": "थेट (प्रॉक्सीशिवाय)",
+    "ownProxy": "स्वतःचा प्रॉक्सी"
   },
   "gamification": {
     "leaderboardScopes": {

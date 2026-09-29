@@ -1203,6 +1203,8 @@
     "batchGroup": "แบตช์",
     "homeSubtitle": "ภาพรวมแดชบอร์ด",
     "providersSubtitle": "จัดการผู้ให้บริการ AI",
+    "modelCatalog": "แคตตาล็อกโมเดล",
+    "modelCatalogSubtitle": "เรียกดูโมเดลจากผู้ให้บริการทั้งหมด",
     "quotaTrackerSubtitle": "ติดตามขีดจำกัดการใช้งาน",
     "providerQuotaSubtitle": "ติดตามขีดจำกัดการใช้งานของผู้ให้บริการ",
     "runtimeSubtitle": "ความยืดหยุ่นและเซสชันแบบเรียลไทม์",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "สืบทอดการเชื่อมต่อ: {host}",
     "inheritedPool": "สืบทอดพูลการเชื่อมต่อ ({count})",
     "poolEmptyBlocked": "พูลว่าง — คำขอจะล้มเหลว (ไม่โดยตรง)",
-    "directEgress": "โดยตรง (ไม่มีพร็อกซี)"
+    "directEgress": "โดยตรง (ไม่มีพร็อกซี)",
+    "ownProxy": "พร็อกซีของตัวเอง"
   },
   "gamification": {
     "leaderboardScopes": {

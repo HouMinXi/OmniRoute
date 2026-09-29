@@ -1203,6 +1203,8 @@
     "batchGroup": "Lote",
     "homeSubtitle": "Visão geral do painel",
     "providersSubtitle": "Gerenciar provedores de IA",
+    "modelCatalog": "Catálogo de modelos",
+    "modelCatalogSubtitle": "Explore modelos de todos os fornecedores",
     "quotaTrackerSubtitle": "Acompanhar limites de uso",
     "providerQuotaSubtitle": "Rastreie os limites de uso do provedor",
     "runtimeSubtitle": "Resiliência e sessões em tempo real",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Herda a ligação: {host}",
     "inheritedPool": "Herda o pool de ligações ({count})",
     "poolEmptyBlocked": "Pool vazio — os pedidos falham (não direto)",
-    "directEgress": "Direto (sem proxy)"
+    "directEgress": "Direto (sem proxy)",
+    "ownProxy": "Proxy próprio"
   },
   "gamification": {
     "leaderboardScopes": {

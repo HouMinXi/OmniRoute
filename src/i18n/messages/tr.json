@@ -1203,6 +1203,8 @@
     "batchGroup": "Toplu İşlem",
     "homeSubtitle": "Pano genel görünümü",
     "providersSubtitle": "Yapay zekâ sağlayıcılarını yönetin",
+    "modelCatalog": "Model kataloğu",
+    "modelCatalogSubtitle": "Sağlayıcılar genelinde modellere göz atın",
     "quotaTrackerSubtitle": "Kullanım sınırlarını izleyin",
     "providerQuotaSubtitle": "Sağlayıcı kullanım sınırlarını izleyin",
     "runtimeSubtitle": "Gerçek zamanlı dayanıklılık ve oturumlar",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Bağlantıyı devralır: {host}",
     "inheritedPool": "Bağlantı havuzunu devralır ({count})",
     "poolEmptyBlocked": "Havuz boş — istekler başarısız olur (doğrudan değil)",
-    "directEgress": "Doğrudan (proxy yok)"
+    "directEgress": "Doğrudan (proxy yok)",
+    "ownProxy": "Kendi proxy'n"
   },
   "gamification": {
     "leaderboardScopes": {

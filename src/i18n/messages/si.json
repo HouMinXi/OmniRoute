@@ -1203,6 +1203,8 @@
     "batchGroup": "කාණ්ඩ සැකසීම",
     "homeSubtitle": "උපකරණ පුවරු සාරාංශය",
     "providersSubtitle": "AI සපයන්නන් කළමනාකරණය කරන්න",
+    "modelCatalog": "මාදිලි නාමාවලිය",
+    "modelCatalogSubtitle": "සපයන්නන් හරහා මාදිලි පිරික්සන්න",
     "quotaTrackerSubtitle": "භාවිත සීමා නිරීක්ෂණය කරන්න",
     "providerQuotaSubtitle": "සපයන්නාගේ භාවිත සීමා නිරීක්ෂණය කරන්න",
     "runtimeSubtitle": "තත්යකාලීන ප්රත්යස්ථතාව සහ සැසි",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "සම්බන්ධතාව උරුම වේ: {host}",
     "inheritedPool": "සම්බන්ධතා තටාකය උරුම වේ ({count})",
     "poolEmptyBlocked": "තටාකය හිස් — ඉල්ලීම් අසාර්ථකයි (සෘජු නොවේ)",
-    "directEgress": "සෘජු (ප්‍රොක්සි නැතිව)"
+    "directEgress": "සෘජු (ප්‍රොක්සි නැතිව)",
+    "ownProxy": "ස්වකීය ප්‍රොක්සිය"
   },
   "gamification": {
     "leaderboardScopes": {

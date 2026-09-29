@@ -1203,6 +1203,8 @@
     "batchGroup": "ബാച്ച്",
     "homeSubtitle": "ഡാഷ്ബോർഡ് അവലോകനം",
     "providersSubtitle": "AI പ്രൊവൈഡർമാരെ നിയന്ത്രിക്കുക",
+    "modelCatalog": "മോഡൽ കാറ്റലോഗ്",
+    "modelCatalogSubtitle": "ദാതാക്കളിലുടനീളമുള്ള മോഡലുകൾ ബ്രൗസ് ചെയ്യുക",
     "quotaTrackerSubtitle": "ഉപയോഗ പരിധികൾ ട്രാക്ക് ചെയ്യുക",
     "providerQuotaSubtitle": "പ്രൊവൈഡർ ഉപയോഗ പരിധികൾ ട്രാക്ക് ചെയ്യുക",
     "runtimeSubtitle": "തത്സമയ പ്രതിരോധശേഷിയും സെഷനുകളും",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "കണക്ഷൻ പാരമ്പര്യമായി: {host}",
     "inheritedPool": "കണക്ഷൻ പൂൾ പാരമ്പര്യമായി ({count})",
     "poolEmptyBlocked": "പൂൾ ശൂന്യം — അഭ്യർത്ഥനകൾ പരാജയപ്പെടുന്നു (നேരിട്ടല്ല)",
-    "directEgress": "നേരിട്ട് (പ്രോക്സി ഇല്ലാതെ)"
+    "directEgress": "നേരിട്ട് (പ്രോക്സി ഇല്ലാതെ)",
+    "ownProxy": "സ്വന്തം പ്രോക്സി"
   },
   "gamification": {
     "leaderboardScopes": {

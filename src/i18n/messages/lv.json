@@ -1203,6 +1203,8 @@
     "batchGroup": "Pakešu apstrāde",
     "homeSubtitle": "Informācijas paneļa pārskats",
     "providersSubtitle": "Pārvaldīt AI nodrošinātājus",
+    "modelCatalog": "Modeļu katalogs",
+    "modelCatalogSubtitle": "Pārlūkojiet visu pakalpojumu sniedzēju modeļus",
     "quotaTrackerSubtitle": "Sekot lietojuma limitiem",
     "providerQuotaSubtitle": "Sekot nodrošinātāja lietojuma limitiem",
     "runtimeSubtitle": "Reāllaika noturība un sesijas",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Manto savienojumu: {host}",
     "inheritedPool": "Manto savienojumu pūlu ({count})",
     "poolEmptyBlocked": "Pūls tukšs — pieprasījumi neizdodas (ne tieši)",
-    "directEgress": "Tiešs (bez starpniekservera)"
+    "directEgress": "Tiešs (bez starpniekservera)",
+    "ownProxy": "Savs starpniekserveris"
   },
   "gamification": {
     "leaderboardScopes": {

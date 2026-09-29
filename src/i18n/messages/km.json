@@ -1203,6 +1203,8 @@
     "batchGroup": "ដំណើរការជាបាច់",
     "homeSubtitle": "ទិដ្ឋភាពទូទៅនៃផ្ទាំងគ្រប់គ្រង",
     "providersSubtitle": "គ្រប់គ្រងអ្នកផ្តល់សេវា AI",
+    "modelCatalog": "កាតាឡុកម៉ូដែល",
+    "modelCatalogSubtitle": "រុករកម៉ូដែលពីអ្នកផ្តល់សេវាទាំងអស់",
     "quotaTrackerSubtitle": "តាមដានដែនកំណត់នៃការប្រើប្រាស់",
     "providerQuotaSubtitle": "តាមដានដែនកំណត់នៃការប្រើប្រាស់របស់អ្នកផ្តល់សេវា",
     "runtimeSubtitle": "ភាពធន់ និងវគ្គក្នុងពេលជាក់ស្តែង",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "ទទួលមរតកការតភ្ជាប់: {host}",
     "inheritedPool": "ទទួលមរតកបណ្តុំការតភ្ជាប់ ({count})",
     "poolEmptyBlocked": "បណ្តុំទទេ — សំណើបរាជ័យ (មិនផ្ទាល់)",
-    "directEgress": "ផ្ទាល់ (គ្មានប្រូកស៊ី)"
+    "directEgress": "ផ្ទាល់ (គ្មានប្រូកស៊ី)",
+    "ownProxy": "ប្រូកស៊ីផ្ទាល់ខ្លួន"
   },
   "gamification": {
     "leaderboardScopes": {

@@ -1203,6 +1203,8 @@
     "batchGroup": "Batchbearbetning",
     "homeSubtitle": "Översikt över instrumentpanelen",
     "providersSubtitle": "Hantera AI-leverantörer",
+    "modelCatalog": "Modellkatalog",
+    "modelCatalogSubtitle": "Bläddra bland modeller från alla leverantörer",
     "quotaTrackerSubtitle": "Spåra användningsgränser",
     "providerQuotaSubtitle": "Spåra leverantörernas användningsgränser",
     "runtimeSubtitle": "Feltolerans och sessioner i realtid",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Ärver anslutning: {host}",
     "inheritedPool": "Ärver anslutningspool ({count})",
     "poolEmptyBlocked": "Poolen tom — förfrågningar misslyckas (inte direkt)",
-    "directEgress": "Direkt (ingen proxy)"
+    "directEgress": "Direkt (ingen proxy)",
+    "ownProxy": "Egen proxy"
   },
   "gamification": {
     "leaderboardScopes": {

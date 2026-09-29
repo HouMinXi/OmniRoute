@@ -1203,6 +1203,8 @@
     "batchGroup": "Paketinis apdorojimas",
     "homeSubtitle": "Skydelio apžvalga",
     "providersSubtitle": "AI teikėjų valdymas",
+    "modelCatalog": "Modelių katalogas",
+    "modelCatalogSubtitle": "Naršykite visų tiekėjų modelius",
     "quotaTrackerSubtitle": "Naudojimo apribojimų stebėjimas",
     "providerQuotaSubtitle": "Teikėjo naudojimo apribojimų stebėjimas",
     "runtimeSubtitle": "Atsparumas realiuoju laiku ir seansai",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "Paveldi ryšį: {host}",
     "inheritedPool": "Paveldi ryšių telkinį ({count})",
     "poolEmptyBlocked": "Telkinys tuščias — užklausos nepavyksta (ne tiesiogiai)",
-    "directEgress": "Tiesiogiai (be tarpinio serverio)"
+    "directEgress": "Tiesiogiai (be tarpinio serverio)",
+    "ownProxy": "Nuosavas tarpinis serveris"
   },
   "gamification": {
     "leaderboardScopes": {

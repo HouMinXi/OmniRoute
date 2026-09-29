@@ -1203,6 +1203,8 @@
     "batchGroup": "ਬੈਚ",
     "homeSubtitle": "ਡੈਸ਼ਬੋਰਡ ਦੀ ਸੰਖੇਪ ਜਾਣਕਾਰੀ",
     "providersSubtitle": "AI ਪ੍ਰਦਾਤਿਆਂ ਦਾ ਪ੍ਰਬੰਧਨ ਕਰੋ",
+    "modelCatalog": "ਮਾਡਲ ਕੈਟਾਲਾਗ",
+    "modelCatalogSubtitle": "ਸਾਰੇ ਪ੍ਰਦਾਤਿਆਂ ਦੇ ਮਾਡਲ ਬ੍ਰਾਊਜ਼ ਕਰੋ",
     "quotaTrackerSubtitle": "ਵਰਤੋਂ ਦੀਆਂ ਸੀਮਾਵਾਂ ਟ੍ਰੈਕ ਕਰੋ",
     "providerQuotaSubtitle": "ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਵਰਤੋਂ ਸੀਮਾਵਾਂ ਟ੍ਰੈਕ ਕਰੋ",
     "runtimeSubtitle": "ਰੀਅਲ-ਟਾਈਮ ਲਚਕੀਲਾਪਣ ਅਤੇ ਸੈਸ਼ਨ",
@@ -12868,7 +12870,8 @@
     "inheritedProxy": "ਕਨੈਕਸ਼ਨ ਵਿਰਾਸਤ: {host}",
     "inheritedPool": "ਕਨੈਕਸ਼ਨ ਪੂਲ ਵਿਰਾਸਤ ({count})",
     "poolEmptyBlocked": "ਪੂਲ ਖਾਲੀ — ਬੇਨਤੀਆਂ ਅਸਫਲ (ਸਿੱਧਾ ਨਹੀਂ)",
-    "directEgress": "ਸਿੱਧਾ (ਬਿਨਾਂ ਪ੍ਰੌਕਸੀ)"
+    "directEgress": "ਸਿੱਧਾ (ਬਿਨਾਂ ਪ੍ਰੌਕਸੀ)",
+    "ownProxy": "ਆਪਣੀ ਪ੍ਰੌਕਸੀ"
   },
   "gamification": {
     "leaderboardScopes": {
