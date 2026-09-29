@@ -2,19 +2,13 @@ import { projectFailureUsageErrorCode, type FailureUsageAggregate } from "./fail
 import { buildClaudePromptCacheLogMeta } from "./executorHelpers.ts";
 import { recoverAnthropicThinkingSignature } from "./thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "./providerExecutionPipeline.ts";
+import { runCredentialRefreshRetry } from "./credentialRefreshRetry.ts";
 import { onFailure, onStreamThrow } from "./recoveryPolicy.ts";
 import { markCodexScopeRateLimited } from "./codexFailover.ts";
 import { deleteSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { COLORS } from "../../utils/stream.ts";
-import {
-  refreshWithRetry,
-  isUnrecoverableRefreshError,
-  runWithOnPersist,
-  runWithCasGuard,
-} from "../../services/tokenRefresh.ts";
-import { runWithCapture } from "../../utils/providerRequestLogging.ts";
 import type { PersistAttemptLogsArgs } from "./attemptLogging.ts";
 import {
   REASONING_BUFFER_MIN_TRIGGER,
@@ -33,22 +27,16 @@ import {
 } from "../../utils/error.ts";
 import { HTTP_STATUS, ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE } from "../../config/constants.ts";
 import { applyStatusRestatement } from "../../config/upstreamStatusRestatement.ts";
-import { updateProviderConnection, getProviderConnectionById } from "@/lib/db/providers";
-import { wasRefreshTokenRotated } from "@omniroute/open-sse/services/refreshSerializer.ts";
+import { updateProviderConnection } from "@/lib/db/providers";
 import {
   createSafeAbortError,
   createStreamingErrorResult,
   isSemaphoreCapacityError,
   getSafeErrorMetadata,
-  getUpstreamErrorIdentifier,
 } from "./streamErrorResult.ts";
-import { buildExecutorClientHeaders } from "./executorClientHeaders.ts";
-import { getExecutionConnectionId } from "./executionCredentials.ts";
-import { prepareUpstreamBody } from "./upstreamBody.ts";
 import { logAuditEvent } from "@/lib/compliance";
 import { trackPendingRequest, appendRequestLog } from "@/lib/usageDb";
 import { updatePendingScope } from "@/lib/usage/pendingRequestScope";
-import { normalizeExecutorResult } from "./upstreamTimeouts.ts";
 import { getProviderCredentials, extractSessionAffinityKey } from "@/sse/services/auth";
 import { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
 import * as localLimiterErrors from "../../services/rateLimitManager/errors.ts";
@@ -64,7 +52,7 @@ import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
 
-type LoggerLike =
+export type LoggerLike =
   | {
       warn?: (...args: unknown[]) => void;
       debug?: (...args: unknown[]) => void;
@@ -701,203 +689,57 @@ export async function runStreamingLeg(deps: StreamingLegDeps): Promise<Streaming
     localLimiterErrors.markTrustedLocalRateLimitResponse(result.response, error);
     return { kind: "returned" as const, value: result, carry: carry() };
   }
-  let upstreamErrorParsed = false;
-  let parsedStatusCode = providerResponse.status;
-  let parsedMessage = "";
-  let parsedRetryAfterMs: number | null = null;
-  let upstreamErrorBody: unknown = null;
-
-  // Track whether stream_options was present and stripped — if so, 401/403 after
-  // that may be from the modification rather than a genuine auth failure, so we
-  // skip the credential refresh attempt in that case.
-  const hadStreamOptions =
-    targetFormat === FORMATS.OPENAI_RESPONSES && "stream_options" in translatedBody;
-  if (hadStreamOptions) {
-    delete translatedBody.stream_options;
-  }
-
-  // Handle 401/403 - try token refresh using executor
-  // T-PROBE: probe-origin failures never attempt the refresh — a probe must
-  // not consume a rotating refresh token nor persist an "expired"
-  // deactivation on refresh failure (#9817). The 401/403 then flows into
-  // the normal providerFailure classification (record-only in probe mode).
-  if (
-    (providerResponse.status === HTTP_STATUS.UNAUTHORIZED ||
-      providerResponse.status === HTTP_STATUS.FORBIDDEN) &&
-    !hadStreamOptions && // Skip refresh if failure may be from stream_options removal, not auth
-    !(await shouldIsolateProbeFailures())
-  ) {
-    // Fix A: wrap refreshCredentials in runWithOnPersist so the persist callback
-    // executes INSIDE the per-connection mutex held by getAccessToken. This makes
-    // [network refresh + DB write + outer-state mutation] one atomic step and
-    // prevents concurrent requests from reading a stale refreshToken before the
-    // DB has been updated (refresh_token_reused on Codex/OpenAI).
-    //
-    // Not every executor routes refresh through getAccessToken (e.g. github.ts
-    // calls refreshCopilotToken directly). When the persistFn doesn't fire from
-    // inside getAccessToken, we still need to do the credentials mutation + user
-    // callback after refreshCredentials returns. The `persistFnRan` flag tracks
-    // which path executed so we don't double-fire (race-prone) or skip (regression).
-    // Front 3: remember the refresh_token we are about to present so that, if the
-    // refresh fails as unrecoverable, we can tell a genuine death apart from a
-    // stale-token reuse that a concurrent/sibling refresh already rotated past.
-    const attemptedRefreshToken =
-      typeof credentials?.refreshToken === "string" ? credentials.refreshToken : null;
-    let persistFnRan = false;
-    const persistFn = onCredentialsRefreshed
-      ? async (refreshResult: Record<string, unknown>) => {
-          persistFnRan = true;
-          // Mutate the shared credentials object so subsequent executor calls
-          // in this request see the new tokens. Runs INSIDE the mutex.
-          Object.assign(credentials, refreshResult);
-          await onCredentialsRefreshed(refreshResult);
-        }
-      : undefined;
-
-    // #4038: build a compare-and-swap reread so getAccessToken can skip the persist if a
-    // concurrent writer (sibling request / HealthCheck / replica) already rotated this
-    // connection's refresh_token past the one we presented — overwriting would revert it
-    // and revoke the token family. No connectionId ⇒ no guard (behavior unchanged).
-    const casConnectionId =
-      typeof credentials?.connectionId === "string" ? credentials.connectionId.trim() : "";
-    const casReread = casConnectionId
-      ? async () => {
-          const latest = await getProviderConnectionById(casConnectionId);
-          return typeof latest?.refreshToken === "string" ? latest.refreshToken : null;
-        }
-      : null;
-
-    const newCredentials = (await refreshWithRetry(
-      () =>
-        runWithCasGuard(
-          casReread ? { expectedRefreshToken: attemptedRefreshToken, reread: casReread } : null,
-          () => runWithOnPersist(persistFn, () => executor.refreshCredentials(credentials, log))
-        ),
-      3,
-      log,
-      provider // Explicitly pass the provider to avoid universally tripping the "unknown" circuit breaker
-    )) as null | {
-      accessToken?: string;
-      copilotToken?: string;
+  const refreshRetryOutcome = await runCredentialRefreshRetry({
+    body,
+    buildUpstreamHeadersForExecute,
+    clientRawRequest,
+    clientResponseFormat,
+    connectionId,
+    contextEditingEnabled,
+    correlationId,
+    credentials,
+    effectiveModel,
+    executor,
+    extendedContext,
+    finalBody,
+    getExecutionCredentials,
+    getManagedLeaseFenceErrorCode,
+    isCombo,
+    isOpencodeClient,
+    log,
+    managedLeaseFenceErrorResult,
+    onCredentialsRefreshed,
+    pendingScope,
+    provider,
+    providerHeaders,
+    providerRequestCapture,
+    providerResponse,
+    providerUrl,
+    reqLogger,
+    streamController,
+    targetFormat,
+    translatedBody,
+    trustedEffortContext,
+    upstreamStream,
+    userAgent,
+    assertManagedLeaseFence,
+  });
+  if (refreshRetryOutcome.earlyReturn) {
+    return {
+      kind: "returned" as const,
+      value: refreshRetryOutcome.earlyReturn,
+      carry: carry(),
     };
-
-    if (newCredentials?.accessToken || newCredentials?.copilotToken) {
-      log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);
-
-      // Fall back to post-mutex mutation only for executors that don't route
-      // through getAccessToken (and therefore never fire onPersist). For
-      // executors that DO route through it (Codex, Claude, Gemini, etc.) the
-      // mutation already happened atomically inside the mutex.
-      if (!persistFnRan) {
-        Object.assign(credentials, newCredentials);
-        if (onCredentialsRefreshed) {
-          await onCredentialsRefreshed(newCredentials);
-        }
-      }
-
-      // Retry with new credentials — model + extra headers follow translatedBody.model so they
-      // stay aligned if this block ever runs after a path that mutates body.model (e.g. fallback).
-      try {
-        const retryModelId = String(translatedBody.model || effectiveModel);
-        const retryBody = await prepareUpstreamBody({
-          translatedBody,
-          modelToCall: retryModelId,
-          ...trustedEffortContext,
-          provider,
-          targetFormat,
-          credentials: getExecutionCredentials(),
-          log,
-          bypassDefaultToolLimit: isOpencodeClient,
-          isOpencodeClient,
-          rawBody: body,
-          clientRawRequest,
-        });
-        assertManagedLeaseFence(getExecutionConnectionId(getExecutionCredentials()));
-        const retryResult = normalizeExecutorResult(
-          await runWithCapture(providerRequestCapture, () =>
-            executor.execute({
-              model: retryModelId,
-              body: retryBody,
-              stream: upstreamStream,
-              credentials: getExecutionCredentials(),
-              signal: streamController.signal,
-              log,
-              extendedContext,
-              upstreamExtraHeaders: buildUpstreamHeadersForExecute(retryModelId),
-              clientHeaders: buildExecutorClientHeaders(clientRawRequest?.headers, userAgent),
-              clientResponseFormat,
-              onCredentialsRefreshed,
-              skipUpstreamRetry: isCombo,
-              contextEditing: { enabled: contextEditingEnabled },
-              correlationId,
-            })
-          )
-        );
-
-        if (retryResult.response.ok) {
-          providerResponse = retryResult.response;
-          providerUrl = retryResult.url;
-          providerHeaders = new Headers(retryResult.headers || {});
-          finalBody = providerRequestCapture.body(retryResult.transformedBody);
-          reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-          updatePendingScope(pendingScope, {
-            providerRequest: finalBody,
-            providerUrl,
-            stage: "provider_response_started",
-          });
-          upstreamErrorParsed = false; // Reset since new response is OK
-        } else {
-          providerResponse = retryResult.response;
-          upstreamErrorParsed = false; // Let it be parsed downstream
-        }
-      } catch (retryErr) {
-        const retryLeaseFenceCode = getManagedLeaseFenceErrorCode(
-          getUpstreamErrorIdentifier(retryErr)
-        );
-        if (retryLeaseFenceCode)
-          return {
-            kind: "returned" as const,
-            value: managedLeaseFenceErrorResult(retryLeaseFenceCode),
-            carry: carry(),
-          };
-        // Refresh succeeded but the retry leg failed (network blip, AbortError,
-        // executor throw). Don't swallow — the operator-visible signal "the user
-        // saw 401 even though auth was actually fixed" is much more confusing
-        // than the original 401 alone. Surface at error level with sanitization.
-        log?.error?.(
-          "TOKEN",
-          `${provider?.toUpperCase()} | retry after refresh failed: ${sanitizeErrorMessage(retryErr)}`
-        );
-      }
-    } else {
-      log?.warn?.("TOKEN", `${provider?.toUpperCase()} | refresh failed`);
-      if (isUnrecoverableRefreshError(newCredentials) && onCredentialsRefreshed) {
-        // Front 3 (reuse-race tolerance): before deactivating, re-read the DB.
-        // If a sibling/concurrent refresh already rotated this connection's
-        // refresh_token (common for Codex/OpenAI under one shared Auth0 client),
-        // the failure we saw was a stale-token reuse — the account is healthy
-        // with the newer token, so keep it active instead of killing it.
-        let alreadyRotated = false;
-        if (typeof connectionId === "string" && connectionId && attemptedRefreshToken) {
-          try {
-            const latest = await getProviderConnectionById(connectionId);
-            if (wasRefreshTokenRotated(attemptedRefreshToken, latest?.refreshToken)) {
-              alreadyRotated = true;
-              log?.warn?.(
-                "TOKEN",
-                `${provider.toUpperCase()} | refresh_token already rotated by a concurrent refresh — keeping connection active`
-              );
-            }
-          } catch {
-            // DB read failed — fall through to the safe default (deactivate).
-          }
-        }
-        if (!alreadyRotated) {
-          await onCredentialsRefreshed({ testStatus: "expired", isActive: false });
-        }
-      }
-    }
   }
+  providerResponse = refreshRetryOutcome.providerResponse;
+  providerUrl = refreshRetryOutcome.providerUrl;
+  providerHeaders = refreshRetryOutcome.providerHeaders;
+  finalBody = refreshRetryOutcome.finalBody;
+  let upstreamErrorParsed = refreshRetryOutcome.upstreamErrorParsed;
+  let parsedStatusCode = refreshRetryOutcome.parsedStatusCode;
+  let parsedMessage = refreshRetryOutcome.parsedMessage;
+  let parsedRetryAfterMs = refreshRetryOutcome.parsedRetryAfterMs;
+  let upstreamErrorBody: unknown = refreshRetryOutcome.upstreamErrorBody;
 
   // Check provider response - return error info for fallback handling
   providerFailure: if (!providerResponse.ok) {
