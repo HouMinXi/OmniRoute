@@ -294,6 +294,99 @@ test("bridges exec_read to a schema-compatible read tool", () => {
   });
 });
 
+// Claude Code's Read schema, verbatim from a live request (2026-09-29).
+const claudeCodeRead: OpenAITool = {
+  type: "function",
+  function: {
+    name: "Read",
+    description: "Reads a file",
+    parameters: {
+      $schema: "https://json-schema.org/draft/2020-12/schema",
+      type: "object",
+      properties: {
+        file_path: { description: "The absolute path to the file to read", type: "string" },
+        offset: {
+          description: "The line number to start reading from.",
+          type: "integer",
+          minimum: 0,
+          maximum: 9007199254740991,
+        },
+        limit: {
+          description: "The number of lines to read.",
+          type: "integer",
+          exclusiveMinimum: 0,
+          maximum: 9007199254740991,
+        },
+        pages: { description: "Page range for PDF files", type: "string" },
+      },
+      required: ["file_path"],
+      additionalProperties: false,
+    },
+  },
+};
+
+const rangedRead: ExecServerEvent = {
+  kind: "exec_read",
+  execMsgId: 1,
+  execId: "read-range",
+  path: "/repo/service.py",
+  offset: 1195,
+  limit: 16,
+};
+
+test("bridges exec_read offset and limit to Claude Code's Read", () => {
+  // Dropping the range turned every partial read into a full re-read, which
+  // Claude Code answers with "Wasted call — file unchanged": a read loop.
+  assert.deepEqual(bridgeCursorBuiltinTool(rangedRead, defs([claudeCodeRead])), {
+    toolName: "Read",
+    arguments: { file_path: "/repo/service.py", offset: 1195, limit: 16 },
+  });
+});
+
+test("bridges exec_read offset and limit to a number-typed read tool", () => {
+  assert.deepEqual(bridgeCursorBuiltinTool(rangedRead, defs([readTool])), {
+    toolName: "read",
+    arguments: { filePath: "/repo/service.py", offset: 1195, limit: 16 },
+  });
+});
+
+test("does not bridge a ranged exec_read to a read tool that cannot carry the range", () => {
+  const pathOnlyRead: OpenAITool = {
+    type: "function",
+    function: {
+      name: "read",
+      description: "Read a file",
+      parameters: {
+        type: "object",
+        properties: { filePath: { type: "string" } },
+        required: ["filePath"],
+        additionalProperties: false,
+      },
+    },
+  };
+  assert.equal(bridgeCursorBuiltinTool(rangedRead, defs([pathOnlyRead])), null);
+});
+
+test("does not bridge an exec_read range outside the schema bounds", () => {
+  const zeroLimit: ExecServerEvent = { ...rangedRead, limit: 0 };
+  const negativeOffset: ExecServerEvent = { ...rangedRead, offset: -5 };
+  assert.equal(bridgeCursorBuiltinTool(zeroLimit, defs([claudeCodeRead])), null);
+  assert.equal(bridgeCursorBuiltinTool(negativeOffset, defs([claudeCodeRead])), null);
+});
+
+test("bridges an unranged exec_read to Claude Code's Read with the path only", () => {
+  const event: ExecServerEvent = {
+    kind: "exec_read",
+    execMsgId: 1,
+    execId: "read-full",
+    path: "/repo/service.py",
+  };
+  assert.deepEqual(bridgeCursorBuiltinTool(event, defs([claudeCodeRead])), {
+    toolName: "Read",
+    arguments: { file_path: "/repo/service.py" },
+  });
+});
+
 test("bridges native TodoWrite and preserves priorities from structured history", () => {
   const history = extractLatestTodoHistory([
     {

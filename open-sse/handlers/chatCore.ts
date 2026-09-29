@@ -2139,7 +2139,11 @@ async function handleChatCoreInner({
     ) {
       log?.info?.(
         "CONTEXT",
-        `Proactive compression triggered: ${estimatedTokens} tokens > ${threshold} threshold (${contextLimit} limit)`
+        // #14931: X is the MESSAGES-only estimate (tools are accounted
+        // separately as the threshold's reserve), unlike the full-breakdown
+        // number the final guard rejects with — state the basis so the two
+        // lines can be read side by side without a decoder ring.
+        `Proactive compression triggered: ${estimatedTokens} message tokens > ${threshold} threshold (${contextLimit} limit, tools reserve ${reservedTokens})`
       );
 
       // Adapt Responses `input[]` → messages so compressContext can run, then restore.
@@ -2166,7 +2170,7 @@ async function handleChatCoreInner({
 
         log?.info?.(
           "CONTEXT",
-          `Context compressed: ${stats.original} → ${stats.final} tokens${layersInfo}`
+          `Context compressed: ${stats.original} → ${stats.final} message tokens${layersInfo}`
         );
 
         logAuditEvent({
