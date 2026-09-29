@@ -1,5 +1,17 @@
-import { runWithProxyContext, getOriginalFetch } from "@omniroute/open-sse/utils/proxyFetch.ts";
+import { isIP } from "node:net";
+import {
+  runWithProxyContext,
+  getOriginalFetch,
+  resolveProxyForRequest,
+} from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { FetchTimeoutError, fetchWithTimeout } from "@/shared/utils/fetchTimeout";
+import {
+  bareHostname,
+  createPinnedFetch,
+  resolveHostnameAddresses,
+  type DnsLookup,
+  type DnsLookupResult,
+} from "@/shared/network/dnsPinnedFetch";
 import {
   OutboundUrlGuardError,
   type OutboundUrlGuardMode,
@@ -24,11 +36,7 @@ const PROVIDER_PROBE_TIMEOUT_MS = resolveProbeTimeoutMs();
 
 export type SafeOutboundFetchGuard = OutboundUrlGuardMode;
 export type SafeOutboundFetchErrorCode =
-  | "INVALID_URL"
-  | "URL_GUARD_BLOCKED"
-  | "TIMEOUT"
-  | "REDIRECT_BLOCKED"
-  | "NETWORK_ERROR";
+  "INVALID_URL" | "URL_GUARD_BLOCKED" | "TIMEOUT" | "REDIRECT_BLOCKED" | "NETWORK_ERROR";
 
 export interface SafeOutboundFetchRetryOptions {
   attempts?: number;
@@ -47,6 +55,11 @@ export interface SafeOutboundFetchOptions extends RequestInit {
    *  fetch directly. Use when a provider endpoint has compatibility issues
    *  with the undici dispatcher layer. */
   bypassProxyPatch?: boolean;
+  /** With `guard: "public-only"`, connect to the address that was checked instead of resolving the
+   *  name again. Skipped when the request goes through a proxy or follows redirects. */
+  pinDns?: boolean;
+  /** Resolver used by the `public-only` host check; tests inject a fake one. */
+  dnsLookup?: DnsLookup;
 }
 
 type SafeOutboundFetchPresetMap = {
@@ -195,6 +208,49 @@ function applyUrlGuard(targetUrl: URL, guard: SafeOutboundFetchGuard, method: st
   }
 }
 
+/**
+ * `public-only` judges the URL's host name, and a name can point at a private address. Resolve it
+ * and refuse it when any answer is private, so an attacker-owned name that resolves to loopback,
+ * the LAN or a metadata address does not get past a check that only reads the spelling. A lookup
+ * that fails is left to the request, which fails the same way.
+ */
+async function resolvePublicHost(
+  targetUrl: URL,
+  method: string,
+  lookup?: DnsLookup
+): Promise<DnsLookupResult[] | null> {
+  const host = bareHostname(targetUrl.hostname);
+  if (!host || isIP(host)) return null;
+
+  let addresses: DnsLookupResult[];
+  try {
+    addresses = await resolveHostnameAddresses(host, lookup);
+  } catch {
+    return null;
+  }
+
+  for (const { address } of addresses) {
+    try {
+      parseAndValidatePublicUrl(
+        `${targetUrl.protocol}//${address.includes(":") ? `[${address}]` : address}/`
+      );
+    } catch (error) {
+      if (error instanceof OutboundUrlGuardError) {
+        throw new SafeOutboundFetchError(`Host "${host}" resolves to a private or local address`, {
+          code: "URL_GUARD_BLOCKED",
+          url: targetUrl.toString(),
+          method,
+          attempts: 1,
+          isRetryable: false,
+          cause: error,
+        });
+      }
+      throw error;
+    }
+  }
+  return addresses;
+}
+
 function getRetryConfig(retry: SafeOutboundFetchRetryOptions | false | undefined, method: string) {
   if (retry === false) {
     return {
@@ -288,14 +344,28 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
     guard = "none",
     proxyConfig,
     bypassProxyPatch = false,
+    pinDns = false,
+    dnsLookup,
     signal,
     ...fetchOptions
   } = options;
 
   applyUrlGuard(targetUrl, guard, method);
+  const checkedAddresses =
+    guard === "public-only" ? await resolvePublicHost(targetUrl, method, dnsLookup) : null;
 
   const retryConfig = getRetryConfig(retry, method);
   const redirect = allowRedirect ? (fetchOptions.redirect ?? "follow") : "manual";
+  // A proxy resolves the name itself and a followed redirect leaves the checked host, so the
+  // connection is only pinned to the checked address for a direct request to that one host.
+  const pinTo =
+    pinDns &&
+    checkedAddresses?.length &&
+    !allowRedirect &&
+    !proxyConfig &&
+    resolveProxyForRequest(targetUrl.toString()).source === "direct"
+      ? (checkedAddresses.find((entry) => entry.family === 4) ?? checkedAddresses[0])
+      : null;
 
   for (let attempt = 1; attempt <= retryConfig.attempts; attempt++) {
     try {
@@ -307,7 +377,11 @@ export async function safeOutboundFetch(url: string | URL, options: SafeOutbound
           signal,
           timeoutMs,
           // When bypassing the proxy patch, use the original native fetch directly.
-          fetchFn: bypassProxyPatch ? getOriginalFetch() : undefined,
+          fetchFn: pinTo
+            ? createPinnedFetch(pinTo.address, pinTo.family)
+            : bypassProxyPatch
+              ? getOriginalFetch()
+              : undefined,
         });
 
       const response = bypassProxyPatch
