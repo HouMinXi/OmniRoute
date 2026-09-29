@@ -81,7 +81,11 @@ test("parseModel still parses ordinary ids", () => {
 });
 
 test("the Gemini upstream URL is only ever built for ids that keep it on the models path", () => {
-  const executor = new (DefaultExecutor as any)("gemini");
+  const executor = new (
+    DefaultExecutor as unknown as new (provider: string) => {
+      buildUrl: (...args: unknown[]) => string;
+    }
+  )("gemini");
   const upstream = (modelString: string): string | null => {
     const { model } = parseModel(modelString);
     if (!model) return null;
