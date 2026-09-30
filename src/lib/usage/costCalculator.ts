@@ -103,8 +103,8 @@ export function getCodexFastCostMultiplier(
   const compactModelKey = modelKey.replace(/-/g, "");
   // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
   if (
-    /^gpt-6-(?:astra|sol|luna)$/.test(modelKey) ||
-    /^gpt6(?:astra|sol|luna)$/.test(compactModelKey)
+    /^gpt-6(?:\.\d+)?-(?:astra|sol|luna)$/.test(modelKey) ||
+    /^gpt6(?:\d+)?(?:astra|sol|luna)$/.test(compactModelKey)
   ) {
     return 2.5;
   }
@@ -117,6 +117,19 @@ export function getCodexFastCostMultiplier(
   if (modelKey === "gpt-5.5" || compactModelKey === "gpt5.5") return 2.5;
   if (modelKey === "gpt-5.4" || compactModelKey === "gpt5.4") return 2;
   return 1;
+}
+
+const GPT61_LONG_CONTEXT_INPUT_TOKENS = 272_000;
+
+function longContextPriceMultiplier(
+  model: string | null | undefined,
+  inputTokens: number
+): { input: number; cache: number; output: number } {
+  const flat = { input: 1, cache: 1, output: 1 };
+  if (inputTokens <= GPT61_LONG_CONTEXT_INPUT_TOKENS) return flat;
+  const modelKey = stripCodexEffortSuffix(normalizeModelName(String(model || "")).toLowerCase());
+  if (!/^gpt-6\.\d+-sol$/.test(modelKey)) return flat;
+  return { input: 2, cache: 2, output: 1.5 };
 }
 
 /**
@@ -162,20 +175,26 @@ export function computeCostFromPricing(
   // so we must subtract BOTH cache types to avoid pricing cache at the full
   // input rate in addition to their dedicated cache_* rates below.
   const nonCachedInput = Math.max(0, inputTokens - cachedTokens - cacheCreationTokens);
-  cost += nonCachedInput * (inputPrice / 1_000_000);
-  if (cachedTokens > 0) cost += cachedTokens * (cachedPrice / 1_000_000);
+  // GPT-6.1 bills the whole request at the long-context rate once input
+  // crosses 272K: 2x input and cache, 1.5x output.
+  // https://developers.openai.com/api/docs/models/gpt-6.1-sol
+  const longContext = longContextPriceMultiplier(options.model, inputTokens);
+  cost += nonCachedInput * ((inputPrice * longContext.input) / 1_000_000);
+  if (cachedTokens > 0) cost += cachedTokens * ((cachedPrice * longContext.cache) / 1_000_000);
 
   const outputTokens = tokens.output ?? tokens.completion_tokens ?? tokens.output_tokens ?? 0;
-  cost += outputTokens * (outputPrice / 1_000_000);
+  cost += outputTokens * ((outputPrice * longContext.output) / 1_000_000);
 
   // completion_tokens is reasoning-inclusive. Reasoning is already billed at
   // the output rate above, so a dedicated price contributes only its premium.
   const reasoningTokens = tokens.reasoning ?? tokens.reasoning_tokens ?? 0;
   if (reasoningTokens > 0 && pricing.reasoning !== undefined && pricing.reasoning !== null) {
-    cost += reasoningTokens * ((reasoningPrice - outputPrice) / 1_000_000);
+    cost += reasoningTokens * (Math.max(0, reasoningPrice - outputPrice * longContext.output) / 1_000_000);
   }
 
-  if (cacheCreationTokens > 0) cost += cacheCreationTokens * (cacheCreationPrice / 1_000_000);
+  if (cacheCreationTokens > 0) {
+    cost += cacheCreationTokens * ((cacheCreationPrice * longContext.cache) / 1_000_000);
+  }
 
   return cost * getCodexFastCostMultiplier(options.provider, options.model, options.serviceTier);
 }

@@ -5,7 +5,7 @@ import { getModelsByProviderId } from "../../open-sse/config/providerModels.ts";
 import { CodexExecutor } from "../../open-sse/executors/codex.ts";
 import { openaiToOpenAIResponsesRequest } from "../../open-sse/translator/request/openai-responses/toResponses.ts";
 import { getPricingForModel } from "../../src/shared/constants/pricing.ts";
-import { getCodexFastCostMultiplier } from "../../src/lib/usage/costCalculator.ts";
+import { computeCostFromPricing, getCodexFastCostMultiplier } from "../../src/lib/usage/costCalculator.ts";
 import { extendCodexGpt56EffortValues } from "../../src/shared/reasoning/effortStandardization.ts";
 import * as reasoningMetadata from "../../src/lib/vscode/reasoningMetadata.ts";
 
@@ -13,6 +13,7 @@ import * as reasoningMetadata from "../../src/lib/vscode/reasoningMetadata.ts";
 // low..max, mirroring the GPT-5.6 Sol/Luna split.
 const FAMILIES = [
   { model: "gpt-6-sol", efforts: ["ultra", "max", "xhigh", "high", "medium", "low"] },
+  { model: "gpt-6.1-sol", efforts: ["ultra", "max", "xhigh", "high", "medium", "low"] },
   { model: "gpt-6-luna", efforts: ["max", "xhigh", "high", "medium", "low"] },
 ] as const;
 
@@ -112,6 +113,10 @@ test("Catalog effort tiers follow the live Codex levels for GPT-6 models", () =>
   for (const provider of ["codex", "cx"]) {
     assert.deepEqual(extendCodexGpt56EffortValues(provider, "gpt-6-astra", base), withUltra);
     assert.deepEqual(extendCodexGpt56EffortValues(provider, "gpt-6-sol", base), withUltra);
+    assert.deepEqual(extendCodexGpt56EffortValues(provider, "gpt-6.1-sol", base), withUltra);
+    // A later minor of the same family keeps ultra without a new allowlist entry.
+    assert.deepEqual(extendCodexGpt56EffortValues(provider, "gpt-6.2-sol", base), withUltra);
+    assert.deepEqual(extendCodexGpt56EffortValues(provider, "gpt-6.1-luna", base), withMax);
     assert.deepEqual(extendCodexGpt56EffortValues(provider, "gpt-6-luna-max", base), withMax);
   }
   // Kiro's GPT-5.6 max extension does not reach models Kiro does not serve.
@@ -179,6 +184,7 @@ test("GPT-6 Sol and Luna Codex pricing and Fast multiplier match the credit rate
   // Sol 50 / 5 / 250, Luna 2.5 / 0.25 / 12.5. Fast is 2.5x Standard for both.
   const expected = {
     "gpt-6-sol": { input: 2, cached: 0.2, output: 10 },
+    "gpt-6.1-sol": { input: 2, cached: 0.1, output: 10 },
     "gpt-6-luna": { input: 0.1, cached: 0.01, output: 0.5 },
   };
   for (const { model, efforts } of FAMILIES) {
@@ -195,4 +201,37 @@ test("GPT-6 Sol and Luna Codex pricing and Fast multiplier match the credit rate
       assert.equal(getCodexFastCostMultiplier("codex", id, "default"), 1, id);
     }
   }
+});
+
+test("GPT-6.1 Sol bills the whole request at the long-context rate past 272K input", () => {
+  const pricing = { input: 2, cached: 0.1, output: 10, cache_creation: 2.5, reasoning: 10 };
+  const tokens = { input: 300_000, cache_read_input_tokens: 50_000, output: 1_000 };
+  const standard = computeCostFromPricing(
+    pricing,
+    { input: 272_000, output: 1_000 },
+    { model: "gpt-6.1-sol" }
+  );
+  const elevated = computeCostFromPricing(
+    pricing,
+    { ...tokens, reasoning_tokens: 200 },
+    { model: "gpt-6.1-sol-high" }
+  );
+  const olderSol = computeCostFromPricing(pricing, tokens, { model: "gpt-6-sol" });
+
+  const standardExpected = (272_000 * 2 + 1_000 * 10) / 1_000_000;
+  // Output is already billed at 1.5x, which is above the reasoning price.
+  // The premium cannot go negative or the request would be under-charged.
+  const elevatedExpected = (250_000 * 4 + 50_000 * 0.2 + 1_000 * 15) / 1_000_000;
+  const olderExpected = (250_000 * 2 + 50_000 * 0.1 + 1_000 * 10) / 1_000_000;
+  assert.ok(Math.abs(standard - standardExpected) < 1e-9);
+  assert.ok(Math.abs(elevated - elevatedExpected) < 1e-9);
+  assert.ok(Math.abs(olderSol - olderExpected) < 1e-9);
+});
+
+test("GPT-6.1 Sol stays at the standard rate one token under 272K and doubles one token over", () => {
+  const pricing = { input: 2, output: 10 };
+  const under = computeCostFromPricing(pricing, { input: 271_999, output: 0 }, { model: "gpt-6.1-sol" });
+  const over = computeCostFromPricing(pricing, { input: 272_001, output: 0 }, { model: "gpt-6.1-sol" });
+  assert.ok(Math.abs(under - (271_999 * 2) / 1_000_000) < 1e-9);
+  assert.ok(Math.abs(over - (272_001 * 4) / 1_000_000) < 1e-9);
 });

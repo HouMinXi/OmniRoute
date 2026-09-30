@@ -41,7 +41,7 @@ export function extendCodexGpt56EffortValues(
   }
 
   const match = normalizedModel.match(
-    /^gpt-(?:5\.6-(sol|terra|luna)|6-(astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/
+    /^gpt-(?:5\.6-(sol|terra|luna)|6(?:\.\d+)?-(astra|sol|luna))(?:-(?:none|low|medium|high|xhigh|max|ultra))?$/
   );
   if (!match) return values;
 
@@ -53,7 +53,8 @@ export function extendCodexGpt56EffortValues(
   if (normalizedProvider !== "codex" && normalizedProvider !== "cx") return values;
 
   const nativeValues = ["low", "medium", "high", "xhigh", "max"];
-  return (match[1] || match[2]) === "luna" ? nativeValues : [...nativeValues, "ultra"];
+  const family = match[1] || match[2];
+  return family === "luna" ? nativeValues : [...nativeValues, "ultra"];
 }
 
 /**

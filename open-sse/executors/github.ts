@@ -110,7 +110,7 @@ export class GithubExecutor extends BaseExecutor {
     // 9router#1536: but never route Gemini/Claude variants to /responses (they 400) —
     // gate the whole decision on supportsResponsesEndpoint().
     if (
-      (targetFormat === "openai-responses" || /codex/i.test(model)) &&
+      (targetFormat === "openai-responses" || /codex|^gpt-6/i.test(model)) &&
       this.supportsResponsesEndpoint(model)
     ) {
       return (
