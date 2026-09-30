@@ -49,5 +49,10 @@ export const config = {
     "/:codexseg([cC][oO][dD][eE][xX])/:path*",
     "/:codexseg([cC][oO][dD][eE][xX])",
     "/:modelsseg([mM][oO][dD][eE][lL][sS])",
+    // Grok Bot tool bridge (frozen spec 2026-09-28): the nonce class spells
+    // both cases explicitly, so it survives Next's source-only matcher
+    // compile (the flag-drop in the header note) unchanged. Keep in sync
+    // with isPublicGrokBridgeRoute in src/server/authz/classify.ts.
+    "/grok-bridge/:nonce([A-Za-z0-9_-]{22})/mcp",
   ],
 };

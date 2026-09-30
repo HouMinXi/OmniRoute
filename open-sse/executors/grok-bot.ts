@@ -1,15 +1,23 @@
 import { randomUUID } from "node:crypto";
-import { createServer } from "node:http";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { BaseExecutor } from "./base.ts";
 import { getAccessToken } from "../services/tokenRefresh.ts";
+import {
+  queueFile,
+  readQueue,
+  removeFromQueue,
+  enqueueCleanup,
+  type PendingCleanup,
+} from "./grok-bot-cleanup-queue.ts";
 import { PROVIDERS, HTTP_STATUS } from "../config/constants.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { startBridgeTurn } from "./grok-bot-bridge.ts";
+import type { BridgeCloseReason } from "../services/grokBotBridgeRegistry";
 
 /**
- * Grok Bot executor — single-account, plain-conversation path.
+ * Grok Bot executor -- single-account, plain-conversation path.
  *
  * Wire contract (spec: _tasks/superpowers/specs/2026-09-22-grok-bot-executor-integration.md):
  * - A fresh temporal agent is created per request via
@@ -75,14 +83,14 @@ type Transport = {
 
 let testTransport: Transport | ((accessToken: string) => Transport) | null = null;
 
-/** Test seam — production uses the fetch-based transport. */
+/** Test seam -- production uses the fetch-based transport. */
 export function setGrokBotTransportForTests(
   t: Transport | ((accessToken: string) => Transport) | null
 ): void {
   testTransport = t;
 }
 
-function getTransport(accessToken: string): Transport {
+export function getTransport(accessToken: string): Transport {
   if (typeof testTransport === "function") return testTransport(accessToken);
   if (testTransport) return testTransport;
   return createTransport(accessToken);
@@ -200,54 +208,6 @@ function createTransport(accessToken: string): Transport {
 // so concurrent requests never share token state; the earlier module-level
 // variable was a real cross-connection race (review finding r5).
 
-type PendingCleanup = {
-  connectionId?: string | null;
-  agentId?: string;
-  rowId?: string;
-  createdAt: string;
-};
-
-function queueFile(): string {
-  const dir = process.env.DATA_DIR ?? os.tmpdir();
-  return path.join(dir, "grok-bot-pending-cleanups.json");
-}
-
-function readQueue(): PendingCleanup[] {
-  try {
-    const raw = fs.readFileSync(queueFile(), "utf-8");
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeQueue(items: PendingCleanup[]): void {
-  const file = queueFile();
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(items, null, 2));
-}
-
-function removeFromQueue(target: PendingCleanup): void {
-  // Synchronous read-filter-write: no await interleaves inside this section,
-  // so a concurrent enqueue in the same process lands in the fresh read and
-  // survives. Matching is by value (agentId + createdAt uniquely identify an
-  // enqueued item; the on-disk copy is a deserialized clone, not a reference).
-  const items = readQueue();
-  const rest = items.filter(
-    (i) => !(i.agentId === target.agentId && i.createdAt === target.createdAt)
-  );
-  if (rest.length !== items.length) {
-    writeQueue(rest);
-  }
-}
-
-function enqueueCleanup(item: PendingCleanup): void {
-  const q = readQueue();
-  q.push(item);
-  writeQueue(q);
-}
-
 function isTimeoutError(err: unknown): boolean {
   return (
     err instanceof Error &&
@@ -320,141 +280,55 @@ function errResponse(status: number, message: string, type = "upstream_error") {
   );
 }
 
-type BridgeController = {
-  start: (publicBaseUrl?: string) => Promise<{ url: string; call?: (challenge: string) => string }>;
-  stop: () => Promise<void>;
-};
-
-export function requestBridgeTunnelCommand(localUrl: string): string[] {
-  const host = new URL(localUrl).host;
-  return [
-    "cloudflared",
-    "tunnel",
-    "--no-autoupdate",
-    "--protocol",
-    "http2",
-    "--url",
-    localUrl,
-    "--http-host-header",
-    host,
-  ];
-}
-
-export function publicBridgeUrlFromTunnelLog(log: string): string | null {
-  return log.match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/)?.[0] ?? null;
-}
-
-type BridgeProcess = {
-  command: string[];
-  output: () => string;
-  stop: () => Promise<void>;
-};
-
-type BridgeToolServer = {
+type StartedBridge = {
   url: string;
   call: (challenge: string) => string;
+  /** Registry-backed turns expose a non-blocking close; test fakes omit it. */
+  close?: (reason: BridgeCloseReason) => void;
+  /** Internally generated challenge on registry-backed turns (spec step 1). */
+  challenge?: string;
+};
+
+type BridgeController = {
+  start: (publicBaseUrl?: string, options?: BridgeTurnOptions) => Promise<StartedBridge>;
   stop: () => Promise<void>;
 };
 
-export async function startLocalBridgeToolServer(
-  challenge: string
-): Promise<BridgeToolServer> {
-  let used = false;
-  const server = createServer((req, res) => {
-    const chunks: Buffer[] = [];
-    req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-    req.on("end", () => {
-      const body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}") as {
-        challenge?: string;
-      };
-      if (body.challenge !== challenge || used) {
-        res.writeHead(400);
-        res.end("rejected");
-        return;
-      }
-      used = true;
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(JSON.stringify({ result: "ok" }));
-    });
-  });
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
-  const address = server.address();
-  const port = typeof address === "object" && address ? address.port : 0;
-  return {
-    url: `http://127.0.0.1:${port}`,
-    call(value: string) {
-      if (value !== challenge) throw new Error("Rejected challenge");
-      if (used) throw new Error("Repeat call rejected");
-      used = true;
-      return "ok";
-    },
-    async stop() {
-      await new Promise<void>((resolve) => server.close(() => resolve()));
-    },
-  };
-}
+/** Per-turn wiring forwarded to the registry-backed bridge (spec steps 9/12). */
+type BridgeTurnOptions = {
+  signal?: AbortSignal | null;
+  onForcedAbort?: () => void;
+};
 
-export async function startRequestBridgeProcess(
-  command: string[],
-  spawnImpl?: typeof import("node:child_process").spawn
-): Promise<BridgeProcess> {
-  const spawn = spawnImpl ?? (await import("node:child_process")).spawn;
-  const child = spawn(command[0] ?? "", command.slice(1), {
-    stdio: ["ignore", "pipe", "pipe"],
-  });
-  let output = "";
-  child.stdout?.on("data", (chunk) => {
-    output += String(chunk);
-  });
-  child.stderr?.on("data", (chunk) => {
-    output += String(chunk);
-  });
-  return {
-    command,
-    output: () => output,
-    async stop() {
-      child.kill();
-    },
-  };
-}
+/**
+ * Default bridge: one registry-backed loopback turn per start() (frozen spec
+ * 2026-09-28 lifecycle steps 1-7). The cloudflared tunnel path was removed;
+ * the public route `/grok-bridge/<nonce>/mcp` replaces it.
+ */
+/** Spec step 11/12: a body with no read() by 29s is force-aborted. */
+export const BRIDGE_UNREAD_TIMEOUT_MS = 29_000;
 
-export function createRequestBridgeController(
-  spawn: (command: string[]) => BridgeProcess | Promise<BridgeProcess>,
-  startToolServer: (challenge: string) => Promise<BridgeToolServer> = startLocalBridgeToolServer,
-  challenge = ""
-): BridgeController {
-  let process: BridgeProcess | null = null;
-  let toolServer: BridgeToolServer | null = null;
+let unreadTimeoutOverrideMs: number | null = null;
+
+export function createDefaultBridgeController(): BridgeController {
+  let current: StartedBridge | null = null;
   return {
-    async start(publicBaseUrl?: string) {
-      toolServer = await startToolServer(challenge);
-      if (publicBaseUrl) {
-        const parsed = new URL(publicBaseUrl);
-        if (parsed.protocol !== "https:") throw new Error("Public bridge URL must use HTTPS");
-        return { url: `${publicBaseUrl.replace(/\/$/, "")}/mcp?nonce=${randomUUID()}`, call: toolServer.call };
-      }
-      process = await spawn(requestBridgeTunnelCommand(toolServer.url));
-      const deadline = Date.now() + 15000;
-      let publicUrl: string | null = null;
-      while (!publicUrl && Date.now() < deadline) {
-        publicUrl = publicBridgeUrlFromTunnelLog(process.output());
-        if (!publicUrl) await new Promise((resolve) => setTimeout(resolve, 10));
-      }
-      if (!publicUrl) throw new Error("Tunnel unavailable");
-      return { url: `${publicUrl}/mcp?nonce=${randomUUID()}`, call: toolServer.call };
+    async start(publicBaseUrl?: string, options?: BridgeTurnOptions) {
+      if (!publicBaseUrl) throw new Error("Public bridge base URL is required");
+      current = null;
+      current = await startBridgeTurn({ publicBaseUrl, ...options });
+      return current;
     },
     async stop() {
-      await process?.stop();
-      await toolServer?.stop();
+      current?.close("cancel");
+      current = null;
     },
   };
 }
 
 export class GrokBotExecutor extends BaseExecutor {
   private readonly machineId = randomUUID();
-  private bridgeController: BridgeController | null = createRequestBridgeController(
-    async (command) => startRequestBridgeProcess(command)
-  );
+  private bridgeController: BridgeController | null = createDefaultBridgeController();
   private readonly bridgeLifecycle: string[] = [];
   private readonly usedBridgeNonces = new Set<string>();
 
@@ -572,6 +446,8 @@ export class GrokBotExecutor extends BaseExecutor {
     let deleteOwnershipTransferred = false;
     let deleteAgentRef: () => Promise<void> = async () => {};
 
+    let startedBridge: StartedBridge | null = null;
+    let turnController: AbortController | null = null;
     try {
       let created: unknown;
       try {
@@ -594,7 +470,7 @@ export class GrokBotExecutor extends BaseExecutor {
         );
       } catch (err) {
         if (isTimeoutError(err)) {
-          // Server may or may not have created the agent — reconcile via the
+          // Server may or may not have created the agent -- reconcile via the
           // roster before the next conversation on this connection.
           enqueueCleanup({ connectionId, agentId, createdAt: new Date().toISOString() });
         }
@@ -618,114 +494,10 @@ export class GrokBotExecutor extends BaseExecutor {
       rowId = agent.id ?? null;
       createdOk = true;
 
-      const bridge = input.body?.grokBotBridge ?? (
-        Array.isArray(input.body?.tools) && process.env.GROK_BOT_PUBLIC_BRIDGE_URL
-          ? { url: process.env.GROK_BOT_PUBLIC_BRIDGE_URL, challenge: randomUUID() }
-          : undefined
-      );
-      if (bridge && !bridge.url) {
-        return errResponse(
-          HTTP_STATUS.BAD_GATEWAY ?? 502,
-          "Request bridge URL is missing"
-        );
-      }
-      if (
-        bridge &&
-        bridge.url !== process.env.GROK_BOT_PUBLIC_BRIDGE_URL &&
-        !/^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/.test(bridge.url ?? "")
-      ) {
-        return errResponse(
-          HTTP_STATUS.BAD_GATEWAY ?? 502,
-          "Request bridge URL must stay on loopback"
-        );
-      }
-      if (bridge && !bridge.challenge) {
-        return errResponse(
-          HTTP_STATUS.BAD_GATEWAY ?? 502,
-          "Request bridge challenge is missing"
-        );
-      }
-
-      let bridgeUrl = bridge?.url;
-      let bridgeCall: ((challenge: string) => string) | undefined;
-      if (bridge) {
-        this.bridgeLifecycle.length = 0;
-        if (this.bridgeController) {
-          this.bridgeLifecycle.push("start");
-          let started: Awaited<ReturnType<BridgeController["start"]>> | null = null;
-          for (let attempt = 0; attempt < 2 && !started; attempt += 1) {
-            try {
-              started = await this.bridgeController.start(
-                bridge.url === process.env.GROK_BOT_PUBLIC_BRIDGE_URL ? bridge.url : undefined
-              );
-            } catch (err) {
-              if (attempt === 1) throw err;
-              await this.bridgeController.stop();
-            }
-          }
-          if (!started) throw new Error("Tunnel unavailable");
-          bridgeUrl = started.url;
-          bridgeCall = started.call;
-          if (
-            !/^https:\/\/(?!127\.0\.0\.1|localhost(?:[:/]|$))/.test(bridgeUrl ?? "") ||
-            !/[?&]nonce=[^&]+/.test(bridgeUrl ?? "") ||
-            this.usedBridgeNonces.has(bridgeUrl ?? "")
-          ) {
-            return errResponse(
-              HTTP_STATUS.BAD_GATEWAY ?? 502,
-              "Request bridge URL must use a public HTTPS endpoint"
-            );
-          }
-          this.usedBridgeNonces.add(bridgeUrl ?? "");
-        } else if (
-          !/^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/.test(bridgeUrl ?? "")
-        ) {
-          return errResponse(
-            HTTP_STATUS.BAD_GATEWAY ?? 502,
-            "Request bridge URL must stay on loopback"
-          );
-        }
-        const discovery = (await t.rpc("DashboardService/ListSandMcpTools", {
-          serverIdentifiers: ["bridge"],
-          mcpConfigJson: JSON.stringify({
-            mcpServers: {
-              bridge: {
-                url: bridgeUrl,
-                headers: { Authorization: `Bearer ${bridge.challenge}` },
-              },
-            },
-          }),
-        })) as {
-          tools?: Array<{ name?: string }>;
-        };
-        const discovered = Array.isArray(discovery?.tools)
-          ? discovery.tools.some((tool) => tool?.name === "bridge_value")
-          : false;
-        if (!discovered) {
-          return errResponse(
-            HTTP_STATUS.BAD_GATEWAY ?? 502,
-            "Request bridge tool was not discovered"
-          );
-        }
-      }
-
-      const prompt = composePrompt(input.body?.messages ?? [], bridge?.challenge);
-      const messageId = randomUUID();
-      const sendPayload: Record<string, unknown> = {
-        agentId,
-        sessionId: EMPTY_SESSION_ID,
-        machineId: this.machineId,
-        messageId,
-        text: prompt,
-        sentAtMs: String(Date.now()),
-      };
-      if (bridge) {
-        sendPayload.mcpConfigJson = JSON.stringify({
-          mcpServers: { bridge: { url: bridgeUrl } },
-        });
-      }
-      await t.rpc("SendGrokBotUserMessage", sendPayload);
-
+      // Bind remote cleanup the moment the agent exists: any later failure
+      // (send, discovery, prompt build) must still delete it. Binding after
+      // the send left a window where a failed discovery leaked the agent
+      // (review finding, slice 4d R1).
       deleteAgentRef = async (): Promise<void> => {
         if (!createdOk) return;
         try {
@@ -745,7 +517,181 @@ export class GrokBotExecutor extends BaseExecutor {
         }
       };
 
-      const collect = this.watchTurn(t, agentId, messageId, input.signal ?? null);
+
+
+
+      const bridge = input.body?.grokBotBridge ?? (
+        Array.isArray(input.body?.tools) && process.env.GROK_BOT_PUBLIC_BRIDGE_URL
+          ? { url: process.env.GROK_BOT_PUBLIC_BRIDGE_URL, challenge: randomUUID() }
+          : undefined
+      );
+      if (bridge && !bridge.url) {
+        return errResponse(
+          HTTP_STATUS.BAD_GATEWAY ?? 502,
+          "Request bridge URL is missing"
+        );
+      }
+      if (bridge && this.bridgeController && !process.env.GROK_BOT_PUBLIC_BRIDGE_URL) {
+        // Stop switch (spec deployment step 9): while the public bridge URL
+        // is cleared, automatic derivation is off AND explicit bridge input
+        // is rejected. Controller-less configurations (test fakes, legacy
+        // ingress) are not production ingress and stay unaffected.
+        return errResponse(
+          HTTP_STATUS.BAD_GATEWAY ?? 502,
+          "Request bridge is disabled"
+        );
+      }
+      if (
+        bridge &&
+        bridge.url !== process.env.GROK_BOT_PUBLIC_BRIDGE_URL &&
+        !/^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/.test(bridge.url ?? "")
+      ) {
+        return errResponse(
+          HTTP_STATUS.BAD_GATEWAY ?? 502,
+          "Request bridge URL must stay on loopback"
+        );
+      }
+      if (bridge && !this.bridgeController && !bridge.challenge) {
+        // The controller path generates its own challenge (spec step 1), so
+        // the request's legacy challenge field is not required there; only
+        // controller-less configurations (test fakes, legacy ingress) still
+        // depend on the client-supplied value.
+        return errResponse(
+          HTTP_STATUS.BAD_GATEWAY ?? 502,
+          "Request bridge challenge is missing"
+        );
+      }
+
+      let bridgeUrl = bridge?.url;
+      let bridgeCall: ((challenge: string) => string) | undefined;
+      if (bridge) {
+        this.bridgeLifecycle.length = 0;
+        if (this.bridgeController) {
+          this.bridgeLifecycle.push("start");
+          // Turn-scoped cancel convergence (spec steps 9/10/12): one signal
+          // drives the upstream watch, the registry close, and the unread
+          // escalation; client cancel and forced abort land on the same path.
+          turnController = new AbortController();
+          const turnOptions: BridgeTurnOptions = {
+            signal: turnController.signal,
+            onForcedAbort: () => turnController?.abort(),
+          };
+          // Client cancel must converge on the same turn-scoped signal
+          // (spec step 9): the watch races the combined signal, but the
+          // registry close and the unread escalation only observe this one.
+          if (input.signal) {
+            if (input.signal.aborted) turnController.abort();
+            else
+              input.signal.addEventListener("abort", () => turnController?.abort(), {
+                once: true,
+              });
+          }
+          let started: StartedBridge | null = null;
+          for (let attempt = 0; attempt < 2 && !started; attempt += 1) {
+            try {
+              started = await this.bridgeController.start(bridge.url, turnOptions);
+            } catch (err) {
+              if (attempt === 1) throw err;
+              await this.bridgeController.stop();
+            }
+          }
+          if (!started) throw new Error("Bridge start failed");
+          startedBridge = started;
+          bridgeUrl = started.url;
+          bridgeCall = started.call;
+          if (
+            !/^https:\/\/(?!127\.0\.0\.1|localhost(?:[:/]|$))/.test(bridgeUrl ?? "") ||
+            !/\/grok-bridge\/[A-Za-z0-9_-]{22}\/mcp$/.test(bridgeUrl ?? "") ||
+            this.usedBridgeNonces.has(bridgeUrl ?? "")
+          ) {
+            return errResponse(
+              HTTP_STATUS.BAD_GATEWAY ?? 502,
+              "Request bridge URL must use a public HTTPS path-nonce endpoint"
+            );
+          }
+          this.usedBridgeNonces.add(bridgeUrl ?? "");
+        } else if (
+          !/^https?:\/\/(?:127\.0\.0\.1|localhost)(?::\d+)?(?:\/|$)/.test(bridgeUrl ?? "")
+        ) {
+          return errResponse(
+            HTTP_STATUS.BAD_GATEWAY ?? 502,
+            "Request bridge URL must stay on loopback"
+          );
+        }
+        const discovery = (await t.rpc("aiserver.v1.DashboardService/ListSandMcpTools", {
+          serverIdentifiers: ["bridge"],
+          mcpConfigJson: JSON.stringify({
+            mcpServers: {
+              bridge: {
+                url: bridgeUrl,
+                // Spec lifecycle step 4: the executor-generated challenge
+                // travels in the header; the request's legacy challenge
+                // field is only a fallback for controller-less test fakes.
+                headers: {
+                  Authorization: `Bearer ${startedBridge?.challenge ?? bridge.challenge}`,
+                },
+              },
+            },
+          }),
+        })) as {
+          tools?: Array<{ name?: string }>;
+          servers?: Array<{ tools?: Array<{ name?: string }> }>;
+        };
+        const directTools = Array.isArray(discovery?.tools) ? discovery.tools : [];
+        const serverTools = Array.isArray(discovery?.servers)
+          ? discovery.servers.flatMap((server) => (Array.isArray(server?.tools) ? server.tools : []))
+          : [];
+        const discovered = [...directTools, ...serverTools].some((tool) => tool?.name === "bridge_value");
+        if (!discovered) {
+          return errResponse(
+            HTTP_STATUS.BAD_GATEWAY ?? 502,
+            "Request bridge tool was not discovered"
+          );
+        }
+      }
+
+      // The prompt challenge and the discovery-config Authorization header
+      // must carry the SAME value the local gate verifies (spec step 1: the
+      // generated challenge on controller turns; the request challenge only
+      // as legacy fallback).
+      const prompt = composePrompt(
+        input.body?.messages ?? [],
+        startedBridge?.challenge ?? bridge?.challenge
+      );
+      const messageId = randomUUID();
+      const sendPayload: Record<string, unknown> = {
+        agentId,
+        sessionId: EMPTY_SESSION_ID,
+        machineId: this.machineId,
+        messageId,
+        text: prompt,
+        sentAtMs: String(Date.now()),
+      };
+      if (bridge) {
+        // Spec lifecycle step 6: the execution stage carries the identical
+        // authorization header explicitly; upstream header inheritance is
+        // not relied upon.
+        sendPayload.mcpConfigJson = JSON.stringify({
+          mcpServers: {
+            bridge: {
+              url: bridgeUrl,
+              headers: {
+                Authorization: `Bearer ${startedBridge?.challenge ?? bridge.challenge}`,
+              },
+            },
+          },
+        });
+      }
+      await t.rpc("SendGrokBotUserMessage", sendPayload);
+
+
+
+      const turnSignal = turnController
+        ? input.signal
+          ? AbortSignal.any([input.signal, turnController.signal])
+          : turnController.signal
+        : (input.signal ?? null);
+      const collect = this.watchTurn(t, agentId, messageId, turnSignal);
       if (!stream) {
         const text = await collect;
         if (bridge && text?.trim() === "TOOL_UNAVAILABLE") {
@@ -758,7 +704,10 @@ export class GrokBotExecutor extends BaseExecutor {
         let answer = text;
         if (bridgeCall) {
           try {
-            answer = bridgeCall(bridge?.challenge ?? "");
+            // Registry-backed turns verify against their internally
+            // generated challenge (spec step 1); fakes keep the
+            // request-supplied value.
+            answer = bridgeCall(startedBridge?.challenge ?? bridge?.challenge ?? "");
           } catch (err) {
             return errResponse(
               HTTP_STATUS.BAD_GATEWAY ?? 502,
@@ -777,28 +726,89 @@ export class GrokBotExecutor extends BaseExecutor {
       }
 
       const encoder = new TextEncoder();
-      const body = new ReadableStream<Uint8Array>({
-        async start(controller) {
-          try {
-            const text = await collect;
-            if (text) {
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify(sseChunk(model, text, id))}\n\n`)
-              );
-            }
-            controller.enqueue(
-              encoder.encode(`data: ${JSON.stringify(sseFinish(model, id))}\n\n`)
-            );
-            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-          } catch (err) {
-            controller.error(err);
-            return;
-          } finally {
-            await deleteAgentRef();
-            controller.close();
-          }
+      // Spec step 11: a bridge body nobody reads by 29 seconds is
+      // force-aborted. The first pull() is the read() that transfers
+      // ownership: after it, a later cancel follows step 8 with no forced
+      // abort.
+      let readClaimed = false;
+      let unreadTimer: ReturnType<typeof setTimeout> | null = null;
+      let body: ReadableStream<Uint8Array>;
+      const clearUnreadTimer = () => {
+        if (unreadTimer) {
+          clearTimeout(unreadTimer);
+          unreadTimer = null;
+        }
+      };
+      body = new ReadableStream<Uint8Array>({
+        pull() {
+          readClaimed = true;
+          clearUnreadTimer();
         },
-      });
+        start(controller) {
+          // Fire-and-forget: resolving start immediately lets pull() stay
+          // read-triggered under HWM 0 while collect is still pending, so a
+          // read within the deadline transfers ownership (spec step 11).
+          void (async () => {
+            try {
+              const text = await collect;
+              if (text) {
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify(sseChunk(model, text, id))}\n\n`)
+                );
+              }
+              controller.enqueue(
+                encoder.encode(`data: ${JSON.stringify(sseFinish(model, id))}\n\n`)
+              );
+              controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+            } catch (err) {
+              clearUnreadTimer();
+              const turnAborted = turnController
+                ? turnController.signal.aborted
+                : (input.signal?.aborted ?? false);
+              if (turnAborted) {
+                // Spec step 8 cancel paths (client cancel, upstream abort):
+                // no error frame and no [DONE]; just close the stream.
+              } else {
+                // Spec step 8 timeout/upstream failure after headers: one
+                // readable error frame, then close. controller.error() is
+                // never used before the frame can be read.
+                const errorType = (err as { errorType?: unknown }).errorType;
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({
+                      error: {
+                        message: sanitizeErrorMessage(err),
+                        type: typeof errorType === "string" ? errorType : "upstream_error",
+                      },
+                    })}\n\n`
+                  )
+                );
+              }
+              return;
+            } finally {
+              clearUnreadTimer();
+              await deleteAgentRef();
+              // Idempotent: cancel paths already forced the close.
+              startedBridge?.close?.("normal");
+              controller.close();
+            }
+          })();
+        }
+        // HWM 0 keeps pull() read-triggered: the first read() is what
+        // transfers ownership (spec step 11). A default HWM would call pull
+        // eagerly and claim ownership before any reader existed.
+      }, { highWaterMark: 0 });
+      // Spec step 11: a bridge body nobody reads by the deadline is
+      // force-aborted. Ownership evidence is the pull() fast path or an
+      // attached reader (`body.locked`, observable synchronously); HWM 0
+      // alone never invokes pull on a bare read().
+      if (startedBridge) {
+        unreadTimer = setTimeout(() => {
+          unreadTimer = null;
+          if (!readClaimed && !body.locked) turnController?.abort();
+        }, unreadTimeoutOverrideMs ?? BRIDGE_UNREAD_TIMEOUT_MS);
+        unreadTimer.unref?.();
+      }
       deleteOwnershipTransferred = true;
       return new Response(body, {
         status: 200,
@@ -812,7 +822,18 @@ export class GrokBotExecutor extends BaseExecutor {
         typeof errorType === "string" ? errorType : "upstream_error"
       );
     } finally {
-      if (this.bridgeLifecycle.includes("start") && this.bridgeController) {
+      // Remote agent cleanup runs first and on its own budget: a custom
+      // controller whose stop() blocks must never delay it.
+      if (createdOk && !deleteOwnershipTransferred) {
+        await deleteAgentRef();
+      }
+      if (startedBridge?.close) {
+        // Registry close at draining strength: new admissions stop now and
+        // teardown proceeds on its own 30-second budget (spec step 7). The
+        // client answer is never blocked on drain.
+        this.bridgeLifecycle.push("close");
+        startedBridge.close("normal");
+      } else if (this.bridgeLifecycle.includes("start") && this.bridgeController) {
         this.bridgeLifecycle.push("stop");
         try {
           await this.bridgeController.stop();
@@ -820,9 +841,6 @@ export class GrokBotExecutor extends BaseExecutor {
           this.bridgeLifecycle.push("stop-failed");
           log?.warn?.("GROK_BOT", `bridge stop failed: ${sanitizeErrorMessage(err)}`);
         }
-      }
-      if (createdOk && !deleteOwnershipTransferred) {
-        await deleteAgentRef();
       }
     }
   }
@@ -882,13 +900,13 @@ export class GrokBotExecutor extends BaseExecutor {
             });
           }
         }
-        // Stream ended without settlement (server idle cut) — reconnect.
+        // Stream ended without settlement (server idle cut) -- reconnect.
       } catch (err) {
         if ((err as { errorType?: unknown }).errorType === "incomplete_turn") throw err;
         if (signal?.aborted) throw err;
         if (submitted !== null) return submitted;
         if (Date.now() >= deadline) break;
-        // Read timeout or transient drop — reconnect below.
+        // Read timeout or transient drop -- reconnect below.
         void err;
       }
     }
@@ -985,7 +1003,7 @@ export class GrokBotExecutor extends BaseExecutor {
     log?: { warn?: (...a: unknown[]) => void }
   ): Promise<{ accessToken: string } | null> {
     if (!credentials?.refreshToken) {
-      log?.warn?.("TOKEN_REFRESH", "Grok Bot: no refresh token — re-authentication required");
+      log?.warn?.("TOKEN_REFRESH", "Grok Bot: no refresh token -- re-authentication required");
       return null;
     }
     const result = await getAccessToken("grok-bot", credentials, log);
@@ -1004,6 +1022,9 @@ export default GrokBotExecutor;
 
 /** Test/introspection hooks for the pending-cleanup queue. */
 export const _grokBotInternals = {
+  setUnreadTimeoutForTests(ms: number | null): void {
+    unreadTimeoutOverrideMs = ms;
+  },
   pendingCleanupCount(): number {
     return readQueue().length;
   },

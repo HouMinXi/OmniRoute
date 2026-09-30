@@ -363,6 +363,29 @@ export async function registerNodejs(): Promise<void> {
   // scoring for generic providers in the App Router production runtime.
   await registerQuotaFetchers();
 
+  // Grok Bot remote-cleanup sweeper (spec step 14): drain the persistent
+  // retry queue once at boot, then every 60s -- independent of new requests
+  // arriving on the affected connection. Non-fatal: a sweeper failure must
+  // never block server readiness.
+  try {
+    const [{ startGrokBotCleanupSweeper }, { getTransport }, { getProviderConnectionById }] =
+      await Promise.all([
+        import("@omniroute/open-sse/executors/grok-bot-cleanup-sweeper.ts"),
+        import("@omniroute/open-sse/executors/grok-bot.ts"),
+        import("@/lib/db/providers"),
+      ]);
+    startGrokBotCleanupSweeper({
+      resolveConnection: async (connectionId: string) => {
+        const connection = await getProviderConnectionById(connectionId);
+        return connection ? { refreshToken: connection.refreshToken } : null;
+      },
+      transportFor: (accessToken: string) => getTransport(accessToken),
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn("[STARTUP] Grok Bot cleanup sweeper unavailable (non-fatal):", msg);
+  }
+
   // Guarantee the SQLite singleton — including a sql.js WASM pre-init when
   // both synchronous drivers (better-sqlite3, node:sqlite) are unavailable —
   // is ready before ANY other startup step reaches getDbInstance(). This

@@ -19,11 +19,19 @@ type FakeTransport = {
   rosterRows: Record<string, unknown>[];
   rosterEcho: boolean;
   discoveredTools: string[];
+  legacyTools: string[];
   lastAgentId: string;
   lastMessageId: string;
   failDelete: boolean;
   createBehavior: "ok" | "missing-agent" | "id-mismatch" | "wrong-harness" | "timeout";
   watchEvents: WatchEvent[];
+  /** Test hook fired after the SendGrokBotUserMessage payload validates. */
+  onSend?: (payload: Record<string, unknown>) => void | Promise<void>;
+  /**
+   * Async watch override for escalation tests: the fake races this iterator
+   * against the watch signal so cancel propagates like the live transport.
+   */
+  watchEventsAsync?: () => AsyncIterable<unknown>;
 };
 
 function makeTransport(): FakeTransport {
@@ -32,12 +40,40 @@ function makeTransport(): FakeTransport {
     rosterRows: [],
     rosterEcho: false,
     discoveredTools: ["bridge_value"],
+    legacyTools: [],
     lastAgentId: "",
     lastMessageId: "",
     failDelete: false,
     createBehavior: "ok",
     watchEvents: [],
+    onSend: undefined,
+    watchEventsAsync: undefined,
   };
+}
+
+/**
+ * Race an async iterator against an AbortSignal, mirroring how the live
+ * transport's fetch-driven watch iterator rejects on signal abort.
+ */
+async function* abortable<T>(iterable: AsyncIterable<T>, signal: AbortSignal | null): AsyncIterable<T> {
+  const iterator = iterable[Symbol.asyncIterator]();
+  try {
+    while (true) {
+      if (signal?.aborted) throw new Error("aborted");
+      const raceSignal = signal
+        ? new Promise<never>((_, reject) =>
+            signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true })
+          )
+        : null;
+      const next = await (raceSignal ? Promise.race([iterator.next(), raceSignal]) : iterator.next());
+      if (next.done) return;
+      yield next.value;
+    }
+  } finally {
+    // Do not await: a generator suspended on a never-settling await blocks
+    // return() forever, which would hang the abort propagation itself.
+    void iterator.return?.();
+  }
 }
 
 function b64Row(clientNonce: string, answer: string) {
@@ -121,6 +157,7 @@ function installTransport(t: FakeTransport) {
           throw new Error("SendGrokBotUserMessage invalid payload");
         }
         t.lastMessageId = String(payload.messageId);
+        await t.onSend?.(payload);
         return { dispatched: true };
       }
       if (method === "DeleteGrokBotAgent") {
@@ -135,12 +172,22 @@ function installTransport(t: FakeTransport) {
         }
         return { agents: t.rosterRows };
       }
-      if (method === "DashboardService/ListSandMcpTools") {
-        return { tools: t.discoveredTools.map((name) => ({ name })) };
+      if (method === "aiserver.v1.DashboardService/ListSandMcpTools") {
+        const response: Record<string, unknown> = {
+          servers: [{ status: "connected", tools: t.discoveredTools.map((name) => ({ name })) }],
+        };
+        if (t.legacyTools.length > 0) {
+          response.tools = t.legacyTools.map((name) => ({ name }));
+        }
+        return response;
       }
       return {};
     },
-    async *watch(method: string, payload: Record<string, unknown>) {
+    async *watch(
+      method: string,
+      payload: Record<string, unknown>,
+      opts?: { signal?: AbortSignal | null }
+    ) {
       t.calls.push({ method, payload });
       // Default: live-shaped frames (measured 2026-09-23). Overrides come from
       // t.watchEvents (compatibility paths) — a single `false` sentinel yields
@@ -157,6 +204,10 @@ function installTransport(t: FakeTransport) {
       ) {
         throw new Error("WatchGrokBotTranscripts invalid payload");
       }
+      if (t.watchEventsAsync) {
+        yield* abortable(t.watchEventsAsync(), opts?.signal ?? null);
+        return;
+      }
       if (t.watchEvents.length > 0) {
         for (const ev of t.watchEvents) yield ev;
         return;
@@ -172,11 +223,33 @@ function installTransport(t: FakeTransport) {
   });
 }
 
+function registeredNonceFromSend(t: FakeTransport): string {
+  // The discovery config recorded on SendGrokBotUserMessage carries the
+  // registry-backed path URL; extract the nonce the turn registered.
+  const send = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
+  assert.ok(send, "expected a SendGrokBotUserMessage call");
+  const config = JSON.parse(String((send!.payload as Record<string, unknown>).mcpConfigJson));
+  const url = String(config.mcpServers.bridge.url);
+  const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(url);
+  assert.ok(match, `expected a registered path URL, got ${url}`);
+  return match![1]!;
+}
+
+function fakeBridgeUrl(tag: string): string {
+  // 22-char nonce from the allowed class, deterministic per tag so
+  // per-test URL dedupe (usedBridgeNonces) still distinguishes turns.
+  const nonce = (tag + "abcdefghijklmnopqrstuv") // 22 chars total
+    .replace(/[^A-Za-z0-9_-]/g, "x")
+    .slice(0, 22)
+    .padEnd(22, "x");
+  return `https://bridge.example.test/grok-bridge/${nonce}/mcp`;
+}
+
 function makeInput(
   messages: unknown[],
   stream = false,
   signal?: AbortSignal,
-  bridge?: { url: string; challenge: string }
+  bridge?: { url: string; challenge?: string }
 ) {
   return {
     model: "grok-bot",
@@ -221,6 +294,10 @@ describe("GrokBotExecutor", () => {
     t = makeTransport();
     installTransport(t);
     _grokBotInternals.resetPendingCleanupsForTests();
+    // Production shape (spec deployment step 9): the public bridge URL is
+    // configured; tests that exercise the stop switch or env-absent paths
+    // override/delete it locally.
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
     executor = new GrokBotExecutor();
   });
 
@@ -262,7 +339,7 @@ describe("GrokBotExecutor", () => {
     executor.setBridgeControllerForTests({
       async start(publicBaseUrl?: string) {
         seenBaseUrl = publicBaseUrl ?? "";
-        return { url: "https://omni.minxihou.site/grok-bridge/mcp?nonce=one", call: () => "bridge-ok" };
+        return { url: fakeBridgeUrl("one"), call: () => "bridge-ok" };
       },
       async stop() {},
     });
@@ -276,7 +353,7 @@ describe("GrokBotExecutor", () => {
       assert.equal(body.choices[0].message.content, "bridge-ok");
       assert.equal(seenBaseUrl, "https://omni.minxihou.site/grok-bridge");
       assert.equal(spawned, false);
-      assert.equal(t.calls.some((call) => call.method === "DashboardService/ListSandMcpTools"), true);
+      assert.equal(t.calls.some((call) => call.method === "aiserver.v1.DashboardService/ListSandMcpTools"), true);
     } finally {
       if (previous === undefined) delete process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
       else process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
@@ -368,11 +445,11 @@ describe("GrokBotExecutor", () => {
     assert.match(String(send.payload.text), /returned value verbatim/);
     assert.match(String(send.payload.text), /TOOL_UNAVAILABLE/);
     assert.equal(
-      t.calls.some((c) => c.method === "DashboardService/ListSandMcpTools"),
+      t.calls.some((c) => c.method === "aiserver.v1.DashboardService/ListSandMcpTools"),
       true,
       "bridge request must discover tools before sending"
     );
-    const discoveryIndex = t.calls.findIndex((c) => c.method === "DashboardService/ListSandMcpTools");
+    const discoveryIndex = t.calls.findIndex((c) => c.method === "aiserver.v1.DashboardService/ListSandMcpTools");
     const sendIndex = t.calls.findIndex((c) => c.method === "SendGrokBotUserMessage");
     assert.ok(discoveryIndex >= 0 && discoveryIndex < sendIndex);
     const discoveryConfig = JSON.parse(String(t.calls[discoveryIndex]?.payload.mcpConfigJson));
@@ -381,112 +458,112 @@ describe("GrokBotExecutor", () => {
   });
 
   it("returns the bridge tool result instead of the model text", async () => {
-    executor.setBridgeControllerForTests({
-      async start() {
-        return {
-          url: "https://bridge.example.test/mcp?nonce=result",
-          call: () => "bridge-ok",
-        };
-      },
-      async stop() {},
-    });
-    t.watchEvents = settledWatchEvents("model said something else");
-    const res = (await executor.execute(
-      makeInput([{ role: "user", content: "hi" }], false, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "test-challenge",
-      })
-    )) as Response;
-    assert.equal(res.status, 200);
-    assert.equal((await res.json()).choices[0].message.content, "bridge-ok");
+      executor.setBridgeControllerForTests({
+        async start() {
+          return {
+            url: fakeBridgeUrl("result"),
+            call: () => "bridge-ok",
+          };
+        },
+        async stop() {},
+      });
+      t.watchEvents = settledWatchEvents("model said something else");
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "http://127.0.0.1:9/mcp",
+          challenge: "test-challenge",
+        })
+      )) as Response;
+      assert.equal(res.status, 200);
+      assert.equal((await res.json()).choices[0].message.content, "bridge-ok");
   });
 
   it("rejects a bridge call instead of returning the model text", async () => {
-    executor.setBridgeControllerForTests({
-      async start() {
-        return {
-          url: "https://bridge.example.test/mcp?nonce=reject",
-          call() {
-            throw new Error("Rejected challenge");
-          },
-        };
-      },
-      async stop() {},
-    });
-    t.watchEvents = settledWatchEvents("model said something else");
-    const res = (await executor.execute(
-      makeInput([{ role: "user", content: "hi" }], false, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "wrong",
-      })
-    )) as Response;
-    assert.equal(res.status, 502);
-    assert.match(await res.text(), /bridge_rejected/);
+      executor.setBridgeControllerForTests({
+        async start() {
+          return {
+            url: fakeBridgeUrl("reject"),
+            call() {
+              throw new Error("Rejected challenge");
+            },
+          };
+        },
+        async stop() {},
+      });
+      t.watchEvents = settledWatchEvents("model said something else");
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "http://127.0.0.1:9/mcp",
+          challenge: "wrong",
+        })
+      )) as Response;
+      assert.equal(res.status, 502);
+      assert.match(await res.text(), /bridge_rejected/);
   });
 
   it("reports a bridge tool that was not called", async () => {
-    executor.setBridgeControllerForTests({
-      async start() {
-        return {
-          url: "https://bridge.example.test/mcp?nonce=unused",
-          call: () => "bridge-ok",
-        };
-      },
-      async stop() {},
-    });
-    t.watchEvents = settledWatchEvents("TOOL_UNAVAILABLE");
-    const res = (await executor.execute(
-      makeInput([{ role: "user", content: "hi" }], false, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "test-challenge",
-      })
-    )) as Response;
-    assert.equal(res.status, 502);
-    assert.match(await res.text(), /bridge_not_called/);
+      executor.setBridgeControllerForTests({
+        async start() {
+          return {
+            url: fakeBridgeUrl("unused"),
+            call: () => "bridge-ok",
+          };
+        },
+        async stop() {},
+      });
+      t.watchEvents = settledWatchEvents("TOOL_UNAVAILABLE");
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "http://127.0.0.1:9/mcp",
+          challenge: "test-challenge",
+        })
+      )) as Response;
+      assert.equal(res.status, 502);
+      assert.match(await res.text(), /bridge_not_called/);
   });
 
   it("retries one new tunnel after the first tunnel fails", async () => {
-    let starts = 0;
-    executor.setBridgeControllerForTests({
-      async start() {
-        starts += 1;
-        if (starts === 1) throw new Error("Tunnel unavailable");
-        return {
-          url: "https://bridge.example.test/mcp?nonce=retry",
-          call: () => "bridge-ok",
-        };
-      },
-      async stop() {},
-    });
-    t.watchEvents = settledWatchEvents("model text");
-    const res = (await executor.execute(
-      makeInput([{ role: "user", content: "hi" }], false, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "test-challenge",
-      })
-    )) as Response;
-    assert.equal(res.status, 200);
-    assert.equal(starts, 2);
-    assert.equal((await res.json()).choices[0].message.content, "bridge-ok");
+      let starts = 0;
+      executor.setBridgeControllerForTests({
+        async start() {
+          starts += 1;
+          if (starts === 1) throw new Error("Bridge start failed");
+          return {
+            url: fakeBridgeUrl("retry"),
+            call: () => "bridge-ok",
+          };
+        },
+        async stop() {},
+      });
+      t.watchEvents = settledWatchEvents("model text");
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "http://127.0.0.1:9/mcp",
+          challenge: "test-challenge",
+        })
+      )) as Response;
+      assert.equal(res.status, 200);
+      assert.equal(starts, 2);
+      assert.equal((await res.json()).choices[0].message.content, "bridge-ok");
   });
 
   it("does not start a third tunnel after two failures", async () => {
-    let starts = 0;
-    executor.setBridgeControllerForTests({
-      async start() {
-        starts += 1;
-        throw new Error("Tunnel unavailable");
-      },
-      async stop() {},
-    });
-    const res = (await executor.execute(
-      makeInput([{ role: "user", content: "hi" }], false, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "test-challenge",
-      })
-    )) as Response;
-    assert.equal(res.status, 502);
-    assert.equal(starts, 2);
+      let starts = 0;
+      executor.setBridgeControllerForTests({
+        async start() {
+          starts += 1;
+          throw new Error("Bridge start failed");
+        },
+        async stop() {},
+      });
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "http://127.0.0.1:9/mcp",
+          challenge: "test-challenge",
+        })
+      )) as Response;
+      assert.equal(res.status, 502);
+      assert.equal(starts, 2);
   });
 
   it("streams SSE chunks and terminates with [DONE]", async () => {
@@ -503,7 +580,7 @@ describe("GrokBotExecutor", () => {
     executor.setBridgeControllerForTests({
       async start() {
         events.push("start");
-        return { url: "https://bridge.example.test/mcp?nonce=one" };
+        return { url: fakeBridgeUrl("one") };
       },
       async stop() {
         events.push("stop");
@@ -519,12 +596,12 @@ describe("GrokBotExecutor", () => {
       )) as Response;
       assert.equal(res.status, 200);
       assert.deepEqual(events, ["start", "stop"]);
-      const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
+      const started = t.calls.find((c) => c.method === "aiserver.v1.DashboardService/ListSandMcpTools");
       const startedConfig = JSON.parse(String(started?.payload.mcpConfigJson));
-      assert.equal(startedConfig.mcpServers.bridge.url, "https://bridge.example.test/mcp?nonce=one");
+      assert.equal(startedConfig.mcpServers.bridge.url, fakeBridgeUrl("one"));
       const sent = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
       const sentConfig = JSON.parse(String(sent?.payload.mcpConfigJson));
-      assert.equal(sentConfig.mcpServers.bridge.url, "https://bridge.example.test/mcp?nonce=one");
+      assert.equal(sentConfig.mcpServers.bridge.url, fakeBridgeUrl("one"));
       executor.setBridgeControllerForTests({
         async start() {
           return { url: "https://bridge.example.test/mcp" };
@@ -540,7 +617,7 @@ describe("GrokBotExecutor", () => {
       assert.ok(reused.status >= 400);
       executor.setBridgeControllerForTests({
         async start() {
-          return { url: "https://bridge.example.test/mcp?nonce=one" };
+          return { url: fakeBridgeUrl("one") };
         },
         async stop() {},
       });
@@ -589,7 +666,7 @@ describe("GrokBotExecutor", () => {
       assert.equal(events.includes("stop-after-failure"), true);
       executor.setBridgeControllerForTests({
         async start() {
-          return { url: "https://bridge.example.test/mcp?nonce=stop" };
+          return { url: fakeBridgeUrl("stop") };
         },
         async stop() {
           throw new Error("bridge stop failed");
@@ -618,7 +695,7 @@ describe("GrokBotExecutor", () => {
       })
     )) as Response;
     assert.equal(res.status, 200);
-    const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
+    const started = t.calls.find((c) => c.method === "aiserver.v1.DashboardService/ListSandMcpTools");
     const startedConfig = JSON.parse(String(started?.payload.mcpConfigJson));
     assert.equal(startedConfig.mcpServers.bridge.url, "http://127.0.0.1:9/mcp");
   });
@@ -747,6 +824,57 @@ describe("GrokBotExecutor", () => {
     );
   });
 
+  it("discovers the bridge tool via a legacy flat tools array alongside servers", async () => {
+    // Both shapes populated at once: servers carry an unrelated tool, the
+    // legacy flat array carries the bridge tool. The executor must merge
+    // both paths and discover it.
+    t.discoveredTools = ["unrelated_tool"];
+    t.legacyTools = ["bridge_value"];
+    executor.setBridgeControllerForTests({
+      async start() {
+        return {
+          url: fakeBridgeUrl("result"),
+          call: () => "bridge-ok",
+        };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("model said something else");
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "http://127.0.0.1:9/mcp",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).choices[0].message.content, "bridge-ok");
+    t.legacyTools = [];
+  });
+
+  it("discovers the bridge tool via a legacy flat tools array alone", async () => {
+    t.discoveredTools = [];
+    t.legacyTools = ["bridge_value"];
+    executor.setBridgeControllerForTests({
+      async start() {
+        return {
+          url: fakeBridgeUrl("result"),
+          call: () => "bridge-ok",
+        };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("model said something else");
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "http://127.0.0.1:9/mcp",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.equal(res.status, 200);
+    assert.equal((await res.json()).choices[0].message.content, "bridge-ok");
+    t.legacyTools = [];
+  });
+
   for (const behavior of ["missing-agent", "id-mismatch", "wrong-harness"] as const) {
     it(`fails without sending a message when create returns ${behavior}`, async () => {
       t.createBehavior = behavior;
@@ -801,6 +929,43 @@ describe("GrokBotExecutor", () => {
     const res2 = (await executor.execute(makeInput([{ role: "user", content: "again" }]))) as Response;
     assert.equal(res2.status, 200);
     assert.equal(_grokBotInternals.pendingCleanupCount(), 1, "queue item must survive roster failure");
+  });
+
+  it("deletes the agent when discovery fails after a successful send (review finding 4d-R1)", async () => {
+    t.watchEvents = settledWatchEvents("unused");
+    const callsBefore = t.calls.length;
+    setGrokBotTransportForTests({
+      async rpc(method: string, payload: Record<string, unknown>) {
+        t.calls.push({ method, payload });
+        if (method === "CreateGrokBotTemporalAgent") {
+          t.lastAgentId = String(payload.agentId);
+          return {
+            agent: { id: "row-1", legacyAgentId: payload.agentId, harness: "temporal" },
+          };
+        }
+        if (method === "SendGrokBotUserMessage") return { dispatched: true };
+        if (method === "aiserver.v1.DashboardService/ListSandMcpTools")
+          throw new Error("discovery boom");
+        if (method === "DeleteGrokBotAgent") return {};
+        return {};
+      },
+      async *watch() {
+        for (const ev of settledWatchEvents("unused")) yield ev;
+      },
+    });
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "https://bridge.example.com",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.ok(res.status >= 400);
+    const after = t.calls.slice(callsBefore);
+    assert.equal(
+      after.some((c) => c.method === "DeleteGrokBotAgent"),
+      true,
+      "agent must be deleted even when discovery fails after the send"
+    );
   });
 
   it("queues with row id when delete fails, and deletes directly next time", async () => {
@@ -1083,183 +1248,284 @@ describe("GrokBotExecutor", () => {
     );
   });
 
-  it("stops a real request bridge controller after success and failure", async () => {
-    const events: string[] = [];
-    const { createRequestBridgeController } = await import("../../open-sse/executors/grok-bot.ts");
-    let toolStopped = false;
-    const controller = createRequestBridgeController(
-      (command) => {
-      events.push(command[0] ?? "");
-      let ready = false;
-      setTimeout(() => {
-        ready = true;
-      }, 20);
-      return {
-        command,
-        output: () => (ready ? "ready https://safe-bridge.trycloudflare.com" : ""),
-        async stop() {
-          events.push("stop");
-        },
-      };
-    }, async () => ({
-      url: "http://127.0.0.1:9",
-      call(challenge: string) {
-        if (challenge !== "test-challenge") throw new Error("Rejected challenge");
-        return "ok";
-      },
-      async stop() {
-        toolStopped = true;
-      },
-    }));
-    let seenChallenge = "";
-    const challengeEvents: string[] = [];
-    const challengeController = createRequestBridgeController(
-      (command) => {
-        challengeEvents.push(command[0] ?? "");
-        return {
-          command,
-          output: () => "ready https://safe-bridge.trycloudflare.com",
-          async stop() {},
-        };
-      },
-      async (value) => {
-        seenChallenge = value;
-        let used = false;
-        return {
-          url: "http://127.0.0.1:9",
-          call() {
-            if (used) throw new Error("Repeat call rejected");
-            used = true;
-            return "ok";
-          },
-          async stop() {},
-        };
-      },
-      "request-challenge"
-    );
-    const startedTool = await challengeController.start();
-    assert.equal(seenChallenge, "request-challenge");
-    assert.equal(startedTool.call?.("request-challenge"), "ok");
-    assert.throws(() => startedTool.call?.("request-challenge"), /Repeat call rejected/);
-    assert.deepEqual(challengeEvents, ["cloudflared"]);
-    await challengeController.stop();
-    executor.setBridgeControllerForTests(controller);
-    t.watchEvents = settledWatchEvents("hello back");
-    const ok = (await executor.execute(
-      makeInput([{ role: "user", content: "hi" }], false, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "test-challenge",
-      })
-    )) as Response;
-    assert.equal(ok.status, 200);
-    const started = t.calls.find((c) => c.method === "DashboardService/ListSandMcpTools");
-    const startedConfig = JSON.parse(String(started?.payload.mcpConfigJson));
-    assert.match(String(startedConfig.mcpServers.bridge.url), /^https:\/\/safe-bridge\.trycloudflare\.com\/mcp\?nonce=/);
-    assert.deepEqual(events, ["cloudflared", "stop"]);
-    assert.equal(toolStopped, true);
-    executor.setBridgeControllerForTests(
-      createRequestBridgeController(() => ({
-        command: [],
-        output: () => "",
-        async stop() {
-          events.push("stop-invalid");
-        },
-      }), async () => ({
-        url: "http://127.0.0.1:9",
-        call: () => "ok",
-        async stop() {},
-      }))
-    );
-    const invalid = (await executor.execute(
-      makeInput([{ role: "user", content: "hi" }], false, undefined, {
-        url: "http://127.0.0.1:9/mcp",
-        challenge: "test-challenge",
-      })
-    )) as Response;
-    assert.ok(invalid.status >= 400);
-    assert.equal(events.includes("stop-invalid"), true);
-    const { requestBridgeTunnelCommand, publicBridgeUrlFromTunnelLog } = await import(
-      "../../open-sse/executors/grok-bot.ts"
-    );
-    assert.deepEqual(requestBridgeTunnelCommand("http://127.0.0.1:9"), [
-      "cloudflared",
-      "tunnel",
-      "--no-autoupdate",
-      "--protocol",
-      "http2",
-      "--url",
-      "http://127.0.0.1:9",
-      "--http-host-header",
-      "127.0.0.1:9",
-    ]);
-    assert.equal(
-      publicBridgeUrlFromTunnelLog("ready https://safe-bridge.trycloudflare.com now"),
-      "https://safe-bridge.trycloudflare.com"
-    );
-    const { startRequestBridgeProcess } = await import("../../open-sse/executors/grok-bot.ts");
-    let killed = false;
-    const process = await startRequestBridgeProcess(["cloudflared", "tunnel"], ((command, args) => ({
-      command,
-      args,
-      stdout: { on(_event: string, listener: (chunk: string) => void) { listener("https://safe-bridge.trycloudflare.com"); } },
-      stderr: { on() {} },
-      kill() {
-        killed = true;
-      },
-    })) as never);
-    assert.equal(process.output(), "https://safe-bridge.trycloudflare.com");
-    await process.stop();
-    assert.equal(killed, true);
-    const { startLocalBridgeToolServer } = await import("../../open-sse/executors/grok-bot.ts");
-    const localTool = await startLocalBridgeToolServer("request-challenge");
-    assert.equal(localTool.call("request-challenge"), "ok");
-    assert.throws(() => localTool.call("request-challenge"), /Repeat call rejected/);
-    await localTool.stop();
-    const httpTool = await startLocalBridgeToolServer("request-challenge");
-    const response = await fetch(httpTool.url, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ challenge: "request-challenge" }),
-    });
-    assert.equal(response.status, 200);
-    await httpTool.stop();
-    let spawned = "";
-    const defaultController = createRequestBridgeController((command) => {
-      spawned = command[0] ?? "";
-      return {
-        command,
-        output: () => "ready https://safe-bridge.trycloudflare.com",
-        async stop() {},
-      };
-    });
-    const startedDefault = await defaultController.start();
-    assert.equal(spawned, "cloudflared");
-    assert.match(startedDefault.url, /^https:\/\/safe-bridge\.trycloudflare\.com\/mcp\?nonce=/);
-    await defaultController.stop();
-    let customSpawned = false;
-    const custom = createRequestBridgeController(() => {
-      customSpawned = true;
-      throw new Error("custom public URL must not spawn");
-    }, undefined, "request-challenge");
-    const startedCustom = await custom.start("https://bridge.example.com");
-    assert.equal(customSpawned, false);
-    assert.match(startedCustom.url, /^https:\/\/bridge\.example\.com\/mcp\?nonce=/);
-    assert.match(startedCustom.url, /[?&]nonce=[^&]+/);
-    const shared = createRequestBridgeController(() => {
-      throw new Error("shared bridge must not spawn");
-    }, undefined, "request-challenge");
-    const first = await shared.start("https://omni.minxihou.site/grok-bridge");
-    const second = await shared.start("https://omni.minxihou.site/grok-bridge");
-    assert.notEqual(new URL(first.url).searchParams.get("nonce"), new URL(second.url).searchParams.get("nonce"));
-    await shared.stop();
-    await custom.stop();
-    if (globalThis.process.env.GROK_BOT_REAL_TUNNEL === "1") {
-      const real = createRequestBridgeController(async (command) => await startRequestBridgeProcess(command));
-      const startedReal = await real.start();
-      assert.match(startedReal.url, /^https:\/\/.+\.trycloudflare\.com\/mcp\?nonce=/);
-      await real.stop();
+  it("rejects explicit bridge input while the stop switch is active (spec test 36)", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    try {
+      // Default controller in place (production shape); env cleared = stop switch.
+      t.watchEvents = settledWatchEvents("unused");
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "https://bridge.example.com",
+          challenge: "test-challenge",
+        })
+      )) as Response;
+      assert.ok(res.status >= 400, "explicit bridge input must be rejected while the stop switch is active");
+      const body = (await res.json()) as { error?: { message?: string } };
+      assert.equal(body.error?.message, "Request bridge is disabled");
+      assert.equal(
+        t.calls.some((c) => c.method === "aiserver.v1.DashboardService/ListSandMcpTools"),
+        false,
+        "no bridge turn may start while the stop switch is active"
+      );
+    } finally {
+      if (previous !== undefined) globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
     }
   });
+
+  it("controller path does not require the legacy request challenge", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("hello back");
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        assert.ok(match);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: `Bearer ${challenge}`, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "bridge_value" } }),
+        });
+      };
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "https://bridge.example.com",
+        })
+      )) as Response;
+      assert.equal(res.status, 200, JSON.stringify(await res.json().catch(() => ({}))));
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("default bridge controller starts registry turns with path-nonce URLs", async () => {
+    const { createDefaultBridgeController } = await import("../../open-sse/executors/grok-bot.ts");
+    const controller = createDefaultBridgeController();
+    const first = await controller.start("https://bridge.example.com");
+    assert.match(
+      first.url,
+      /^https:\/\/bridge\.example\.com\/grok-bridge\/[A-Za-z0-9_-]{22}\/mcp$/
+    );
+    assert.match(first.challenge ?? "", /^[A-Za-z0-9_-]{16,}$/);
+    // The canary requires the tool to have been driven over HTTP first.
+    assert.throws(() => first.call(first.challenge ?? ""), /Bridge tool was not called/);
+    const second = await controller.start("https://bridge.example.com");
+    assert.notEqual(first.url, second.url);
+    // Close every turn so the process-wide singleton registry never carries
+    // leaked active entries into later tests.
+    first.close("cancel");
+    await controller.stop();
+    const refused = await controller.start("").then(
+      () => null,
+      (err) => err
+    );
+    assert.match(String(refused), /Public bridge base URL is required/);
+  });
+
+  it("executor flow: discovery and execution configs carry the challenge header", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("hello back");
+      // Drive the real loopback tool server the way the public route would
+      // after its challenge check: parse nonce + bearer from the execution
+      // config, then POST tools/call to the registered port.
+      let sendChallenge = "";
+      t.onSend = async (payload) => {
+        // The prompt instruction and the wire Authorization must carry the
+        // same challenge the local gate verifies (spec step 1).
+        const sendChallengeMatch = /challenge ([A-Za-z0-9_-]+)\./.exec(String(payload.text ?? ""));
+        assert.ok(sendChallengeMatch, "send payload prompt must name the challenge");
+        sendChallenge = sendChallengeMatch[1];
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        assert.ok(match, "HOOK-FAIL: execution config must use the path-nonce form");
+        const nonce = match[1];
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(nonce);
+        assert.equal(found.kind, "active", "HOOK-FAIL: nonce not active");
+        if (found.kind !== "active") return;
+        const response = await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${nonce}/mcp`, {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${challenge}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "bridge_value" } }),
+        });
+        assert.equal(response.status, 200, `HOOK-FAIL: local server responded ${response.status}: ${await response.text().catch(() => "?")}`);
+      };
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], false, undefined, {
+          url: "https://bridge.example.com",
+          challenge: "test-challenge",
+        })
+      )) as Response;
+      assert.equal(res.status, 200, JSON.stringify(await res.json().catch(() => ({}))));
+      const pathNonce = /^https:\/\/bridge\.example\.com\/grok-bridge\/[A-Za-z0-9_-]{22}\/mcp$/;
+      const discovery = t.calls.find((c) => c.method === "aiserver.v1.DashboardService/ListSandMcpTools");
+      const discoveryConfig = JSON.parse(String(discovery?.payload.mcpConfigJson));
+      assert.match(String(discoveryConfig.mcpServers.bridge.url), pathNonce);
+      assert.match(String(discoveryConfig.mcpServers.bridge.headers.Authorization), /^Bearer .+$/);
+      const send = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
+      const sendConfig = JSON.parse(String(send?.payload.mcpConfigJson));
+      assert.match(String(sendConfig.mcpServers.bridge.url), pathNonce);
+      // Spec lifecycle step 6: the execution stage carries the identical
+      // authorization header explicitly, not via upstream inheritance.
+      assert.match(String(sendConfig.mcpServers.bridge.headers.Authorization), /^Bearer .+$/);
+      assert.equal(
+        sendConfig.mcpServers.bridge.headers.Authorization,
+        discoveryConfig.mcpServers.bridge.headers.Authorization
+      );
+      // The finally path closes the turn through the registry (draining
+      // strength) instead of blocking on tunnel teardown.
+      assert.equal(
+        "Bearer " + sendChallenge,
+        String(sendConfig.mcpServers.bridge.headers.Authorization),
+        "prompt challenge and wire Authorization must be the same value"
+      );
+      assert.equal(executor.bridgeLifecycleForTests().includes("close"), true);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("read() transfers ownership: a stream read within the deadline completes normally", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      _grokBotInternals.setUnreadTimeoutForTests(40);
+      let releaseWatch: (() => void) | null = null;
+      t.watchEventsAsync = () =>
+        (async function* () {
+          await new Promise<void>((resolve) => {
+            releaseWatch = resolve;
+          });
+          // Echo row must carry the sent messageId so the executor skips it.
+          yield b64Row(t.lastMessageId ?? "unused", "owned answer");
+          yield terminal("submit_answer", "owned answer");
+        })();
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], true, undefined, {
+          url: "https://bridge.example.com",
+        })
+      )) as Response;
+      assert.equal(res.status, 200);
+      // First read transfers ownership. Stay pending past the 40ms deadline:
+      // no forced abort may fire while a reader owns the body.
+      const reader = res.body!.getReader();
+      // Start the read without blocking on it: pull() fires synchronously
+      // with read(), transferring ownership before the deadline elapses.
+      const firstPromise = reader.read();
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      // Nobody aborted the pending turn: the reader owns the body now. The
+      // turn drains at execute() return by design; a forced abort would
+      // sever the watch, so the [DONE] + answer assertions below are the
+      // ownership proof.
+      releaseWatch?.();
+      const first = await firstPromise;
+      assert.equal(first.done, false);
+      const chunks: Uint8Array[] = [first.value!];
+      for (;;) {
+        const next = await reader.read();
+        if (next.done) break;
+        chunks.push(next.value!);
+      }
+      const text = new TextDecoder().decode(Buffer.concat(chunks));
+      assert.equal(text.includes("[DONE]"), true);
+      assert.equal(text.includes("owned answer"), true);
+      const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+      assert.equal(getGrokBotBridgeRegistry().lookup(registeredNonceFromSend(t)).kind, "closed-replay");
+    } finally {
+      _grokBotInternals.setUnreadTimeoutForTests(null);
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+      t.watchEventsAsync = undefined;
+    }
+  });
+
+  it("client cancel on a bridge stream ends with no frame, no [DONE], and closes the nonce", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    let releaseWatch: (() => void) | null = null;
+    try {
+      t.watchEventsAsync = () =>
+        (async function* () {
+          await new Promise<void>((resolve) => {
+            releaseWatch = resolve;
+          });
+        })();
+      const client = new AbortController();
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], true, client.signal, {
+          url: "https://bridge.example.com",
+        })
+      )) as Response;
+      assert.equal(res.status, 200);
+      // Poll until the watch is attached (condition, not a blind sleep).
+      for (let i = 0; i < 100 && !t.calls.some((c) => c.method === "WatchGrokBotTranscripts"); i += 1) {
+        await new Promise((resolve) => setTimeout(resolve, 5));
+      }
+      client.abort();
+      await new Promise((resolve) => setTimeout(resolve, 20));
+      releaseWatch?.();
+      const text = await new Response(res.body).text();
+      // Spec step 8 cancel path: no error frame and no [DONE].
+      assert.equal(text.includes("[DONE]"), false);
+      assert.equal(text.includes('"error"'), false);
+      const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+      assert.equal(getGrokBotBridgeRegistry().lookup(registeredNonceFromSend(t)).kind, "closed-replay");
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+      t.watchEventsAsync = undefined;
+    }
+  });
+
+  it("force-aborts an unread bridge stream at the unread deadline and closes the nonce", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      _grokBotInternals.setUnreadTimeoutForTests(40);
+      t.watchEventsAsync = () =>
+        (async function* () {
+          await new Promise(() => {
+            /* pending forever */
+          });
+        })();
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }], true, undefined, {
+          url: "https://bridge.example.com",
+        })
+      )) as Response;
+      assert.equal(res.status, 200);
+      // Nobody reads the body; the 40ms unread deadline must fire.
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      const text = await new Response(res.body).text();
+      assert.equal(text, "");
+      const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+      assert.equal(getGrokBotBridgeRegistry().lookup(registeredNonceFromSend(t)).kind, "closed-replay");
+    } finally {
+      _grokBotInternals.setUnreadTimeoutForTests(null);
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+      t.watchEventsAsync = undefined;
+    }
+  });
+
 });
 
 test.after(async () => {

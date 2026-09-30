@@ -4,6 +4,7 @@ import { createRequire } from "node:module";
 
 import { config } from "../../../src/proxy.ts";
 import { classifyRoute } from "../../../src/server/authz/classify.ts";
+import { generateBridgeNonce } from "../../../open-sse/services/grokBotBridgeRegistry.ts";
 
 // Regression guard — GHSA-jvqc-mp9f-q936 (case-sensitive authz-matcher bypass).
 //
@@ -73,4 +74,40 @@ test("classifyRoute treats uppercase client aliases as CLIENT_API, not managemen
   assert.equal(classifyRoute("/CODEX", "POST").routeClass, "CLIENT_API");
   // Lowercase behavior is unchanged.
   assert.equal(classifyRoute("/v1/chat/completions", "POST").routeClass, "CLIENT_API");
+});
+
+test("grok-bridge: proxy matcher, classifyRoute, and the registry nonce generator stay in lockstep", () => {
+  // 200 generated nonces must satisfy both the Next-compiled proxy matcher
+  // and the authz classifier; a mismatch either way is a bypass (matcher
+  // without classify) or a broken feature (classify without matcher).
+  for (let i = 0; i < 200; i += 1) {
+    const nonce = generateBridgeNonce();
+    assert.match(nonce, /^[A-Za-z0-9_-]{22}$/);
+    const path = `/grok-bridge/${nonce}/mcp`;
+    assert.equal(isMatchedByProxy(path), true, `proxy matcher must cover ${path}`);
+    assert.equal(classifyRoute(path, "POST").routeClass, "PUBLIC");
+    assert.equal(classifyRoute(path, "GET").routeClass, "PUBLIC", "handler owns the 405");
+    assert.equal(classifyRoute(path, "OPTIONS").routeClass, "PUBLIC");
+    assert.equal(classifyRoute(path, "POST").reason, "grok_bridge_public_route");
+  }
+});
+
+test("grok-bridge: malformed shapes stay outside the proxy matcher and management-classified", () => {
+  const nonce = generateBridgeNonce();
+  const negatives: Array<[string, string]> = [
+    ["too short nonce", `/grok-bridge/${nonce.slice(0, 21)}/mcp`],
+    ["too long nonce", `/grok-bridge/${nonce}x/mcp`],
+    ["illegal character", `/grok-bridge/${nonce.slice(0, 21)}+/mcp`],
+    ["missing mcp suffix", `/grok-bridge/${nonce}`],
+    ["extended suffix", `/grok-bridge/${nonce}/mcp/extra`],
+    ["wrong prefix", `/xrok-bridge/${nonce}/mcp`],
+  ];
+  for (const [label, path] of negatives) {
+    assert.equal(isMatchedByProxy(path), false, `${label}: ${path} must not reach the proxy handler`);
+    assert.equal(classifyRoute(path, "POST").routeClass, "MANAGEMENT", `${label}: ${path} stays management`);
+  }
+  assert.equal(classifyRoute("/grok-bridge", "POST").routeClass, "MANAGEMENT");
+  assert.equal(classifyRoute("/grok-bridge/nonce", "POST").routeClass, "MANAGEMENT");
+  // The proxy matcher is anchored: a prefix must not match inside a longer path.
+  assert.equal(isMatchedByProxy(`/prefix/grok-bridge/${nonce}/mcp`), false);
 });
