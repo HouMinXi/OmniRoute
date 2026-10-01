@@ -10,6 +10,7 @@ import {
   Button,
   Card,
   CursorAuthModal,
+  GrokBotAuthModal,
   Input,
   KiroOAuthWrapper,
   OAuthModal,
@@ -929,6 +930,12 @@ export default function ProviderOnboardingWizard() {
           />
         ) : selectedProvider.id === "cursor" ? (
           <CursorAuthModal
+            isOpen={showOAuthModal}
+            onSuccess={handleOAuthSuccess}
+            onClose={() => setShowOAuthModal(false)}
+          />
+        ) : selectedProvider.id === "grok-bot" ? (
+          <GrokBotAuthModal
             isOpen={showOAuthModal}
             onSuccess={handleOAuthSuccess}
             onClose={() => setShowOAuthModal(false)}

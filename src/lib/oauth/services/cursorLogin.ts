@@ -94,15 +94,21 @@ export function credentialsFromCursorTokens(
   };
 }
 
-/** Generate PKCE params + deep-control login URL (challenge only — never the verifier). */
-export async function generateCursorAuthParams(): Promise<CursorAuthParams> {
+/**
+ * Generate PKCE params + deep-control login URL (challenge only — never the verifier).
+ * `redirectTarget` selects the product: "cli" is the Cursor CLI login, "sand" is
+ * the Grok Bot desktop login. The two grants are not interchangeable.
+ */
+export async function generateCursorAuthParams(
+  redirectTarget: "cli" | "sand" = "cli"
+): Promise<CursorAuthParams> {
   const { codeVerifier, codeChallenge } = generatePKCE();
   const uuid = randomUUID();
   const params = new URLSearchParams({
     challenge: codeChallenge,
     uuid,
     mode: "login",
-    redirectTarget: "cli",
+    redirectTarget,
   });
   return {
     verifier: codeVerifier,
