@@ -261,7 +261,7 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
     }
     try {
       const buffered = await readResponseCapped(upstream, deadline);
-      const responseBody = [204, 205, 304].includes(upstream.status) ? null : buffered;
+      const responseBody = [204, 205, 304].includes(upstream.status) ? null : new Uint8Array(buffered);
       return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
     } catch (error) {
       return error instanceof BridgeBodyTooLargeError

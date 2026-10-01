@@ -104,7 +104,7 @@ export type BridgeRegisterResult =
   | { ok: true; entry: BridgeTurnEntry }
   | { ok: false; reason: "invalid-nonce" | "duplicate" | "invalid-target" | "at-cap" | "capacity" };
 
-export type SetTimeoutFn = typeof setTimeout;
+export type SetTimeoutFn = (fn: () => void, ms: number) => ReturnType<typeof setTimeout>;
 export type ClearTimeoutFn = typeof clearTimeout;
 
 export interface BridgeRegistryClock {
