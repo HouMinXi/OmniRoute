@@ -9,6 +9,7 @@ import {
   consumeCursorLoginSession,
 } from "@/lib/oauth/services/cursorLogin";
 import { persistGrokBotConnection } from "@/lib/oauth/services/persistGrokBotConnection";
+import { fetchGrokBotAccountEmail } from "@/lib/oauth/services/grokBotAccount";
 import { isCloudEnabled } from "@/models";
 import { syncToCloud } from "@/lib/cloudSync";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
@@ -85,8 +86,13 @@ export async function POST(request: Request) {
     consumeCursorLoginSession(sessionId);
 
     const creds = credentialsFromCursorTokens(result.accessToken, result.refreshToken);
+    const accountEmail = await fetchGrokBotAccountEmail(result.accessToken);
     const machineId = await getConsistentMachineId();
-    const connection = await persistGrokBotConnection({ ...creds, machineId });
+    const connection = await persistGrokBotConnection({
+      ...creds,
+      email: accountEmail ?? creds.email,
+      machineId,
+    });
 
     await syncToCloudIfEnabled();
 
