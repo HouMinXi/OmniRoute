@@ -123,11 +123,18 @@ test("R10: chatCore wires applyStatusRestatement into the providerFailure block"
     new URL("../../open-sse/handlers/chatCore/streamingResponse.ts", import.meta.url),
     "utf8"
   );
-  assert.match(legSrc, /applyStatusRestatement\(/, "streaming leg must call applyStatusRestatement");
+  assert.match(
+    legSrc,
+    /applyStatusRestatement\(/,
+    "streaming leg must call applyStatusRestatement"
+  );
 
   const helperIndex = src.indexOf("const applyProviderFailureClassification = async (");
   const helperEnd = src.indexOf("const streamingOutcome = await runStreamingResponse(");
-  assert.ok(helperIndex > -1 && helperEnd > helperIndex, "classification helper exists before streaming dispatch");
+  assert.ok(
+    helperIndex > -1 && helperEnd > helperIndex,
+    "classification helper exists before streaming dispatch"
+  );
   const classifyCalls = src.match(/classifyProviderError\(/g) ?? [];
   assert.equal(classifyCalls.length, 1, "chatCore classifies provider errors in exactly one place");
   const classifyIndex = src.indexOf("classifyProviderError(statusCode");
@@ -138,6 +145,21 @@ test("R10: chatCore wires applyStatusRestatement into the providerFailure block"
 
   const blockIndex = legSrc.indexOf("providerFailure: if (!providerResponse.ok)");
   assert.ok(blockIndex > -1, "providerFailure block exists in streamingResponse.ts");
+  // Cross-file form of the original `classifyIndex < blockIndex` ordering: the classification
+  // helper (holding the single classifyProviderError call) must be defined before the dispatch
+  // that hands it to the leaf containing the providerFailure block, and the dispatch must
+  // actually pass it in.
+  const dispatchIndex = src.indexOf("await runStreamingResponse({");
+  assert.ok(dispatchIndex > -1, "streaming dispatch exists in chatCore.ts");
+  assert.ok(
+    classifyIndex < dispatchIndex,
+    "classifyProviderError must be classified-before the block: helper precedes the streaming dispatch"
+  );
+  assert.match(
+    src.slice(dispatchIndex, src.indexOf("});", dispatchIndex)),
+    /\bapplyProviderFailureClassification,/,
+    "streaming dispatch must pass applyProviderFailureClassification into the leaf"
+  );
   assert.equal(
     legSrc.indexOf("classifyProviderError("),
     -1,
