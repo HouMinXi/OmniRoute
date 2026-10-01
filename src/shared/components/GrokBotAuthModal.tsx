@@ -31,17 +31,6 @@ export default function GrokBotAuthModal({
   const pollAbortRef = useRef(false);
 
   useEffect(() => {
-    if (!isOpen) {
-      pollAbortRef.current = true;
-      return;
-    }
-    pollAbortRef.current = false;
-    setError(null);
-    setLoginUrl("");
-    setSessionId("");
-  }, [isOpen]);
-
-  useEffect(() => {
     return () => {
       pollAbortRef.current = true;
     };
@@ -126,8 +115,13 @@ export default function GrokBotAuthModal({
     setSessionId("");
   };
 
+  const handleClose = () => {
+    pollAbortRef.current = true;
+    onClose();
+  };
+
   return (
-    <Modal isOpen={isOpen} title="Add Grok Bot account" onClose={onClose}>
+    <Modal isOpen={isOpen} title="Add Grok Bot account" onClose={handleClose}>
       <div className="flex flex-col gap-4">
         <p className="text-sm text-text-muted">
           Sign in with the Grok Bot account in the browser window. This is separate from a Grok
