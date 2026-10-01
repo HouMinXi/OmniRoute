@@ -103,7 +103,12 @@ export type CursorSession = {
   state: "running" | "awaiting_tool_result" | "closed";
   lastActivityTs: number;
   idleTimer?: ReturnType<typeof setTimeout>;
+  // Usage already reported by earlier HTTP segments of this run. Cursor's
+  // turn_ended totals the whole run, so the resumed segment reports the rest.
+  reportedUsage?: CursorReportedUsage;
 };
+
+export type CursorReportedUsage = { prompt: number; completion: number; cached: number };
 
 export class CursorSessionManager {
   private sessions = new Map<string, CursorSession>();

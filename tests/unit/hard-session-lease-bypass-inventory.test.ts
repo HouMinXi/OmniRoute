@@ -151,6 +151,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/app/api/provider-nodes/[id]/route.ts": 1,
     "src/app/api/providers/[id]/chatgpt-web-codex-doctor/route.ts": 1,
     "src/app/api/providers/[id]/refresh-token/route.ts": 1,
+    // #15130: the connection test re-reads the row uncached right before its write so an
+    // operator disable that landed mid-probe is honored — a state re-read of the connection
+    // under test, never a connection selection (class C).
+    "src/app/api/providers/[id]/test/route.ts": 1,
     "src/app/api/providers/bulk/route.ts": 1,
     "src/app/api/providers/client/route.ts": 1,
     "src/app/api/providers/free-onboarding/route.ts": 2,
