@@ -1,7 +1,7 @@
 import {
   handleGrokBridgeMethodNotAllowed,
   handleGrokBridgeOptions,
-  handleGrokBridgePost,
+  handleGrokBridgeRequest,
 } from "@omniroute/open-sse/services/grokBotBridgeProxy";
 import { getGrokBotBridgeRegistry } from "@omniroute/open-sse/services/grokBotBridgeRegistry";
 
@@ -18,7 +18,7 @@ import { getGrokBotBridgeRegistry } from "@omniroute/open-sse/services/grokBotBr
 export async function POST(request: Request, { params }: { params: Promise<{ nonce: string }> }): Promise<Response> {
   const { nonce } = await params;
   const url = new URL(request.url);
-  return handleGrokBridgePost({
+  return handleGrokBridgeRequest({
     request,
     upstreamPath: `${url.pathname}${url.search}`,
     nonce,
@@ -30,9 +30,7 @@ export function OPTIONS(): Response {
   return handleGrokBridgeOptions();
 }
 
-export function GET(): Response {
-  return handleGrokBridgeMethodNotAllowed();
-}
+export const GET = POST;
 
 export function PUT(): Response {
   return handleGrokBridgeMethodNotAllowed();

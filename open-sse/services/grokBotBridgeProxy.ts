@@ -54,8 +54,8 @@ function bearerToken(headers: Headers): string | null {
 
 function corsHeaders(): Headers {
   const headers = new Headers();
-  headers.set("access-control-allow-methods", "POST, OPTIONS");
-  headers.set("access-control-allow-headers", "authorization, content-type");
+  headers.set("access-control-allow-methods", "GET, POST, OPTIONS");
+  headers.set("access-control-allow-headers", "authorization, content-type, accept, mcp-protocol-version");
   return headers;
 }
 
@@ -64,7 +64,7 @@ export function handleGrokBridgeOptions(): Response {
 }
 
 export function handleGrokBridgeMethodNotAllowed(): Response {
-  return new Response(null, { status: 405, headers: { allow: "POST, OPTIONS" } });
+  return new Response(null, { status: 405, headers: { allow: "GET, POST, OPTIONS" } });
 }
 
 /**
@@ -95,14 +95,18 @@ function withDeadline<T>(promise: Promise<T>, remainingMs: number): Promise<T> {
   });
 }
 
-async function readBodyCapped(request: Request, deadline: number): Promise<Buffer> {
+async function readBodyCapped(request: Request, deadline: number, signal: AbortSignal): Promise<Buffer> {
   if (!request.body) return Buffer.alloc(0);
   const reader = request.body.getReader();
+  const onAbort = () => { void reader.cancel().catch(() => {}); };
+  signal.addEventListener("abort", onAbort, { once: true });
+  if (signal.aborted) onAbort();
   const chunks: Buffer[] = [];
   let total = 0;
   try {
     for (;;) {
       const { done, value } = await withDeadline(reader.read(), deadline - nowMs());
+      if (signal.aborted) throw new BridgeDeadlineError();
       if (done) break;
       total += value.byteLength;
       if (total > BRIDGE_BODY_LIMIT_BYTES) {
@@ -113,6 +117,8 @@ async function readBodyCapped(request: Request, deadline: number): Promise<Buffe
       chunks.push(Buffer.from(value));
     }
   } finally {
+    signal.removeEventListener("abort", onAbort);
+    void reader.cancel().catch(() => {});
     reader.releaseLock();
   }
   return Buffer.concat(chunks);
@@ -140,7 +146,7 @@ async function readResponseCapped(response: Response, deadline: number): Promise
   return Buffer.concat(chunks);
 }
 
-export interface GrokBridgePostInput {
+export interface GrokBridgeRequestInput {
   request: Request;
   /** Path and query to forward to the local server (from the public URL). */
   upstreamPath: string;
@@ -150,9 +156,12 @@ export interface GrokBridgePostInput {
   timeoutMs?: number;
 }
 
-export async function handleGrokBridgePost(input: GrokBridgePostInput): Promise<Response> {
+export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Promise<Response> {
   const { request, upstreamPath, nonce, registry } = input;
   const timeoutMs = input.timeoutMs ?? BRIDGE_PROXY_TIMEOUT_MS;
+  if (request.method !== "GET" && request.method !== "POST") {
+    return handleGrokBridgeMethodNotAllowed();
+  }
 
   // Step 1: the handler re-checks the same 22-character pattern the route
   // segment matcher compiles, before the registry is ever touched.
@@ -188,65 +197,143 @@ export async function handleGrokBridgePost(input: GrokBridgePostInput): Promise<
     return jsonError(registry.isOverCap(entry) ? 404 : 410, registry.isOverCap(entry) ? "not_found" : "gone");
   }
 
-  // Step 6: one monotonic deadline from reservation to the complete upstream
-  // response. The byte limit and the deadline race: 413 for the limit, 504
-  // for the deadline, whichever is reached first. The slot stays consumed.
+  // Step 6: one monotonic budget covers the upload, response and live stream.
   const deadline = nowMs() + timeoutMs;
-  let body: Buffer;
-  try {
-    body = await readBodyCapped(request, deadline);
-  } catch (error) {
-    if (error instanceof BridgeBodyTooLargeError) {
-      return jsonError(413, "payload_too_large");
-    }
-    return jsonError(504, "gateway_timeout");
-  }
-
-  // Step 7: proxy under the remaining budget. Only the authorization and
-  // content-type headers are forwarded; every hop-by-hop header is dropped
-  // by construction.
-  const remaining = deadline - nowMs();
-  if (remaining <= 0) {
-    return jsonError(504, "gateway_timeout");
-  }
   const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), remaining);
-  // Register so a forced close (cancel, cap, escalation) aborts both phases
-  // of this in-flight request, not just new admissions (spec step 10).
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  timer.unref?.();
   entry.inflight.add(controller);
-  let upstream: Response;
-  try {
-    upstream = await fetch(`http://127.0.0.1:${entry.port}${upstreamPath}`, {
-      method: "POST",
-      headers: {
-        authorization: request.headers.get("authorization") ?? "",
-        "content-type": request.headers.get("content-type") ?? "application/json",
-      },
-      body,
-      signal: controller.signal,
-    });
-  } catch {
-    if (controller.signal.aborted) {
-      return jsonError(504, "gateway_timeout");
-    }
-    // Step 8: upstream unreachable (connection refused, DNS, reset, ...).
-    return jsonError(502, "bad_gateway");
-  } finally {
+  const onClientAbort = () => controller.abort();
+  request.signal.addEventListener("abort", onClientAbort, { once: true });
+  if (request.signal.aborted) onClientAbort();
+  const cleanup = () => {
     clearTimeout(timer);
     entry.inflight.delete(controller);
-  }
-
+    request.signal.removeEventListener("abort", onClientAbort);
+  };
+  let streaming = false;
   try {
-    const buffered = await readResponseCapped(upstream, deadline);
-    const headers = new Headers();
-    const contentType = upstream.headers.get("content-type");
-    if (contentType) headers.set("content-type", contentType);
-    return new Response(buffered, { status: upstream.status, headers });
-  } catch (error) {
-    if (error instanceof BridgeBodyTooLargeError) {
-      // Step 8: an upstream response body over 1 MiB is a sanitized 502.
-      return jsonError(502, "bad_gateway");
+    let body: Buffer | undefined;
+    try {
+      if (request.method === "POST") {
+        body = await readBodyCapped(request, deadline, controller.signal);
+      }
+    } catch (error) {
+      if (error instanceof BridgeBodyTooLargeError) {
+        return jsonError(413, "payload_too_large");
+      }
+      return jsonError(504, "gateway_timeout");
     }
-    return jsonError(504, "gateway_timeout");
+    if (controller.signal.aborted || deadline <= nowMs()) {
+      return jsonError(504, "gateway_timeout");
+    }
+    // Allow only the authentication and MCP negotiation headers.
+    const headers = new Headers();
+    for (const name of ["authorization", "content-type", "accept", "mcp-protocol-version"]) {
+      const value = request.headers.get(name);
+      if (value !== null) headers.set(name, value);
+    }
+    if (request.method === "POST" && !headers.has("content-type")) {
+      headers.set("content-type", "application/json");
+    }
+    let upstream: Response;
+    try {
+      upstream = await fetch(`http://127.0.0.1:${entry.port}${upstreamPath}`, {
+        method: request.method,
+        headers,
+        body: body ? new Uint8Array(body) : undefined,
+        signal: controller.signal,
+      });
+    } catch {
+      return controller.signal.aborted
+        ? jsonError(504, "gateway_timeout")
+        : jsonError(502, "bad_gateway");
+    }
+    const responseHeaders = new Headers();
+    const contentType = upstream.headers.get("content-type");
+    if (contentType) responseHeaders.set("content-type", contentType);
+    if (upstream.body && contentType?.split(";")[0].trim() === "text/event-stream") {
+      responseHeaders.set("cache-control", "no-cache, no-transform");
+      const stream = relayEventStream(upstream.body, controller, cleanup);
+      const response = new Response(stream, { status: upstream.status, headers: responseHeaders });
+      streaming = true;
+      return response;
+    }
+    try {
+      const buffered = await readResponseCapped(upstream, deadline);
+      const responseBody = [204, 205, 304].includes(upstream.status) ? null : buffered;
+      return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
+    } catch (error) {
+      return error instanceof BridgeBodyTooLargeError
+        ? jsonError(502, "bad_gateway")
+        : jsonError(504, "gateway_timeout");
+    }
+  } finally {
+    if (!streaming) {
+      cleanup();
+      controller.abort();
+    }
   }
+}
+
+/** Relay SSE under the same deadline, including when nobody reads the body. */
+function relayEventStream(
+  upstream: ReadableStream<Uint8Array>,
+  abort: AbortController,
+  cleanup: () => void
+): ReadableStream<Uint8Array> {
+  const reader = upstream.getReader();
+  let total = 0;
+  let settled = false;
+  let downstream: ReadableStreamDefaultController<Uint8Array>;
+  const finish = (error?: Error) => {
+    if (settled) return;
+    settled = true;
+    abort.signal.removeEventListener("abort", onAbort);
+    cleanup();
+    if (error) {
+      downstream.error(error);
+      void reader.cancel().catch(() => {}).finally(() => reader.releaseLock());
+      abort.abort();
+    } else {
+      downstream.close();
+      reader.releaseLock();
+    }
+  };
+  const onAbort = () => finish(new Error("bridge stream closed"));
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      downstream = controller;
+      abort.signal.addEventListener("abort", onAbort, { once: true });
+      if (abort.signal.aborted) onAbort();
+    },
+    async pull(controller) {
+      if (settled) return;
+      try {
+        const { done, value } = await reader.read();
+        if (settled) return;
+        if (done) {
+          finish();
+          return;
+        }
+        total += value.byteLength;
+        if (total > BRIDGE_BODY_LIMIT_BYTES) {
+          finish(new Error("bridge response too large"));
+          return;
+        }
+        if (settled) return;
+        controller.enqueue(value);
+      } catch {
+        finish(new Error("bridge stream closed"));
+      }
+    },
+    cancel() {
+      if (settled) return;
+      settled = true;
+      abort.signal.removeEventListener("abort", onAbort);
+      abort.abort();
+      cleanup();
+      return reader.cancel().catch(() => {}).finally(() => reader.releaseLock());
+    },
+  });
 }

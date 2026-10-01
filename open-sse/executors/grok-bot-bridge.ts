@@ -1,4 +1,5 @@
 import { createServer, type Server } from "node:http";
+import { LATEST_PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS } from "@modelcontextprotocol/sdk/types.js";
 import {
   challengeTokenConstantTimeEqual,
   generateBridgeChallenge,
@@ -42,27 +43,69 @@ function handleBridgeMcpRequest(
   req: import("node:http").IncomingMessage,
   res: import("node:http").ServerResponse
 ): void {
+  // Authenticate before opening a stream or consuming a request body.
+  const auth = req.headers.authorization ?? "";
+  if (
+    !auth.startsWith(BEARER_PREFIX) ||
+    !challengeTokenConstantTimeEqual(auth.slice(BEARER_PREFIX.length), state.challenge)
+  ) {
+    res.writeHead(400, { "content-type": "application/json" });
+    res.end(JSON.stringify({ error: "rejected" }));
+    return;
+  }
+  if (req.method === "GET") {
+    res.writeHead(200, {
+      "content-type": "text/event-stream",
+      "cache-control": "no-cache, no-transform",
+    });
+    res.write(": connected\n\n");
+    const heartbeat = setInterval(() => {
+      if (!res.destroyed) res.write(": keepalive\n\n");
+    }, 5000);
+    heartbeat.unref?.();
+    res.once("close", () => clearInterval(heartbeat));
+    return;
+  }
+  if (req.method !== "POST") {
+    res.writeHead(405, { allow: "GET, POST" }).end();
+    return;
+  }
   const chunks: Buffer[] = [];
   req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
   req.on("end", () => {
-    // Defense in depth: the public route already constant-time checked the
-    // bearer challenge before proxying; the local server re-checks the
-    // forwarded header so a misrouted direct hit still cannot drive the tool.
-    const auth = req.headers.authorization ?? "";
-    if (
-      !auth.startsWith(BEARER_PREFIX) ||
-      !challengeTokenConstantTimeEqual(auth.slice(BEARER_PREFIX.length), state.challenge)
-    ) {
-      res.writeHead(400, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: "rejected" }));
-      return;
-    }
-    let body: { jsonrpc?: string; id?: unknown; method?: string; params?: { name?: string } };
+    let body: {
+      jsonrpc?: string;
+      id?: unknown;
+      method?: string;
+      params?: { name?: string; protocolVersion?: string };
+    };
     try {
       body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}") as typeof body;
     } catch {
       res.writeHead(400, { "content-type": "application/json" });
       res.end(JSON.stringify({ error: "rejected" }));
+      return;
+    }
+    if (body.id === undefined) {
+      res.writeHead(202).end();
+      return;
+    }
+    if (body.method === "initialize") {
+      const requestedVersion = body.params?.protocolVersion;
+      const protocolVersion = requestedVersion && SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion)
+        ? requestedVersion
+        : LATEST_PROTOCOL_VERSION;
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(jsonRpcResult(body.id, {
+        protocolVersion,
+        capabilities: { tools: {} },
+        serverInfo: { name: "grok-bot-bridge", version: "1.0.0" },
+      }));
+      return;
+    }
+    if (body.method === "ping") {
+      res.writeHead(200, { "content-type": "application/json" });
+      res.end(jsonRpcResult(body.id, {}));
       return;
     }
     if (body.method === "tools/list") {

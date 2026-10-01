@@ -11,7 +11,7 @@ const {
   BRIDGE_MAX_REQUESTS_PER_NONCE,
 } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
 const {
-  handleGrokBridgePost,
+  handleGrokBridgeRequest,
   handleGrokBridgeOptions,
   handleGrokBridgeMethodNotAllowed,
   BRIDGE_BODY_LIMIT_BYTES,
@@ -160,7 +160,7 @@ describe("grok bot bridge proxy pipeline", () => {
 
   it("proxies a valid request end to end and forwards only authorization and content-type", async () => {
     const { nonce, challenge } = registerTurn();
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge, headers: { "content-type": "application/json", "x-extra": "drop-me" } }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -183,7 +183,7 @@ describe("grok bot bridge proxy pipeline", () => {
       res.end(JSON.stringify({ jsonrpc: "2.0", error: { code: -32603 } }));
     });
     const { nonce, challenge } = registerTurn();
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -196,7 +196,7 @@ describe("grok bot bridge proxy pipeline", () => {
 
   it("returns 404 for an unknown nonce and consumes nothing", async () => {
     const nonce = generateBridgeNonce();
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge: "test-challenge" }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -208,7 +208,7 @@ describe("grok bot bridge proxy pipeline", () => {
   });
 
   it("returns 404 for a malformed nonce before any registry access", async () => {
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest("short", { challenge: "test-challenge" }),
       upstreamPath: "/grok-bridge/short/mcp",
       nonce: "short",
@@ -220,7 +220,7 @@ describe("grok bot bridge proxy pipeline", () => {
 
   it("returns 404 with no slot consumed for a missing or wrong challenge", async () => {
     const { nonce } = registerTurn("real-challenge");
-    const missing = await handleGrokBridgePost({
+    const missing = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge: null }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -228,7 +228,7 @@ describe("grok bot bridge proxy pipeline", () => {
     });
     assert.equal(missing.status, 404);
     assert.equal(slotCount(nonce), 0, "missing challenge consumes no slot");
-    const wrong = await handleGrokBridgePost({
+    const wrong = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge: "wrong-value" }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -242,7 +242,7 @@ describe("grok bot bridge proxy pipeline", () => {
   it("returns 410 for a closed nonce before the cap and 404 at or after it", async () => {
     const { nonce, challenge } = registerTurn();
     registry.close(nonce, "normal");
-    const beforeCap = await handleGrokBridgePost({
+    const beforeCap = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -251,7 +251,7 @@ describe("grok bot bridge proxy pipeline", () => {
     assert.equal(beforeCap.status, 410);
     assert.equal(slotCount(nonce), 0, "closed replay consumes no slot");
     clock.advance(BRIDGE_ABSOLUTE_CAP_MS);
-    const afterCap = await handleGrokBridgePost({
+    const afterCap = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -263,7 +263,7 @@ describe("grok bot bridge proxy pipeline", () => {
   it("returns 410 for an expired nonce and consumes no slot", async () => {
     const { nonce, challenge } = registerTurn();
     clock.advance(BRIDGE_IDLE_TTL_MS + 1);
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -277,7 +277,7 @@ describe("grok bot bridge proxy pipeline", () => {
   it("allows exactly 8 requests per nonce and rejects the 9th with 410", async () => {
     const { nonce, challenge } = registerTurn();
     for (let i = 0; i < BRIDGE_MAX_REQUESTS_PER_NONCE; i += 1) {
-      const res = await handleGrokBridgePost({
+      const res = await handleGrokBridgeRequest({
         request: postRequest(nonce, { challenge }),
         upstreamPath: `/grok-bridge/${nonce}/mcp`,
         nonce,
@@ -286,7 +286,7 @@ describe("grok bot bridge proxy pipeline", () => {
       assert.equal(res.status, 200, `request ${i + 1}`);
     }
     assert.equal(slotCount(nonce), BRIDGE_MAX_REQUESTS_PER_NONCE);
-    const ninth = await handleGrokBridgePost({
+    const ninth = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -298,7 +298,7 @@ describe("grok bot bridge proxy pipeline", () => {
   it("returns 413 for a request body over 1 MiB and never proxies the upload", async () => {
     const { nonce, challenge } = registerTurn();
     const oversized = Buffer.alloc(BRIDGE_BODY_LIMIT_BYTES + 2, 65);
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge, body: oversized }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -327,7 +327,7 @@ describe("grok bot bridge proxy pipeline", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       duplex: "half" as any,
     });
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request,
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -351,7 +351,7 @@ describe("grok bot bridge proxy pipeline", () => {
       hooks: silentHooks,
     });
     assert.equal(result.ok, true);
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge: "test-challenge" }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -369,7 +369,7 @@ describe("grok bot bridge proxy pipeline", () => {
       res.end(Buffer.alloc(BRIDGE_BODY_LIMIT_BYTES + 2, 67));
     });
     const { nonce, challenge } = registerTurn();
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -392,7 +392,7 @@ describe("grok bot bridge proxy pipeline", () => {
       });
     });
     const { nonce, challenge } = registerTurn();
-    const slow = await handleGrokBridgePost({
+    const slow = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -407,7 +407,7 @@ describe("grok bot bridge proxy pipeline", () => {
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true }));
     });
-    const second = await handleGrokBridgePost({
+    const second = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -432,7 +432,7 @@ describe("grok bot bridge proxy pipeline", () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       duplex: "half" as any,
     });
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request,
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -447,7 +447,7 @@ describe("grok bot bridge proxy pipeline", () => {
   it("checks pipeline order: unknown nonce with an oversized body returns 404, not 413", async () => {
     const nonce = generateBridgeNonce();
     const oversized = Buffer.alloc(BRIDGE_BODY_LIMIT_BYTES + 2, 69);
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge: "test-challenge", body: oversized }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -460,7 +460,7 @@ describe("grok bot bridge proxy pipeline", () => {
   it("checks pipeline order: wrong challenge with an oversized body returns 404 and consumes no slot", async () => {
     const { nonce } = registerTurn("real-challenge");
     const oversized = Buffer.alloc(BRIDGE_BODY_LIMIT_BYTES + 2, 70);
-    const res = await handleGrokBridgePost({
+    const res = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge: "wrong", body: oversized }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -485,7 +485,7 @@ describe("grok bot bridge proxy pipeline", () => {
       challenge,
       hooks: silentHooks,
     });
-    const responsePromise = handleGrokBridgePost({
+    const responsePromise = handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge, headers: { "content-type": "application/json" } }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
@@ -513,10 +513,10 @@ describe("grok bot bridge proxy pipeline", () => {
   it("returns 204 with CORS headers for OPTIONS and 405 for other methods", async () => {
     const options = handleGrokBridgeOptions();
     assert.equal(options.status, 204);
-    assert.equal(options.headers.get("access-control-allow-methods"), "POST, OPTIONS");
-    assert.equal(options.headers.get("access-control-allow-headers"), "authorization, content-type");
-    const get = handleGrokBridgeMethodNotAllowed();
-    assert.equal(get.status, 405);
-    assert.equal(get.headers.get("allow"), "POST, OPTIONS");
+    assert.equal(options.headers.get("access-control-allow-methods"), "GET, POST, OPTIONS");
+    assert.equal(options.headers.get("access-control-allow-headers"), "authorization, content-type, accept, mcp-protocol-version");
+    const other = handleGrokBridgeMethodNotAllowed();
+    assert.equal(other.status, 405);
+    assert.equal(other.headers.get("allow"), "GET, POST, OPTIONS");
   });
 });
