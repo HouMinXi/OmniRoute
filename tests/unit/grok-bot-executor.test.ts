@@ -448,6 +448,7 @@ describe("GrokBotExecutor", () => {
     assert.ok(send, "send-message not called");
     const bridgeConfig = JSON.parse(String(send.payload.mcpConfigJson));
     assert.equal(bridgeConfig.mcpServers.bridge.url, "http://127.0.0.1:9/mcp");
+    assert.match(String(send.payload.text), /bridge_value tool/);
     assert.match(String(send.payload.text), /challenge test-challenge/);
     assert.match(String(send.payload.text), /returned value verbatim/);
     assert.match(String(send.payload.text), /TOOL_UNAVAILABLE/);
@@ -853,6 +854,34 @@ describe("GrokBotExecutor", () => {
       true,
       "message must be sent when the prefixed bridge tool is discovered"
     );
+    const prefixedSend = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
+    assert.match(
+      String(prefixedSend?.payload.text),
+      /bridge-bridge_value tool/,
+      "the prompt must name the tool the way Cursor advertised it"
+    );
+  });
+
+  it("names the tool from toolName when the advertised name is missing", async () => {
+    t.discoveredTools = [];
+    t.prefixedTools = [{ name: "", toolName: "bridge_value" }];
+    executor.setBridgeControllerForTests({
+      async start() {
+        return { url: fakeBridgeUrl("result"), call: () => "bridge-ok" };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("model said something else");
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "http://127.0.0.1:9/mcp",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.equal(res.status, 200);
+    const sent = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
+    assert.match(String(sent?.payload.text), /bridge_value tool/);
+    assert.doesNotMatch(String(sent?.payload.text), /bridge-bridge_value/);
   });
 
   it("rejects a tool whose name merely ends with the bridge suffix", async () => {

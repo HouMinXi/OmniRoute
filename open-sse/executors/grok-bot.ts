@@ -217,7 +217,7 @@ function isTimeoutError(err: unknown): boolean {
   );
 }
 
-function composePrompt(messages: unknown[], challenge?: string): string {
+function composePrompt(messages: unknown[], challenge?: string, advertisedName?: string): string {
   const lines: string[] = [];
   for (const m of Array.isArray(messages) ? messages : []) {
     const msg = m as { role?: string; content?: unknown };
@@ -232,7 +232,9 @@ function composePrompt(messages: unknown[], challenge?: string): string {
   );
   if (challenge) {
     lines.push(
-      "Use only the bridge bridge_value tool once, with challenge " +
+      "Use only the " +
+        (advertisedName || "bridge") +
+        " tool once, with challenge " +
         challenge +
         ". Reply with its returned value verbatim. The value is unknown to you. If the tool is not available, say TOOL_UNAVAILABLE. Do not use any other tool, computer, file, web, permission, persistent memory, or service."
     );
@@ -564,6 +566,7 @@ export class GrokBotExecutor extends BaseExecutor {
 
       let bridgeUrl = bridge?.url;
       let bridgeCall: ((challenge: string) => string) | undefined;
+      let advertisedToolName: string | undefined;
       if (bridge) {
         this.bridgeLifecycle.length = 0;
         if (this.bridgeController) {
@@ -648,13 +651,14 @@ export class GrokBotExecutor extends BaseExecutor {
           tool?.toolName === "bridge_value" ||
           tool?.name === "bridge_value" ||
           tool?.name === "bridge-bridge_value";
-        const discovered = [...directTools, ...serverTools].some(isBridgeTool);
-        if (!discovered) {
+        const bridgeTool = [...directTools, ...serverTools].find(isBridgeTool);
+        if (!bridgeTool) {
           return errResponse(
             HTTP_STATUS.BAD_GATEWAY ?? 502,
             "Request bridge tool was not discovered"
           );
         }
+        advertisedToolName = bridgeTool.name || bridgeTool.toolName;
       }
 
       // The prompt challenge and the discovery-config Authorization header
@@ -663,7 +667,8 @@ export class GrokBotExecutor extends BaseExecutor {
       // as legacy fallback).
       const prompt = composePrompt(
         input.body?.messages ?? [],
-        startedBridge?.challenge ?? bridge?.challenge
+        startedBridge?.challenge ?? bridge?.challenge,
+        advertisedToolName
       );
       const messageId = randomUUID();
       const sendPayload: Record<string, unknown> = {
