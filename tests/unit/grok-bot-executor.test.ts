@@ -20,6 +20,8 @@ type FakeTransport = {
   rosterEcho: boolean;
   discoveredTools: string[];
   legacyTools: string[];
+  /** Cursor-shaped entries: name is prefixed, toolName holds the raw name. */
+  prefixedTools: { name: string; toolName: string }[];
   lastAgentId: string;
   lastMessageId: string;
   failDelete: boolean;
@@ -41,6 +43,7 @@ function makeTransport(): FakeTransport {
     rosterEcho: false,
     discoveredTools: ["bridge_value"],
     legacyTools: [],
+    prefixedTools: [],
     lastAgentId: "",
     lastMessageId: "",
     failDelete: false,
@@ -173,8 +176,12 @@ function installTransport(t: FakeTransport) {
         return { agents: t.rosterRows };
       }
       if (method === "aiserver.v1.DashboardService/ListSandMcpTools") {
+        const tools = [
+          ...t.discoveredTools.map((name) => ({ name })),
+          ...t.prefixedTools,
+        ];
         const response: Record<string, unknown> = {
-          servers: [{ status: "connected", tools: t.discoveredTools.map((name) => ({ name })) }],
+          servers: [{ status: "connected", tools }],
         };
         if (t.legacyTools.length > 0) {
           response.tools = t.legacyTools.map((name) => ({ name }));
@@ -821,6 +828,47 @@ describe("GrokBotExecutor", () => {
       t.calls.some((c) => c.method === "SendGrokBotUserMessage"),
       false,
       "message must not be sent when bridge discovery fails"
+    );
+  });
+
+  it("discovers the bridge tool when Cursor prefixes the name", async () => {
+    t.discoveredTools = [];
+    t.prefixedTools = [{ name: "bridge-bridge_value", toolName: "bridge_value" }];
+    executor.setBridgeControllerForTests({
+      async start() {
+        return { url: fakeBridgeUrl("result"), call: () => "bridge-ok" };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("model said something else");
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "http://127.0.0.1:9/mcp",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.equal(res.status, 200, `expected the prefixed tool to count as discovered, got ${res.status}`);
+    assert.equal(
+      t.calls.some((c) => c.method === "SendGrokBotUserMessage"),
+      true,
+      "message must be sent when the prefixed bridge tool is discovered"
+    );
+  });
+
+  it("rejects a tool whose name merely ends with the bridge suffix", async () => {
+    t.discoveredTools = [];
+    t.prefixedTools = [{ name: "evil-bridge_value", toolName: "evil-bridge_value" }];
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "http://127.0.0.1:9/mcp",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.ok(res.status >= 400, `expected a lookalike tool to be rejected, got ${res.status}`);
+    assert.equal(
+      t.calls.some((c) => c.method === "SendGrokBotUserMessage"),
+      false,
+      "a lookalike tool name must not count as the bridge tool"
     );
   });
 

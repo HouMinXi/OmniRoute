@@ -634,14 +634,21 @@ export class GrokBotExecutor extends BaseExecutor {
             },
           }),
         })) as {
-          tools?: Array<{ name?: string }>;
-          servers?: Array<{ tools?: Array<{ name?: string }> }>;
+          tools?: Array<{ name?: string; toolName?: string }>;
+          servers?: Array<{ tools?: Array<{ name?: string; toolName?: string }> }>;
         };
         const directTools = Array.isArray(discovery?.tools) ? discovery.tools : [];
         const serverTools = Array.isArray(discovery?.servers)
           ? discovery.servers.flatMap((server) => (Array.isArray(server?.tools) ? server.tools : []))
           : [];
-        const discovered = [...directTools, ...serverTools].some((tool) => tool?.name === "bridge_value");
+        // Cursor prefixes the advertised name with the server identifier
+        // (`bridge-bridge_value`) and keeps the raw name in `toolName`.
+        // Match only those two observed shapes, not an open suffix.
+        const isBridgeTool = (tool: { name?: string; toolName?: string }) =>
+          tool?.toolName === "bridge_value" ||
+          tool?.name === "bridge_value" ||
+          tool?.name === "bridge-bridge_value";
+        const discovered = [...directTools, ...serverTools].some(isBridgeTool);
         if (!discovered) {
           return errResponse(
             HTTP_STATUS.BAD_GATEWAY ?? 502,
