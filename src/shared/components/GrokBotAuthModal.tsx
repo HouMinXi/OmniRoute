@@ -116,7 +116,7 @@ export default function GrokBotAuthModal({
   };
 
   const handleClose = () => {
-    pollAbortRef.current = true;
+    void handleCancelLogin();
     onClose();
   };
 

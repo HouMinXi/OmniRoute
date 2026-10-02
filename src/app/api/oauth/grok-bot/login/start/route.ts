@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import {
   createCursorLoginSession,
+  CURSOR_LOGIN_TTL_SECONDS,
   generateCursorAuthParams,
 } from "@/lib/oauth/services/cursorLogin";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
       success: true,
       sessionId,
       loginUrl,
-      expiresInSeconds: 15 * 60,
+      expiresInSeconds: CURSOR_LOGIN_TTL_SECONDS,
     });
   } catch (error) {
     const message = sanitizeErrorMessage(error) || "Failed to start Grok Bot login";
