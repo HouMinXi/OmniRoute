@@ -53,6 +53,7 @@ import {
   getQuotaWindowStatus,
   hydrateCodexQuotaCacheForRequest,
   isQuotaExhaustedForRequest,
+  getClaudeQuotaPreflightResetAt,
   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
 } from "@/domain/quotaCache";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
@@ -1899,6 +1900,9 @@ export async function getProviderCredentials(
       // All remaining eligible accounts are exhausted
       const earliestResetAt = getEarliestFutureDate(
         exhaustedQuota.map((c) => {
+          if (resolveProviderId(provider) === "claude") {
+            return getClaudeQuotaPreflightResetAt(c.id) || getQuotaCache(c.id)?.nextResetAt || null;
+          }
           const entry = getQuotaCache(c.id);
           return entry?.nextResetAt || null;
         })
