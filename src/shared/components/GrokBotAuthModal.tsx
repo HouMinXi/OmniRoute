@@ -29,9 +29,12 @@ export default function GrokBotAuthModal({
   const [loginStarting, setLoginStarting] = useState(false);
   const [loginPolling, setLoginPolling] = useState(false);
   const pollAbortRef = useRef(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
+      mountedRef.current = false;
       pollAbortRef.current = true;
     };
   }, []);
@@ -59,19 +62,20 @@ export default function GrokBotAuthModal({
           continue;
         }
         if (data.status === "ok" || data.success) {
+          if (!mountedRef.current) return;
           onSuccess?.();
           onClose();
           return;
         }
         throw new Error(errorMessageFromBody(data, "Grok Bot login failed"));
       }
-      setError("Login timed out. Start again.");
+      if (mountedRef.current) setError("Login timed out. Start again.");
     } catch (err) {
-      if (!pollAbortRef.current) {
+      if (mountedRef.current && !pollAbortRef.current) {
         setError(err instanceof Error ? err.message : "Grok Bot login failed");
       }
     } finally {
-      setLoginPolling(false);
+      if (mountedRef.current) setLoginPolling(false);
     }
   };
 
@@ -110,6 +114,7 @@ export default function GrokBotAuthModal({
         /* ignore */
       }
     }
+    if (!mountedRef.current) return;
     setLoginPolling(false);
     setLoginUrl("");
     setSessionId("");
