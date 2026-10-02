@@ -232,11 +232,11 @@ function composePrompt(messages: unknown[], challenge?: string, advertisedName?:
   );
   if (challenge) {
     lines.push(
-      "Use only the " +
+      "First use GetMcpTools to find the " +
         (advertisedName || "bridge") +
-        " tool once, with challenge " +
+        " tool and no other. Discovery of that one tool is allowed for this request. Then call it once, with challenge " +
         challenge +
-        ". Reply with its returned value verbatim. The value is unknown to you. If the tool is not available, say TOOL_UNAVAILABLE. Do not use any other tool, computer, file, web, permission, persistent memory, or service."
+        ". Reply with its returned value verbatim. The value is unknown to you. If discovery cannot find the tool, say TOOL_UNAVAILABLE. Do not use any other tool, computer, file, web, permission, persistent memory, or service."
     );
   }
   return lines.join("\n");

@@ -448,6 +448,9 @@ describe("GrokBotExecutor", () => {
     assert.ok(send, "send-message not called");
     const bridgeConfig = JSON.parse(String(send.payload.mcpConfigJson));
     assert.equal(bridgeConfig.mcpServers.bridge.url, "http://127.0.0.1:9/mcp");
+    assert.match(String(send.payload.text), /GetMcpTools/);
+    assert.match(String(send.payload.text), /Discovery of that one tool is allowed/);
+    assert.match(String(send.payload.text), /discovery cannot find the tool/);
     assert.match(String(send.payload.text), /bridge_value tool/);
     assert.match(String(send.payload.text), /challenge test-challenge/);
     assert.match(String(send.payload.text), /returned value verbatim/);
