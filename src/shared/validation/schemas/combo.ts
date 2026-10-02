@@ -319,6 +319,23 @@ export const comboRuntimeConfigSchema = z
     return config;
   });
 
+// Per-combo universal handoff. Runtime reads combo.universal_handoff (and the
+// camelCase alias) in phaseComboSetup; an omitted schema field is stripped by
+// Zod before the route writes the combo, so enabled:false never persisted
+// (#15251). The process-wide default stays enabled:true.
+export const universalHandoffSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    trigger: z.enum(["always", "on-switch", "on-error"]).optional(),
+    providerAllowlist: z.array(z.string().trim().min(1).max(200)).max(100).optional(),
+    maxMessagesForSummary: z.number().int().min(5).max(100).optional(),
+    handoffModel: z.string().trim().max(300).optional(),
+    ttlMinutes: z.number().int().min(1).max(10080).optional(),
+    preserveSystemPrompt: z.boolean().optional(),
+    relayMode: z.enum(["schema-locked", "standard"]).optional(),
+  })
+  .strict();
+
 export const comboNameSchema = z
   .string()
   .trim()
@@ -374,6 +391,8 @@ export const createComboSchema = z
     system_message: z.string().max(50000).optional(),
     tool_filter_regex: z.string().max(1000).optional(),
     context_cache_protection: z.boolean().optional(),
+    universal_handoff: universalHandoffSchema.optional(),
+    universalHandoff: universalHandoffSchema.optional(),
     context_length: z.number().int().min(1000).max(2000000).optional(),
     // Optional embedding dimensions override for embedding combos.
     // When set, the value is injected into every upstream embedding request as
@@ -450,6 +469,8 @@ export const updateComboSchema = z
     system_message: z.string().max(50000).optional().nullable(),
     tool_filter_regex: z.string().max(1000).optional().nullable(),
     context_cache_protection: z.boolean().optional().nullable(),
+    universal_handoff: universalHandoffSchema.optional().nullable(),
+    universalHandoff: universalHandoffSchema.optional().nullable(),
     context_length: z.number().int().min(1000).max(2000000).optional().nullable(),
     compressionOverride: comboCompressionOverrideSchema.optional(),
     dimensions: z
@@ -473,6 +494,8 @@ export const updateComboSchema = z
       value.system_message === undefined &&
       value.tool_filter_regex === undefined &&
       value.context_cache_protection === undefined &&
+      value.universal_handoff === undefined &&
+      value.universalHandoff === undefined &&
       value.context_length === undefined &&
       value.compressionOverride === undefined &&
       value.dimensions === undefined
