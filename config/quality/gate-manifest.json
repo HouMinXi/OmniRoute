@@ -94,6 +94,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:cycles:ratchet",
+      "command": "node scripts/check/check-cycles.mjs --ratchet",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "check:dashboard-typecheck",
       "command": "node scripts/check/check-dashboard-typecheck.mjs",
       "disposition": "separately-invoked"
