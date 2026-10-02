@@ -10,7 +10,8 @@ import {
   STREAM_RECOVERY,
 } from "../../config/constants.ts";
 import { incrementTokenUsage } from "../../services/geminiRateLimitTracker.ts";
-import { requestTtftMs } from "../../utils/streamTiming.ts";
+import { requestTtftMs, streamEmittedOutput } from "../../utils/streamTiming.ts";
+import { clearPostOutputFailureStreak } from "../../services/accountFallback/postOutputFailureStreak.ts";
 import {
   createRoutingEvent,
   emitRoutingEvent,
@@ -97,6 +98,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     memoryOwnerId,
     memorySettings,
     model,
+    modelInfo,
     onRequestSuccess,
     onStreamFailure,
     pendingConnId,
@@ -361,6 +363,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     const streamConnectionId = getCurrentConnectionId();
 
     if (normalizedStreamStatus === 200) {
+      clearPostOutputFailureStreak(provider, streamConnectionId, modelInfo.model);
       void maybeSyncClaudeExtraUsageState({
         provider,
         connectionId: streamConnectionId,
@@ -587,6 +590,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     onStreamComplete,
     persistFailureUsage,
     onStreamFailure,
+    hasEmittedOutput: () => streamEmittedOutput(transformStream),
   });
   const handleStreamFailure = streamFailureFinalizers.handleStreamFailure;
   onPipelineStreamError = streamFailureFinalizers.onPipelineStreamError;

@@ -33,7 +33,7 @@ export {
 } from "./chatCore/claudeSystemRole.ts";
 import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
 import { acquireTurnExecution, createTurnInProgressResult } from "./chatCore/turnExecutionGuard.ts";
-import { checkSemanticCache } from "./chatCore/semanticCache.ts";
+import { checkSemanticCache, isSemanticCacheEnabled } from "./chatCore/semanticCache.ts";
 import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
 import {
   shouldDefaultAllowClassifier,
@@ -186,7 +186,7 @@ import { isSemaphoreCapacityError, getSafeErrorMetadata } from "./chatCore/strea
 import { buildCacheUsageLogMeta } from "./chatCore/cacheUsageMeta.ts";
 
 import { resolveExecutionCredentials as resolveExecutionCredentialsFor } from "./chatCore/executionCredentials.ts";
-import { resolveExecutorWithProxy as resolveExecutorWithProxyFor } from "./chatCore/executorProxy.ts";
+import { createExecutorResolver } from "./chatCore/executorProxy.ts";
 import type { ClaudeMessage } from "./chatCore/claudeMessageTypes.ts";
 import { normalizeClaudeUpstreamMessages as normalizeClaudeUpstreamMessagesFor } from "./chatCore/claudeUpstreamMessages.ts";
 import {
@@ -382,6 +382,8 @@ async function handleChatCoreInner({
   skipResourcePressureGuard = false,
   reasoningTransportFallback = "drop",
   managedLease = null,
+  // Trusted management validation only; never populated from request body/headers.
+  validationExecutorFence = null,
   // #12150 P1b: additive, optional video-bridge log/Memory shadow — shape is
   // VideoBridgeLogParam (defined near the top of this file). Built once in chat.ts from
   // preCallGuardrails.results (video-bridge guardrail meta) and threaded here
@@ -1116,7 +1118,7 @@ async function handleChatCoreInner({
   });
   effectiveServiceTier = resolveEffectiveServiceTier(body);
   setGeminiThoughtSignatureMode(settings.antigravitySignatureCacheMode);
-  const semanticCacheEnabled = settings.semanticCacheEnabled !== false;
+  const semanticCacheEnabled = isSemanticCacheEnabled(settings, apiKeyInfo);
 
   const reqLogger = await createRequestLogger(sourceFormat, targetFormat, model, {
     enabled: detailedLoggingEnabled && !videoBridgeObserved,
@@ -1292,7 +1294,9 @@ async function handleChatCoreInner({
   // further down — see #8378 (context limit resolved by the combo was silently
   // discarded because it only existed inside this `if` block).
   let contextLimit = getTokenLimit(provider, effectiveModel);
-  if (body && Array.isArray(allMessages) && allMessages.length > 0) {
+  // Strict model proofs cannot invoke auxiliary compression providers or prewarmers.
+  // This trusted in-process fence is never accepted from a client header/body.
+  if (!validationExecutorFence && body && Array.isArray(allMessages) && allMessages.length > 0) {
     let estimatedTokens = estimateTokens(allMessages);
     const compressionSettingsResult = await resolveCompressionSettings(log);
     const compressionSettings: CompressionConfig | null = compressionSettingsResult.settings;
@@ -2840,12 +2844,7 @@ async function handleChatCoreInner({
   // #6339: pass the resolved connection's providerSpecificData so a per-connection
   // cliproxyapiMode="claude-native" override can deep-route this single connection
   // through CLIProxyAPI regardless of the provider-level upstream_proxy_config mode.
-  const resolveExecutorWithProxy = (prov: string) =>
-    resolveExecutorWithProxyFor(
-      prov,
-      log,
-      (credentials?.providerSpecificData as Record<string, unknown> | null | undefined) ?? null
-    );
+  const resolveExecutorWithProxy = createExecutorResolver(log, credentials, validationExecutorFence);
 
   // === Quota Share enforcement PRE-hook (B/F7) ===
   // Runs after provider/model/credentials/apiKeyInfo are fully resolved,
@@ -3781,6 +3780,7 @@ async function handleChatCoreInner({
 
   const streamingTailOutcome = await runStreamingTail({
     agentGoalPolicy,
+    modelInfo,
     forcedConnectionId,
     apiKeyInfo,
     attachCompressionUsageReceiptAfterAnalytics,
