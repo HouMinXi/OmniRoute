@@ -857,9 +857,10 @@ describe("GrokBotExecutor", () => {
     const prefixedSend = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
     assert.match(
       String(prefixedSend?.payload.text),
-      /bridge-bridge_value tool/,
-      "the prompt must name the tool the way Cursor advertised it"
+      /bridge_value tool/,
+      "the prompt must use the raw tool name the model can invoke"
     );
+    assert.doesNotMatch(String(prefixedSend?.payload.text), /bridge-bridge_value/);
   });
 
   it("names the tool from toolName when the advertised name is missing", async () => {

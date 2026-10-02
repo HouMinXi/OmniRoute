@@ -658,7 +658,9 @@ export class GrokBotExecutor extends BaseExecutor {
             "Request bridge tool was not discovered"
           );
         }
-        advertisedToolName = bridgeTool.name || bridgeTool.toolName;
+        // The model calls the tool by its raw name; Cursor's prefixed `name`
+        // is only the discovery label and the model cannot invoke it.
+        advertisedToolName = bridgeTool.toolName || bridgeTool.name;
       }
 
       // The prompt challenge and the discovery-config Authorization header
