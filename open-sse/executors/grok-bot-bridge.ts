@@ -26,6 +26,7 @@ export const BRIDGE_TOOL_NAME = "bridge_value";
 
 type BridgeToolState = {
   challenge: string;
+  nonce: string;
   used: boolean;
   calls: number;
 };
@@ -58,6 +59,12 @@ function handleBridgeMcpRequest(
       "content-type": "text/event-stream",
       "cache-control": "no-cache, no-transform",
     });
+    // Cursor's client speaks the legacy HTTP+SSE transport: it waits for the
+    // first frame to be an `endpoint` event naming the POST address, and
+    // closes the stream when that frame never arrives. The data must be a
+    // path so the client resolves it against the connection origin.
+    const postPath = `/grok-bridge/${state.nonce}/mcp`;
+    res.write(`event: endpoint\ndata: ${postPath}\n\n`);
     res.write(": connected\n\n");
     const heartbeat = setInterval(() => {
       if (!res.destroyed) res.write(": keepalive\n\n");
@@ -189,7 +196,7 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
   // any await, so the cap path can reach it even while the bind promise is
   // unsettled. A destroy that lands before the bind resolves is re-applied
   // idempotently once the listen callback fires.
-  const state: BridgeToolState = { challenge, used: false, calls: 0 };
+  const state: BridgeToolState = { challenge, nonce, used: false, calls: 0 };
   const server: Server = createServer((req, res) => handleBridgeMcpRequest(state, req, res));
   let destroyed = false;
   const destroyServer = () => {

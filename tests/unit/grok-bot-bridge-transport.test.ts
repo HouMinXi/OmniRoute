@@ -81,7 +81,8 @@ describe("Grok Bot MCP transport", () => {
       const reader = response.body!.getReader();
       const first = await reader.read();
       assert.equal(first.done, false);
-      assert.match(new TextDecoder().decode(first.value), /^: /);
+      const frame = new TextDecoder().decode(first.value);
+      assert.match(frame, /^event: endpoint\ndata: \/grok-bridge\/[A-Za-z0-9_-]{22}\/mcp\n\n/);
       f.turn.close("cancel");
       await reader.read().catch(() => ({ done: true }));
     } finally { f.turn.close("cancel"); }
@@ -108,7 +109,12 @@ describe("Grok Bot MCP transport", () => {
       assert.equal(f.entry.slotsUsed, 1);
       assert.equal(f.entry.inflight.size, 1);
       const reader = response.body!.getReader();
-      assert.equal((await reader.read()).done, false);
+      const first = await reader.read();
+      assert.equal(first.done, false);
+      assert.match(
+        new TextDecoder().decode(first.value),
+        /^event: endpoint\ndata: \/grok-bridge\/[A-Za-z0-9_-]{22}\/mcp\n\n/
+      );
       await reader.cancel();
       await waitUntil(() => f.entry.inflight.size === 0, "cancel must release the in-flight controller");
       assert.equal(f.registry.lookup(f.turn.nonce).kind, "active", "closing a discovery stream must not close the tool turn");
