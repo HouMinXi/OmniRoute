@@ -83,8 +83,6 @@ export async function POST(request: Request) {
       );
     }
 
-    consumeCursorLoginSession(sessionId);
-
     const creds = credentialsFromCursorTokens(result.accessToken, result.refreshToken);
     const accountEmail = await fetchGrokBotAccountEmail(result.accessToken);
     const machineId = await getConsistentMachineId();
@@ -93,6 +91,8 @@ export async function POST(request: Request) {
       email: accountEmail ?? creds.email,
       machineId,
     });
+
+    consumeCursorLoginSession(sessionId);
 
     await syncToCloudIfEnabled();
 
