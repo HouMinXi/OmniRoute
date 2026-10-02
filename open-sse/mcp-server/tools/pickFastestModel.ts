@@ -112,7 +112,7 @@ async function fetchTelemetrySources(): Promise<TelemetrySources> {
     apiFetch("/api/combos"),
     apiFetch("/api/monitoring/health"),
     apiFetch("/api/usage/quota"),
-    apiFetch("/api/usage/analytics?period=session"),
+    apiFetch("/api/usage/analytics?range=1d"),
   ]);
 
   const analytics = toRecord(settledValue(analyticsRaw));

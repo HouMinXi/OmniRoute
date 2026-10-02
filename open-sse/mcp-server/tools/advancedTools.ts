@@ -17,6 +17,7 @@
  */
 
 import { logToolCall } from "../audit.ts";
+import { readAnalyticsTotals, readProviderMetrics } from "../analyticsShape.ts";
 import { toSafeMcpErrorMessage } from "../errorMessage.ts";
 import { getMcpHttpAuthHeadersForInternalFetch } from "../httpAuthContext.ts";
 import { getInternalServiceAuthHeaders } from "../../../src/lib/api/internalServiceAuth.ts";
@@ -340,8 +341,8 @@ export async function handleSetBudgetGuard(args: {
     // Get current session cost
     let spent = 0;
     try {
-      const analytics = toRecord(await apiFetch("/api/usage/analytics?period=session"));
-      spent = toNumber(analytics.totalCost, 0);
+      const analytics = toRecord(await apiFetch("/api/usage/analytics?range=1d"));
+      spent = readAnalyticsTotals(analytics).totalCost;
     } catch {
       /* ignore if analytics not available */
     }
@@ -626,7 +627,7 @@ export async function handleGetProviderMetrics(args: { provider: string }) {
     const [healthRaw, quotaRaw, analyticsRaw] = await Promise.allSettled([
       apiFetch("/api/monitoring/health"),
       apiFetch(`/api/usage/quota?provider=${encodeURIComponent(args.provider)}`),
-      apiFetch(`/api/usage/analytics?period=session&provider=${encodeURIComponent(args.provider)}`),
+      apiFetch(`/api/usage/analytics?range=1d&provider=${encodeURIComponent(args.provider)}`),
     ]);
 
     const health = healthRaw.status === "fulfilled" ? toRecord(healthRaw.value) : {};
@@ -641,11 +642,13 @@ export async function handleGetProviderMetrics(args: { provider: string }) {
     );
     const providerQuota = quota.providers.find((p) => p.provider === args.provider) || null;
 
+    const providerMetrics = readProviderMetrics(analytics, args.provider);
+
     const result = {
       provider: args.provider,
-      successRate: toNumber(analytics.successRate, 1.0),
-      requestCount: toNumber(analytics.requestCount, 0),
-      avgLatencyMs: toNumber(analytics.avgLatencyMs, 0),
+      successRate: providerMetrics.successRate,
+      requestCount: providerMetrics.requestCount,
+      avgLatencyMs: providerMetrics.avgLatencyMs,
       p50LatencyMs: toNumber(analytics.p50LatencyMs, 0),
       p95LatencyMs: toNumber(analytics.p95LatencyMs, 0),
       p99LatencyMs: toNumber(analytics.p99LatencyMs, 0),
@@ -841,21 +844,19 @@ export async function handleSyncPricing(args: { sources?: string[]; dryRun?: boo
 export async function handleGetSessionSnapshot() {
   const start = Date.now();
   try {
-    const analytics = toRecord(
-      await apiFetch("/api/usage/analytics?period=session").catch(() => ({}))
-    );
-    const tokenCount = toRecord(analytics.tokenCount);
+    const analytics = toRecord(await apiFetch("/api/usage/analytics?range=1d").catch(() => ({})));
+    const totals = readAnalyticsTotals(analytics);
     const byModel = toArrayOfRecords(analytics.byModel);
     const byProvider = toArrayOfRecords(analytics.byProvider);
 
     const result = {
       sessionStart: toString(analytics.sessionStart, new Date().toISOString()),
       duration: toString(analytics.duration, "unknown"),
-      requestCount: toNumber(analytics.requestCount, 0),
-      costTotal: toNumber(analytics.totalCost, 0),
+      requestCount: totals.requestCount,
+      costTotal: totals.totalCost,
       tokenCount: {
-        prompt: toNumber(tokenCount.prompt, 0),
-        completion: toNumber(tokenCount.completion, 0),
+        prompt: totals.promptTokens,
+        completion: totals.completionTokens,
       },
       topModels: byModel.slice(0, 5).map((model) => ({
         model: toString(model.model, "unknown"),

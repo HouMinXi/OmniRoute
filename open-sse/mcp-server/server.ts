@@ -43,6 +43,7 @@ import { startMcpHeartbeat } from "./runtimeHeartbeat.ts";
 import { countUniqueMcpTools } from "./toolCount.ts";
 import { z } from "zod";
 import { closeAuditDb, logToolCall } from "./audit.ts";
+import { analyticsRangeForPeriod, readAnalyticsTotals } from "./analyticsShape.ts";
 import {
   evaluateToolScopes,
   resolveCallerScopeContext,
@@ -572,26 +573,20 @@ async function handleCostReport(args: { period?: string }) {
   const start = Date.now();
   try {
     const period = args.period || "session";
-    const rangeMap: Record<string, string> = {
-      session: "1d",
-      day: "1d",
-      week: "7d",
-      month: "30d",
-    };
-    const range = rangeMap[period] || "30d";
+    const range = analyticsRangeForPeriod(period);
     const raw = toRecord(
       await omniRouteFetch(`/api/usage/analytics?range=${encodeURIComponent(range)}`)
     );
-    const tokenCount = toRecord(raw.tokenCount);
+    const totals = readAnalyticsTotals(raw);
     const budget = toRecord(raw.budget);
 
     const result = {
       period,
-      totalCost: toNumber(raw.totalCost, 0),
-      requestCount: toNumber(raw.requestCount, 0),
+      totalCost: totals.totalCost,
+      requestCount: totals.requestCount,
       tokenCount: {
-        prompt: toNumber(tokenCount.prompt, 0),
-        completion: toNumber(tokenCount.completion, 0),
+        prompt: totals.promptTokens,
+        completion: totals.completionTokens,
       },
       byProvider: toArray(raw.byProvider),
       byModel: toArray(raw.byModel),
