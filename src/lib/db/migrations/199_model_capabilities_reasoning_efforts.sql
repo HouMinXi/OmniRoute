@@ -1,4 +1,4 @@
--- 197_model_capabilities_reasoning_efforts.sql
+-- 199_model_capabilities_reasoning_efforts.sql
 --
 -- models.dev publishes a model's reasoning tiers as reasoning_options
 -- [{ type: "effort", values: [...] }]. The sync stored only the boolean
