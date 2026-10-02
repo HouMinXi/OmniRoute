@@ -70,6 +70,8 @@ type HeaderLike =
 type MessageLike = {
   role?: string;
   content?: unknown;
+  tool_calls?: unknown;
+  tool_call_id?: unknown;
 };
 
 type BuildRequestOptions = {
@@ -506,7 +508,10 @@ function buildClaudeCodeCompatibleMessages(messages: MessageLike[]) {
 
   for (const message of converted) {
     const last = merged[merged.length - 1];
-    if (last && last.role === message.role) {
+    const touchesToolHistory =
+      message.content.some((block) => block.type === "tool_use" || block.type === "tool_result") ||
+      last?.content.some((block) => block.type === "tool_use" || block.type === "tool_result");
+    if (last && last.role === message.role && !touchesToolHistory) {
       last.content.push(...message.content);
       continue;
     }
@@ -687,6 +692,29 @@ function containsDefaultSystemSkeleton(blocks: Array<Record<string, unknown>>) {
 
 function convertClaudeCodeCompatibleMessage(message: MessageLike | null | undefined) {
   const rawRole = String(message?.role || "").toLowerCase();
+
+  if (rawRole === "tool") {
+    const toolUseId = toNonEmptyString(message?.tool_call_id);
+    if (!toolUseId) return null;
+    const text = contentToText(message?.content);
+    return {
+      role: "user" as const,
+      content: [
+        {
+          type: "tool_result",
+          tool_use_id: toolUseId,
+          content:
+            text ||
+            (message?.content == null
+              ? ""
+              : typeof message.content === "string"
+                ? message.content
+                : JSON.stringify(message.content)),
+        },
+      ],
+    };
+  }
+
   const role =
     rawRole === "user"
       ? "user"
@@ -699,10 +727,48 @@ function convertClaudeCodeCompatibleMessage(message: MessageLike | null | undefi
   const text = contentToText(message?.content);
   // #7777: keep the user-turn media parts that contentToText() above drops.
   const media = role === "user" ? collectClaudeMediaBlocks(message?.content) : [];
-  const content = [...(text ? [{ type: "text", text }] : []), ...media];
+  const toolUses = role === "assistant" ? collectOpenAiToolUseBlocks(message?.tool_calls) : [];
+  const content = [...(text ? [{ type: "text", text }] : []), ...media, ...toolUses];
   if (content.length === 0) return null;
 
   return { role, content };
+}
+
+function collectOpenAiToolUseBlocks(toolCalls: unknown): Array<Record<string, unknown>> {
+  if (!Array.isArray(toolCalls)) return [];
+  const blocks: Array<Record<string, unknown>> = [];
+  for (const call of toolCalls) {
+    const record = readRecord(call);
+    if (!record || record.type !== "function") continue;
+    const fn = readRecord(record.function);
+    const name = toNonEmptyString(fn?.name);
+    const id = toNonEmptyString(record.id);
+    if (!name || !id) continue;
+    blocks.push({
+      type: "tool_use",
+      id,
+      name,
+      input: parseOpenAiToolArguments(fn?.arguments),
+    });
+  }
+  return blocks;
+}
+
+function parseOpenAiToolArguments(args: unknown): Record<string, unknown> {
+  if (args && typeof args === "object" && !Array.isArray(args)) {
+    return args as Record<string, unknown>;
+  }
+  if (typeof args !== "string" || !args.trim()) return {};
+  try {
+    const parsed = JSON.parse(args) as unknown;
+    if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return parsed as Record<string, unknown>;
+    }
+  } catch {
+    // Malformed arguments still have to travel with the call; an empty object
+    // keeps the tool_use id pairable with its later tool_result.
+  }
+  return {};
 }
 
 function buildClaudeCodeCompatibleTools(

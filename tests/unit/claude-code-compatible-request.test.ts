@@ -493,3 +493,75 @@ test("buildClaudeCodeCompatibleRequest covers string system input, non-array Cla
   assert.equal(stringSystem.tools.length, 0);
   assert.equal(stringSystem.system.at(-1).text, "custom system");
 });
+
+test("OpenAI tool-call history survives the Claude Code compatible translation (#15229)", () => {
+  const payload = buildClaudeCodeCompatibleRequest({
+    sourceBody: {
+      messages: [
+        { role: "user", content: "Read the file" },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call_read_1",
+              type: "function",
+              function: { name: "read_file", arguments: '{"path":"README.md"}' },
+            },
+          ],
+        },
+        { role: "tool", tool_call_id: "call_read_1", content: "file contents" },
+        { role: "user", content: "Summarize it" },
+      ],
+    },
+    normalizedBody: {
+      messages: [
+        { role: "user", content: "Read the file" },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            {
+              id: "call_read_1",
+              type: "function",
+              function: { name: "read_file", arguments: '{"path":"README.md"}' },
+            },
+          ],
+        },
+        { role: "tool", tool_call_id: "call_read_1", content: "file contents" },
+        { role: "user", content: "Summarize it" },
+      ],
+    },
+    model: "claude-sonnet-4-6",
+    cwd: "/tmp/claude-code-compatible",
+    now: new Date("2026-01-02T12:00:00.000Z"),
+  });
+
+  const toolUse = payload.messages
+    .flatMap((message) => message.content)
+    .find((block) => block.type === "tool_use");
+  const toolResult = payload.messages
+    .flatMap((message) => message.content)
+    .find((block) => block.type === "tool_result");
+
+  assert.ok(toolUse, "assistant tool_calls must become a tool_use block");
+  assert.equal(toolUse.id, "call_read_1");
+  assert.equal(toolUse.name, "read_file");
+  assert.deepEqual(toolUse.input, { path: "README.md" });
+
+  assert.ok(toolResult, "role:tool must become a tool_result block");
+  assert.equal(toolResult.tool_use_id, toolUse.id);
+  assert.equal(toolResult.content, "file contents");
+
+  const toolUseIndex = payload.messages.findIndex((message) =>
+    message.content.some((block) => block.type === "tool_use" && block.id === "call_read_1")
+  );
+  const toolResultIndex = payload.messages.findIndex((message) =>
+    message.content.some(
+      (block) => block.type === "tool_result" && block.tool_use_id === "call_read_1"
+    )
+  );
+  assert.equal(payload.messages[toolUseIndex]?.role, "assistant");
+  assert.equal(payload.messages[toolResultIndex]?.role, "user");
+  assert.equal(toolResultIndex, toolUseIndex + 1);
+});
