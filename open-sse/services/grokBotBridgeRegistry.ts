@@ -18,7 +18,21 @@ export const BRIDGE_IDLE_TTL_MS = 60_000;
 export const BRIDGE_ABSOLUTE_CAP_MS = 5 * 60_000;
 export const BRIDGE_MAX_ACTIVE_SESSIONS = 100;
 export const BRIDGE_MAX_TOMBSTONES = 1000;
-export const BRIDGE_MAX_REQUESTS_PER_NONCE = 8;
+export const BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT = 8;
+
+/**
+ * Requests one nonce accepts before further ones are refused. A Cursor
+ * handshake is four requests and the model repeats it, so the default of 8
+ * is the whole budget. Override with GROK_BOT_BRIDGE_MAX_REQUESTS; a missing
+ * or unusable value keeps the default.
+ */
+export function bridgeMaxRequestsPerNonce(): number {
+  const raw = process.env.GROK_BOT_BRIDGE_MAX_REQUESTS;
+  if (raw === undefined || raw.trim() === "") return BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 1) return BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT;
+  return parsed;
+}
 export const BRIDGE_REAPER_INTERVAL_MS = 30_000;
 export const BRIDGE_DRAIN_BUDGET_MS = 30_000;
 
@@ -319,7 +333,7 @@ export class GrokBotBridgeRegistry {
    */
   reserveSlot(entry: BridgeTurnEntry): boolean {
     if (entry.state !== "active") return false;
-    if (entry.slotsUsed >= BRIDGE_MAX_REQUESTS_PER_NONCE) return false;
+    if (entry.slotsUsed >= bridgeMaxRequestsPerNonce()) return false;
     entry.slotsUsed += 1;
     entry.expiryAt = this.clock.now() + BRIDGE_IDLE_TTL_MS;
     return true;

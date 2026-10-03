@@ -8,7 +8,7 @@ const {
   generateBridgeNonce,
   BRIDGE_ABSOLUTE_CAP_MS,
   BRIDGE_IDLE_TTL_MS,
-  BRIDGE_MAX_REQUESTS_PER_NONCE,
+  bridgeMaxRequestsPerNonce,
 } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
 const {
   handleGrokBridgeRequest,
@@ -276,7 +276,7 @@ describe("grok bot bridge proxy pipeline", () => {
 
   it("allows exactly 8 requests per nonce and rejects the 9th with 410", async () => {
     const { nonce, challenge } = registerTurn();
-    for (let i = 0; i < BRIDGE_MAX_REQUESTS_PER_NONCE; i += 1) {
+    for (let i = 0; i < bridgeMaxRequestsPerNonce(); i += 1) {
       const res = await handleGrokBridgeRequest({
         request: postRequest(nonce, { challenge }),
         upstreamPath: `/grok-bridge/${nonce}/mcp`,
@@ -285,7 +285,7 @@ describe("grok bot bridge proxy pipeline", () => {
       });
       assert.equal(res.status, 200, `request ${i + 1}`);
     }
-    assert.equal(slotCount(nonce), BRIDGE_MAX_REQUESTS_PER_NONCE);
+    assert.equal(slotCount(nonce), bridgeMaxRequestsPerNonce());
     const ninth = await handleGrokBridgeRequest({
       request: postRequest(nonce, { challenge }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,

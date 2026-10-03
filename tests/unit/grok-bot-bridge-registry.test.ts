@@ -11,7 +11,7 @@ const {
   BRIDGE_ABSOLUTE_CAP_MS,
   BRIDGE_IDLE_TTL_MS,
   BRIDGE_MAX_ACTIVE_SESSIONS,
-  BRIDGE_MAX_REQUESTS_PER_NONCE,
+  bridgeMaxRequestsPerNonce,
   BRIDGE_MAX_TOMBSTONES,
   BRIDGE_NONCE_PATTERN,
 } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
@@ -291,12 +291,12 @@ describe("bridge registry lifecycle", () => {
     const entry = (registry.lookup(input.nonce) as { entry: { slotsUsed: number; expiryAt: number } }).entry;
     const expiry0 = entry.expiryAt;
     clock.advance(1000);
-    for (let i = 0; i < BRIDGE_MAX_REQUESTS_PER_NONCE; i++) {
+    for (let i = 0; i < bridgeMaxRequestsPerNonce(); i++) {
       assert.equal(registry.reserveSlot(entry as never), true);
     }
-    assert.equal(entry.slotsUsed, 8);
+    assert.equal(entry.slotsUsed, bridgeMaxRequestsPerNonce());
     assert.equal(registry.reserveSlot(entry as never), false);
-    assert.equal(entry.slotsUsed, 8, "slots are never refunded");
+    assert.equal(entry.slotsUsed, bridgeMaxRequestsPerNonce(), "slots are never refunded");
     assert.ok(entry.expiryAt > expiry0, "successful reservation renews sliding TTL");
   });
 
