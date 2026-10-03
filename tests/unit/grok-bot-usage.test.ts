@@ -25,11 +25,12 @@ describe("Grok Bot usage", () => {
   });
 
   it("reads the weekly included allowance from GetSandUsageStatus", async () => {
+    const resetAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
     globalThis.fetch = async () =>
       new Response(
         JSON.stringify({
           usagePercent: 1.65718,
-          nextResetTimestampUtc: "2026-10-02T08:46:01.382Z",
+          nextResetTimestampUtc: resetAt,
           grokPlanLabel: "SuperGrok Heavy",
           hasAvailableUsage: true,
         }),
@@ -46,7 +47,7 @@ describe("Grok Bot usage", () => {
 
     assert.equal(result.plan, "SuperGrok Heavy");
     assert.equal(result.quotas?.weekly?.remainingPercentage, 98.34282);
-    assert.equal(result.quotas?.weekly?.resetAt, "2026-10-02T08:46:01.382Z");
+    assert.equal(result.quotas?.weekly?.resetAt, resetAt);
     assert.equal(
       parseQuotaData("grok-bot", result)[0]?.remainingPercentage,
       98.34282
