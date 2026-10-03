@@ -196,12 +196,19 @@ export async function POST(request: Request) {
       defaultModel,
       testStatus,
       providerSpecificData: incomingPsd,
+      allowNoCredential,
     } = validation.data;
     const provider = resolveProviderId(requestedProvider);
     const retirementResponse =
       rejectRetiredCommonChatGptWebProvider(requestedProvider) ??
       rejectRetiredCommonChatGptWebProvider(provider);
     if (retirementResponse) return retirementResponse;
+    if (allowNoCredential === true && !providerAllowsOptionalApiKey(provider)) {
+      return NextResponse.json(
+        { error: "This provider does not allow a connection without a credential" },
+        { status: 400 }
+      );
+    }
 
     // Business validation
     const isValidProvider =
