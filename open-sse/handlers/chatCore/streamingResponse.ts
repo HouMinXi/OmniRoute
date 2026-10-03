@@ -118,7 +118,6 @@ import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
  * @param {function} options.onDisconnect - Callback when client disconnects
  * @param {string} options.connectionId - Connection ID for usage tracking
  * @param {object} options.apiKeyInfo - API key metadata for usage attribution
- * @param {string} options.userAgent - Client user agent for caching decisions
  * @param {string} options.comboName - Combo name if this is a combo request
  * @param {string} options.comboStrategy - Combo routing strategy (e.g., 'priority', 'cost-optimized')
  * @param {boolean} options.isCombo - Whether this request is from a combo
@@ -182,7 +181,6 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     triedModels,
     trustedEffortContext,
     upstreamStream,
-    userAgent,
   } = deps;
 
   let claudePromptCacheLogMeta,
