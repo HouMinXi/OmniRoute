@@ -464,19 +464,21 @@ type ClaudeEmptyResponseLifecycle = {
   hasMessageDelta: boolean;
   hasMessageStop: boolean;
   hasError: boolean;
+  stopReason: string | null;
   syntheticContentInjected: boolean;
   warningLogged: boolean;
 };
 
 const SYNTHETIC_CLAUDE_EMPTY_RESPONSE_TEXT = "";
 
-function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
+export function createClaudeEmptyResponseLifecycle(): ClaudeEmptyResponseLifecycle {
   return {
     hasMessageStart: false,
     hasContentBlock: false,
     hasMessageDelta: false,
     hasMessageStop: false,
     hasError: false,
+    stopReason: null,
     syntheticContentInjected: false,
     warningLogged: false,
   };
@@ -492,7 +494,7 @@ function isClaudeEventPayload(payload: unknown): boolean {
   return getClaudeEventType(payload) !== null;
 }
 
-function updateClaudeEmptyResponseLifecycle(
+export function updateClaudeEmptyResponseLifecycle(
   lifecycle: ClaudeEmptyResponseLifecycle,
   payload: unknown
 ) {
@@ -510,6 +512,12 @@ function updateClaudeEmptyResponseLifecycle(
       break;
     case "message_delta":
       lifecycle.hasMessageDelta = true;
+      {
+        const delta = (payload as JsonRecord).delta;
+        const reason =
+          delta && typeof delta === "object" ? (delta as JsonRecord).stop_reason : null;
+        if (typeof reason === "string" && reason) lifecycle.stopReason = reason;
+      }
       break;
     case "message_stop":
       lifecycle.hasMessageStop = true;
