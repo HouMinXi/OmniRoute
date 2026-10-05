@@ -250,6 +250,17 @@ export async function dispatchWithCooldownRetry(opts: {
       state.abortControllers = new Map<number, AbortController>();
       const rejectedModelKeys = (state.requestScopedRejectedModelKeys ??= new Set<string>());
       const zeroLatencyOptimizationsEnabled = deps.config.zeroLatencyOptimizationsEnabled === true;
+      // A hedged target sends the same body a second time. Bodies past this
+      // size sit in the native TLS send buffer until the network drains them,
+      // and a slow upstream holds both copies for the whole headers wait.
+      const HEDGE_MAX_BODY_BYTES = 256 * 1024;
+      let bodyBytes = 0;
+      try {
+        bodyBytes = Buffer.byteLength(JSON.stringify(deps.body));
+      } catch {
+        bodyBytes = 0;
+      }
+      const bodySmallEnoughToHedge = bodyBytes <= HEDGE_MAX_BODY_BYTES;
       const hasProtectedPriorityTarget =
         deps.strategy === "priority" &&
         state.orderedTargets.some((target) => target.fallbackOnlyOnQuotaExhaustion === true);
@@ -323,6 +334,7 @@ export async function dispatchWithCooldownRetry(opts: {
         if (
           zeroLatencyOptimizationsEnabled &&
           deps.config.hedging &&
+          bodySmallEnoughToHedge &&
           !hasProtectedPriorityTarget &&
           i + 1 < state.orderedTargets.length
         ) {
