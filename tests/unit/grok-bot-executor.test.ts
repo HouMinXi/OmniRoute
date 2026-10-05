@@ -1050,6 +1050,32 @@ describe("GrokBotExecutor", () => {
     assert.doesNotMatch(String(prefixedSend?.payload.text), /bridge-bridge_value/);
   });
 
+  it("discovers a client tool when Cursor prefixes it", async () => {
+    t.discoveredTools = [];
+    t.prefixedTools = [{ name: "bridge-canary_value", toolName: "canary_value" }];
+    executor.setBridgeControllerForTests({
+      async start() {
+        return { url: fakeBridgeUrl("result"), call: () => "bridge-ok" };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("model said something else");
+    const input = makeInput([{ role: "user", content: "hi" }], false, undefined, {
+      url: "http://127.0.0.1:9/mcp",
+      challenge: "test-challenge",
+    });
+    (input.body as { tools?: unknown }).tools = [
+      { type: "function", function: { name: "canary_value", parameters: { type: "object" } } },
+    ];
+    const res = (await executor.execute(input)) as Response;
+    assert.equal(res.status, 200, `expected the prefixed client tool to count as discovered, got ${res.status}`);
+    assert.equal(
+      t.calls.some((c) => c.method === "SendGrokBotUserMessage"),
+      true,
+      "message must be sent when the client tool is discovered"
+    );
+  });
+
   it("names the tool from toolName when the advertised name is missing", async () => {
     t.discoveredTools = [];
     t.prefixedTools = [{ name: "", toolName: "bridge_value" }];

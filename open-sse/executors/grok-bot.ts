@@ -770,12 +770,19 @@ export class GrokBotExecutor extends BaseExecutor {
           ? discovery.servers.flatMap((server) => (Array.isArray(server?.tools) ? server.tools : []))
           : [];
         // Cursor prefixes the advertised name with the server identifier
-        // (`bridge-bridge_value`) and keeps the raw name in `toolName`.
-        // Match only those two observed shapes, not an open suffix.
+        // and keeps the raw name in `toolName`. The bridge registers the
+        // client's own tool names when the request carries tools, and
+        // falls back to bridge_value only when it does not, so the match
+        // has to accept both the fallback and whatever was registered.
+        const registered = new Set(advertised.map((tool) => tool.name));
         const isBridgeTool = (tool: { name?: string; toolName?: string }) =>
           tool?.toolName === "bridge_value" ||
           tool?.name === "bridge_value" ||
-          tool?.name === "bridge-bridge_value";
+          tool?.name === "bridge-bridge_value" ||
+          (typeof tool?.toolName === "string" && registered.has(tool.toolName)) ||
+          (typeof tool?.name === "string" &&
+            tool.name.startsWith("bridge-") &&
+            registered.has(tool.name.slice("bridge-".length)));
         const bridgeTool = [...directTools, ...serverTools].find(isBridgeTool);
         if (!bridgeTool) {
           return errResponse(
