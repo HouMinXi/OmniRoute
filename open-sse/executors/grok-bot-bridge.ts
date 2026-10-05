@@ -79,12 +79,12 @@ function handleBridgeMcpRequest(
       "content-type": "text/event-stream",
       "cache-control": "no-cache, no-transform",
     });
-    // Streamable HTTP (protocol 2025-03-26 and later) uses GET only as a
-    // server-to-client channel. The legacy `endpoint` event belongs to the
-    // 2024-11-05 HTTP+SSE transport; a current client treats that frame as a
-    // protocol error and drops the connection before it ever POSTs. A comment
-    // frame keeps the stream open without claiming a transport the client
-    // does not speak.
+    // Cursor advertises protocol 2025-11-25 but reads this stream as the
+    // 2024-11-05 HTTP+SSE transport. It takes the first frame as the POST
+    // address and closes the stream when that frame is anything else, so the
+    // endpoint event has to be the first byte. The data is a path, resolved
+    // by the client against the connection origin.
+    res.write(`event: endpoint\ndata: /grok-bridge/${state.nonce}/mcp\n\n`);
     res.write(": connected\n\n");
     const heartbeat = setInterval(() => {
       if (!res.destroyed) res.write(": keepalive\n\n");

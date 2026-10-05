@@ -221,6 +221,15 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
     try {
       stream = new ReadableStream<Uint8Array>({
       start(sink) {
+        // Cursor sends mcp-protocol-version 2025-11-25 but still speaks the
+        // 2024-11-05 HTTP+SSE transport: it reads the first frame and, unless
+        // that frame is an `endpoint` event naming the POST path, closes the
+        // stream and never POSTs. A packet capture on the live bridge showed
+        // the 200 and the comment frame delivered, then a FIN one round trip
+        // later. The data is a path so the client resolves it against the
+        // connection origin, and it is built from the turn nonce so it does
+        // not depend on the request URL.
+        sink.enqueue(encoder.encode(`event: endpoint\ndata: /grok-bridge/${entry.nonce}/mcp\n\n`));
         sink.enqueue(encoder.encode(": connected\n\n"));
         const timer = setInterval(() => {
           if (controller.signal.aborted) return;
