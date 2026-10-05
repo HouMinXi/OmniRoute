@@ -374,6 +374,44 @@ describe("GrokBotExecutor", () => {
     assert.equal((await res.json()).error.type, "incomplete_turn");
   });
 
+  it("returns a tool call when the turn ends without text", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = [{ agent: { isRunningTurn: true } }, { agent: { isRunningTurn: false } }];
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo", arguments: { text: "ping" } } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: { text: { type: "string" } } } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      const responseBody = (await res.json()) as {
+        choices: Array<{ finish_reason: string; message: { tool_calls?: Array<{ function: { name: string } }> } }>;
+      };
+      assert.equal(responseBody.choices[0]?.finish_reason, "tool_calls");
+      assert.equal(responseBody.choices[0]?.message.tool_calls?.[0]?.function.name, "canary_echo");
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
   it("rejects a completion attached to a different agent", async () => {
     t.watchEvents = [
       { agent: { agentId: "foreign-agent", isRunningTurn: true },
@@ -430,6 +468,36 @@ describe("GrokBotExecutor", () => {
       setGrokBotTransportForTests(null);
       installTransport(t);
     }
+  });
+
+  it("keeps a system line bare and drops a numeric content", async () => {
+    executor.setBridgeControllerForTests(null);
+    const input = makeInput([{ role: "user", content: "hi" }]);
+    (input.body as { messages: unknown[] }).messages = [
+      { role: "system", content: "be brief" },
+      { role: "user", content: 123 },
+      { role: "assistant", content: "", tool_calls: "not-an-array" },
+      { role: "user", content: "hi" },
+    ];
+    const res = (await executor.execute(input)) as Response;
+    assert.equal(res.status, 200);
+    const send = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
+    const text = String(send?.payload.text);
+    assert.match(text, /^be brief\n/);
+    assert.equal(text.includes("System:"), false);
+    assert.equal(text.includes("123"), false);
+    assert.equal(text.includes("Assistant called"), false);
+    assert.match(text, /User: hi/);
+  });
+
+  it("skips a null entry in the message list", async () => {
+    executor.setBridgeControllerForTests(null);
+    const input = makeInput([{ role: "user", content: "hi" }]);
+    (input.body as { messages: unknown[] }).messages = [null, { role: "user", content: "hi" }];
+    const res = (await executor.execute(input)) as Response;
+    assert.equal(res.status, 200);
+    const send = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
+    assert.match(String(send?.payload.text), /User: hi/);
   });
 
   it("answers a plain question and deletes the agent by row id", async () => {
@@ -584,6 +652,87 @@ describe("GrokBotExecutor", () => {
     assert.match(text, /data: \{/);
     assert.match(text, /chat\.completion\.chunk/);
     assert.match(text, /data: \[DONE\]/);
+  });
+
+  it("streams a tool call when the turn ends without text", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = [{ agent: { isRunningTurn: true } }, { agent: { isRunningTurn: false } }];
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo", arguments: { text: "ping" } } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], true, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: { text: { type: "string" } } } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      const text = await res.text();
+      assert.match(text, /"name":"canary_echo"/);
+      assert.match(text, /"finish_reason":"tool_calls"/);
+      assert.match(text, /data: \[DONE\]/);
+      assert.equal(text.includes("incomplete_turn"), false);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("streams the assistant text ahead of the tool call", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      const textRow = Buffer.from(
+        JSON.stringify({ kind: "send-message", clientNonce: null, message: { type: "text", content: "calling now" } })
+      ).toString("base64");
+      t.watchEvents = [
+        { agent: { isRunningTurn: true } },
+        { rows: { entries: [{ body: textRow }] } },
+        { agent: { isRunningTurn: false } },
+      ];
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo", arguments: { text: "ping" } } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], true, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: { text: { type: "string" } } } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      const text = await res.text();
+      const contentAt = text.indexOf("calling now");
+      const callAt = text.indexOf("canary_echo");
+      assert.ok(contentAt >= 0 && callAt > contentAt);
+      assert.match(text, /"finish_reason":"tool_calls"/);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
   });
 
   it("stops the request bridge after the turn and does not send when start fails", async () => {
@@ -760,6 +909,41 @@ describe("GrokBotExecutor", () => {
     const send = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
     assert.ok(send, "send-message not called");
     assert.equal(send.payload.mcpConfigJson, undefined);
+  });
+
+  it("rejects a loopback bridge URL when the default controller is in place", async () => {
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "http://127.0.0.1:9/mcp",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.equal(res.status, 502);
+    const body = await res.json();
+    assert.equal(body.error.message, "Request bridge URL must use a public HTTPS path-nonce endpoint");
+    assert.equal(t.calls.some((call) => call.method === "SendGrokBotUserMessage"), false);
+  });
+
+  it("rejects a bridge URL that is not loopback", async () => {
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, {
+        url: "https://evil.example.com/mcp",
+        challenge: "test-challenge",
+      })
+    )) as Response;
+    assert.equal(res.status, 502);
+    assert.equal((await res.json()).error.message.includes("loopback"), true);
+    assert.equal(t.calls.some((call) => call.method === "SendGrokBotUserMessage"), false);
+  });
+
+  it("rejects a controller-less bridge that has no challenge", async () => {
+    executor.setBridgeControllerForTests(null);
+    const res = (await executor.execute(
+      makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "http://127.0.0.1:9/mcp" })
+    )) as Response;
+    assert.equal(res.status, 502);
+    const body = await res.json();
+    assert.equal(body.error.message, "Request bridge challenge is missing");
   });
 
   it("does not send when the request bridge URL is missing", async () => {
@@ -968,6 +1152,21 @@ describe("GrokBotExecutor", () => {
       );
     });
   }
+
+  it("rejects a request with no access token", async () => {
+    const input = makeInput([{ role: "user", content: "hi" }]);
+    (input.credentials as { accessToken?: string }).accessToken = "";
+    const res = (await executor.execute(input)) as Response;
+    assert.equal(res.status, 401);
+    assert.equal(t.calls.some((call) => call.method === "CreateGrokBotTemporalAgent"), false);
+  });
+
+  it("rejects an explicit bridge that has no url", async () => {
+    const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "" });
+    const res = (await executor.execute(input)) as Response;
+    assert.equal(res.status, 502);
+    assert.equal((await res.json()).error.message.includes("URL is missing"), true);
+  });
 
   it("queues a cleanup when create times out, then reconciles via roster on next call", async () => {
     t.createBehavior = "timeout";
@@ -1382,6 +1581,483 @@ describe("GrokBotExecutor", () => {
         })
       )) as Response;
       assert.equal(res.status, 200, JSON.stringify(await res.json().catch(() => ({}))));
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("replaces a non-object tool schema with an empty object schema", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("done");
+      let schema: unknown = "unset";
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        const list = await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+        });
+        const listBody = (await list.json()) as { result: { tools: Array<{ inputSchema: unknown }> } };
+        schema = listBody.result.tools[0]?.inputSchema;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "canary_echo" } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: "not-a-schema" } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      assert.deepEqual(schema, { type: "object", properties: {} });
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("advertises the client tools on the bridge instead of bridge_value", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("hello back");
+      let listed: string[] = [];
+      let sent = "";
+      t.onSend = async (payload) => {
+        sent = String(payload.text ?? "");
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        const list = await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+        });
+        const listBody = (await list.json()) as { result: { tools: Array<{ name: string }> } };
+        listed = listBody.result.tools.map((tool) => tool.name);
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/call", params: { name: "canary_echo", arguments: { text: "ping" } } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown; tool_choice?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", description: "echo", parameters: { type: "object", properties: { text: { type: "string" } } } } },
+      ];
+      (input.body as { tool_choice?: unknown; parallel_tool_calls?: boolean }).tool_choice = { type: "function", function: { name: "canary_echo" } };
+      (input.body as { parallel_tool_calls?: boolean }).parallel_tool_calls = false;
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      assert.deepEqual(listed, ["canary_echo"]);
+      assert.equal(sent.includes("call it once"), false);
+      assert.match(sent, /Call canary_echo before answering/);
+      assert.match(sent, /Call one tool, wait for its result/);
+      const responseBody = (await res.json()) as {
+        choices: Array<{ finish_reason: string; message: { tool_calls?: Array<{ function: { name: string; arguments: string } }> } }>;
+      };
+      assert.equal(responseBody.choices[0]?.finish_reason, "tool_calls");
+      assert.equal(responseBody.choices[0]?.message.tool_calls?.[0]?.function.name, "canary_echo");
+      assert.equal(responseBody.choices[0]?.message.tool_calls?.[0]?.function.arguments, JSON.stringify({ text: "ping" }));
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("does not open a bridge for an empty tool list or tool_choice none", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("plain answer");
+      for (const body of [
+        { tools: [] as unknown[] },
+        { tools: [{ type: "function", function: { name: "canary_echo", parameters: {} } }], tool_choice: "none" },
+      ]) {
+        t.calls.length = 0;
+        const input = makeInput([{ role: "user", content: "hi" }]);
+        Object.assign(input.body as object, body);
+        const res = (await executor.execute(input)) as Response;
+        assert.equal(res.status, 200);
+        const sent = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
+        assert.equal(sent?.payload.mcpConfigJson, undefined);
+      }
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("tells the model to call some tool when tool_choice is required", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("done");
+      let sent = "";
+      t.onSend = async (payload) => {
+        sent = String(payload.text ?? "");
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo" } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown; tool_choice?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: {} } } },
+      ];
+      (input.body as { tool_choice?: unknown }).tool_choice = "required";
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      assert.match(sent, /Call at least one of them before answering/);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("streams the tool call as chunks ending with finish_reason tool_calls", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("hello back");
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo", arguments: { text: "ping" } } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], true, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", description: "echo", parameters: { type: "object" } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      const reader = res.body!.getReader();
+      const dec = new TextDecoder();
+      let text = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += dec.decode(value, { stream: true });
+      }
+      assert.match(text, /"name":"canary_echo"/);
+      assert.match(text, /"finish_reason":"tool_calls"/);
+      assert.match(text, /data: \[DONE\]/);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("sends a tool result back as its own line, not as a user line", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("done");
+      let sent = "";
+      t.onSend = async (payload) => {
+        sent = String(payload.text ?? "");
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "bridge_value" } }),
+        });
+      };
+      const res = (await executor.execute(
+        makeInput(
+          [
+            { role: "user", content: "hi" },
+            { role: "assistant", content: null, tool_calls: [{ id: "call_0", type: "function", function: { name: "canary_echo", arguments: "{\"text\":\"ping\"}" } }] },
+            { role: "tool", tool_call_id: "call_0", content: "pong" },
+          ],
+          false,
+          undefined,
+          { url: "https://bridge.example.com" }
+        )
+      )) as Response;
+      assert.equal(res.status, 200);
+      assert.match(sent, /Tool result \(call_0\): pong/);
+      assert.match(sent, /Assistant called canary_echo \(call_0\) with \{"text":"ping"\}/);
+      assert.equal(sent.includes("User: pong"), false);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("stringifies object tool-call arguments instead of printing object Object", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("done");
+      let sent = "";
+      t.onSend = async (payload) => {
+        sent = String(payload.text ?? "");
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo" } }),
+        });
+      };
+      const input = makeInput(
+        [
+          {
+            role: "assistant",
+            content: null,
+            tool_calls: [{ id: "call_0", type: "function", function: { name: "canary_echo", arguments: { text: "ping" } } }],
+          },
+          { role: "user", content: "again" },
+        ],
+        false,
+        undefined,
+        { url: "https://bridge.example.com" }
+      );
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: {} } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      assert.match(sent, /Assistant called canary_echo \(call_0\) with \{"text":"ping"\}/);
+      assert.equal(sent.includes("[object Object]"), false);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("returns both tool calls from one turn", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("done");
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        for (const [name, args] of [["canary_value", {}], ["canary_echo", { text: "ping" }]] as Array<[string, object]>) {
+          await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+            method: "POST",
+            headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+            body: JSON.stringify({ jsonrpc: "2.0", id: name, method: "tools/call", params: { name, arguments: args } }),
+          });
+        }
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_value", parameters: { type: "object" } } },
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object" } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      const responseBody = (await res.json()) as {
+        choices: Array<{ message: { tool_calls?: Array<{ function: { name: string } }> } }>;
+      };
+      const names = responseBody.choices[0]?.message.tool_calls?.map((call) => call.function.name);
+      assert.deepEqual(names, ["canary_value", "canary_echo"]);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("keeps a tool call that arrives after the assistant text", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      const textRow = Buffer.from(
+        JSON.stringify({ kind: "send-message", clientNonce: null, message: { type: "text", content: "calling now" } })
+      ).toString("base64");
+      t.watchEvents = [
+        { agent: { isRunningTurn: true } },
+        { rows: { entries: [{ body: textRow }] } },
+        { agent: { isRunningTurn: false } },
+      ];
+      t.onSend = async (payload) => {
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo", arguments: { text: "ping" } } }),
+        });
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: { text: { type: "string" } } } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      const responseBody = (await res.json()) as {
+        choices: Array<{ message: { tool_calls?: Array<{ function: { name: string } }> } }>;
+      };
+      const names = responseBody.choices[0]?.message.tool_calls?.map((call) => call.function.name);
+      assert.deepEqual(names, ["canary_echo"]);
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("keeps a tool call that lands between the text frame and the end of the turn", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      const textRow = Buffer.from(
+        JSON.stringify({ kind: "send-message", clientNonce: null, message: { type: "text", content: "calling now" } })
+      ).toString("base64");
+      let bridgeReady: () => void = () => {};
+      const bridgeOpened = new Promise<void>((resolve) => {
+        bridgeReady = resolve;
+      });
+      t.onSend = () => bridgeReady();
+      t.watchEventsAsync = async function* () {
+        yield { agent: { isRunningTurn: true } };
+        yield { rows: { entries: [{ body: textRow }] } };
+        await bridgeOpened;
+        const config = JSON.parse(String(t.calls.find((call) => call.method === "SendGrokBotUserMessage")?.payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (match) {
+          const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+          const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+          const found = getGrokBotBridgeRegistry().lookup(match[1]);
+          if (found.kind === "active") {
+            await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+              method: "POST",
+              headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+              body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo", arguments: { text: "ping" } } }),
+            });
+          }
+        }
+        yield { agent: { isRunningTurn: false } };
+      };
+      const input = makeInput([{ role: "user", content: "hi" }], false, undefined, { url: "https://bridge.example.com" });
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: { text: { type: "string" } } } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      const responseBody = (await res.json()) as {
+        choices: Array<{ message: { content?: string | null; tool_calls?: Array<{ function: { name: string } }> } }>;
+      };
+      assert.equal(responseBody.choices[0]?.message.content, "calling now");
+      assert.deepEqual(
+        responseBody.choices[0]?.message.tool_calls?.map((call) => call.function.name),
+        ["canary_echo"]
+      );
+    } finally {
+      if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+      else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;
+    }
+  });
+
+  it("keeps text from an array content block", async () => {
+    const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
+    globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
+    try {
+      t.watchEvents = settledWatchEvents("done");
+      let sent = "";
+      t.onSend = async (payload) => {
+        sent = String(payload.text ?? "");
+        const config = JSON.parse(String(payload.mcpConfigJson)) as {
+          mcpServers: { bridge: { url: string; headers: { Authorization: string } } };
+        };
+        const match = /\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/.exec(config.mcpServers.bridge.url);
+        if (!match) return;
+        const challenge = config.mcpServers.bridge.headers.Authorization.slice("Bearer ".length);
+        const { getGrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+        const found = getGrokBotBridgeRegistry().lookup(match[1]);
+        if (found.kind !== "active") return;
+        await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${match[1]}/mcp`, {
+          method: "POST",
+          headers: { authorization: "Bearer " + challenge, "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/call", params: { name: "canary_echo" } }),
+        });
+      };
+      const input = makeInput(
+        [{ role: "user", content: [{ type: "text", text: "first line" }, { type: "image_url", image_url: { url: "data:image/png;base64,xx" } }, { type: "text", text: "second line" }] }],
+        false,
+        undefined,
+        { url: "https://bridge.example.com" }
+      );
+      (input.body as { tools?: unknown }).tools = [
+        { type: "function", function: { name: "canary_echo", parameters: { type: "object", properties: {} } } },
+      ];
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      assert.match(sent, /User: first line\n\[image attached: image\/png\]\nsecond line/);
+      assert.equal(sent.includes("base64"), false);
     } finally {
       if (previous === undefined) delete globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
       else globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = previous;

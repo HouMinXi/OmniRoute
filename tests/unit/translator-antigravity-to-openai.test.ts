@@ -500,3 +500,56 @@ test("Antigravity -> OpenAI preserves custom response objects without result key
   assert.ok(toolMsg, "expected role:tool message");
   assert.equal(toolMsg.content, '{"output":"value","success":false}');
 });
+
+test("Antigravity toolConfig NONE becomes tool_choice none", () => {
+  const result = antigravityToOpenAIRequest(
+    "grok-bot",
+    { request: { contents: [], toolConfig: { functionCallingConfig: { mode: "NONE" } } } },
+    false
+  );
+  assert.equal(result.tool_choice, "none");
+});
+
+test("Antigravity toolConfig ANY becomes tool_choice required", () => {
+  const result = antigravityToOpenAIRequest(
+    "grok-bot",
+    { request: { contents: [], toolConfig: { functionCallingConfig: { mode: "ANY" } } } },
+    false
+  );
+  assert.equal(result.tool_choice, "required");
+});
+
+test("Antigravity toolConfig with several allowed names keeps only those tools", () => {
+  const result = antigravityToOpenAIRequest(
+    "grok-bot",
+    {
+      request: {
+        contents: [],
+        tools: [
+          { functionDeclarations: [{ name: "canary_echo" }, { name: "other" }, { name: "third" }] },
+        ],
+        toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["canary_echo", "third"] } },
+      },
+    },
+    false
+  );
+  assert.deepEqual(
+    result.tools?.map((tool) => (tool as { function: { name: string } }).function.name),
+    ["canary_echo", "third"]
+  );
+  assert.equal(result.tool_choice, "required");
+});
+
+test("Antigravity toolConfig with an allowed function name forces that function", () => {
+  const result = antigravityToOpenAIRequest(
+    "grok-bot",
+    {
+      request: {
+        contents: [],
+        toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["canary_echo"] } },
+      },
+    },
+    false
+  );
+  assert.deepEqual(result.tool_choice, { type: "function", function: { name: "canary_echo" } });
+});

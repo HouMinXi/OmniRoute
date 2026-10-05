@@ -285,7 +285,7 @@ describe("bridge registry lifecycle", () => {
     }
   });
 
-  it("atomic slot reservation: exactly 8, consumed once, extends sliding TTL", () => {
+  it("atomic slot reservation: fills the budget, consumed once, extends sliding TTL", () => {
     const input = regInput(clock);
     registry.register(input);
     const entry = (registry.lookup(input.nonce) as { entry: { slotsUsed: number; expiryAt: number } }).entry;
@@ -298,6 +298,37 @@ describe("bridge registry lifecycle", () => {
     assert.equal(registry.reserveSlot(entry as never), false);
     assert.equal(entry.slotsUsed, bridgeMaxRequestsPerNonce(), "slots are never refunded");
     assert.ok(entry.expiryAt > expiry0, "successful reservation renews sliding TTL");
+  });
+
+  it("holds the idle window to the absolute cap without consuming a slot", () => {
+    const input = regInput(clock);
+    registry.register(input);
+    const entry = (registry.lookup(input.nonce) as { entry: { slotsUsed: number; expiryAt: number; createdAt: number } }).entry;
+    const slots = entry.slotsUsed;
+    assert.equal(registry.holdUntilCap(entry as never), true);
+    assert.equal(entry.slotsUsed, slots, "holding consumes no request slot");
+    assert.equal(entry.expiryAt, entry.createdAt + 5 * 60_000);
+    registry.close(input.nonce, "normal");
+    const closed = registry.lookup(input.nonce);
+    if (closed.kind === "closed-replay") {
+      assert.equal(registry.holdUntilCap(closed.entry as never), false);
+    }
+  });
+
+  it("reads the absolute cap from the environment", async () => {
+    const { bridgeAbsoluteCapMs } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+    const previous = process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS;
+    try {
+      delete process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS;
+      assert.equal(bridgeAbsoluteCapMs(), 5 * 60_000);
+      process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS = "120000";
+      assert.equal(bridgeAbsoluteCapMs(), 120_000);
+      process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS = "not-a-number";
+      assert.equal(bridgeAbsoluteCapMs(), 5 * 60_000);
+    } finally {
+      if (previous === undefined) delete process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS;
+      else process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS = previous;
+    }
   });
 
   it("reservation fails once the turn is closing", () => {

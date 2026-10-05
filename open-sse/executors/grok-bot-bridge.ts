@@ -24,11 +24,31 @@ export const BRIDGE_DRAIN_BUDGET_MS = 30_000;
 
 export const BRIDGE_TOOL_NAME = "bridge_value";
 
+type AdvertisedTool = {
+  name: string;
+  description?: string;
+  inputSchema?: unknown;
+};
+
+function advertisedTools(tools: AdvertisedTool[] | undefined): AdvertisedTool[] {
+  if (tools && tools.length) return tools;
+  return [{
+    name: BRIDGE_TOOL_NAME,
+    description: "Request-level bridge tool; call exactly once.",
+    inputSchema: { type: "object", properties: {}, additionalProperties: true },
+  }];
+}
+
 type BridgeToolState = {
   challenge: string;
   nonce: string;
   used: boolean;
   calls: number;
+  tools: AdvertisedTool[];
+  registry: GrokBotBridgeRegistry | null;
+  // tools/call 进来时留下的名字和参数。响应仍回 ok，这里只是接住，
+  // 还没有送回客户端。
+  invocations: Array<{ name: string; arguments: unknown }>;
 };
 
 function jsonRpcResult(id: unknown, result: unknown): string {
@@ -84,7 +104,7 @@ function handleBridgeMcpRequest(
       jsonrpc?: string;
       id?: unknown;
       method?: string;
-      params?: { name?: string; protocolVersion?: string };
+      params?: { name?: string; protocolVersion?: string; arguments?: unknown };
     };
     try {
       body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}") as typeof body;
@@ -119,24 +139,26 @@ function handleBridgeMcpRequest(
       res.writeHead(200, { "content-type": "application/json" });
       res.end(
         jsonRpcResult(body.id, {
-          tools: [
-            {
-              name: BRIDGE_TOOL_NAME,
-              description: "Request-level bridge tool; call exactly once.",
-              inputSchema: { type: "object", properties: {}, additionalProperties: true },
-            },
-          ],
+          tools: state.tools,
         })
       );
       return;
     }
     if (body.method === "tools/call") {
-      if (body.params?.name !== BRIDGE_TOOL_NAME) {
+      if (!state.tools.some((tool) => tool.name === body.params?.name)) {
         res.writeHead(200, { "content-type": "application/json" });
         res.end(jsonRpcError(body.id, -32601, `unknown tool: ${String(body.params?.name)}`));
         return;
       }
       state.calls += 1;
+      state.invocations.push({
+        name: body.params?.name ?? "",
+        arguments: body.params?.arguments ?? {},
+      });
+      if (state.registry) {
+        const found = state.registry.lookup(state.nonce);
+        if (found.kind === "active") state.registry.holdUntilCap(found.entry);
+      }
       res.writeHead(200, { "content-type": "application/json" });
       res.end(
         jsonRpcResult(body.id, {
@@ -160,6 +182,8 @@ export type StartedBridgeTurn = {
    * throws on a wrong challenge or a repeat call, returns "ok" otherwise.
    */
   call: (challenge: string) => string;
+  /** tools/call 进来时留下的名字和参数，按到达顺序。 */
+  invocations: Array<{ name: string; arguments: unknown }>;
   /** Registry close; "normal" drains (async, non-blocking), forced reasons tear down now. */
   close: (reason: BridgeCloseReason) => boolean;
 };
@@ -179,6 +203,8 @@ export type StartBridgeTurnOptions = {
   onForcedAbort?: () => void;
   /** Test seam for the drain budget. */
   drainBudgetMs?: number;
+  /** 客户端带来的工具。不传时桥只挂 bridge_value，和原来一样。 */
+  tools?: AdvertisedTool[];
 };
 
 export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<StartedBridgeTurn> {
@@ -196,7 +222,11 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
   // any await, so the cap path can reach it even while the bind promise is
   // unsettled. A destroy that lands before the bind resolves is re-applied
   // idempotently once the listen callback fires.
-  const state: BridgeToolState = { challenge, nonce, used: false, calls: 0 };
+  const state: BridgeToolState = {
+    challenge, nonce, used: false, calls: 0, invocations: [],
+    tools: advertisedTools(options.tools),
+    registry: options.registry ?? null,
+  };
   const server: Server = createServer((req, res) => handleBridgeMcpRequest(state, req, res));
   let destroyed = false;
   const destroyServer = () => {
@@ -281,6 +311,7 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
     url: `${options.publicBaseUrl.replace(/\/$/, "")}/grok-bridge/${nonce}/mcp`,
     nonce,
     challenge,
+    invocations: state.invocations,
     call(value: string) {
       if (value !== challenge) throw new Error("Rejected challenge");
       if (state.used) throw new Error("Repeat call rejected");

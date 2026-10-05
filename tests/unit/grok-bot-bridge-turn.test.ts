@@ -53,6 +53,58 @@ describe("grok bot bridge turn (registry-backed)", () => {
     assert.throws(() => turn.call("wrong-value"), /Rejected challenge/);
   });
 
+  it("keeps the tool name and arguments from tools/call", async () => {
+    const turn = await startBridgeTurn({ publicBaseUrl: "https://bridge.example.com", registry });
+    const found = registry.lookup(turn.nonce);
+    if (found.kind !== "active") {
+      assert.fail(`nonce must be active, got: ${found.kind}`);
+    }
+    const call = await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`, {
+      method: "POST",
+      headers: { authorization: "Bearer " + turn.challenge, "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0",
+        id: 1,
+        method: "tools/call",
+        params: { name: BRIDGE_TOOL_NAME, arguments: { text: "ping" } },
+      }),
+    });
+    assert.equal(call.status, 200);
+    const body = (await call.json()) as { result: { content: Array<{ text: string }> } };
+    assert.equal(body.result.content[0]?.text, "ok");
+    assert.deepEqual(turn.invocations, [{ name: BRIDGE_TOOL_NAME, arguments: { text: "ping" } }]);
+  });
+
+  it("advertises the tools it was given and accepts a call to one of them", async () => {
+    const tools = [
+      { name: "canary_value", description: "canary", inputSchema: { type: "object", properties: {} } },
+      { name: "canary_echo", description: "echo", inputSchema: { type: "object", properties: { text: { type: "string" } } } },
+    ];
+    const turn = await startBridgeTurn({ publicBaseUrl: "https://bridge.example.com", registry, tools });
+    const found = registry.lookup(turn.nonce);
+    if (found.kind !== "active") {
+      assert.fail(`nonce must be active, got: ${found.kind}`);
+    }
+    const list = await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`, {
+      method: "POST",
+      headers: { authorization: "Bearer " + turn.challenge, "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
+    });
+    const listBody = (await list.json()) as { result: { tools: Array<{ name: string }> } };
+    assert.deepEqual(listBody.result.tools.map((tool) => tool.name), ["canary_value", "canary_echo"]);
+
+    const call = await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`, {
+      method: "POST",
+      headers: { authorization: "Bearer " + turn.challenge, "content-type": "application/json" },
+      body: JSON.stringify({
+        jsonrpc: "2.0", id: 2, method: "tools/call",
+        params: { name: "canary_echo", arguments: { text: "ping" } },
+      }),
+    });
+    assert.equal(call.status, 200);
+    assert.deepEqual(turn.invocations, [{ name: "canary_echo", arguments: { text: "ping" } }]);
+  });
+
   it("rejects direct hits with a missing or wrong bearer challenge", async () => {
     const turn = await startBridgeTurn({ publicBaseUrl: "https://bridge.example.com", registry });
     const found = registry.lookup(turn.nonce);

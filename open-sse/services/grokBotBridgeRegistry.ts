@@ -18,19 +18,32 @@ export const BRIDGE_IDLE_TTL_MS = 60_000;
 export const BRIDGE_ABSOLUTE_CAP_MS = 5 * 60_000;
 export const BRIDGE_MAX_ACTIVE_SESSIONS = 100;
 export const BRIDGE_MAX_TOMBSTONES = 1000;
-export const BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT = 8;
+export const BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT = 32;
 
 /**
  * Requests one nonce accepts before further ones are refused. A Cursor
- * handshake is four requests and the model repeats it, so the default of 8
- * is the whole budget. Override with GROK_BOT_BRIDGE_MAX_REQUESTS; a missing
- * or unusable value keeps the default.
+ * handshake is four requests and the model repeats it, which takes eight.
+ * Tool calls share the same budget, so the default leaves room for them.
+ * Override with GROK_BOT_BRIDGE_MAX_REQUESTS; a missing or unusable value
+ * keeps the default.
  */
 export function bridgeMaxRequestsPerNonce(): number {
   const raw = process.env.GROK_BOT_BRIDGE_MAX_REQUESTS;
   if (raw === undefined || raw.trim() === "") return BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT;
   const parsed = Number(raw);
   if (!Number.isInteger(parsed) || parsed < 1) return BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT;
+  return parsed;
+}
+
+/**
+ * 一轮的绝对上限，毫秒。等工具结果的窗口推到这里为止。
+ * GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS 覆盖；缺失或不是正整数时用默认 5 分钟。
+ */
+export function bridgeAbsoluteCapMs(): number {
+  const raw = process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS;
+  if (raw === undefined || raw.trim() === "") return BRIDGE_ABSOLUTE_CAP_MS;
+  const parsed = Number(raw);
+  if (!Number.isInteger(parsed) || parsed < 1) return BRIDGE_ABSOLUTE_CAP_MS;
   return parsed;
 }
 export const BRIDGE_REAPER_INTERVAL_MS = 30_000;
@@ -266,7 +279,7 @@ export class GrokBotBridgeRegistry {
     const now = this.clock.now();
     // Registration-time cap re-check: a turn whose bind was slow can never
     // outlive its cap through a late registration.
-    if (now >= input.createdAt + BRIDGE_ABSOLUTE_CAP_MS) {
+    if (now >= input.createdAt + bridgeAbsoluteCapMs()) {
       return { ok: false, reason: "at-cap" };
     }
     if (this.combinedCount >= BRIDGE_MAX_ACTIVE_SESSIONS) {
@@ -291,7 +304,7 @@ export class GrokBotBridgeRegistry {
       inflight: new Set(),
     };
     this.active.set(entry.nonce, entry);
-    const capDelay = Math.max(0, input.createdAt + BRIDGE_ABSOLUTE_CAP_MS - now);
+    const capDelay = Math.max(0, input.createdAt + bridgeAbsoluteCapMs() - now);
     entry.capTimer = this.clock.setTimeout(() => {
       try {
         this.close(entry.nonce, "cap");
@@ -318,12 +331,25 @@ export class GrokBotBridgeRegistry {
 
   /** True at or after the absolute cap; replay of such a nonce is `404`. */
   isOverCap(entry: BridgeTurnEntry): boolean {
-    return this.clock.now() >= entry.createdAt + BRIDGE_ABSOLUTE_CAP_MS;
+    return this.clock.now() >= entry.createdAt + bridgeAbsoluteCapMs();
   }
 
   /** True at or after the sliding expiry; new requests after expiry are `410`. */
   isExpired(entry: BridgeTurnEntry): boolean {
     return this.clock.now() >= entry.expiryAt;
+  }
+
+  /**
+   * 等工具结果的期间没有新请求进来，reserveSlot 不会被调，空闲窗口
+   * 会在 60 秒到期。这个续期不消耗请求额度，把窗口推到绝对上限，
+   * 不超过。已经到上限或已经关闭的不续。
+   */
+  holdUntilCap(entry: BridgeTurnEntry): boolean {
+    if (entry.state !== "active") return false;
+    const capAt = entry.createdAt + bridgeAbsoluteCapMs();
+    if (this.clock.now() >= capAt) return false;
+    entry.expiryAt = capAt;
+    return true;
   }
 
   /**
@@ -432,7 +458,7 @@ export class GrokBotBridgeRegistry {
   sweep(): void {
     const now = this.clock.now();
     for (const [nonce, entry] of this.tombstones) {
-      if (now >= entry.createdAt + BRIDGE_ABSOLUTE_CAP_MS) {
+      if (now >= entry.createdAt + bridgeAbsoluteCapMs()) {
         if (entry.capTimer) {
           this.clock.clearTimeout(entry.capTimer);
           entry.capTimer = null;
@@ -441,7 +467,7 @@ export class GrokBotBridgeRegistry {
       }
     }
     for (const [nonce, entry] of this.activeClose) {
-      if (now >= entry.createdAt + BRIDGE_ABSOLUTE_CAP_MS) {
+      if (now >= entry.createdAt + bridgeAbsoluteCapMs()) {
         this.activeClose.delete(nonce);
         // The registration-time cap timer must not outlive the promotion;
         // a dangling ref'd timer would hold the process up to the remainder

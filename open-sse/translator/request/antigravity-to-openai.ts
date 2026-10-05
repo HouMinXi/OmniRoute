@@ -4,6 +4,7 @@ import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
 import { fixToolPairs } from "../../services/contextManager.ts";
 import { normalizeEffort } from "@/shared/reasoning/effortStandardization";
+import { applyGeminiFunctionCallingConfig } from "../helpers/geminiFunctionCalling.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -131,6 +132,8 @@ export function antigravityToOpenAIRequest(model, body, stream) {
   // run `fixToolAdjacency` here because this stage still emits OpenAI-format messages and
   // Claude's adjacency rule is enforced downstream per provider.
   result.messages = fixToolPairs(result.messages) as JsonRecord[];
+
+  applyGeminiFunctionCallingConfig(result, req.toolConfig?.functionCallingConfig);
 
   return result;
 }

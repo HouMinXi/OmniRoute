@@ -217,20 +217,74 @@ function isTimeoutError(err: unknown): boolean {
   );
 }
 
-function composePrompt(messages: unknown[], challenge?: string, advertisedName?: string): string {
+function composePrompt(messages: unknown[], challenge?: string, advertisedName?: string, hasClientTools = false, toolChoice?: unknown, parallel = true): string {
   const lines: string[] = [];
   for (const m of Array.isArray(messages) ? messages : []) {
-    const msg = m as { role?: string; content?: unknown };
-    const content = typeof msg?.content === "string" ? msg.content : "";
-    if (!content) continue;
+    const msg = m as {
+      role?: string;
+      content?: unknown;
+      tool_call_id?: string;
+      tool_calls?: Array<{ id?: string; function?: { name?: string; arguments?: unknown } }>;
+    };
+    const content = typeof msg?.content === "string"
+      ? msg.content
+      : Array.isArray(msg?.content)
+        ? (msg.content as Array<{ type?: string; text?: string; image_url?: { url?: string } }>)
+            .map((part) => {
+              if (part?.type === "text" && typeof part.text === "string") return part.text;
+              if (part?.type === "image_url") {
+                const url = part.image_url?.url ?? "";
+                const kind = url.startsWith("data:") ? url.slice(5, url.indexOf(";")) || "image" : "image";
+                return `[image attached: ${kind}]`;
+              }
+              return "";
+            })
+            .filter((part) => part)
+            .join("\n")
+        : "";
+    const calls = Array.isArray(msg?.tool_calls) ? msg.tool_calls : [];
+    if (!content && !calls.length) continue;
     if (msg.role === "system") lines.push(content);
-    else if (msg.role === "assistant") lines.push(`Assistant: ${content}`);
+    else if (msg.role === "assistant") {
+      if (content) lines.push(`Assistant: ${content}`);
+      for (const call of calls) {
+        const name = call.function?.name ?? "";
+        const rawArgs = call.function?.arguments;
+        const args = typeof rawArgs === "string"
+          ? rawArgs
+          : rawArgs && typeof rawArgs === "object"
+            ? JSON.stringify(rawArgs)
+            : "";
+        lines.push(`Assistant called ${name}${call.id ? " (" + call.id + ")" : ""} with ${args}`);
+      }
+    }
+    else if (msg.role === "tool") lines.push(`Tool result${msg.tool_call_id ? " (" + msg.tool_call_id + ")" : ""}: ${content}`);
     else lines.push(`User: ${content}`);
   }
   lines.push(
     "Answer only from this conversation. Do not read or write Grok account memory."
   );
-  if (challenge) {
+  if (challenge && hasClientTools) {
+    const forced =
+      toolChoice && typeof toolChoice === "object" && !Array.isArray(toolChoice)
+        ? (toolChoice as { function?: { name?: string } }).function?.name
+        : undefined;
+    const directive =
+      toolChoice === "none"
+        ? "Do not call any of them. Answer from the conversation. "
+        : toolChoice === "required"
+          ? "Call at least one of them before answering. "
+          : forced
+            ? "Call " + forced + " before answering. "
+            : "Call whichever of them the request needs, as many times as it needs. ";
+    lines.push(
+      "The tools listed for this request are available through GetMcpTools. " +
+        directive +
+        "A line starting with \"Tool result\" is the value returned by an earlier call; use it and continue. " +
+        "Do not use any tool that was not listed, nor any computer, file, web, permission, persistent memory, or service." +
+        (parallel ? "" : " Call one tool, wait for its result, then decide the next.")
+    );
+  } else if (challenge) {
     lines.push(
       "First use GetMcpTools to find the " +
         (advertisedName || "bridge") +
@@ -255,6 +309,36 @@ function chatCompletionBody(model: string, content: string, id: string) {
   };
 }
 
+function toolCallBody(
+  model: string,
+  id: string,
+  calls: Array<{ name: string; arguments: unknown }>,
+  content: string | null = null
+) {
+  return {
+    id,
+    object: "chat.completion",
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: "assistant",
+          content,
+          tool_calls: calls.map((call) => ({
+            id: "call_" + randomUUID(),
+            type: "function",
+            function: { name: call.name, arguments: JSON.stringify(call.arguments ?? {}) },
+          })),
+        },
+        finish_reason: "tool_calls",
+      },
+    ],
+    usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
+  };
+}
+
 function sseChunk(model: string, content: string, id: string) {
   return {
     id,
@@ -265,13 +349,39 @@ function sseChunk(model: string, content: string, id: string) {
   };
 }
 
-function sseFinish(model: string, id: string) {
+function sseFinish(model: string, id: string, reason = "stop") {
   return {
     id,
     object: "chat.completion.chunk",
     created: Math.floor(Date.now() / 1000),
     model,
-    choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+    choices: [{ index: 0, delta: {}, finish_reason: reason }],
+  };
+}
+
+function sseToolCallChunk(
+  model: string,
+  id: string,
+  index: number,
+  call: { name: string; arguments: unknown }
+) {
+  return {
+    id,
+    object: "chat.completion.chunk",
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [{
+      index: 0,
+      delta: {
+        tool_calls: [{
+          index,
+          id: "call_" + randomUUID(),
+          type: "function",
+          function: { name: call.name, arguments: JSON.stringify(call.arguments ?? {}) },
+        }],
+      },
+      finish_reason: null,
+    }],
   };
 }
 
@@ -300,6 +410,7 @@ type BridgeController = {
 type BridgeTurnOptions = {
   signal?: AbortSignal | null;
   onForcedAbort?: () => void;
+  tools?: Array<{ name: string; description?: string; inputSchema?: unknown }>;
 };
 
 /**
@@ -522,8 +633,11 @@ export class GrokBotExecutor extends BaseExecutor {
 
 
 
+      const clientToolList = Array.isArray(input.body?.tools) ? input.body.tools : [];
       const bridge = input.body?.grokBotBridge ?? (
-        Array.isArray(input.body?.tools) && process.env.GROK_BOT_PUBLIC_BRIDGE_URL
+        clientToolList.length > 0 &&
+        input.body?.tool_choice !== "none" &&
+        process.env.GROK_BOT_PUBLIC_BRIDGE_URL
           ? { url: process.env.GROK_BOT_PUBLIC_BRIDGE_URL, challenge: randomUUID() }
           : undefined
       );
@@ -567,6 +681,7 @@ export class GrokBotExecutor extends BaseExecutor {
       let bridgeUrl = bridge?.url;
       let bridgeCall: ((challenge: string) => string) | undefined;
       let advertisedToolName: string | undefined;
+      let advertised: Array<{ name: string; description?: string; inputSchema?: unknown }> = [];
       if (bridge) {
         this.bridgeLifecycle.length = 0;
         if (this.bridgeController) {
@@ -575,9 +690,19 @@ export class GrokBotExecutor extends BaseExecutor {
           // drives the upstream watch, the registry close, and the unread
           // escalation; client cancel and forced abort land on the same path.
           turnController = new AbortController();
+          const clientTools = Array.isArray(input.body?.tools) ? input.body.tools : [];
+          advertised = clientTools.flatMap((tool: { function?: { name?: string; description?: string; parameters?: unknown } }) => {
+            const fn = tool?.function;
+            if (!fn || typeof fn.name !== "string" || !fn.name) return [];
+            const schema = fn.parameters;
+            const inputSchema =
+              schema && typeof schema === "object" && !Array.isArray(schema) ? schema : { type: "object", properties: {} };
+            return [{ name: fn.name, description: fn.description, inputSchema }];
+          });
           const turnOptions: BridgeTurnOptions = {
             signal: turnController.signal,
             onForcedAbort: () => turnController?.abort(),
+            ...(advertised.length ? { tools: advertised } : {}),
           };
           // Client cancel must converge on the same turn-scoped signal
           // (spec step 9): the watch races the combined signal, but the
@@ -670,7 +795,10 @@ export class GrokBotExecutor extends BaseExecutor {
       const prompt = composePrompt(
         input.body?.messages ?? [],
         startedBridge?.challenge ?? bridge?.challenge,
-        advertisedToolName
+        advertisedToolName,
+        advertised.length > 0,
+        input.body?.tool_choice,
+        input.body?.parallel_tool_calls !== false
       );
       const messageId = randomUUID();
       const sendPayload: Record<string, unknown> = {
@@ -716,6 +844,12 @@ export class GrokBotExecutor extends BaseExecutor {
           );
         }
         let answer = text;
+        if (startedBridge?.invocations?.length) {
+          return new Response(
+            JSON.stringify(toolCallBody(model, id, startedBridge.invocations, text || null)),
+            { status: 200, headers: { "Content-Type": "application/json" } }
+          );
+        }
         if (bridgeCall) {
           try {
             // Registry-backed turns verify against their internally
@@ -765,17 +899,47 @@ export class GrokBotExecutor extends BaseExecutor {
           void (async () => {
             try {
               const text = await collect;
-              if (text) {
+              const calls = startedBridge?.invocations ?? [];
+              if (calls.length) {
+                if (text) {
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify(sseChunk(model, text, id))}\n\n`)
+                  );
+                }
+                calls.forEach((call, index) => {
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify(sseToolCallChunk(model, id, index, call))}\n\n`)
+                  );
+                });
                 controller.enqueue(
-                  encoder.encode(`data: ${JSON.stringify(sseChunk(model, text, id))}\n\n`)
+                  encoder.encode(`data: ${JSON.stringify(sseFinish(model, id, "tool_calls"))}\n\n`)
+                );
+              } else {
+                if (text) {
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify(sseChunk(model, text, id))}\n\n`)
+                  );
+                }
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify(sseFinish(model, id))}\n\n`)
                 );
               }
-              controller.enqueue(
-                encoder.encode(`data: ${JSON.stringify(sseFinish(model, id))}\n\n`)
-              );
               controller.enqueue(encoder.encode("data: [DONE]\n\n"));
             } catch (err) {
               clearUnreadTimer();
+              const calls = startedBridge?.invocations ?? [];
+              if ((err as { errorType?: unknown }).errorType === "incomplete_turn" && calls.length) {
+                calls.forEach((call, index) => {
+                  controller.enqueue(
+                    encoder.encode(`data: ${JSON.stringify(sseToolCallChunk(model, id, index, call))}\n\n`)
+                  );
+                });
+                controller.enqueue(
+                  encoder.encode(`data: ${JSON.stringify(sseFinish(model, id, "tool_calls"))}\n\n`)
+                );
+                controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+                return;
+              }
               const turnAborted = turnController
                 ? turnController.signal.aborted
                 : (input.signal?.aborted ?? false);
@@ -829,6 +993,15 @@ export class GrokBotExecutor extends BaseExecutor {
         headers: { "Content-Type": "text/event-stream" },
       });
     } catch (err) {
+      if (
+        (err as { errorType?: unknown }).errorType === "incomplete_turn" &&
+        startedBridge?.invocations?.length
+      ) {
+        return new Response(
+          JSON.stringify(toolCallBody(model, id, startedBridge.invocations)),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      }
       const errorType = (err as { errorType?: unknown }).errorType;
       return errResponse(
         HTTP_STATUS.BAD_GATEWAY ?? 502,
@@ -909,6 +1082,8 @@ export class GrokBotExecutor extends BaseExecutor {
           if (typeof result === "string") return result;
           if (submitted !== null) return submitted;
           if (result) {
+            const real = parts.filter((part) => !part.startsWith("\u0000submit:"));
+            if (real.length) return real.join("");
             throw Object.assign(new Error("turn became idle without explicit completion"), {
               errorType: "incomplete_turn",
             });
@@ -999,7 +1174,7 @@ export class GrokBotExecutor extends BaseExecutor {
         typeof decoded.message.content === "string"
       ) {
         parts.push(decoded.message.content);
-        return parts.join("");
+        return false;
       }
     }
     if (
