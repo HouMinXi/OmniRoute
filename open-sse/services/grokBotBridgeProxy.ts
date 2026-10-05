@@ -197,6 +197,50 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
     return jsonError(registry.isOverCap(entry) ? 404 : 410, registry.isOverCap(entry) ? "not_found" : "gone");
   }
 
+  // GET is only the server-to-client channel. Answering it here returns the
+  // SSE headers before any upstream dial, so a client that gives up when the
+  // first byte is late still sees the stream open. The same timeoutMs budget
+  // the POST path uses still bounds it. The local bridge GET carries no
+  // request data; POST is the path that must reach it.
+  if (request.method === "GET") {
+    const headers = new Headers({
+      "content-type": "text/event-stream",
+      "cache-control": "no-cache, no-transform",
+    });
+    const encoder = new TextEncoder();
+    const controller = new AbortController();
+    entry.inflight.add(controller);
+    const deadline = setTimeout(() => controller.abort(), timeoutMs);
+    deadline.unref?.();
+    const release = (sink: ReadableStreamDefaultController<Uint8Array> | null) => {
+      clearTimeout(deadline);
+      entry.inflight.delete(controller);
+      if (sink) { try { sink.close(); } catch { /* already closed */ } }
+    };
+    let stream: ReadableStream<Uint8Array>;
+    try {
+      stream = new ReadableStream<Uint8Array>({
+      start(sink) {
+        sink.enqueue(encoder.encode(": connected\n\n"));
+        const timer = setInterval(() => {
+          if (controller.signal.aborted) return;
+          try { sink.enqueue(encoder.encode(": keepalive\n\n")); }
+          catch { clearInterval(timer); }
+        }, 5000);
+        timer.unref?.();
+        controller.signal.addEventListener("abort", () => { clearInterval(timer); release(sink); }, { once: true });
+        request.signal.addEventListener("abort", () => controller.abort(), { once: true });
+      },
+      cancel() { controller.abort(); },
+    });
+    } catch (err) {
+      clearTimeout(deadline);
+      entry.inflight.delete(controller);
+      throw err;
+    }
+    return new Response(stream, { status: 200, headers });
+  }
+
   // Step 6: one monotonic budget covers the upload, response and live stream.
   const deadline = nowMs() + timeoutMs;
   const controller = new AbortController();
