@@ -19,6 +19,8 @@ import {
   errorResponseWithComboDiagnostics,
   unavailableResponse,
 } from "../../utils/error.ts";
+import { estimateSizeFast } from "../../utils/estimateSize.ts";
+import { jsonLength } from "../../utils/jsonSize.ts";
 import { COMBO_FAILURE_THRESHOLD, recordComboFailure } from "./failureTracker.ts";
 import {
   buildAllTargetsCoolingDownResponse,
@@ -60,6 +62,25 @@ import { collectCircuitOpenExclusions, evaluateExecuteTargetGates } from "./exec
 import { executeTargetAttempt } from "./executeTargetAttempt.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
+
+/** A second in-flight copy of a body larger than this sits in the TLS send buffer. */
+const HEDGE_MAX_BODY_BYTES = 256 * 1024;
+
+/**
+ * Hedging sends the body twice. The fast estimate rejects oversized values
+ * without allocating a JSON string. `jsonLength` then confirms the exact
+ * serialized size; a cycle or BigInt makes it throw, and that unknown size
+ * must not hedge — recording 0 bytes would send the body twice anyway.
+ */
+function isBodySmallEnoughToHedge(body: unknown): boolean {
+  try {
+    const estimated = estimateSizeFast(body, HEDGE_MAX_BODY_BYTES);
+    if (!Number.isFinite(estimated) || estimated > HEDGE_MAX_BODY_BYTES) return false;
+    return jsonLength(body) <= HEDGE_MAX_BODY_BYTES;
+  } catch {
+    return false;
+  }
+}
 
 /**
  * Resolve the earliest known connection cooldown across every target's eligible
@@ -253,14 +274,7 @@ export async function dispatchWithCooldownRetry(opts: {
       // A hedged target sends the same body a second time. Bodies past this
       // size sit in the native TLS send buffer until the network drains them,
       // and a slow upstream holds both copies for the whole headers wait.
-      const HEDGE_MAX_BODY_BYTES = 256 * 1024;
-      let bodyBytes = 0;
-      try {
-        bodyBytes = Buffer.byteLength(JSON.stringify(deps.body));
-      } catch {
-        bodyBytes = 0;
-      }
-      const bodySmallEnoughToHedge = bodyBytes <= HEDGE_MAX_BODY_BYTES;
+      const bodySmallEnoughToHedge = isBodySmallEnoughToHedge(deps.body);
       const hasProtectedPriorityTarget =
         deps.strategy === "priority" &&
         state.orderedTargets.some((target) => target.fallbackOnlyOnQuotaExhaustion === true);
