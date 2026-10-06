@@ -2309,6 +2309,42 @@ describe("GrokBotExecutor", () => {
     }
   });
 
+
+  it("cuts an oversized history down to the upstream text cap", async () => {
+    executor.setBridgeControllerForTests(null);
+    const old = "OLD-" + "a".repeat(150_000);
+    const recent = "RECENT-" + "b".repeat(150_000);
+    const input = makeInput([{ role: "user", content: "hi" }]);
+    (input.body as { messages: unknown[] }).messages = [
+      { role: "user", content: old },
+      { role: "user", content: recent },
+    ];
+    const res = (await executor.execute(input)) as Response;
+    assert.equal(res.status, 200);
+    const send = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
+    const text = String(send?.payload.text);
+    assert.ok(text.length <= 190_000, "prompt length " + text.length);
+    assert.equal(text.includes("OLD-"), false);
+    assert.equal(text.includes("RECENT-"), true);
+    assert.match(text, /Answer only from this conversation/);
+  });
+
+  it("stays within the cap when one message is longer than the budget", async () => {
+    executor.setBridgeControllerForTests(null);
+    const huge = "Z".repeat(250_000);
+    const input = makeInput([{ role: "user", content: "hi" }]);
+    (input.body as { messages: unknown[] }).messages = [
+      { role: "user", content: huge },
+    ];
+    const res = (await executor.execute(input)) as Response;
+    assert.equal(res.status, 200);
+    const send = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
+    const text = String(send?.payload.text);
+    assert.ok(text.length <= 190_000, "prompt length " + text.length);
+    assert.match(text, /Answer only from this conversation/);
+    assert.equal(text.includes("Z"), true);
+  });
+
 });
 
 test.after(async () => {

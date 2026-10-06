@@ -67,6 +67,11 @@ const HARNESS_TEMPORAL = 2;
 // Client-invented session ids are rejected (404, measured); empty string means
 // "the agent's current turn".
 const EMPTY_SESSION_ID = "";
+// SendGrokBotUserMessage rejects text over 200000 characters (measured live
+// 2026-10-06, HTTP 400 "text exceeds the maximum length of 200000"). The
+// margin leaves room for the trailing instruction lines and the newlines
+// joining them.
+const MAX_PROMPT_CHARS = 190_000;
 // SendGrokBotUserMessage requires a machineId (client-side sandbox machine
 // identity). The live server accepts a random UUID. It is per-executor-instance
 // (not module-level) so coexisting executor instances do not share a machine
@@ -261,6 +266,7 @@ function composePrompt(messages: unknown[], challenge?: string, advertisedName?:
     else if (msg.role === "tool") lines.push(`Tool result${msg.tool_call_id ? " (" + msg.tool_call_id + ")" : ""}: ${content}`);
     else lines.push(`User: ${content}`);
   }
+  const messageLineCount = lines.length;
   lines.push(
     "Answer only from this conversation. Do not read or write Grok account memory."
   );
@@ -293,7 +299,33 @@ function composePrompt(messages: unknown[], challenge?: string, advertisedName?:
         ". Reply with its returned value verbatim. The value is unknown to you. If discovery cannot find the tool, say TOOL_UNAVAILABLE. Do not use any other tool, computer, file, web, permission, persistent memory, or service."
     );
   }
-  return lines.join("\n");
+  return fitPrompt(lines, messageLineCount);
+}
+
+// Drop the oldest message lines until the joined prompt is within the upstream
+// text cap. The trailing instruction lines stay: they carry the tool contract
+// the turn depends on. A single message that is itself over the cap is cut
+// from its front, so the most recent part of it survives.
+function fitPrompt(lines: string[], messageLineCount: number): string {
+  const tail = lines.slice(messageLineCount);
+  const tailText = tail.join("\n");
+  const budget = MAX_PROMPT_CHARS - (tailText.length ? tailText.length + 1 : 0);
+  const head = lines.slice(0, messageLineCount);
+  // Cumulative length of head[i..] joined with newlines, computed once so a
+  // long history is trimmed in linear time instead of rejoining on each drop.
+  const cum: number[] = new Array(head.length + 1);
+  cum[head.length] = 0;
+  for (let i = head.length - 1; i >= 0; i--) {
+    cum[i] = head[i].length + (i + 1 < head.length ? 1 + cum[i + 1] : 0);
+  }
+  let start = 0;
+  while (start < head.length - 1 && cum[start] > budget) start += 1;
+  let kept = head.slice(start);
+  if (kept.length === 1 && kept[0].length > budget) {
+    kept = [kept[0].slice(kept[0].length - Math.max(0, budget))];
+  }
+  const body = kept.join("\n");
+  return tailText ? body + "\n" + tailText : body;
 }
 
 function chatCompletionBody(model: string, content: string, id: string) {
