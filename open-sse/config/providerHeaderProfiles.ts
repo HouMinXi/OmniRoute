@@ -177,13 +177,198 @@ export const QWEN_STAINLESS_LANG = "js";
 
 export const QODER_DEFAULT_USER_AGENT = "Qoder-Cli";
 
-// CODEBUDDY_CN_USER_AGENT is the single source of truth for the CLI/CodeBuddy version
+// CODEBUDDY_CN_USER_AGENT is the captured pin for the CLI/CodeBuddy version
 // string. It MUST stay identical across OAuth (src/lib/oauth/constants/oauth.ts), chat
 // completions (open-sse/config/providers/registry/codebuddy-cn/index.ts) and usage/quota
-// (open-sse/services/usage/codebuddy-cn.ts) — a mismatched version string across a
+// (open-sse/services/usage/codebuddy-cn.ts) - a mismatched version string across a
 // single account's auth vs. chat calls is exactly the kind of internally-inconsistent
-// client fingerprint Tencent's WAF flags as anomalous (#12702).
+// client fingerprint Tencent's WAF flags as anomalous (#12702). Request paths read
+// getCodeBuddyCnUserAgent(), which may replace both numbers with a newer npm publish.
 export const CODEBUDDY_CN_USER_AGENT = "CLI/2.108.1 CodeBuddy/2.108.1";
+
+const QWEN_DOTTED_TRIPLE_PATTERN = /^\d+\.\d+\.\d+$/;
+const NPM_QWEN_CODE_LATEST_URL = "https://registry.npmjs.org/@qwen-code/qwen-code/latest";
+const NPM_CODEBUDDY_LATEST_URL = "https://registry.npmjs.org/@tencent-ai/codebuddy-code/latest";
+export const QWEN_CLI_VERSION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+export const QWEN_CLI_VERSION_FETCH_TIMEOUT_MS = 20_000;
+export const CODEBUDDY_CN_VERSION_CACHE_TTL_MS = QWEN_CLI_VERSION_CACHE_TTL_MS;
+export const CODEBUDDY_CN_VERSION_FETCH_TIMEOUT_MS = QWEN_CLI_VERSION_FETCH_TIMEOUT_MS;
+
+type NpmFetchLike = typeof fetch;
+
+type VersionCache = { fetchedAt: number; version: string };
+
+let qwenVersionCache: VersionCache | null = null;
+let qwenVersionInFlight: Promise<string> | null = null;
+let codeBuddyVersionCache: VersionCache | null = null;
+let codeBuddyVersionInFlight: Promise<string> | null = null;
+
+function parseDottedTriple(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return QWEN_DOTTED_TRIPLE_PATTERN.test(trimmed) ? trimmed : null;
+}
+
+function compareDottedTriple(left: string, right: string): number {
+  const leftParts = left.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const rightParts = right.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  for (let i = 0; i < 3; i += 1) {
+    if (leftParts[i] !== rightParts[i]) return leftParts[i] - rightParts[i];
+  }
+  return 0;
+}
+
+function readFreshVersionCache(
+  cache: VersionCache | null,
+  ttlMs: number,
+  now = Date.now()
+): string | null {
+  if (!cache) return null;
+  if (now - cache.fetchedAt >= ttlMs) return null;
+  return cache.version;
+}
+
+function shouldAutoRefreshCliVersion(): boolean {
+  if (typeof process === "undefined") return false;
+  return !process.env.NODE_TEST_CONTEXT;
+}
+
+/**
+ * Warm one npm `latest` document. A dotted triple newer than `pin` is cached
+ * for six hours; a rejected fetch, a non-2xx, a non-triple, or an older
+ * publish leaves the pin in place. The fetch aborts at 20s.
+ */
+function refreshNpmDottedTriple(options: {
+  url: string;
+  pin: string;
+  userAgent: string;
+  timeoutMs: number;
+  ttlMs: number;
+  readCache: () => VersionCache | null;
+  setCache: (next: VersionCache) => void;
+  readInFlight: () => Promise<string> | null;
+  setInFlight: (next: Promise<string> | null) => void;
+  fetchImpl: NpmFetchLike;
+}): Promise<string> {
+  const fresh = readFreshVersionCache(options.readCache(), options.ttlMs);
+  if (fresh && compareDottedTriple(fresh, options.pin) > 0) return Promise.resolve(fresh);
+  const existing = options.readInFlight();
+  if (existing) return existing;
+
+  const current = (async () => {
+    let resolved: string | null = null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), options.timeoutMs);
+    try {
+      const response = await options.fetchImpl(options.url, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": options.userAgent,
+        },
+        signal: controller.signal,
+      });
+      if (response.ok) {
+        const payload = (await response.json()) as { version?: unknown };
+        resolved = parseDottedTriple(payload?.version);
+      }
+    } catch {
+      resolved = null;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (resolved && compareDottedTriple(resolved, options.pin) > 0) {
+      options.setCache({ fetchedAt: Date.now(), version: resolved });
+      return resolved;
+    }
+    const stillFresh = readFreshVersionCache(options.readCache(), options.ttlMs);
+    if (stillFresh && compareDottedTriple(stillFresh, options.pin) > 0) return stillFresh;
+    return options.pin;
+  })();
+
+  options.setInFlight(current);
+  void current.finally(() => {
+    if (options.readInFlight() === current) options.setInFlight(null);
+  });
+  return current;
+}
+
+/** Sync hot path. Cache if newer than the pin, else the pin. Never waits. */
+export function getQwenCliVersion(): string {
+  if (shouldAutoRefreshCliVersion() && !qwenVersionInFlight) {
+    const fresh = readFreshVersionCache(qwenVersionCache, QWEN_CLI_VERSION_CACHE_TTL_MS);
+    if (!fresh || compareDottedTriple(fresh, QWEN_CLI_VERSION) <= 0) {
+      void refreshQwenCliVersion();
+    }
+  }
+  const fresh = readFreshVersionCache(qwenVersionCache, QWEN_CLI_VERSION_CACHE_TTL_MS);
+  if (fresh && compareDottedTriple(fresh, QWEN_CLI_VERSION) > 0) return fresh;
+  return QWEN_CLI_VERSION;
+}
+
+export function refreshQwenCliVersion(fetchImpl: NpmFetchLike = fetch): Promise<string> {
+  return refreshNpmDottedTriple({
+    url: NPM_QWEN_CODE_LATEST_URL,
+    pin: QWEN_CLI_VERSION,
+    userAgent: "OmniRoute-QwenCodeVersion/1.0",
+    timeoutMs: QWEN_CLI_VERSION_FETCH_TIMEOUT_MS,
+    ttlMs: QWEN_CLI_VERSION_CACHE_TTL_MS,
+    readCache: () => qwenVersionCache,
+    setCache: (next) => {
+      qwenVersionCache = next;
+    },
+    readInFlight: () => qwenVersionInFlight,
+    setInFlight: (next) => {
+      qwenVersionInFlight = next;
+    },
+    fetchImpl,
+  });
+}
+
+export function resetQwenCliVersionCache(): void {
+  qwenVersionCache = null;
+  qwenVersionInFlight = null;
+}
+
+function formatCodeBuddyCnUserAgent(version: string): string {
+  return `CLI/${version} CodeBuddy/${version}`;
+}
+
+/** Sync hot path. Both numbers move together, or the captured pin stays. */
+export function getCodeBuddyCnUserAgent(): string {
+  if (shouldAutoRefreshCliVersion() && !codeBuddyVersionInFlight) {
+    const fresh = readFreshVersionCache(codeBuddyVersionCache, CODEBUDDY_CN_VERSION_CACHE_TTL_MS);
+    if (!fresh) void refreshCodeBuddyCnUserAgent();
+  }
+  const fresh = readFreshVersionCache(codeBuddyVersionCache, CODEBUDDY_CN_VERSION_CACHE_TTL_MS);
+  if (fresh) return formatCodeBuddyCnUserAgent(fresh);
+  return CODEBUDDY_CN_USER_AGENT;
+}
+
+export function refreshCodeBuddyCnUserAgent(fetchImpl: NpmFetchLike = fetch): Promise<string> {
+  const pinVersion = CODEBUDDY_CN_USER_AGENT.match(/(\d+\.\d+\.\d+)/)?.[1] ?? "0.0.0";
+  return refreshNpmDottedTriple({
+    url: NPM_CODEBUDDY_LATEST_URL,
+    pin: pinVersion,
+    userAgent: "OmniRoute-CodeBuddyVersion/1.0",
+    timeoutMs: CODEBUDDY_CN_VERSION_FETCH_TIMEOUT_MS,
+    ttlMs: CODEBUDDY_CN_VERSION_CACHE_TTL_MS,
+    readCache: () => codeBuddyVersionCache,
+    setCache: (next) => {
+      codeBuddyVersionCache = next;
+    },
+    readInFlight: () => codeBuddyVersionInFlight,
+    setInFlight: (next) => {
+      codeBuddyVersionInFlight = next;
+    },
+    fetchImpl,
+  }).then((version) => formatCodeBuddyCnUserAgent(version));
+}
+
+export function resetCodeBuddyCnVersionCache(): void {
+  codeBuddyVersionCache = null;
+  codeBuddyVersionInFlight = null;
+}
 
 export const KIRO_SDK_USER_AGENT = "AWS-SDK-JS/3.0.0 kiro-ide/1.0.0";
 export const KIRO_AMZ_USER_AGENT = "aws-sdk-js/3.0.0 kiro-ide/1.0.0";
@@ -269,7 +454,7 @@ export function normalizeStainlessArch(arch: string = getRuntimeArch()): string 
   return arch ? `other:${arch}` : "unknown";
 }
 
-export function getQwenCliUserAgent(version = QWEN_CLI_VERSION): string {
+export function getQwenCliUserAgent(version = getQwenCliVersion()): string {
   // Qoder's DashScope-compatible backend expects Qwen Code's runtime-derived wire identity.
   // Keep it runtime-derived so packaged deployments use their own platform/architecture.
   return `QwenCode/${version} (${getRuntimePlatform()}; ${getRuntimeArch()})`;
