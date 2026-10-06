@@ -6,11 +6,22 @@ import type { AntigravityClientProfile } from "@/shared/constants/antigravityCli
 // VS Code Copilot Chat extension. The CLI's `copilot-developer-cli` integration
 // id is the catalog-unlock lever: it exposes the full entitled model set
 // (gemini-3.x, gpt-5.4-nano, the full opus reasoning range) where `vscode-chat`
-// returns a narrower list. Version strings track the live-captured CLI 1.0.88.
+// returns a narrower list. Version strings start at the live-captured CLI
+// 1.0.88 and follow a newer `@github/copilot` publish when the registry
+// answers. Copilot gates models on that version and 400s a pin that is behind.
 export const GITHUB_COPILOT_API_VERSION = "2026-08-01";
 export const GITHUB_COPILOT_CLI_VERSION = "1.0.88";
 const GITHUB_COPILOT_VERSION_OVERRIDE_ENV = "GITHUB_COPILOT_CLI_VERSION";
 const SAFE_COPILOT_VERSION_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]{0,31}$/;
+const COPILOT_DOTTED_TRIPLE_PATTERN = /^\d+\.\d+\.\d+$/;
+const NPM_GITHUB_COPILOT_LATEST_URL = "https://registry.npmjs.org/@github/copilot/latest";
+export const GITHUB_COPILOT_VERSION_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
+export const GITHUB_COPILOT_VERSION_FETCH_TIMEOUT_MS = 20_000;
+
+type CopilotFetchLike = typeof fetch;
+
+let copilotVersionCache: { fetchedAt: number; version: string } | null = null;
+let copilotVersionInFlight: Promise<string> | null = null;
 
 function getSafeCopilotEnvValue(name: string, pattern: RegExp): string | null {
   const raw = typeof process === "undefined" ? undefined : process.env?.[name];
@@ -22,12 +33,96 @@ function getSafeCopilotEnvValue(name: string, pattern: RegExp): string | null {
   return normalized;
 }
 
+function parseCopilotDottedTriple(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return COPILOT_DOTTED_TRIPLE_PATTERN.test(trimmed) ? trimmed : null;
+}
+
+function compareCopilotDottedTriple(left: string, right: string): number {
+  const leftParts = left.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  const rightParts = right.split(".").map((part) => Number.parseInt(part, 10) || 0);
+  for (let i = 0; i < 3; i += 1) {
+    if (leftParts[i] !== rightParts[i]) return leftParts[i] - rightParts[i];
+  }
+  return 0;
+}
+
+/** A fetched version replaces the pin only when it is strictly newer. */
+function pickCopilotVersionAtLeastPin(candidate: string | null): string {
+  if (candidate && compareCopilotDottedTriple(candidate, GITHUB_COPILOT_CLI_VERSION) > 0) {
+    return candidate;
+  }
+  return GITHUB_COPILOT_CLI_VERSION;
+}
+
+function readFreshCopilotVersionCache(now = Date.now()): string | null {
+  if (!copilotVersionCache) return null;
+  if (now - copilotVersionCache.fetchedAt >= GITHUB_COPILOT_VERSION_CACHE_TTL_MS) return null;
+  return copilotVersionCache.version;
+}
+
+/**
+ * Refresh the advertised Copilot CLI version from `@github/copilot` on npm.
+ * A dotted triple newer than 1.0.88 replaces it; any failure, a non-triple,
+ * or an older publish keeps the pin. Cached for six hours. The fetch aborts
+ * at 20s — registry responses from this host regularly exceed a few seconds.
+ */
+export function resolveGitHubCopilotCliVersion(
+  fetchImpl: CopilotFetchLike = fetch
+): Promise<string> {
+  const now = Date.now();
+  const fresh = readFreshCopilotVersionCache(now);
+  if (fresh) return Promise.resolve(pickCopilotVersionAtLeastPin(fresh));
+  if (copilotVersionInFlight) return copilotVersionInFlight;
+
+  copilotVersionInFlight = (async () => {
+    let resolved: string | null = null;
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), GITHUB_COPILOT_VERSION_FETCH_TIMEOUT_MS);
+    try {
+      const response = await fetchImpl(NPM_GITHUB_COPILOT_LATEST_URL, {
+        headers: {
+          Accept: "application/json",
+          "User-Agent": "OmniRoute-CopilotVersion/1.0",
+        },
+        signal: controller.signal,
+      });
+      if (response.ok) {
+        const payload = (await response.json()) as { version?: unknown };
+        resolved = parseCopilotDottedTriple(payload?.version);
+      }
+    } catch {
+      resolved = null;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+
+    if (resolved && compareCopilotDottedTriple(resolved, GITHUB_COPILOT_CLI_VERSION) > 0) {
+      copilotVersionCache = { fetchedAt: Date.now(), version: resolved };
+    }
+    return pickCopilotVersionAtLeastPin(resolved ?? readFreshCopilotVersionCache());
+  })();
+
+  const current = copilotVersionInFlight;
+  void current.finally(() => {
+    if (copilotVersionInFlight === current) copilotVersionInFlight = null;
+  });
+  return current;
+}
+
+/** Test seam: drop the registry cache so the next resolve hits the network. */
+export function resetGitHubCopilotCliVersionCache(): void {
+  copilotVersionCache = null;
+  copilotVersionInFlight = null;
+}
+
 /** Captured pin, overridable via GITHUB_COPILOT_CLI_VERSION (#12417). */
 export function getGitHubCopilotCliVersion(): string {
-  return (
-    getSafeCopilotEnvValue(GITHUB_COPILOT_VERSION_OVERRIDE_ENV, SAFE_COPILOT_VERSION_PATTERN) ||
-    GITHUB_COPILOT_CLI_VERSION
-  );
+  const override = getSafeCopilotEnvValue(GITHUB_COPILOT_VERSION_OVERRIDE_ENV, SAFE_COPILOT_VERSION_PATTERN);
+  if (override) return override;
+  if (!process.env.NODE_TEST_CONTEXT && !readFreshCopilotVersionCache() && !copilotVersionInFlight) void resolveGitHubCopilotCliVersion();
+  return pickCopilotVersionAtLeastPin(readFreshCopilotVersionCache());
 }
 
 export const GITHUB_COPILOT_EDITOR_VERSION = `copilot/${GITHUB_COPILOT_CLI_VERSION}`;
