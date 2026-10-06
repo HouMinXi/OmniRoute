@@ -17,6 +17,7 @@
 //     a real defect; exit 1.
 //   • DRIFT checks (eslint WARNINGS, cognitive-complexity, file-size, cyclomatic
 //     complexity, dead-code, type-coverage, compression-budget, openapi-coverage,
+//     pricing-freshness,
 //     workflow-lint/zizmor, codeql-ratchet) → ratchet drift accrued across the
 //     cycle is NOT a contributor's fault; it is reported and rebaselined by the
 //     maintainer at release. Drift NEVER changes the exit code, so wiring this as
@@ -359,6 +360,11 @@ export function extractCiGates(
     const steps = doc?.jobs?.[job]?.steps;
     if (!Array.isArray(steps)) continue;
     for (const step of steps) {
+      // A step guarded to pull_request events reads the PR's base/head/title/body, which a
+      // scheduled or push validation does not have (check:ai-attribution ran `git log ".."`).
+      if (typeof step?.if === "string" && /event_name\s*==\s*['"]pull_request['"]/.test(step.if)) {
+        continue;
+      }
       const runStr = typeof step?.run === "string" ? step.run : "";
       if (!runStr) continue;
       for (const rawLine of runStr.split("\n")) {
@@ -689,6 +695,15 @@ async function main() {
     "run",
     "check:codeql-ratchet",
   ]);
+  // Pricing data untouched for 90 days: a clock, not a regression, so it can't belong to a
+  // PR gate (it would red every PR at once). Reported here, refreshed at release.
+  await driftCmd(
+    "pricing-freshness",
+    "Pricing freshness (90 days)",
+    npmCmd,
+    ["run", "check:pricing-freshness"],
+    "touched within 90 days"
+  );
 
   // Docs sync + fabricated-docs (strict) is a real-defect gate (invented env vars /
   // routes, i18n mirror drift) — HARD.
