@@ -377,7 +377,8 @@ export async function registerNodejs(): Promise<void> {
     startGrokBotCleanupSweeper({
       resolveConnection: async (connectionId: string) => {
         const connection = await getProviderConnectionById(connectionId);
-        return connection ? { refreshToken: connection.refreshToken } : null;
+        const token = connection?.refreshToken;
+        return typeof token === "string" ? { refreshToken: token } : null;
       },
       transportFor: (accessToken: string) => getTransport(accessToken),
     });

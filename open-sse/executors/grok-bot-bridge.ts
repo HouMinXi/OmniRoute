@@ -6,6 +6,7 @@ import {
   generateBridgeNonce,
   getGrokBotBridgeRegistry,
   type BridgeCloseReason,
+  type BridgeTurnEntry,
   type GrokBotBridgeRegistry,
 } from "../services/grokBotBridgeRegistry";
 
@@ -270,13 +271,16 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
 
   // Lifecycle step 3: register inside the registry critical section. A
   // refusal closes the just-started server before the error returns.
+  let registeredEntry: BridgeTurnEntry | null = null;
   const registered = registry.register({
     nonce,
     port,
     createdAt,
     challenge,
     hooks: {
-      onDraining: () => armDrain(registered.entry),
+      onDraining: () => {
+        if (registeredEntry) armDrain(registeredEntry);
+      },
       onForcedAbort: () => {
         if (drainTimer) {
           clearTimeout(drainTimer);
@@ -288,7 +292,7 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
       onLocallyClosed: (reason) => options.onLocallyClosed?.(reason),
     },
   });
-  if (!registered.ok) {
+  if ("reason" in registered) {
     if (drainTimer) {
       clearTimeout(drainTimer);
       drainTimer = null;
@@ -296,6 +300,7 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
     destroyServer();
     throw new Error(`bridge registration refused: ${registered.reason}`);
   }
+  registeredEntry = registered.entry;
 
   if (options.signal) {
     options.signal.addEventListener(

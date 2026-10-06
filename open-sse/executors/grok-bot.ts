@@ -431,6 +431,8 @@ type StartedBridge = {
   close?: (reason: BridgeCloseReason) => void;
   /** Internally generated challenge on registry-backed turns (spec step 1). */
   challenge?: string;
+  /** Tool calls the model made during the turn, read back when it ends. */
+  invocations?: Array<{ name: string; arguments: unknown }>;
 };
 
 type BridgeController = {
@@ -561,6 +563,8 @@ export class GrokBotExecutor extends BaseExecutor {
       model?: string;
       grokBotBridge?: { url?: string; challenge?: string };
       tools?: unknown[];
+      tool_choice?: unknown;
+      parallel_tool_calls?: boolean;
     };
     credentials?: { accessToken?: string; refreshToken?: string; connectionId?: string };
     signal?: AbortSignal | null;
