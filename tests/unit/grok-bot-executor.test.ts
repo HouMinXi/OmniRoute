@@ -674,7 +674,7 @@ describe("GrokBotExecutor", () => {
       },
       async stop() {},
     });
-    t.watchEvents = settledWatchEvents("I will check the pipeline.");
+    t.watchEvents = settledWatchEvents("I will use lookup for this.");
     const input = makeInput([{ role: "user", content: "check it" }], true, undefined, {
       url: "http://127.0.0.1:9/mcp",
       challenge: "test-challenge",
@@ -691,7 +691,37 @@ describe("GrokBotExecutor", () => {
     const text = new TextDecoder().decode(Buffer.concat(chunks));
     assert.equal(res.status, 200);
     assert.match(text, /bridge_not_called/);
-    assert.equal(text.includes("I will check the pipeline."), false);
+    assert.equal(text.includes("I will use lookup for this."), false);
+  });
+
+  it("returns plain text when the model names no tool", async () => {
+    executor.setBridgeControllerForTests({
+      async start() {
+        return {
+          url: "https://bridge.example.com/grok-bridge/plainstreamxxxxxxxxxx2/mcp",
+          invocations: [],
+        };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("nothing new since last time.");
+    const input = makeInput([{ role: "user", content: "any result" }], true, undefined, {
+      url: "http://127.0.0.1:9/mcp",
+      challenge: "test-challenge",
+    });
+    (input.body as { tools?: unknown[] }).tools = [{ type: "function", function: { name: "lookup" } }];
+    const res = (await executor.execute(input)) as Response;
+    const reader = res.body!.getReader();
+    const chunks: Uint8Array[] = [];
+    for (;;) {
+      const next = await reader.read();
+      if (next.done) break;
+      chunks.push(next.value!);
+    }
+    const text = new TextDecoder().decode(Buffer.concat(chunks));
+    assert.equal(res.status, 200);
+    assert.equal(text.includes("bridge_not_called"), false);
+    assert.equal(text.includes("nothing new since last time."), true);
   });
 
   it("retries one new tunnel after the first tunnel fails", async () => {

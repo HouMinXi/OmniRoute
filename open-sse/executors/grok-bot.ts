@@ -222,6 +222,14 @@ function isTimeoutError(err: unknown): boolean {
   );
 }
 
+function namesAClientTool(text: string, tools: unknown[]): boolean {
+  for (const tool of tools) {
+    const name = (tool as { function?: { name?: unknown } })?.function?.name;
+    if (typeof name === "string" && name && text.includes(name)) return true;
+  }
+  return false;
+}
+
 function composePrompt(messages: unknown[], challenge?: string, advertisedName?: string, hasClientTools = false, toolChoice?: unknown, parallel = true): string {
   const lines: string[] = [];
   for (const m of Array.isArray(messages) ? messages : []) {
@@ -958,7 +966,11 @@ export class GrokBotExecutor extends BaseExecutor {
                 controller.enqueue(
                   encoder.encode(`data: ${JSON.stringify(sseFinish(model, id, "tool_calls"))}\n\n`)
                 );
-              } else if (startedBridge && clientToolList.length > 0) {
+              } else if (
+                startedBridge &&
+                clientToolList.length > 0 &&
+                namesAClientTool(text ?? "", clientToolList)
+              ) {
                 controller.enqueue(
                   encoder.encode(
                     `data: ${JSON.stringify({
