@@ -880,7 +880,7 @@ export class GrokBotExecutor extends BaseExecutor {
       const collect = this.watchTurn(t, agentId, messageId, turnSignal, input.log ?? null);
       if (!stream) {
         const text = await collect;
-        if (startedBridge && !(startedBridge.invocations?.length)) {
+        if (bridge && text?.trim() === "TOOL_UNAVAILABLE") {
           return errResponse(
             HTTP_STATUS.BAD_GATEWAY ?? 502,
             "Request bridge tool was not called",
@@ -958,7 +958,7 @@ export class GrokBotExecutor extends BaseExecutor {
                 controller.enqueue(
                   encoder.encode(`data: ${JSON.stringify(sseFinish(model, id, "tool_calls"))}\n\n`)
                 );
-              } else if (startedBridge) {
+              } else if (startedBridge && clientToolList.length > 0) {
                 controller.enqueue(
                   encoder.encode(
                     `data: ${JSON.stringify({

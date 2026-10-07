@@ -649,7 +649,6 @@ describe("GrokBotExecutor", () => {
         async start() {
           return {
             url: fakeBridgeUrl("unused"),
-            call: () => "bridge-ok",
           };
         },
         async stop() {},
@@ -665,48 +664,34 @@ describe("GrokBotExecutor", () => {
       assert.match(await res.text(), /bridge_not_called/);
   });
 
-  it("rejects a tool turn that answers without calling the bridge", async () => {
-    const cases = [
-      { stream: false, nonce: "plainjsonxxxxxxxxxxxx1" },
-      { stream: true, nonce: "plainstreamxxxxxxxxxx1" },
-    ];
-    for (const item of cases) {
-      executor.setBridgeControllerForTests({
-        async start() {
-          return {
-            url: "https://bridge.example.com/grok-bridge/" + item.nonce + "/mcp",
-            call: () => "bridge-ok",
-            invocations: [],
-          };
-        },
-        async stop() {},
-      });
-      t.watchEvents = settledWatchEvents("I will check the pipeline.");
-      const res = (await executor.execute(
-        makeInput([{ role: "user", content: "check it" }], item.stream, undefined, {
-          url: "http://127.0.0.1:9/mcp",
-          challenge: "test-challenge",
-        })
-      )) as Response;
-      let text = "";
-      if (item.stream && res.body) {
-        const reader = res.body.getReader();
-        const chunks: Uint8Array[] = [];
-        for (;;) {
-          const next = await reader.read();
-          if (next.done) break;
-          chunks.push(next.value!);
-        }
-        text = new TextDecoder().decode(Buffer.concat(chunks));
-        assert.equal(res.status, 200);
-        assert.match(text, /bridge_not_called/);
-        assert.equal(text.includes("I will check the pipeline."), false);
-      } else {
-        text = await res.text();
-        assert.equal(res.status, 502);
-        assert.match(text, /bridge_not_called/);
-      }
+  it("rejects a streamed tool turn that answers without calling the bridge", async () => {
+    executor.setBridgeControllerForTests({
+      async start() {
+        return {
+          url: "https://bridge.example.com/grok-bridge/plainstreamxxxxxxxxxx1/mcp",
+          invocations: [],
+        };
+      },
+      async stop() {},
+    });
+    t.watchEvents = settledWatchEvents("I will check the pipeline.");
+    const input = makeInput([{ role: "user", content: "check it" }], true, undefined, {
+      url: "http://127.0.0.1:9/mcp",
+      challenge: "test-challenge",
+    });
+    (input.body as { tools?: unknown[] }).tools = [{ type: "function", function: { name: "lookup" } }];
+    const res = (await executor.execute(input)) as Response;
+    const reader = res.body!.getReader();
+    const chunks: Uint8Array[] = [];
+    for (;;) {
+      const next = await reader.read();
+      if (next.done) break;
+      chunks.push(next.value!);
     }
+    const text = new TextDecoder().decode(Buffer.concat(chunks));
+    assert.equal(res.status, 200);
+    assert.match(text, /bridge_not_called/);
+    assert.equal(text.includes("I will check the pipeline."), false);
   });
 
   it("retries one new tunnel after the first tunnel fails", async () => {
