@@ -294,6 +294,45 @@ function settledWatchEvents(answer: string): WatchEvent[] {
 }
 
 describe("GrokBotExecutor", () => {
+  it("keeps one copy when the same answer arrives twice", async () => {
+    const answer = "I will check the pipeline.";
+    const row = Buffer.from(JSON.stringify({
+      kind: "send-message",
+      message: { type: "text", content: answer },
+    })).toString("base64");
+    t.watchEvents = [
+      { agent: { isRunningTurn: true } },
+      { entry: { kind: "send-message", message: { type: "text", content: answer } } },
+      { rows: { entries: [{ body: row }] } },
+      { agent: { isRunningTurn: false } },
+    ];
+    const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.choices[0].message.content, answer);
+  });
+
+  it("keeps both parts when a different sentence comes between repeats", async () => {
+    const first = "first sentence.";
+    const second = "second sentence.";
+    const row = (text: string) => Buffer.from(JSON.stringify({
+      kind: "send-message",
+      message: { type: "text", content: text },
+    })).toString("base64");
+    t.watchEvents = [
+      { agent: { isRunningTurn: true } },
+      { rows: { entries: [{ body: row(first) }] } },
+      { rows: { entries: [{ body: row(second) }] } },
+      { rows: { entries: [{ body: row(first) }] } },
+      { agent: { isRunningTurn: false } },
+    ];
+    const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.choices[0].message.content, first + second + first);
+  });
+
+
   let t: FakeTransport;
   let executor: InstanceType<typeof GrokBotExecutor>;
 
@@ -624,6 +663,50 @@ describe("GrokBotExecutor", () => {
       )) as Response;
       assert.equal(res.status, 502);
       assert.match(await res.text(), /bridge_not_called/);
+  });
+
+  it("rejects a tool turn that answers without calling the bridge", async () => {
+    const cases = [
+      { stream: false, nonce: "plainjsonxxxxxxxxxxxx1" },
+      { stream: true, nonce: "plainstreamxxxxxxxxxx1" },
+    ];
+    for (const item of cases) {
+      executor.setBridgeControllerForTests({
+        async start() {
+          return {
+            url: "https://bridge.example.com/grok-bridge/" + item.nonce + "/mcp",
+            call: () => "bridge-ok",
+            invocations: [],
+          };
+        },
+        async stop() {},
+      });
+      t.watchEvents = settledWatchEvents("I will check the pipeline.");
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "check it" }], item.stream, undefined, {
+          url: "http://127.0.0.1:9/mcp",
+          challenge: "test-challenge",
+        })
+      )) as Response;
+      let text = "";
+      if (item.stream && res.body) {
+        const reader = res.body.getReader();
+        const chunks: Uint8Array[] = [];
+        for (;;) {
+          const next = await reader.read();
+          if (next.done) break;
+          chunks.push(next.value!);
+        }
+        text = new TextDecoder().decode(Buffer.concat(chunks));
+        assert.equal(res.status, 200);
+        assert.match(text, /bridge_not_called/);
+        assert.equal(text.includes("I will check the pipeline."), false);
+      } else {
+        text = await res.text();
+        assert.equal(res.status, 502);
+        assert.match(text, /bridge_not_called/);
+      }
+    }
   });
 
   it("retries one new tunnel after the first tunnel fails", async () => {

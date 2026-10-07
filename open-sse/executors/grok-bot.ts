@@ -286,6 +286,7 @@ function composePrompt(messages: unknown[], challenge?: string, advertisedName?:
     lines.push(
       "The tools listed for this request are available through GetMcpTools. " +
         directive +
+        "If you do not call one, reply TOOL_UNAVAILABLE and nothing else. " +
         "A line starting with \"Tool result\" is the value returned by an earlier call; use it and continue. " +
         "Do not use any tool that was not listed, nor any computer, file, web, permission, persistent memory, or service." +
         (parallel ? "" : " Call one tool, wait for its result, then decide the next.")
@@ -879,7 +880,7 @@ export class GrokBotExecutor extends BaseExecutor {
       const collect = this.watchTurn(t, agentId, messageId, turnSignal, input.log ?? null);
       if (!stream) {
         const text = await collect;
-        if (bridge && text?.trim() === "TOOL_UNAVAILABLE") {
+        if (startedBridge && !(startedBridge.invocations?.length)) {
           return errResponse(
             HTTP_STATUS.BAD_GATEWAY ?? 502,
             "Request bridge tool was not called",
@@ -956,6 +957,17 @@ export class GrokBotExecutor extends BaseExecutor {
                 });
                 controller.enqueue(
                   encoder.encode(`data: ${JSON.stringify(sseFinish(model, id, "tool_calls"))}\n\n`)
+                );
+              } else if (startedBridge) {
+                controller.enqueue(
+                  encoder.encode(
+                    `data: ${JSON.stringify({
+                      error: {
+                        message: "Request bridge tool was not called",
+                        type: "bridge_not_called",
+                      },
+                    })}\n\n`
+                  )
                 );
               } else {
                 if (text) {
@@ -1229,7 +1241,7 @@ export class GrokBotExecutor extends BaseExecutor {
         decoded.message?.type === "text" &&
         typeof decoded.message.content === "string"
       ) {
-        parts.push(decoded.message.content);
+        if (parts.at(-1) !== decoded.message.content) parts.push(decoded.message.content);
         return false;
       }
     }
@@ -1238,7 +1250,7 @@ export class GrokBotExecutor extends BaseExecutor {
       ev.entry.message?.type === "text" &&
       typeof ev.entry.message.content === "string"
     ) {
-      parts.push(ev.entry.message.content);
+      if (parts.at(-1) !== ev.entry.message.content) parts.push(ev.entry.message.content);
     }
     return false;
   }
