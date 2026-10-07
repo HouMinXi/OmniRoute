@@ -876,7 +876,7 @@ export class GrokBotExecutor extends BaseExecutor {
           ? AbortSignal.any([input.signal, turnController.signal])
           : turnController.signal
         : (input.signal ?? null);
-      const collect = this.watchTurn(t, agentId, messageId, turnSignal);
+      const collect = this.watchTurn(t, agentId, messageId, turnSignal, input.log ?? null);
       if (!stream) {
         const text = await collect;
         if (bridge && text?.trim() === "TOOL_UNAVAILABLE") {
@@ -1093,7 +1093,8 @@ export class GrokBotExecutor extends BaseExecutor {
     t: Transport,
     agentId: string,
     messageId: string,
-    signal: AbortSignal | null
+    signal: AbortSignal | null,
+    log: { warn?: (...args: unknown[]) => void } | null
   ): Promise<string> {
     let seenRunning = false;
     const parts: string[] = [];
@@ -1115,6 +1116,18 @@ export class GrokBotExecutor extends BaseExecutor {
       try {
         const watch = t.watch("WatchGrokBotTranscripts", payload, { signal: link });
         for await (const event of watch) {
+          if (process.env.GROK_BOT_WATCH_TRACE === "1") {
+            const ev = event as {
+              agent?: { isRunningTurn?: boolean };
+              agentState?: { live?: unknown[] };
+              entry?: { kind?: string };
+              rows?: { entries?: unknown[] };
+            };
+            log?.warn?.(
+              "GROK_BOT_WATCH",
+              `running=${String(ev.agent?.isRunningTurn ?? "")} live=${ev.agentState?.live?.length ?? 0} entry=${ev.entry?.kind ?? ""} rows=${ev.rows?.entries?.length ?? 0} parts=${parts.length}`
+            );
+          }
           const result = this.consumeWatchFrame(event, agentId, messageId, parts, (running) => {
             if (running) seenRunning = true;
             else if (seenRunning) return true;

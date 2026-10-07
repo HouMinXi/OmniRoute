@@ -374,6 +374,31 @@ describe("GrokBotExecutor", () => {
     assert.equal((await res.json()).error.type, "incomplete_turn");
   });
 
+  it("traces watch frame shape without the answer text", async () => {
+    const previous = process.env.GROK_BOT_WATCH_TRACE;
+    process.env.GROK_BOT_WATCH_TRACE = "1";
+    const lines: string[] = [];
+    t.watchEvents = [
+      { agent: { isRunningTurn: true } },
+      { entry: { kind: "send-message", message: { type: "text", content: "secret-answer" } } },
+      { agent: { isRunningTurn: false } },
+    ];
+    try {
+      const input = makeInput([{ role: "user", content: "hi" }]);
+      (input as { log: { warn: (...args: unknown[]) => void } | null }).log = {
+        warn: (...args) => lines.push(args.map(String).join(" ")),
+      };
+      const res = (await executor.execute(input)) as Response;
+      assert.equal(res.status, 200);
+      const trace = lines.filter((line) => line.includes("GROK_BOT_WATCH")).join("\n");
+      assert.equal(trace.includes("entry=send-message"), true);
+      assert.equal(trace.includes("secret-answer"), false);
+    } finally {
+      if (previous === undefined) delete process.env.GROK_BOT_WATCH_TRACE;
+      else process.env.GROK_BOT_WATCH_TRACE = previous;
+    }
+  });
+
   it("returns a tool call when the turn ends without text", async () => {
     const previous = globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL;
     globalThis.process.env.GROK_BOT_PUBLIC_BRIDGE_URL = "https://bridge.example.com";
