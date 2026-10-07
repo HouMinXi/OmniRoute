@@ -55,7 +55,7 @@ export function connectionHasExtraKeys(connectionId: string, extraKeys?: string[
 
 // In-memory health status (synced to DB on state changes)
 // Key format: "primary" | "extra_0" | "extra_1" | ...
-interface KeyHealth {
+export interface KeyHealth {
   status: "active" | "warning" | "invalid";
   failures: number; // consecutive failures
   lastFailure: string | null; // ISO timestamp
@@ -106,15 +106,9 @@ export function parseRetryAfterMs(value: string | null | undefined): number | nu
  * only applies when no in-memory record exists (e.g. first touch after
  * startup hydration).
  */
-function isCooling(
-  connectionId: string,
-  keyId: string,
-  provided?: KeyHealth | undefined
-): boolean {
+function isCooling(connectionId: string, keyId: string, provided?: KeyHealth | undefined): boolean {
   const inMemory = _keyHealth.get(`${connectionId}:${keyId}`);
-  const until = inMemory
-    ? inMemory.cooldownUntil ?? null
-    : (provided?.cooldownUntil ?? null);
+  const until = inMemory ? (inMemory.cooldownUntil ?? null) : (provided?.cooldownUntil ?? null);
   if (!until) return false;
   const untilMs = Date.parse(until);
   return Number.isFinite(untilMs) && untilMs > Date.now();

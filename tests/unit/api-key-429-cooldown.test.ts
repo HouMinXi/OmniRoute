@@ -2,7 +2,7 @@
 // Per-key 429 cooldown (#14573): a rate limit on one extra key must cool only that
 // key — not mark it invalid, not disable the whole connection. The rotator skips
 // cooling keys and picks them up again once cooldownUntil passes.
-import { test, describe, it, afterEach } from "node:test";
+import { describe, it, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import {
@@ -122,7 +122,15 @@ describe("recordKeyCooldown + rotation skip", () => {
     recordKeyCooldown(conn, "primary", 60_000);
     const dbHealth = {
       primary: { ...getAllKeyHealth()[`${conn}:primary`], cooldownUntil: null },
-      extra_0: { status: "active", failures: 0, lastFailure: null, lastSuccess: null, totalRequests: 0, totalFailures: 0, cooldownUntil: null },
+      extra_0: {
+        status: "active",
+        failures: 0,
+        lastFailure: null,
+        lastSuccess: null,
+        totalRequests: 0,
+        totalFailures: 0,
+        cooldownUntil: null,
+      },
     };
     const pick = getValidApiKey(conn, "sk-p", ["sk-e0"], dbHealth as never);
     // the in-memory cooldown write happened after startup sync, so it still wins
@@ -177,7 +185,14 @@ describe("hasEligibleKey (connection guard input)", () => {
 describe("recordKeyHealthStatus 429 handling", () => {
   it("429 with retryAfterMs cools the selected key and keeps status active", () => {
     const conn = "kh-429-cool";
-    recordKeyHealthStatus(429, creds(conn, { selectedKeyId: "extra_0" }), noopLog, undefined, "", 30_000);
+    recordKeyHealthStatus(
+      429,
+      creds(conn, { selectedKeyId: "extra_0" }),
+      noopLog,
+      undefined,
+      "",
+      30_000
+    );
     const h = getAllKeyHealth()[`${conn}:extra_0`];
     assert.ok(h, "health entry expected");
     assert.ok(h.cooldownUntil !== null && new Date(h.cooldownUntil).getTime() > Date.now());
@@ -252,13 +267,17 @@ describe("shouldKeepConnectionActiveOnRateLimit", () => {
 
 describe("chatCore wiring (source-locked)", () => {
   const src = readFileSync(new URL("../../open-sse/handlers/chatCore.ts", import.meta.url), "utf8");
+  const executeSrc = readFileSync(
+    new URL("../../open-sse/handlers/chatCore/executeProviderRequest.ts", import.meta.url),
+    "utf8"
+  );
 
   it("streaming executor site records 429 into key health (not only 2xx/401/403)", () => {
-    const i = src.indexOf("recordKeyHealthStatus(\n                  res.response.status,");
+    const i = executeSrc.search(/recordKeyHealthStatus\(\s*res\.response\.status,/);
     assert.notEqual(i, -1, "streaming recordKeyHealthStatus call site must exist");
     // Only the condition head counts — comments inside the block must not satisfy this.
-    const condStart = src.lastIndexOf("if (", i);
-    const cond = src.slice(condStart, condStart + 600);
+    const condStart = executeSrc.lastIndexOf("if (", i);
+    const cond = executeSrc.slice(condStart, condStart + 700);
     assert.ok(
       cond.includes("HTTP_STATUS.RATE_LIMITED"),
       "streaming condition head must admit 429 via HTTP_STATUS.RATE_LIMITED"
@@ -266,7 +285,7 @@ describe("chatCore wiring (source-locked)", () => {
   });
 
   it("QUOTA_EXHAUSTED branch keeps the connection active when extra keys remain eligible", () => {
-    const q = src.indexOf('errorType === PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED');
+    const q = src.indexOf("errorType === PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED");
     assert.notEqual(q, -1);
     const block = src.slice(q, q + 9000);
     assert.ok(
