@@ -6739,7 +6739,10 @@
     "codexPaidCreditsDisabled": "Créditos de pago de Codex desactivados",
     "failedUpdateCodexPaidCredits": "No se pudo actualizar la política de créditos de pago de Codex",
     "allowCodexPaidCreditsLabel": "Permitir créditos de pago de Codex",
-    "allowCodexPaidCreditsDescription": "Permite que esta cuenta use créditos de pago cuando su cuota de suscripción alcance el umbral. Requiere créditos disponibles informados por OpenAI; puede generar cargos. Los límites de Spark y los enfriamientos del proveedor siguen aplicándose. La disponibilidad de créditos se comprueba aunque la verificación previa de cuota esté desactivada, salvo que el filtrado local de cuota esté totalmente desactivado (verificación previa de cuota y política de límites, ambas desactivadas)."
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
+    "rawClaudePassthroughLabel": "Raw Request Passthrough",
+    "rawClaudePassthroughDescription": "Forward client requests directly without CLI emulation or cache header modification.",
+    "rawClaudePassthroughWarning": "Notice: This mode disables request rewriting. It does not alter credential permissions, terms of service, or billing policies. Requests may be rejected by the provider, and any additional usage fees depend on your account plan. Third-party integrations should use authorized API credentials."
   },
   "settings": {
     "title": "Configuración",

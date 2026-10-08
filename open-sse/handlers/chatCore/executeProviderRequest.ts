@@ -108,6 +108,7 @@ export type ExecuteProviderRequestDeps = {
   clientResponseFormat: string | null | undefined;
   connectionId: string | null | undefined;
   contextEditingEnabled?: boolean;
+  isClaudePassthrough?: boolean;
   correlationId: string | null | undefined;
   credentials: Record<string, unknown> | null | undefined;
   dedupEnabled: boolean;
@@ -162,6 +163,7 @@ export async function executeProviderRequest(
     clientResponseFormat,
     connectionId,
     contextEditingEnabled,
+    isClaudePassthrough,
     correlationId,
     credentials,
     dedupEnabled,
@@ -351,6 +353,7 @@ export async function executeProviderRequest(
                         onCredentialsRefreshed,
                         skipUpstreamRetry,
                         contextEditing: { enabled: contextEditingEnabled },
+                        isClaudePassthrough,
                         correlationId,
                       })
                     ),
@@ -557,6 +560,7 @@ export async function executeProviderRequest(
                             onCredentialsRefreshed,
                             skipUpstreamRetry,
                             contextEditing: { enabled: contextEditingEnabled },
+                            isClaudePassthrough,
                             correlationId,
                           })
                         ),

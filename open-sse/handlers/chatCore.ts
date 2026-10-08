@@ -3024,6 +3024,7 @@ async function handleChatCoreInner({
     clientResponseFormat,
     connectionId,
     contextEditingEnabled,
+    isClaudePassthrough,
     correlationId,
     credentials,
     dedupEnabled,
