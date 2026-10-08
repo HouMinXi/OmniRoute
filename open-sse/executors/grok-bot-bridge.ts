@@ -152,10 +152,14 @@ function handleBridgeMcpRequest(
         return;
       }
       state.calls += 1;
-      state.invocations.push({
-        name: body.params?.name ?? "",
-        arguments: body.params?.arguments ?? {},
-      });
+      const args = body.params?.arguments ?? {};
+      const name = body.params?.name ?? "";
+      const already = state.invocations.some(
+        (call) => call.name === name && JSON.stringify(call.arguments) === JSON.stringify(args)
+      );
+      if (!already) {
+        state.invocations.push({ name, arguments: args });
+      }
       if (state.registry) {
         const found = state.registry.lookup(state.nonce);
         if (found.kind === "active") state.registry.holdUntilCap(found.entry);

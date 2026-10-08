@@ -75,6 +75,28 @@ describe("grok bot bridge turn (registry-backed)", () => {
     assert.deepEqual(turn.invocations, [{ name: BRIDGE_TOOL_NAME, arguments: { text: "ping" } }]);
   });
 
+  it("records one invocation when the same tools/call arrives twice", async () => {
+    const turn = await startBridgeTurn({ publicBaseUrl: "https://bridge.example.com", registry });
+    const found = registry.lookup(turn.nonce);
+    if (found.kind !== "active") {
+      assert.fail(`nonce must be active, got: ${found.kind}`);
+    }
+    const body = JSON.stringify({
+      jsonrpc: "2.0",
+      id: 1,
+      method: "tools/call",
+      params: { name: BRIDGE_TOOL_NAME, arguments: { a: 2, b: 2 } },
+    });
+    const post = () => fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`, {
+      method: "POST",
+      headers: { authorization: "Bearer " + turn.challenge, "content-type": "application/json" },
+      body,
+    });
+    assert.equal((await post()).status, 200);
+    assert.equal((await post()).status, 200);
+    assert.deepEqual(turn.invocations, [{ name: BRIDGE_TOOL_NAME, arguments: { a: 2, b: 2 } }]);
+  });
+
   it("advertises the tools it was given and accepts a call to one of them", async () => {
     const tools = [
       { name: "canary_value", description: "canary", inputSchema: { type: "object", properties: {} } },
