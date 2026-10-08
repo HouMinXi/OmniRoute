@@ -706,8 +706,55 @@ export function translateNonStreamingResponse(
     return convertOpenAINonStreamingToGeminiFamily(toRecord(intermediateOpenAI));
   }
 
+  if (sourceFormat === FORMATS.OPENAI_RESPONSES && sourceFormat !== targetFormat) {
+    return convertOpenAINonStreamingToResponses(toRecord(intermediateOpenAI));
+  }
+
   // Return intermediateOpenAI (which is either the raw response if unknown targetFormat, or an OpenAI compatible payload)
   return intermediateOpenAI;
+}
+
+function convertOpenAINonStreamingToResponses(openai: JsonRecord): JsonRecord {
+  const choice = toRecord((Array.isArray(openai.choices) ? openai.choices : [])[0]);
+  const message = toRecord(choice.message);
+  const output: JsonRecord[] = [];
+  const text = typeof message.content === "string" ? message.content : "";
+  if (text) {
+    output.push({
+      id: `msg_${toString(openai.id, "0")}`,
+      type: "message",
+      content: [{ type: "output_text", annotations: [], logprobs: [], text }],
+      role: "assistant",
+      status: "completed",
+    });
+  }
+  for (const tool of Array.isArray(message.tool_calls) ? message.tool_calls : []) {
+    const toolObj = toRecord(tool);
+    const fn = toRecord(toolObj.function);
+    const callId = toString(toolObj.id);
+    output.push({
+      id: `fc_${callId}`,
+      type: "function_call",
+      arguments: typeof fn.arguments === "string" ? fn.arguments : JSON.stringify(fn.arguments ?? {}),
+      call_id: callId,
+      name: toString(fn.name),
+      status: "completed",
+    });
+  }
+  const usage = toRecord(openai.usage);
+  return {
+    id: toString(openai.id),
+    object: "response",
+    created_at: toNumber(openai.created, Math.floor(Date.now() / 1000)),
+    model: toString(openai.model),
+    output,
+    status: "completed",
+    usage: {
+      input_tokens: toNumber(usage.prompt_tokens, 0),
+      output_tokens: toNumber(usage.completion_tokens, 0),
+      total_tokens: toNumber(usage.total_tokens, 0),
+    },
+  };
 }
 
 /**
@@ -809,8 +856,7 @@ function convertOpenAINonStreamingToClaude(
         type: "tool_use",
         id: sanitizeToolId(rawId),
         name: restoreClaudeToolName(toString(fn.name), toolNameMap ?? null),
-        input:
-          typeof fn.arguments === "string" ? JSON.parse(fn.arguments || "{}") : fn.arguments || {},
+        input: parseFunctionCallArgs(fn.arguments),
       });
     }
   }

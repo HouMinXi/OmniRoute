@@ -60,6 +60,7 @@ export const DEFAULT_PRICING_OAUTH = {
     },
     "claude-opus-5-5": CLAUDE_OPUS_5_5_PRICING,
     "claude-opus-5": CLAUDE_OPUS_5_PRICING,
+    "claude-opus-5-5": CLAUDE_OPUS_5_PRICING,
     "claude-opus-4-8": {
       input: 5.0,
       output: 25.0,
@@ -377,6 +378,7 @@ export const DEFAULT_PRICING_OAUTH = {
   agy: ANTIGRAVITY_GEMINI_3_7_PRICING,
   gh: {
     "claude-opus-5": CLAUDE_OPUS_5_PRICING,
+    "claude-opus-5-5": CLAUDE_OPUS_5_PRICING,
     "gpt-5": {
       input: 3.0,
       output: 12.0,

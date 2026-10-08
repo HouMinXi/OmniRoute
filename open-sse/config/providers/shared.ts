@@ -379,6 +379,10 @@ export const GPT_5_6_CODEX_CAPABILITIES = {
   supportsReasoning: true,
   supportsVision: true,
   supportsXHighEffort: true,
+  // Codex OAuth models hide effort_tiers by ownedBy (catalog.ts). The
+  // registry list is still what getRegistryThinkingEfforts reads, and it
+  // is what lets gpt-6-astra / gpt-6.1-sol keep low..max in the dashboard.
+  supportedThinkingEfforts: ["low", "medium", "high", "xhigh", "max"],
   contextLength: 872000,
   maxInputTokens: 872000,
   maxOutputTokens: 128000,

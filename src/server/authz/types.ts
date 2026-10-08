@@ -27,6 +27,7 @@ export type RouteClass = "PUBLIC" | "CLIENT_API" | "MANAGEMENT";
 export type ClassificationReason =
   | "public_prefix"
   | "public_readonly_prefix"
+  | "grok_bridge_public_route"
   | "dashboard_prefix"
   | "setup_wizard"
   | "public_connect_page"

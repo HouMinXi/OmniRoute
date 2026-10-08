@@ -67,6 +67,12 @@ function isEmptyContentFailure(status: number, errorText: string): boolean {
   return status === 502 && (/empty content/i.test(errorText) || /empty response/i.test(errorText));
 }
 
+// A grok-bot turn that went idle before the answer is one unfinished request,
+// not a dead connection. The same account answered the next request.
+function isUnfinishedTurnFailure(status: number, errorText: string): boolean {
+  return status === 502 && /incomplete_turn|idle without explicit completion/i.test(errorText);
+}
+
 /** #12441 — quota/credits bodies must not take the 401/403 auth-skip path. */
 export function isQuotaOrCreditsError(
   errorText: string,
@@ -571,6 +577,7 @@ function markConnectionLevelExhaustion(
     // connection-level. Don't exhaust the provider; let the remaining legs (incl. same-provider)
     // be tried in-request.
     isEmptyContentFailure(result.status, errorText) ||
+    isUnfinishedTurnFailure(result.status, errorText) ||
     // Per-model-quota providers (gemini, github, passthrough, compatible) multiplex models
     // behind one connection. A model-level 500 (e.g. Gemini "Internal error encountered")
     // must NOT exhaust the connection — other models on the same connection may still succeed.

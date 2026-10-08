@@ -90,7 +90,16 @@ export function buildCanonicalToAliasMap(
  *      practice (fetcher writes bare keys), but kept defensive.
  *
  * Returns `undefined` when no lookup hits.
+ *
+ * A generic openai-compatible adapter publishes under a prefix the pricing
+ * catalog does not know (`ih/`, `si/`). The bare-id fallback then returns
+ * whichever unrelated provider happens to sell the same model name, and
+ * that entry carries the foreign provider's alias, display name, free-tier
+ * budget and price. For those two prefixes the model name is still useful,
+ * but the provider-scoped fields are not: the prefix itself is the adapter.
  */
+const GENERIC_ADAPTER_PREFIXES = new Set(["ih", "si"]);
+
 export function lookupEnrichment(
   rawId: string,
   enrichment: OmniRouteEnrichmentMap | undefined,
@@ -109,7 +118,12 @@ export function lookupEnrichment(
       if (viaAlias) return viaAlias;
     }
     const bare = enrichment.get(modelId);
-    if (bare) return bare;
+    if (bare) {
+      if (GENERIC_ADAPTER_PREFIXES.has(prefix)) {
+        return { name: bare.name, providerAlias: prefix, providerDisplayName: prefix };
+      }
+      return bare;
+    }
   }
   return undefined;
 }

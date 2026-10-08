@@ -284,6 +284,14 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
       body.tool_choice,
       useNativeResponsesWebSearch && hasClaudeServerWebSearchTool(body.tools)
     );
+    if (
+      body.tool_choice !== null &&
+      typeof body.tool_choice === "object" &&
+      !Array.isArray(body.tool_choice) &&
+      body.tool_choice.disable_parallel_tool_use === true
+    ) {
+      result.parallel_tool_calls = false;
+    }
   }
 
   // Reasoning effort: map Claude-side thinking controls to OpenAI reasoning_effort.
@@ -525,7 +533,7 @@ function convertClaudeMessage(msg, preserveCacheControl = false) {
           toolResults.push({
             role: "tool",
             tool_call_id: block.tool_use_id,
-            content: resultContent,
+            content: block.is_error === true ? `Error: ${resultContent}` : resultContent,
           });
           break;
       }

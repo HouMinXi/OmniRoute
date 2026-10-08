@@ -149,6 +149,47 @@ test("#5085 empty-content 502 must NOT mark the provider/connection exhausted (m
   );
 });
 
+test("incomplete_turn 502 must NOT mark the provider exhausted", () => {
+  const sets = freshSets();
+  const { providerExhausted } = applyComboTargetExhaustion(
+    makeTarget("grok-bot", "grok-bot/grok-bot", "conn-1"),
+    {
+      result: { status: 502, headers: new Headers() },
+      fallbackResult: { reason: "server_error" },
+      errorText: "Stream ended before producing a non-ping SSE event: Error: turn became idle without explicit completion",
+      rawModel: "grok-bot",
+      isTokenLimitBreach: false,
+      allAccountsRateLimited: false,
+      sets,
+      log,
+      tag: "COMBO",
+      exhaustedLogLevel: "info",
+    }
+  );
+  assert.equal(providerExhausted, false);
+  assert.equal(sets.exhaustedConnections.has("grok-bot:conn-1"), false);
+});
+
+test("a 500 that merely mentions an unfinished turn still exhausts the connection", async () => {
+  const sets = freshSets();
+  applyComboTargetExhaustion(
+    makeTarget("grok-bot", "grok-bot/grok-bot", "conn-1"),
+    {
+      result: { status: 500, headers: new Headers() },
+      fallbackResult: { reason: "server_error" },
+      errorText: "turn became idle without explicit completion",
+      rawModel: "grok-bot",
+      isTokenLimitBreach: false,
+      allAccountsRateLimited: false,
+      sets,
+      log,
+      tag: "COMBO",
+      exhaustedLogLevel: "info",
+    }
+  );
+  assert.equal(sets.exhaustedConnections.has("grok-bot:conn-1"), true);
+});
+
 test("#8397 empty-response 502 (no usable choices/output) must NOT mark provider/connection exhausted", () => {
   const sets = freshSets();
   const { providerExhausted: providerExhausted } = applyComboTargetExhaustion(

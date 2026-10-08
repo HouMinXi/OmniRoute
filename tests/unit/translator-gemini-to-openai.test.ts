@@ -304,3 +304,79 @@ test("Gemini -> OpenAI preserves custom response objects without result key", ()
   assert.equal(result.messages[0].role, "tool");
   assert.equal(result.messages[0].content, '{"output":"value","success":false}');
 });
+
+test("Gemini toolConfig NONE becomes tool_choice none", () => {
+  const result = geminiToOpenAIRequest(
+    "grok-bot",
+    { contents: [], toolConfig: { functionCallingConfig: { mode: "NONE" } } },
+    false
+  );
+  assert.equal(result.tool_choice, "none");
+});
+
+test("Gemini toolConfig ANY becomes tool_choice required", () => {
+  const result = geminiToOpenAIRequest(
+    "grok-bot",
+    { contents: [], toolConfig: { functionCallingConfig: { mode: "ANY" } } },
+    false
+  );
+  assert.equal(result.tool_choice, "required");
+});
+
+test("Gemini toolConfig with several allowed names keeps only those tools", () => {
+  const result = geminiToOpenAIRequest(
+    "grok-bot",
+    {
+      contents: [],
+      tools: [
+        { functionDeclarations: [{ name: "canary_echo" }, { name: "other" }, { name: "third" }] },
+      ],
+      toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["canary_echo", "third"] } },
+    },
+    false
+  );
+  assert.deepEqual(
+    result.tools?.map((tool) => (tool as { function: { name: string } }).function.name),
+    ["canary_echo", "third"]
+  );
+  assert.equal(result.tool_choice, "required");
+});
+
+test("Gemini toolConfig with an allowed function name forces that function", () => {
+  const result = geminiToOpenAIRequest(
+    "grok-bot",
+    { contents: [], toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["canary_echo"] } } },
+    false
+  );
+  assert.deepEqual(result.tool_choice, { type: "function", function: { name: "canary_echo" } });
+});
+
+test("Gemini toolConfig with one allowed name drops the other tools", () => {
+  const result = geminiToOpenAIRequest(
+    "grok-bot",
+    {
+      contents: [],
+      tools: [{ functionDeclarations: [{ name: "canary_echo" }, { name: "other" }] }],
+      toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["canary_echo"] } },
+    },
+    false
+  );
+  assert.deepEqual(
+    result.tools?.map((tool) => (tool as { function: { name: string } }).function.name),
+    ["canary_echo"]
+  );
+});
+
+test("Gemini toolConfig with no matching allowed names does not require a call", () => {
+  const result = geminiToOpenAIRequest(
+    "grok-bot",
+    {
+      contents: [],
+      tools: [{ functionDeclarations: [{ name: "canary_echo" }] }],
+      toolConfig: { functionCallingConfig: { mode: "ANY", allowedFunctionNames: ["missing", "also"] } },
+    },
+    false
+  );
+  assert.deepEqual(result.tools, []);
+  assert.equal(result.tool_choice, undefined);
+});

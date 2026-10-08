@@ -2,6 +2,7 @@ import { register } from "../registry.ts";
 import { FORMATS } from "../formats.ts";
 import { adjustMaxTokens } from "../helpers/maxTokensHelper.ts";
 import { createGeminiToolCallIdPairing } from "../helpers/geminiToolCallIds.ts";
+import { applyGeminiFunctionCallingConfig } from "../helpers/geminiFunctionCalling.ts";
 
 const newCallId = () => `call_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 
@@ -15,6 +16,7 @@ export function geminiToOpenAIRequest(model, body, stream) {
     temperature?: number;
     top_p?: number;
     tools?: Array<Record<string, unknown>>;
+    tool_choice?: unknown;
   } = {
     model: model,
     messages: [],
@@ -77,6 +79,8 @@ export function geminiToOpenAIRequest(model, body, stream) {
       }
     }
   }
+
+  applyGeminiFunctionCallingConfig(result, body.toolConfig?.functionCallingConfig);
 
   return result;
 }
