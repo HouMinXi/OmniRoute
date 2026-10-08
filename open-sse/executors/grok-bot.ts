@@ -1123,20 +1123,30 @@ export class GrokBotExecutor extends BaseExecutor {
     let seenRunning = false;
     const parts: string[] = [];
     let submitted: string | null = null;
+    let generation = 0;
+    const pendingSeqs = new Set<string>();
+    let staleTimer: ReturnType<typeof setTimeout> | null = null;
+    let staleAbort: AbortController | null = null;
+    const stopStale = () => {
+      if (staleTimer) clearTimeout(staleTimer);
+      staleTimer = null;
+    };
     const deadline = Date.now() + WATCH_IDLE_TIMEOUT_MS;
     // A freshly created temporal agent has no transcript history, so the
     // generation-0 / seq-"0" baseline is exact. Reused agents would need a
     // ListGrokBotTranscriptEntries pass first (out of scope: one-shot agents).
-    const payload = {
-      cursors: [{ agentId, sessionId: EMPTY_SESSION_ID, generation: 0, afterUpdatedSeq: "0" }],
-      includeUnlistedAgents: false,
-      inlineBodyMaxBytes: 65536,
-    };
-
     while (Date.now() < deadline) {
       const remaining = deadline - Date.now();
       const timeoutSignal = AbortSignal.timeout(Math.min(WATCH_READ_TIMEOUT_MS, remaining));
-      const link = signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal;
+      staleAbort = new AbortController();
+      const link = signal
+        ? AbortSignal.any([signal, timeoutSignal, staleAbort.signal])
+        : AbortSignal.any([timeoutSignal, staleAbort.signal]);
+      const payload = {
+        cursors: [{ agentId, sessionId: EMPTY_SESSION_ID, generation, afterUpdatedSeq: "0" }],
+        includeUnlistedAgents: false,
+        inlineBodyMaxBytes: 65536,
+      };
       try {
         const watch = t.watch("WatchGrokBotTranscripts", payload, { signal: link });
         for await (const event of watch) {
@@ -1161,28 +1171,49 @@ export class GrokBotExecutor extends BaseExecutor {
               `running=${String(ev.agent?.isRunningTurn ?? "")} live=${ev.agentState?.live?.length ?? 0} composing=${String(live?.isComposingMessage ?? "")} retrying=${String(live?.isRetrying ?? "")} activity=${JSON.stringify(live?.activity ?? null)} awaiting=${JSON.stringify(live?.awaiting ?? null)} entry=${ev.entry?.kind ?? ""} rows=${ev.rows?.entries?.length ?? 0} parts=${parts.length}`
             );
           }
-          const result = this.consumeWatchFrame(event, agentId, messageId, parts, (running) => {
+          const result = this.consumeWatchFrame(event, agentId, messageId, parts, pendingSeqs, (running) => {
             if (running) seenRunning = true;
             else if (seenRunning) return true;
             return false;
           }, (answer) => {
             submitted = answer;
+          }, (remainingMs) => {
+            if (staleTimer) clearTimeout(staleTimer);
+            staleTimer = setTimeout(() => staleAbort?.abort(), remainingMs);
           });
-          if (typeof result === "string") return result;
-          if (submitted !== null) return submitted;
+          if (typeof result === "string") { stopStale(); return result; }
+          if (submitted !== null) { stopStale(); return submitted; }
           if (result) {
+            if (pendingSeqs.size > 0) {
+              throw Object.assign(new Error("turn ended with transcript rows still missing"), {
+                errorType: "incomplete_turn",
+              });
+            }
             const real = parts.filter((part) => !part.startsWith("\u0000submit:"));
-            if (real.length) return real.join("");
+            if (real.length) { stopStale(); return real.join(""); }
             throw Object.assign(new Error("turn became idle without explicit completion"), {
               errorType: "incomplete_turn",
             });
           }
         }
         // Stream ended without settlement (server idle cut) -- reconnect.
+        stopStale();
       } catch (err) {
+        if (staleAbort?.signal.aborted) {
+          if (staleTimer) clearTimeout(staleTimer);
+          if (pendingSeqs.size === 0) {
+            const real = parts.filter((part) => !part.startsWith("\u0000submit:"));
+            if (real.length) { stopStale(); return real.join(""); }
+          }
+        }
         if ((err as { errorType?: unknown }).errorType === "incomplete_turn") throw err;
+        if ((err as { errorType?: unknown }).errorType === "watch_resync") {
+          stopStale();
+          generation = (err as { generation: number }).generation;
+          continue;
+        }
         if (signal?.aborted) throw err;
-        if (submitted !== null) return submitted;
+        if (submitted !== null) { stopStale(); return submitted; }
         if (Date.now() >= deadline) break;
         // Read timeout or transient drop -- reconnect below.
         void err;
@@ -1201,13 +1232,18 @@ export class GrokBotExecutor extends BaseExecutor {
     agentId: string,
     messageId: string,
     parts: string[],
+    pendingSeqs: Set<string>,
     onRunning: (running: boolean) => boolean,
-    onSubmit: (answer: string) => void
+    onSubmit: (answer: string) => void,
+    onStale: (remainingMs: number) => void
   ): boolean | string {
     const ev = event as {
-      agentState?: { live?: Array<{ agentId?: string; isRunningTurn?: boolean; isRunning?: boolean }> };
+      cursorTooOld?: { generation?: number };
+      cleared?: { newGeneration?: number };
+      turnFailed?: { agentId?: string };
+      agentState?: { live?: Array<{ agentId?: string; isRunningTurn?: boolean; isRunning?: boolean; staleAfterMs?: number; updatedAtMs?: number }> };
       agent?: { agentId?: string; isRunningTurn?: boolean; isRunning?: boolean };
-      rows?: { entries?: Array<{ body?: string }> };
+      rows?: { entries?: Array<{ seq?: string; body?: string }> };
       entry?: {
         kind?: string;
         message?: { type?: string; content?: string };
@@ -1225,12 +1261,29 @@ export class GrokBotExecutor extends BaseExecutor {
       if (typeof a.isRunning === "boolean") return a.isRunning;
       return false;
     };
+    const resyncGeneration = ev.cursorTooOld?.generation ?? ev.cleared?.newGeneration;
+    if (typeof resyncGeneration === "number" && resyncGeneration > 0) {
+      throw Object.assign(new Error("watch cursor moved"), {
+        errorType: "watch_resync",
+        generation: resyncGeneration,
+      });
+    }
+    if (ev.turnFailed) {
+      throw Object.assign(new Error("server reported the turn failed"), {
+        errorType: "incomplete_turn",
+      });
+    }
     // Mixed-agent frames are not attributable: no entry-level agent identity.
     if (ev.agent?.agentId !== undefined && ev.agent.agentId !== agentId) return false;
     const liveIds = ev.agentState?.live?.map((a) => a.agentId).filter((id) => id !== undefined);
     if (liveIds?.length && liveIds.some((id) => id !== agentId)) return false;
     for (const live of ev.agentState?.live ?? []) {
       const running = runningOf(live);
+      if (running) {
+        const windowMs = live.staleAfterMs && live.staleAfterMs > 0 ? live.staleAfterMs : 90_000;
+        const elapsed = live.updatedAtMs && live.updatedAtMs > 0 ? Date.now() - live.updatedAtMs : 0;
+        onStale(Math.max(0, windowMs - elapsed));
+      }
       if (running !== null && onRunning(running)) return true;
     }
     if (ev.agent) {
@@ -1246,7 +1299,11 @@ export class GrokBotExecutor extends BaseExecutor {
       onSubmit(ev.entry.tool.content);
     }
     for (const row of ev.rows?.entries ?? []) {
-      if (!row.body) continue;
+      if (!row.body) {
+        if (row.seq !== undefined) pendingSeqs.add(row.seq);
+        continue;
+      }
+      if (row.seq !== undefined) pendingSeqs.delete(row.seq);
       let decoded: { clientNonce?: string; kind?: string; message?: { type?: string; content?: string } };
       try {
         decoded = JSON.parse(Buffer.from(row.body, "base64").toString("utf-8"));

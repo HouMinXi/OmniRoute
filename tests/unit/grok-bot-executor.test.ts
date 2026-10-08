@@ -201,11 +201,12 @@ function installTransport(t: FakeTransport) {
       // nothing extra so tests can inject raw sequences.
       const cursor = (payload.cursors as Array<Record<string, unknown>> | undefined)?.[0];
       const agentId = cursor?.agentId;
-      // Stub-side guard mirroring the live watch contract: cursors carry
-      // generation + afterUpdatedSeq, and the two top-level fields exist.
+      // The current call is already recorded, so a count of one means this is
+      // the first watch of the turn. Later watches may carry the generation a
+      // cursorTooOld or cleared frame named.
+      const earlierWatches = t.calls.filter((call) => call.method === "WatchGrokBotTranscripts").length;
       if (
-        cursor?.generation !== 0 ||
-        cursor?.afterUpdatedSeq !== "0" ||
+        (earlierWatches === 1 && (cursor?.generation !== 0 || cursor?.afterUpdatedSeq !== "0")) ||
         payload.includeUnlistedAgents !== false ||
         payload.inlineBodyMaxBytes !== 65536
       ) {
@@ -2466,6 +2467,93 @@ describe("GrokBotExecutor", () => {
     assert.ok(text.length <= 190_000, "prompt length " + text.length);
     assert.match(text, /Answer only from this conversation/);
     assert.equal(text.includes("Z"), true);
+  });
+
+  it("reconnects a watch at the generation a cursorTooOld frame names", async () => {
+    executor.setBridgeControllerForTests(null);
+    let watchCount = 0;
+    t.watchEventsAsync = async function* () {
+      watchCount += 1;
+      if (watchCount === 1) {
+        yield { cursorTooOld: { agentId: "agent-1", generation: 5, sessionId: "" } };
+        return;
+      }
+      yield { agent: { isRunningTurn: true } };
+      yield { entry: { kind: "send-message", message: { type: "text", content: "pong" } } };
+      yield { agent: { isRunningTurn: false } };
+    };
+    const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+    assert.equal(res.status, 200);
+    const watches = t.calls.filter((call) => call.method === "WatchGrokBotTranscripts");
+    assert.equal(watches.length, 2);
+    const second = (watches[1]?.payload.cursors as Array<Record<string, unknown>>)[0];
+    assert.equal(second?.generation, 5);
+  });
+
+  it("does not return text while an earlier row is still missing its body", async () => {
+    executor.setBridgeControllerForTests(null);
+    const later = Buffer.from(
+      JSON.stringify({ kind: "send-message", clientNonce: null, message: { type: "text", content: "second" } })
+    ).toString("base64");
+    t.watchEvents = [
+      { agent: { isRunningTurn: true } },
+      { rows: { entries: [{ seq: "7" }] } },
+      { rows: { entries: [{ seq: "8", body: later }] } },
+      { agent: { isRunningTurn: false } },
+    ];
+    const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+    assert.equal(res.status, 502);
+    const responseBody = (await res.json()) as { error?: { type?: string } };
+    assert.equal(responseBody.error?.type, "incomplete_turn");
+  });
+
+  it("ends a turn on the stale timer when isRunning never flips", async () => {
+    executor.setBridgeControllerForTests(null);
+    const body = Buffer.from(
+      JSON.stringify({ kind: "send-message", clientNonce: null, message: { type: "text", content: "pong" } })
+    ).toString("base64");
+    t.watchEventsAsync = async function* () {
+      yield { agentState: { live: [{ isRunning: true, staleAfterMs: 1000, updatedAtMs: Date.now() }] } };
+      yield { rows: { entries: [{ body }] } };
+      await new Promise(() => {});
+    };
+    const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+    assert.equal(res.status, 200);
+    const responseBody = (await res.json()) as { choices: Array<{ message: { content?: string } }> };
+    assert.equal(responseBody.choices[0]?.message.content, "pong");
+  });
+
+  it("rejects a turn the server says failed even after text arrived", async () => {
+    executor.setBridgeControllerForTests(null);
+    t.watchEvents = [
+      { agent: { isRunningTurn: true } },
+      { entry: { kind: "send-message", message: { type: "text", content: "partial" } } },
+      { turnFailed: { agentId: "agent-1" } },
+    ];
+    const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+    assert.equal(res.status, 502);
+    const responseBody = (await res.json()) as { error?: { type?: string } };
+    assert.equal(responseBody.error?.type, "incomplete_turn");
+  });
+
+  it("does not let a stale timer from the first watch abort the reconnected one", async () => {
+    executor.setBridgeControllerForTests(null);
+    let watchCount = 0;
+    t.watchEventsAsync = async function* () {
+      watchCount += 1;
+      if (watchCount === 1) {
+        yield { agentState: { live: [{ isRunning: true, staleAfterMs: 50, updatedAtMs: Date.now() }] } };
+        yield { cursorTooOld: { generation: 3, sessionId: "" } };
+        return;
+      }
+      yield { agent: { isRunningTurn: true } };
+      yield { entry: { kind: "send-message", message: { type: "text", content: "pong" } } };
+      yield { agent: { isRunningTurn: false } };
+    };
+    const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+    assert.equal(res.status, 200);
+    const responseBody = (await res.json()) as { choices: Array<{ message: { content?: string } }> };
+    assert.equal(responseBody.choices[0]?.message.content, "pong");
   });
 
 });
