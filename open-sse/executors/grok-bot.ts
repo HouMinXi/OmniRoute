@@ -1156,6 +1156,9 @@ export class GrokBotExecutor extends BaseExecutor {
               agentState?: {
                 live?: Array<{
                   isRunning?: boolean;
+                  isRunningTurn?: boolean;
+                  staleAfterMs?: number | string;
+                  updatedAtMs?: number | string;
                   isComposingMessage?: boolean;
                   isRetrying?: boolean;
                   activity?: unknown;
@@ -1168,7 +1171,7 @@ export class GrokBotExecutor extends BaseExecutor {
             const live = ev.agentState?.live?.[0];
             log?.warn?.(
               "GROK_BOT_WATCH",
-              `running=${String(ev.agent?.isRunningTurn ?? "")} live=${ev.agentState?.live?.length ?? 0} composing=${String(live?.isComposingMessage ?? "")} retrying=${String(live?.isRetrying ?? "")} activity=${JSON.stringify(live?.activity ?? null)} awaiting=${JSON.stringify(live?.awaiting ?? null)} entry=${ev.entry?.kind ?? ""} rows=${ev.rows?.entries?.length ?? 0} parts=${parts.length}`
+              `running=${String(ev.agent?.isRunningTurn ?? "")} live=${ev.agentState?.live?.length ?? 0} liveRunning=${String(live?.isRunning ?? "")} liveRunningTurn=${String(live?.isRunningTurn ?? "")} staleAfter=${String(live?.staleAfterMs ?? "")} updatedAt=${String(live?.updatedAtMs ?? "")} entry=${ev.entry?.kind ?? ""} parts=${parts.length}`
             );
           }
           const result = this.consumeWatchFrame(event, agentId, messageId, parts, pendingSeqs, (running) => {
