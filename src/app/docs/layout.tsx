@@ -3,6 +3,7 @@ import { DocsLayout } from "fumadocs-ui/layouts/docs";
 import { source } from "@/lib/source";
 import type { ReactNode } from "react";
 import type { BaseLayoutProps } from "fumadocs-ui/layouts/shared";
+import type { Root } from "fumadocs-core/page-tree";
 import { Suspense } from "react";
 import LanguageSelector from "@/shared/components/LanguageSelector";
 import { getTranslations } from "next-intl/server";
@@ -60,7 +61,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
         },
       }}
     >
-      <DocsLayout tree={source.pageTree} {...docsLayoutOptions}>
+      <DocsLayout tree={source.pageTree as unknown as Root} {...docsLayoutOptions}>
         {children}
       </DocsLayout>
     </RootProvider>

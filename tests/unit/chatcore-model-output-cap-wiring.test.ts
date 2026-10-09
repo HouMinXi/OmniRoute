@@ -21,8 +21,16 @@ const OUTPUT_CAP = 1000;
 const INPUT_CAP = 10;
 const REQUESTED_MAX_TOKENS = 50_000;
 const originalFetch = globalThis.fetch;
-let dispatchedBody: Record<string, unknown> | null = null;
+type DispatchedBody = { max_tokens?: number };
+let dispatchedBody: DispatchedBody | null = null;
 let fetchCalls = 0;
+function noteDispatchedBody(body: DispatchedBody | null): DispatchedBody | null {
+  dispatchedBody = body;
+  return dispatchedBody;
+}
+function readDispatchedBody(): DispatchedBody | null {
+  return noteDispatchedBody(dispatchedBody);
+}
 const silentLog = { debug() {}, info() {}, warn() {}, error() {} };
 
 function buildRequest(maxTokens: number, content = "hello") {
@@ -47,6 +55,13 @@ function buildRequest(maxTokens: number, content = "hello") {
     userAgent: "unit-test",
     isCombo: false,
     log: silentLog,
+    comboStrategy: null,
+    connectionId: "capwire",
+    comboName: null,
+    onCredentialsRefreshed: async () => {},
+    onRequestSuccess: () => {},
+    onStreamFailure: () => {},
+    onDisconnect: () => {},
   };
 }
 
@@ -62,7 +77,7 @@ test.before(() => {
   );
   globalThis.fetch = async (_input: RequestInfo | URL, init?: RequestInit) => {
     fetchCalls += 1;
-    dispatchedBody = init?.body ? JSON.parse(String(init.body)) : null;
+    noteDispatchedBody(init?.body ? (JSON.parse(String(init.body)) as DispatchedBody) : null);
     return new Response(
       JSON.stringify({
         id: "chatcmpl-capwire",
@@ -88,7 +103,9 @@ test("handleChatCore clamps an over-cap max_tokens to the model's output cap bef
   fetchCalls = 0;
   await handleChatCore(buildRequest(REQUESTED_MAX_TOKENS));
   assert.equal(fetchCalls, 1);
-  assert.equal(dispatchedBody?.max_tokens, OUTPUT_CAP);
+  const sent = readDispatchedBody();
+  if (sent === null) throw new Error("expected a dispatched body");
+  assert.equal(sent.max_tokens, OUTPUT_CAP);
 });
 
 test("handleChatCore leaves a max_tokens below the cap untouched", async () => {
@@ -97,13 +114,16 @@ test("handleChatCore leaves a max_tokens below the cap untouched", async () => {
   const underCap = OUTPUT_CAP - 1;
   await handleChatCore(buildRequest(underCap));
   assert.equal(fetchCalls, 1);
-  assert.equal(dispatchedBody?.max_tokens, underCap);
+  const sent = readDispatchedBody();
+  if (sent === null) throw new Error("expected a dispatched body");
+  assert.equal(sent.max_tokens, underCap);
 });
 
 test("handleChatCore rejects input over the model input cap before upstream dispatch", async () => {
   dispatchedBody = null;
   fetchCalls = 0;
   const result = await handleChatCore(buildRequest(1, "x".repeat(200)));
+  assert.ok("status" in result, "input-cap rejection must return a status");
   assert.equal(result.status, 400);
   assert.equal(fetchCalls, 0, "input-cap rejection must not call the upstream");
   assert.match(JSON.stringify(result), /maximum input tokens/i);
@@ -123,6 +143,7 @@ test("DISABLE_CONTEXT_WINDOW_CHECKS lets direct-model input exceed the declared 
   featureFlagsDb.setFeatureFlagOverride("DISABLE_CONTEXT_WINDOW_CHECKS", "true");
   try {
     const result = await handleChatCore(buildRequest(1, "x".repeat(200)));
+    assert.ok("success" in result, "disabled context checks must return a success result");
     assert.equal(result.success, true);
     assert.equal(fetchCalls, 1, "disabled context checks must let the upstream decide");
     assert.ok(dispatchedBody, "oversized input must reach the upstream when the flag is enabled");
@@ -137,9 +158,12 @@ test("DISABLE_CONTEXT_WINDOW_CHECKS keeps the direct model output cap active", a
   featureFlagsDb.setFeatureFlagOverride("DISABLE_CONTEXT_WINDOW_CHECKS", "true");
   try {
     const result = await handleChatCore(buildRequest(REQUESTED_MAX_TOKENS, "x".repeat(200)));
+    assert.ok("success" in result, "disabled context checks must return a success result");
     assert.equal(result.success, true);
     assert.equal(fetchCalls, 1);
-    assert.equal(dispatchedBody?.max_tokens, OUTPUT_CAP);
+    const sent = readDispatchedBody();
+    if (sent === null) throw new Error("expected a dispatched body");
+    assert.equal(sent.max_tokens, OUTPUT_CAP);
   } finally {
     featureFlagsDb.removeFeatureFlagOverride("DISABLE_CONTEXT_WINDOW_CHECKS");
   }

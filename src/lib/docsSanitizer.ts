@@ -11,14 +11,55 @@ let sanitizer: Sanitizer | null = null;
 // reviewable. Covers GFM output: headings, lists, tables, code, images, GFM
 // task-list checkboxes (`input[type=checkbox]`), and collapsible details blocks.
 const ALLOWED_TAGS = [
-  "h1", "h2", "h3", "h4", "h5", "h6", "blockquote", "p", "a", "ul", "ol",
-  "li", "ins", "del", "sub", "sup", "em", "strong", "span", "hr", "br",
-  "div", "table", "thead", "caption", "tbody", "tr", "th", "td", "pre",
-  "code", "img", "details", "summary", "input",
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+  "h5",
+  "h6",
+  "blockquote",
+  "p",
+  "a",
+  "ul",
+  "ol",
+  "li",
+  "ins",
+  "del",
+  "sub",
+  "sup",
+  "em",
+  "strong",
+  "span",
+  "hr",
+  "br",
+  "div",
+  "table",
+  "thead",
+  "caption",
+  "tbody",
+  "tr",
+  "th",
+  "td",
+  "pre",
+  "code",
+  "img",
+  "details",
+  "summary",
+  "input",
 ];
 const ALLOWED_ATTR = [
-  "href", "name", "target", "src", "alt", "title", "class", "id", "type",
-  "checked", "disabled", "rel",
+  "href",
+  "name",
+  "target",
+  "src",
+  "alt",
+  "title",
+  "class",
+  "id",
+  "type",
+  "checked",
+  "disabled",
+  "rel",
 ];
 
 /**
@@ -27,7 +68,20 @@ const ALLOWED_ATTR = [
 function getSanitizer(): Sanitizer {
   if (!sanitizer) {
     const window = new JSDOM("").window;
-    sanitizer = createDOMPurify(window as unknown as Window);
+    // jsdom's Window is a structural match for DOMPurify's WindowLike, but the
+    // two Window declarations are not identical, so pass the DOM constructors
+    // the sanitizer actually reads instead of the whole window.
+    sanitizer = createDOMPurify({
+      document: window.document,
+      DocumentFragment: window.DocumentFragment,
+      HTMLTemplateElement: window.HTMLTemplateElement,
+      Node: window.Node,
+      Element: window.Element,
+      NodeFilter: window.NodeFilter,
+      NamedNodeMap: window.NamedNodeMap,
+      HTMLFormElement: window.HTMLFormElement,
+      DOMParser: window.DOMParser,
+    });
   }
   return sanitizer;
 }

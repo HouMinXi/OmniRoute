@@ -39,6 +39,18 @@ function openaiToolCallChunk(name: string): { choices: Array<Record<string, unkn
  * the CLI rejects with "No such tool available" — killing /loop AND every
  * other native tool call emitted in lowercase form.
  */
+
+function toolUseBlock(content: unknown): { name?: unknown; input?: unknown } {
+  if (!Array.isArray(content)) throw new Error("expected claude content blocks");
+  const block = content.find(
+    (entry) => entry && typeof entry === "object" && "type" in entry && entry.type === "tool_use"
+  );
+  if (!block || typeof block !== "object" || !("name" in block)) {
+    throw new Error("expected a tool_use block");
+  }
+  return block;
+}
+
 describe("Claude Code cron-era tool names survive identity-echo alias maps", () => {
   const ECHO_MAPS = [
     ["identity entry croncreate→croncreate", new Map([["croncreate", "croncreate"]])],
@@ -150,9 +162,13 @@ describe("translateNonStreamingResponse restores Claude Code tool casing", () =>
       FORMATS.CLAUDE,
       null
     );
-    const toolUse = out.content.find((b) => b.type === "tool_use");
+    const toolUse = toolUseBlock(out.content);
     assert.equal(toolUse.name, "Bash");
-    assert.equal(toolUse.input.command, "echo ok");
+    const input = toolUse.input;
+    assert.equal(
+      input && typeof input === "object" && "command" in input ? input.command : undefined,
+      "echo ok"
+    );
   });
 
   it("upgrades cron-era tools through identity-echo maps", () => {
@@ -162,7 +178,7 @@ describe("translateNonStreamingResponse restores Claude Code tool casing", () =>
       FORMATS.CLAUDE,
       new Map([["croncreate", "croncreate"]])
     );
-    assert.equal(out.content.find((b) => b.type === "tool_use").name, "CronCreate");
+    assert.equal(toolUseBlock(out.content).name, "CronCreate");
   });
 
   it("request-side aliases still win over canonical casing", () => {
@@ -172,7 +188,7 @@ describe("translateNonStreamingResponse restores Claude Code tool casing", () =>
       FORMATS.CLAUDE,
       new Map([["read", "mcp__fs__read"]])
     );
-    assert.equal(out.content.find((b) => b.type === "tool_use").name, "mcp__fs__read");
+    assert.equal(toolUseBlock(out.content).name, "mcp__fs__read");
   });
 
   it("keeps canonical casing the upstream echoed verbatim when no alias map exists (live repro #11085)", () => {
@@ -186,7 +202,7 @@ describe("translateNonStreamingResponse restores Claude Code tool casing", () =>
       FORMATS.CLAUDE,
       null
     );
-    assert.equal(out.content.find((b) => b.type === "tool_use").name, "CronCreate");
+    assert.equal(toolUseBlock(out.content).name, "CronCreate");
     assert.equal(restoreClaudeToolName("Bash", null), "Bash");
     assert.equal(restoreClaudeToolName("WebSearch", null), "WebSearch");
     assert.equal(restoreClaudeToolName("TaskCreate", new Map()), "TaskCreate");

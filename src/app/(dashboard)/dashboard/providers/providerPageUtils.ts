@@ -282,7 +282,7 @@ export function resolveProviderOAuthBackendId(
 export function connectionMatchesProviderCard(
   conn: { provider?: string; authType?: string } | null | undefined,
   providerId: string,
-  cardAuthType: "oauth" | "free" | "apikey"
+  cardAuthType: "oauth" | "free" | "apikey" | "no-auth"
 ): boolean {
   if (!conn || !connectionBelongsToProviderPage(conn.provider, providerId)) return false;
   if (cardAuthType === "free") return true;
@@ -298,7 +298,7 @@ export function connectionMatchesProviderCard(
 
 type GetProviderStats = (
   providerId: string,
-  authType: "oauth" | "free" | "apikey"
+  authType: "oauth" | "free" | "apikey" | "no-auth"
 ) => ProviderStatsSnapshot;
 
 function getProviderSortLabel<TProvider>(entry: ProviderEntry<TProvider>): string {

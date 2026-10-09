@@ -75,10 +75,11 @@ async function tryI18nFallback(slug: string[], locale: string): Promise<string |
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
   const { source } = await import("../../../lib/source");
-  const [{ DocsPage, DocsBody }, defaultMdxComponents] = await Promise.all([
+  const [{ DocsPage, DocsBody }, mdxModule] = await Promise.all([
     import("fumadocs-ui/layouts/docs/page"),
     import("fumadocs-ui/mdx"),
   ]);
+  const defaultMdxComponents = mdxModule.default;
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
@@ -98,7 +99,7 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
 
   // Default: English MDX rendered natively by Fumadocs with resolved links
   const MDX = page.data.body;
-  const docPath = page.file?.path || `${params.slug.join("/")}.md`;
+  const docPath = page.path || `${params.slug.join("/")}.md`;
   const DocsLink = (linkProps: React.ComponentProps<typeof defaultMdxComponents.a>) => {
     const resolved = linkProps.href ? resolveDocHref(linkProps.href, docPath) : linkProps.href;
     return <defaultMdxComponents.a {...linkProps} href={resolved} />;

@@ -21,10 +21,25 @@ test.after(async () => {
   resetDbInstance();
 });
 
-function transform(model: string, body: Record<string, unknown>) {
-  return new CodexExecutor().transformRequest(model, { model, input: [], ...body }, false, {
-    requestEndpointPath: "/responses",
-  });
+function transform(
+  model: string,
+  body: Record<string, unknown>,
+  stream = false,
+  requestEndpointPath = "/responses"
+): {
+  model?: unknown;
+  reasoning?: { effort?: unknown; summary?: unknown };
+} {
+  const result = new CodexExecutor().transformRequest(
+    model,
+    { model, input: [], ...body },
+    stream,
+    {
+      requestEndpointPath,
+    }
+  );
+  assert.ok(result && typeof result === "object" && !Array.isArray(result));
+  return result as { model?: unknown; reasoning?: { effort?: unknown; summary?: unknown } };
 }
 
 test("Codex exposes GPT-6 Sol and Luna with their effort variants", () => {
@@ -56,17 +71,26 @@ test("GPT-6 Sol and Luna effort aliases reach Codex as the base model", () => {
     for (const effort of efforts) {
       const result = transform(`${model}-${effort}`, {});
       assert.equal(result.model, model, `${model}-${effort}`);
+      assert.ok(result.reasoning, effort);
       assert.equal(result.reasoning.effort, effort === "ultra" ? "max" : effort, effort);
     }
   }
 });
 
 test("Explicit max reasoning is not clamped to xhigh for GPT-6 Sol and Luna", () => {
-  assert.equal(transform("gpt-6-sol", { reasoning: { effort: "max" } }).reasoning.effort, "max");
-  assert.equal(transform("gpt-6-sol", { reasoning: { effort: "ultra" } }).reasoning.effort, "max");
-  assert.equal(transform("gpt-6-luna", { reasoning: { effort: "max" } }).reasoning.effort, "max");
+  const solMax = transform("gpt-6-sol", { reasoning: { effort: "max" } });
+  assert.ok(solMax.reasoning);
+  assert.equal(solMax.reasoning.effort, "max");
+  const solUltra = transform("gpt-6-sol", { reasoning: { effort: "ultra" } });
+  assert.ok(solUltra.reasoning);
+  assert.equal(solUltra.reasoning.effort, "max");
+  const lunaMax = transform("gpt-6-luna", { reasoning: { effort: "max" } });
+  assert.ok(lunaMax.reasoning);
+  assert.equal(lunaMax.reasoning.effort, "max");
   // Luna tops out at max, like GPT-5.6 Luna.
-  assert.equal(transform("gpt-6-luna", { reasoning: { effort: "ultra" } }).reasoning.effort, "max");
+  const lunaUltra = transform("gpt-6-luna", { reasoning: { effort: "ultra" } });
+  assert.ok(lunaUltra.reasoning);
+  assert.equal(lunaUltra.reasoning.effort, "max");
 });
 
 test("Luna has no ultra alias, so the suffix is not split off", () => {
@@ -153,6 +177,7 @@ test("Parenthesized Sol and Luna effort overrides keep the reasoning summary", (
   for (const model of ["gpt-6-sol(ultra)", "gpt-6-sol(max)", "gpt-6-luna(max)"]) {
     const result = transform(model, { reasoning: { effort: "low", summary: "detailed" } });
     assert.equal(result.model, model.slice(0, model.indexOf("(")), model);
+    assert.ok(result.reasoning, model);
     assert.equal(result.reasoning.effort, "max", model);
     assert.equal(result.reasoning.summary, "detailed", model);
   }
@@ -166,10 +191,14 @@ test("Chat-to-Codex translation preserves max reasoning for GPT-6 Sol and Luna",
       true,
       {}
     );
-    const result = new CodexExecutor().transformRequest(model, translated, true, {
-      requestEndpointPath: "/chat/completions",
-    });
+    const result = transform(
+      model,
+      translated as Record<string, unknown>,
+      true,
+      "/chat/completions"
+    );
     assert.equal(result.model, model);
+    assert.ok(result.reasoning, model);
     assert.equal(result.reasoning.effort, "max", model);
   }
 });

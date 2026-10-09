@@ -359,7 +359,7 @@ export default function ProviderModelsSection({
           inputPlaceholder={passthroughInputPlaceholder}
           copied={copied}
           onCopy={onCopy}
-          onSetAlias={onSetAlias}
+          onSetAlias={(modelId, alias) => onSetAlias(modelId, alias, providerAlias)}
           onDeleteAlias={onDeleteAlias}
           t={t}
           effectiveModelNormalize={effectiveModelNormalize}

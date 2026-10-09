@@ -34,7 +34,9 @@ test("#13462 base64 image data URLs pass through the credential masker unchanged
       ],
     };
     const result = await guardrail.preCall(payload, {} as never);
-    const next = (result?.modifiedPayload ?? payload) as typeof payload;
+    const next = (
+      result && result.modifiedPayload ? result.modifiedPayload : payload
+    ) as typeof payload;
     assert.equal(next.messages[0].content[0].image_url.url, IMAGE_URL);
   });
 });
@@ -46,7 +48,10 @@ test("#13462 the same key-shaped text outside a data URL is still redacted", asy
       { messages: [{ role: "user", content: `key=${KEY_SHAPED}` }] },
       {} as never
     );
-    const next = result?.modifiedPayload as { messages: Array<{ content: string }> };
+    if (!result || result.modifiedPayload === undefined) {
+      throw new Error("expected the plain-text token to be redacted");
+    }
+    const next = result.modifiedPayload as { messages: Array<{ content: string }> };
     assert.ok(next, "expected the plain-text token to be redacted");
     assert.match(next.messages[0].content, /\[REDACTED:google\]/);
   });

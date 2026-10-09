@@ -66,7 +66,6 @@ function getRangeStartIso(range: string): string | null {
 const WEEKDAY_LABELS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 type PricingByProvider = Record<string, Record<string, Record<string, unknown>>>;
-type UsageRows = Array<Record<string, unknown>>;
 type ComputeCostFromPricing = (
   pricing: Record<string, unknown> | null | undefined,
   tokens: Record<string, number | undefined> | null | undefined,
@@ -445,10 +444,10 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       await import("@/lib/usage/costCalculator");
     const { PROVIDER_ID_TO_ALIAS } = await import("@omniroute/open-sse/config/providerModels");
 
-    const summaryRow = getUsageSummary(unifiedSource, unifiedParams) as Record<string, unknown>;
+    const summaryRow = getUsageSummary(unifiedSource, unifiedParams);
 
-    const dailyRows = getDailyUsage(unifiedSource, unifiedParams) as UsageRows;
-    const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const dailyRows = getDailyUsage(unifiedSource, unifiedParams);
+    const dailyCostRows = getDailyCostRows(unifiedSource, unifiedParams);
 
     const heatmapStart = new Date();
     heatmapStart.setUTCDate(heatmapStart.getUTCDate() - 364);
@@ -470,30 +469,30 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       });
     }
 
-    const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams) as UsageRows;
+    const heatmapRows = getHeatmapRows(heatmapConditions, heatmapParams);
 
-    const modelRows = getModelUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const modelRows = getModelUsageRows(unifiedSource, unifiedParams);
 
-    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerCostRows = getProviderCostRows(unifiedSource, unifiedParams);
 
-    const providerRows = getProviderUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const providerRows = getProviderUsageRows(unifiedSource, unifiedParams);
 
     const accountCostWhereClause = whereClause
       .replace(/timestamp/g, "usage_history.timestamp")
       .replace(/api_key_/g, "usage_history.api_key_");
-    const accountCostRows = getAccountCostRows(accountCostWhereClause, params) as UsageRows;
+    const accountCostRows = getAccountCostRows(accountCostWhereClause, params);
 
-    const accountRows = getAccountUsageRows(accountCostWhereClause, params) as UsageRows;
+    const accountRows = getAccountUsageRows(accountCostWhereClause, params);
 
     const apiKeyWhereClause = appendWhereCondition(
       whereClause,
       "(api_key_id IS NOT NULL AND api_key_id != '') OR (api_key_name IS NOT NULL AND api_key_name != '')"
     );
-    const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params) as UsageRows;
+    const apiKeyRows = getApiKeyUsageRows(apiKeyWhereClause, params);
 
-    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams) as UsageRows;
+    const serviceTierRows = getServiceTierUsageRows(unifiedSource, unifiedParams);
 
-    const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params) as UsageRows;
+    const apiKeyMetadataRows = getApiKeyMetadataRows(apiKeyWhereClause, params);
 
     const apiKeyMetadata = new Map<string, { latestName: string; aliases: Set<string> }>();
     for (const row of apiKeyMetadataRows) {
@@ -510,9 +509,9 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       apiKeyMetadata.set(groupKey, existing);
     }
 
-    const weeklyRows = getWeeklyPatternRows(unifiedSource, unifiedParams) as UsageRows;
+    const weeklyRows = getWeeklyPatternRows(unifiedSource, unifiedParams);
 
-    const fallbackRow = getFallbackStats(whereClause, params) as Record<string, unknown>;
+    const fallbackRow = getFallbackStats(whereClause, params);
     const errorBreakdown = getErrorTypeBreakdown(whereClause, params);
 
     const summary = {
@@ -580,7 +579,7 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
 
       // Calculate costs
       const cost = computeUsageRowCost(
-        row,
+        { ...row },
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
         normalizeModelName,
@@ -619,7 +618,7 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       const provider = row.provider as string;
       const short = normalizeModelName(model);
       const cost = computeUsageRowCost(
-        row,
+        { ...row },
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
         normalizeModelName,
@@ -691,7 +690,7 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       const provider = toStringValue(row.provider);
       if (!provider) continue;
       const cost = computeUsageRowCost(
-        row,
+        { ...row },
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
         normalizeModelName,
@@ -701,13 +700,16 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       providerCostByProvider.set(provider, (providerCostByProvider.get(provider) || 0) + cost);
     }
 
-    const byProvider = await buildByProviderRows(providerRows, providerCostByProvider);
+    const byProvider = await buildByProviderRows(
+      providerRows.map((row) => ({ ...row })),
+      providerCostByProvider
+    );
 
     const accountCostByAccount = new Map<string, number>();
     for (const row of accountCostRows) {
       const accountKey = toStringValue(row.accountKey, "unknown");
       const cost = computeUsageRowCost(
-        row,
+        { ...row },
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
         normalizeModelName,
@@ -770,7 +772,7 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       existing.completionTokens += Number(row.completionTokens);
       existing.totalTokens += Number(row.totalTokens);
       existing.cost += computeUsageRowCost(
-        row,
+        { ...row },
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
         normalizeModelName,
@@ -815,7 +817,7 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       existing.completionTokens += Number(row.completionTokens || 0);
       existing.totalTokens += Number(row.totalTokens || 0);
       const actualCost = computeUsageRowCost(
-        row,
+        { ...row },
         pricingByProvider,
         PROVIDER_ID_TO_ALIAS,
         normalizeModelName,
@@ -825,7 +827,7 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
       existing.cost += actualCost;
       if (serviceTier === "flex") {
         const standardCost = computeUsageRowStandardCost(
-          row,
+          { ...row },
           pricingByProvider,
           PROVIDER_ID_TO_ALIAS,
           normalizeModelName,
@@ -834,7 +836,7 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
         );
         existing.savings += Math.max(0, standardCost - actualCost);
         existing.usageSavingsTokens += computeUsageSavingsTokens(
-          row,
+          { ...row },
           serviceTier,
           getCodexFastCostMultiplier
         );
@@ -944,12 +946,12 @@ async function computeAnalyticsResponse(request: Request): Promise<Response> {
           apiKeyParams: apiKeyParamEntries,
         });
 
-        const presetModelRows = getPresetCostModelRows(pSrc, pParams) as UsageRows;
+        const presetModelRows = getPresetCostModelRows(pSrc, pParams);
 
         let presetTotalCost = 0;
         for (const row of presetModelRows) {
           presetTotalCost += computeUsageRowCost(
-            row,
+            { ...row },
             pricingByProvider,
             PROVIDER_ID_TO_ALIAS,
             normalizeModelName,

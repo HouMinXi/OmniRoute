@@ -75,9 +75,9 @@ test("providers rotate --from-env reads key from process.env and writes DB", asy
     process.env.TEST_ROTATION_KEY = "sk-new-rotated-key";
 
     // Mock fetch so isServerUp() returns false → direct DB path
-    globalThis.fetch = async () => {
+    globalThis.fetch = (async () => {
       throw new Error("offline");
-    };
+    }) as unknown as typeof fetch;
 
     const { runProvidersRotateCommand } = await import("../../bin/cli/commands/providers.mjs");
     const exitCode = await runProvidersRotateCommand(conn.id, {
@@ -171,13 +171,13 @@ test("providers status returns json when server returns expiration list", async 
         rateLimitedUntil: null,
       },
     ];
-    const mockFetch = async () => ({
+    const mockFetch = (async () => ({
       ok: true,
       status: 200,
       headers: { get: () => null },
       json: async () => ({ list: mockList, summary: {} }),
       text: async () => "",
-    });
+    })) as unknown as typeof fetch;
     globalThis.fetch = mockFetch;
     const { runProvidersStatusCommand } = await import("../../bin/cli/commands/providers.mjs");
     // Run with our fetch in place

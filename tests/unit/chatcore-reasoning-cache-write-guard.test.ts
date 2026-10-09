@@ -116,7 +116,14 @@ async function invokeChatCoreNonStreaming(provider: string, model: string, toolC
         headers: new Headers({ accept: "application/json" }),
       },
       userAgent: "unit-test",
-    } as never);
+      comboStrategy: null,
+      connectionId: "reasoning-cache",
+      comboName: null,
+      onCredentialsRefreshed: async () => {},
+      onRequestSuccess: () => {},
+      onStreamFailure: () => {},
+      onDisconnect: () => {},
+    });
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -138,9 +145,16 @@ async function invokeChatCoreStreaming(provider: string, model: string, toolCall
         headers: new Headers({ accept: "text/event-stream" }),
       },
       userAgent: "unit-test",
-    } as never);
+      comboStrategy: null,
+      connectionId: "reasoning-cache",
+      comboName: null,
+      onCredentialsRefreshed: async () => {},
+      onRequestSuccess: () => {},
+      onStreamFailure: () => {},
+      onDisconnect: () => {},
+    });
     // Drain the streaming response to trigger onStreamComplete (the cache write callback fires on flush/close)
-    if (result.success && result.response?.body) {
+    if ("success" in result && result.success && "response" in result && result.response.body) {
       const reader = result.response.body.getReader();
       const decoder = new TextDecoder();
       let text = "";
@@ -151,7 +165,7 @@ async function invokeChatCoreStreaming(provider: string, model: string, toolCall
       }
       await new Promise((resolve) => setImmediate(resolve));
       void text;
-    } else if (result.success) {
+    } else if ("success" in result && result.success && "response" in result) {
       try {
         await result.response.text();
         await new Promise((resolve) => setImmediate(resolve));

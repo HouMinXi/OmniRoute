@@ -99,8 +99,18 @@ async function seedCatalog() {
     SYNCED_PROVIDER,
     (connection as { id: string }).id,
     [
-      { id: SYNCED_MODEL_ID, source: "imported", supportedEndpoints: ["chat"] },
-      { id: SYNCED_AUDIO_MODEL_ID, source: "imported", supportedEndpoints: ["audio-speech"] },
+      {
+        id: SYNCED_MODEL_ID,
+        name: SYNCED_MODEL_ID,
+        source: "imported",
+        supportedEndpoints: ["chat"],
+      },
+      {
+        id: SYNCED_AUDIO_MODEL_ID,
+        name: SYNCED_AUDIO_MODEL_ID,
+        source: "imported",
+        supportedEndpoints: ["audio-speech"],
+      },
     ]
   );
   await modelsDb.addCustomModel(SYNCED_PROVIDER, CUSTOM_MODEL_ID, "Probe Custom 12058");

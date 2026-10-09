@@ -100,16 +100,25 @@ test("real native child diagnoses and repairs with a real backup", async () => {
     };
     const diagnosis = await runDbHealthInChild(job);
     assert.equal(diagnosis.issues.find((i) => i.table === "quota_snapshots")?.count, 1);
-    assert.equal(raw.prepare("SELECT count(*) n FROM quota_snapshots").get().n, 1);
+    assert.equal(
+      (raw.prepare("SELECT count(*) n FROM quota_snapshots").get() as { n: number }).n,
+      1
+    );
     const repaired = await runDbHealthInChild({ ...job, autoRepair: true });
     assert.equal(repaired.repairedCount, 1);
     assert.equal(repaired.backupCreated, true);
     const backups = fs.readdirSync(job.backupDir).filter((name) => name.endsWith(".sqlite"));
     assert.equal(backups.length, 1);
     const backup = new Database(path.join(job.backupDir, backups[0]), { readonly: true });
-    assert.equal(backup.prepare("SELECT count(*) n FROM quota_snapshots").get().n, 1);
+    assert.equal(
+      (backup.prepare("SELECT count(*) n FROM quota_snapshots").get() as { n: number }).n,
+      1
+    );
     backup.close();
-    assert.equal(raw.prepare("SELECT count(*) n FROM quota_snapshots").get().n, 0);
+    assert.equal(
+      (raw.prepare("SELECT count(*) n FROM quota_snapshots").get() as { n: number }).n,
+      0
+    );
   } finally {
     db.close();
     fs.rmSync(dir, { recursive: true, force: true });

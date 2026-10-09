@@ -21,9 +21,14 @@ const getCodexConfigPath = () => getCliConfigPaths("codex").config;
 const getCodexAuthPath = () => getCliConfigPaths("codex").auth;
 const getCodexDir = () => path.dirname(getCodexConfigPath());
 
+interface ParsedCodexToml {
+  _root: Record<string, unknown>;
+  _sections: Record<string, Record<string, unknown>>;
+}
+
 // Parse TOML config to object (simple parser for codex config)
-const parseToml = (content: string) => {
-  const result: Record<string, any> = { _root: {}, _sections: {} };
+const parseToml = (content: string): ParsedCodexToml => {
+  const result: ParsedCodexToml = { _root: {}, _sections: {} };
   let currentSection = "_root";
 
   content.split("\n").forEach((line) => {
@@ -229,7 +234,7 @@ export async function POST(request: Request) {
     await createMultiBackup("codex", [configPath, authPath]);
 
     // Read and parse existing config
-    let parsed: Record<string, any> = { _root: {}, _sections: {} };
+    let parsed: ParsedCodexToml = { _root: {}, _sections: {} };
     try {
       const existingConfig = await fs.readFile(configPath, "utf-8");
       parsed = parseToml(existingConfig);
@@ -326,7 +331,7 @@ export async function DELETE(request: Request) {
     await createMultiBackup("codex", [configPath, getCodexAuthPath()]);
 
     // Read and parse existing config
-    let parsed: Record<string, any> = { _root: {}, _sections: {} };
+    let parsed: ParsedCodexToml = { _root: {}, _sections: {} };
     try {
       const existingConfig = await fs.readFile(configPath, "utf-8");
       parsed = parseToml(existingConfig);

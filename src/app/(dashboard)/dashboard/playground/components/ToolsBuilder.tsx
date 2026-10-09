@@ -59,7 +59,7 @@ export default function ToolsBuilder({ toolsBuilder }: ToolsBuilderProps) {
 
     const result = add(tool);
     if (!result.ok) {
-      setFormError(result.error);
+      setFormError("error" in result ? result.error : t("toolParamsInvalid"));
       return;
     }
 

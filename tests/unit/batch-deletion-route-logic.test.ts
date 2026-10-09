@@ -21,7 +21,7 @@ function scopeCheck(
   recordApiKeyId: string | null | undefined,
   apiKeyId: string | null
 ): boolean {
-  return canAccessOwnedRecord({ isSessionAuth, apiKeyId }, recordApiKeyId);
+  return canAccessOwnedRecord({ isSessionAuth, apiKeyId, apiKeyMetadata: null }, recordApiKeyId);
 }
 
 function canDeleteBatch(status: string): boolean {

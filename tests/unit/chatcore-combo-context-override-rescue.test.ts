@@ -67,6 +67,13 @@ function buildRequest(isCombo: boolean, content: string) {
     userAgent: "unit-test",
     isCombo,
     log: silentLog,
+    onCredentialsRefreshed: async () => {},
+    onRequestSuccess: () => {},
+    onStreamFailure: () => {},
+    onDisconnect: () => {},
+    connectionId: "combo-ctx-rescue",
+    comboName: null,
+    comboStrategy: null,
   };
 }
 
@@ -107,9 +114,8 @@ test("raw-alias combo request rescued by an exact context override dispatches", 
   // request must NOT be rejected at the gate — the upstream fetch must fire.
   const result = await handleChatCore(buildRequest(true, BIG_PROMPT));
   assert.ok(fetchCalls > 0, "rescued combo target must reach the upstream fetch");
-  assert.notEqual(
-    result.status,
-    400,
+  assert.ok(
+    !("status" in result) || result.status !== 400,
     "rescued combo target must not be rejected with the input-cap 400"
   );
 });
@@ -127,6 +133,10 @@ test("an exact raw-alias max_input_tokens override is enforced even in a combo",
     true
   );
   const result = await handleChatCore(buildRequest(true, BIG_PROMPT));
+  assert.ok(
+    "status" in result,
+    "explicit max_input override must reject before a success response"
+  );
   assert.equal(result.status, 400);
   assert.equal(
     fetchCalls,

@@ -36,7 +36,7 @@ async function resetStorage() {
 }
 
 async function seedConnection(provider: string, overrides: any = {}) {
-  return providersDb.createProviderConnection({
+  const connection = await providersDb.createProviderConnection({
     provider,
     authType: overrides.authType || "oauth",
     name: overrides.name || `${provider}-${Math.random().toString(16).slice(2, 8)}`,
@@ -47,6 +47,14 @@ async function seedConnection(provider: string, overrides: any = {}) {
     priority: overrides.priority,
     providerSpecificData: overrides.providerSpecificData || {},
   });
+  const connectionId = connection?.id;
+  assert.equal(typeof connectionId, "string");
+  return connection as { id: string };
+}
+
+function selectedId(value: unknown): string | undefined {
+  if (!value || typeof value !== "object" || !("connectionId" in value)) return undefined;
+  return typeof value.connectionId === "string" ? value.connectionId : undefined;
 }
 
 test.beforeEach(async () => {
@@ -74,7 +82,7 @@ test("codex session affinity wins over a per-request reset-aware forcedConnectio
     forcedConnectionId: connectionA.id,
   });
   assert.equal(
-    request1?.connectionId,
+    request1 && selectedId(request1),
     connectionA.id,
     "request 1 should pin to the scored winner A"
   );
@@ -93,7 +101,7 @@ test("codex session affinity wins over a per-request reset-aware forcedConnectio
     forcedConnectionId: connectionB.id,
   });
   assert.equal(
-    request2?.connectionId,
+    request2 && selectedId(request2),
     connectionA.id,
     "request 2 must still use the pinned connection A, not the freshly re-scored B"
   );
@@ -110,7 +118,7 @@ test("codex session affinity wins over a per-request reset-aware forcedConnectio
     forcedConnectionId: connectionB.id,
   });
   assert.equal(
-    request3?.connectionId,
+    request3 && selectedId(request3),
     connectionB.id,
     "a new session must honor the fresh re-scored pick"
   );
@@ -141,7 +149,7 @@ test("reset-aware forcedConnectionId is honored when the pinned connection becom
     sessionKey: "session-failover",
     forcedConnectionId: connectionA.id,
   });
-  assert.equal(request1?.connectionId, connectionA.id);
+  assert.equal(request1 && selectedId(request1), connectionA.id);
 
   // A becomes rate-limited (e.g. 429 handled by markAccountUnavailable in
   // production). Reset-aware re-scores and now forces B. The pin (A) is no
@@ -156,7 +164,7 @@ test("reset-aware forcedConnectionId is honored when the pinned connection becom
     forcedConnectionId: connectionB.id,
   });
   assert.equal(
-    request2?.connectionId,
+    request2 && selectedId(request2),
     connectionB.id,
     "an ineligible pin must fall through to the freshly forced connection"
   );
@@ -175,14 +183,14 @@ test("no session affinity configured: reset-aware forcedConnectionId applies exa
     sessionKey: "session-no-ttl",
     forcedConnectionId: connectionA.id,
   });
-  assert.equal(request1?.connectionId, connectionA.id);
+  assert.equal(request1 && selectedId(request1), connectionA.id);
 
   const request2 = await auth.getProviderCredentials("codex", null, null, "gpt-5.5", {
     sessionKey: "session-no-ttl",
     forcedConnectionId: connectionB.id,
   });
   assert.equal(
-    request2?.connectionId,
+    request2 && selectedId(request2),
     connectionB.id,
     "with affinity disabled (ttl=0) each request must honor the fresh forcedConnectionId"
   );

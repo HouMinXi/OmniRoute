@@ -27,7 +27,13 @@ import {
 
 // ── Types ─────────────────────────────────────────────────────────────────
 
-import type { WsClientMessage, WsServerMessage, WsEventMessage, WsAuthResult } from "./types";
+import type {
+  WsClientMessage,
+  WsServerMessage,
+  WsEventMessage,
+  WsSubscribeMessage,
+  WsAuthResult,
+} from "./types";
 
 import { emit, on, onAny, getEventHistory, type HistoryEntry } from "@/lib/events/eventBus";
 
@@ -78,6 +84,20 @@ function isOriginAllowed(origin: string | undefined): boolean {
     allowedOrigins: ALLOWED_ORIGINS,
     allowedHosts: ALLOWED_HOSTS,
   });
+}
+
+const SUBSCRIBE_CHANNELS = [
+  "requests",
+  "combo",
+  "credentials",
+  "compression",
+  "agents",
+] as const satisfies readonly WsSubscribeMessage["channels"][number][];
+
+function isSubscribeChannel(
+  channel: DashboardChannel
+): channel is WsSubscribeMessage["channels"][number] {
+  return (SUBSCRIBE_CHANNELS as readonly string[]).includes(channel);
 }
 
 // ── Client State ──────────────────────────────────────────────────────────
@@ -302,7 +322,7 @@ function handleMessage(clientId: string, raw: string): void {
       // Send buffered events that match subscribed channels
       const relevantHistory = eventHistoryBacklog.filter((h) => {
         const ch = getChannelForEvent(h.event as DashboardEventName);
-        return ch && msg.channels.includes(ch);
+        return ch !== undefined && isSubscribeChannel(ch) && msg.channels.includes(ch);
       });
 
       sendTo(client.ws, {
@@ -351,6 +371,8 @@ function publishDashboardEvent(
   if (eventHistoryBacklog.length > BACKLOG_MAX) {
     eventHistoryBacklog.shift();
   }
+
+  if (!isSubscribeChannel(channel)) return false;
 
   const msg: WsEventMessage = {
     type: "event",

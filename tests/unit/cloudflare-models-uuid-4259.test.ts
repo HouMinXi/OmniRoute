@@ -25,7 +25,10 @@ async function resetStorage() {
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
-async function seedConnection(provider: string, overrides: Record<string, any> = {}) {
+async function seedConnection(
+  provider: string,
+  overrides: Record<string, any> = {}
+): Promise<{ id: string }> {
   return providersDb.createProviderConnection({
     provider,
     authType: overrides.authType || "apikey",
@@ -34,13 +37,13 @@ async function seedConnection(provider: string, overrides: Record<string, any> =
     isActive: overrides.isActive ?? true,
     testStatus: overrides.testStatus || "active",
     providerSpecificData: overrides.providerSpecificData || {},
-  });
+  }) as Promise<{ id: string }>;
 }
 
 async function callRoute(connectionId: string, search = "") {
   return providerModelsRoute.GET(
     new Request(`http://localhost/api/providers/${connectionId}/models${search}`),
-    { params: { id: connectionId } }
+    { params: Promise.resolve({ id: connectionId }) }
   );
 }
 
@@ -93,9 +96,9 @@ test("#4259 cloudflare-ai discovery uses the model name (slug) as id, not the UU
     `unexpected discovery URL: ${calledUrl}`
   );
 
-  const body = await response.json();
+  const body = (await response.json()) as { source: string; models: Array<{ id: string }> };
   assert.equal(body.source, "api");
-  const ids: string[] = body.models.map((m: any) => m.id);
+  const ids: string[] = body.models.map((m) => m.id);
 
   // The human-usable slug must be the id (RED before the fix — id was the UUID).
   assert.ok(

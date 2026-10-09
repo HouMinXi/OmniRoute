@@ -22,18 +22,20 @@ function req(body: unknown) {
 test("buildClientRawRequest deep-clones the body (not the same reference)", () => {
   const body = { model: "m", messages: [{ role: "user", content: "hi" }] };
   const out = buildClientRawRequest(req(body), body);
-  assert.deepEqual(out.body, body);
-  assert.notEqual(out.body, body, "must be a distinct object");
-  assert.notEqual(out.body.messages, body.messages, "nested arrays must be cloned too");
+  const snapshot = out.body as { messages: Array<{ role: string; content: string }> };
+  assert.deepEqual(snapshot, body);
+  assert.notEqual(snapshot, body, "must be a distinct object");
+  assert.notEqual(snapshot.messages, body.messages, "nested arrays must be cloned too");
 });
 
 test("mutating the original body after capture does not corrupt the snapshot", () => {
   const body = { model: "m", messages: [{ role: "user", content: "original" }] };
   const out = buildClientRawRequest(req(body), body);
+  const snapshot = out.body as { messages: Array<{ role: string; content: string }> };
   body.messages[0].content = "MUTATED";
   body.messages.push({ role: "user", content: "added" });
-  assert.equal(out.body.messages.length, 1, "snapshot length is frozen at capture time");
-  assert.equal(out.body.messages[0].content, "original", "snapshot content is isolated");
+  assert.equal(snapshot.messages.length, 1, "snapshot length is frozen at capture time");
+  assert.equal(snapshot.messages[0].content, "original", "snapshot content is isolated");
 });
 
 test("endpoint and headers are captured from the request", () => {
@@ -72,7 +74,8 @@ test("resolveDispatchClientRawRequest uses modelAbortSignal directly when client
   const modelAbortController = new AbortController();
   const clientRawRequest = { endpoint: "/v1/responses", signal: null };
   const out = resolveDispatchClientRawRequest(clientRawRequest, modelAbortController.signal);
-  assert.equal(out?.endpoint, "/v1/responses", "other fields are preserved");
+  assert.ok(out && "endpoint" in out);
+  assert.equal(out.endpoint, "/v1/responses", "other fields are preserved");
   assert.equal(out?.signal?.aborted, false);
   modelAbortController.abort(new Error("target timeout"));
   assert.equal(out?.signal?.aborted, true, "the returned signal must reflect the model abort");

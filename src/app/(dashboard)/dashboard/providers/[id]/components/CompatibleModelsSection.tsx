@@ -563,6 +563,7 @@ export default function CompatibleModelsSection({
                     key={`${providerStorageAlias}:${modelId}`}
                     modelId={modelId}
                     fullModel={fullModel}
+                    provider={providerStorageAlias}
                     alias={alias}
                     displayName={displayName}
                     source={source}
@@ -590,7 +591,6 @@ export default function CompatibleModelsSection({
                     onTestModel={onTestModel}
                     testStatus={modelTestStatus?.[modelId] || null}
                     testingModel={testingModelId === modelId}
-                    provider={providerStorageAlias}
                     supportsVision={supportsVision}
                     maxOutputTokenOverride={outputOverrides.overrides[modelId] ?? null}
                     onSaveMaxOutputTokenOverride={outputOverrides.save}

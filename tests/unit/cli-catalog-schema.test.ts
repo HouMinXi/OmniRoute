@@ -33,7 +33,6 @@ test("CliCatalogSchema.parse() accepts the full CLI_TOOLS record", () => {
 
 test("CliCatalogEntrySchema throws ZodError for invalid category value", () => {
   const base = { ...CLI_TOOLS["claude"] };
-  // @ts-expect-error — intentional invalid value for testing
   const invalid = { ...base, category: "invalid" };
   assert.throws(
     () => CliCatalogEntrySchema.parse(invalid),
@@ -52,7 +51,6 @@ test("CliCatalogEntrySchema throws ZodError for invalid color (not #RRGGBB)", ()
 
 test("CliCatalogEntrySchema throws ZodError for invalid baseUrlSupport value", () => {
   const base = { ...CLI_TOOLS["cline"] };
-  // @ts-expect-error — intentional invalid value for testing
   const invalid = { ...base, baseUrlSupport: "maybe" };
   assert.throws(
     () => CliCatalogEntrySchema.parse(invalid),
@@ -71,7 +69,6 @@ test("CliCatalogEntrySchema throws ZodError when required string fields are empt
 
 test("CliCatalogEntrySchema throws ZodError for invalid configType value", () => {
   const base = { ...CLI_TOOLS["custom"] };
-  // @ts-expect-error — intentional invalid value for testing
   const invalid = { ...base, configType: "unknown-type" };
   assert.throws(
     () => CliCatalogEntrySchema.parse(invalid),

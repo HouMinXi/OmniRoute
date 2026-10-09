@@ -252,7 +252,12 @@ export async function POST(req: Request) {
   const engineId = mode === "caveman" && !rawEngineId ? "caveman" : rawEngineId;
   const effectiveMode: CompressionMode =
     engineId || pipeline ? "stacked" : (mode as CompressionMode);
-  const originalText = messagesToText(messages);
+  const originalText = messagesToText(
+    messages.map((message) => ({
+      role: message.role,
+      content: message.content ?? "",
+    }))
+  );
   const originalTokens = countTokens(originalText);
 
   try {

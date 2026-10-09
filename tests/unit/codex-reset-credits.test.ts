@@ -118,7 +118,10 @@ test("consumeCodexResetCredit fetches a credit id, posts it, then refreshes usag
   );
   const calls: Array<{ url: string; init: RequestInit }> = [];
 
-  globalThis.fetch = async (url, init = {}) => {
+  globalThis.fetch = async (
+    url,
+    init: { method?: unknown; headers?: unknown; body?: unknown } = {}
+  ) => {
     calls.push({ url: String(url), init });
 
     if (String(url).endsWith("/rate-limit-reset-credits")) {
@@ -166,8 +169,12 @@ test("consumeCodexResetCredit fetches a credit id, posts it, then refreshes usag
   const refreshedQuotas = result.usage.quotas as QuotaUsageRecord;
 
   const recovered = await providersDb.getProviderConnectionById(connection.id);
-  assert.equal(recovered.providerSpecificData.codexScopeRateLimitedUntil?.codex, undefined);
-  assert.equal(recovered.providerSpecificData.codexQuotaStateByScope.codex.usage5h, 0);
+  const recoveredData = recovered.providerSpecificData as {
+    codexScopeRateLimitedUntil?: { codex?: unknown };
+    codexQuotaStateByScope: { codex: { usage5h: unknown } };
+  };
+  assert.equal(recoveredData.codexScopeRateLimitedUntil?.codex, undefined);
+  assert.equal(recoveredData.codexQuotaStateByScope.codex.usage5h, 0);
   assert.equal(result.outcome, "reset");
   assert.equal(result.usage.plan, "plus");
   assert.equal(refreshedQuotas.weekly?.used, 40);
@@ -212,7 +219,10 @@ test("consumeCodexResetCredit automatically redeems the soonest-expiring availab
   const connection = (await createCodexConnection()) as { id: string };
   let consumedCreditId: string | null = null;
 
-  globalThis.fetch = async (url, init = {}) => {
+  globalThis.fetch = async (
+    url,
+    init: { method?: unknown; headers?: unknown; body?: unknown } = {}
+  ) => {
     if (String(url).endsWith("/rate-limit-reset-credits")) {
       return new Response(
         JSON.stringify({
@@ -255,7 +265,10 @@ test("consumeCodexResetCredit redeems an explicitly selected available credit", 
   const connection = (await createCodexConnection()) as { id: string };
   let consumedCreditId: string | null = null;
 
-  globalThis.fetch = async (url, init = {}) => {
+  globalThis.fetch = async (
+    url,
+    init: { method?: unknown; headers?: unknown; body?: unknown } = {}
+  ) => {
     if (String(url).endsWith("/rate-limit-reset-credits")) {
       return new Response(
         JSON.stringify({

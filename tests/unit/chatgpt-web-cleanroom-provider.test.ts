@@ -172,6 +172,7 @@ test("surfaces an exhausted Free image quota as 429 for sibling-account fallback
     },
   });
 
+  assert.ok("response" in response, "image limit must come back as an executor response");
   assert.equal(response.response.status, 429);
   assert.match(await response.response.text(), /image upload limit/);
 });

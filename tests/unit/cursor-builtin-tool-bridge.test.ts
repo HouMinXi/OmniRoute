@@ -700,7 +700,7 @@ test("fails closed when no declared tool matches the built-in event", () => {
   assert.equal(bridgeCursorBuiltinTool(shellEvent(), defs([incompatible]), "posix"), null);
   assert.equal(
     bridgeCursorBuiltinTool(
-      { kind: "exec_write", execMsgId: 2, execId: "write", path: "/tmp/a" },
+      { kind: "exec_write", execMsgId: 2, execId: "write", path: "/tmp/a", fileText: "" },
       defs([readTool]),
       "posix"
     ),
@@ -827,12 +827,12 @@ test("a Write with no schema-compatible content property stays rejected", () => 
 
 test("binary writes and non-UTF-8 encoding hints cannot be forwarded as plain text", () => {
   const event = {
-    kind: "exec_write",
+    kind: "exec_write" as const,
     execMsgId: 1,
     execId: "e",
     path: "/tmp/existing.bin",
     fileText: "",
-  } as ExecServerEvent;
+  };
   const tools = defs([
     tool("write", { filePath: { type: "string" }, content: { type: "string" } }, [
       "filePath",

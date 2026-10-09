@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { NextRequest } from "next/server";
+import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 /**
  * Regression test for issue #13679 (PR D, item #5) — deploy manifests
@@ -42,7 +44,8 @@ async function resetStorage() {
 
 test.beforeEach(async () => {
   await resetStorage();
-  loginRoute.authRouteInternals.getCookieStore = async () => ({ set() {} });
+  loginRoute.authRouteInternals.getCookieStore = async () =>
+    ({ set() {} }) as unknown as ReadonlyRequestCookies;
 });
 
 test.afterEach(() => {
@@ -75,7 +78,7 @@ function postLogin(password: string, forwardedFor: string) {
         "x-omniroute-trusted-peer-ip": forwardedFor,
       },
       body: JSON.stringify({ password }),
-    })
+    }) as NextRequest
   );
 }
 

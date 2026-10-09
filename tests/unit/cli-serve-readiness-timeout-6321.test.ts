@@ -48,6 +48,7 @@ test("ServerSupervisor.getRecentLog() exposes buffered output for readiness diag
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 0,
+    onCrashCallback: undefined,
   });
 
   assert.equal(

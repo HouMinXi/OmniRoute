@@ -273,7 +273,7 @@ export async function buildProviderHealthAutopilotReport(
     return provider && (!providerFilter || provider === providerFilter);
   });
   const breakers = getAllCircuitBreakerStatuses().filter((breaker) => {
-    const name = toString((breaker as JsonRecord).name);
+    const name = breaker.name;
     const provider = canonicalProviderId(name);
     if (!name || !provider || name.startsWith("test-") || name.startsWith("test_")) return false;
     return !providerFilter || provider === providerFilter;
@@ -295,7 +295,7 @@ export async function buildProviderHealthAutopilotReport(
     if (provider) providerIds.add(provider);
   }
   for (const breaker of breakers) {
-    const provider = canonicalProviderId((breaker as JsonRecord).name);
+    const provider = canonicalProviderId(breaker.name);
     if (provider) providerIds.add(provider);
   }
   for (const lockout of lockouts) {
@@ -313,9 +313,7 @@ export async function buildProviderHealthAutopilotReport(
     const providerConnections = connections.filter(
       (connection) => canonicalProviderId(connection.provider) === provider
     );
-    const breaker = breakers.find(
-      (entry) => canonicalProviderId((entry as JsonRecord).name) === provider
-    ) as JsonRecord | undefined;
+    const breaker = breakers.find((entry) => canonicalProviderId(entry.name) === provider);
     const providerLockouts = lockouts.filter(
       (lockout) => canonicalProviderId(providerFromLockout(lockout)) === provider
     );

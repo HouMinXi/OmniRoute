@@ -21,7 +21,7 @@ const trivialMsgs = [{ role: "user", content: "list the files" }];
 const heavyMsgs = [{ role: "user", content: HEAVY }];
 
 test("explicit reasoning_effort is never overwritten by adaptive wiring", () => {
-  const body = { model: "m", reasoning_effort: "low" };
+  const body = { model: "m", messages: trivialMsgs, reasoning_effort: "low" };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: "auto",
@@ -31,7 +31,7 @@ test("explicit reasoning_effort is never overwritten by adaptive wiring", () => 
 });
 
 test("explicit reasoning object is never overwritten", () => {
-  const body = { model: "m", reasoning: { effort: "high" } };
+  const body = { model: "m", messages: trivialMsgs, reasoning: { effort: "high" } };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: trivialMsgs },
     headerEffort: "auto",
@@ -42,7 +42,7 @@ test("explicit reasoning object is never overwritten", () => {
 });
 
 test("explicit thinking field is never overwritten", () => {
-  const body = { model: "m", thinking: { type: "enabled" } };
+  const body = { model: "m", messages: trivialMsgs, thinking: { type: "enabled" } };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: "auto",
@@ -53,7 +53,7 @@ test("explicit thinking field is never overwritten", () => {
 });
 
 test("model-default 'auto' marker is resolved, never sent upstream verbatim", () => {
-  const body = { model: "m", reasoning_effort: "auto" };
+  const body = { model: "m", messages: trivialMsgs, reasoning_effort: "auto" };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: trivialMsgs },
     headerEffort: null,
@@ -64,7 +64,7 @@ test("model-default 'auto' marker is resolved, never sent upstream verbatim", ()
 });
 
 test("model-default 'auto' resolves high on heavy turns", () => {
-  const body = { model: "m", reasoning_effort: "auto" };
+  const body = { model: "m", messages: trivialMsgs, reasoning_effort: "auto" };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: null,
@@ -74,7 +74,7 @@ test("model-default 'auto' resolves high on heavy turns", () => {
 });
 
 test("header opt-in resolves from the raw (pre-translation) body messages", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: "auto",
@@ -84,7 +84,7 @@ test("header opt-in resolves from the raw (pre-translation) body messages", () =
 });
 
 test("no opt-in leaves the body untouched (same reference)", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: null,
@@ -95,7 +95,7 @@ test("no opt-in leaves the body untouched (same reference)", () => {
 });
 
 test("missing rawBody does not throw", () => {
-  const body = { model: "m", reasoning_effort: "auto" };
+  const body = { model: "m", messages: trivialMsgs, reasoning_effort: "auto" };
   const out = wireAdaptiveEffort(body, {
     rawBody: undefined,
     headerEffort: null,
@@ -108,7 +108,7 @@ test("missing rawBody does not throw", () => {
 // client request (chatCore.ts passes `clientRawRequest` through untouched), so
 // the call site does not need its own header extraction.
 test("header is read from clientRawRequest.headers (plain record, case-insensitive)", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     clientRawRequest: { headers: { "X-OmniRoute-Effort": "auto" } },
@@ -118,7 +118,7 @@ test("header is read from clientRawRequest.headers (plain record, case-insensiti
 });
 
 test("header is read from clientRawRequest.headers (Headers instance)", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: trivialMsgs },
     clientRawRequest: { headers: new Headers({ "x-omniroute-effort": "auto" }) },
@@ -128,7 +128,7 @@ test("header is read from clientRawRequest.headers (Headers instance)", () => {
 });
 
 test("clientRawRequest without the header (or without headers at all) is not an opt-in", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const noHeader = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     clientRawRequest: { headers: { "user-agent": "x" } },
@@ -149,7 +149,7 @@ test("clientRawRequest without the header (or without headers at all) is not an 
 });
 
 test("a pre-extracted headerEffort takes precedence over clientRawRequest.headers", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: null,
@@ -167,7 +167,7 @@ test("a pre-extracted headerEffort takes precedence over clientRawRequest.header
 // `FORMATS.OPENAI` the same way (applyDefaultReasoningEffort,
 // promoteStrayReasoningEffort's same-format Responses lane) -- wiring must match.
 test("header opt-in is a no-op on a Claude-targeted dispatch (body returned unchanged)", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: "auto",
@@ -178,7 +178,7 @@ test("header opt-in is a no-op on a Claude-targeted dispatch (body returned unch
 });
 
 test("header opt-in is a no-op on a Gemini-targeted dispatch", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: "auto",
@@ -189,7 +189,7 @@ test("header opt-in is a no-op on a Gemini-targeted dispatch", () => {
 });
 
 test("header read from clientRawRequest is also a no-op on a non-OpenAI target", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     clientRawRequest: { headers: { "x-omniroute-effort": "auto" } },
@@ -204,7 +204,7 @@ test("model-default 'auto' marker is left untouched (not stripped, not resolved)
   // targetFormat check -- on a non-OpenAI target the body (including any stray
   // literal "auto") must be untouched, since it was never OmniRoute's own
   // injection to interpret on that dispatch shape.
-  const body = { model: "m", reasoning_effort: "auto" };
+  const body = { model: "m", messages: trivialMsgs, reasoning_effort: "auto" };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: null,
@@ -215,7 +215,7 @@ test("model-default 'auto' marker is left untouched (not stripped, not resolved)
 });
 
 test("targetFormat undefined (e.g. an uncovered call site) also no-ops -- fail closed", () => {
-  const body = { model: "m" };
+  const body = { model: "m", messages: trivialMsgs };
   const out = wireAdaptiveEffort(body, {
     rawBody: { messages: heavyMsgs },
     headerEffort: "auto",

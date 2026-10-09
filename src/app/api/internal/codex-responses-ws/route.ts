@@ -441,9 +441,21 @@ async function resolveCodexCredentials(
       model,
       { excludeConnectionIds: excludedConnectionIds }
     );
-    if (!credentials || "allRateLimited" in credentials || !credentials.connectionId) break;
+    if (
+      !credentials ||
+      !("connectionId" in credentials) ||
+      typeof credentials.connectionId !== "string"
+    )
+      break;
 
-    const leaseId = await acquireCodexWsLease(credentials.connectionId, credentials.maxConcurrent);
+    const maxConcurrentValue = (credentials as { maxConcurrent?: unknown }).maxConcurrent;
+    const maxConcurrent =
+      typeof maxConcurrentValue === "number"
+        ? maxConcurrentValue
+        : maxConcurrentValue === null
+          ? null
+          : undefined;
+    const leaseId = await acquireCodexWsLease(credentials.connectionId, maxConcurrent);
     if (!leaseId) {
       excludedConnectionIds.push(credentials.connectionId);
       continue;

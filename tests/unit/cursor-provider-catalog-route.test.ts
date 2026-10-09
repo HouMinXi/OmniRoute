@@ -13,6 +13,13 @@ const { createProviderConnection } = await import("../../src/lib/db/providers.ts
 const { replaceSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");
 const { GET } = await import("../../src/app/api/synced-available-models/route.ts");
 
+function connectionId(connection: { id?: unknown } | null): string {
+  if (!connection || typeof connection.id !== "string" || connection.id.length === 0) {
+    throw new Error("provider connection is missing an id");
+  }
+  return connection.id;
+}
+
 test.after(() => {
   resetDbInstance();
   fs.rmSync(dataDir, { recursive: true, force: true });
@@ -27,7 +34,7 @@ test("provider page catalog exposes Cursor effort aliases without adding custom 
     apiKey: "test-token",
     isActive: true,
   });
-  await replaceSyncedAvailableModelsForConnection("cursor", connection.id, [
+  await replaceSyncedAvailableModelsForConnection("cursor", connectionId(connection), [
     { id: "grok-4.7", name: "Grok 4.7", source: "imported" },
   ]);
 

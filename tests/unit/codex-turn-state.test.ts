@@ -13,6 +13,12 @@ import {
 } from "../../open-sse/config/codexIdentity.ts";
 import { buildStreamingResponseHeaders } from "../../open-sse/handlers/chatCore/responseHeaders.ts";
 
+function turnStateEcho(value: { providerSpecificData?: unknown }): unknown {
+  const data = value.providerSpecificData;
+  if (!data || typeof data !== "object" || Array.isArray(data)) return undefined;
+  return "codexTurnStateEcho" in data ? data.codexTurnStateEcho : undefined;
+}
+
 const TURN_STATE = "ts-blob-0123456789";
 
 function reset() {
@@ -108,7 +114,7 @@ test("withCodexFingerprintCredentials stashes the allowed echo independent of mo
 
   // Same account, explicit off: echo survives alongside original identity passthrough.
   const sameAccount = withCodexFingerprintCredentials(baseCredentials, clientHeaders, {});
-  assert.equal(sameAccount.providerSpecificData?.codexTurnStateEcho, TURN_STATE);
+  assert.equal(turnStateEcho(sameAccount), TURN_STATE);
   assert.ok(sameAccount.providerSpecificData?.codexOriginalIdentityHeaders);
   assert.equal(sameAccount.providerSpecificData?.codexClientIdentity, undefined);
 
@@ -118,7 +124,7 @@ test("withCodexFingerprintCredentials stashes the allowed echo independent of mo
     clientHeaders,
     {}
   );
-  assert.equal(crossAccount.providerSpecificData?.codexTurnStateEcho, undefined);
+  assert.equal(turnStateEcho(crossAccount), undefined);
 
   // Compact endpoint: convergence identity is skipped but the echo guard still runs.
   const compact = withCodexFingerprintCredentials(
@@ -127,7 +133,7 @@ test("withCodexFingerprintCredentials stashes the allowed echo independent of mo
     {}
   );
   assert.equal(compact.providerSpecificData?.codexClientIdentity, undefined);
-  assert.equal(compact.providerSpecificData?.codexTurnStateEcho, TURN_STATE);
+  assert.equal(turnStateEcho(compact), TURN_STATE);
 });
 
 test("streaming response headers forward x-codex-turn-state outside the byte budget", () => {

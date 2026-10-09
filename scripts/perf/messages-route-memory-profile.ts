@@ -78,7 +78,7 @@ function markerFor(tokenEquivalent: number): string {
 export function buildWorkerEnv(
   source: NodeJS.ProcessEnv | Record<string, string | undefined> = process.env
 ): NodeJS.ProcessEnv {
-  const env: NodeJS.ProcessEnv = {};
+  const env: Record<string, string | undefined> = {};
   for (const key of ["PATH", "HOME", "TMPDIR", "TEMP", "TMP", "LANG", "LC_ALL", "TZ"] as const) {
     const value = source[key];
     if (value) env[key] = value;

@@ -15,8 +15,7 @@ const { cursorProvider, cursor_apiProvider } =
   await import("../../open-sse/config/providers/registry/cursor/index.ts");
 const { REGISTRY, generateAliasMap, getProviderCategory } =
   await import("../../open-sse/config/providerRegistry.ts");
-const { getExecutor, hasSpecializedExecutor } =
-  await import("../../open-sse/executors/index.ts");
+const { getExecutor, hasSpecializedExecutor } = await import("../../open-sse/executors/index.ts");
 const { CursorExecutor } = await import("../../open-sse/executors/cursor.ts");
 const { __resetCursorApiKeyAuthForTest } =
   await import("../../open-sse/services/cursorApiKeyAuth.ts");
@@ -45,7 +44,7 @@ describe("cursor-api provider wiring", () => {
     assert.equal(cursorProvider.authType, "oauth");
     assert.equal(getProviderCategory("cursor"), "oauth");
     assert.ok(OAUTH_PROVIDERS.cursor);
-    assert.ok(!APIKEY_PROVIDERS.cursor);
+    assert.ok(!("cursor" in APIKEY_PROVIDERS));
   });
 
   it("has its own API-key catalog card admitted by the managed-connection gate", () => {
@@ -156,8 +155,8 @@ describe("CursorExecutor credential resolution", () => {
       stream: false,
       credentials: { apiKey: API_KEY, connectionId: "cursor-api-test" },
       signal: null,
-      log: null,
       upstreamExtraHeaders: null,
+      clientHeaders: null,
     });
 
     assert.equal(result.response.status, 500);

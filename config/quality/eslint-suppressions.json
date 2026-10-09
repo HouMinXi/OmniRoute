@@ -648,11 +648,6 @@
       "count": 5
     }
   },
-  "open-sse/utils/stream.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "open-sse/utils/streamHelpers.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
@@ -2769,9 +2764,6 @@
   "tests/unit/cli-oauth-commands.test.ts": {
     "@typescript-eslint/no-explicit-any": {
       "count": 20
-    },
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
     }
   },
   "tests/unit/cli-oneproxy-commands.test.ts": {
@@ -2894,7 +2886,7 @@
       "count": 13
     },
     "@typescript-eslint/no-unused-vars": {
-      "count": 2
+      "count": 1
     }
   },
   "tests/unit/cli-sync-commands.test.ts": {
@@ -2961,7 +2953,7 @@
   },
   "tests/unit/cloudflare-models-uuid-4259.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 3
+      "count": 2
     }
   },
   "tests/unit/cloudflaredTunnel-extended.test.ts": {

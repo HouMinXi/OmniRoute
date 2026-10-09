@@ -231,7 +231,7 @@ export async function POST(request: Request) {
       return createErrorResponse({
         status: createRes.status,
         message: `Deno Deploy create-app failed: ${upstreamMessage}`,
-        type: "upstream_error",
+        type: "server_error",
       });
     }
 
@@ -240,7 +240,7 @@ export async function POST(request: Request) {
       return createErrorResponse({
         status: 502,
         message: "Deno Deploy returned no app id",
-        type: "upstream_error",
+        type: "server_error",
       });
     }
 
@@ -284,7 +284,7 @@ export async function POST(request: Request) {
       return createErrorResponse({
         status: deployRes.status,
         message: `Deno Deploy failed: ${upstreamMessage}`,
-        type: "upstream_error",
+        type: "server_error",
       });
     }
 
@@ -311,7 +311,7 @@ export async function POST(request: Request) {
           finalStatus === "timeout"
             ? "Deno Deploy did not reach 'succeeded' state within 60 seconds. Check your Deno Deploy dashboard."
             : "Deno Deploy revision failed.",
-        type: finalStatus === "timeout" ? "timeout" : "upstream_error",
+        type: "server_error",
       });
     }
 

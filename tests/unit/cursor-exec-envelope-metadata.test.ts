@@ -29,6 +29,26 @@ import {
 } from "../../open-sse/utils/cursorAgentProtobuf.ts";
 import { decodeFields } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
+function fieldVarint(field: WireField | undefined): bigint | undefined {
+  return field && field.wireType === 0 ? field.varint : undefined;
+}
+
 /** Wrap an ExecServerMessage body as AgentServerMessage.exec_server_message (field 2). */
 function asAgentServerMessage(execServerMessageHex: string): Buffer {
   const body = Buffer.from(execServerMessageHex, "hex");
@@ -106,26 +126,46 @@ test("the mcp_state reply declares one server carrying the tools on field 5", ()
   assert.equal(frame.readUInt32BE(1), body.length);
 
   const ecm = decodeFields(
-    decodeFields(body).find((field) => field.fieldNumber === 2)!.bytes // exec_client_message
+    lenBytes(decodeFields(body).find((field) => field.fieldNumber === 2)) // exec_client_message
   );
-  assert.equal(ecm.find((f) => f.fieldNumber === 1)?.varint, 7n, "ExecClientMessage.id");
+  assert.equal(fieldVarint(ecm.find((f) => f.fieldNumber === 1)), 7n, "ExecClientMessage.id");
 
   const result = ecm.find((f) => f.fieldNumber === 36);
   assert.ok(result, "mcp_state_exec_result must mirror the request's field 36");
 
-  const success = decodeFields(result.bytes).find((f) => f.fieldNumber === 1);
+  const success = decodeFields(lenBytes(result)).find((f) => f.fieldNumber === 1);
   assert.ok(success, "McpStateExecResult.success");
 
-  const servers = decodeFields(success.bytes).filter((f) => f.fieldNumber === 1);
+  const servers = decodeFields(lenBytes(success)).filter((f) => f.fieldNumber === 1);
   assert.equal(servers.length, 1, "McpStateSuccess.servers");
 
-  const server = decodeFields(servers[0].bytes);
-  assert.equal(server.find((f) => f.fieldNumber === 1)?.bytes.toString("utf8"), "omniroute");
-  assert.equal(server.find((f) => f.fieldNumber === 2)?.bytes.toString("utf8"), "omniroute");
+  const server = decodeFields(lenBytes(servers[0]));
+  assert.equal(
+    fieldText(
+      server.find((f) => f.fieldNumber === 1),
+      "utf8"
+    ),
+    "omniroute"
+  );
+  assert.equal(
+    fieldText(
+      server.find((f) => f.fieldNumber === 2),
+      "utf8"
+    ),
+    "omniroute"
+  );
   const tools = server.filter((f) => f.fieldNumber === 5);
   assert.equal(tools.length, 1, "McpStateServer.tools is field 5");
-  assert.match(tools[0].bytes.toString("utf8"), /bash/);
-  assert.equal(server.find((f) => f.fieldNumber === 7)?.bytes.toString("utf8"), "ready");
+  const toolBytes = fieldText(tools[0], "utf8");
+  assert.ok(toolBytes);
+  assert.match(toolBytes, /bash/);
+  assert.equal(
+    fieldText(
+      server.find((f) => f.fieldNumber === 7),
+      "utf8"
+    ),
+    "ready"
+  );
 });
 
 test("the request_context reply puts tools on RequestContext.tools (field 7), not rules (2)", () => {
@@ -140,12 +180,17 @@ test("the request_context reply puts tools on RequestContext.tools (field 7), no
   ]);
 
   const body = frame.subarray(5);
-  const ecm = decodeFields(decodeFields(body).find((f) => f.fieldNumber === 2)!.bytes);
+  const ecm = decodeFields(lenBytes(decodeFields(body).find((f) => f.fieldNumber === 2)));
   const requestContext = decodeFields(
-    decodeFields(
-      decodeFields(ecm.find((f) => f.fieldNumber === 10)!.bytes).find((f) => f.fieldNumber === 1)!
-        .bytes // RequestContextResult.success
-    ).find((f) => f.fieldNumber === 1)!.bytes // RequestContextSuccess.request_context
+    lenBytes(
+      decodeFields(
+        lenBytes(
+          decodeFields(lenBytes(ecm.find((f) => f.fieldNumber === 10))).find(
+            (f) => f.fieldNumber === 1
+          )
+        )
+      ).find((f) => f.fieldNumber === 1)
+    ) // RequestContextSuccess.request_context
   );
 
   assert.equal(
@@ -155,7 +200,9 @@ test("the request_context reply puts tools on RequestContext.tools (field 7), no
   );
   const tools = requestContext.filter((f) => f.fieldNumber === 7);
   assert.equal(tools.length, 1, "RequestContext.tools is field 7");
-  assert.match(tools[0].bytes.toString("utf8"), /bash/);
+  const toolBytes = fieldText(tools[0], "utf8");
+  assert.ok(toolBytes);
+  assert.match(toolBytes, /bash/);
 });
 
 /**
@@ -198,30 +245,54 @@ test("the request_context ack advertises the tools as an MCP descriptor", () => 
     },
   ]);
 
-  const ecm = decodeFields(decodeFields(frame.subarray(5)).find((f) => f.fieldNumber === 2)!.bytes);
+  const ecm = decodeFields(
+    lenBytes(decodeFields(frame.subarray(5)).find((f) => f.fieldNumber === 2))
+  );
   const requestContext = decodeFields(
-    decodeFields(
-      decodeFields(ecm.find((f) => f.fieldNumber === 10)!.bytes).find((f) => f.fieldNumber === 1)!
-        .bytes
-    ).find((f) => f.fieldNumber === 1)!.bytes
+    lenBytes(
+      decodeFields(
+        lenBytes(
+          decodeFields(lenBytes(ecm.find((f) => f.fieldNumber === 10))).find(
+            (f) => f.fieldNumber === 1
+          )
+        )
+      ).find((f) => f.fieldNumber === 1)
+    )
   );
 
   const metaOptions = requestContext.find((f) => f.fieldNumber === 34);
   assert.ok(metaOptions, "RequestContext.mcp_meta_tool_options");
 
-  const meta = decodeFields(metaOptions.bytes);
-  assert.equal(meta.find((f) => f.fieldNumber === 1)?.varint, 1n, "McpMetaToolOptions.enabled");
+  const meta = decodeFields(lenBytes(metaOptions));
+  assert.equal(
+    fieldVarint(meta.find((f) => f.fieldNumber === 1)),
+    1n,
+    "McpMetaToolOptions.enabled"
+  );
 
-  const descriptor = decodeFields(meta.find((f) => f.fieldNumber === 2)!.bytes);
-  assert.equal(descriptor.find((f) => f.fieldNumber === 1)?.bytes.toString("utf8"), "omniroute");
-  assert.equal(descriptor.find((f) => f.fieldNumber === 2)?.bytes.toString("utf8"), "omniroute");
+  const descriptor = decodeFields(lenBytes(meta.find((f) => f.fieldNumber === 2)));
+  assert.equal(
+    fieldText(
+      descriptor.find((f) => f.fieldNumber === 1),
+      "utf8"
+    ),
+    "omniroute"
+  );
+  assert.equal(
+    fieldText(
+      descriptor.find((f) => f.fieldNumber === 2),
+      "utf8"
+    ),
+    "omniroute"
+  );
 
   const descriptorTools = descriptor.filter((f) => f.fieldNumber === 5);
   assert.equal(descriptorTools.length, 1, "McpDescriptor.tools is field 5");
   assert.equal(
-    decodeFields(descriptorTools[0].bytes)
-      .find((f) => f.fieldNumber === 1)
-      ?.bytes.toString("utf8"),
+    fieldText(
+      decodeFields(lenBytes(descriptorTools[0])).find((f) => f.fieldNumber === 1),
+      "utf8"
+    ),
     "bash",
     "McpToolDescriptor.tool_name"
   );

@@ -220,11 +220,13 @@ export async function POST(request) {
           },
         });
 
+        const warning = "warning" in result ? result.warning : null;
+        const method = "method" in result ? result.method : null;
         return NextResponse.json({
           valid: !!result.valid,
           error: result.valid ? null : result.error || "Invalid API key",
-          warning: result.warning || null,
-          method: result.method || null,
+          warning: warning || null,
+          method: method || null,
         });
       }
 

@@ -9,11 +9,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { cleanJSONSchemaForAntigravity, GEMINI_UNSUPPORTED_SCHEMA_KEYS } = await import(
-  "../../open-sse/translator/helpers/geminiHelper.ts"
-);
+const { cleanJSONSchemaForAntigravity, GEMINI_UNSUPPORTED_SCHEMA_KEYS } =
+  await import("../../open-sse/translator/helpers/geminiHelper.ts");
 
-const clean = (schema: unknown) => cleanJSONSchemaForAntigravity(schema, { preserveNullable: true });
+const clean = (schema: unknown) =>
+  cleanJSONSchemaForAntigravity(schema, { preserveNullable: true });
 const valueProp = (out: unknown) =>
   (out as { properties: { value: Record<string, unknown> } }).properties.value;
 
@@ -51,8 +51,12 @@ test("nested nullable fields are marked too", () => {
         items: { type: "object", properties: { note: { type: ["string", "null"] } } },
       },
     },
-  }) as Record<string, never>;
-  const note = out.properties["items"]["items"]["properties"]["note"];
+  }) as {
+    properties: {
+      items: { items: { properties: { note: { type: string; nullable: boolean } } } };
+    };
+  };
+  const note = out.properties.items.items.properties.note;
   assert.equal(note.type, "string");
   assert.equal(note.nullable, true);
 });

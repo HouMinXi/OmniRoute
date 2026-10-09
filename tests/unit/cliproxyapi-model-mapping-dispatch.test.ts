@@ -53,14 +53,13 @@ type ExecutorLike = { execute: (input: ExecuteInput) => Promise<unknown> };
 async function captureFetchBody(fn: () => Promise<unknown>): Promise<Record<string, unknown>> {
   let capturedBody: Record<string, unknown> | null = null;
   const originalFetch = globalThis.fetch;
-  // @ts-expect-error test stub
-  globalThis.fetch = async (_url: string, init: RequestInit) => {
+  globalThis.fetch = (async (_url: string, init: RequestInit) => {
     capturedBody = JSON.parse(init.body as string);
     return new Response(JSON.stringify({ ok: true }), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
-  };
+  }) as typeof fetch;
   try {
     await fn();
   } finally {

@@ -50,7 +50,7 @@ test("completeness: every file lands in exactly one shard", () => {
 
 test("weightItems gives unknown/new specs the median weight, not an extreme", () => {
   const items = weightItems(["new.spec.ts", "big.spec.ts", "small.spec.ts"], {
-    _meta: "x",
+    _meta: 0,
     "big.spec.ts": 600,
     "small.spec.ts": 20,
     "other.spec.ts": 100,

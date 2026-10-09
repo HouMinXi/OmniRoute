@@ -262,8 +262,17 @@ export async function handleValidatedRerankRequestBody(
       if (isAllRateLimitedCredentials(credentials)) {
         return rateLimitedProviderResponse(prefix, credentials);
       }
-
-      const token = credentials?.apiKey || credentials?.accessToken;
+      const apiKey = Reflect.get(credentials, "apiKey");
+      const accessToken = Reflect.get(credentials, "accessToken");
+      let token = "";
+      if (typeof apiKey === "string") token = apiKey;
+      else if (typeof accessToken === "string") token = accessToken;
+      if (!token) {
+        return errorResponse(
+          HTTP_STATUS.BAD_REQUEST,
+          `No credentials for local provider: ${prefix}`
+        );
+      }
       const startTime = Date.now();
       // One body serves every known local server: Cohere/OpenAI spelling (`documents`,
       // `return_documents`) plus the TEI spelling (`texts`, `return_text`). See

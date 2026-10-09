@@ -2,6 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { makeMcpResp, makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
 
+type McpToolResult = Parameters<typeof makeMcpStreamFetch>[0] extends { toolResult?: infer T }
+  ? T
+  : never;
+
 function makeResp(data: unknown, status = 200) {
   return makeMcpResp(data, status) as any;
 }
@@ -21,7 +25,9 @@ test("oneproxy status chama omniroute_oneproxy_stats via MCP", async () => {
   // client contract, not the subcommand wiring (covered by the import test below).
   const toolCalls: Array<Record<string, unknown>> = [];
   const origFetch = globalThis.fetch;
-  const streamFetch = makeMcpStreamFetch({ toolResult: { poolSize: 10, activeProxies: 8 } });
+  const streamFetch = makeMcpStreamFetch({
+    toolResult: { poolSize: 10, activeProxies: 8 } as unknown as McpToolResult,
+  });
   globalThis.fetch = (async (url: string | URL, init?: any) => {
     const parsed = init?.body ? JSON.parse(init.body) : {};
     if (parsed.method === "tools/call") toolCalls.push(parsed.params ?? {});
@@ -42,7 +48,9 @@ test("oneproxy status chama omniroute_oneproxy_stats via MCP", async () => {
 
 test("oneproxy stats passa provider e period para MCP", async () => {
   const origFetch = globalThis.fetch;
-  globalThis.fetch = makeMcpStreamFetch({ toolResult: { requests: 5000 } });
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { requests: 5000 } as unknown as McpToolResult,
+  });
   const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
   const result = await mcpCallTool("omniroute_oneproxy_stats", {
     provider: "openai",
@@ -55,7 +63,7 @@ test("oneproxy stats passa provider e period para MCP", async () => {
 test("oneproxy fetch chama omniroute_oneproxy_fetch com count e type", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = makeMcpStreamFetch({
-    toolResult: { proxies: [{ host: "10.0.0.1", type: "http" }] },
+    toolResult: { proxies: [{ host: "10.0.0.1", type: "http" }] } as unknown as McpToolResult,
   });
   const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
   const result = await mcpCallTool("omniroute_oneproxy_fetch", { count: 5, type: "http" });
@@ -66,7 +74,9 @@ test("oneproxy fetch chama omniroute_oneproxy_fetch com count e type", async () 
 
 test("oneproxy rotate chama omniroute_oneproxy_rotate com provider", async () => {
   const origFetch = globalThis.fetch;
-  globalThis.fetch = makeMcpStreamFetch({ toolResult: { rotated: true, newProxy: "10.0.0.2" } });
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { rotated: true, newProxy: "10.0.0.2" } as unknown as McpToolResult,
+  });
   const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
   const result = await mcpCallTool("omniroute_oneproxy_rotate", { provider: "anthropic" });
   globalThis.fetch = origFetch;

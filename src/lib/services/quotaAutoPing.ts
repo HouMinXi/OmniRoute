@@ -65,7 +65,12 @@ export interface QuotaAutoPingConnection {
 
 export interface QuotaAutoPingDeps {
   getSettings: () => Promise<JsonRecord>;
-  getProviderConnections: (filter: JsonRecord) => Promise<QuotaAutoPingConnection[]>;
+  getProviderConnections: (
+    filter?: JsonRecord,
+    limit?: number,
+    offset?: number,
+    columns?: string[]
+  ) => Promise<JsonRecord[]>;
   updateProviderConnection: (id: string, data: JsonRecord) => Promise<unknown>;
   refreshAndUpdateCredentials: (
     connection: QuotaAutoPingConnection
@@ -500,9 +505,14 @@ async function pingProviderConnections(
   nowMs: number
 ): Promise<void> {
   const connections = await deps.getProviderConnections({ provider, isActive: true });
-  const targets = connections.filter(
-    (conn) => conn.authType === "oauth" && enabledMap[conn.id] === true
-  );
+  const targets = connections.filter((conn): conn is QuotaAutoPingConnection & JsonRecord => {
+    return (
+      typeof conn.id === "string" &&
+      typeof conn.provider === "string" &&
+      conn.authType === "oauth" &&
+      enabledMap[conn.id] === true
+    );
+  });
   for (const connection of targets) {
     try {
       await pingConnection(connection, provider, providerConfig, deps, state, nowMs);

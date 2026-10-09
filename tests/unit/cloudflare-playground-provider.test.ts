@@ -341,15 +341,17 @@ test("executor returns a clean 502 when the browser session cannot start", async
 
 test("executor prefixes bare model ids with @cf/ (upstream convention)", async () => {
   const seen: string[] = [];
-  class CapturingTransport extends FakeTransport {
-    async start(config: Parameters<CfTransport["start"]>[0]) {
-      seen.push(config.model);
-      return { ok: true } as const;
-    }
-  }
-  const executor = new CloudflarePlaygroundExecutor(
-    (chatId) => new CapturingTransport(buildSuccessFrames(chatId))
-  );
+  const executor = new CloudflarePlaygroundExecutor((chatId) => {
+    const inner = new FakeTransport(buildSuccessFrames(chatId));
+    return {
+      start: async (config: { model: string }) => {
+        seen.push(config.model);
+        return inner.start();
+      },
+      frames: () => inner.frames(),
+      close: () => inner.close(),
+    };
+  });
   await executor.execute(
     executeArgs(
       { model: "zai-org/glm-4.7-flash", messages: [{ role: "user", content: "hi" }] },
@@ -380,7 +382,9 @@ test("PlaywrightCfTransport.start() closes the browser when Cloudflare Attention
       close: async () => {
         closeCalls += 1;
       },
-    }) as unknown as ReturnType<typeof playwright.chromium.launch>) as typeof playwright.chromium.launch;
+    }) as unknown as ReturnType<
+      typeof playwright.chromium.launch
+    >) as typeof playwright.chromium.launch;
 
   try {
     const transport = new PlaywrightCfTransport("chat-attention-required");

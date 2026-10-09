@@ -31,6 +31,9 @@ export interface ElectronAPI {
   openExternal(url: string): Promise<void>;
   getDataDir(): Promise<string>;
   restartServer(): Promise<{ success: boolean }>;
+  checkForUpdates(): Promise<{ success: boolean; error?: string }>;
+  downloadUpdate(): Promise<{ success: boolean; error?: string }>;
+  installUpdate(): Promise<void>;
 
   // ── Send (fire-and-forget) ─────────────────────────────
   minimizeWindow(): void;
@@ -40,6 +43,14 @@ export interface ElectronAPI {
   // ── Receive (returns disposer for cleanup) ─────────────
   onServerStatus(callback: (data: ServerStatus) => void): () => void;
   onPortChanged(callback: (port: number) => void): () => void;
+  onUpdateStatus(
+    callback: (data: {
+      status: string;
+      version?: string;
+      percent?: number;
+      message?: string;
+    }) => void
+  ): () => void;
 
   // ── Static Properties ──────────────────────────────────
   isElectron: boolean;

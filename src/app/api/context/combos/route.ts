@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createCompressionCombo, listCompressionCombos } from "@/lib/db/compressionCombos";
+import type { CompressionPipelineStep } from "@omniroute/open-sse/services/compression/types.ts";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
@@ -9,6 +10,35 @@ import {
 } from "@/shared/validation/compressionConfigSchemas";
 
 export const pipelineStepSchema = stackedPipelineStepSchema;
+
+const STORED_STEP_INTENSITIES = [
+  "lite",
+  "full",
+  "ultra",
+  "minimal",
+  "standard",
+  "aggressive",
+] as const;
+
+function isStoredStepIntensity(value: string): value is (typeof STORED_STEP_INTENSITIES)[number] {
+  return (STORED_STEP_INTENSITIES as readonly string[]).includes(value);
+}
+
+function toStoredPipeline(
+  pipeline: z.infer<typeof compressionComboCreateSchema>["pipeline"]
+): CompressionPipelineStep[] | undefined {
+  if (!pipeline) return undefined;
+  return pipeline.map((step): CompressionPipelineStep => {
+    const stored: CompressionPipelineStep = { engine: step.engine };
+    if (typeof step.intensity === "string" && isStoredStepIntensity(step.intensity)) {
+      stored.intensity = step.intensity;
+    }
+    if (step.config && typeof step.config === "object") {
+      stored.config = { ...step.config };
+    }
+    return stored;
+  });
+}
 
 export const compressionComboCreateSchema = z
   .object({
@@ -45,6 +75,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: validation.error }, { status: 400 });
   }
 
-  const combo = createCompressionCombo(validation.data);
+  const combo = createCompressionCombo({
+    ...validation.data,
+    pipeline: toStoredPipeline(validation.data.pipeline),
+  });
   return NextResponse.json(combo, { status: 201 });
 }

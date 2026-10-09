@@ -180,8 +180,8 @@ test("bulk response shape: all-failure has status failed", () => {
 });
 
 test("bulk response shape: partial failure has status success", () => {
-  const entries = 3;
-  const failed = 1;
+  const entries: number = 3;
+  const failed: number = 1;
   const status = failed === entries ? "failure" : "success";
   assert.equal(status, "success");
 });

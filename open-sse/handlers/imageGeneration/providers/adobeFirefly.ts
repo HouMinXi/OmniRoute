@@ -52,8 +52,8 @@ export async function handleAdobeFireflyImageGeneration({
     [key: string]: unknown;
   };
   credentials: {
-    apiKey?: string;
-    accessToken?: string;
+    apiKey?: string | null;
+    accessToken?: string | null;
     connectionId?: string;
     providerSpecificData?: {
       cookie?: unknown;

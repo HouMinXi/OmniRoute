@@ -96,6 +96,8 @@ test("b.ai import fetches the live /v1/models catalog", async () => {
     name: "bai-live",
     apiKey: "bai-key",
   });
+  assert.ok(connection);
+  const connectionId = String(connection.id);
 
   let fetched = false;
   const originalFetch = globalThis.fetch;
@@ -112,8 +114,8 @@ test("b.ai import fetches the live /v1/models catalog", async () => {
 
   try {
     const response = await modelsRoute.GET(
-      new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
-      { params: { id: connection.id } }
+      new Request(`http://localhost/api/providers/${connectionId}/models?refresh=true`),
+      { params: Promise.resolve({ id: connectionId }) }
     );
     assert.equal(response.status, 200);
     const body = (await response.json()) as ModelsBody;
@@ -136,14 +138,16 @@ test("b.ai import falls back to an empty local catalog when live fetch fails", a
     name: "bai-fallback",
     apiKey: "bai-key-2",
   });
+  assert.ok(connection);
+  const connectionId = String(connection.id);
 
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => new Response("bad gateway", { status: 502 });
 
   try {
     const response = await modelsRoute.GET(
-      new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
-      { params: { id: connection.id } }
+      new Request(`http://localhost/api/providers/${connectionId}/models?refresh=true`),
+      { params: Promise.resolve({ id: connectionId }) }
     );
     assert.equal(response.status, 200);
     const body = (await response.json()) as ModelsBody;

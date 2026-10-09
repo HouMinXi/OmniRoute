@@ -38,7 +38,18 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
-    updateDatabaseSettings(validation.data);
+    const current = getDatabaseSettings();
+    const data = validation.data;
+    updateDatabaseSettings({
+      logs: data.logs,
+      backup: data.backup ? { ...current.backup, ...data.backup } : undefined,
+      cache: data.cache ? { ...current.cache, ...data.cache } : undefined,
+      retention: data.retention ? { ...current.retention, ...data.retention } : undefined,
+      aggregation: data.aggregation ? { ...current.aggregation, ...data.aggregation } : undefined,
+      optimization: data.optimization
+        ? { ...current.optimization, ...data.optimization }
+        : undefined,
+    });
 
     // Return merged settings (GET response pattern)
     return NextResponse.json(publicDatabaseSettings());

@@ -6,7 +6,7 @@ import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
 
 import ProviderIcon from "@/shared/components/ProviderIcon";
-import { normalizeCodexBaseUrl } from "@/shared/utils/codexBaseUrl";
+import { normalizeCodexBaseUrl, type CodexWireApi } from "@/shared/utils/codexBaseUrl";
 import { isApplyDisabled, isResetDisabled } from "./codexButtonState";
 import { CODEX_DEFAULT_MODELS } from "./codexToolOptions";
 
@@ -32,7 +32,7 @@ export default function CodexToolCard({
   const [selectedModel, setSelectedModel] = useState("gpt-5.6-sol");
   const [modelMappings, setModelMappings] = useState<Record<string, string>>({});
   const [reasoningEffort, setReasoningEffort] = useState("xhigh");
-  const [wireApi, setWireApi] = useState("responses");
+  const [wireApi, setWireApi] = useState<CodexWireApi>("responses");
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTarget, setModalTarget] = useState<string | null>(null); // null = default model, string = mapping key
   const [modelAliases, setModelAliases] = useState({});
@@ -644,7 +644,10 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                   </span>
                   <select
                     value={wireApi}
-                    onChange={(e) => setWireApi(e.target.value)}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      if (next === "chat" || next === "responses") setWireApi(next);
+                    }}
                     className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
                   >
                     <option value="chat">{t("wireApiChatCompletions")}</option>

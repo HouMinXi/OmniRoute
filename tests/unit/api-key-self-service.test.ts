@@ -15,7 +15,10 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import DatabaseSync from "better-sqlite3";
 
-import { SELF_ACCOUNT_QUOTA_SCOPE, SELF_USAGE_SCOPE } from "../../src/shared/constants/selfServiceScopes.ts";
+import {
+  SELF_ACCOUNT_QUOTA_SCOPE,
+  SELF_USAGE_SCOPE,
+} from "../../src/shared/constants/selfServiceScopes.ts";
 import { buildApiKeySelfServiceStatus } from "../../src/lib/usage/apiKeySelfService.ts";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -57,10 +60,7 @@ test("self-service scope migration backfills own usage once and preserves explic
   assert.deepEqual(scopesById.get("legacy-empty"), [SELF_USAGE_SCOPE]);
   assert.deepEqual(scopesById.get("legacy-null"), [SELF_USAGE_SCOPE]);
   assert.deepEqual(scopesById.get("custom"), ["custom:scope", SELF_USAGE_SCOPE]);
-  assert.deepEqual(scopesById.get("quota-opt-in"), [
-    SELF_ACCOUNT_QUOTA_SCOPE,
-    SELF_USAGE_SCOPE,
-  ]);
+  assert.deepEqual(scopesById.get("quota-opt-in"), [SELF_ACCOUNT_QUOTA_SCOPE, SELF_USAGE_SCOPE]);
   assert.deepEqual(scopesById.get("already-disabled-after-migration"), ["custom:scope"]);
 });
 
@@ -231,7 +231,11 @@ test("self-service status reports all explicitly allowed provider account quotas
         usage: {
           plan: "Claude Max",
           quotas: {
-            daily: { usedPercentage: 35, remainingPercentage: 65, resetAt: "2026-05-30T00:00:00.000Z" },
+            daily: {
+              usedPercentage: 35,
+              remainingPercentage: 65,
+              resetAt: "2026-05-30T00:00:00.000Z",
+            },
           },
         },
         cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -246,12 +250,17 @@ test("self-service status reports all explicitly allowed provider account quotas
     status.accountQuotas.map((quota: { connectionId: string }) => quota.connectionId),
     ["conn-codex", "conn-claude"]
   );
-  assert.equal(status.accountQuotas[0].provider, "codex");
-  assert.equal(status.accountQuotas[0].plan, "ChatGPT Plus");
-  assert.equal(status.accountQuotas[0].quotas.session.remainingPercentage, 99);
-  assert.equal(status.accountQuotas[1].provider, "claude");
-  assert.equal(status.accountQuotas[1].plan, "Claude Max");
-  assert.equal(status.accountQuotas[1].quotas.daily.usedPercentage, 35);
+  const first = status.accountQuotas?.[0];
+  const second = status.accountQuotas?.[1];
+  assert.equal(first && "provider" in first ? first.provider : undefined, "codex");
+  assert.equal(first && "plan" in first ? first.plan : undefined, "ChatGPT Plus");
+  assert.equal(
+    first && "quotas" in first ? first.quotas?.session?.remainingPercentage : undefined,
+    99
+  );
+  assert.equal(second && "provider" in second ? second.provider : undefined, "claude");
+  assert.equal(second && "plan" in second ? second.plan : undefined, "Claude Max");
+  assert.equal(second && "quotas" in second ? second.quotas?.daily?.usedPercentage : undefined, 35);
 });
 
 test("self-service status reports all active provider account quotas for unrestricted keys", async () => {
@@ -268,7 +277,10 @@ test("self-service status reports all active provider account quotas for unrestr
       { id: "conn-disabled", provider: "claude", isActive: false },
     ],
     fetchAndPersistProviderLimits: async (connectionId: string) => ({
-      connection: { id: connectionId, provider: connectionId === "conn-codex" ? "codex" : "cursor" },
+      connection: {
+        id: connectionId,
+        provider: connectionId === "conn-codex" ? "codex" : "cursor",
+      },
       usage: {
         plan: connectionId === "conn-codex" ? "ChatGPT Plus" : "Cursor Pro",
         quotas: {
@@ -285,8 +297,13 @@ test("self-service status reports all active provider account quotas for unrestr
     status.accountQuotas.map((quota: { connectionId: string }) => quota.connectionId),
     ["conn-codex", "conn-cursor"]
   );
-  assert.equal(status.accountQuotas[0].quotas.monthly.remainingPercentage, 75);
-  assert.equal(status.accountQuotas[1].plan, "Cursor Pro");
+  const first = status.accountQuotas?.[0];
+  const second = status.accountQuotas?.[1];
+  assert.equal(
+    first && "quotas" in first ? first.quotas?.monthly?.remainingPercentage : undefined,
+    75
+  );
+  assert.equal(second && "plan" in second ? second.plan : undefined, "Cursor Pro");
 });
 
 test("self-service status isolates provider account quota fetch failures per connection", async () => {
@@ -318,9 +335,13 @@ test("self-service status isolates provider account quota fetch failures per con
 
   const status = await buildApiKeySelfServiceStatus(metadata, deps);
 
-  assert.equal(status.accountQuotas[0].connectionId, "conn-codex");
-  assert.equal(status.accountQuotas[0].quotas.weekly.remainingPercentage, 60);
-  assert.deepEqual(status.accountQuotas[1], {
+  const first = status.accountQuotas?.[0];
+  assert.equal(first && "connectionId" in first ? first.connectionId : undefined, "conn-codex");
+  assert.equal(
+    first && "quotas" in first ? first.quotas?.weekly?.remainingPercentage : undefined,
+    60
+  );
+  assert.deepEqual(status.accountQuotas?.[1], {
     provider: "cursor",
     connectionId: "conn-cursor",
     shared: true,
@@ -358,9 +379,13 @@ test("self-service status isolates explicit provider connection lookup failures"
 
   const status = await buildApiKeySelfServiceStatus(metadata, deps);
 
-  assert.equal(status.accountQuotas[0].connectionId, "conn-codex");
-  assert.equal(status.accountQuotas[0].quotas.weekly.remainingPercentage, 60);
-  assert.deepEqual(status.accountQuotas[1], {
+  const first = status.accountQuotas?.[0];
+  assert.equal(first && "connectionId" in first ? first.connectionId : undefined, "conn-codex");
+  assert.equal(
+    first && "quotas" in first ? first.quotas?.weekly?.remainingPercentage : undefined,
+    60
+  );
+  assert.deepEqual(status.accountQuotas?.[1], {
     provider: "unknown",
     connectionId: "conn-missing",
     shared: true,
@@ -454,11 +479,19 @@ test("self-service fetches Moonshot custom-node quota via providerSpecificData h
     fetchAndPersistProviderLimits: async (connectionId: string) => {
       fetches.push(connectionId);
       return {
-        connection: { id: connectionId, provider: "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf" },
+        connection: {
+          id: connectionId,
+          provider: "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf",
+        },
         usage: {
           plan: "Kimi 开放平台（国内）",
           quotas: {
-            available: { remaining: 15, remainingPercentage: 100, unlimited: true, currency: "CNY" },
+            available: {
+              remaining: 15,
+              remainingPercentage: 100,
+              unlimited: true,
+              currency: "CNY",
+            },
           },
         },
         cache: { quotas: null, plan: null, message: null, fetchedAt: "" },
@@ -468,6 +501,7 @@ test("self-service fetches Moonshot custom-node quota via providerSpecificData h
 
   const status = await buildApiKeySelfServiceStatus(metadata, deps);
   assert.deepEqual(fetches, ["conn-mnative"]);
-  assert.equal(status.accountQuotas[0].unavailable, undefined);
-  assert.equal(status.accountQuotas[0].plan, "Kimi 开放平台（国内）");
+  const first = status.accountQuotas?.[0];
+  assert.equal(first && "unavailable" in first ? first.unavailable : undefined, undefined);
+  assert.equal(first && "plan" in first ? first.plan : undefined, "Kimi 开放平台（国内）");
 });

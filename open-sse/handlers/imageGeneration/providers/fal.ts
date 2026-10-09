@@ -1,4 +1,4 @@
-import type { ExecutorLog, ProviderCredentials } from "../../../executors/base.ts";
+import type { ExecutorLog } from "../../../executors/base.ts";
 import {
   mapFalImageSize,
   normalizeProviderImagePayload,
@@ -26,7 +26,7 @@ type FalAIImageEditOptions = {
   providerConfig: { baseUrl: string };
   body: Record<string, unknown>;
   images: Array<{ bytes: Buffer; mime: string }>;
-  credentials: ProviderCredentials;
+  credentials: { apiKey?: string | null; accessToken?: string | null };
   log: ExecutorLog | null | undefined;
 };
 

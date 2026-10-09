@@ -28,7 +28,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-process.env.NODE_ENV = "test";
+process.env["NODE_ENV"] = "test";
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-agent-availability-route-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 

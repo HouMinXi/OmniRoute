@@ -212,10 +212,17 @@ export async function POST(request: Request) {
     const lettaDir = getLettaDir();
     await fs.mkdir(lettaDir, { recursive: true });
 
-    let settings = {};
+    let settings: { preferredBackendMode?: string; [key: string]: unknown } = {};
     try {
       const existing = await fs.readFile(settingsPath, "utf-8");
-      settings = JSON.parse(existing);
+      const parsed: unknown = JSON.parse(existing);
+      if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+        const next: { preferredBackendMode?: string; [key: string]: unknown } = {};
+        for (const key of Object.keys(parsed)) {
+          if (key in parsed) next[key] = parsed[key];
+        }
+        settings = next;
+      }
     } catch {
       /* No existing settings */
     }

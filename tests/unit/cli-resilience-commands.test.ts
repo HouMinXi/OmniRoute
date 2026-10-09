@@ -2,6 +2,10 @@ import test from "node:test";
 import { makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
 import assert from "node:assert/strict";
 
+type McpToolResult = Parameters<typeof makeMcpStreamFetch>[0] extends { toolResult?: infer T }
+  ? T
+  : never;
+
 function makeResp(data: unknown, status = 200) {
   const obj = {
     ok: status < 400,
@@ -96,10 +100,13 @@ test("resilience reset envia provider e body correto", async () => {
 test("resilience profile set usa JSON-RPC tools/call", async () => {
   let capturedCall: any = null;
   const origFetch = globalThis.fetch;
-  globalThis.fetch = makeMcpStreamFetch({ toolResult: {} });
+  globalThis.fetch = makeMcpStreamFetch({ toolResult: {} as unknown as McpToolResult });
   const inner = globalThis.fetch;
   globalThis.fetch = ((url: any, init: any) => {
-    if (String(url).includes("/api/mcp/stream") && String(init?.body || "").includes("tools/call")) {
+    if (
+      String(url).includes("/api/mcp/stream") &&
+      String(init?.body || "").includes("tools/call")
+    ) {
       capturedCall = JSON.parse(init.body);
     }
     return inner(url, init);

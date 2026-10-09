@@ -41,6 +41,12 @@ import {
 // CCH Signing tests
 // ─────────────────────────────────────────────────────────────────────────────
 
+type CacheBlock = { cache_control?: unknown; type?: string; text?: string };
+function blockCache(block: CacheBlock | string | undefined) {
+  if (!block || typeof block !== "object" || !("cache_control" in block)) return undefined;
+  return block.cache_control;
+}
+
 describe("computeCCH", () => {
   it("returns a 5-character lowercase hex string", async () => {
     const encoder = new TextEncoder();
@@ -357,7 +363,7 @@ describe("ensureCacheControlOnLastUserMessage", () => {
 
     ensureCacheControlOnLastUserMessage(body);
 
-    assert.deepEqual(body.messages[2].content[0].cache_control, { type: "ephemeral" });
+    assert.deepEqual(blockCache(body.messages[2].content[0]), { type: "ephemeral" });
   });
 
   it("keeps an existing message breakpoint and advances one to the last user message", () => {
@@ -380,11 +386,12 @@ describe("ensureCacheControlOnLastUserMessage", () => {
     ensureCacheControlOnLastUserMessage(body);
     ensureCacheControlOnLastUserMessage(body);
 
-    assert.deepEqual(body.messages[0].content[0].cache_control, { type: "ephemeral" });
-    assert.deepEqual(body.messages[1].content[0].cache_control, { type: "ephemeral" });
+    assert.deepEqual(blockCache(body.messages[0].content[0]), { type: "ephemeral" });
+    assert.deepEqual(blockCache(body.messages[1].content[0]), { type: "ephemeral" });
     assert.equal(
-      body.messages.flatMap((message) => message.content).filter((block) => block.cache_control)
-        .length,
+      body.messages
+        .flatMap((message) => message.content)
+        .filter((block) => ("cache_control" in block ? block.cache_control : undefined)).length,
       2
     );
   });
@@ -400,7 +407,7 @@ describe("ensureCacheControlOnLastUserMessage", () => {
 
     ensureCacheControlOnLastUserMessage(body);
 
-    assert.deepEqual(body.messages[0].content[0].cache_control, {
+    assert.deepEqual(blockCache(body.messages[0].content[0]), {
       type: "ephemeral",
       ttl: "5m",
     });
@@ -418,7 +425,7 @@ describe("ensureCacheControlOnLastUserMessage", () => {
 
     ensureCacheControlOnLastUserMessage(body);
 
-    assert.equal(body.messages[0].content[0].cache_control, undefined);
+    assert.equal(blockCache(body.messages[0].content[0]), undefined);
   });
 
   it("handles body without messages without throwing", () => {
@@ -453,7 +460,10 @@ describe("normalizeCacheControlTtl", () => {
 
     normalizeCacheControlTtl(body);
 
-    assert.deepEqual(body.system[0].cache_control, { type: "ephemeral", ttl: "5m" });
+    assert.deepEqual("cache_control" in body.system[0] ? body.system[0].cache_control : undefined, {
+      type: "ephemeral",
+      ttl: "5m",
+    });
   });
 
   it("defaults missing ttl in tools and message content blocks", () => {
@@ -470,7 +480,7 @@ describe("normalizeCacheControlTtl", () => {
     normalizeCacheControlTtl(body);
 
     assert.deepEqual(body.tools[0].cache_control, { type: "ephemeral", ttl: "1h" });
-    assert.deepEqual(body.messages[0].content[0].cache_control, {
+    assert.deepEqual(blockCache(body.messages[0].content[0]), {
       type: "ephemeral",
       ttl: "1h",
     });
@@ -489,7 +499,7 @@ describe("normalizeCacheControlTtl", () => {
 
     normalizeCacheControlTtl(body);
 
-    assert.deepEqual(body.messages[0].content[0].cache_control, {
+    assert.deepEqual(blockCache(body.messages[0].content[0]), {
       type: "ephemeral",
       ttl: "5m",
     });
@@ -501,7 +511,10 @@ describe("normalizeCacheControlTtl", () => {
     };
 
     assert.doesNotThrow(() => normalizeCacheControlTtl(body));
-    assert.equal(body.system[0].cache_control, undefined);
+    assert.equal(
+      "cache_control" in body.system[0] ? body.system[0].cache_control : undefined,
+      undefined
+    );
   });
 
   it("handles a body with no system/tools/messages without throwing", () => {

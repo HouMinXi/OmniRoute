@@ -174,14 +174,26 @@ export async function GET(
             hasPipelineDetails: true,
           };
 
-          // Merge with persistent entry if available, preferring persisted fields
-          persistedRequest = persistedRequest
-            ? {
-                ...persistedRequest,
-                pipelinePayloads: persistedRequest.pipelinePayloads || pipelinePayloads,
-                hasPipelineDetails: persistedRequest.hasPipelineDetails || true,
-              }
-            : minimal;
+          if (!persistedRequest) {
+            const memoryPayload: Record<string, unknown> = {
+              clientRequest: pipelinePayloads.clientRequest,
+              providerRequest: pipelinePayloads.providerRequest,
+              providerResponse: pipelinePayloads.providerResponse,
+              clientResponse: pipelinePayloads.clientResponse,
+            };
+            const memoryPreviousResponseId = extractPreviousResponseId(memoryPayload);
+            return NextResponse.json({
+              ...minimal,
+              previousResponseId: memoryPreviousResponseId,
+              parentLogId: null,
+            });
+          }
+
+          persistedRequest = {
+            ...persistedRequest,
+            pipelinePayloads: persistedRequest.pipelinePayloads || pipelinePayloads,
+            hasPipelineDetails: persistedRequest.hasPipelineDetails || true,
+          };
         }
       } catch (e) {
         console.warn("/api/logs/[id] - failed to read in-memory completed detail:", e);

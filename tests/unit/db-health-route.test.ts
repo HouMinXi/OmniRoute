@@ -25,7 +25,7 @@ async function resetStorage() {
   process.env.INITIAL_PASSWORD = TEST_INITIAL_PASSWORD;
 }
 
-function makeRequest(method, cookie) {
+function makeRequest(method: string, cookie?: string) {
   return new Request("http://localhost/api/db/health", {
     method,
     headers: cookie ? { cookie } : {},

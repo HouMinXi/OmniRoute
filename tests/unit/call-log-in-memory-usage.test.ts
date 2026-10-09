@@ -52,12 +52,15 @@ for (const finalizeFirst of [false, true]) {
       completedDetails: history.getCompletedDetails().values(),
     });
     const row = rows.find((entry) => entry.id === id);
+    assert.ok(row);
     assert.equal(row.tokens.in, 43979);
     assert.equal(row.tokens.out, 243);
     assert.equal(row.tokens.cacheRead, 43000);
     assert.equal(row.tokens.reasoning, 100);
     assert.equal(row.tokens.cacheCreation, null);
-    assert.equal(getDbInstance().prepare("SELECT count(*) AS n FROM call_logs").get().n, 0);
+    const count = getDbInstance().prepare("SELECT count(*) AS n FROM call_logs").get() as
+      { n?: number } | undefined;
+    assert.equal(count?.n, 0);
   });
 }
 
@@ -96,6 +99,8 @@ test("concurrent requests keep separate usage and missing updates preserve recor
 
 test("chat attempt logging connects its trace id to the live pending request id", () => {
   const id = history.trackPendingRequest("model", "provider", "connection", true);
+  assert.equal(typeof id, "string");
+  if (typeof id !== "string") return;
   persistAttemptLogs(
     { status: 200, tokens: { input: 1234, output: 56 } },
     {
@@ -130,6 +135,8 @@ test("chat attempt logging connects its trace id to the live pending request id"
 test("late artifact enrichment does not erase usage recorded after finalization", async () => {
   const { writeCallArtifact } = await import("../../src/lib/usage/callLogArtifacts.ts");
   const id = history.trackPendingRequest("enrichment-model", "provider", "connection", true);
+  assert.equal(typeof id, "string");
+  if (typeof id !== "string") return;
   const timestamp = new Date().toISOString();
   const artifactPath = `usage-enrichment/${id}.json`;
   writeCallArtifact(

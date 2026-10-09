@@ -193,11 +193,17 @@ function makeHitArgs(overrides: Record<string, unknown> = {}) {
 
 // Seed the cache under the EXACT signature checkSemanticCache rebuilds for `args`.
 function seedHit(args: ReturnType<typeof makeHitArgs>["args"], response: unknown) {
-  const body = args.body as Record<string, unknown>;
+  const body = args.body as ReturnType<typeof makeHitArgs>["args"]["body"] & {
+    input?: unknown;
+    top_p?: number;
+    tool_choice?: unknown;
+    tools?: unknown;
+    response_format?: unknown;
+  };
   const signature = generateSignature(
     args.model,
     body.messages ?? body.input,
-    args.body.temperature,
+    body.temperature,
     body.top_p,
     args.apiKeyId ?? undefined,
     { toolChoice: body.tool_choice, tools: body.tools, responseFormat: body.response_format }
@@ -431,8 +437,15 @@ test("checkSemanticCache replays the full prompt total of an OpenAI answer cache
     },
   };
   const cached = translateNonStreamingResponse(openAiAnswer, "openai", "claude");
+  if (!cached || typeof cached !== "object" || !("type" in cached) || !("usage" in cached)) {
+    throw new Error("expected a Claude-shaped cached body");
+  }
   assert.equal(cached.type, "message", "sanity: the cached body is Claude-shaped");
-  assert.equal(cached.usage.input_tokens, 100, "sanity: input_tokens excludes the cache");
+  const usage = cached.usage;
+  if (!usage || typeof usage !== "object" || !("input_tokens" in usage)) {
+    throw new Error("expected Claude usage on the cached body");
+  }
+  assert.equal(usage.input_tokens, 100, "sanity: input_tokens excludes the cache");
 
   const { args } = makeHitArgs({
     body: {

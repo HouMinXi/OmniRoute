@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactElement } from "react";
 import { Card } from "@/shared/components";
 
 interface Execution {
@@ -28,7 +29,7 @@ export function OmniExecutionsTab({
   execTotal,
   onPagePrev,
   onPageNext,
-}: OmniExecutionsTabProps): JSX.Element {
+}: OmniExecutionsTabProps): ReactElement {
   const t = useTranslations("skills");
 
   return (

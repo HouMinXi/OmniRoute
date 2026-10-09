@@ -5,7 +5,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
-// @ts-expect-error — .mjs gate module has no type declarations; runtime shape is known.
 import {
   findErrorHelperViolations,
   KNOWN_MISSING_ERROR_HELPER,
@@ -367,7 +366,6 @@ test("G-11: does NOT flag a raw error inside a logToolCall audit row", () => {
 
 // --- 6A.8: stale-allowlist enforcement ---
 
-// @ts-expect-error — reportStaleEntries exported from the gate module
 import { reportStaleEntries } from "../../scripts/check/lib/allowlist.mjs";
 type ReportStaleFn = (allowlist: Set<string> | string[], live: string[], gate: string) => string[];
 const reportStale = reportStaleEntries as ReportStaleFn;

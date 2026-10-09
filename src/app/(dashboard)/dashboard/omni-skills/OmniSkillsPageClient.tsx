@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type ReactElement } from "react";
 import { useTranslations } from "next-intl";
 import { Card } from "@/shared/components";
 import { SkillsConceptCard } from "@/shared/components";
@@ -20,7 +20,7 @@ interface Execution {
   createdAt: string;
 }
 
-export function OmniSkillsPageClient(): JSX.Element {
+export function OmniSkillsPageClient(): ReactElement {
   const [skills, setSkills] = useState<OmniSkill[]>([]);
   const [executions, setExecutions] = useState<Execution[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,9 +211,7 @@ export function OmniSkillsPageClient(): JSX.Element {
           <p className="text-2xl font-bold text-emerald-400 mt-1">{enabledCount}</p>
         </Card>
         <Card className="p-4">
-          <p className="text-xs text-text-muted uppercase tracking-wide">
-            {t("totalExecutions")}
-          </p>
+          <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalExecutions")}</p>
           <p className="text-2xl font-bold text-violet-400 mt-1">{execTotal}</p>
         </Card>
         <Card className="p-4">

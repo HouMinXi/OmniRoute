@@ -60,13 +60,15 @@ test("Antigravity tool sanitization preserves declared and historical tool names
     ["workspace_read", "run_command"],
     "only client-declared tools should remain, in their original order"
   );
+  const firstCall = result.request.contents[0].parts[0];
+  const firstResponse = result.request.contents[1].parts[0];
   assert.equal(
-    result.request.contents[0].parts[0].functionCall.name,
+    "functionCall" in firstCall ? firstCall.functionCall.name : undefined,
     "workspace_read",
     "functionCall names must remain aligned with declarations"
   );
   assert.equal(
-    result.request.contents[1].parts[0].functionResponse.name,
+    "functionResponse" in firstResponse ? firstResponse.functionResponse.name : undefined,
     "workspace_read",
     "functionResponse names must remain aligned with declarations"
   );

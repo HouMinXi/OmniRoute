@@ -44,15 +44,15 @@ async function checkAuth(request: Request): Promise<Response | null> {
   return null;
 }
 
-function validateId(id: unknown): { valid: true; id: string } | { valid: false; error: Response } {
+function validateId(id: unknown): { ok: true; id: string } | { ok: false; error: Response } {
   const result = z.string().uuid().safeParse(id);
   if (!result.success) {
     return {
-      valid: false,
+      ok: false,
       error: errorResp(HTTP_STATUS.BAD_REQUEST, "Invalid preset id: must be a valid UUID"),
     };
   }
-  return { valid: true, id: result.data };
+  return { ok: true, id: result.data };
 }
 
 export async function OPTIONS(): Promise<Response> {
@@ -72,7 +72,7 @@ export async function GET(
 
   const { id: rawId } = await params;
   const validation = validateId(rawId);
-  if (!validation.valid) return validation.error;
+  if (validation.ok === false) return validation.error;
   const { id } = validation;
 
   try {
@@ -106,7 +106,7 @@ export async function PUT(
 
   const { id: rawId } = await params;
   const validation = validateId(rawId);
-  if (!validation.valid) return validation.error;
+  if (validation.ok === false) return validation.error;
   const { id } = validation;
 
   // Parse JSON body
@@ -166,7 +166,7 @@ export async function DELETE(
 
   const { id: rawId } = await params;
   const validation = validateId(rawId);
-  if (!validation.valid) return validation.error;
+  if (validation.ok === false) return validation.error;
   const { id } = validation;
 
   try {

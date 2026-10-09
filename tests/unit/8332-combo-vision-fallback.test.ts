@@ -47,7 +47,10 @@ function okResponse(body: unknown = { choices: [{ message: { content: "ok" } }] 
   });
 }
 
-function capabilityEntry(limitContext: unknown, overrides: Record<string, unknown> = {}) {
+function capabilityEntry(
+  limitContext: number | null,
+  overrides: Partial<import("../../src/lib/modelsDevSync/transform.ts").ModelCapabilityEntry> = {}
+): import("../../src/lib/modelsDevSync/transform.ts").ModelCapabilityEntry {
   return {
     tool_call: true,
     reasoning: false,

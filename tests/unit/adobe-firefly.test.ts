@@ -59,28 +59,32 @@ import { getExecutor } from "../../open-sse/executors/index.ts";
 // --- Registry --------------------------------------------------------------
 
 test("adobe-firefly is registered in WEB_COOKIE_PROVIDERS with a webCookie risk notice", () => {
-  const entry = (WEB_COOKIE_PROVIDERS as Record<string, unknown>)["adobe-firefly"];
+  const entry = (WEB_COOKIE_PROVIDERS as Record<string, Record<string, unknown>>)["adobe-firefly"];
   assert.ok(entry, "adobe-firefly must exist in WEB_COOKIE_PROVIDERS");
   assert.equal(entry.id, "adobe-firefly");
   assert.equal(entry.alias, "firefly");
   assert.equal(entry.subscriptionRisk, true);
   assert.equal(entry.riskNoticeVariant, "webCookie");
-  assert.match(entry.website, /firefly\.adobe\.com/);
+  assert.match(String(entry.website), /firefly\.adobe\.com/);
 });
 
 test("adobe-firefly is registered in IMAGE_PROVIDERS with adobe-firefly-image format", () => {
-  const entry = (IMAGE_PROVIDERS as Record<string, unknown>)["adobe-firefly"];
+  const entry = (IMAGE_PROVIDERS as unknown as Record<string, Record<string, unknown>>)[
+    "adobe-firefly"
+  ];
   assert.ok(entry);
   assert.equal(entry.format, "adobe-firefly-image");
-  assert.match(entry.baseUrl, /firefly-3p\.ff\.adobe\.io/);
+  assert.match(String(entry.baseUrl), /firefly-3p\.ff\.adobe\.io/);
   assert.ok(Array.isArray(entry.models) && entry.models.length >= 4);
 });
 
 test("adobe-firefly is registered in VIDEO_PROVIDERS with adobe-firefly-video format", () => {
-  const entry = (VIDEO_PROVIDERS as Record<string, unknown>)["adobe-firefly"];
+  const entry = (VIDEO_PROVIDERS as unknown as Record<string, Record<string, unknown>>)[
+    "adobe-firefly"
+  ];
   assert.ok(entry);
   assert.equal(entry.format, "adobe-firefly-video");
-  assert.match(entry.baseUrl, /3p-videos/);
+  assert.match(String(entry.baseUrl), /3p-videos/);
   assert.ok(Array.isArray(entry.models) && entry.models.length >= 5);
 });
 
@@ -176,7 +180,7 @@ test("buildAdobeImagePayload produces nano and gpt-image shapes", () => {
     aspectRatio: "16:9",
     outputResolution: "2K",
     modelSpec: ADOBE_FIREFLY_IMAGE_MODELS["nano-banana-pro"],
-  });
+  }) as Record<string, unknown>;
   assert.equal(nano.modelId, "gemini-flash");
   assert.equal(nano.modelVersion, "nano-banana-2");
   assert.deepEqual(nano.size, { width: 2752, height: 1536 });
@@ -188,7 +192,7 @@ test("buildAdobeImagePayload produces nano and gpt-image shapes", () => {
     outputResolution: "1K",
     modelSpec: ADOBE_FIREFLY_IMAGE_MODELS["gpt-image"],
     quality: "high",
-  });
+  }) as Record<string, unknown>;
   assert.equal(gpt.modelId, "gpt-image");
   assert.equal((gpt.generationSettings as Record<string, unknown>).detailLevel, 5);
   // Live browser body uses size:"auto" and no top-level size/outputResolution
@@ -221,7 +225,7 @@ test("buildAdobeImagePayload attaches referenceBlobs like live adobe_atach_image
     outputResolution: "1K",
     modelSpec: ADOBE_FIREFLY_IMAGE_MODELS["gpt-image"],
     sourceImageIds: ["aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee"],
-  });
+  }) as Record<string, unknown>;
   assert.deepEqual(gpt.referenceBlobs, [
     { id: "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee", usage: "subject" },
   ]);
@@ -308,7 +312,7 @@ test("buildAdobeVideoPayload produces sora and veo shapes", () => {
     aspectRatio: "16:9",
     duration: 8,
     modelSpec: ADOBE_FIREFLY_VIDEO_MODELS["sora-2"],
-  });
+  }) as Record<string, unknown>;
   assert.equal(sora.modelId, "sora");
   assert.equal(sora.duration, 8);
 
@@ -317,7 +321,7 @@ test("buildAdobeVideoPayload produces sora and veo shapes", () => {
     aspectRatio: "9:16",
     duration: 6,
     modelSpec: ADOBE_FIREFLY_VIDEO_MODELS["veo-3.1"],
-  });
+  }) as Record<string, unknown>;
   assert.equal(veo.modelId, "veo");
   assert.equal(veo.modelVersion, "3.1-generate");
   assert.equal(

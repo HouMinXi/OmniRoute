@@ -26,7 +26,7 @@ export async function POST(request: Request): Promise<Response> {
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return NextResponse.json({ error: parsed.error.message }, { status: 400 });
 
-  const result = rankCandidates(parsed.data);
+  const result = rankCandidates(parsed.data.candidates);
   return NextResponse.json({
     request: { candidateCount: parsed.data.candidates.length },
     ...result,

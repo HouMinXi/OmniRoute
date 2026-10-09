@@ -90,6 +90,7 @@ test("Copilot session failures do not return a credential-bearing header project
       body: { messages: [{ role: "user", content: "hello" }] },
       credentials: { apiKey: `ey${"x".repeat(120)}` },
       model: "copilot",
+      stream: false,
     });
 
     assert.deepEqual(result.headers, {});

@@ -24,9 +24,10 @@
  */
 export function resolveHealthCheckStatusWrite(
   alive: boolean,
-  env: { PROXY_HEALTH_AUTO_DEACTIVATE?: string } = process.env
+  env: NodeJS.ProcessEnv = process.env
 ): "active" | "inactive" | null {
-  if ((env.PROXY_HEALTH_AUTO_DEACTIVATE ?? "").trim().toLowerCase() !== "true") {
+  const flag = env.PROXY_HEALTH_AUTO_DEACTIVATE;
+  if ((typeof flag === "string" ? flag : "").trim().toLowerCase() !== "true") {
     // Default: never let an automated probe change a proxy's status.
     return null;
   }
@@ -34,8 +35,7 @@ export function resolveHealthCheckStatusWrite(
 }
 
 /** True when automated probes are allowed to write proxy status (opt-in). */
-export function isProxyHealthAutoDeactivateEnabled(
-  env: { PROXY_HEALTH_AUTO_DEACTIVATE?: string } = process.env
-): boolean {
-  return (env.PROXY_HEALTH_AUTO_DEACTIVATE ?? "").trim().toLowerCase() === "true";
+export function isProxyHealthAutoDeactivateEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  const flag = env.PROXY_HEALTH_AUTO_DEACTIVATE;
+  return (typeof flag === "string" ? flag : "").trim().toLowerCase() === "true";
 }

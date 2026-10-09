@@ -7,7 +7,7 @@ const fmt = (n: number) => n.toLocaleString("en-US");
 export function EncoderComparisonTable({ comparison }: { comparison: EncoderComparison }) {
   const t = useTranslations("compressionStudio");
   if (!comparison || comparison.arraysCompared === 0) return null;
-  const rows: Array<{
+  const candidates: Array<{
     key: "gcf" | "toon" | "json";
     label: string;
     size: { bytes: number; tokens: number } | null;
@@ -15,7 +15,10 @@ export function EncoderComparisonTable({ comparison }: { comparison: EncoderComp
     { key: "gcf", label: "GCF", size: comparison.gcf },
     { key: "toon", label: "TOON", size: comparison.toonAvailable ? comparison.toon : null },
     { key: "json", label: "JSON", size: comparison.json },
-  ].sort((a, b) => (a.size?.tokens ?? Infinity) - (b.size?.tokens ?? Infinity));
+  ];
+  const rows = [...candidates].sort(
+    (a, b) => (a.size?.tokens ?? Infinity) - (b.size?.tokens ?? Infinity)
+  );
 
   return (
     <section data-testid="encoder-comparison" className="rounded border p-2 text-xs">

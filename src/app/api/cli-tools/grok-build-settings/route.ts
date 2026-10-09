@@ -23,6 +23,7 @@ import {
   resetGrokBuildConfig,
   resolveGrokBuildConfigPath,
   type GrokBuildApplyOptions,
+  type GrokBuildSettings,
   type GrokSubagentType,
 } from "@/shared/services/grokBuildConfig";
 

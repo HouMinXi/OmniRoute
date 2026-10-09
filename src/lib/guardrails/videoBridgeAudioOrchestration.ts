@@ -230,16 +230,24 @@ export async function orchestrateVideoAudioTranscription(
 
   const cached = readCache(options, sttModel);
   if (cached) {
-    return { attempted: true, sttModel, timingPrecision: cached.timingPrecision, track: cached.track };
+    return {
+      attempted: true,
+      sttModel,
+      timingPrecision: cached.timingPrecision,
+      track: cached.track,
+    };
   }
 
   const extraction = await runExtraction(options, sttModel);
-  if (!extraction.ok) return extraction.result;
+  if (extraction.ok === false) return extraction.result;
 
   const transcription = await runTranscription(options, sttModel, extraction.value);
-  if (!transcription.ok) return transcription.result;
+  if (transcription.ok === false) return transcription.result;
 
-  const { observations, timingPrecision } = buildObservations(extraction.value, transcription.value);
+  const { observations, timingPrecision } = buildObservations(
+    extraction.value,
+    transcription.value
+  );
   const track: FusionTrack = { observations };
   writeCache(options, sttModel, { timingPrecision, track });
   return { attempted: true, sttModel, timingPrecision, track };

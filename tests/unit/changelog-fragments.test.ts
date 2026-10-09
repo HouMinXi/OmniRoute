@@ -10,8 +10,28 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
+type FragmentEntry = { file: string; text: string };
+type CollectedFragments = {
+  features: FragmentEntry[];
+  fixes: FragmentEntry[];
+  maintenance: FragmentEntry[];
+  invalid: Array<{ file: string; error: string }>;
+};
+
 const { SECTIONS, validateFragmentText, collectFragments, insertBullets, aggregate } =
-  await import("../../scripts/release/aggregate-changelog.mjs");
+  (await import("../../scripts/release/aggregate-changelog.mjs")) as {
+    SECTIONS: Record<string, string>;
+    validateFragmentText: (text: string) => string | null;
+    collectFragments: (root: string) => CollectedFragments;
+    insertBullets: (
+      changelogText: string,
+      bulletsBySection: Record<string, Array<{ text?: string } | string>>,
+      version?: string | null
+    ) => string;
+    aggregate: (options: { root: string; dryRun?: boolean; version?: string }) => {
+      total: number;
+    };
+  };
 const { findInvalidFragments } = await import("../../scripts/check/check-changelog-integrity.mjs");
 
 const CHANGELOG_FIXTURE = `# Changelog
@@ -41,7 +61,7 @@ _Living section — bullets land here as PRs merge._
 - **old feature**: shipped (#0)
 `;
 
-function makeRoot({ fragments = {} } = {}) {
+function makeRoot({ fragments = {} }: { fragments?: Record<string, string> } = {}) {
   const root = mkdtempSync(join(tmpdir(), "chfrag-"));
   writeFileSync(join(root, "CHANGELOG.md"), CHANGELOG_FIXTURE);
   mkdirSync(join(root, "changelog.d"), { recursive: true });
@@ -56,9 +76,9 @@ function makeRoot({ fragments = {} } = {}) {
 test("validateFragmentText accepts a bullet and rejects garbage", () => {
   assert.equal(validateFragmentText("- **fix:** ok (#9 — thanks @x)"), null);
   assert.equal(validateFragmentText("- multi\n  continuation line"), null);
-  assert.match(validateFragmentText(""), /empty/);
-  assert.match(validateFragmentText("not a bullet"), /must start/);
-  assert.match(validateFragmentText("- ok\n<<<<<<< HEAD"), /conflict markers/);
+  assert.match(validateFragmentText("") ?? "", /empty/);
+  assert.match(validateFragmentText("not a bullet") ?? "", /must start/);
+  assert.match(validateFragmentText("- ok\n<<<<<<< HEAD") ?? "", /conflict markers/);
 });
 
 test("collectFragments reads sections sorted and flags invalid files", () => {

@@ -75,6 +75,12 @@ function buildRequest(content: string) {
     userAgent: "unit-test",
     isCombo: true,
     comboName: COMBO_NAME,
+    comboStrategy: null,
+    connectionId: "c14931",
+    onCredentialsRefreshed: async () => {},
+    onRequestSuccess: () => {},
+    onStreamFailure: () => {},
+    onDisconnect: () => {},
     log: {
       debug() {},
       info() {},
@@ -117,12 +123,16 @@ test("#14931 A: uncataloged executing member no longer clamped to generic 128000
   // context-length rejection.
   const content = "x".repeat(600_000);
   const result = await handleChatCore(buildRequest(content));
-  if (result.success) {
+  if ("success" in result && result.success) {
     assert.ok(true, "guard passed and the stubbed upstream answered");
     return;
   }
-  const failure = result as { success: false; error: string; rawMessage?: string };
-  const message = failure.rawMessage ?? failure.error;
+  assert.ok("success" in result && result.success === false && "error" in result);
+  const failure = result;
+  const message =
+    "rawMessage" in failure && typeof failure.rawMessage === "string"
+      ? failure.rawMessage
+      : failure.error;
   assert.doesNotMatch(
     message,
     /context_length_exceeded|exceeds (maximum input tokens|context window)/i,
@@ -135,9 +145,14 @@ test("#14931 B: oversized request still rejected against the inherited sibling l
   // 4.6M chars → ~1.15M estimated tokens: above even the inherited window.
   const content = "x".repeat(4_600_000);
   const result = await handleChatCore(buildRequest(content));
+  assert.ok("success" in result, "expected the oversized request to be rejected");
   assert.equal(result.success, false, "expected the oversized request to be rejected");
-  const failure = result as { success: false; error: string; rawMessage?: string };
-  const message = failure.rawMessage ?? failure.error;
+  assert.ok("error" in result, "expected the oversized request to carry an error");
+  const failure = result;
+  const message =
+    "rawMessage" in failure && typeof failure.rawMessage === "string"
+      ? failure.rawMessage
+      : failure.error;
   assert.match(
     message,
     /limit 1000000\b/,

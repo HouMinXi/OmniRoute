@@ -5,7 +5,7 @@
 // Shows ServiceKindTabs if the provider declares multiple kinds; falls back to
 // a single-kind panel or the LlmChatCard for standard LLM providers.
 
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useTranslations } from "next-intl";
 import { LlmChatCard } from "@/app/(dashboard)/dashboard/media-providers/components/LlmChatCard";
 import { ServiceKindTabs } from "@/app/(dashboard)/dashboard/media-providers/components/ServiceKindTabs";
@@ -32,7 +32,7 @@ export const MEDIA_SERVICE_KINDS: ServiceKind[] = [
   "music",
 ];
 
-export function renderKindPanel(kind: ServiceKind, providerId: string): JSX.Element | null {
+export function renderKindPanel(kind: ServiceKind, providerId: string): ReactElement | null {
   switch (kind) {
     case "llm":
       return <LlmChatCard providerId={providerId} />;

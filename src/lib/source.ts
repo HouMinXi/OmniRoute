@@ -1,5 +1,15 @@
 import { docs } from "../../.source/server";
 import { loader } from "fumadocs-core/source";
+import type { TOCItemType } from "fumadocs-core/toc";
+import type { MDXContent } from "mdx/types";
+
+declare module "fumadocs-core/source" {
+  interface PageData {
+    body: MDXContent;
+    toc: TOCItemType[];
+    full?: boolean;
+  }
+}
 
 const generatedSource = docs.toFumadocsSource();
 

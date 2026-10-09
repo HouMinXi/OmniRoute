@@ -26,6 +26,16 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 const core = await import("../../src/lib/db/core.ts");
 const backup = await import("../../src/lib/db/backup.ts");
 const databaseSettings = await import("../../src/lib/db/databaseSettings.ts");
+import { DEFAULT_DATABASE_SETTINGS } from "../../src/types/databaseSettings.ts";
+
+function backupPatch(autoBackupEnabled: boolean) {
+  return {
+    backup: {
+      ...DEFAULT_DATABASE_SETTINGS.backup,
+      autoBackupEnabled,
+    },
+  };
+}
 
 function resetStorage() {
   core.resetDbInstance();
@@ -65,21 +75,21 @@ test("no persisted value at all → auto backups are NOT disabled (backups allow
 });
 
 test("autoBackupEnabled=false → auto backups are disabled (gate trips)", () => {
-  databaseSettings.updateDatabaseSettings({ backup: { autoBackupEnabled: false } });
+  databaseSettings.updateDatabaseSettings(backupPatch(false));
   assert.equal(backup.isAutoBackupDisabledBySetting(), true);
 });
 
 test("autoBackupEnabled=true → auto backups are NOT disabled", () => {
-  databaseSettings.updateDatabaseSettings({ backup: { autoBackupEnabled: true } });
+  databaseSettings.updateDatabaseSettings(backupPatch(true));
   assert.equal(backup.isAutoBackupDisabledBySetting(), false);
 });
 
 test("persisted value survives a getUserDatabaseSettings round-trip", () => {
-  databaseSettings.updateDatabaseSettings({ backup: { autoBackupEnabled: false } });
+  databaseSettings.updateDatabaseSettings(backupPatch(false));
   assert.equal(databaseSettings.getUserDatabaseSettings().backup.autoBackupEnabled, false);
   assert.equal(backup.isAutoBackupDisabledBySetting(), true);
 
-  databaseSettings.updateDatabaseSettings({ backup: { autoBackupEnabled: true } });
+  databaseSettings.updateDatabaseSettings(backupPatch(true));
   assert.equal(databaseSettings.getUserDatabaseSettings().backup.autoBackupEnabled, true);
   assert.equal(backup.isAutoBackupDisabledBySetting(), false);
 });

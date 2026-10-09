@@ -11,31 +11,35 @@ import { createErrorResponse } from "@/lib/api/errorResponse";
 import { globalTrafficBuffer } from "@/mitm/inspector/buffer";
 import type { AgentId } from "@/mitm/types";
 
-const VALID_IDS = new Set<AgentId>([
-  "antigravity",
-  "kiro",
-  "copilot",
-  "codex",
-  "cursor",
-  "zed",
-  "claude-code",
-  "open-code",
-  "trae",
-  "windsurf",
-  "jules",
-]);
+function isAgentId(id: string): id is AgentId {
+  switch (id) {
+    case "antigravity":
+    case "kiro":
+    case "copilot":
+    case "codex":
+    case "cursor":
+    case "zed":
+    case "claude-code":
+    case "open-code":
+    case "trae":
+    case "ghe-copilot":
+      return true;
+    default:
+      return false;
+  }
+}
 
 type Params = { params: Promise<{ id: string }> };
 
 export async function GET(_request: Request, { params }: Params): Promise<Response> {
   const { id } = await params;
 
-  if (!VALID_IDS.has(id as AgentId)) {
+  if (!isAgentId(id)) {
     return createErrorResponse({ status: 404, message: `Unknown agent id: ${id}` });
   }
 
   try {
-    const agentId = id as AgentId;
+    const agentId = id;
 
     // Get all intercepted requests for this agent
     const allRequests = globalTrafficBuffer.list();

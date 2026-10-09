@@ -54,7 +54,7 @@ test("#5899 openai gateway baseUrl ending in /v1/chat/completions never probes /
   try {
     await modelsRoute.GET(
       new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
-      { params: { id: connection.id } }
+      { params: Promise.resolve({ id: String(connection.id) }) }
     );
   } finally {
     globalThis.fetch = originalFetch;

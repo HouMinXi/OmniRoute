@@ -8,6 +8,7 @@ import {
   resolveReasoningSourceModels,
   validateCodexWsDecision,
 } from "@/lib/reasoningRouting/policy";
+import type { ReasoningSourceEffort } from "@/lib/db/reasoningRoutingRules";
 import { simulateReasoningRoutingSchema } from "@/shared/validation/schemas";
 import { validatedJsonBody } from "@/shared/validation/helpers";
 import { validateApiKeyRoutingTarget } from "@/shared/utils/apiKeyPolicy";
@@ -47,7 +48,7 @@ async function readPermissionError(targetRejection: Response | null): Promise<st
 
 async function resolveSimulationDecision(
   model: string,
-  effort: string,
+  effort: "missing" | "signal" | ReasoningSourceEffort,
   thinkingBudgetTokens: number | undefined,
   apiKey: { id?: string } | null,
   requestTags: string[],
@@ -73,7 +74,11 @@ export async function POST(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
   const parsed = await validatedJsonBody(request, simulateReasoningRoutingSchema);
-  if (!parsed.success) return parsed.response;
+  if (!parsed.success) {
+    return NextResponse.json(buildErrorBody(400, "Invalid reasoning routing simulation"), {
+      status: 400,
+    });
+  }
   const { model, effort, thinkingBudgetTokens, apiKeyId, requestTags, transport } = parsed.data;
   const apiKey = apiKeyId ? await getApiKeyById(apiKeyId) : null;
   if (apiKeyId && !apiKey) {

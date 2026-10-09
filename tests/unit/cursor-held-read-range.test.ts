@@ -19,6 +19,26 @@ import {
   encodeUInt32Field,
 } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
+function fieldVarint(field: WireField | undefined): bigint | undefined {
+  return field && field.wireType === 0 ? field.varint : undefined;
+}
+
 const readTool = openAIToolsToMcpDefs([
   {
     type: "function",
@@ -68,19 +88,22 @@ function readSuccessFields(range?: { offset: number; limit: number }) {
   );
   assert.equal(frames.length, 1);
   const acm = decodeFields(frames[0].subarray(5)).find((f) => f.fieldNumber === 2)!;
-  const readResult = decodeFields(acm.bytes).find((f) => f.fieldNumber === 7)!;
-  const success = decodeFields(readResult.bytes).find((f) => f.fieldNumber === 1)!;
-  return { args: JSON.parse(ctx.toolCalls[0].argumentsJson), fields: decodeFields(success.bytes) };
+  const readResult = decodeFields(lenBytes(acm)).find((f) => f.fieldNumber === 7)!;
+  const success = decodeFields(lenBytes(readResult)).find((f) => f.fieldNumber === 1)!;
+  return {
+    args: JSON.parse(ctx.toolCalls[0].argumentsJson),
+    fields: decodeFields(lenBytes(success)),
+  };
 }
 
 test("a ranged held read tells Cursor the client already applied the range", () => {
   const { args, fields } = readSuccessFields({ offset: 2001, limit: 2000 });
   assert.deepEqual(args, { filePath: "/repo/huge.py", offset: 2001, limit: 2000 });
-  assert.equal(fields.find((f) => f.fieldNumber === 8)?.varint, 1n, "range_applied");
+  assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 8)), 1n, "range_applied");
   // Cursor rejects an offset past total_lines ("Offset 2001 is beyond file
   // length (2 lines)"), so the count must reach the end of the slice.
-  assert.equal(fields.find((f) => f.fieldNumber === 3)?.varint, 2002n, "total_lines");
-  assert.equal(fields.find((f) => f.fieldNumber === 2)?.bytes.toString(), "2001: a\n2002: b");
+  assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 3)), 2002n, "total_lines");
+  assert.equal(fieldText(fields.find((f) => f.fieldNumber === 2)), "2001: a\n2002: b");
 });
 
 test("an unranged held read does not claim a range", () => {

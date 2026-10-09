@@ -66,7 +66,8 @@ export async function POST(request) {
       null,
       modelInfo.model
     );
-    if (!credentials || isCredentialDiagnosticSentinel(credentials)) {
+    const providerCredentials = toCountTokensCredentials(credentials);
+    if (!providerCredentials) {
       return estimated;
     }
 
@@ -74,7 +75,7 @@ export async function POST(request) {
     // The provider-side count is a real upstream call — it must honor the
     // connection's proxy assignment exactly like chat execution does.
     const proxyInfo = await safeResolveProxy(
-      credentials.connectionId,
+      providerCredentials.connectionId,
       undefined,
       modelInfo.provider
     );
@@ -82,7 +83,7 @@ export async function POST(request) {
       executor?.countTokens?.({
         model: modelInfo.model,
         body,
-        credentials,
+        credentials: providerCredentials,
         log,
       })
     );
@@ -129,6 +130,62 @@ export async function POST(request) {
     );
     return estimated;
   }
+}
+
+function toCountTokensCredentials(credentials: unknown): {
+  connectionId: string;
+  apiKey?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  expiresAt?: string;
+  email?: string | null;
+  maxConcurrent?: number | null;
+  providerSpecificData?: Record<string, unknown>;
+} | null {
+  if (!credentials || isCredentialDiagnosticSentinel(credentials)) return null;
+  if (
+    typeof credentials !== "object" ||
+    !("connectionId" in credentials) ||
+    typeof credentials.connectionId !== "string" ||
+    !credentials.connectionId
+  ) {
+    return null;
+  }
+  const narrowed: {
+    connectionId: string;
+    apiKey?: string;
+    accessToken?: string;
+    refreshToken?: string;
+    expiresAt?: string;
+    email?: string | null;
+    maxConcurrent?: number | null;
+    providerSpecificData?: Record<string, unknown>;
+  } = { connectionId: credentials.connectionId };
+  const apiKey = Reflect.get(credentials, "apiKey");
+  if (typeof apiKey === "string") narrowed.apiKey = apiKey;
+  const accessToken = Reflect.get(credentials, "accessToken");
+  if (typeof accessToken === "string") narrowed.accessToken = accessToken;
+  const refreshToken = Reflect.get(credentials, "refreshToken");
+  if (typeof refreshToken === "string") narrowed.refreshToken = refreshToken;
+  const expiresAt = Reflect.get(credentials, "expiresAt");
+  if (typeof expiresAt === "string") narrowed.expiresAt = expiresAt;
+  const email = Reflect.get(credentials, "email");
+  if (typeof email === "string" || email === null) narrowed.email = email;
+  const maxConcurrent = Reflect.get(credentials, "maxConcurrent");
+  if (typeof maxConcurrent === "number" || maxConcurrent === null) {
+    narrowed.maxConcurrent = maxConcurrent;
+  }
+  const providerSpecificData = Reflect.get(credentials, "providerSpecificData");
+  if (
+    providerSpecificData &&
+    typeof providerSpecificData === "object" &&
+    !Array.isArray(providerSpecificData)
+  ) {
+    const data: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(providerSpecificData)) data[key] = value;
+    narrowed.providerSpecificData = data;
+  }
+  return narrowed;
 }
 
 function safeStringify(value) {

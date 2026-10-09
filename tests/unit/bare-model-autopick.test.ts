@@ -16,6 +16,7 @@ test("unprefixed model with no active providers falls back to ambiguous_model wh
 
   assert.equal(info.provider, null);
   assert.equal((info as Record<string, unknown>).errorType, "ambiguous_model");
-  assert.ok(Array.isArray((info as Record<string, unknown>).candidateProviders));
-  assert.ok((info as Record<string, unknown>).candidateProviders.length > 1);
+  const candidateProviders = (info as { candidateProviders?: unknown }).candidateProviders;
+  assert.ok(Array.isArray(candidateProviders));
+  assert.ok(candidateProviders.length > 1);
 });

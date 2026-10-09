@@ -79,7 +79,7 @@ function sortProviderOptions(options: WizardProviderOption[]): WizardProviderOpt
 }
 
 export function getWizardApiKeyProviderOptions(): WizardProviderOption[] {
-  const freeApiKeyProviders = Object.values(FREE_PROVIDERS).filter(
+  const freeApiKeyProviders = (Object.values(FREE_PROVIDERS) as WizardProviderDefinition[]).filter(
     (provider) => provider.noAuth || supportsApiKeyOnFreeProvider(provider.id)
   );
   const providers = [...Object.values(APIKEY_PROVIDERS), ...freeApiKeyProviders].filter(
@@ -90,7 +90,10 @@ export function getWizardApiKeyProviderOptions(): WizardProviderOption[] {
 
 export function getWizardOAuthProviderOptions(): WizardProviderOption[] {
   const providersById = new Map<string, WizardProviderDefinition>();
-  for (const provider of [...Object.values(OAUTH_PROVIDERS), ...Object.values(FREE_PROVIDERS)]) {
+  for (const provider of [
+    ...Object.values(OAUTH_PROVIDERS),
+    ...(Object.values(FREE_PROVIDERS) as WizardProviderDefinition[]),
+  ]) {
     if (SUPPORTED_WIZARD_OAUTH_PROVIDER_IDS.has(provider.id)) {
       providersById.set(provider.id, provider);
     }

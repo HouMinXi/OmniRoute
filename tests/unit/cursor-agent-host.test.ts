@@ -4,6 +4,12 @@ import test from "node:test";
 import { resolveCursorAgentUrl } from "../../open-sse/executors/cursor/agentEndpoint.ts";
 import { encodeMessage, encodeString } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+function responseBody(body: Buffer): Uint8Array<ArrayBuffer> {
+  const copy = new Uint8Array(body.byteLength);
+  copy.set(body);
+  return copy;
+}
+
 function serverConfig(agentUrl: string, agentnUrl: string): Buffer {
   return encodeMessage(27, [encodeString(1, agentUrl), encodeString(2, agentnUrl)]);
 }
@@ -20,9 +26,11 @@ test("Cursor Agent uses each connection's server-assigned endpoint", async () =>
     requestedTokens.push(token);
     const region = token === "Bearer token-us" ? "us" : "eu";
     return new Response(
-      serverConfig(
-        `https://agent.${region}.api5.cursor.sh`,
-        `https://agentn.${region}.api5.cursor.sh`
+      responseBody(
+        serverConfig(
+          `https://agent.${region}.api5.cursor.sh`,
+          `https://agentn.${region}.api5.cursor.sh`
+        )
       ),
       { status: 200, headers: { "Content-Type": "application/proto" } }
     );
@@ -64,9 +72,11 @@ test("Cursor Agent uses the token with the connection cache key", async () => {
     requestedTokens.push(token);
     const region = token.endsWith("new") ? "new" : "old";
     return new Response(
-      serverConfig(
-        `https://agent.${region}.api5.cursor.sh`,
-        `https://agentn.${region}.api5.cursor.sh`
+      responseBody(
+        serverConfig(
+          `https://agent.${region}.api5.cursor.sh`,
+          `https://agentn.${region}.api5.cursor.sh`
+        )
       ),
       { status: 200, headers: { "Content-Type": "application/proto" } }
     );
@@ -91,7 +101,9 @@ test("Cursor Agent rejects an endpoint outside Cursor's API domain", async () =>
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () =>
     new Response(
-      serverConfig("https://attacker.example/agent", "https://attacker.example/agentn"),
+      responseBody(
+        serverConfig("https://attacker.example/agent", "https://attacker.example/agentn")
+      ),
       { status: 200, headers: { "Content-Type": "application/proto" } }
     );
 

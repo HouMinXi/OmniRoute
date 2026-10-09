@@ -28,7 +28,11 @@ import { type ConnectionRowConnection } from "./ConnectionRow";
 import { type BatchTestResults } from "../hooks/useProviderConnections";
 import { type ConnectionDeleteConfirmState } from "../hooks/useConnectionDeleteConfirm";
 import { type ImportProgress } from "../hooks/useModelImportHandlers";
-import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
+import {
+  providerText,
+  type ProviderMessageTranslator,
+  type CommandCodeAuthFlowState,
+} from "../providerPageHelpers";
 import { resolveProviderOAuthBackendId } from "../../providerPageUtils";
 
 interface ProviderInfo {
@@ -40,7 +44,7 @@ interface ProviderInfo {
 }
 
 interface ProxyTarget {
-  level: string;
+  level: "global" | "provider" | "combo" | "key";
   id: string;
   label: string;
 }
@@ -75,7 +79,7 @@ interface ProviderModalsPanelProps {
   // AddApiKey
   showAddApiKeyModal: boolean;
   siliconFlowInitialBaseUrl: string | undefined;
-  commandCodeAuthState: { phase: string; [key: string]: unknown };
+  commandCodeAuthState: CommandCodeAuthFlowState;
   handleStartCommandCodeAuth: () => void;
   handleSaveApiKey: (data: any) => Promise<void>;
   handleCloseAddApiKeyModal: () => void;
@@ -101,8 +105,8 @@ interface ProviderModalsPanelProps {
   externalLinkLoading: boolean;
   externalLinkError: string | null;
   externalLinkUrl: string | null;
-  externalLinkCopied: boolean;
-  externalLinkCopy: () => void;
+  externalLinkCopied: string | false;
+  externalLinkCopy: (text: string, id?: string) => void | Promise<unknown>;
   // Edit connection
   showEditModal: boolean;
   setShowEditModal: (open: boolean) => void;
@@ -235,7 +239,13 @@ export default function ProviderModalsPanel({
     <>
       {showRiskNoticeModal && subscriptionRisk && (
         <RiskNoticeModal
-          variant={(providerInfo.riskNoticeVariant as string) ?? "oauth"}
+          variant={
+            providerInfo.riskNoticeVariant === "webCookie" ||
+            providerInfo.riskNoticeVariant === "deprecated" ||
+            providerInfo.riskNoticeVariant === "embedded-service"
+              ? providerInfo.riskNoticeVariant
+              : "oauth"
+          }
           providerId={providerId}
           providerName={providerInfo.name}
           onConfirm={handleConfirmRiskNotice}
@@ -326,10 +336,10 @@ export default function ProviderModalsPanel({
         isOpen={batchDeleteConfirmOpen}
         onClose={() => setBatchDeleteConfirmOpen(false)}
         onConfirm={handleBatchDeleteConfirm}
-        title={t("batchDeleteConfirmTitle", "Delete connections")}
+        title={providerText(t, "batchDeleteConfirmTitle", "Delete connections")}
         message={t("batchDeleteConfirm", { count: selectedIds.size })}
-        confirmText={t("batchDeleteConfirmButton", "Delete")}
-        cancelText={t("cancel", "Cancel")}
+        confirmText={providerText(t, "batchDeleteConfirmButton", "Delete")}
+        cancelText={providerText(t, "cancel", "Cancel")}
         loading={batchDeleting}
       />
       <ConfirmModal

@@ -15,17 +15,37 @@ test.after(() => {
   fs.rmSync(dir, { recursive: true, force: true });
 });
 const until = new Date(Date.now() + 3600000).toISOString();
+type SeededConnection = {
+  id: string;
+  provider: string;
+  isActive?: boolean;
+  providerSpecificData: Record<string, unknown>;
+};
+function asConnection(value: unknown): SeededConnection {
+  assert.ok(value && typeof value === "object");
+  const row = value as Record<string, unknown>;
+  assert.equal(typeof row.id, "string");
+  assert.equal(typeof row.provider, "string");
+  assert.ok(
+    row.providerSpecificData &&
+      typeof row.providerSpecificData === "object" &&
+      !Array.isArray(row.providerSpecificData)
+  );
+  return row as SeededConnection;
+}
 async function seed() {
-  return db.createProviderConnection({
-    provider: "codex",
-    authType: "oauth",
-    name: crypto.randomUUID(),
-    providerSpecificData: {
-      unrelated: 42,
-      codexScopeRateLimitedUntil: { codex: until, spark: until },
-      codexExhaustedWindowByScope: { codex: "5h", spark: "7d" },
-    },
-  });
+  return asConnection(
+    await db.createProviderConnection({
+      provider: "codex",
+      authType: "oauth",
+      name: crypto.randomUUID(),
+      providerSpecificData: {
+        unrelated: 42,
+        codexScopeRateLimitedUntil: { codex: until, spark: until },
+        codexExhaustedWindowByScope: { codex: "5h", spark: "7d" },
+      },
+    })
+  );
 }
 test("fresh recovered usage unlocks Codex, hydrates tiles and preserves Spark and another account", async () => {
   const a = await seed(),
@@ -35,14 +55,15 @@ test("fresh recovered usage unlocks Codex, hydrates tiles and preserves Spark an
     { quotas: { session: { used: 0, total: 100 }, weekly: { used: 0, total: 100 } } },
     a.providerSpecificData
   );
-  const after = await db.getProviderConnectionById(a.id);
+  const after = asConnection(await db.getProviderConnectionById(a.id));
   const projected = pool.projectCodexAccountPool(after);
   assert.equal(projected.children[0].unavailable, false);
   assert.equal(projected.children[0].quota.windows["5h"].usedPercentage, 0);
   assert.equal(projected.children[1].unavailable, true);
   assert.equal(after.providerSpecificData.unrelated, 42);
   assert.equal(
-    pool.projectCodexAccountPool(await db.getProviderConnectionById(b.id)).children[0].unavailable,
+    pool.projectCodexAccountPool(asConnection(await db.getProviderConnectionById(b.id))).children[0]
+      .unavailable,
     true
   );
 });
@@ -54,8 +75,8 @@ test("partial or exhausted quota never unlocks a scope", async () => {
     const a = await seed();
     await recovery.syncCodexQuotaObservation(a.id, { quotas }, a.providerSpecificData);
     assert.equal(
-      pool.projectCodexAccountPool(await db.getProviderConnectionById(a.id)).children[0]
-        .unavailable,
+      pool.projectCodexAccountPool(asConnection(await db.getProviderConnectionById(a.id)))
+        .children[0].unavailable,
       true
     );
   }
@@ -69,14 +90,15 @@ test("newer cooldown written during fetch survives stale observation", async () 
     a.providerSpecificData
   );
   assert.equal(
-    pool.projectCodexAccountPool(await db.getProviderConnectionById(a.id)).children[0].unavailable,
+    pool.projectCodexAccountPool(asConnection(await db.getProviderConnectionById(a.id))).children[0]
+      .unavailable,
     true
   );
 });
 test("manual release clears only selected account scope without changing credentials or active state", async () => {
   const a = await seed();
   await recovery.clearCodexAccountCooldown(a.id, "codex");
-  const after = await db.getProviderConnectionById(a.id);
+  const after = asConnection(await db.getProviderConnectionById(a.id));
   assert.equal(pool.projectCodexAccountPool(after).children[0].unavailable, false);
   assert.equal(pool.projectCodexAccountPool(after).children[1].unavailable, true);
   assert.equal(after.isActive, a.isActive);

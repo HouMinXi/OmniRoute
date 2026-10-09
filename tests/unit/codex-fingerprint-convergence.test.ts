@@ -54,8 +54,15 @@ test("Codex off mode preserves original OAuth identity headers", () => {
     clientHeaders,
   });
   const wrapped = withCodexFingerprintCredentials(credentials, clientHeaders, {});
-  assert.deepEqual(wrapped.providerSpecificData.codexOriginalIdentityHeaders, original);
-  assert.equal(wrapped.providerSpecificData.codexClientIdentity, undefined);
+  const wrappedData = wrapped.providerSpecificData as
+    | {
+        codexOriginalIdentityHeaders?: unknown;
+        codexClientIdentity?: unknown;
+      }
+    | null
+    | undefined;
+  assert.deepEqual(wrappedData?.codexOriginalIdentityHeaders, original);
+  assert.equal(wrappedData?.codexClientIdentity, undefined);
 
   const resolvedAgain = resolveCodexOriginalIdentityHeaders({
     credentials,
@@ -299,6 +306,7 @@ test("Codex websocket off mode preserves original identity headers and body meta
         },
       },
     });
+    assert.ok(!(result instanceof Response));
     await result.response.text();
   } finally {
     __setCodexWebSocketTransportForTesting(undefined);
@@ -359,6 +367,7 @@ test("Codex websocket headers and payload share one fingerprint identity", async
         providerSpecificData: { workspaceId: "ws-ws", codexTransport: "websocket" },
       },
     });
+    assert.ok(!(result instanceof Response));
     await result.response.text();
   } finally {
     __setCodexWebSocketTransportForTesting(undefined);
@@ -444,7 +453,7 @@ test("ensureCodexFingerprintSeed creates once, preserves, and skips non-converge
   assert.notEqual(forgedOnCreate?.codexFingerprintSeed, "99999999-8888-4777-8666-555555555555");
 
   // Non-OAuth (API key) connections are never seeded.
-  assert.equal(ensureCodexFingerprintSeed(undefined, { apiKey: "sk-x" }), undefined);
+  assert.equal(ensureCodexFingerprintSeed(undefined, {}), undefined);
   assert.equal(ensureCodexFingerprintSeed(undefined, undefined), undefined);
 
   // device/full modes require the seed as well.

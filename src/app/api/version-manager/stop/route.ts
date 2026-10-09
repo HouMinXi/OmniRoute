@@ -8,7 +8,7 @@ import { parseVersionManagerToolRequest } from "../request";
 
 export async function POST(request: Request) {
   const parsed = await parseVersionManagerToolRequest(request);
-  if (!parsed.ok) {
+  if (parsed.ok === false) {
     return parsed.response;
   }
 

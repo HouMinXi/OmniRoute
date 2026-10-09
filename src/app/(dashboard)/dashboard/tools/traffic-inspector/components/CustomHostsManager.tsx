@@ -51,7 +51,7 @@ export function CustomHostsManager({ onClose }: CustomHostsManagerProps) {
     setError(null);
     const parsed = HostInputSchema.safeParse(input.trim());
     if (!parsed.success) {
-      setError(parsed.error.errors[0]?.message ?? t("invalidHost"));
+      setError(parsed.error.issues[0]?.message ?? t("invalidHost"));
       return;
     }
     const host = parsed.data;

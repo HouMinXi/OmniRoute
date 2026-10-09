@@ -41,6 +41,7 @@ test("#9204: an Antigravity CLI login is eligible for an agy model request", asy
 
   const credentials = await getProviderCredentials(parsed.provider!, null, null, parsed.model);
   assert.ok(credentials, "the active Antigravity CLI connection must remain selectable");
+  assert.ok("connectionId" in credentials && "accessToken" in credentials);
   assert.equal(credentials.connectionId, connection.id);
   assert.equal(credentials.accessToken, "fresh-access-token");
 });

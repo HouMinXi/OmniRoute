@@ -27,6 +27,51 @@ function sanitizeAuditUrl(url: string | null | undefined) {
   }
 }
 
+function toProxyContext(proxy: unknown):
+  | {
+      type: unknown;
+      host: unknown;
+      port: unknown;
+      username: unknown;
+      password: unknown;
+    }
+  | {
+      type: unknown;
+      host: unknown;
+      port: unknown;
+      username: unknown;
+      password: unknown;
+      family: string;
+      name?: string;
+      relayAuth?: string;
+    }
+  | null {
+  if (!proxy || typeof proxy !== "object" || Array.isArray(proxy) || !("host" in proxy)) {
+    return null;
+  }
+  const record = proxy as Record<string, unknown>;
+  const context = {
+    type: record.type,
+    host: record.host,
+    port: record.port,
+    username: record.username,
+    password: record.password,
+  };
+  if (
+    typeof record.family !== "string" &&
+    record.relayAuth === undefined &&
+    record.name === undefined
+  ) {
+    return context;
+  }
+  return {
+    ...context,
+    family: typeof record.family === "string" ? record.family : "auto",
+    ...(typeof record.name === "string" ? { name: record.name } : {}),
+    ...(typeof record.relayAuth === "string" ? { relayAuth: record.relayAuth } : {}),
+  };
+}
+
 // POST /api/providers/validate - Validate API key with provider
 export async function POST(request) {
   const authError = await requireManagementAuth(request);
@@ -117,12 +162,12 @@ export async function POST(request) {
     }
 
     const registryProxy = await resolveProxyForProvider(provider);
-    let proxyToUse = registryProxy;
+    let proxyToUse = toProxyContext(registryProxy);
 
     if (!proxyToUse) {
       const providerProxy = await getProxyForLevel("provider", provider);
       const globalProxy = providerProxy ? null : await getProxyForLevel("global");
-      proxyToUse = providerProxy || globalProxy || null;
+      proxyToUse = toProxyContext(providerProxy || globalProxy || null);
     }
 
     const result = projectProviderValidationResultForPublicResponse(

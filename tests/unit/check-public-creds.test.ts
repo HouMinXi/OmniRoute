@@ -181,7 +181,6 @@ test("6A.8: does NOT flag resolvePublicCred() in a new open-sse executor", () =>
 
 // --- 6A.8: stale-allowlist enforcement ---
 
-// @ts-expect-error — assertNoStale exported from lib module
 import { reportStaleEntries as reportStale } from "../../scripts/check/lib/allowlist.mjs";
 
 test("6A.8 stale: known literal that was removed from the codebase is detected as stale", () => {

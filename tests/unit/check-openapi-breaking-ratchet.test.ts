@@ -18,7 +18,6 @@ import {
   evaluateOpenapiRatchet,
   readBaselineOpenapiValue,
   releaseBranchForVersion,
-  // @ts-expect-error — .mjs helper has no type declarations; runtime shape is known.
 } from "../../scripts/check/check-openapi-breaking.mjs";
 
 type RatchetVerdict = { regressed: boolean; skipped: boolean };

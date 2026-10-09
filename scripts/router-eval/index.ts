@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
 import path from "node:path";
+import { runtimeRequire } from "@/lib/db/adapters/runtimeRequire.ts";
 
 import {
   compareRouterEvalRuns,
@@ -158,7 +159,12 @@ function parseInputLine(rawLine: string): RouterObservation | null {
 async function readJsonl(inputPath?: string): Promise<RouterObservation[]> {
   let text: string;
   if (!inputPath) {
-    text = await new Response(process.stdin, { duplex: "half" }).text();
+    const chunks: Buffer[] = [];
+    for await (const chunk of process.stdin) {
+      if (typeof chunk === "string") chunks.push(Buffer.from(chunk));
+      else if (chunk instanceof Uint8Array) chunks.push(Buffer.from(chunk));
+    }
+    text = Buffer.concat(chunks).toString("utf8");
   } else {
     text = await fs.promises.readFile(path.resolve(inputPath), "utf8");
   }
@@ -324,8 +330,20 @@ function readUsageHistoryDb(
 
 async function openSqliteDatabase(sqliteFile: string): Promise<SqliteDatabase> {
   if ("Bun" in globalThis) {
-    const sqlite = await import("bun:sqlite");
-    return new sqlite.Database(sqliteFile, { readonly: true });
+    const loaded = runtimeRequire("bun:" + "sqlite");
+    if (
+      typeof loaded === "object" &&
+      loaded !== null &&
+      "Database" in loaded &&
+      typeof loaded.Database === "function"
+    ) {
+      const Database = loaded.Database as new (
+        filename: string,
+        options?: { readonly?: boolean }
+      ) => SqliteDatabase;
+      return new Database(sqliteFile, { readonly: true });
+    }
+    throw new Error("bun sqlite driver is unavailable");
   }
 
   const sqlite = await import("better-sqlite3");

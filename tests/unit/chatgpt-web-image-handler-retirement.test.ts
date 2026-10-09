@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { handleImageGeneration } from "../../open-sse/handlers/imageGeneration.ts";
+import { handleImageGeneration as handleImageGenerationUntyped } from "../../open-sse/handlers/imageGeneration.ts";
+
+const handleImageGeneration = handleImageGenerationUntyped as (options: {
+  body: { model: string; prompt: string };
+  credentials: { apiKey: string };
+  log: null;
+  resolvedProvider?: string;
+}) => ReturnType<typeof handleImageGenerationUntyped>;
 
 test("central image handler retires cgpt-web and reports clean-room chatgpt-web as unsupported", async () => {
   const originalFetch = globalThis.fetch;
@@ -46,8 +53,9 @@ test("central image handler retires cgpt-web and reports clean-room chatgpt-web 
       credentials: { apiKey: "unused" },
       log: null,
     });
+    assert.ok("status" in cleanRoomTextOnly && "error" in cleanRoomTextOnly);
     assert.equal(cleanRoomTextOnly.status, 400);
-    assert.match(cleanRoomTextOnly.error, /invalid image model/i);
+    assert.match(String(cleanRoomTextOnly.error), /invalid image model/i);
     assert.notEqual((cleanRoomTextOnly as { code?: string }).code, "PROVIDER_RETIRED");
 
     const similarButDistinct = await handleImageGeneration({
@@ -55,6 +63,7 @@ test("central image handler retires cgpt-web and reports clean-room chatgpt-web 
       credentials: { apiKey: "unused" },
       log: null,
     });
+    assert.ok("status" in similarButDistinct);
     assert.equal(similarButDistinct.status, 400);
     assert.notEqual((similarButDistinct as { code?: string }).code, "PROVIDER_RETIRED");
     assert.equal(fetchCalls, 0);

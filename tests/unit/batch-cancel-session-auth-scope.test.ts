@@ -71,7 +71,10 @@ describe("cancel route ownership scoping", () => {
     const batch = seedBatch("env-key", "in_progress", "a1");
 
     // Exactly the check cancel/route.ts now runs: `!canAccessOwnedRecord(scope, batch.apiKeyId)`
-    const allowed = canAccessOwnedRecord({ isSessionAuth: true, apiKeyId: null }, batch.apiKeyId);
+    const allowed = canAccessOwnedRecord(
+      { isSessionAuth: true, apiKeyId: null, apiKeyMetadata: null },
+      batch.apiKeyId
+    );
 
     assert.equal(allowed, true, "the operator's dashboard must be able to cancel any batch");
   });
@@ -80,7 +83,7 @@ describe("cancel route ownership scoping", () => {
     const batch = seedBatch("env-key", "validating", "a2");
 
     const allowed = canAccessOwnedRecord(
-      { isSessionAuth: false, apiKeyId: "other-key" },
+      { isSessionAuth: false, apiKeyId: "other-key", apiKeyMetadata: null },
       batch.apiKeyId
     );
 
@@ -91,7 +94,7 @@ describe("cancel route ownership scoping", () => {
     const batch = seedBatch("key-owns-this", "validating", "a3");
 
     const allowed = canAccessOwnedRecord(
-      { isSessionAuth: false, apiKeyId: "key-owns-this" },
+      { isSessionAuth: false, apiKeyId: "key-owns-this", apiKeyMetadata: null },
       batch.apiKeyId
     );
 

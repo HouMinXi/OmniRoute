@@ -29,7 +29,7 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-function captureMapKeys(): { keys: string[]; restore: () => void } {
+function captureMapKeys(): { keys: string[]; release: () => void } {
   const capturedKeys: string[] = [];
   const originalSet = Map.prototype.set;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

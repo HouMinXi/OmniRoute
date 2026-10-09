@@ -34,8 +34,8 @@ async function createCodexOAuthConnection(providerSpecificData?: Record<string, 
     refreshToken: `refresh-${suffix}`,
     providerSpecificData,
   });
-  assert.ok(connection && typeof connection.id === "string");
-  return connection;
+  assert.ok(connection && typeof connection === "object" && typeof connection.id === "string");
+  return connection as { id: string; providerSpecificData: unknown };
 }
 
 test("codex OAuth connections persist a fingerprint seed at creation (default session mode)", async () => {

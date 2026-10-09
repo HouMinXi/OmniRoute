@@ -17,9 +17,9 @@ const { applyFingerprint, isCliCompatEnabled, setCliCompatProviders } =
 test("Amp CLI was removed from CLI_TOOLS per plan 14 D17 (MITM backlog plan 11)", () => {
   // amp (Sourcegraph) removed from CLI_TOOLS in plan 14 because it has a closed ecosystem
   // and does not support a generic custom base URL. Cross-ref: plan 11 MITM backlog.
-  assert.equal((CLI_TOOLS as Record<string, unknown>).amp, undefined);
+  assert.equal((CLI_TOOLS as Record<string, { configType?: string } | undefined>).amp, undefined);
   // amp may still appear in cliRuntime.ts (runtime detection catalog — separate from UI catalog)
-  assert.equal(CLI_COMPAT_PROVIDER_IDS.includes("amp"), false);
+  assert.equal((CLI_COMPAT_PROVIDER_IDS as readonly string[]).includes("amp"), false);
 });
 
 test("Hermes quick-config is registered as a guide-based CLI tool", () => {
@@ -51,7 +51,7 @@ test("ACP registry accepts the Gemini CLI target used by the manager", () => {
 test("CLI fingerprint toggles only expose implemented fingerprints and functional legacy aliases", () => {
   const implemented = new Set<string>(IMPLEMENTED_CLI_FINGERPRINT_PROVIDER_IDS);
 
-  for (const providerId of CLI_COMPAT_PROVIDER_IDS) {
+  for (const providerId of CLI_COMPAT_PROVIDER_IDS as readonly string[]) {
     assert.equal(
       implemented.has(providerId),
       true,
@@ -59,7 +59,7 @@ test("CLI fingerprint toggles only expose implemented fingerprints and functiona
     );
   }
 
-  for (const toggleId of CLI_COMPAT_TOGGLE_IDS) {
+  for (const toggleId of CLI_COMPAT_TOGGLE_IDS as readonly string[]) {
     const providerId = normalizeCliCompatProviderId(toggleId);
     assert.equal(
       implemented.has(providerId),
@@ -68,16 +68,16 @@ test("CLI fingerprint toggles only expose implemented fingerprints and functiona
     );
   }
 
-  for (const providerId of IMPLEMENTED_CLI_FINGERPRINT_PROVIDER_IDS) {
-    assert.equal(CLI_COMPAT_PROVIDER_IDS.includes(providerId), true);
+  for (const providerId of IMPLEMENTED_CLI_FINGERPRINT_PROVIDER_IDS as readonly string[]) {
+    assert.equal((CLI_COMPAT_PROVIDER_IDS as readonly string[]).includes(providerId), true);
   }
 
-  for (const providerId of CLI_COMPAT_OMITTED_PROVIDER_IDS) {
-    assert.equal(CLI_COMPAT_PROVIDER_IDS.includes(providerId), false);
+  for (const providerId of CLI_COMPAT_OMITTED_PROVIDER_IDS as readonly string[]) {
+    assert.equal((CLI_COMPAT_PROVIDER_IDS as readonly string[]).includes(providerId), false);
     assert.equal((CLI_COMPAT_TOGGLE_IDS as readonly string[]).includes(providerId), false);
   }
 
-  assert.equal(CLI_COMPAT_TOGGLE_IDS.includes("copilot"), true);
+  assert.equal((CLI_COMPAT_TOGGLE_IDS as readonly string[]).includes("copilot"), true);
   assert.equal((CLI_COMPAT_TOGGLE_IDS as readonly string[]).includes("github"), false);
 });
 

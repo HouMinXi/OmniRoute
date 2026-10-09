@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactElement } from "react";
 import type { PoolAllocation } from "@/lib/quota/dimensions";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 
@@ -29,7 +30,7 @@ export default function StackedAllocationBar({
   usage,
   keyLabels,
   dimensionIndex = 0,
-}: StackedAllocationBarProps): JSX.Element | null {
+}: StackedAllocationBarProps): ReactElement | null {
   const t = useTranslations("quotaShare");
 
   if (allocations.length === 0) {

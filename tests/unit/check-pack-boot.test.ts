@@ -69,7 +69,7 @@ test("pickPort stays inside the reserved smoke range for any pid", () => {
 test("installed package contract requires sql.js metadata, entrypoint, and WASM", () => {
   const present = new Set(REQUIRED_SQLJS_RUNTIME_FILES.map((file) => path.join("/pkg", file)));
   assert.deepEqual(
-    findMissingSqlJsRuntimeFiles("/pkg", (file) => present.has(file)),
+    findMissingSqlJsRuntimeFiles("/pkg", (file) => present.has(String(file))),
     []
   );
 
@@ -78,7 +78,7 @@ test("installed package contract requires sql.js metadata, entrypoint, and WASM"
   // never the old vendored dist/node_modules one (banned from the tarball).
   present.delete(path.join("/pkg", "node_modules/sql.js/dist/sql-wasm.wasm"));
   assert.deepEqual(
-    findMissingSqlJsRuntimeFiles("/pkg", (file) => present.has(file)),
+    findMissingSqlJsRuntimeFiles("/pkg", (file) => present.has(String(file))),
     ["node_modules/sql.js/dist/sql-wasm.wasm"]
   );
 });
@@ -88,13 +88,13 @@ test("installed package contract requires a resolvable node-machine-id CommonJS 
     REQUIRED_MACHINE_TOKEN_RUNTIME_FILES.map((file) => path.join("/pkg", file))
   );
   assert.deepEqual(
-    findMissingMachineTokenRuntimeFiles("/pkg", (file) => present.has(file)),
+    findMissingMachineTokenRuntimeFiles("/pkg", (file) => present.has(String(file))),
     []
   );
 
   present.delete(path.join("/pkg", "node_modules/node-machine-id/index.js"));
   assert.deepEqual(
-    findMissingMachineTokenRuntimeFiles("/pkg", (file) => present.has(file)),
+    findMissingMachineTokenRuntimeFiles("/pkg", (file) => present.has(String(file))),
     ["node_modules/node-machine-id/index.js"]
   );
 });

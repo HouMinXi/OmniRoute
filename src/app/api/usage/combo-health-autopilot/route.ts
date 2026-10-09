@@ -11,14 +11,14 @@ const querySchema = z.object({
     .string()
     .regex(/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
     .optional(),
-  includeHealthy: z
-    .enum(["true", "false"])
-    .transform((value) => value === "true")
-    .default("false"),
-  includeActions: z
-    .enum(["true", "false"])
-    .transform((value) => value === "true")
-    .default("true"),
+  includeHealthy: z.preprocess(
+    (value) => (value === undefined ? "false" : value),
+    z.enum(["true", "false"]).transform((value) => value === "true")
+  ),
+  includeActions: z.preprocess(
+    (value) => (value === undefined ? "true" : value),
+    z.enum(["true", "false"]).transform((value) => value === "true")
+  ),
 });
 
 export async function GET(request: Request) {

@@ -54,7 +54,14 @@ export async function GET(request: Request) {
     }
 
     const settings = await readSettings();
-    const hasOmniRoute = !!settings?.env?.ANTHROPIC_BASE_URL;
+    const env =
+      settings && typeof settings === "object" && "env" in settings ? settings.env : undefined;
+    const hasOmniRoute =
+      !!env &&
+      typeof env === "object" &&
+      !Array.isArray(env) &&
+      "ANTHROPIC_BASE_URL" in env &&
+      typeof env.ANTHROPIC_BASE_URL === "string";
 
     return NextResponse.json({
       installed: runtime.installed,

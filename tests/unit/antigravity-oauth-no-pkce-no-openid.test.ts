@@ -60,9 +60,9 @@ test("antigravity.exchangeToken never forwards code_verifier (no PKCE → no inv
     );
   }) as typeof fetch;
   try {
-    // Pass a codeVerifier (as the modal does — generateAuthData always mints one).
-    // It MUST be ignored: the authorize URL had no code_challenge, so forwarding a
-    // code_verifier makes Google reject the exchange (invalid_grant → 500).
+    // The public exchangeToken now takes (config, code, redirectUri) only.
+    // A verifier cannot be passed, which is the no-PKCE contract: the body
+    // below must still not carry code_verifier.
     await PROVIDERS.antigravity.exchangeToken(
       {
         clientId: "cid",
@@ -70,8 +70,7 @@ test("antigravity.exchangeToken never forwards code_verifier (no PKCE → no inv
         tokenUrl: "https://oauth2.googleapis.com/token",
       },
       "the-code",
-      "http://127.0.0.1:20128/callback",
-      "should-be-ignored-verifier"
+      "http://127.0.0.1:20128/callback"
     );
   } finally {
     globalThis.fetch = origFetch;

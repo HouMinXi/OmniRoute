@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, type ReactElement } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
@@ -19,7 +19,7 @@ interface SkillPreviewPaneProps {
   onRefresh?: () => void;
 }
 
-function SkeletonLines({ lines }: { lines: number }): JSX.Element {
+function SkeletonLines({ lines }: { lines: number }): ReactElement {
   return (
     <div className="space-y-2 animate-pulse" aria-hidden="true">
       {Array.from({ length: lines }).map((_, i) => (
@@ -38,7 +38,7 @@ export function SkillPreviewPane({
   markdown,
   loading,
   onRefresh,
-}: SkillPreviewPaneProps): JSX.Element {
+}: SkillPreviewPaneProps): ReactElement {
   const t = useTranslations("agentSkills");
 
   const handleCopyRawUrl = useCallback(async () => {

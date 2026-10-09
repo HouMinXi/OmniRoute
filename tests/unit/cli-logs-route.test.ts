@@ -54,7 +54,7 @@ test.after(async () => {
 // Helper — make a request; auth passes because requireLogin is set to false in test.before
 function makeReq(queryString = "") {
   const url = `http://localhost/api/cli-tools/logs${queryString ? `?${queryString}` : ""}`;
-  return new Request(url);
+  return new Request(url) as unknown as import("next/server").NextRequest;
 }
 
 test("GET /api/cli-tools/logs returns 200 with JSON array when log file exists", async () => {

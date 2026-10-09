@@ -278,6 +278,10 @@ export function createApiBridgeServer(dashboardPort: number): http.Server {
   server.on("upgrade", (req, socket, head) => {
     const rawUrl = req.url || "/";
     const pathname = rawUrl.split("?")[0] || "/";
+    if (!(socket instanceof net.Socket)) {
+      socket.destroy();
+      return;
+    }
 
     if (!isOpenAiCompatiblePath(pathname)) {
       writeUpgradeProxyError(

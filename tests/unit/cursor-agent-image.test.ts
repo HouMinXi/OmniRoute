@@ -1,7 +1,11 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
-import { IMAGE_PROVIDERS, parseImageModel, getImageProvider } from "../../open-sse/config/imageRegistry.ts";
+import {
+  IMAGE_PROVIDERS,
+  parseImageModel,
+  getImageProvider,
+} from "../../open-sse/config/imageRegistry.ts";
 import {
   buildCursorAgentAuthEnv,
   buildCursorAgentImagePrompt,
@@ -74,6 +78,7 @@ test("handleCursorAgentImageGeneration rejects empty prompt and missing credenti
     peerLocality: "loopback",
   });
   assert.equal(noPrompt.success, false);
+  if (!("status" in noPrompt)) throw new Error("expected image error");
   assert.equal(noPrompt.status, 400);
 
   const noCreds = await handleCursorAgentImageGeneration({
@@ -85,6 +90,7 @@ test("handleCursorAgentImageGeneration rejects empty prompt and missing credenti
     peerLocality: "loopback",
   });
   assert.equal(noCreds.success, false);
+  if (!("status" in noCreds)) throw new Error("expected image error");
   assert.equal(noCreds.status, 401);
 });
 
@@ -102,6 +108,7 @@ test("handleCursorAgentImageGeneration returns 501 when agentBin path is missing
     peerLocality: "loopback",
   });
   assert.equal(result.success, false);
+  if (!("status" in result)) throw new Error("expected image error");
   assert.equal(result.status, 501);
   assert.match(String(result.error), /CURSOR_AGENT_BIN|agentBin/i);
 });
@@ -131,6 +138,7 @@ test("handleCursorAgentImageGeneration rejects a non-loopback/non-LAN caller BEF
 
   assert.equal(spawnCalled, false, "spawn must not run for a rejected non-local caller");
   assert.equal(result.success, false);
+  if (!("status" in result)) throw new Error("expected image error");
   assert.equal(result.status, 403);
   assert.match(String(result.error), /localhost|LAN/i);
 });
@@ -145,6 +153,7 @@ test("handleCursorAgentImageGeneration rejects when peerLocality is missing (fai
     credentials: { accessToken: "crsr_test" },
   });
   assert.equal(result.success, false);
+  if (!("status" in result)) throw new Error("expected image error");
   assert.equal(result.status, 403);
 });
 
@@ -202,6 +211,7 @@ test("handleCursorAgentImageGeneration returns b64_json via injectable spawn", a
   });
 
   assert.equal(result.success, true);
+  if (!("data" in result)) throw new Error("expected image success");
   assert.ok(result.data?.data?.[0]?.b64_json);
   assert.equal(result.data.data[0].b64_json, tinyPng.toString("base64"));
 });

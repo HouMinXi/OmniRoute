@@ -11,6 +11,7 @@ import {
   AUTO_FAMILY_IDS,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
 import { parseAutoSuffix } from "@omniroute/open-sse/services/autoCombo/suffixComposition";
+import { isValidModelFamily } from "@omniroute/open-sse/services/autoCombo/modelFamily";
 
 const ALL_VARIANTS: Array<{ variant: AutoVariant | undefined; name: string }> = [
   { variant: undefined, name: "Auto" },
@@ -180,6 +181,7 @@ export async function GET(request: Request) {
     for (const modelStr of AUTO_FAMILY_IDS) {
       if (seenIds.has(modelStr)) continue;
       const suffix = modelStr.slice("auto/".length);
+      if (!isValidModelFamily(suffix)) continue;
       await pushVariant(modelStr, async () => {
         const virtual = await createVirtualAutoComboFromPrepared(prepared, undefined, {
           family: suffix,

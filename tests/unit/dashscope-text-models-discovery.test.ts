@@ -12,6 +12,13 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
 const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.ts");
 
+function connectionId(connection: { id?: unknown } | null): string {
+  if (!connection || typeof connection.id !== "string" || connection.id.length === 0) {
+    throw new Error("provider connection is missing an id");
+  }
+  return connection.id;
+}
+
 const ALIBABA_MODEL_STUDIO_MODEL_IDS = [
   "qwen3.7-max",
   "qwen3.7-plus",
@@ -96,7 +103,7 @@ async function assertTextOnlyDiscovery({
     apiKey: "test-dashscope-key",
     ...(region ? { providerSpecificData: { region } } : {}),
   });
-  await modelsDb.replaceSyncedAvailableModelsForConnection(provider, connection.id, [
+  await modelsDb.replaceSyncedAvailableModelsForConnection(provider, connectionId(connection), [
     { id: "qwen-image-stale", name: "Stale image model", source: "imported" },
   ]);
 
@@ -114,8 +121,8 @@ async function assertTextOnlyDiscovery({
 
   try {
     const response = await modelsRoute.GET(
-      new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
-      { params: { id: connection.id } }
+      new Request(`http://localhost/api/providers/${connectionId(connection)}/models?refresh=true`),
+      { params: { id: connectionId(connection) } }
     );
     assert.equal(response.status, 200);
     const body = await response.json();
@@ -127,7 +134,10 @@ async function assertTextOnlyDiscovery({
     assert.equal(requestedUrl, expectedUrl);
     assert.equal(fetchCalls, 1);
 
-    const persisted = await modelsDb.getSyncedAvailableModelsForConnection(provider, connection.id);
+    const persisted = await modelsDb.getSyncedAvailableModelsForConnection(
+      provider,
+      connectionId(connection)
+    );
     assert.deepEqual(
       persisted.map((model) => model.id),
       expectedModelIds
@@ -196,8 +206,8 @@ test("Alibaba free billing mode syncs all live text models, not only the curated
 
   try {
     const response = await modelsRoute.GET(
-      new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
-      { params: { id: connection.id } }
+      new Request(`http://localhost/api/providers/${connectionId(connection)}/models?refresh=true`),
+      { params: { id: connectionId(connection) } }
     );
     assert.equal(response.status, 200);
     const body = await response.json();

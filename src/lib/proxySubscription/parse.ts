@@ -238,19 +238,25 @@ function collectFromArray(
   for (const item of items) {
     if (typeof item === "string") {
       const n = nodeFromUri(item.trim());
-      if (n) (isDirect(n) ? nodes : needsCore).push(n);
+      if (n) {
+        if (isDirect(n)) nodes.push(n);
+        else needsCore.push(n);
+      }
       continue;
     }
     if (item && typeof item === "object") {
       const n = nodeFromClashObject(item as Record<string, unknown>);
-      if (n) (isDirect(n) ? nodes : needsCore).push(n);
+      if (n) {
+        if (isDirect(n)) nodes.push(n);
+        else needsCore.push(n);
+      }
     }
   }
   return { nodes, needsCore, format };
 }
 
 function isDirect(n: SubscriptionNode | NeedsCoreNode): n is SubscriptionNode {
-  return (n as SubscriptionNode).type !== undefined;
+  return "type" in n && n.type !== undefined;
 }
 
 function parseClashYaml(content: string): ParsedSubscription {
@@ -276,7 +282,10 @@ function parseLineList(lines: string[]): ParsedSubscription {
   const needsCore: NeedsCoreNode[] = [];
   for (const line of lines) {
     const n = nodeFromUri(line);
-    if (n) (isDirect(n) ? nodes : needsCore).push(n);
+    if (n) {
+      if (isDirect(n)) nodes.push(n);
+      else needsCore.push(n);
+    }
   }
   return { nodes, needsCore, format: "lines" };
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import type { ReactElement } from "react";
 import { useTranslations } from "next-intl";
 import { SkillsConceptCard } from "@/shared/components/SkillsConceptCard";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -14,7 +15,7 @@ type FilterCategory = "all" | "api" | "cli" | "config";
 
 // ── Skeleton helpers ─────────────────────────────────────────────────────────
 
-function SkillCardSkeleton(): JSX.Element {
+function SkillCardSkeleton(): ReactElement {
   return (
     <div className="flex items-start gap-3 rounded-lg border border-border p-3 animate-pulse">
       <div className="h-9 w-9 rounded-lg bg-bg-subtle shrink-0" />
@@ -27,7 +28,7 @@ function SkillCardSkeleton(): JSX.Element {
   );
 }
 
-function CoverageBarSkeleton(): JSX.Element {
+function CoverageBarSkeleton(): ReactElement {
   return (
     <div className="space-y-2 animate-pulse">
       <div className="flex gap-2">
@@ -48,7 +49,7 @@ function CoverageBarSkeleton(): JSX.Element {
 
 // ── Main component ───────────────────────────────────────────────────────────
 
-export function AgentSkillsPageClient(): JSX.Element {
+export function AgentSkillsPageClient(): ReactElement {
   const t = useTranslations("agentSkills");
 
   // State

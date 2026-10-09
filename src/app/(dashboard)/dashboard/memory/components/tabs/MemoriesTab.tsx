@@ -471,7 +471,8 @@ export default function MemoriesTab() {
                         <td className="py-2 px-4">
                           <Badge
                             variant={getTypeColor(memory.type)}
-                            title={t(
+                            className="cursor-help"
+                            aria-label={t(
                               TYPE_TOOLTIPS[memory.type]?.replace("memory.", "") ?? memory.type
                             )}
                           >

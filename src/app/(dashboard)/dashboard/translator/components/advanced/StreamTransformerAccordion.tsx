@@ -125,7 +125,7 @@ export default function StreamTransformerAccordion({
   const t = useTranslations("translator");
 
   const translateOrFallback = useCallback(
-    (key: string, fallback: string, values?: Record<string, unknown>) => {
+    (key: string, fallback: string, values?: Record<string, string | number | Date>) => {
       try {
         const translated = t(key, values);
         return translated === key || translated === `translator.${key}` ? fallback : translated;

@@ -1,6 +1,10 @@
 import test from "node:test";
-import { makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
 import assert from "node:assert/strict";
+import { makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
+
+type McpToolResult = Parameters<typeof makeMcpStreamFetch>[0] extends { toolResult?: infer T }
+  ? T
+  : never;
 
 const SKILLS_DATA = [
   { id: "sk_pdf", name: "PDF Parser", type: "sandbox", version: "1.0.0", enabled: true },
@@ -116,11 +120,11 @@ test("runSkillsGet busca /api/skills/:id", async () => {
 });
 
 test("runSkillsEnable usa JSON-RPC tools/call", async () => {
-  const calls: unknown[] = [];
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
   const origFetch = globalThis.fetch;
-  globalThis.fetch = makeMcpStreamFetch({ toolResult: { ok: true } });
+  globalThis.fetch = makeMcpStreamFetch({ toolResult: { ok: true } as unknown as McpToolResult });
   const inner = globalThis.fetch;
-  globalThis.fetch = ((url: unknown, init: unknown) => {
+  globalThis.fetch = ((url: string | URL | Request, init?: RequestInit) => {
     calls.push({ url: String(url), init });
     return inner(url, init);
   }) as any;
@@ -130,7 +134,9 @@ test("runSkillsEnable usa JSON-RPC tools/call", async () => {
 
   globalThis.fetch = origFetch;
   assert.ok(calls.some((x) => String(x.url).includes("/api/mcp/stream")));
-  const callBody = JSON.parse(calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}");
+  const callBody = JSON.parse(
+    String(calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}")
+  );
   assert.equal(callBody.method, "tools/call");
   assert.equal(callBody.params.name, "omniroute_skills_enable");
   assert.equal(callBody.params.arguments.skillId, "sk_pdf");
@@ -139,11 +145,13 @@ test("runSkillsEnable usa JSON-RPC tools/call", async () => {
 });
 
 test("runSkillsExecute usa JSON-RPC tools/call", async () => {
-  const calls: unknown[] = [];
+  const calls: Array<{ url: string; init?: RequestInit }> = [];
   const origFetch = globalThis.fetch;
-  globalThis.fetch = makeMcpStreamFetch({ toolResult: { result: "ok", output: "parsed" } });
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { result: "ok", output: "parsed" } as unknown as McpToolResult,
+  });
   const inner = globalThis.fetch;
-  globalThis.fetch = ((url: unknown, init: unknown) => {
+  globalThis.fetch = ((url: string | URL | Request, init?: RequestInit) => {
     calls.push({ url: String(url), init });
     return inner(url, init);
   }) as any;
@@ -154,7 +162,9 @@ test("runSkillsExecute usa JSON-RPC tools/call", async () => {
   );
 
   globalThis.fetch = origFetch;
-  const callBody = JSON.parse(calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}");
+  const callBody = JSON.parse(
+    String(calls.find((x) => String(x.init?.body || "").includes("tools/call"))?.init?.body || "{}")
+  );
   assert.equal(callBody.method, "tools/call");
   assert.equal(callBody.params.name, "omniroute_skills_execute");
   assert.equal(callBody.params.arguments.skillId, "sk_pdf");
@@ -203,10 +213,10 @@ test("runMarketplaceSearch retorna pacotes com query e filtros", async () => {
 });
 
 test("runMarketplaceInstall --yes envia POST sem confirmação", async () => {
-  let capturedBody: unknown = null;
+  let capturedBody: { packageId?: string; version?: string; enable?: boolean } | null = null;
   const origFetch = globalThis.fetch;
-  globalThis.fetch = ((_url: string, init: unknown) => {
-    capturedBody = JSON.parse(init?.body ?? "{}");
+  globalThis.fetch = ((_url: string, init?: RequestInit) => {
+    capturedBody = JSON.parse(String(init?.body ?? "{}"));
     return Promise.resolve(makeResp({ skillId: "sk_pdf_installed" }));
   }) as any;
 

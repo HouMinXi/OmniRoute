@@ -38,80 +38,80 @@ export function createProgressTransform({
     tokenCount += text.split("\n").filter((line) => line.startsWith("data: ")).length;
   };
 
-  return new TransformStream(
-    {
-      start(controller) {
-        writer = controller;
-        startTime = Date.now();
+  const transformer: Transformer & {
+    cancel: (reason?: unknown) => void;
+  } = {
+    start(controller) {
+      writer = controller;
+      startTime = Date.now();
 
-        intervalId = setInterval(() => {
-          if (signal?.aborted) {
-            clearInterval(intervalId);
-            return;
-          }
-          const progressEvent = `event: progress\ndata: ${JSON.stringify({
+      intervalId = setInterval(() => {
+        if (signal?.aborted) {
+          clearInterval(intervalId);
+          return;
+        }
+        const progressEvent = `event: progress\ndata: ${JSON.stringify({
+          tokens_generated: tokenCount,
+          elapsed_ms: Date.now() - startTime,
+        })}\n\n`;
+        try {
+          controller.enqueue(encoder.encode(progressEvent));
+        } catch {
+          // Stream closed
+          clearInterval(intervalId);
+        }
+      }, intervalMs);
+
+      // Clean up on abort
+      signal?.addEventListener(
+        "abort",
+        () => {
+          clearInterval(intervalId);
+        },
+        { once: true }
+      );
+    },
+
+    transform(chunk, controller) {
+      const text =
+        typeof chunk === "string"
+          ? decoder.decode() + chunk
+          : decoder.decode(chunk, { stream: true });
+      pendingLine += text;
+
+      const lastNewline = pendingLine.lastIndexOf("\n");
+      if (lastNewline >= 0) {
+        countDataLines(pendingLine.slice(0, lastNewline + 1));
+        pendingLine = pendingLine.slice(lastNewline + 1);
+      }
+      controller.enqueue(chunk);
+    },
+
+    flush() {
+      clearInterval(intervalId);
+      pendingLine += decoder.decode();
+      countDataLines(pendingLine);
+      // Final progress event
+      if (writer) {
+        try {
+          const finalEvent = `event: progress\ndata: ${JSON.stringify({
             tokens_generated: tokenCount,
             elapsed_ms: Date.now() - startTime,
+            done: true,
           })}\n\n`;
-          try {
-            controller.enqueue(encoder.encode(progressEvent));
-          } catch {
-            // Stream closed
-            clearInterval(intervalId);
-          }
-        }, intervalMs);
-
-        // Clean up on abort
-        signal?.addEventListener(
-          "abort",
-          () => {
-            clearInterval(intervalId);
-          },
-          { once: true }
-        );
-      },
-
-      transform(chunk, controller) {
-        const text =
-          typeof chunk === "string"
-            ? decoder.decode() + chunk
-            : decoder.decode(chunk, { stream: true });
-        pendingLine += text;
-
-        const lastNewline = pendingLine.lastIndexOf("\n");
-        if (lastNewline >= 0) {
-          countDataLines(pendingLine.slice(0, lastNewline + 1));
-          pendingLine = pendingLine.slice(lastNewline + 1);
+          writer.enqueue(encoder.encode(finalEvent));
+        } catch {
+          // Stream already closed
         }
-        controller.enqueue(chunk);
-      },
-
-      flush() {
-        clearInterval(intervalId);
-        pendingLine += decoder.decode();
-        countDataLines(pendingLine);
-        // Final progress event
-        if (writer) {
-          try {
-            const finalEvent = `event: progress\ndata: ${JSON.stringify({
-              tokens_generated: tokenCount,
-              elapsed_ms: Date.now() - startTime,
-              done: true,
-            })}\n\n`;
-            writer.enqueue(encoder.encode(finalEvent));
-          } catch {
-            // Stream already closed
-          }
-        }
-      },
-
-      cancel() {
-        clearInterval(intervalId);
-      },
+      }
     },
-    { highWaterMark: 16384 },
-    { highWaterMark: 16384 }
-  );
+
+    cancel() {
+      clearInterval(intervalId);
+    },
+  };
+
+  return new TransformStream(transformer, { highWaterMark: 16384 }, { highWaterMark: 16384 });
 }
 
 /**

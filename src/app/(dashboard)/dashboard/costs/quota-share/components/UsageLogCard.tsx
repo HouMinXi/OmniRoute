@@ -46,12 +46,12 @@ export default function UsageLogCard({ poolId, keyLabels }: UsageLogCardProps) {
       .then((data) => {
         if (!alive) return;
         const raw: unknown = data?.events;
-        setEvents(Array.isArray(raw) ? (raw as ConsumptionEvent[]) : [] ?? []);
+        setEvents(Array.isArray(raw) ? (raw as ConsumptionEvent[]) : []);
         setLoaded(true);
       })
       .catch(() => {
         if (alive) {
-          setEvents([] ?? []);
+          setEvents([]);
           setLoaded(true);
         }
       });

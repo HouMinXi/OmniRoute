@@ -88,7 +88,7 @@ export async function POST(request, { params }) {
       `No credentials for image provider: ${rawProvider}`
     );
   }
-  if (credentials.allRateLimited) {
+  if ("allRateLimited" in credentials && credentials.allRateLimited) {
     return unavailableResponse(
       HTTP_STATUS.RATE_LIMITED,
       `[${rawProvider}] All accounts rate limited`,
@@ -122,9 +122,14 @@ export async function POST(request, { params }) {
   }
 
   const errorPayload = toJsonErrorPayload((result as any).error, "Image generation provider error");
-  const message =
-    typeof errorPayload?.error?.message === "string"
-      ? errorPayload.error.message
-      : "Image generation provider error";
+  const errorRecord =
+    errorPayload && typeof errorPayload === "object" && "error" in errorPayload
+      ? errorPayload.error
+      : null;
+  const nested =
+    errorRecord && typeof errorRecord === "object" && "message" in errorRecord
+      ? errorRecord.message
+      : null;
+  const message = typeof nested === "string" ? nested : "Image generation provider error";
   return errorResponse((result as any).status, message);
 }

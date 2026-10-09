@@ -46,15 +46,15 @@ test("getUsageForProvider with bailian-coding-plan and consoleApiKey returns quo
     providerSpecificData: { consoleApiKey: "ck-test" },
   });
 
-  // Should NOT return "Usage API not implemented" message
-  assert.notStrictEqual(
-    result?.message,
-    "Usage API not implemented for bailian-coding-plan",
-    "Should have implemented bailian-coding-plan usage"
-  );
-
-  // Should return quota data with percentUsed
-  assert.ok(result, "Should return quota data");
+  assert.ok(result && !("message" in result));
+  if (
+    !result ||
+    !("used" in result) ||
+    !("total" in result) ||
+    !("remainingPercentage" in result)
+  ) {
+    assert.fail("expected quota usage");
+  }
   assert.ok(result.used !== undefined, "Should have used property");
   assert.ok(result.total !== undefined, "Should have total property");
   assert.ok(result.remainingPercentage !== undefined, "Should have remainingPercentage");
@@ -84,9 +84,15 @@ test("getUsageForProvider with bailian-coding-plan and only apiKey falls back to
     },
   };
 
-  let fetchCalledWith = null;
-  globalThis.fetch = async (url, options) => {
-    fetchCalledWith = options;
+  let authHeader = "";
+  globalThis.fetch = async (url: unknown, options?: RequestInit) => {
+    const headers = options?.headers;
+    authHeader =
+      headers instanceof Headers
+        ? (headers.get("Authorization") ?? "")
+        : Array.isArray(headers)
+          ? (headers.find(([key]) => key.toLowerCase() === "authorization")?.[1] ?? "")
+          : ((headers as Record<string, string> | undefined)?.Authorization ?? "");
     return new Response(JSON.stringify(mockBailianResponse), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -99,23 +105,17 @@ test("getUsageForProvider with bailian-coding-plan and only apiKey falls back to
     providerSpecificData: {},
   });
 
-  // Should NOT return "Usage API not implemented" message
-  assert.notStrictEqual(
-    result?.message,
-    "Usage API not implemented for bailian-coding-plan",
+  assert.ok(
+    result && !("message" in result),
     "Should have implemented bailian-coding-plan usage with apiKey fallback"
   );
 
   assert.ok(result, "Should return quota data via apiKey fallback");
 
-  // Verify that apiKey was used as fallback (since no consoleApiKey provided)
-  if (fetchCalledWith) {
-    const authHeader = fetchCalledWith.headers?.Authorization || "";
-    assert.ok(
-      authHeader.includes("sk-test-fallback"),
-      "Should use apiKey when consoleApiKey is not provided"
-    );
-  }
+  assert.ok(
+    authHeader.includes("sk-test-fallback"),
+    "Should use apiKey when consoleApiKey is not provided"
+  );
 });
 
 test("getUsageForProvider with bailian-coding-plan returns quota with percentUsed from most restrictive window", async () => {
@@ -155,12 +155,10 @@ test("getUsageForProvider with bailian-coding-plan returns quota with percentUse
     providerSpecificData: { consoleApiKey: "ck-test" },
   });
 
-  // Should NOT return "Usage API not implemented" message
-  assert.notStrictEqual(
-    result?.message,
-    "Usage API not implemented for bailian-coding-plan",
-    "Should have implemented bailian-coding-plan usage"
-  );
+  assert.ok(result && !("message" in result), "Should have implemented bailian-coding-plan usage");
+  if (!result || !("used" in result) || !("total" in result)) {
+    assert.fail("expected quota usage");
+  }
 
   // Should return percentUsed = 0.8 (80% from weekly, the most restrictive)
   assert.ok(result, "Should return quota data");

@@ -23,6 +23,16 @@ export interface TrayInstance {
   destroy(): void;
 }
 
+interface SystrayHandle {
+  onClick(handler: (action: { seq_id: number }) => void): void;
+  sendAction(action: {
+    type: string;
+    item: { title: string; enabled: boolean; checked: boolean; tooltip: string };
+    seq_id: number;
+  }): void;
+  kill(exitProcess: boolean): void;
+}
+
 // Minimal 16x16 OmniRoute icon as base64 PNG (fallback when file missing)
 const FALLBACK_ICON_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAAAlwSFlzAAALEwAACxMBAJqcGAAAAHpJREFUOE9jYBgFgwEwMjIy/Gdg+P8fyP4PxP8ZGBgEcBnGyMjIsICBgSEAhyH/gfgBUNN8XJoZsdkCVL8Ah+b/QPwbqvkBMvk/AwMDAzYX/GdgYAhAN+A/SICRWAMYGfFEJSMjzriEiwDR/xmIa2RkZCSqnZERb3QCAAo3KxzxbKe1AAAAAElFTkSuQmCC";
@@ -139,7 +149,7 @@ async function initUnixTray(options: TrayOptions): Promise<TrayInstance | null> 
     },
     debug: false,
     copyDir: false,
-  });
+  }) as SystrayHandle;
   systray.onClick(async (action: { seq_id: number }) => {
     switch (action.seq_id) {
       case MENU_INDEX.OPEN_DASHBOARD:

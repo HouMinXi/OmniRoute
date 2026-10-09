@@ -81,6 +81,7 @@ test("alibaba free-quota 403 does not exhaust the whole connection in combo rout
     rawModel: "qwen3.7-max-preview",
     isTokenLimitBreach: false,
     allAccountsRateLimited: false,
+    requestScopedFailure: false,
     sets: s,
     log,
     tag: "COMBO",

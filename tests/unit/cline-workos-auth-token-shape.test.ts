@@ -100,14 +100,20 @@ test("ClinePass BYOK and OAuth auth modes both carry the full protocol headers",
 });
 
 test("buildProviderHeaders uses the cline workos auth token shape", () => {
-  const headers = buildProviderHeaders("cline", { apiKey: "tok-abc" }, true);
+  const headers = buildProviderHeaders("cline", { apiKey: "tok-abc" }, true) as Record<
+    string,
+    string
+  >;
   assert.equal(headers.Authorization, "Bearer workos:tok-abc");
   assert.equal(headers["HTTP-Referer"], "https://cline.bot");
   assert.equal(headers["X-CLIENT-TYPE"], "omniroute");
 });
 
 test("buildProviderHeaders honors an accessToken for cline", () => {
-  const headers = buildProviderHeaders("cline", { accessToken: "acc-xyz" }, false);
+  const headers = buildProviderHeaders("cline", { accessToken: "acc-xyz" }, false) as Record<
+    string,
+    string
+  >;
   assert.equal(headers.Authorization, "Bearer workos:acc-xyz");
 });
 
@@ -169,7 +175,10 @@ test("DefaultExecutor clinepass authType branch matches buildClinepassHeaders() 
 
   for (const credentials of [apiKeyCredentials, oauthCredentials]) {
     const viaExecutor = executor.buildHeaders(credentials, true, {});
-    const viaDirectCall = buildClinepassHeaders(credentials, credentials.apiKey);
+    const viaDirectCall = buildClinepassHeaders(
+      credentials,
+      "apiKey" in credentials ? credentials.apiKey : undefined
+    );
     assert.equal(
       viaExecutor["Authorization"],
       viaDirectCall["Authorization"],

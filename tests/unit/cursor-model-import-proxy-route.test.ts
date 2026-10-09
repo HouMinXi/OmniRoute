@@ -12,6 +12,13 @@ const { createProviderConnection } = await import("../../src/lib/db/providers.ts
 const { setProxyForLevel } = await import("../../src/lib/db/settings.ts");
 const { proxyFetch } = await import("../../open-sse/utils/proxyFetch.ts");
 const { GET } = await import("../../src/app/api/providers/[id]/models/route.ts");
+
+function connectionId(connection: { id?: unknown } | null): string {
+  if (!connection || typeof connection.id !== "string" || connection.id.length === 0) {
+    throw new Error("provider connection is missing an id");
+  }
+  return connection.id;
+}
 const originalFetch = globalThis.fetch;
 
 test.after(() => {
@@ -45,8 +52,8 @@ test("Cursor model import sends AvailableModels through the configured proxy", a
     });
 
   const response = await GET(
-    new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
-    { params: { id: connection.id } }
+    new Request(`http://localhost/api/providers/${connectionId(connection)}/models?refresh=true`),
+    { params: { id: connectionId(connection) } }
   );
   const body = await response.json();
   assert.equal(directRequests, 0, "AvailableModels must not bypass the configured proxy");

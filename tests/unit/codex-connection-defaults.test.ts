@@ -118,10 +118,19 @@ test("provider connection persistence normalizes request defaults without droppi
   assert.equal((created.providerSpecificData as any).openaiStoreEnabled, true);
   assert.equal((created.providerSpecificData as any).workspaceId, "ws-normalize");
   assert.equal((created.providerSpecificData as any).tag, "team-z");
+  assert.ok(
+    created && typeof created === "object" && "id" in created && typeof created.id === "string"
+  );
+  const createdProviderData =
+    created.providerSpecificData &&
+    typeof created.providerSpecificData === "object" &&
+    !Array.isArray(created.providerSpecificData)
+      ? created.providerSpecificData
+      : {};
 
   const updated = await providersDb.updateProviderConnection((created as any).id, {
     providerSpecificData: {
-      ...created.providerSpecificData,
+      ...createdProviderData,
       requestDefaults: { reasoningEffort: "medium" },
     },
   });

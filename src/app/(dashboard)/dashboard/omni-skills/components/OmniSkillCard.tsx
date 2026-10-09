@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactElement } from "react";
 
 export interface OmniSkill {
   id: string;
@@ -21,7 +22,7 @@ interface OmniSkillCardProps {
   onClick: () => void;
 }
 
-export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps): JSX.Element {
+export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps): ReactElement {
   const t = useTranslations("skills");
   const effectiveMode = skill.mode || (skill.enabled ? "on" : "off");
 
@@ -87,7 +88,9 @@ export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps):
         <div className="flex items-center gap-1.5 shrink-0">
           <span className={`inline-block size-2 rounded-full ${modeDot}`} />
           <span className={`text-[10px] font-medium ${modeColor}`}>
-            {t(effectiveMode === "on" ? "onMode" : effectiveMode === "auto" ? "autoMode" : "offMode")}
+            {t(
+              effectiveMode === "on" ? "onMode" : effectiveMode === "auto" ? "autoMode" : "offMode"
+            )}
           </span>
         </div>
       </div>

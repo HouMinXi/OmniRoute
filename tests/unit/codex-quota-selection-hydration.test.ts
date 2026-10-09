@@ -14,6 +14,20 @@ const quotaSnapshotsDb = await import("../../src/lib/db/quotaSnapshots.ts");
 const quotaCache = await import("../../src/domain/quotaCache.ts");
 const auth = await import("../../src/sse/services/auth.ts");
 
+function selectedConnection(value: unknown): { connectionId: string } {
+  const connectionId =
+    value && typeof value === "object" && "connectionId" in value ? value.connectionId : undefined;
+  assert.equal(typeof connectionId, "string");
+  return value as { connectionId: string };
+}
+
+function rateLimited(value: unknown): { allRateLimited: true; retryAfter?: string } {
+  assert.ok(
+    value && typeof value === "object" && "allRateLimited" in value && value.allRateLimited === true
+  );
+  return value as { allRateLimited: true; retryAfter?: string };
+}
+
 function futureIso(ms = 60_000) {
   return new Date(Date.now() + ms).toISOString();
 }
@@ -79,8 +93,8 @@ test("Codex selection ignores hydrated Spark-only exhaustion for normal Codex mo
     "gpt-5.3-codex-spark"
   );
 
-  assert.equal(normalSelected.connectionId, connectionId);
-  assert.equal(sparkSelected.allRateLimited, true);
+  assert.equal(selectedConnection(normalSelected).connectionId, connectionId);
+  assert.equal(rateLimited(sparkSelected).allRateLimited, true);
 });
 
 test("Codex selection hydrates authoritative scoped quota metadata after restart", async () => {
@@ -131,9 +145,9 @@ test("Codex selection hydrates authoritative scoped quota metadata after restart
     "gpt-5.3-codex-spark"
   );
 
-  assert.equal(normalSelected.connectionId, connectionId);
-  assert.equal(sparkSelected.allRateLimited, true);
-  assert.equal(sparkSelected.retryAfter, sparkResetAt);
+  assert.equal(selectedConnection(normalSelected).connectionId, connectionId);
+  assert.equal(rateLimited(sparkSelected).allRateLimited, true);
+  assert.equal(rateLimited(sparkSelected).retryAfter, sparkResetAt);
   assert.equal(
     quotaCache.getQuotaWindowStatus(connectionId, "session", 100)?.reachedThreshold,
     false
@@ -182,6 +196,6 @@ test("legacy Codex quota metadata hydrates only its embedded child scope", async
     "gpt-5.3-codex-spark"
   );
 
-  assert.equal(normalSelected.connectionId, connectionId);
-  assert.equal(sparkSelected.allRateLimited, true);
+  assert.equal(selectedConnection(normalSelected).connectionId, connectionId);
+  assert.equal(rateLimited(sparkSelected).allRateLimited, true);
 });

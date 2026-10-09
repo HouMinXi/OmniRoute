@@ -14,6 +14,22 @@ import {
   encodeUInt32Field,
 } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
 const command = "gcc --version";
 const payload = encodeMessage(2, [
   encodeUInt32Field(1, 8),
@@ -24,9 +40,9 @@ const payload = encodeMessage(2, [
 function shellResultField(frame: Buffer) {
   const outer = decodeFields(frame.subarray(5)).find((field) => field.fieldNumber === 2);
   assert.ok(outer, "AgentClientMessage.exec_client_message");
-  const result = decodeFields(outer.bytes).find((field) => field.fieldNumber === 55);
+  const result = decodeFields(lenBytes(outer)).find((field) => field.fieldNumber === 55);
   assert.ok(result, "MiniSweAgentBashResult uses ExecClientMessage field 55");
-  return decodeFields(result.bytes);
+  return decodeFields(lenBytes(result));
 }
 
 test("mini-SWE bash field 52 bridges to declared bash and returns ShellResult on field 55", () => {
@@ -65,9 +81,7 @@ test("mini-SWE bash field 52 bridges to declared bash and returns ShellResult on
   const success = shellResultField(written[0]).find((field) => field.fieldNumber === 1);
   assert.ok(success);
   assert.equal(
-    decodeFields(success.bytes)
-      .find((field) => field.fieldNumber === 5)
-      ?.bytes.toString(),
+    fieldText(decodeFields(lenBytes(success)).find((field) => field.fieldNumber === 5)),
     "gcc (GCC) 13.3"
   );
   manager.close(session);

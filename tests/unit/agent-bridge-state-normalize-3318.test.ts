@@ -1,9 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { normalizeAgentBridgeState, DEFAULT_AGENT_BRIDGE_STATE } = await import(
-  "../../src/app/(dashboard)/dashboard/tools/agent-bridge/normalizeState.ts"
-);
+const { normalizeAgentBridgeState, DEFAULT_AGENT_BRIDGE_STATE } =
+  await import("../../src/app/(dashboard)/dashboard/tools/agent-bridge/normalizeState.ts");
 
 // #3318: the /api/tools/agent-bridge/state route returns `{ server, agents }`,
 // but the page/components read `{ serverState, agentStates, bypassPatterns,
@@ -14,7 +13,7 @@ const { normalizeAgentBridgeState, DEFAULT_AGENT_BRIDGE_STATE } = await import(
 // known server fields through.
 
 test("the raw /state route shape lacks the keys the page reads (documents the bug)", () => {
-  const routeShape = {
+  const routeShape: { server: object; agents: object[]; serverState?: unknown } = {
     server: { running: true, pid: 123, dnsConfigured: true, certExists: true },
     agents: [{ id: "claude-code", name: "Claude Code", hosts: [], viability: "ok" }],
   };
@@ -56,7 +55,11 @@ test("normalizeAgentBridgeState maps orphanedStateDetected + dnsConfigured from 
     agents: [],
   };
   const result = normalizeAgentBridgeState(routeShape);
-  assert.equal(result.serverState.orphanedStateDetected, true, "orphanedStateDetected maps through");
+  assert.equal(
+    result.serverState.orphanedStateDetected,
+    true,
+    "orphanedStateDetected maps through"
+  );
   assert.equal(result.serverState.dnsConfigured, true, "dnsConfigured maps through");
 });
 

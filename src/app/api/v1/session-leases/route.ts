@@ -26,7 +26,7 @@ import {
 import { getModelInfo } from "@/sse/services/model";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 
-const action = <T extends string>(name: T, shape: z.ZodRawShape) =>
+const action = <T extends string, S extends z.ZodRawShape>(name: T, shape: S) =>
   z.object({ action: z.literal(name), ...shape });
 const generation = z.number().int().positive().safe();
 const actionSchema = z.discriminatedUnion("action", [
@@ -143,7 +143,27 @@ export async function POST(request: Request): Promise<Response> {
         "No eligible connection satisfies the managed key policy"
       );
     }
-    const failure = buildManagedLeaseSelectionErrorResponse(selection);
+    const failure = buildManagedLeaseSelectionErrorResponse({
+      eligibleCount:
+        "eligibleCount" in selection && typeof selection.eligibleCount === "number"
+          ? selection.eligibleCount
+          : undefined,
+      freeCount:
+        "freeCount" in selection && typeof selection.freeCount === "number"
+          ? selection.freeCount
+          : undefined,
+      leaseConnectionMismatch:
+        "leaseConnectionMismatch" in selection && selection.leaseConnectionMismatch === true,
+      leaseFenceStale: "leaseFenceStale" in selection && selection.leaseFenceStale === true,
+      leaseRequired: "leaseRequired" in selection && selection.leaseRequired === true,
+      retryAfter:
+        "retryAfter" in selection && typeof selection.retryAfter === "string"
+          ? selection.retryAfter
+          : undefined,
+      waitingForCapacity:
+        "waitingForCapacity" in selection && selection.waitingForCapacity === true,
+      allRateLimited: "allRateLimited" in selection && selection.allRateLimited === true,
+    });
     if (failure) {
       for (const [name, value] of Object.entries(CORS_HEADERS)) failure.headers.set(name, value);
       return failure;

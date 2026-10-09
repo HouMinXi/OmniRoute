@@ -27,6 +27,7 @@
 
 import { deleteProxyById, listProxies, updateProxy } from "@/lib/db/proxies";
 import { exportProxyLogsSince } from "@/lib/db/proxyLogs";
+import type { ProxyRegistryRecord } from "@/lib/db/proxies/types";
 import { isProxyLogIncludeIps } from "@/lib/proxyLogger";
 import {
   getRecentEgressSharingSummary,
@@ -45,6 +46,7 @@ import {
   classifyProbeError,
   classifyProbeStatus,
   decideProxyHealthAction,
+  type CrossProbeResult,
   type ProxyProbeOutcome,
 } from "./decision.ts";
 import {
@@ -181,8 +183,8 @@ interface CollectedProbe {
 
 /** Phase 1 of the sweep: probe every proxy in batches, decide nothing yet. */
 async function collectProbeResults(
-  proxies: Array<{ id: string }>,
-  probe: (proxy: { id: string }) => Promise<CollectedProbe>
+  proxies: ProxyRegistryRecord[],
+  probe: (proxy: ProxyRegistryRecord) => Promise<CollectedProbe>
 ): Promise<CollectedProbe[]> {
   const collected: CollectedProbe[] = [];
   for (let i = 0; i < proxies.length; i += CONCURRENCY) {
@@ -199,9 +201,9 @@ async function collectProbeResults(
 }
 
 async function probeBatchMember(
-  proxy: { id: string },
+  proxy: ProxyRegistryRecord,
   indexInBatch: number,
-  probe: (proxy: { id: string }) => Promise<CollectedProbe>
+  probe: (proxy: ProxyRegistryRecord) => Promise<CollectedProbe>
 ): Promise<CollectedProbe> {
   // Spread the departures: without this the whole batch leaves at the same tick and a
   // shared egress IP hits the target with CONCURRENCY simultaneous requests.
@@ -297,7 +299,7 @@ export async function __decideOneResultForTesting(
 
 async function decideOneResult(
   raw: CollectedProbe,
-  final: CollectedProbe,
+  final: CrossProbeResult,
   wasPromoted: boolean,
   ctx: {
     failureMap: Map<string, number>;
@@ -489,15 +491,7 @@ function probeErrorCode(error: unknown): string | null {
   return null;
 }
 
-async function testOneProxy(proxy: {
-  id: string;
-  type: string;
-  host: string;
-  port: number;
-  username?: string;
-  password?: string;
-  family?: string;
-}): Promise<ProxyProbeResult> {
+async function testOneProxy(proxy: ProxyRegistryRecord): Promise<ProxyProbeResult> {
   let proxyUrl: string | null;
   try {
     proxyUrl = proxyConfigToUrl(proxy);

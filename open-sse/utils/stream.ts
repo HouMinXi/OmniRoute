@@ -83,10 +83,7 @@ import {
   hasUnsupportedReasoningSignal,
 } from "./reasoningFields.ts";
 import { applyThinkTag, flushThink, initThinkState } from "./thinkTagParser.ts";
-import {
-  caseInsensitiveToolNameLookup,
-  restoreOpenAIToolNames,
-} from "../translator/helpers/toolCallHelper.ts";
+import { restoreOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
 import { restoreClaudeToolName } from "../services/claudeCodeToolRemapper.ts";
 import { normalizeFinalOpenAIStreamChunk } from "./openAIStreamChunk.ts";
 import { collectClaudeDelta } from "./streamClaudeDelta.ts";
@@ -1377,1745 +1374,1389 @@ export function createSSEStream(options: StreamOptions = {}) {
     return true;
   };
 
-  const sseStream = new TransformStream(
-    {
-      start(controller) {
-        // Start idle watchdog — checks every 10s if provider has stopped sending
-        if (STREAM_IDLE_TIMEOUT_MS > 0) {
-          idleTimer = setInterval(() => {
-            if (!streamTimedOut && Date.now() - lastChunkTime > STREAM_IDLE_TIMEOUT_MS) {
-              streamTimedOut = true;
-              clearIdleTimer();
-              const timeoutMsg = `[STREAM] Idle timeout: no data from ${provider || "provider"} for ${STREAM_IDLE_TIMEOUT_MS}ms (model: ${model || "unknown"})`;
-              console.warn(timeoutMsg);
-              let failureHandled = false;
-              if (onFailure) {
-                try {
-                  timing.markInterrupted();
-                  failureHandled =
-                    onFailure({
-                      status: HTTP_STATUS.GATEWAY_TIMEOUT,
-                      message: timeoutMsg,
-                      code: "stream_idle_timeout",
-                      type: "timeout_error",
-                    }) === true;
-                } catch (e) {
-                  console.debug(`[STREAM] onFailure callback error (idle_timeout):`, e);
-                }
-              }
-              if (!failureHandled) {
-                clearPendingRequestFromStream();
-              }
-              appendRequestLog({
-                model,
-                provider,
-                connectionId,
-                status: `FAILED ${HTTP_STATUS.GATEWAY_TIMEOUT}`,
-              }).catch(() => {});
-              const timeoutError = new Error(timeoutMsg);
-              timeoutError.name = "StreamIdleTimeoutError";
-              controller.error(markPendingRequestCleared(timeoutError));
-            }
-          }, 10_000);
-        }
-      },
-
-      transform(chunk, controller) {
-        if (streamTimedOut) return;
-        const now = Date.now();
-        timing.markByte();
-        lastChunkTime = now;
-        const text = decoder.decode(chunk, { stream: true });
-        buffer += text;
-        reqLogger?.appendProviderChunk?.(text);
-        const nlIdx = buffer.lastIndexOf("\n");
-        const lines = nlIdx >= 0 ? buffer.slice(0, nlIdx).split("\n") : [];
-        if (nlIdx >= 0) buffer = buffer.slice(nlIdx + 1);
-
-        for (const line of multilineSseDataLineNormalizer.normalize(lines)) {
-          const trimmed = line.trim();
-
-          // Passthrough mode: normalize and forward
-          if (mode === STREAM_MODE.PASSTHROUGH) {
-            let output: string;
-            let injectedUsage = false;
-            let clientPayload: unknown = null;
-            let failurePayload: StreamFailurePayload | null = null;
-            let publicFailureMessage: string | null = null;
-
-            if (skipPassthroughEvent) {
-              if (!trimmed) {
-                skipPassthroughEvent = false;
-                clearPendingPassthroughEvent();
-              }
-              continue;
-            }
-
-            // Drop whole keepalive event blocks — strict OpenAI-compatible SDKs
-            // try to JSON.parse empty keepalive payloads and crash.
-            if (/^event:\s*keepalive\b/i.test(trimmed)) {
-              skipPassthroughEvent = true;
-              clearPendingPassthroughEvent();
-              continue;
-            }
-
-            if (/^event:/i.test(trimmed)) {
-              const eventType = trimmed.replace(/^event:\s*/i, "");
-              if (
-                shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, {
-                  type: eventType,
-                })
-              ) {
-                emitClaudeEmptyStreamErrorAndAbort(controller);
-                return;
-              }
-
-              passthroughEventPrefix.remember(line);
-              continue;
-            }
-
-            if (/^(?::|id:|retry:)/i.test(trimmed)) {
-              passthroughEventPrefix.remember(line);
-              continue;
-            }
-
-            if (!trimmed) {
-              const pendingOutput = passthroughEventPrefix.flush();
-              if (pendingOutput) {
-                reqLogger?.appendConvertedChunk?.(pendingOutput);
-                forward(controller, encoder.encode(pendingOutput));
-              }
-              clearPendingPassthroughEvent();
-              continue;
-            }
-
-            if (!trimmed.startsWith("data:")) {
-              passthroughEventPrefix.remember(line);
-              continue;
-            }
-
-            const parsedPassthroughData = trimmed.startsWith("data:")
-              ? parseSSEDataPayload(trimmed.slice(5), {
-                  eventType: passthroughEventPrefix.eventType(),
-                })
-              : null;
-
-            // #5786 — drop replayed Responses-API events (a re-sent event carrying an
-            // already-seen sequence_number) so their deltas are not forwarded twice.
-            if (
-              parsedPassthroughData &&
-              typeof parsedPassthroughData.type === "string" &&
-              parsedPassthroughData.type.startsWith("response.") &&
-              isDuplicateResponsesSequence(parsedPassthroughData.sequence_number)
-            ) {
-              clearPendingPassthroughEvent();
-              continue;
-            }
-
-            if (trimmed.startsWith("data:")) {
-              const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
-              if (providerPayload) {
-                providerPayloadCollector.push(providerPayload);
-                if ((providerPayload as { done?: unknown }).done === true) {
-                  continue;
-                }
-              }
-            }
-
-            if (trimmed.startsWith("data:") && trimmed.slice(5).trim() === "[DONE]") {
-              continue;
-            }
-
-            if (trimmed.startsWith("data:") && trimmed.slice(5).trim() !== "[DONE]") {
+  const sseTransformer: Transformer & {
+    cancel: (reason?: unknown) => void;
+  } = {
+    start(controller) {
+      // Start idle watchdog — checks every 10s if provider has stopped sending
+      if (STREAM_IDLE_TIMEOUT_MS > 0) {
+        idleTimer = setInterval(() => {
+          if (!streamTimedOut && Date.now() - lastChunkTime > STREAM_IDLE_TIMEOUT_MS) {
+            streamTimedOut = true;
+            clearIdleTimer();
+            const timeoutMsg = `[STREAM] Idle timeout: no data from ${provider || "provider"} for ${STREAM_IDLE_TIMEOUT_MS}ms (model: ${model || "unknown"})`;
+            console.warn(timeoutMsg);
+            let failureHandled = false;
+            if (onFailure) {
               try {
-                let parsed = parsedPassthroughData ?? JSON.parse(trimmed.slice(5).trim());
-                const projectedFailure = projectStreamFailureEvent(parsed);
-                if (projectedFailure) {
-                  parsed = projectedFailure.publicPayload;
-                  failurePayload = projectedFailure.internalFailure;
-                  publicFailureMessage = projectedFailure.publicMessage;
-                  output = `data: ${JSON.stringify(parsed)}\n\n`;
-                  injectedUsage = true;
-                }
+                timing.markInterrupted();
+                failureHandled =
+                  onFailure({
+                    status: HTTP_STATUS.GATEWAY_TIMEOUT,
+                    message: timeoutMsg,
+                    code: "stream_idle_timeout",
+                    type: "timeout_error",
+                  }) === true;
+              } catch (e) {
+                console.debug(`[STREAM] onFailure callback error (idle_timeout):`, e);
+              }
+            }
+            if (!failureHandled) {
+              clearPendingRequestFromStream();
+            }
+            appendRequestLog({
+              model,
+              provider,
+              connectionId,
+              status: `FAILED ${HTTP_STATUS.GATEWAY_TIMEOUT}`,
+            }).catch(() => {});
+            const timeoutError = new Error(timeoutMsg);
+            timeoutError.name = "StreamIdleTimeoutError";
+            controller.error(markPendingRequestCleared(timeoutError));
+          }
+        }, 10_000);
+      }
+    },
 
-                // Some upstream Responses-compatible providers leak an initial Chat Completions
-                // bootstrap chunk (assistant role + empty content) before emitting proper
-                // `response.*` events. That chunk is invalid on /v1/responses and breaks strict
-                // clients like OpenCode, so drop it only for Responses-native consumers.
+    transform(chunk, controller) {
+      if (streamTimedOut) return;
+      const now = Date.now();
+      timing.markByte();
+      lastChunkTime = now;
+      const text = decoder.decode(chunk, { stream: true });
+      buffer += text;
+      reqLogger?.appendProviderChunk?.(text);
+      const nlIdx = buffer.lastIndexOf("\n");
+      const lines = nlIdx >= 0 ? buffer.slice(0, nlIdx).split("\n") : [];
+      if (nlIdx >= 0) buffer = buffer.slice(nlIdx + 1);
 
-                const isEmptyAssistantBootstrapChunkForResponsesClient =
-                  clientExpectsResponsesStream &&
-                  parsed?.object === "chat.completion.chunk" &&
-                  Array.isArray(parsed?.choices) &&
-                  parsed.choices.length > 0 &&
-                  parsed.choices.every((choice) => {
-                    const candidate = choice && typeof choice === "object" ? choice : {};
-                    const delta =
-                      candidate.delta && typeof candidate.delta === "object"
-                        ? candidate.delta
-                        : null;
+      for (const line of multilineSseDataLineNormalizer.normalize(lines)) {
+        const trimmed = line.trim();
 
-                    if (!delta || delta.role !== "assistant") return false;
-                    if (hasActiveDeltaValue(delta.content)) return false;
-                    if (candidate.finish_reason !== null && candidate.finish_reason !== undefined) {
-                      return false;
-                    }
+        // Passthrough mode: normalize and forward
+        if (mode === STREAM_MODE.PASSTHROUGH) {
+          let output: string;
+          let injectedUsage = false;
+          let clientPayload: unknown = null;
+          let failurePayload: StreamFailurePayload | null = null;
+          let publicFailureMessage: string | null = null;
 
-                    const { role: _role, content: _content, ...restDelta } = delta;
-                    return !hasActiveDeltaValue(restDelta);
-                  });
+          if (skipPassthroughEvent) {
+            if (!trimmed) {
+              skipPassthroughEvent = false;
+              clearPendingPassthroughEvent();
+            }
+            continue;
+          }
 
-                if (isEmptyAssistantBootstrapChunkForResponsesClient) {
-                  continue;
-                }
+          // Drop whole keepalive event blocks — strict OpenAI-compatible SDKs
+          // try to JSON.parse empty keepalive payloads and crash.
+          if (/^event:\s*keepalive\b/i.test(trimmed)) {
+            skipPassthroughEvent = true;
+            clearPendingPassthroughEvent();
+            continue;
+          }
 
-                // Detect Responses SSE payloads (have a `type` field like "response.created",
-                // "response.output_item.added", etc.) and skip Chat Completions-specific
-                // sanitization to avoid corrupting the stream for Responses-native clients.
-                const isResponsesSSE =
-                  parsed.type &&
-                  typeof parsed.type === "string" &&
-                  parsed.type.startsWith("response.");
+          if (/^event:/i.test(trimmed)) {
+            const eventType = trimmed.replace(/^event:\s*/i, "");
+            if (
+              shouldInjectClaudeEmptyResponseBeforeCurrentEvent(claudeEmptyResponseLifecycle, {
+                type: eventType,
+              })
+            ) {
+              emitClaudeEmptyStreamErrorAndAbort(controller);
+              return;
+            }
 
-                // Detect Claude SSE payloads. Includes "ping" and "error" to ensure
-                // they bypass the Chat Completions sanitization path which would
-                // incorrectly process or drop them.
-                const isClaudeSSE =
-                  parsed.type &&
-                  typeof parsed.type === "string" &&
-                  (parsed.type.startsWith("message") ||
-                    parsed.type.startsWith("content_block") ||
-                    parsed.type === "ping" ||
-                    parsed.type === "error");
-                if (sanitizeUsagePayloadForRequest(parsed, body, clientResponseFormat)) {
-                  output = `data: ${JSON.stringify(parsed)}\n\n`;
-                  injectedUsage = true;
-                }
-                if (isResponsesSSE) {
-                  // #6199/#6561 — statefully drop internal commentary-phase output (see
-                  // ./responsesCommentaryDrop.ts) and clear the buffered `event:` line
-                  // for the same frame, or it flushes alone as an event-only SSE frame.
-                  if (
-                    shouldDropResponsesCommentary &&
-                    shouldDropResponsesCommentaryEvent(
-                      parsed as JsonRecord,
-                      passthroughResponsesCommentaryItemIds,
-                      passthroughResponsesCommentaryIndexes
-                    )
-                  ) {
-                    clearPendingPassthroughEvent();
-                    continue;
-                  }
+            passthroughEventPrefix.remember(line);
+            continue;
+          }
 
-                  const responsesIdsNormalized = normalizeResponsesSseIds(parsed as JsonRecord);
-                  const parsedResponse =
-                    parsed.response &&
-                    typeof parsed.response === "object" &&
-                    !Array.isArray(parsed.response)
-                      ? (parsed.response as JsonRecord)
-                      : null;
-                  const responseId =
-                    (parsedResponse ? stringifyIdValue(parsedResponse.id) : null) ||
-                    stringifyIdValue(parsed.response_id);
-                  if (responseId) {
-                    passthroughResponsesId = responseId;
-                  }
-                  // Responses SSE: only extract usage, forward payload as-is
-                  const extracted = extractUsage(parsed);
-                  if (extracted) {
-                    usage = extracted;
-                  }
-                  // Keep generic Responses deltas for fallback usage estimates,
-                  // but only visible text deltas may become assistant content in
-                  // logs/replay payloads.
-                  if (typeof parsed.delta === "string") {
-                    totalContentLength += parsed.delta.length;
-                  }
-                  if (
-                    parsed.type === "response.output_text.delta" &&
-                    typeof parsed.delta === "string"
-                  ) {
-                    const incomingDelta = parsed.delta;
-                    const bufferedCandidate =
-                      passthroughBufferedTextualToolCallContent + incomingDelta;
-                    if (
-                      passthroughBufferedTextualToolCallContent ||
-                      containsTextualToolCallCandidate(incomingDelta)
-                    ) {
-                      const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
-                      if (parsedCandidate?.kind === "complete") {
-                        const collectedToolCall = collectPassthroughTextualToolCall(
-                          bufferedCandidate,
-                          passthroughToolCalls,
-                          allowedToolNames
-                        );
-                        if (collectedToolCall) {
-                          passthroughHasToolCalls = true;
-                          const responseToolCallEvents =
-                            buildResponsesFunctionCallEvents(collectedToolCall);
-                          output = formatSSEDataEvents(responseToolCallEvents);
-                          for (const event of responseToolCallEvents) {
-                            clientPayloadCollector.push(event);
-                          }
-                          reqLogger?.appendConvertedChunk?.(output);
-                          forward(controller, encoder.encode(output));
-                          injectedUsage = true;
-                        } else {
-                          output = `data: ${JSON.stringify(parsed)}\n\n`;
-                          injectedUsage = true;
-                        }
-                        passthroughBufferedTextualToolCallContent = "";
-                        parsed.delta = "";
-                      } else if (parsedCandidate?.kind === "partial") {
-                        passthroughBufferedTextualToolCallContent = appendBoundedText(
-                          passthroughBufferedTextualToolCallContent,
-                          incomingDelta
-                        );
-                        parsed.delta = "";
-                        output = `data: ${JSON.stringify(parsed)}\n\n`;
-                        injectedUsage = true;
-                      } else {
-                        if (passthroughBufferedTextualToolCallContent) {
-                          parsed.delta = passthroughBufferedTextualToolCallContent + incomingDelta;
-                          output = `data: ${JSON.stringify(parsed)}\n\n`;
-                          injectedUsage = true;
-                        }
-                        passthroughAccumulatedContent = appendBoundedText(
-                          passthroughAccumulatedContent,
-                          passthroughBufferedTextualToolCallContent + incomingDelta
-                        );
-                        passthroughBufferedTextualToolCallContent = "";
-                      }
-                    } else {
-                      passthroughAccumulatedContent = appendBoundedText(
-                        passthroughAccumulatedContent,
-                        incomingDelta
-                      );
-                    }
-                  }
-                  if (
-                    parsed.type === "response.reasoning_summary_text.delta" ||
-                    parsed.type === "response.reasoning_summary_text.done" ||
-                    parsed.type === "response.reasoning_summary_part.done"
-                  ) {
-                    const reasoningKey = getResponsesReasoningKey(parsed);
-                    if (reasoningKey) {
-                      passthroughResponsesReasoningSummarySeen.add(reasoningKey);
-                    }
-                  }
-                  // Track a reasoning opening (paired at `done` for the duration).
-                  if (
-                    parsed.type === "response.output_item.added" &&
-                    parsed.item?.type === "reasoning"
-                  )
-                    reasoningObserver.note(parsed, Date.now());
-                  if (
-                    parsed.type === "response.output_item.added" &&
-                    parsed.item?.type === "function_call"
-                  ) {
-                    const item =
-                      parsed.item && typeof parsed.item === "object" && !Array.isArray(parsed.item)
-                        ? { ...(parsed.item as JsonRecord) }
-                        : null;
-                    const pendingKey =
-                      item && typeof item.id === "string"
-                        ? item.id
-                        : item && typeof item.call_id === "string"
-                          ? item.call_id
-                          : null;
-                    if (item && pendingKey) {
-                      if (typeof item.arguments !== "string") {
-                        item.arguments = "";
-                      }
-                      passthroughResponsesPendingFunctionCalls.set(pendingKey, item);
-                      passthroughResponsesCurrentFunctionCallKey = pendingKey;
-                    }
-                  }
-                  if (parsed.type === "response.function_call_arguments.delta") {
-                    const pendingKey =
-                      typeof parsed.item_id === "string"
-                        ? parsed.item_id
-                        : passthroughResponsesCurrentFunctionCallKey;
-                    const pending = pendingKey
-                      ? passthroughResponsesPendingFunctionCalls.get(pendingKey)
-                      : undefined;
-                    if (pending && typeof parsed.delta === "string") {
-                      const previousArgs =
-                        typeof pending.arguments === "string" ? pending.arguments : "";
-                      pending.arguments = previousArgs + parsed.delta;
-                    }
-                  }
-                  if (parsed.type === "response.function_call_arguments.done") {
-                    const pendingKey =
-                      typeof parsed.item_id === "string"
-                        ? parsed.item_id
-                        : passthroughResponsesCurrentFunctionCallKey;
-                    const pending = pendingKey
-                      ? passthroughResponsesPendingFunctionCalls.get(pendingKey)
-                      : undefined;
-                    if (pending) {
-                      if (typeof parsed.arguments === "string") {
-                        pending.arguments = parsed.arguments;
-                      }
-                      pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [pending]);
-                    }
-                  }
-                  // Capture each completed output item so the final
-                  // response.completed snapshot can be backfilled when upstream
-                  // returns an empty `output` (happens with store: false).
-                  if (parsed.type === "response.output_item.done" && parsed.item) {
-                    emitSyntheticResponsesReasoningSummary(controller, parsed);
-                    pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [parsed.item]);
-                    // L12 replay already filtered above via isDuplicateResponsesSequence.
-                    reasoningObserver.note(parsed, Date.now());
-                    if (parsed.item?.type === "function_call") {
-                      const pendingKey =
-                        typeof parsed.item.id === "string"
-                          ? parsed.item.id
-                          : typeof parsed.item.call_id === "string"
-                            ? parsed.item.call_id
-                            : null;
-                      if (pendingKey) {
-                        passthroughResponsesPendingFunctionCalls.delete(pendingKey);
-                        if (passthroughResponsesCurrentFunctionCallKey === pendingKey) {
-                          passthroughResponsesCurrentFunctionCallKey = null;
-                        }
-                      }
-                    }
-                  }
-                  let responsesCommentaryStrippedFromCompleted = false;
-                  if (
-                    parsed.type === "response.completed" &&
-                    Array.isArray(parsed.response?.output) &&
-                    parsed.response.output.length > 0
-                  ) {
-                    // #10156 — an upstream may echo a `phase:"commentary"` item back
-                    // inside a non-empty terminal `output` array even though its live
-                    // SSE frames were already dropped above. Keep both representations
-                    // consistent by applying the same drop here.
-                    if (shouldDropResponsesCommentary) {
-                      const { items, changed } = filterResponsesCommentaryFromItems(
-                        parsed.response.output,
-                        isResponsesCommentaryMessageItem
-                      );
-                      if (changed) {
-                        parsed.response.output = items;
-                        responsesCommentaryStrippedFromCompleted = true;
-                      }
-                    }
-                    pushUniqueResponsesOutputItems(
-                      passthroughResponsesOutputItems,
-                      parsed.response.output
-                    );
-                  }
-                  // #7936 - restore `namespace` + `name` on passthrough Responses
-                  // function_call items. The restoration mutates `parsed`, so a
-                  // real change must be re-serialized; otherwise the client still
-                  // receives the flattened wire name.
-                  const responsesIdentityRestored =
-                    (parsed.type === "response.output_item.added" ||
-                      parsed.type === "response.output_item.done" ||
-                      parsed.type === "response.completed") &&
-                    restoreResponsesPassthroughFunctionCallIdentity(
-                      parsed as JsonRecord,
-                      requestToolIdentityMap
-                    );
-                  if (
-                    parsed.type === "response.completed" &&
-                    passthroughResponsesPendingFunctionCalls.size > 0
-                  ) {
-                    pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [
-                      ...passthroughResponsesPendingFunctionCalls.values(),
-                    ]);
-                    passthroughResponsesPendingFunctionCalls.clear();
-                    passthroughResponsesCurrentFunctionCallKey = null;
-                  }
-                  // Two transport-level fixes for Responses passthrough:
-                  //   1) Strip echoed `instructions` + `tools` from lifecycle
-                  //      events — they can balloon a single SSE event past
-                  //      100 KB and break parsers (e.g. GitHub Copilot CLI).
-                  //   2) Backfill `response.completed.response.output` when
-                  //      upstream sent it empty (store: false) — some clients
-                  //      build their tool-call list from that snapshot rather
-                  //      than from per-item events.
-                  const textualToolCallBackfilled =
-                    parsed.type === "response.completed" && passthroughToolCalls.size > 0;
-                  if (textualToolCallBackfilled) {
-                    parsed = toResponsesCompletedWithToolCalls(parsed as JsonRecord, [
-                      ...passthroughToolCalls.values(),
-                    ]) as typeof parsed;
-                  }
-                  const stripped = stripResponsesLifecycleEcho(parsed);
-                  // Belt-and-suspenders for #10156: filter the backfill buffer itself
-                  // before it can seed an empty `response.completed.response.output`,
-                  // in case a future code path pushes a commentary item into it
-                  // without going through the response.completed branch above.
-                  const backfillCandidates = shouldDropResponsesCommentary
-                    ? filterResponsesCommentaryFromItems(
-                        passthroughResponsesOutputItems,
-                        isResponsesCommentaryMessageItem
-                      ).items
-                    : passthroughResponsesOutputItems;
-                  const backfilled = backfillResponsesCompletedOutput(parsed, backfillCandidates);
-                  const usageNormalized = normalizeUsage(parsed);
-                  if (
-                    stripped ||
-                    backfilled ||
-                    textualToolCallBackfilled ||
-                    responsesIdsNormalized ||
-                    usageNormalized ||
-                    responsesCommentaryStrippedFromCompleted ||
-                    responsesIdentityRestored
-                  ) {
-                    output = `data: ${JSON.stringify(parsed)}\n\n`;
-                    injectedUsage = true;
-                  }
-                  // Passthrough mode never pushes a Responses SSE event into
-                  // clientPayloadCollector on the common (non-tool-call, non-
-                  // commentary) path -- only the textual-tool-call conversion
-                  // branch above pushes its own synthesized events. Push just
-                  // the fully-processed terminal `response.completed` (after
-                  // the backfill/strip/tool-call-merge above, so it matches
-                  // exactly what the client receives): that alone is enough
-                  // for buildStreamSummaryFromEvents' reducer to recover a
-                  // real Responses `id` + `output` for previous_response_id
-                  // continuation storage (src/lib/db/responsesContinuationStore.ts).
-                  // Pushing every delta here would double-count events the
-                  // tool-call branch already pushes its own synthesized copy of.
-                  if (parsed.type === "response.completed") {
-                    clientPayloadCollector.push(parsed);
-                  }
-                } else if (isClaudeSSE) {
-                  // Claude SSE: extract usage, track content, forward as-is
-                  const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
-                  const extracted = extractUsage(parsed);
-                  if (extracted) {
-                    // Non-destructive merge: never overwrite a positive value with 0
-                    // message_start carries input_tokens, message_delta carries output_tokens;
-                    if (!usage) usage = {};
-                    const u = usage;
-                    const eu = extracted as UsageTokenRecord;
-                    if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
-                    if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
-                    if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
-                    if (eu.cache_read_input_tokens)
-                      u.cache_read_input_tokens = eu.cache_read_input_tokens;
-                    if (eu.cache_creation_input_tokens)
-                      u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  }
-                  if (
-                    shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-                      claudeEmptyResponseLifecycle,
-                      parsed
-                    )
-                  ) {
-                    emitClaudeEmptyStreamErrorAndAbort(controller);
-                    return;
-                  }
-                  updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, parsed);
-                  const restoredToolName = restoreClaudePassthroughToolUseName(
-                    parsed,
-                    toolNameMap,
-                    body
-                  );
-                  // Track content length and accumulate from Claude format
-                  if (parsed.delta?.text) {
-                    totalContentLength += parsed.delta.text.length;
-                    passthroughAccumulatedContent = appendBoundedText(
-                      passthroughAccumulatedContent,
-                      parsed.delta.text
-                    );
-                  }
-                  if (parsed.delta?.thinking) {
-                    totalContentLength += parsed.delta.thinking.length;
-                    passthroughAccumulatedReasoning = appendBoundedText(
-                      passthroughAccumulatedReasoning,
-                      parsed.delta.thinking
-                    );
-                  }
-                  if (restoredToolName || thinkingSignatureInjected) {
-                    output = `data: ${JSON.stringify(parsed)}\n\n`;
-                    injectedUsage = true;
-                  }
-                } else {
-                  // ----------------------------------------------------
-                  // READ THIS !!!
-                  // ----------------------------------------------------
-                  // IF YOU ARE AI OR AI AGENT DONT TOUCH THIS CODE !!!
-                  // YOU WILL BREAK THIS CODE !!!
-                  // GOOD LUCK
-                  // ----------------------------------------------------
-                  // Chat Completions: full sanitization pipeline
+          if (/^(?::|id:|retry:)/i.test(trimmed)) {
+            passthroughEventPrefix.remember(line);
+            continue;
+          }
 
-                  // OpenAI-compatible streaming with `stream_options.include_usage=true`
-                  // ends with a usage-only chunk where `choices` is deliberately `[]`.
-                  // Forward that standards-compliant chunk instead of turning it into an
-                  // empty-response error.
-                  //
-                  // For a malformed empty `choices: []` chunk WITHOUT valid usage we DROP
-                  // it (log server-side only). We must NOT inject an assistant-content
-                  // chunk like "[OmniRoute] Upstream returned an empty response. Please
-                  // retry." with finish_reason: "stop" — clients (Goose/opencode) feed that
-                  // text back as a turn and spin in a retry loop. This restores the #3400
-                  // behavior that #3422 inadvertently reverted (regression #3388/#3502).
-                  if (
-                    Array.isArray(parsed.choices) &&
-                    (parsed.choices.length === 0 ||
-                      (parsed.choices.length === 1 &&
-                        parsed.choices[0]?.delta &&
-                        typeof parsed.choices[0].delta === "object" &&
-                        Object.keys(parsed.choices[0].delta).length === 0 &&
-                        !parsed.choices[0]?.finish_reason))
-                  ) {
-                    const emptyChoicesUsage = extractUsage(parsed) ?? parsed.usage;
-                    if (hasValidUsage(emptyChoicesUsage) && !passthroughForwardedUsageSummary) {
-                      usage = resolveTrailingUsageSummary(
-                        emptyChoicesUsage,
-                        usage,
-                        body,
-                        totalContentLength,
-                        sourceFormat || FORMATS.OPENAI
-                      );
-                      passthroughForwardedUsage = true;
-                      passthroughForwardedUsageSummary = true;
-                      output = `data: ${JSON.stringify(parsed)}\n\n`;
-                      injectedUsage = true;
-                      clientPayload = parsed;
-                      clientPayloadCollector.push(clientPayload);
-                      reqLogger?.appendConvertedChunk?.(output);
-                      forward(controller, encoder.encode(output));
-                      continue;
-                    }
+          if (!trimmed) {
+            const pendingOutput = passthroughEventPrefix.flush();
+            if (pendingOutput) {
+              reqLogger?.appendConvertedChunk?.(pendingOutput);
+              forward(controller, encoder.encode(pendingOutput));
+            }
+            clearPendingPassthroughEvent();
+            continue;
+          }
 
-                    // If we already forwarded usage, drop any trailing empty-choices valid usage
-                    if (passthroughForwardedUsageSummary && hasValidUsage(emptyChoicesUsage)) {
-                      continue;
-                    }
+          if (!trimmed.startsWith("data:")) {
+            passthroughEventPrefix.remember(line);
+            continue;
+          }
 
-                    console.warn(
-                      `[STREAM] Upstream returned empty choices array (${provider || "provider"}:${model || "unknown"}) — dropping chunk`
-                    );
-                    continue;
-                  }
+          const parsedPassthroughData = trimmed.startsWith("data:")
+            ? parseSSEDataPayload(trimmed.slice(5), {
+                eventType: passthroughEventPrefix.eventType(),
+              })
+            : null;
 
-                  const hadNonStringToolCallId = Array.isArray(parsed.choices)
-                    ? parsed.choices.some(
-                        (choice) =>
-                          Array.isArray(choice?.delta?.tool_calls) &&
-                          choice.delta.tool_calls.some(
-                            (tc) => tc?.id != null && typeof tc.id !== "string"
-                          )
-                      )
-                    : false;
-                  const hadNonStringTopLevelId =
-                    parsed?.id != null && typeof parsed.id !== "string";
-                  const rawDelta = parsed.choices?.[0]?.delta;
-                  const hadReasoningAlias = hasUnsupportedReasoningSignal(rawDelta);
-                  const hadUpstreamReasoningContent =
-                    typeof rawDelta?.reasoning_content === "string" &&
-                    rawDelta.reasoning_content.length > 0;
-                  // Typed content-part arrays are folded into strings by
-                  // sanitizeStreamingChunk, so the raw line must not be forwarded.
-                  const hadArrayContent = Array.isArray(rawDelta?.content);
+          // #5786 — drop replayed Responses-API events (a re-sent event carrying an
+          // already-seen sequence_number) so their deltas are not forwarded twice.
+          if (
+            parsedPassthroughData &&
+            typeof parsedPassthroughData.type === "string" &&
+            parsedPassthroughData.type.startsWith("response.") &&
+            isDuplicateResponsesSequence(parsedPassthroughData.sequence_number)
+          ) {
+            clearPendingPassthroughEvent();
+            continue;
+          }
 
-                  if (!projectedFailure) {
-                    parsed = sanitizeStreamingChunk(parsed);
-                    if (
-                      parsed &&
-                      typeof parsed === "object" &&
-                      !Array.isArray(parsed) &&
-                      (parsed as Record<string, unknown>)[OMIT_STREAMING_CHUNK_MARKER] === true
-                    ) {
-                      continue;
-                    }
-                  }
-
-                  const restoredOpenAIToolName = restoreOpenAIToolNames(parsed, toolNameMap);
-                  const idFixed = hadNonStringTopLevelId ? false : fixInvalidId(parsed);
-
-                  if (!projectedFailure && !hasValuableContent(parsed, FORMATS.OPENAI)) {
-                    continue;
-                  }
-
-                  const delta = parsed.choices?.[0]?.delta;
-                  let textualToolCallConverted = false;
-                  let toolCallIdCoerced = false;
-                  let splitMixedReasoningContent = false;
-                  const thinkParsed = applyThinkTag(thinkState, delta);
-
-                  // Split combined reasoning+content deltas into separate SSE events.
-                  // Standard OpenAI streaming never mixes both fields in one delta;
-                  // clients (e.g. LobeChat) may skip content when reasoning_content
-                  // is present, causing the first content token to be lost.
-                  if (delta?.reasoning_content && delta?.content) {
-                    // Shallow-clone only the mutated fields instead of a full
-                    // structuredClone — the original `parsed` is a JSON-derived
-                    // object so spreading preserves every field while skipping
-                    // the deep-clone overhead (GC pressure, polyfill fallback).
-                    const reasoningChunk = {
-                      ...parsed,
-                      usage: undefined,
-                      choices: [
-                        {
-                          ...parsed.choices[0],
-                          delta: { ...parsed.choices[0].delta, content: undefined },
-                          finish_reason: null,
-                        },
-                        ...parsed.choices.slice(1),
-                      ],
-                    };
-                    const rOutput = `data: ${JSON.stringify(reasoningChunk)}\n\n`;
-                    passthroughAccumulatedReasoning = appendBoundedText(
-                      passthroughAccumulatedReasoning,
-                      delta.reasoning_content
-                    );
-                    totalContentLength += delta.reasoning_content.length;
-                    clientPayloadCollector.push(reasoningChunk);
-                    reqLogger?.appendConvertedChunk?.(rOutput);
-                    forward(controller, encoder.encode(rOutput));
-                    delete delta.reasoning_content;
-                    splitMixedReasoningContent = true;
-                  }
-
-                  // Track whether we need to re-serialize (separate from injectedUsage
-                  // to avoid blocking subsequent finish_reason / usage mutations).
-                  // sanitizeStreamingChunk above can MIRROR reasoning_details[].text
-                  // into reasoning_content when the upstream only sent `reasoning`
-                  // (OpenRouter thinking models, #12665). hadReasoningAlias covers
-                  // reasoning_text/thinking/thought aliases, but a populated `reasoning`
-                  // string makes hasUnsupportedReasoningSignal return false — so we also
-                  // force a re-serialize when sanitize added a reasoning_content that the
-                  // upstream delta did not already carry.
-                  const needsReserialization =
-                    hadArrayContent ||
-                    splitMixedReasoningContent ||
-                    thinkParsed ||
-                    hadReasoningAlias ||
-                    (delta?.content === "" && delta?.reasoning_content) ||
-                    (!hadUpstreamReasoningContent &&
-                      typeof delta?.reasoning_content === "string" &&
-                      delta.reasoning_content.length > 0);
-
-                  // T18: Track if we saw tool calls & accumulate for call log
-                  if (delta?.tool_calls && delta.tool_calls.length > 0) {
-                    passthroughHasToolCalls = true;
-                    lastToolCallChunkTime = now;
-                    for (const tc of delta.tool_calls) {
-                      // Note: sanitizeStreamingChunk above already coerces non-string
-                      // tool_call IDs, but this defensive check catches edge cases
-                      // where sanitize didn't run (e.g. flush path shortcuts).
-                      if (tc?.id != null && typeof tc.id !== "string") {
-                        tc.id = String(tc.id);
-                        toolCallIdCoerced = true;
-                      }
-                      // Key by index first — id only appears on the first delta in OpenAI streaming
-                      let key: string;
-                      if (Number.isInteger(tc?.index)) {
-                        key = `idx:${tc.index}`;
-                      } else if (tc?.id != null) {
-                        key = `id:${tc.id}`;
-                      } else {
-                        key = `seq:${++passthroughToolCallSeq}`;
-                      }
-                      const existing = passthroughToolCalls.get(key);
-                      const deltaArgs =
-                        typeof tc?.function?.arguments === "string" ? tc.function.arguments : "";
-                      if (!existing) {
-                        passthroughToolCalls.set(key, {
-                          id: tc?.id != null ? String(tc.id) : null,
-                          index: Number.isInteger(tc?.index) ? tc.index : passthroughToolCalls.size,
-                          type: tc?.type || "function",
-                          function: {
-                            name: tc?.function?.name || "",
-                            arguments: deltaArgs,
-                          },
-                        });
-                      } else {
-                        if (tc?.id) existing.id = existing.id || String(tc.id);
-                        if (tc?.function?.name && !existing.function.name)
-                          existing.function.name = tc.function.name;
-                        existing.function.arguments += deltaArgs;
-                      }
-                    }
-                  }
-
-                  const content = delta?.content;
-                  if (typeof content === "string") {
-                    totalContentLength += content.length;
-
-                    if (!contentAfterToolSeen) {
-                      const toolTs = toolFinishTime || pendingToolFinishTime;
-                      const lastChunkTs = lastToolCallChunkTime;
-                      if (toolTs || lastChunkTs) {
-                        contentAfterToolSeen = true;
-                        try {
-                          recordToolLatency(
-                            provider || "unknown",
-                            toolTs ? now - toolTs : null,
-                            lastChunkTs ? now - lastChunkTs : null
-                          );
-                        } catch {} // best-effort telemetry — must never break the stream
-                        pendingToolFinishTime = null;
-                      }
-                    }
-                  }
-                  const reasoningDelta = getReadableReasoningValue(delta);
-                  if (reasoningDelta) {
-                    totalContentLength += reasoningDelta.length;
-                  }
-                  {
-                    const guarded = applyTextualToolCallStreamingGuard(
-                      parsed as Record<string, unknown>
-                    );
-                    parsed = guarded.parsed as typeof parsed;
-                    textualToolCallConverted = guarded.textualToolCallConverted;
-                  }
-                  if (reasoningDelta)
-                    passthroughAccumulatedReasoning = appendBoundedText(
-                      passthroughAccumulatedReasoning,
-                      reasoningDelta
-                    );
-
-                  const extracted = extractUsage(parsed);
-                  if (extracted) {
-                    usage = extracted;
-                  }
-
-                  const isFinishChunk = parsed.choices?.[0]?.finish_reason;
-
-                  // Remember the upstream's chat-completion id so synthetic chunks
-                  // emitted at flush (e.g. the estimated usage-only chunk) carry the
-                  // stream's real string id instead of null on the chat path
-                  // (passthroughResponsesId is only ever set on the Responses path).
-                  if (typeof parsed.id === "string" && parsed.id) {
-                    passthroughLastChatId = parsed.id;
-                  } else if (typeof parsed.id === "number") {
-                    passthroughLastChatId = String(parsed.id);
-                  }
-
-                  if (isFinishChunk) {
-                    passthroughSawFinishReason = true;
-                  }
-
-                  if (isFinishChunk && passthroughHasToolCalls) {
-                    toolFinishTime = now;
-                    try {
-                      markToolFinish(sessionId);
-                    } catch {} // best-effort bookkeeping write — a miss just skips latency correlation
-                  }
-
-                  // T18: Normalize finish_reason to 'tool_calls' if tool calls were used
-                  if (
-                    isFinishChunk &&
-                    passthroughHasToolCalls &&
-                    parsed.choices[0].finish_reason !== "tool_calls"
-                  ) {
-                    parsed.choices[0].finish_reason = "tool_calls";
-                    // If we modify it, we must output the modified object. This used to
-                    // piggyback on the estimated-usage rewrite below; with the estimate
-                    // moved to flush() (#12151 follow-up) the rewrite must happen here.
-                    // injectedUsage doubles as the "output already rewritten" latch —
-                    // without it the raw line overwrites this rewrite further down.
-                    output = `data: ${JSON.stringify(parsed)}\n\n`;
-                    injectedUsage = true;
-                  }
-                  // #12151 follow-up: do NOT inject estimated usage into the finish chunk.
-                  // A genuine OpenAI upstream sends its usage in a trailing empty-choices
-                  // chunk AFTER the finish; estimating here marked passthroughForwardedUsage
-                  // and made the real trailing block get dropped in favor of the estimate
-                  // (billing regression pinned by tests/unit/stream-utils.test.ts). The
-                  // estimate is now emitted in flush(), only when the upstream stayed silent.
-                  if (isFinishChunk && hasValidUsage(usage) && !passthroughForwardedUsage) {
-                    const buffered = addBufferToUsage(usage);
-                    parsed.usage = timing.withTps(
-                      carryCacheCreationMarker(
-                        parsed.usage,
-                        filterUsageForFormat(buffered, sourceFormat || FORMATS.OPENAI)
-                      )
-                    );
-                    output = `data: ${JSON.stringify(parsed)}\n\n`;
-                    passthroughForwardedUsage = true;
-                    injectedUsage = true;
-                  } else if (textualToolCallConverted) {
-                    output = `data: ${JSON.stringify(parsed)}\n\n`;
-                    injectedUsage = true;
-                  } else if (
-                    idFixed ||
-                    needsReserialization ||
-                    toolCallIdCoerced ||
-                    hadNonStringToolCallId ||
-                    hadNonStringTopLevelId ||
-                    restoredOpenAIToolName
-                  ) {
-                    output = `data: ${JSON.stringify(parsed)}\n\n`;
-                    injectedUsage = true;
-                  }
-                }
-
-                clientPayload = parsed;
-              } catch {
-                // Skip non-JSON data lines silently — don't forward garbage to clients.
-                // Upstream providers sometimes return plain-text errors (HTML, rate-limit
-                // messages) in the SSE stream that would break downstream JSON decoders.
+          if (trimmed.startsWith("data:")) {
+            const providerPayload = parsedPassthroughData ?? parseSSELine(trimmed);
+            if (providerPayload) {
+              providerPayloadCollector.push(providerPayload);
+              if ((providerPayload as { done?: unknown }).done === true) {
                 continue;
               }
             }
+          }
 
-            if (!injectedUsage) {
-              if (line.startsWith("data:") && !line.startsWith("data: ")) {
-                output = "data: " + line.slice(5) + "\n\n";
-              } else {
-                output = line + "\n\n";
-              }
-            }
-
-            output = passthroughEventPrefix.prefixData(output, line);
-
-            if (clientPayload) {
-              clientPayloadCollector.push(clientPayload);
-            }
-
-            reqLogger?.appendConvertedChunk?.(output);
-            forward(controller, encoder.encode(output));
-            if (failurePayload) {
-              abortStreamFailure(
-                controller,
-                failurePayload,
-                publicFailureMessage || "Upstream failure"
-              );
-              return;
-            }
-            if (!trimmed) {
-              clearPendingPassthroughEvent();
-            }
+          if (trimmed.startsWith("data:") && trimmed.slice(5).trim() === "[DONE]") {
             continue;
           }
 
-          // Translate mode
-          if (!trimmed) continue;
-
-          if (state?.upstreamError) {
-            continue;
-          }
-
-          const parsed = parseSSELine(trimmed);
-          if (!parsed) continue;
-
-          if (upstreamErrorForwarded) continue;
-
-          if (emitTranslatedFailureAndAbort(controller, parsed)) return;
-
-          // OpenAI-format upstreams may stream `delta.content` as typed part arrays
-          // (Mistral thinking chunks); translators expect a string.
-          if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
-
-          // #5786 — drop replayed Responses-API events (identical/lower sequence_number
-          // re-sent on an upstream reconnect) so their deltas are not glued twice into
-          // the translated client stream.
-          if (
-            targetFormat === FORMATS.OPENAI_RESPONSES &&
-            isDuplicateResponsesSequence((parsed as JsonRecord).sequence_number)
-          ) {
-            continue;
-          }
-
-          // Encrypted-reasoning observation on the raw event (replay already
-          // filtered above; never stores content, only presence + timing).
-          if (
-            targetFormat === FORMATS.OPENAI_RESPONSES &&
-            (parsed.type === "response.output_item.added" ||
-              parsed.type === "response.output_item.done") &&
-            (parsed as JsonRecord).item !== undefined
-          )
-            reasoningObserver.note(parsed, Date.now());
-
-          if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
-          providerPayloadCollector.push(parsed);
-          if (parsed && parsed.done) {
-            continue;
-          }
-          sanitizeUsagePayloadForRequest(parsed, body, targetFormat);
-          if (parsed.choices?.[0]?.delta?.tool_calls) {
-            lastToolCallChunkTime = now;
-          }
-          if (parsed.choices?.[0]?.finish_reason === "tool_calls") {
-            toolFinishTime = now;
+          if (trimmed.startsWith("data:") && trimmed.slice(5).trim() !== "[DONE]") {
             try {
-              markToolFinish(sessionId);
-            } catch {} // best-effort bookkeeping write — a miss just skips latency correlation
-          }
+              let parsed = parsedPassthroughData ?? JSON.parse(trimmed.slice(5).trim());
+              const projectedFailure = projectStreamFailureEvent(parsed);
+              if (projectedFailure) {
+                parsed = projectedFailure.publicPayload;
+                failurePayload = projectedFailure.internalFailure;
+                publicFailureMessage = projectedFailure.publicMessage;
+                output = `data: ${JSON.stringify(parsed)}\n\n`;
+                injectedUsage = true;
+              }
 
-          // Track content length and accumulate for call log (from raw provider chunk, so content is never missed)
-          // Do this before translation so we capture content regardless of translator output shape
+              // Some upstream Responses-compatible providers leak an initial Chat Completions
+              // bootstrap chunk (assistant role + empty content) before emitting proper
+              // `response.*` events. That chunk is invalid on /v1/responses and breaks strict
+              // clients like OpenCode, so drop it only for Responses-native consumers.
 
-          // Claude format
-          const claudeDelta = collectClaudeDelta(parsed.delta, state);
-          totalContentLength += claudeDelta.contentLength;
+              const isEmptyAssistantBootstrapChunkForResponsesClient =
+                clientExpectsResponsesStream &&
+                parsed?.object === "chat.completion.chunk" &&
+                Array.isArray(parsed?.choices) &&
+                parsed.choices.length > 0 &&
+                parsed.choices.every((choice) => {
+                  const candidate = choice && typeof choice === "object" ? choice : {};
+                  const delta =
+                    candidate.delta && typeof candidate.delta === "object" ? candidate.delta : null;
 
-          // OpenAI format
-          if (parsed.choices?.[0]?.delta?.content) {
-            const c = parsed.choices[0].delta.content;
-            if (typeof c === "string") {
-              totalContentLength += c.length;
-              if (state?.accumulatedContent !== undefined)
-                state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-            } else if (Array.isArray(c)) {
-              for (const part of c) {
-                if (part?.text && typeof part.text === "string") {
-                  totalContentLength += part.text.length;
-                  if (state?.accumulatedContent !== undefined)
-                    state.accumulatedContent = appendBoundedText(
-                      state.accumulatedContent,
-                      part.text
+                  if (!delta || delta.role !== "assistant") return false;
+                  if (hasActiveDeltaValue(delta.content)) return false;
+                  if (candidate.finish_reason !== null && candidate.finish_reason !== undefined) {
+                    return false;
+                  }
+
+                  const { role: _role, content: _content, ...restDelta } = delta;
+                  return !hasActiveDeltaValue(restDelta);
+                });
+
+              if (isEmptyAssistantBootstrapChunkForResponsesClient) {
+                continue;
+              }
+
+              // Detect Responses SSE payloads (have a `type` field like "response.created",
+              // "response.output_item.added", etc.) and skip Chat Completions-specific
+              // sanitization to avoid corrupting the stream for Responses-native clients.
+              const isResponsesSSE =
+                parsed.type &&
+                typeof parsed.type === "string" &&
+                parsed.type.startsWith("response.");
+
+              // Detect Claude SSE payloads. Includes "ping" and "error" to ensure
+              // they bypass the Chat Completions sanitization path which would
+              // incorrectly process or drop them.
+              const isClaudeSSE =
+                parsed.type &&
+                typeof parsed.type === "string" &&
+                (parsed.type.startsWith("message") ||
+                  parsed.type.startsWith("content_block") ||
+                  parsed.type === "ping" ||
+                  parsed.type === "error");
+              if (sanitizeUsagePayloadForRequest(parsed, body, clientResponseFormat)) {
+                output = `data: ${JSON.stringify(parsed)}\n\n`;
+                injectedUsage = true;
+              }
+              if (isResponsesSSE) {
+                // #6199/#6561 — statefully drop internal commentary-phase output (see
+                // ./responsesCommentaryDrop.ts) and clear the buffered `event:` line
+                // for the same frame, or it flushes alone as an event-only SSE frame.
+                if (
+                  shouldDropResponsesCommentary &&
+                  shouldDropResponsesCommentaryEvent(
+                    parsed as JsonRecord,
+                    passthroughResponsesCommentaryItemIds,
+                    passthroughResponsesCommentaryIndexes
+                  )
+                ) {
+                  clearPendingPassthroughEvent();
+                  continue;
+                }
+
+                const responsesIdsNormalized = normalizeResponsesSseIds(parsed as JsonRecord);
+                const parsedResponse =
+                  parsed.response &&
+                  typeof parsed.response === "object" &&
+                  !Array.isArray(parsed.response)
+                    ? (parsed.response as JsonRecord)
+                    : null;
+                const responseId =
+                  (parsedResponse ? stringifyIdValue(parsedResponse.id) : null) ||
+                  stringifyIdValue(parsed.response_id);
+                if (responseId) {
+                  passthroughResponsesId = responseId;
+                }
+                // Responses SSE: only extract usage, forward payload as-is
+                const extracted = extractUsage(parsed);
+                if (extracted) {
+                  usage = extracted;
+                }
+                // Keep generic Responses deltas for fallback usage estimates,
+                // but only visible text deltas may become assistant content in
+                // logs/replay payloads.
+                if (typeof parsed.delta === "string") {
+                  totalContentLength += parsed.delta.length;
+                }
+                if (
+                  parsed.type === "response.output_text.delta" &&
+                  typeof parsed.delta === "string"
+                ) {
+                  const incomingDelta = parsed.delta;
+                  const bufferedCandidate =
+                    passthroughBufferedTextualToolCallContent + incomingDelta;
+                  if (
+                    passthroughBufferedTextualToolCallContent ||
+                    containsTextualToolCallCandidate(incomingDelta)
+                  ) {
+                    const parsedCandidate = parseTextualToolCallCandidate(bufferedCandidate);
+                    if (parsedCandidate?.kind === "complete") {
+                      const collectedToolCall = collectPassthroughTextualToolCall(
+                        bufferedCandidate,
+                        passthroughToolCalls,
+                        allowedToolNames
+                      );
+                      if (collectedToolCall) {
+                        passthroughHasToolCalls = true;
+                        const responseToolCallEvents =
+                          buildResponsesFunctionCallEvents(collectedToolCall);
+                        output = formatSSEDataEvents(responseToolCallEvents);
+                        for (const event of responseToolCallEvents) {
+                          clientPayloadCollector.push(event);
+                        }
+                        reqLogger?.appendConvertedChunk?.(output);
+                        forward(controller, encoder.encode(output));
+                        injectedUsage = true;
+                      } else {
+                        output = `data: ${JSON.stringify(parsed)}\n\n`;
+                        injectedUsage = true;
+                      }
+                      passthroughBufferedTextualToolCallContent = "";
+                      parsed.delta = "";
+                    } else if (parsedCandidate?.kind === "partial") {
+                      passthroughBufferedTextualToolCallContent = appendBoundedText(
+                        passthroughBufferedTextualToolCallContent,
+                        incomingDelta
+                      );
+                      parsed.delta = "";
+                      output = `data: ${JSON.stringify(parsed)}\n\n`;
+                      injectedUsage = true;
+                    } else {
+                      if (passthroughBufferedTextualToolCallContent) {
+                        parsed.delta = passthroughBufferedTextualToolCallContent + incomingDelta;
+                        output = `data: ${JSON.stringify(parsed)}\n\n`;
+                        injectedUsage = true;
+                      }
+                      passthroughAccumulatedContent = appendBoundedText(
+                        passthroughAccumulatedContent,
+                        passthroughBufferedTextualToolCallContent + incomingDelta
+                      );
+                      passthroughBufferedTextualToolCallContent = "";
+                    }
+                  } else {
+                    passthroughAccumulatedContent = appendBoundedText(
+                      passthroughAccumulatedContent,
+                      incomingDelta
                     );
+                  }
+                }
+                if (
+                  parsed.type === "response.reasoning_summary_text.delta" ||
+                  parsed.type === "response.reasoning_summary_text.done" ||
+                  parsed.type === "response.reasoning_summary_part.done"
+                ) {
+                  const reasoningKey = getResponsesReasoningKey(parsed);
+                  if (reasoningKey) {
+                    passthroughResponsesReasoningSummarySeen.add(reasoningKey);
+                  }
+                }
+                // Track a reasoning opening (paired at `done` for the duration).
+                if (
+                  parsed.type === "response.output_item.added" &&
+                  parsed.item?.type === "reasoning"
+                )
+                  reasoningObserver.note(parsed, Date.now());
+                if (
+                  parsed.type === "response.output_item.added" &&
+                  parsed.item?.type === "function_call"
+                ) {
+                  const item =
+                    parsed.item && typeof parsed.item === "object" && !Array.isArray(parsed.item)
+                      ? { ...(parsed.item as JsonRecord) }
+                      : null;
+                  const pendingKey =
+                    item && typeof item.id === "string"
+                      ? item.id
+                      : item && typeof item.call_id === "string"
+                        ? item.call_id
+                        : null;
+                  if (item && pendingKey) {
+                    if (typeof item.arguments !== "string") {
+                      item.arguments = "";
+                    }
+                    passthroughResponsesPendingFunctionCalls.set(pendingKey, item);
+                    passthroughResponsesCurrentFunctionCallKey = pendingKey;
+                  }
+                }
+                if (parsed.type === "response.function_call_arguments.delta") {
+                  const pendingKey =
+                    typeof parsed.item_id === "string"
+                      ? parsed.item_id
+                      : passthroughResponsesCurrentFunctionCallKey;
+                  const pending = pendingKey
+                    ? passthroughResponsesPendingFunctionCalls.get(pendingKey)
+                    : undefined;
+                  if (pending && typeof parsed.delta === "string") {
+                    const previousArgs =
+                      typeof pending.arguments === "string" ? pending.arguments : "";
+                    pending.arguments = previousArgs + parsed.delta;
+                  }
+                }
+                if (parsed.type === "response.function_call_arguments.done") {
+                  const pendingKey =
+                    typeof parsed.item_id === "string"
+                      ? parsed.item_id
+                      : passthroughResponsesCurrentFunctionCallKey;
+                  const pending = pendingKey
+                    ? passthroughResponsesPendingFunctionCalls.get(pendingKey)
+                    : undefined;
+                  if (pending) {
+                    if (typeof parsed.arguments === "string") {
+                      pending.arguments = parsed.arguments;
+                    }
+                    pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [pending]);
+                  }
+                }
+                // Capture each completed output item so the final
+                // response.completed snapshot can be backfilled when upstream
+                // returns an empty `output` (happens with store: false).
+                if (parsed.type === "response.output_item.done" && parsed.item) {
+                  emitSyntheticResponsesReasoningSummary(controller, parsed);
+                  pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [parsed.item]);
+                  // L12 replay already filtered above via isDuplicateResponsesSequence.
+                  reasoningObserver.note(parsed, Date.now());
+                  if (parsed.item?.type === "function_call") {
+                    const pendingKey =
+                      typeof parsed.item.id === "string"
+                        ? parsed.item.id
+                        : typeof parsed.item.call_id === "string"
+                          ? parsed.item.call_id
+                          : null;
+                    if (pendingKey) {
+                      passthroughResponsesPendingFunctionCalls.delete(pendingKey);
+                      if (passthroughResponsesCurrentFunctionCallKey === pendingKey) {
+                        passthroughResponsesCurrentFunctionCallKey = null;
+                      }
+                    }
+                  }
+                }
+                let responsesCommentaryStrippedFromCompleted = false;
+                if (
+                  parsed.type === "response.completed" &&
+                  Array.isArray(parsed.response?.output) &&
+                  parsed.response.output.length > 0
+                ) {
+                  // #10156 — an upstream may echo a `phase:"commentary"` item back
+                  // inside a non-empty terminal `output` array even though its live
+                  // SSE frames were already dropped above. Keep both representations
+                  // consistent by applying the same drop here.
+                  if (shouldDropResponsesCommentary) {
+                    const { items, changed } = filterResponsesCommentaryFromItems(
+                      parsed.response.output,
+                      isResponsesCommentaryMessageItem
+                    );
+                    if (changed) {
+                      parsed.response.output = items;
+                      responsesCommentaryStrippedFromCompleted = true;
+                    }
+                  }
+                  pushUniqueResponsesOutputItems(
+                    passthroughResponsesOutputItems,
+                    parsed.response.output
+                  );
+                }
+                // #7936 - restore `namespace` + `name` on passthrough Responses
+                // function_call items. The restoration mutates `parsed`, so a
+                // real change must be re-serialized; otherwise the client still
+                // receives the flattened wire name.
+                const responsesIdentityRestored =
+                  (parsed.type === "response.output_item.added" ||
+                    parsed.type === "response.output_item.done" ||
+                    parsed.type === "response.completed") &&
+                  restoreResponsesPassthroughFunctionCallIdentity(
+                    parsed as JsonRecord,
+                    requestToolIdentityMap
+                  );
+                if (
+                  parsed.type === "response.completed" &&
+                  passthroughResponsesPendingFunctionCalls.size > 0
+                ) {
+                  pushUniqueResponsesOutputItems(passthroughResponsesOutputItems, [
+                    ...passthroughResponsesPendingFunctionCalls.values(),
+                  ]);
+                  passthroughResponsesPendingFunctionCalls.clear();
+                  passthroughResponsesCurrentFunctionCallKey = null;
+                }
+                // Two transport-level fixes for Responses passthrough:
+                //   1) Strip echoed `instructions` + `tools` from lifecycle
+                //      events — they can balloon a single SSE event past
+                //      100 KB and break parsers (e.g. GitHub Copilot CLI).
+                //   2) Backfill `response.completed.response.output` when
+                //      upstream sent it empty (store: false) — some clients
+                //      build their tool-call list from that snapshot rather
+                //      than from per-item events.
+                const textualToolCallBackfilled =
+                  parsed.type === "response.completed" && passthroughToolCalls.size > 0;
+                if (textualToolCallBackfilled) {
+                  parsed = toResponsesCompletedWithToolCalls(parsed as JsonRecord, [
+                    ...passthroughToolCalls.values(),
+                  ]) as typeof parsed;
+                }
+                const stripped = stripResponsesLifecycleEcho(parsed);
+                // Belt-and-suspenders for #10156: filter the backfill buffer itself
+                // before it can seed an empty `response.completed.response.output`,
+                // in case a future code path pushes a commentary item into it
+                // without going through the response.completed branch above.
+                const backfillCandidates = shouldDropResponsesCommentary
+                  ? filterResponsesCommentaryFromItems(
+                      passthroughResponsesOutputItems,
+                      isResponsesCommentaryMessageItem
+                    ).items
+                  : passthroughResponsesOutputItems;
+                const backfilled = backfillResponsesCompletedOutput(parsed, backfillCandidates);
+                const usageNormalized = normalizeUsage(parsed);
+                if (
+                  stripped ||
+                  backfilled ||
+                  textualToolCallBackfilled ||
+                  responsesIdsNormalized ||
+                  usageNormalized ||
+                  responsesCommentaryStrippedFromCompleted ||
+                  responsesIdentityRestored
+                ) {
+                  output = `data: ${JSON.stringify(parsed)}\n\n`;
+                  injectedUsage = true;
+                }
+                // Passthrough mode never pushes a Responses SSE event into
+                // clientPayloadCollector on the common (non-tool-call, non-
+                // commentary) path -- only the textual-tool-call conversion
+                // branch above pushes its own synthesized events. Push just
+                // the fully-processed terminal `response.completed` (after
+                // the backfill/strip/tool-call-merge above, so it matches
+                // exactly what the client receives): that alone is enough
+                // for buildStreamSummaryFromEvents' reducer to recover a
+                // real Responses `id` + `output` for previous_response_id
+                // continuation storage (src/lib/db/responsesContinuationStore.ts).
+                // Pushing every delta here would double-count events the
+                // tool-call branch already pushes its own synthesized copy of.
+                if (parsed.type === "response.completed") {
+                  clientPayloadCollector.push(parsed);
+                }
+              } else if (isClaudeSSE) {
+                // Claude SSE: extract usage, track content, forward as-is
+                const thinkingSignatureInjected = injectThinkingSignature(parsed, provider);
+                const extracted = extractUsage(parsed);
+                if (extracted) {
+                  // Non-destructive merge: never overwrite a positive value with 0
+                  // message_start carries input_tokens, message_delta carries output_tokens;
+                  if (!usage) usage = {};
+                  const u = usage;
+                  const eu = extracted as UsageTokenRecord;
+                  if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
+                  if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
+                  if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
+                  if (eu.cache_read_input_tokens)
+                    u.cache_read_input_tokens = eu.cache_read_input_tokens;
+                  if (eu.cache_creation_input_tokens)
+                    u.cache_creation_input_tokens = eu.cache_creation_input_tokens;
+                }
+                if (
+                  shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
+                    claudeEmptyResponseLifecycle,
+                    parsed
+                  )
+                ) {
+                  emitClaudeEmptyStreamErrorAndAbort(controller);
+                  return;
+                }
+                updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, parsed);
+                const restoredToolName = restoreClaudePassthroughToolUseName(
+                  parsed,
+                  toolNameMap,
+                  body
+                );
+                // Track content length and accumulate from Claude format
+                if (parsed.delta?.text) {
+                  totalContentLength += parsed.delta.text.length;
+                  passthroughAccumulatedContent = appendBoundedText(
+                    passthroughAccumulatedContent,
+                    parsed.delta.text
+                  );
+                }
+                if (parsed.delta?.thinking) {
+                  totalContentLength += parsed.delta.thinking.length;
+                  passthroughAccumulatedReasoning = appendBoundedText(
+                    passthroughAccumulatedReasoning,
+                    parsed.delta.thinking
+                  );
+                }
+                if (restoredToolName || thinkingSignatureInjected) {
+                  output = `data: ${JSON.stringify(parsed)}\n\n`;
+                  injectedUsage = true;
+                }
+              } else {
+                // ----------------------------------------------------
+                // READ THIS !!!
+                // ----------------------------------------------------
+                // IF YOU ARE AI OR AI AGENT DONT TOUCH THIS CODE !!!
+                // YOU WILL BREAK THIS CODE !!!
+                // GOOD LUCK
+                // ----------------------------------------------------
+                // Chat Completions: full sanitization pipeline
+
+                // OpenAI-compatible streaming with `stream_options.include_usage=true`
+                // ends with a usage-only chunk where `choices` is deliberately `[]`.
+                // Forward that standards-compliant chunk instead of turning it into an
+                // empty-response error.
+                //
+                // For a malformed empty `choices: []` chunk WITHOUT valid usage we DROP
+                // it (log server-side only). We must NOT inject an assistant-content
+                // chunk like "[OmniRoute] Upstream returned an empty response. Please
+                // retry." with finish_reason: "stop" — clients (Goose/opencode) feed that
+                // text back as a turn and spin in a retry loop. This restores the #3400
+                // behavior that #3422 inadvertently reverted (regression #3388/#3502).
+                if (
+                  Array.isArray(parsed.choices) &&
+                  (parsed.choices.length === 0 ||
+                    (parsed.choices.length === 1 &&
+                      parsed.choices[0]?.delta &&
+                      typeof parsed.choices[0].delta === "object" &&
+                      Object.keys(parsed.choices[0].delta).length === 0 &&
+                      !parsed.choices[0]?.finish_reason))
+                ) {
+                  const emptyChoicesUsage = extractUsage(parsed) ?? parsed.usage;
+                  if (hasValidUsage(emptyChoicesUsage) && !passthroughForwardedUsageSummary) {
+                    usage = resolveTrailingUsageSummary(
+                      emptyChoicesUsage,
+                      usage,
+                      body,
+                      totalContentLength,
+                      sourceFormat || FORMATS.OPENAI
+                    );
+                    passthroughForwardedUsage = true;
+                    passthroughForwardedUsageSummary = true;
+                    output = `data: ${JSON.stringify(parsed)}\n\n`;
+                    injectedUsage = true;
+                    clientPayload = parsed;
+                    clientPayloadCollector.push(clientPayload);
+                    reqLogger?.appendConvertedChunk?.(output);
+                    forward(controller, encoder.encode(output));
+                    continue;
+                  }
+
+                  // If we already forwarded usage, drop any trailing empty-choices valid usage
+                  if (passthroughForwardedUsageSummary && hasValidUsage(emptyChoicesUsage)) {
+                    continue;
+                  }
+
+                  console.warn(
+                    `[STREAM] Upstream returned empty choices array (${provider || "provider"}:${model || "unknown"}) — dropping chunk`
+                  );
+                  continue;
+                }
+
+                const hadNonStringToolCallId = Array.isArray(parsed.choices)
+                  ? parsed.choices.some(
+                      (choice) =>
+                        Array.isArray(choice?.delta?.tool_calls) &&
+                        choice.delta.tool_calls.some(
+                          (tc) => tc?.id != null && typeof tc.id !== "string"
+                        )
+                    )
+                  : false;
+                const hadNonStringTopLevelId = parsed?.id != null && typeof parsed.id !== "string";
+                const rawDelta = parsed.choices?.[0]?.delta;
+                const hadReasoningAlias = hasUnsupportedReasoningSignal(rawDelta);
+                const hadUpstreamReasoningContent =
+                  typeof rawDelta?.reasoning_content === "string" &&
+                  rawDelta.reasoning_content.length > 0;
+                // Typed content-part arrays are folded into strings by
+                // sanitizeStreamingChunk, so the raw line must not be forwarded.
+                const hadArrayContent = Array.isArray(rawDelta?.content);
+
+                if (!projectedFailure) {
+                  parsed = sanitizeStreamingChunk(parsed);
+                  if (
+                    parsed &&
+                    typeof parsed === "object" &&
+                    !Array.isArray(parsed) &&
+                    (parsed as Record<string, unknown>)[OMIT_STREAMING_CHUNK_MARKER] === true
+                  ) {
+                    continue;
+                  }
+                }
+
+                const restoredOpenAIToolName = restoreOpenAIToolNames(parsed, toolNameMap);
+                const idFixed = hadNonStringTopLevelId ? false : fixInvalidId(parsed);
+
+                if (!projectedFailure && !hasValuableContent(parsed, FORMATS.OPENAI)) {
+                  continue;
+                }
+
+                const delta = parsed.choices?.[0]?.delta;
+                let textualToolCallConverted = false;
+                let toolCallIdCoerced = false;
+                let splitMixedReasoningContent = false;
+                const thinkParsed = applyThinkTag(thinkState, delta);
+
+                // Split combined reasoning+content deltas into separate SSE events.
+                // Standard OpenAI streaming never mixes both fields in one delta;
+                // clients (e.g. LobeChat) may skip content when reasoning_content
+                // is present, causing the first content token to be lost.
+                if (delta?.reasoning_content && delta?.content) {
+                  // Shallow-clone only the mutated fields instead of a full
+                  // structuredClone — the original `parsed` is a JSON-derived
+                  // object so spreading preserves every field while skipping
+                  // the deep-clone overhead (GC pressure, polyfill fallback).
+                  const reasoningChunk = {
+                    ...parsed,
+                    usage: undefined,
+                    choices: [
+                      {
+                        ...parsed.choices[0],
+                        delta: { ...parsed.choices[0].delta, content: undefined },
+                        finish_reason: null,
+                      },
+                      ...parsed.choices.slice(1),
+                    ],
+                  };
+                  const rOutput = `data: ${JSON.stringify(reasoningChunk)}\n\n`;
+                  passthroughAccumulatedReasoning = appendBoundedText(
+                    passthroughAccumulatedReasoning,
+                    delta.reasoning_content
+                  );
+                  totalContentLength += delta.reasoning_content.length;
+                  clientPayloadCollector.push(reasoningChunk);
+                  reqLogger?.appendConvertedChunk?.(rOutput);
+                  forward(controller, encoder.encode(rOutput));
+                  delete delta.reasoning_content;
+                  splitMixedReasoningContent = true;
+                }
+
+                // Track whether we need to re-serialize (separate from injectedUsage
+                // to avoid blocking subsequent finish_reason / usage mutations).
+                // sanitizeStreamingChunk above can MIRROR reasoning_details[].text
+                // into reasoning_content when the upstream only sent `reasoning`
+                // (OpenRouter thinking models, #12665). hadReasoningAlias covers
+                // reasoning_text/thinking/thought aliases, but a populated `reasoning`
+                // string makes hasUnsupportedReasoningSignal return false — so we also
+                // force a re-serialize when sanitize added a reasoning_content that the
+                // upstream delta did not already carry.
+                const needsReserialization =
+                  hadArrayContent ||
+                  splitMixedReasoningContent ||
+                  thinkParsed ||
+                  hadReasoningAlias ||
+                  (delta?.content === "" && delta?.reasoning_content) ||
+                  (!hadUpstreamReasoningContent &&
+                    typeof delta?.reasoning_content === "string" &&
+                    delta.reasoning_content.length > 0);
+
+                // T18: Track if we saw tool calls & accumulate for call log
+                if (delta?.tool_calls && delta.tool_calls.length > 0) {
+                  passthroughHasToolCalls = true;
+                  lastToolCallChunkTime = now;
+                  for (const tc of delta.tool_calls) {
+                    // Note: sanitizeStreamingChunk above already coerces non-string
+                    // tool_call IDs, but this defensive check catches edge cases
+                    // where sanitize didn't run (e.g. flush path shortcuts).
+                    if (tc?.id != null && typeof tc.id !== "string") {
+                      tc.id = String(tc.id);
+                      toolCallIdCoerced = true;
+                    }
+                    // Key by index first — id only appears on the first delta in OpenAI streaming
+                    let key: string;
+                    if (Number.isInteger(tc?.index)) {
+                      key = `idx:${tc.index}`;
+                    } else if (tc?.id != null) {
+                      key = `id:${tc.id}`;
+                    } else {
+                      key = `seq:${++passthroughToolCallSeq}`;
+                    }
+                    const existing = passthroughToolCalls.get(key);
+                    const deltaArgs =
+                      typeof tc?.function?.arguments === "string" ? tc.function.arguments : "";
+                    if (!existing) {
+                      passthroughToolCalls.set(key, {
+                        id: tc?.id != null ? String(tc.id) : null,
+                        index: Number.isInteger(tc?.index) ? tc.index : passthroughToolCalls.size,
+                        type: tc?.type || "function",
+                        function: {
+                          name: tc?.function?.name || "",
+                          arguments: deltaArgs,
+                        },
+                      });
+                    } else {
+                      if (tc?.id) existing.id = existing.id || String(tc.id);
+                      if (tc?.function?.name && !existing.function.name)
+                        existing.function.name = tc.function.name;
+                      existing.function.arguments += deltaArgs;
+                    }
+                  }
+                }
+
+                const content = delta?.content;
+                if (typeof content === "string") {
+                  totalContentLength += content.length;
+
+                  if (!contentAfterToolSeen) {
+                    const toolTs = toolFinishTime || pendingToolFinishTime;
+                    const lastChunkTs = lastToolCallChunkTime;
+                    if (toolTs || lastChunkTs) {
+                      contentAfterToolSeen = true;
+                      try {
+                        recordToolLatency(
+                          provider || "unknown",
+                          toolTs ? now - toolTs : null,
+                          lastChunkTs ? now - lastChunkTs : null
+                        );
+                      } catch {} // best-effort telemetry — must never break the stream
+                      pendingToolFinishTime = null;
+                    }
+                  }
+                }
+                const reasoningDelta = getReadableReasoningValue(delta);
+                if (reasoningDelta) {
+                  totalContentLength += reasoningDelta.length;
+                }
+                {
+                  const guarded = applyTextualToolCallStreamingGuard(
+                    parsed as Record<string, unknown>
+                  );
+                  parsed = guarded.parsed as typeof parsed;
+                  textualToolCallConverted = guarded.textualToolCallConverted;
+                }
+                if (reasoningDelta)
+                  passthroughAccumulatedReasoning = appendBoundedText(
+                    passthroughAccumulatedReasoning,
+                    reasoningDelta
+                  );
+
+                const extracted = extractUsage(parsed);
+                if (extracted) {
+                  usage = extracted;
+                }
+
+                const isFinishChunk = parsed.choices?.[0]?.finish_reason;
+
+                // Remember the upstream's chat-completion id so synthetic chunks
+                // emitted at flush (e.g. the estimated usage-only chunk) carry the
+                // stream's real string id instead of null on the chat path
+                // (passthroughResponsesId is only ever set on the Responses path).
+                if (typeof parsed.id === "string" && parsed.id) {
+                  passthroughLastChatId = parsed.id;
+                } else if (typeof parsed.id === "number") {
+                  passthroughLastChatId = String(parsed.id);
+                }
+
+                if (isFinishChunk) {
+                  passthroughSawFinishReason = true;
+                }
+
+                if (isFinishChunk && passthroughHasToolCalls) {
+                  toolFinishTime = now;
+                  try {
+                    markToolFinish(sessionId);
+                  } catch {} // best-effort bookkeeping write — a miss just skips latency correlation
+                }
+
+                // T18: Normalize finish_reason to 'tool_calls' if tool calls were used
+                if (
+                  isFinishChunk &&
+                  passthroughHasToolCalls &&
+                  parsed.choices[0].finish_reason !== "tool_calls"
+                ) {
+                  parsed.choices[0].finish_reason = "tool_calls";
+                  // If we modify it, we must output the modified object. This used to
+                  // piggyback on the estimated-usage rewrite below; with the estimate
+                  // moved to flush() (#12151 follow-up) the rewrite must happen here.
+                  // injectedUsage doubles as the "output already rewritten" latch —
+                  // without it the raw line overwrites this rewrite further down.
+                  output = `data: ${JSON.stringify(parsed)}\n\n`;
+                  injectedUsage = true;
+                }
+                // #12151 follow-up: do NOT inject estimated usage into the finish chunk.
+                // A genuine OpenAI upstream sends its usage in a trailing empty-choices
+                // chunk AFTER the finish; estimating here marked passthroughForwardedUsage
+                // and made the real trailing block get dropped in favor of the estimate
+                // (billing regression pinned by tests/unit/stream-utils.test.ts). The
+                // estimate is now emitted in flush(), only when the upstream stayed silent.
+                if (isFinishChunk && hasValidUsage(usage) && !passthroughForwardedUsage) {
+                  const buffered = addBufferToUsage(usage);
+                  parsed.usage = timing.withTps(
+                    carryCacheCreationMarker(
+                      parsed.usage,
+                      filterUsageForFormat(buffered, sourceFormat || FORMATS.OPENAI)
+                    )
+                  );
+                  output = `data: ${JSON.stringify(parsed)}\n\n`;
+                  passthroughForwardedUsage = true;
+                  injectedUsage = true;
+                } else if (textualToolCallConverted) {
+                  output = `data: ${JSON.stringify(parsed)}\n\n`;
+                  injectedUsage = true;
+                } else if (
+                  idFixed ||
+                  needsReserialization ||
+                  toolCallIdCoerced ||
+                  hadNonStringToolCallId ||
+                  hadNonStringTopLevelId ||
+                  restoredOpenAIToolName
+                ) {
+                  output = `data: ${JSON.stringify(parsed)}\n\n`;
+                  injectedUsage = true;
                 }
               }
-            }
-          }
-          const openAiDelta = parsed.choices?.[0]?.delta;
-          const openAiReasoning = getReadableReasoningValue(openAiDelta);
-          if (openAiReasoning) {
-            totalContentLength += openAiReasoning.length;
-            if (state?.accumulatedReasoning !== undefined)
-              state.accumulatedReasoning = appendBoundedText(
-                state.accumulatedReasoning,
-                openAiReasoning
-              );
-          }
-          // Mirror only client-unsupported reasoning aliases into `reasoning_content`.
-          // Gate on reasoning_content being ABSENT (not on getReadableReasoningValue
-          // which also includes the `reasoning` string): OpenRouter thinking models
-          // return BOTH `reasoning` and `reasoning_details[].text`, and `reasoning`
-          // alone previously skipped the mirror, dropping thinking traces for clients
-          // that only read `reasoning_content` (#12665).
-          const openAiReasoningContent =
-            typeof openAiDelta?.reasoning_content === "string" &&
-            openAiDelta.reasoning_content.length > 0
-              ? openAiDelta.reasoning_content
-              : "";
-          if (!openAiReasoningContent) {
-            const delta = openAiDelta;
-            const r = getUnsupportedReasoningValue(delta);
-            if (typeof r === "string" && r.length > 0) {
-              parsed.choices[0].delta.reasoning_content = r;
-              delete parsed.choices[0].delta.thinking;
-              delete parsed.choices[0].delta.thought;
-              totalContentLength += r.length;
-              if (state?.accumulatedReasoning !== undefined)
-                state.accumulatedReasoning = appendBoundedText(state.accumulatedReasoning, r);
+
+              clientPayload = parsed;
+            } catch {
+              // Skip non-JSON data lines silently — don't forward garbage to clients.
+              // Upstream providers sometimes return plain-text errors (HTML, rate-limit
+              // messages) in the SSE stream that would break downstream JSON decoders.
+              continue;
             }
           }
 
-          // Gemini / Cloud Code format - may have multiple parts
-          // Cloud Code API wraps in { response: { candidates: [...] } }, so unwrap.
-          // Only applies to Gemini-family formats — skip for OpenAI, Claude, etc.
-          const isGeminiFormat =
-            targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY;
-          const geminiChunk = isGeminiFormat ? unwrapGeminiChunk(parsed) : parsed;
-          if (geminiChunk.candidates?.[0]?.content?.parts) {
-            for (const part of geminiChunk.candidates[0].content.parts) {
-              if (part.text && typeof part.text === "string") {
+          if (!injectedUsage) {
+            if (line.startsWith("data:") && !line.startsWith("data: ")) {
+              output = "data: " + line.slice(5) + "\n\n";
+            } else {
+              output = line + "\n\n";
+            }
+          }
+
+          output = passthroughEventPrefix.prefixData(output, line);
+
+          if (clientPayload) {
+            clientPayloadCollector.push(clientPayload);
+          }
+
+          reqLogger?.appendConvertedChunk?.(output);
+          forward(controller, encoder.encode(output));
+          if (failurePayload) {
+            abortStreamFailure(
+              controller,
+              failurePayload,
+              publicFailureMessage || "Upstream failure"
+            );
+            return;
+          }
+          if (!trimmed) {
+            clearPendingPassthroughEvent();
+          }
+          continue;
+        }
+
+        // Translate mode
+        if (!trimmed) continue;
+
+        if (state?.upstreamError) {
+          continue;
+        }
+
+        const parsed = parseSSELine(trimmed);
+        if (!parsed) continue;
+
+        if (upstreamErrorForwarded) continue;
+
+        if (emitTranslatedFailureAndAbort(controller, parsed)) return;
+
+        // OpenAI-format upstreams may stream `delta.content` as typed part arrays
+        // (Mistral thinking chunks); translators expect a string.
+        if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
+
+        // #5786 — drop replayed Responses-API events (identical/lower sequence_number
+        // re-sent on an upstream reconnect) so their deltas are not glued twice into
+        // the translated client stream.
+        if (
+          targetFormat === FORMATS.OPENAI_RESPONSES &&
+          isDuplicateResponsesSequence((parsed as JsonRecord).sequence_number)
+        ) {
+          continue;
+        }
+
+        // Encrypted-reasoning observation on the raw event (replay already
+        // filtered above; never stores content, only presence + timing).
+        if (
+          targetFormat === FORMATS.OPENAI_RESPONSES &&
+          (parsed.type === "response.output_item.added" ||
+            parsed.type === "response.output_item.done") &&
+          (parsed as JsonRecord).item !== undefined
+        )
+          reasoningObserver.note(parsed, Date.now());
+
+        if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
+        providerPayloadCollector.push(parsed);
+        if (parsed && parsed.done) {
+          continue;
+        }
+        sanitizeUsagePayloadForRequest(parsed, body, targetFormat);
+        if (parsed.choices?.[0]?.delta?.tool_calls) {
+          lastToolCallChunkTime = now;
+        }
+        if (parsed.choices?.[0]?.finish_reason === "tool_calls") {
+          toolFinishTime = now;
+          try {
+            markToolFinish(sessionId);
+          } catch {} // best-effort bookkeeping write — a miss just skips latency correlation
+        }
+
+        // Track content length and accumulate for call log (from raw provider chunk, so content is never missed)
+        // Do this before translation so we capture content regardless of translator output shape
+
+        // Claude format
+        const claudeDelta = collectClaudeDelta(parsed.delta, state);
+        totalContentLength += claudeDelta.contentLength;
+
+        // OpenAI format
+        if (parsed.choices?.[0]?.delta?.content) {
+          const c = parsed.choices[0].delta.content;
+          if (typeof c === "string") {
+            totalContentLength += c.length;
+            if (state?.accumulatedContent !== undefined)
+              state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
+          } else if (Array.isArray(c)) {
+            for (const part of c) {
+              if (part?.text && typeof part.text === "string") {
                 totalContentLength += part.text.length;
                 if (state?.accumulatedContent !== undefined)
                   state.accumulatedContent = appendBoundedText(state.accumulatedContent, part.text);
               }
             }
           }
+        }
+        const openAiDelta = parsed.choices?.[0]?.delta;
+        const openAiReasoning = getReadableReasoningValue(openAiDelta);
+        if (openAiReasoning) {
+          totalContentLength += openAiReasoning.length;
+          if (state?.accumulatedReasoning !== undefined)
+            state.accumulatedReasoning = appendBoundedText(
+              state.accumulatedReasoning,
+              openAiReasoning
+            );
+        }
+        // Mirror only client-unsupported reasoning aliases into `reasoning_content`.
+        // Gate on reasoning_content being ABSENT (not on getReadableReasoningValue
+        // which also includes the `reasoning` string): OpenRouter thinking models
+        // return BOTH `reasoning` and `reasoning_details[].text`, and `reasoning`
+        // alone previously skipped the mirror, dropping thinking traces for clients
+        // that only read `reasoning_content` (#12665).
+        const openAiReasoningContent =
+          typeof openAiDelta?.reasoning_content === "string" &&
+          openAiDelta.reasoning_content.length > 0
+            ? openAiDelta.reasoning_content
+            : "";
+        if (!openAiReasoningContent) {
+          const delta = openAiDelta;
+          const r = getUnsupportedReasoningValue(delta);
+          if (typeof r === "string" && r.length > 0) {
+            parsed.choices[0].delta.reasoning_content = r;
+            delete parsed.choices[0].delta.thinking;
+            delete parsed.choices[0].delta.thought;
+            totalContentLength += r.length;
+            if (state?.accumulatedReasoning !== undefined)
+              state.accumulatedReasoning = appendBoundedText(state.accumulatedReasoning, r);
+          }
+        }
 
-          // Responses-API upstream (e.g. grok-cli): only output_text deltas are the
-          // visible answer. Reasoning reaches accumulatedReasoning through the response
-          // translator (replayable text on output_item.done), and the `.done` events
-          // repeat the full text as snapshots, so the generic `delta`/`text` fallback
-          // below must not see these events at all.
-          const responsesEventType =
-            typeof (parsed as JsonRecord).type === "string" &&
-            ((parsed as JsonRecord).type as string).startsWith("response.")
-              ? ((parsed as JsonRecord).type as string)
-              : null;
-          if (responsesEventType) {
-            const d = (parsed as JsonRecord).delta;
-            if (typeof d === "string") {
-              totalContentLength += d.length;
-              if (
-                responsesEventType === "response.output_text.delta" &&
-                state?.accumulatedContent !== undefined
-              ) {
-                state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-              }
+        // Gemini / Cloud Code format - may have multiple parts
+        // Cloud Code API wraps in { response: { candidates: [...] } }, so unwrap.
+        // Only applies to Gemini-family formats — skip for OpenAI, Claude, etc.
+        const isGeminiFormat =
+          targetFormat === FORMATS.GEMINI || targetFormat === FORMATS.ANTIGRAVITY;
+        const geminiChunk = isGeminiFormat ? unwrapGeminiChunk(parsed) : parsed;
+        if (geminiChunk.candidates?.[0]?.content?.parts) {
+          for (const part of geminiChunk.candidates[0].content.parts) {
+            if (part.text && typeof part.text === "string") {
+              totalContentLength += part.text.length;
+              if (state?.accumulatedContent !== undefined)
+                state.accumulatedContent = appendBoundedText(state.accumulatedContent, part.text);
             }
           }
+        }
 
-          // Generic fallback: delta string, top-level content/text (e.g. some SSE payloads)
-          if (!responsesEventType && state?.accumulatedContent !== undefined) {
-            if (typeof (parsed as JsonRecord).delta === "string") {
-              const d = (parsed as JsonRecord).delta as string;
+        // Responses-API upstream (e.g. grok-cli): only output_text deltas are the
+        // visible answer. Reasoning reaches accumulatedReasoning through the response
+        // translator (replayable text on output_item.done), and the `.done` events
+        // repeat the full text as snapshots, so the generic `delta`/`text` fallback
+        // below must not see these events at all.
+        const responsesEventType =
+          typeof (parsed as JsonRecord).type === "string" &&
+          ((parsed as JsonRecord).type as string).startsWith("response.")
+            ? ((parsed as JsonRecord).type as string)
+            : null;
+        if (responsesEventType) {
+          const d = (parsed as JsonRecord).delta;
+          if (typeof d === "string") {
+            totalContentLength += d.length;
+            if (
+              responsesEventType === "response.output_text.delta" &&
+              state?.accumulatedContent !== undefined
+            ) {
               state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
-              totalContentLength += d.length;
-            }
-            if (typeof (parsed as JsonRecord).content === "string") {
-              const c = (parsed as JsonRecord).content as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
-              totalContentLength += c.length;
-            }
-            if (typeof (parsed as JsonRecord).text === "string") {
-              const t = (parsed as JsonRecord).text as string;
-              state.accumulatedContent = appendBoundedText(state.accumulatedContent, t);
-              totalContentLength += t.length;
-            }
-          }
-
-          const translateHasContent =
-            claudeDelta.hasText ||
-            typeof parsed.choices?.[0]?.delta?.content === "string" ||
-            Boolean(getAnyReasoningValue(parsed.choices?.[0]?.delta));
-          if (translateHasContent && !contentAfterToolSeen) {
-            const toolTs = toolFinishTime || pendingToolFinishTime;
-            const lastChunkTs = lastToolCallChunkTime;
-            if (toolTs || lastChunkTs) {
-              contentAfterToolSeen = true;
-              try {
-                recordToolLatency(
-                  provider || "unknown",
-                  toolTs ? now - toolTs : null,
-                  lastChunkTs ? now - lastChunkTs : null
-                );
-              } catch {} // best-effort telemetry — must never break the stream
-              pendingToolFinishTime = null;
-            }
-          }
-
-          // Extract usage
-          const extracted = extractUsage(parsed);
-          if (extracted) {
-            if (!state.usage) {
-              state.usage = extracted;
-            } else {
-              const su = state.usage as Record<string, number>;
-              const eu = extracted as Record<string, number>;
-              if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
-              if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
-              if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-              if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
-              if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-              if (eu.cache_read_input_tokens > 0)
-                su.cache_read_input_tokens = eu.cache_read_input_tokens;
-              if (eu.cache_creation_input_tokens > 0)
-                su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-              if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
-              if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
-            }
-          }
-
-          // Translate: targetFormat -> openai -> sourceFormat
-          const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
-
-          // Log OpenAI intermediate chunks (if available)
-          for (const item of getOpenAIIntermediateChunks(translated)) {
-            const openaiOutput = formatSSE(item, FORMATS.OPENAI);
-            reqLogger?.appendOpenAIChunk?.(openaiOutput);
-          }
-
-          if (translated?.length > 0) {
-            for (const item of translated) {
-              emitTranslatedClientItem(controller, item);
             }
           }
         }
-      },
 
-      async flush(controller) {
-        // Clean up idle watchdog timer
-        if (idleTimer) {
-          clearIdleTimer();
-        }
-        if (streamTimedOut) {
-          return;
-        }
-        if (upstreamErrorForwarded) {
-          clearPendingRequestFromStream();
-          return;
-        }
-        try {
-          const remaining = decoder.decode();
-          if (remaining) buffer += remaining;
-          let normalizedTailLines: string[] = [];
-          if (multilineSseDataLineNormalizer.hasPending()) {
-            const tailLines = buffer ? [buffer, ""] : [""];
-            normalizedTailLines = multilineSseDataLineNormalizer.normalize(tailLines);
-            buffer = "";
+        // Generic fallback: delta string, top-level content/text (e.g. some SSE payloads)
+        if (!responsesEventType && state?.accumulatedContent !== undefined) {
+          if (typeof (parsed as JsonRecord).delta === "string") {
+            const d = (parsed as JsonRecord).delta as string;
+            state.accumulatedContent = appendBoundedText(state.accumulatedContent, d);
+            totalContentLength += d.length;
           }
+          if (typeof (parsed as JsonRecord).content === "string") {
+            const c = (parsed as JsonRecord).content as string;
+            state.accumulatedContent = appendBoundedText(state.accumulatedContent, c);
+            totalContentLength += c.length;
+          }
+          if (typeof (parsed as JsonRecord).text === "string") {
+            const t = (parsed as JsonRecord).text as string;
+            state.accumulatedContent = appendBoundedText(state.accumulatedContent, t);
+            totalContentLength += t.length;
+          }
+        }
 
-          if (mode === STREAM_MODE.PASSTHROUGH) {
-            const tailProcessorContext = {
-              getSkipPassthroughEvent: () => skipPassthroughEvent,
-              setSkipPassthroughEvent: (value: boolean) => {
-                skipPassthroughEvent = value;
-              },
-              clearPendingPassthroughEvent,
-              shouldAbortOnClaudeLifecycle: (payload: unknown) =>
-                shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-                  claudeEmptyResponseLifecycle,
-                  payload
-                ),
-              emitClaudeEmptyStreamErrorAndAbort: () =>
-                emitClaudeEmptyStreamErrorAndAbort(controller),
-              isClaudeEventPayload,
-              updateClaudeEmptyResponseLifecycle: (payload: unknown) =>
-                updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, payload),
-              passthroughEventPrefix,
-              emitConvertedOutput: (output: string) => {
-                reqLogger?.appendConvertedChunk?.(output);
-                forward(controller, encoder.encode(output));
-              },
-              pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
-              pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
-              sanitizeUsagePayload: (payload: unknown) =>
-                sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
-              setPassthroughResponsesId: (value: string) => {
-                passthroughResponsesId = value;
-              },
-              setUsage: (value: unknown) => {
-                usage = value as UsageTokenRecord;
-              },
-              addTotalContentLength: (value: number) => {
-                totalContentLength += value;
-              },
-              appendPassthroughContent: (value: string) => {
-                passthroughAccumulatedContent = appendBoundedText(
-                  passthroughAccumulatedContent,
-                  value
-                );
-              },
-              appendPassthroughReasoning: (value: string) => {
-                passthroughAccumulatedReasoning = appendBoundedText(
-                  passthroughAccumulatedReasoning,
-                  value
-                );
-              },
-              getResponsesReasoningKey,
-              markResponsesReasoningSummarySeen: (key: string) => {
-                passthroughResponsesReasoningSummarySeen.add(key);
-              },
-              emitSyntheticResponsesReasoningSummary: (payload: Record<string, unknown>) =>
-                emitSyntheticResponsesReasoningSummary(controller, payload),
-              passthroughResponsesOutputItems,
-              passthroughResponsesPendingFunctionCalls,
-              getPassthroughResponsesCurrentFunctionCallKey: () =>
-                passthroughResponsesCurrentFunctionCallKey,
-              setPassthroughResponsesCurrentFunctionCallKey: (value: string | null) => {
-                passthroughResponsesCurrentFunctionCallKey = value;
-              },
-              hasPassthroughToolCalls: () => passthroughToolCalls.size > 0,
-              toResponsesCompletedWithToolCalls: (parsed: JsonRecord) =>
-                toResponsesCompletedWithToolCalls(parsed, [
-                  ...passthroughToolCalls.values(),
-                ]) as JsonRecord,
-              restoreOpenAIToolNames: (parsed: JsonRecord) =>
-                restoreOpenAIToolNames(parsed, toolNameMap),
-              abortFailure: (failure: StreamFailurePayload, publicMessage: string) =>
-                abortStreamFailure(controller, failure, publicMessage),
-            };
+        const translateHasContent =
+          claudeDelta.hasText ||
+          typeof parsed.choices?.[0]?.delta?.content === "string" ||
+          Boolean(getAnyReasoningValue(parsed.choices?.[0]?.delta));
+        if (translateHasContent && !contentAfterToolSeen) {
+          const toolTs = toolFinishTime || pendingToolFinishTime;
+          const lastChunkTs = lastToolCallChunkTime;
+          if (toolTs || lastChunkTs) {
+            contentAfterToolSeen = true;
+            try {
+              recordToolLatency(
+                provider || "unknown",
+                toolTs ? now - toolTs : null,
+                lastChunkTs ? now - lastChunkTs : null
+              );
+            } catch {} // best-effort telemetry — must never break the stream
+            pendingToolFinishTime = null;
+          }
+        }
 
-            for (const line of normalizedTailLines) {
-              if (processBufferedPassthroughLine(line, tailProcessorContext)) {
-                return;
-              }
-            }
-            const bufferedLine = buffer.trim();
-            if (skipPassthroughEvent || /^event:\s*keepalive\b/i.test(bufferedLine)) {
-              skipPassthroughEvent = false;
-              clearPendingPassthroughEvent();
-            } else if (buffer) {
-              let output = buffer;
-              let bufferedProjectedFailure: ReturnType<typeof projectStreamFailureEvent> = null;
-              if (buffer.startsWith("data:") && !buffer.startsWith("data: ")) {
-                output = "data: " + buffer.slice(5);
-              }
-              let bufferedPayload = parseSSELine(bufferedLine);
-              if (bufferedPayload) {
-                providerPayloadCollector.push(bufferedPayload);
-                bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
-                if (bufferedProjectedFailure) {
-                  bufferedPayload = bufferedProjectedFailure.publicPayload;
-                  output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
-                }
-                if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
-                  output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
-                if (
-                  shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
-                    claudeEmptyResponseLifecycle,
-                    bufferedPayload
-                  )
-                ) {
-                  emitClaudeEmptyStreamErrorAndAbort(controller);
-                  return;
-                }
-                if (isClaudeEventPayload(bufferedPayload)) {
-                  updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, bufferedPayload);
-                }
-                clientPayloadCollector.push(bufferedPayload);
-                // Normalize numeric IDs for final buffered data: chunk (same as transform path)
-                if (typeof bufferedPayload === "object" && !Array.isArray(bufferedPayload)) {
-                  const flushedParsed = bufferedPayload as JsonRecord;
-                  const flushedType =
-                    typeof flushedParsed.type === "string" ? flushedParsed.type : "";
-                  const isResponses = flushedType.startsWith("response.");
-                  const isClaude = isClaudeEventPayload(flushedParsed);
-                  if (isResponses) {
-                    const idsNormalized = normalizeResponsesSseIds(flushedParsed);
-                    const usageNormalized = normalizeUsage(flushedParsed);
-                    if (idsNormalized || usageNormalized) {
-                      output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
-                    }
-                  } else if (!isClaude) {
-                    const { changed: flushChanged, hasFinishReason } =
-                      normalizeFinalOpenAIStreamChunk(flushedParsed, toolNameMap);
-                    // #7800: track finish_reason in the flush path too, so a
-                    // final chunk without trailing newline still suppresses the
-                    // synthetic finish_reason synthesis.
-                    if (hasFinishReason) passthroughSawFinishReason = true;
-                    if (flushChanged) {
-                      output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
-                    }
-                  }
-                }
-              }
-              if (!bufferedLine) output = passthroughEventPrefix.flush() || output;
-              output = passthroughEventPrefix.prefixData(output, buffer);
-              if (output && !output.endsWith("\n\n")) {
-                output = output.endsWith("\n") ? `${output}\n` : `${output}\n\n`;
-              }
+        // Extract usage
+        const extracted = extractUsage(parsed);
+        if (extracted) {
+          if (!state.usage) {
+            state.usage = extracted;
+          } else {
+            const su = state.usage as Record<string, number>;
+            const eu = extracted as Record<string, number>;
+            if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
+            if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
+            if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
+            if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
+            if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
+            if (eu.cache_read_input_tokens > 0)
+              su.cache_read_input_tokens = eu.cache_read_input_tokens;
+            if (eu.cache_creation_input_tokens > 0)
+              su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
+            if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
+            if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
+          }
+        }
+
+        // Translate: targetFormat -> openai -> sourceFormat
+        const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
+
+        // Log OpenAI intermediate chunks (if available)
+        for (const item of getOpenAIIntermediateChunks(translated)) {
+          const openaiOutput = formatSSE(item, FORMATS.OPENAI);
+          reqLogger?.appendOpenAIChunk?.(openaiOutput);
+        }
+
+        if (translated?.length > 0) {
+          for (const item of translated) {
+            emitTranslatedClientItem(controller, item);
+          }
+        }
+      }
+    },
+
+    async flush(controller) {
+      // Clean up idle watchdog timer
+      if (idleTimer) {
+        clearIdleTimer();
+      }
+      if (streamTimedOut) {
+        return;
+      }
+      if (upstreamErrorForwarded) {
+        clearPendingRequestFromStream();
+        return;
+      }
+      try {
+        const remaining = decoder.decode();
+        if (remaining) buffer += remaining;
+        let normalizedTailLines: string[] = [];
+        if (multilineSseDataLineNormalizer.hasPending()) {
+          const tailLines = buffer ? [buffer, ""] : [""];
+          normalizedTailLines = multilineSseDataLineNormalizer.normalize(tailLines);
+          buffer = "";
+        }
+
+        if (mode === STREAM_MODE.PASSTHROUGH) {
+          const tailProcessorContext = {
+            getSkipPassthroughEvent: () => skipPassthroughEvent,
+            setSkipPassthroughEvent: (value: boolean) => {
+              skipPassthroughEvent = value;
+            },
+            clearPendingPassthroughEvent,
+            shouldAbortOnClaudeLifecycle: (payload: unknown) =>
+              shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
+                claudeEmptyResponseLifecycle,
+                payload
+              ),
+            emitClaudeEmptyStreamErrorAndAbort: () =>
+              emitClaudeEmptyStreamErrorAndAbort(controller),
+            isClaudeEventPayload,
+            updateClaudeEmptyResponseLifecycle: (payload: unknown) =>
+              updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, payload),
+            passthroughEventPrefix,
+            emitConvertedOutput: (output: string) => {
               reqLogger?.appendConvertedChunk?.(output);
               forward(controller, encoder.encode(output));
-              if (bufferedProjectedFailure) {
-                abortStreamFailure(
-                  controller,
-                  bufferedProjectedFailure.internalFailure,
-                  bufferedProjectedFailure.publicMessage
-                );
-                return;
-              }
-            }
-
-            if (shouldAbortClaudeStream()) {
-              emitClaudeEmptyStreamErrorAndAbort(controller);
-              return;
-            } else if (shouldInjectClaudeMissingFinalizersOnFlush(claudeEmptyResponseLifecycle)) {
-              emitSyntheticClaudeEmptyResponse(controller, {
-                includeContentBlock: false,
-                includeMessageDelta: !claudeEmptyResponseLifecycle.hasMessageDelta,
-                includeMessageStop: !claudeEmptyResponseLifecycle.hasMessageStop,
-              });
-            }
-            clearPendingPassthroughEvent();
-
-            if (passthroughBufferedTextualToolCallContent) {
-              // Flush any remaining buffered content as plain text.
-              // Previously gated on !includes("Arguments:"), which silently dropped
-              // incomplete tool-call headers (buffer held "Arguments:" but JSON was
-              // never finished before stream ended) — fix #3355 bug 2.
-              let flushOutput = "";
-              if (clientExpectsResponsesStream) {
-                const syntheticChunk = {
-                  type: "response.output_text.delta",
-                  delta: passthroughBufferedTextualToolCallContent,
-                };
-                flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
-              } else if (clientExpectsClaudeStream) {
-                const syntheticChunk = {
-                  type: "content_block_delta",
-                  index: 0,
-                  delta: {
-                    type: "text_delta",
-                    text: passthroughBufferedTextualToolCallContent,
-                  },
-                };
-                flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
-              } else {
-                const syntheticChunk = buildSyntheticChatChunk(passthroughResponsesId, model, {
-                  content: passthroughBufferedTextualToolCallContent,
-                });
-                flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
-              }
-              reqLogger?.appendConvertedChunk?.(flushOutput);
-              forward(controller, encoder.encode(flushOutput));
+            },
+            pushProviderPayload: (payload: unknown) => providerPayloadCollector.push(payload),
+            pushClientPayload: (payload: unknown) => clientPayloadCollector.push(payload),
+            sanitizeUsagePayload: (payload: unknown) =>
+              sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat),
+            setPassthroughResponsesId: (value: string) => {
+              passthroughResponsesId = value;
+            },
+            setUsage: (value: unknown) => {
+              usage = value as UsageTokenRecord;
+            },
+            addTotalContentLength: (value: number) => {
+              totalContentLength += value;
+            },
+            appendPassthroughContent: (value: string) => {
               passthroughAccumulatedContent = appendBoundedText(
                 passthroughAccumulatedContent,
-                passthroughBufferedTextualToolCallContent
+                value
               );
-              passthroughBufferedTextualToolCallContent = "";
-            }
+            },
+            appendPassthroughReasoning: (value: string) => {
+              passthroughAccumulatedReasoning = appendBoundedText(
+                passthroughAccumulatedReasoning,
+                value
+              );
+            },
+            getResponsesReasoningKey,
+            markResponsesReasoningSummarySeen: (key: string) => {
+              passthroughResponsesReasoningSummarySeen.add(key);
+            },
+            emitSyntheticResponsesReasoningSummary: (payload: Record<string, unknown>) =>
+              emitSyntheticResponsesReasoningSummary(controller, payload),
+            passthroughResponsesOutputItems,
+            passthroughResponsesPendingFunctionCalls,
+            getPassthroughResponsesCurrentFunctionCallKey: () =>
+              passthroughResponsesCurrentFunctionCallKey,
+            setPassthroughResponsesCurrentFunctionCallKey: (value: string | null) => {
+              passthroughResponsesCurrentFunctionCallKey = value;
+            },
+            hasPassthroughToolCalls: () => passthroughToolCalls.size > 0,
+            toResponsesCompletedWithToolCalls: (parsed: JsonRecord) =>
+              toResponsesCompletedWithToolCalls(parsed, [
+                ...passthroughToolCalls.values(),
+              ]) as JsonRecord,
+            restoreOpenAIToolNames: (parsed: JsonRecord) =>
+              restoreOpenAIToolNames(parsed, toolNameMap),
+            abortFailure: (failure: StreamFailurePayload, publicMessage: string) =>
+              abortStreamFailure(controller, failure, publicMessage),
+          };
 
-            const accR = passthroughAccumulatedReasoning;
-            const accC = passthroughAccumulatedContent;
-            const thinkFlush = flushThink(thinkState, passthroughResponsesId, accR, accC);
-            if (thinkFlush) {
-              passthroughAccumulatedReasoning = thinkFlush.reasoning;
-              passthroughAccumulatedContent = thinkFlush.content;
-              totalContentLength += thinkFlush.addedLength;
-              clientPayloadCollector.push(thinkFlush.syntheticChunk);
-              reqLogger?.appendConvertedChunk?.(thinkFlush.flushOutput);
-              forward(controller, encoder.encode(thinkFlush.flushOutput));
-            }
-
-            // Estimate usage if provider didn't return valid usage
-            if (!hasValidUsage(usage) && totalContentLength > 0) {
-              usage = estimateUsage(body, totalContentLength, sourceFormat || FORMATS.OPENAI);
-            }
-
-            if (hasValidUsage(usage)) {
-              logUsage(provider, usage, model, connectionId, apiKeyInfo);
-            } else {
-              appendRequestLog({
-                model,
-                provider,
-                connectionId,
-                tokens: null,
-                status: "200 OK",
-              }).catch(() => {});
-            }
-            if (!doneSent) {
-              // #7800: Some providers close the SSE stream without emitting a final
-              // chunk carrying a non-null finish_reason. OpenAI spec requires the
-              // terminal chunk to include finish_reason (e.g. "stop"); strict clients
-              // (pi CLI) reject the stream with "Stream ended without finish_reason".
-              // Synthesize a terminal chunk when the upstream omitted one.
-              if (shouldEmitDoneTerminator && !passthroughSawFinishReason) {
-                const syntheticFinishChunk = buildSyntheticChatChunk(
-                  passthroughResponsesId,
-                  model,
-                  {},
-                  passthroughHasToolCalls ? "tool_calls" : "stop"
-                );
-                const finishOutput = `data: ${JSON.stringify(syntheticFinishChunk)}\n\n`;
-                reqLogger?.appendConvertedChunk?.(finishOutput);
-                forward(controller, encoder.encode(finishOutput));
-                clientPayloadCollector.push(syntheticFinishChunk);
-              }
-              // #12151: upstream never reported usage — emit the estimate as a
-              // canonical OpenAI trailing usage-only chunk (empty choices) before
-              // [DONE], so metered clients still see token counts. When the
-              // upstream DID send usage (trailing or in-band), it was forwarded
-              // already and passthroughForwardedUsage guards this off.
-              if (shouldEmitDoneTerminator && !passthroughForwardedUsage && hasValidUsage(usage)) {
-                const usageOnlyChunk = buildUsageOnlyChunk(
-                  passthroughLastChatId ?? passthroughResponsesId,
-                  model,
-                  timing.withTps(filterUsageForFormat(usage, sourceFormat || FORMATS.OPENAI))
-                );
-                const usageOutput = `data: ${JSON.stringify(usageOnlyChunk)}\n\n`;
-                reqLogger?.appendConvertedChunk?.(usageOutput);
-                forward(controller, encoder.encode(usageOutput));
-                clientPayloadCollector.push(usageOnlyChunk);
-                passthroughForwardedUsage = true;
-              }
-              await emitFinalSseMetadata(controller, usage);
-              doneSent = true;
-              if (shouldEmitDoneTerminator) {
-                clientPayloadCollector.push({ done: true });
-                const doneOutput = "data: [DONE]\n\n";
-                reqLogger?.appendConvertedChunk?.(doneOutput);
-                forward(controller, encoder.encode(doneOutput));
-              }
-            }
-            // Notify caller for call log persistence (include full response body with accumulated content)
-            if (onComplete) {
-              try {
-                const u = usage as Record<string, unknown> | null;
-                const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
-                const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
-                let content = passthroughAccumulatedContent.trim() || "";
-                const finalBufferedTextualToolCall =
-                  passthroughBufferedTextualToolCallContent.trim();
-                if (finalBufferedTextualToolCall) {
-                  if (
-                    collectPassthroughTextualToolCall(
-                      finalBufferedTextualToolCall,
-                      passthroughToolCalls,
-                      allowedToolNames
-                    )
-                  ) {
-                    passthroughHasToolCalls = true;
-                  }
-                  passthroughBufferedTextualToolCallContent = "";
-                }
-                if (
-                  content &&
-                  collectPassthroughTextualToolCall(content, passthroughToolCalls, allowedToolNames)
-                ) {
-                  passthroughHasToolCalls = true;
-                  content = "";
-                } else if (containsMalformedTextualToolCall(content, allowedToolNames)) {
-                  content = "";
-                }
-                const message: Record<string, unknown> = {
-                  role: "assistant",
-                  content: content || null,
-                };
-                const reasoning = passthroughAccumulatedReasoning.trim();
-                if (reasoning) {
-                  message.reasoning_content = reasoning;
-                }
-                if (passthroughToolCalls.size > 0) {
-                  message.tool_calls = [...passthroughToolCalls.values()].sort(
-                    (a, b) => a.index - b.index
-                  );
-                }
-                // Hardening: log empty assistant response after tool completion
-                // for observability — helps diagnose Copilot "Sorry, no response was returned"
-                if (passthroughHasToolCalls && !content.trim() && !reasoning.trim()) {
-                  console.warn(
-                    `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
-                  );
-                } else if (passthroughHasToolCalls && !content.trim() && reasoning.trim()) {
-                  message.content = "";
-                }
-
-                const responseBody = {
-                  choices: [
-                    {
-                      message,
-                      finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
-                    },
-                  ],
-                  usage: {
-                    prompt_tokens: prompt,
-                    completion_tokens: completion,
-                    total_tokens: prompt + completion,
-                  },
-                  _streamed: true,
-                };
-                onComplete({
-                  status: 200,
-                  usage,
-                  responseBody,
-                  reasoningMeta: reasoningObserver.take(),
-                  ...timing.completionTiming(),
-                  // #9315 switched the summary to the accumulated responseBody to avoid
-                  // stale/truncated event data — but responseBody here is synthesized in
-                  // chat-completion shape, which loses the Responses API `response` object.
-                  // Keep a Responses-shaped summary for OPENAI_RESPONSES only. responseBody
-                  // itself never carries an `object` marker (it's built purely for the
-                  // client, which doesn't need one) — the dashboard's Provider Response
-                  // panel does, so stamp `object: "chat.completion"` on a shallow copy
-                  // used only for this summary, leaving responseBody itself untouched.
-                  // getSummary(), not buildStreamSummaryFromEvents(getEvents(), ...): the
-                  // latter only sees the collector's RETAINED (possibly cap-truncated)
-                  // events, silently losing a late response.completed event on a long
-                  // reasoning-heavy stream (live incident 2026-09-04) -- see
-                  // providerPayloadCollector's own `format:` construction comment above.
-                  providerPayload: providerPayloadCollector.build(
-                    sourceFormat === FORMATS.OPENAI_RESPONSES
-                      ? providerPayloadCollector.getSummary()
-                      : { object: "chat.completion", ...responseBody },
-                    { includeEvents: false }
-                  ),
-                  // Same OPENAI_RESPONSES carve-out as providerPayload above, but keyed on
-                  // clientResponseFormat (what the client actually receives) rather than
-                  // sourceFormat (what the upstream sent) -- they're equal in passthrough
-                  // mode but conceptually distinct. Without this, `entry.responseId` in
-                  // src/lib/usage/callLogs.ts is always null for a Responses-API client
-                  // (extractResponsesId reads `clientResponse.id`, which the chat-shaped
-                  // responseBody never has), so previous_response_id continuation lookups
-                  // in src/lib/db/responsesContinuationStore.ts always miss. getSummary(),
-                  // not buildStreamSummaryFromEvents(getEvents(), ...) -- same cap-truncation
-                  // reasoning as providerPayload above; clientPayloadCollector's own `format:`
-                  // construction above gives it the same live, cap-independent reducer.
-                  clientPayload: clientPayloadCollector.build(
-                    clientResponseFormat === FORMATS.OPENAI_RESPONSES
-                      ? clientPayloadCollector.getSummary()
-                      : responseBody,
-                    { includeEvents: false }
-                  ),
-                });
-              } catch (e) {
-                console.debug(`[STREAM] onComplete callback error (${model || "unknown"}):`, e);
-              }
-            } else {
-              clearPendingRequestFromStream();
-            }
-            return;
-          }
-
-          // Translate mode: process remaining buffer
-          if (buffer.trim()) {
-            const parsed = parseSSELine(buffer.trim());
-            if (parsed && !parsed.done) {
-              if (emitTranslatedFailureAndAbort(controller, parsed)) return;
-              if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
-              providerPayloadCollector.push(parsed);
-              // Extract usage from remaining buffer — if the usage-bearing event
-              // (e.g. response.completed) is the last SSE line, it ends up here
-              // in the flush handler where extractUsage was not called.
-              // Non-destructive merge: some providers send usage across multiple
-              // events (e.g. prompt_tokens in message_start, completion_tokens
-              // in message_delta). Direct assignment would lose earlier data.
-              const extracted = extractUsage(parsed);
-              if (extracted) {
-                if (!state.usage) {
-                  state.usage = extracted;
-                } else {
-                  const su = state.usage as Record<string, number>;
-                  const eu = extracted as Record<string, number>;
-                  if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
-                  if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
-                  if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
-                  if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
-                  if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
-                  if (eu.cache_read_input_tokens > 0)
-                    su.cache_read_input_tokens = eu.cache_read_input_tokens;
-                  if (eu.cache_creation_input_tokens > 0)
-                    su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
-                  if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
-                  if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
-                }
-              }
-
-              const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
-
-              // Log OpenAI intermediate chunks
-              for (const item of getOpenAIIntermediateChunks(translated)) {
-                const openaiOutput = formatSSE(item, FORMATS.OPENAI);
-                reqLogger?.appendOpenAIChunk?.(openaiOutput);
-              }
-
-              if (translated?.length > 0) {
-                for (const item of translated) {
-                  emitTranslatedClientItem(controller, item);
-                }
-              }
-            }
-          }
-
-          if (state?.upstreamError) {
-            const err = state.upstreamError;
-
-            // Flush pending translation events BEFORE erroring the stream.
-            // This lets the openai-responses translator emit a proper
-            // `response.failed` with `status: "failed"` and close any
-            // open items (reasoning, tool calls, etc.), instead of silently
-            // aborting the stream and leaving partial items dangling.
-            try {
-              const flushed = translateResponse(targetFormat, sourceFormat, null, state);
-              if (flushed?.length > 0) {
-                for (const item of flushed) {
-                  emitTranslatedClientItem(controller, item);
-                }
-              }
-            } catch {
-              // Swallow flush errors — the controller.error below is the
-              // terminal signal for the client.
-            }
-
-            const errorBody = buildErrorBody(err.status, err.message);
-            const publicErrorMessage = errorBody.error.message;
-            abortStreamFailure(controller, err, publicErrorMessage, { notifyComplete: true });
-            return;
-          }
-
-          // #9268: reject a translate-mode stream that forwarded no valuable chunk
-          // (all-empty `choices: []`) instead of completing with an empty 200.
-          if (
-            mode === STREAM_MODE.TRANSLATE &&
-            rejectEmptyChoicesStream({
-              forwardedValuableChunk,
-              hasValidUsage: hasValidUsage(state?.usage),
-              providerPayloadCollector,
-              clientPayloadCollector,
-              targetFormat,
-              model,
-              usage: state?.usage,
-              onFailure,
-              onComplete,
-              clearPendingRequestFromStream,
-            })
-          ) {
-            controller.error(markPendingRequestCleared(buildEmptyChoicesStreamError()));
-            return;
-          }
-
-          // Flush remaining events (only once at stream end)
-          const flushed = translateResponse(targetFormat, sourceFormat, null, state);
-
-          // Log OpenAI intermediate chunks for flushed events
-          for (const item of getOpenAIIntermediateChunks(flushed)) {
-            const openaiOutput = formatSSE(item, FORMATS.OPENAI);
-            reqLogger?.appendOpenAIChunk?.(openaiOutput);
-          }
-
-          if (flushed?.length > 0) {
-            for (const item of flushed) {
-              emitTranslatedClientItem(controller, item);
-            }
-          }
-
-          // A translator can discover a missing upstream terminal during flush.
-          // Record that failure before usage estimation or successful completion.
-          if (state?.upstreamError) {
-            const err = state.upstreamError;
-            const publicErrorMessage = buildErrorBody(err.status, err.message).error.message;
-            abortStreamFailure(controller, err, publicErrorMessage, {
-              notifyComplete: true,
-              preserveQueuedChunks: true,
-            });
-            return;
-          }
-
-          if (sourceFormat === FORMATS.CLAUDE) {
-            if (shouldAbortClaudeStream()) {
-              emitClaudeEmptyStreamErrorAndAbort(controller);
+          for (const line of normalizedTailLines) {
+            if (processBufferedPassthroughLine(line, tailProcessorContext)) {
               return;
-            } else if (shouldInjectClaudeMissingFinalizersOnFlush(claudeEmptyResponseLifecycle)) {
-              emitSyntheticClaudeEmptyResponse(controller, {
-                includeContentBlock: false,
-                includeMessageDelta: !claudeEmptyResponseLifecycle.hasMessageDelta,
-                includeMessageStop: !claudeEmptyResponseLifecycle.hasMessageStop,
-              });
             }
           }
-
-          /**
-           * Usage injection strategy:
-           * Usage data (input/output tokens) is injected into the last content chunk
-           * or the finish_reason chunk rather than sent as a separate SSE event.
-           * This ensures all major clients (Claude CLI, Continue, Cursor) receive
-           * usage data even if they stop reading after the finish signal.
-           * The usage buffer (state.usage) accumulates across chunks and is only
-           * emitted once at stream end when merged into the final translated chunk.
-           */
-
-          // Estimate usage if provider didn't return valid usage (for translate mode)
-          if (!hasValidUsage(state?.usage) && totalContentLength > 0) {
-            state.usage = estimateUsage(body, totalContentLength, sourceFormat);
-          }
-
-          // Send [DONE] (only if not already sent during transform)
-          if (!doneSent) {
-            // Upstream stayed silent on usage: send the estimate as the canonical
-            // trailing usage-only chunk before [DONE], like the passthrough flush.
-            if (!translateForwardedUsage && hasValidUsage(state?.usage)) {
-              const usageOnlyChunk = buildUsageOnlyChunk(
-                (state as unknown as Record<string, unknown>)?.chatId,
-                model,
-                timing.withTps(filterUsageForFormat(state.usage, sourceFormat))
+          const bufferedLine = buffer.trim();
+          if (skipPassthroughEvent || /^event:\s*keepalive\b/i.test(bufferedLine)) {
+            skipPassthroughEvent = false;
+            clearPendingPassthroughEvent();
+          } else if (buffer) {
+            let output = buffer;
+            let bufferedProjectedFailure: ReturnType<typeof projectStreamFailureEvent> = null;
+            if (buffer.startsWith("data:") && !buffer.startsWith("data: ")) {
+              output = "data: " + buffer.slice(5);
+            }
+            let bufferedPayload = parseSSELine(bufferedLine);
+            if (bufferedPayload) {
+              providerPayloadCollector.push(bufferedPayload);
+              bufferedProjectedFailure = projectStreamFailureEvent(bufferedPayload);
+              if (bufferedProjectedFailure) {
+                bufferedPayload = bufferedProjectedFailure.publicPayload;
+                output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
+              }
+              if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
+                output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
+              if (
+                shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
+                  claudeEmptyResponseLifecycle,
+                  bufferedPayload
+                )
+              ) {
+                emitClaudeEmptyStreamErrorAndAbort(controller);
+                return;
+              }
+              if (isClaudeEventPayload(bufferedPayload)) {
+                updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, bufferedPayload);
+              }
+              clientPayloadCollector.push(bufferedPayload);
+              // Normalize numeric IDs for final buffered data: chunk (same as transform path)
+              if (typeof bufferedPayload === "object" && !Array.isArray(bufferedPayload)) {
+                const flushedParsed = bufferedPayload as JsonRecord;
+                const flushedType =
+                  typeof flushedParsed.type === "string" ? flushedParsed.type : "";
+                const isResponses = flushedType.startsWith("response.");
+                const isClaude = isClaudeEventPayload(flushedParsed);
+                if (isResponses) {
+                  const idsNormalized = normalizeResponsesSseIds(flushedParsed);
+                  const usageNormalized = normalizeUsage(flushedParsed);
+                  if (idsNormalized || usageNormalized) {
+                    output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
+                  }
+                } else if (!isClaude) {
+                  const { changed: flushChanged, hasFinishReason } =
+                    normalizeFinalOpenAIStreamChunk(flushedParsed, toolNameMap);
+                  // #7800: track finish_reason in the flush path too, so a
+                  // final chunk without trailing newline still suppresses the
+                  // synthetic finish_reason synthesis.
+                  if (hasFinishReason) passthroughSawFinishReason = true;
+                  if (flushChanged) {
+                    output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
+                  }
+                }
+              }
+            }
+            if (!bufferedLine) output = passthroughEventPrefix.flush() || output;
+            output = passthroughEventPrefix.prefixData(output, buffer);
+            if (output && !output.endsWith("\n\n")) {
+              output = output.endsWith("\n") ? `${output}\n` : `${output}\n\n`;
+            }
+            reqLogger?.appendConvertedChunk?.(output);
+            forward(controller, encoder.encode(output));
+            if (bufferedProjectedFailure) {
+              abortStreamFailure(
+                controller,
+                bufferedProjectedFailure.internalFailure,
+                bufferedProjectedFailure.publicMessage
               );
-              const usageOutput = `data: ${JSON.stringify(usageOnlyChunk)}\n\n`;
-              reqLogger?.appendConvertedChunk?.(usageOutput);
-              forward(controller, encoder.encode(usageOutput));
-              clientPayloadCollector.push(usageOnlyChunk);
-            }
-            await emitFinalSseMetadata(controller, state?.usage as Record<string, unknown> | null);
-            doneSent = true;
-            if (shouldEmitDoneTerminator) {
-              clientPayloadCollector.push({ done: true });
-              const doneOutput = "data: [DONE]\n\n";
-              reqLogger?.appendConvertedChunk?.(doneOutput);
-              forward(controller, encoder.encode(doneOutput));
+              return;
             }
           }
 
-          if (hasValidUsage(state?.usage)) {
-            logUsage(state.provider || targetFormat, state.usage, model, connectionId, apiKeyInfo);
+          if (shouldAbortClaudeStream()) {
+            emitClaudeEmptyStreamErrorAndAbort(controller);
+            return;
+          } else if (shouldInjectClaudeMissingFinalizersOnFlush(claudeEmptyResponseLifecycle)) {
+            emitSyntheticClaudeEmptyResponse(controller, {
+              includeContentBlock: false,
+              includeMessageDelta: !claudeEmptyResponseLifecycle.hasMessageDelta,
+              includeMessageStop: !claudeEmptyResponseLifecycle.hasMessageStop,
+            });
+          }
+          clearPendingPassthroughEvent();
+
+          if (passthroughBufferedTextualToolCallContent) {
+            // Flush any remaining buffered content as plain text.
+            // Previously gated on !includes("Arguments:"), which silently dropped
+            // incomplete tool-call headers (buffer held "Arguments:" but JSON was
+            // never finished before stream ended) — fix #3355 bug 2.
+            let flushOutput = "";
+            if (clientExpectsResponsesStream) {
+              const syntheticChunk = {
+                type: "response.output_text.delta",
+                delta: passthroughBufferedTextualToolCallContent,
+              };
+              flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
+            } else if (clientExpectsClaudeStream) {
+              const syntheticChunk = {
+                type: "content_block_delta",
+                index: 0,
+                delta: {
+                  type: "text_delta",
+                  text: passthroughBufferedTextualToolCallContent,
+                },
+              };
+              flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
+            } else {
+              const syntheticChunk = buildSyntheticChatChunk(passthroughResponsesId, model, {
+                content: passthroughBufferedTextualToolCallContent,
+              });
+              flushOutput = `data: ${JSON.stringify(syntheticChunk)}\n\n`;
+            }
+            reqLogger?.appendConvertedChunk?.(flushOutput);
+            forward(controller, encoder.encode(flushOutput));
+            passthroughAccumulatedContent = appendBoundedText(
+              passthroughAccumulatedContent,
+              passthroughBufferedTextualToolCallContent
+            );
+            passthroughBufferedTextualToolCallContent = "";
+          }
+
+          const accR = passthroughAccumulatedReasoning;
+          const accC = passthroughAccumulatedContent;
+          const thinkFlush = flushThink(thinkState, passthroughResponsesId, accR, accC);
+          if (thinkFlush) {
+            passthroughAccumulatedReasoning = thinkFlush.reasoning;
+            passthroughAccumulatedContent = thinkFlush.content;
+            totalContentLength += thinkFlush.addedLength;
+            clientPayloadCollector.push(thinkFlush.syntheticChunk);
+            reqLogger?.appendConvertedChunk?.(thinkFlush.flushOutput);
+            forward(controller, encoder.encode(thinkFlush.flushOutput));
+          }
+
+          // Estimate usage if provider didn't return valid usage
+          if (!hasValidUsage(usage) && totalContentLength > 0) {
+            usage = estimateUsage(body, totalContentLength, sourceFormat || FORMATS.OPENAI);
+          }
+
+          if (hasValidUsage(usage)) {
+            logUsage(provider, usage, model, connectionId, apiKeyInfo);
           } else {
             appendRequestLog({
               model,
@@ -3125,58 +2766,107 @@ export function createSSEStream(options: StreamOptions = {}) {
               status: "200 OK",
             }).catch(() => {});
           }
+          if (!doneSent) {
+            // #7800: Some providers close the SSE stream without emitting a final
+            // chunk carrying a non-null finish_reason. OpenAI spec requires the
+            // terminal chunk to include finish_reason (e.g. "stop"); strict clients
+            // (pi CLI) reject the stream with "Stream ended without finish_reason".
+            // Synthesize a terminal chunk when the upstream omitted one.
+            if (shouldEmitDoneTerminator && !passthroughSawFinishReason) {
+              const syntheticFinishChunk = buildSyntheticChatChunk(
+                passthroughResponsesId,
+                model,
+                {},
+                passthroughHasToolCalls ? "tool_calls" : "stop"
+              );
+              const finishOutput = `data: ${JSON.stringify(syntheticFinishChunk)}\n\n`;
+              reqLogger?.appendConvertedChunk?.(finishOutput);
+              forward(controller, encoder.encode(finishOutput));
+              clientPayloadCollector.push(syntheticFinishChunk);
+            }
+            // #12151: upstream never reported usage — emit the estimate as a
+            // canonical OpenAI trailing usage-only chunk (empty choices) before
+            // [DONE], so metered clients still see token counts. When the
+            // upstream DID send usage (trailing or in-band), it was forwarded
+            // already and passthroughForwardedUsage guards this off.
+            if (shouldEmitDoneTerminator && !passthroughForwardedUsage && hasValidUsage(usage)) {
+              const usageOnlyChunk = buildUsageOnlyChunk(
+                passthroughLastChatId ?? passthroughResponsesId,
+                model,
+                timing.withTps(filterUsageForFormat(usage, sourceFormat || FORMATS.OPENAI))
+              );
+              const usageOutput = `data: ${JSON.stringify(usageOnlyChunk)}\n\n`;
+              reqLogger?.appendConvertedChunk?.(usageOutput);
+              forward(controller, encoder.encode(usageOutput));
+              clientPayloadCollector.push(usageOnlyChunk);
+              passthroughForwardedUsage = true;
+            }
+            await emitFinalSseMetadata(controller, usage);
+            doneSent = true;
+            if (shouldEmitDoneTerminator) {
+              clientPayloadCollector.push({ done: true });
+              const doneOutput = "data: [DONE]\n\n";
+              reqLogger?.appendConvertedChunk?.(doneOutput);
+              forward(controller, encoder.encode(doneOutput));
+            }
+          }
           // Notify caller for call log persistence (include full response body with accumulated content)
           if (onComplete) {
             try {
-              const u = state?.usage as Record<string, unknown> | null | undefined;
+              const u = usage as Record<string, unknown> | null;
               const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
               const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
-              let content = (state?.accumulatedContent ?? "").trim() || "";
-              const normalizedToolCalls: ToolCall[] = state?.toolCalls?.size
-                ? [...state.toolCalls.values()]
-                    .map((tc: Record<string, unknown>): ToolCall => ({
-                      id: tc.id != null ? String(tc.id) : null,
-                      index: (tc.index as number) ?? (tc.blockIndex as number) ?? 0,
-                      type: (tc.type as string) ?? "function",
-                      function: (tc.function as ToolCall["function"]) ?? {
-                        name: (tc.name as string) ?? "",
-                        arguments: "",
-                      },
-                    }))
-                    .sort((a, b) => a.index - b.index)
-                : [];
-              const textualToolCall = parseTextualToolCallFromContent(content);
-              if (textualToolCall) {
-                normalizedToolCalls.push({
-                  id: `call_${Date.now()}_${normalizedToolCalls.length}`,
-                  index: normalizedToolCalls.length,
-                  type: "function",
-                  function: {
-                    name: textualToolCall.name,
-                    arguments: JSON.stringify(textualToolCall.args || {}),
-                  },
-                });
+              let content = passthroughAccumulatedContent.trim() || "";
+              const finalBufferedTextualToolCall = passthroughBufferedTextualToolCallContent.trim();
+              if (finalBufferedTextualToolCall) {
+                if (
+                  collectPassthroughTextualToolCall(
+                    finalBufferedTextualToolCall,
+                    passthroughToolCalls,
+                    allowedToolNames
+                  )
+                ) {
+                  passthroughHasToolCalls = true;
+                }
+                passthroughBufferedTextualToolCallContent = "";
+              }
+              if (
+                content &&
+                collectPassthroughTextualToolCall(content, passthroughToolCalls, allowedToolNames)
+              ) {
+                passthroughHasToolCalls = true;
                 content = "";
               } else if (containsMalformedTextualToolCall(content, allowedToolNames)) {
                 content = "";
               }
-              const reasoning = (state?.accumulatedReasoning ?? "").trim();
               const message: Record<string, unknown> = {
                 role: "assistant",
                 content: content || null,
               };
+              const reasoning = passthroughAccumulatedReasoning.trim();
               if (reasoning) {
                 message.reasoning_content = reasoning;
               }
-              const hasToolCalls = normalizedToolCalls.length > 0;
-              if (hasToolCalls) {
-                message.tool_calls = normalizedToolCalls;
+              if (passthroughToolCalls.size > 0) {
+                message.tool_calls = [...passthroughToolCalls.values()].sort(
+                  (a, b) => a.index - b.index
+                );
               }
+              // Hardening: log empty assistant response after tool completion
+              // for observability — helps diagnose Copilot "Sorry, no response was returned"
+              if (passthroughHasToolCalls && !content.trim() && !reasoning.trim()) {
+                console.warn(
+                  `[STREAM] Empty assistant response after tool_calls completion (${provider || "provider"}:${model || "unknown"}) — sessionId=${sessionId}`
+                );
+              } else if (passthroughHasToolCalls && !content.trim() && reasoning.trim()) {
+                message.content = "";
+              }
+
               const responseBody = {
                 choices: [
                   {
                     message,
-                    finish_reason: hasToolCalls ? "tool_calls" : "stop",
+                    finish_reason: passthroughHasToolCalls ? "tool_calls" : "stop",
                   },
                 ],
                 usage: {
@@ -3188,62 +2878,366 @@ export function createSSEStream(options: StreamOptions = {}) {
               };
               onComplete({
                 status: 200,
-                usage: state?.usage,
+                usage,
                 responseBody,
-                ...timing.completionTiming(),
                 reasoningMeta: reasoningObserver.take(),
-                // Same OPENAI_RESPONSES carve-out as the passthrough branch above —
-                // the synthesized chat-shaped responseBody drops the `response` object,
-                // and (like the passthrough branch) never carries an `object` marker at
-                // all — stamp `object: "chat.completion"` on a shallow copy used only
-                // for this summary; responseBody itself (sent to the client / below)
-                // stays untouched.
-                // getSummary(), not buildStreamSummaryFromEvents(getEvents(), ...) -- the
+                ...timing.completionTiming(),
+                // #9315 switched the summary to the accumulated responseBody to avoid
+                // stale/truncated event data — but responseBody here is synthesized in
+                // chat-completion shape, which loses the Responses API `response` object.
+                // Keep a Responses-shaped summary for OPENAI_RESPONSES only. responseBody
+                // itself never carries an `object` marker (it's built purely for the
+                // client, which doesn't need one) — the dashboard's Provider Response
+                // panel does, so stamp `object: "chat.completion"` on a shallow copy
+                // used only for this summary, leaving responseBody itself untouched.
+                // getSummary(), not buildStreamSummaryFromEvents(getEvents(), ...): the
                 // latter only sees the collector's RETAINED (possibly cap-truncated)
                 // events, silently losing a late response.completed event on a long
                 // reasoning-heavy stream (live incident 2026-09-04) -- see
                 // providerPayloadCollector's own `format:` construction comment above.
                 providerPayload: providerPayloadCollector.build(
-                  targetFormat === FORMATS.OPENAI_RESPONSES
+                  sourceFormat === FORMATS.OPENAI_RESPONSES
                     ? providerPayloadCollector.getSummary()
                     : { object: "chat.completion", ...responseBody },
                   { includeEvents: false }
                 ),
-                // Same OPENAI_RESPONSES carve-out as providerPayload above and the
-                // passthrough branch's onComplete, but keyed on sourceFormat (what the
-                // client requested/receives in translate mode) rather than targetFormat
-                // (what the upstream provider speaks) -- translateResponse(targetFormat,
-                // sourceFormat, ...) above confirms that direction. emitTranslatedClientItem
-                // already pushes every client-visible translated item into
-                // clientPayloadCollector unconditionally, so the events are already there;
-                // getSummary() (not buildStreamSummaryFromEvents(getEvents(), ...)) makes
-                // reading them back cap-independent -- same reasoning as providerPayload
-                // above; clientPayloadCollector's own `format:` construction gives it the
-                // same live reducer.
+                // Same OPENAI_RESPONSES carve-out as providerPayload above, but keyed on
+                // clientResponseFormat (what the client actually receives) rather than
+                // sourceFormat (what the upstream sent) -- they're equal in passthrough
+                // mode but conceptually distinct. Without this, `entry.responseId` in
+                // src/lib/usage/callLogs.ts is always null for a Responses-API client
+                // (extractResponsesId reads `clientResponse.id`, which the chat-shaped
+                // responseBody never has), so previous_response_id continuation lookups
+                // in src/lib/db/responsesContinuationStore.ts always miss. getSummary(),
+                // not buildStreamSummaryFromEvents(getEvents(), ...) -- same cap-truncation
+                // reasoning as providerPayload above; clientPayloadCollector's own `format:`
+                // construction above gives it the same live, cap-independent reducer.
                 clientPayload: clientPayloadCollector.build(
-                  sourceFormat === FORMATS.OPENAI_RESPONSES
+                  clientResponseFormat === FORMATS.OPENAI_RESPONSES
                     ? clientPayloadCollector.getSummary()
                     : responseBody,
                   { includeEvents: false }
                 ),
               });
             } catch (e) {
-              console.debug(
-                `[STREAM] onComplete callback error in flush (${model || "unknown"}):`,
-                e
-              );
+              console.debug(`[STREAM] onComplete callback error (${model || "unknown"}):`, e);
             }
           } else {
             clearPendingRequestFromStream();
           }
-        } catch (error) {
-          console.log(`[STREAM] Error in flush (${model || "unknown"}):`, error.message || error);
+          return;
         }
-      },
-      cancel(reason) {
-        clearIdleTimer();
-      },
+
+        // Translate mode: process remaining buffer
+        if (buffer.trim()) {
+          const parsed = parseSSELine(buffer.trim());
+          if (parsed && !parsed.done) {
+            if (emitTranslatedFailureAndAbort(controller, parsed)) return;
+            if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
+            providerPayloadCollector.push(parsed);
+            // Extract usage from remaining buffer — if the usage-bearing event
+            // (e.g. response.completed) is the last SSE line, it ends up here
+            // in the flush handler where extractUsage was not called.
+            // Non-destructive merge: some providers send usage across multiple
+            // events (e.g. prompt_tokens in message_start, completion_tokens
+            // in message_delta). Direct assignment would lose earlier data.
+            const extracted = extractUsage(parsed);
+            if (extracted) {
+              if (!state.usage) {
+                state.usage = extracted;
+              } else {
+                const su = state.usage as Record<string, number>;
+                const eu = extracted as Record<string, number>;
+                if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
+                if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
+                if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
+                if (eu.input_tokens > 0) su.input_tokens = eu.input_tokens;
+                if (eu.output_tokens > 0) su.output_tokens = eu.output_tokens;
+                if (eu.cache_read_input_tokens > 0)
+                  su.cache_read_input_tokens = eu.cache_read_input_tokens;
+                if (eu.cache_creation_input_tokens > 0)
+                  su.cache_creation_input_tokens = eu.cache_creation_input_tokens;
+                if (eu.cached_tokens > 0) su.cached_tokens = eu.cached_tokens;
+                if (eu.reasoning_tokens > 0) su.reasoning_tokens = eu.reasoning_tokens;
+              }
+            }
+
+            const translated = translateResponse(targetFormat, sourceFormat, parsed, state);
+
+            // Log OpenAI intermediate chunks
+            for (const item of getOpenAIIntermediateChunks(translated)) {
+              const openaiOutput = formatSSE(item, FORMATS.OPENAI);
+              reqLogger?.appendOpenAIChunk?.(openaiOutput);
+            }
+
+            if (translated?.length > 0) {
+              for (const item of translated) {
+                emitTranslatedClientItem(controller, item);
+              }
+            }
+          }
+        }
+
+        if (state?.upstreamError) {
+          const err = state.upstreamError;
+
+          // Flush pending translation events BEFORE erroring the stream.
+          // This lets the openai-responses translator emit a proper
+          // `response.failed` with `status: "failed"` and close any
+          // open items (reasoning, tool calls, etc.), instead of silently
+          // aborting the stream and leaving partial items dangling.
+          try {
+            const flushed = translateResponse(targetFormat, sourceFormat, null, state);
+            if (flushed?.length > 0) {
+              for (const item of flushed) {
+                emitTranslatedClientItem(controller, item);
+              }
+            }
+          } catch {
+            // Swallow flush errors — the controller.error below is the
+            // terminal signal for the client.
+          }
+
+          const errorBody = buildErrorBody(err.status, err.message);
+          const publicErrorMessage = errorBody.error.message;
+          abortStreamFailure(controller, err, publicErrorMessage, { notifyComplete: true });
+          return;
+        }
+
+        // #9268: reject a translate-mode stream that forwarded no valuable chunk
+        // (all-empty `choices: []`) instead of completing with an empty 200.
+        if (
+          mode === STREAM_MODE.TRANSLATE &&
+          rejectEmptyChoicesStream({
+            forwardedValuableChunk,
+            hasValidUsage: hasValidUsage(state?.usage),
+            providerPayloadCollector,
+            clientPayloadCollector,
+            targetFormat,
+            model,
+            usage: state?.usage,
+            onFailure,
+            onComplete,
+            clearPendingRequestFromStream,
+          })
+        ) {
+          controller.error(markPendingRequestCleared(buildEmptyChoicesStreamError()));
+          return;
+        }
+
+        // Flush remaining events (only once at stream end)
+        const flushed = translateResponse(targetFormat, sourceFormat, null, state);
+
+        // Log OpenAI intermediate chunks for flushed events
+        for (const item of getOpenAIIntermediateChunks(flushed)) {
+          const openaiOutput = formatSSE(item, FORMATS.OPENAI);
+          reqLogger?.appendOpenAIChunk?.(openaiOutput);
+        }
+
+        if (flushed?.length > 0) {
+          for (const item of flushed) {
+            emitTranslatedClientItem(controller, item);
+          }
+        }
+
+        // A translator can discover a missing upstream terminal during flush.
+        // Record that failure before usage estimation or successful completion.
+        if (state?.upstreamError) {
+          const err = state.upstreamError;
+          const publicErrorMessage = buildErrorBody(err.status, err.message).error.message;
+          abortStreamFailure(controller, err, publicErrorMessage, {
+            notifyComplete: true,
+            preserveQueuedChunks: true,
+          });
+          return;
+        }
+
+        if (sourceFormat === FORMATS.CLAUDE) {
+          if (shouldAbortClaudeStream()) {
+            emitClaudeEmptyStreamErrorAndAbort(controller);
+            return;
+          } else if (shouldInjectClaudeMissingFinalizersOnFlush(claudeEmptyResponseLifecycle)) {
+            emitSyntheticClaudeEmptyResponse(controller, {
+              includeContentBlock: false,
+              includeMessageDelta: !claudeEmptyResponseLifecycle.hasMessageDelta,
+              includeMessageStop: !claudeEmptyResponseLifecycle.hasMessageStop,
+            });
+          }
+        }
+
+        /**
+         * Usage injection strategy:
+         * Usage data (input/output tokens) is injected into the last content chunk
+         * or the finish_reason chunk rather than sent as a separate SSE event.
+         * This ensures all major clients (Claude CLI, Continue, Cursor) receive
+         * usage data even if they stop reading after the finish signal.
+         * The usage buffer (state.usage) accumulates across chunks and is only
+         * emitted once at stream end when merged into the final translated chunk.
+         */
+
+        // Estimate usage if provider didn't return valid usage (for translate mode)
+        if (!hasValidUsage(state?.usage) && totalContentLength > 0) {
+          state.usage = estimateUsage(body, totalContentLength, sourceFormat);
+        }
+
+        // Send [DONE] (only if not already sent during transform)
+        if (!doneSent) {
+          // Upstream stayed silent on usage: send the estimate as the canonical
+          // trailing usage-only chunk before [DONE], like the passthrough flush.
+          if (!translateForwardedUsage && hasValidUsage(state?.usage)) {
+            const usageOnlyChunk = buildUsageOnlyChunk(
+              (state as unknown as Record<string, unknown>)?.chatId,
+              model,
+              timing.withTps(filterUsageForFormat(state.usage, sourceFormat))
+            );
+            const usageOutput = `data: ${JSON.stringify(usageOnlyChunk)}\n\n`;
+            reqLogger?.appendConvertedChunk?.(usageOutput);
+            forward(controller, encoder.encode(usageOutput));
+            clientPayloadCollector.push(usageOnlyChunk);
+          }
+          await emitFinalSseMetadata(controller, state?.usage as Record<string, unknown> | null);
+          doneSent = true;
+          if (shouldEmitDoneTerminator) {
+            clientPayloadCollector.push({ done: true });
+            const doneOutput = "data: [DONE]\n\n";
+            reqLogger?.appendConvertedChunk?.(doneOutput);
+            forward(controller, encoder.encode(doneOutput));
+          }
+        }
+
+        if (hasValidUsage(state?.usage)) {
+          logUsage(state.provider || targetFormat, state.usage, model, connectionId, apiKeyInfo);
+        } else {
+          appendRequestLog({
+            model,
+            provider,
+            connectionId,
+            tokens: null,
+            status: "200 OK",
+          }).catch(() => {});
+        }
+        // Notify caller for call log persistence (include full response body with accumulated content)
+        if (onComplete) {
+          try {
+            const u = state?.usage as Record<string, unknown> | null | undefined;
+            const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
+            const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
+            let content = (state?.accumulatedContent ?? "").trim() || "";
+            const normalizedToolCalls: ToolCall[] = state?.toolCalls?.size
+              ? [...state.toolCalls.values()]
+                  .map((tc: Record<string, unknown>): ToolCall => ({
+                    id: tc.id != null ? String(tc.id) : null,
+                    index: (tc.index as number) ?? (tc.blockIndex as number) ?? 0,
+                    type: (tc.type as string) ?? "function",
+                    function: (tc.function as ToolCall["function"]) ?? {
+                      name: (tc.name as string) ?? "",
+                      arguments: "",
+                    },
+                  }))
+                  .sort((a, b) => a.index - b.index)
+              : [];
+            const textualToolCall = parseTextualToolCallFromContent(content);
+            if (textualToolCall) {
+              normalizedToolCalls.push({
+                id: `call_${Date.now()}_${normalizedToolCalls.length}`,
+                index: normalizedToolCalls.length,
+                type: "function",
+                function: {
+                  name: textualToolCall.name,
+                  arguments: JSON.stringify(textualToolCall.args || {}),
+                },
+              });
+              content = "";
+            } else if (containsMalformedTextualToolCall(content, allowedToolNames)) {
+              content = "";
+            }
+            const reasoning = (state?.accumulatedReasoning ?? "").trim();
+            const message: Record<string, unknown> = {
+              role: "assistant",
+              content: content || null,
+            };
+            if (reasoning) {
+              message.reasoning_content = reasoning;
+            }
+            const hasToolCalls = normalizedToolCalls.length > 0;
+            if (hasToolCalls) {
+              message.tool_calls = normalizedToolCalls;
+            }
+            const responseBody = {
+              choices: [
+                {
+                  message,
+                  finish_reason: hasToolCalls ? "tool_calls" : "stop",
+                },
+              ],
+              usage: {
+                prompt_tokens: prompt,
+                completion_tokens: completion,
+                total_tokens: prompt + completion,
+              },
+              _streamed: true,
+            };
+            onComplete({
+              status: 200,
+              usage: state?.usage,
+              responseBody,
+              ...timing.completionTiming(),
+              reasoningMeta: reasoningObserver.take(),
+              // Same OPENAI_RESPONSES carve-out as the passthrough branch above —
+              // the synthesized chat-shaped responseBody drops the `response` object,
+              // and (like the passthrough branch) never carries an `object` marker at
+              // all — stamp `object: "chat.completion"` on a shallow copy used only
+              // for this summary; responseBody itself (sent to the client / below)
+              // stays untouched.
+              // getSummary(), not buildStreamSummaryFromEvents(getEvents(), ...) -- the
+              // latter only sees the collector's RETAINED (possibly cap-truncated)
+              // events, silently losing a late response.completed event on a long
+              // reasoning-heavy stream (live incident 2026-09-04) -- see
+              // providerPayloadCollector's own `format:` construction comment above.
+              providerPayload: providerPayloadCollector.build(
+                targetFormat === FORMATS.OPENAI_RESPONSES
+                  ? providerPayloadCollector.getSummary()
+                  : { object: "chat.completion", ...responseBody },
+                { includeEvents: false }
+              ),
+              // Same OPENAI_RESPONSES carve-out as providerPayload above and the
+              // passthrough branch's onComplete, but keyed on sourceFormat (what the
+              // client requested/receives in translate mode) rather than targetFormat
+              // (what the upstream provider speaks) -- translateResponse(targetFormat,
+              // sourceFormat, ...) above confirms that direction. emitTranslatedClientItem
+              // already pushes every client-visible translated item into
+              // clientPayloadCollector unconditionally, so the events are already there;
+              // getSummary() (not buildStreamSummaryFromEvents(getEvents(), ...)) makes
+              // reading them back cap-independent -- same reasoning as providerPayload
+              // above; clientPayloadCollector's own `format:` construction gives it the
+              // same live reducer.
+              clientPayload: clientPayloadCollector.build(
+                sourceFormat === FORMATS.OPENAI_RESPONSES
+                  ? clientPayloadCollector.getSummary()
+                  : responseBody,
+                { includeEvents: false }
+              ),
+            });
+          } catch (e) {
+            console.debug(
+              `[STREAM] onComplete callback error in flush (${model || "unknown"}):`,
+              e
+            );
+          }
+        } else {
+          clearPendingRequestFromStream();
+        }
+      } catch (error) {
+        console.log(`[STREAM] Error in flush (${model || "unknown"}):`, error.message || error);
+      }
     },
+    cancel() {
+      clearIdleTimer();
+    },
+  };
+
+  const sseStream = new TransformStream(
+    sseTransformer,
     ...createByteLengthQueueStrategies(streamBufferBytes)
   );
   return registerStreamTiming(sseStream, timing);

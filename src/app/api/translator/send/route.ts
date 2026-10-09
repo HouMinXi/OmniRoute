@@ -12,9 +12,15 @@ import { logTranslationEvent } from "@/lib/translatorEvents";
 import { translatorSendSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
-function getProviderBaseUrl(providerSpecificData: unknown): string | undefined {
-  if (!providerSpecificData || typeof providerSpecificData !== "object") return undefined;
-  const baseUrl = (providerSpecificData as Record<string, unknown>).baseUrl;
+function asProviderSpecificData(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
+function getProviderBaseUrl(
+  providerSpecificData: Record<string, unknown> | null
+): string | undefined {
+  const baseUrl = providerSpecificData?.baseUrl;
   return typeof baseUrl === "string" && baseUrl.trim().length > 0 ? baseUrl : undefined;
 }
 
@@ -50,10 +56,15 @@ export async function POST(request) {
     const connections = await getProviderConnections({ provider });
     const connection = (
       await Promise.all(
-        connections.map(async (candidate) => ({
-          candidate,
-          blocked: await isConnectionUnavailableToAuxiliaryActivity(candidate.id),
-        }))
+        connections.map(async (candidate) => {
+          const connectionId = candidate.id;
+          return {
+            candidate,
+            blocked:
+              typeof connectionId === "string" &&
+              (await isConnectionUnavailableToAuxiliaryActivity(connectionId)),
+          };
+        })
       )
     ).find(({ candidate, blocked }) => candidate.isActive !== false && !blocked)?.candidate;
 
@@ -85,13 +96,14 @@ export async function POST(request) {
       projectId: connection.projectId,
       providerSpecificData: connection.providerSpecificData,
     };
-    targetFormat = getTargetFormat(provider, connection.providerSpecificData);
+    const providerSpecificData = asProviderSpecificData(connection.providerSpecificData);
+    targetFormat = getTargetFormat(provider, providerSpecificData);
 
     // Build URL and headers using provider service
     const url = buildProviderUrl(provider, body.model || "test-model", true, {
       baseUrlIndex: 0,
-      baseUrl: getProviderBaseUrl(connection.providerSpecificData),
-      providerSpecificData: connection.providerSpecificData,
+      baseUrl: getProviderBaseUrl(providerSpecificData),
+      providerSpecificData,
     });
     const headers = buildProviderHeaders(provider, credentials, true, body);
 
@@ -118,12 +130,23 @@ export async function POST(request) {
         latency: Date.now() - startedAt,
         endpoint: "/api/translator/send",
       });
+      const upstreamError =
+        normalizedUpstreamError &&
+        typeof normalizedUpstreamError === "object" &&
+        "error" in normalizedUpstreamError
+          ? normalizedUpstreamError.error
+          : null;
+      const upstreamMessage =
+        upstreamError &&
+        typeof upstreamError === "object" &&
+        "message" in upstreamError &&
+        typeof upstreamError.message === "string"
+          ? upstreamError.message
+          : null;
       return NextResponse.json(
         {
           success: false,
-          error:
-            normalizedUpstreamError.error?.message ||
-            `Provider error: ${response.status} ${response.statusText}`,
+          error: upstreamMessage || `Provider error: ${response.status} ${response.statusText}`,
           details: normalizedUpstreamError,
         },
         { status: response.status }

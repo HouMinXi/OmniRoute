@@ -119,7 +119,7 @@ export async function PATCH(request: Request): Promise<NextResponse> {
   if (authError) return authError;
 
   const body = await readJson(request);
-  if (!body.ok) return error(body.status, body.message);
+  if (body.ok === false) return error(body.status, body.message);
   const parsed = overrideSchema.safeParse(body.value);
   if (!parsed.success) return error(400, "Invalid Radar local override");
 
@@ -144,7 +144,7 @@ export async function PUT(request: Request): Promise<NextResponse> {
   if (authError) return authError;
 
   const body = await readJson(request);
-  if (!body.ok) return error(body.status, body.message);
+  if (body.ok === false) return error(body.status, body.message);
   const parsed = tombstoneSchema.safeParse(body.value);
   if (!parsed.success) return error(400, "Invalid Radar tombstone");
 

@@ -46,16 +46,18 @@ test("computeBackoff respects Retry-After header", () => {
 });
 
 test("computeBackoff grows exponentially without header", () => {
-  const d1 = computeBackoff(1, null, { ...RETRY_DEFAULTS, jitter: false });
-  const d2 = computeBackoff(2, null, { ...RETRY_DEFAULTS, jitter: false });
-  const d3 = computeBackoff(3, null, { ...RETRY_DEFAULTS, jitter: false });
+  const noJitter = { ...RETRY_DEFAULTS, jitter: false as never };
+  const d1 = computeBackoff(1, null, noJitter);
+  const d2 = computeBackoff(2, null, noJitter);
+  const d3 = computeBackoff(3, null, noJitter);
   assert.ok(d2 > d1, "attempt 2 > attempt 1");
   assert.ok(d3 >= d2, "attempt 3 >= attempt 2 (may cap)");
   assert.ok(d3 <= RETRY_DEFAULTS.maxMs, "capped at maxMs");
 });
 
 test("computeBackoff with jitter stays within ±25% of base", () => {
-  const base = computeBackoff(1, null, { ...RETRY_DEFAULTS, jitter: false });
+  const noJitter = { ...RETRY_DEFAULTS, jitter: false as never };
+  const base = computeBackoff(1, null, noJitter);
   for (let i = 0; i < 20; i++) {
     const jittered = computeBackoff(1, null, RETRY_DEFAULTS);
     const tolerance = base * 0.25 + 1;

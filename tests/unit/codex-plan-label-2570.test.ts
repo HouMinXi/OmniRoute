@@ -60,14 +60,14 @@ test("getCodexPlanLabel falls back to workspacePlanType when chatgptPlanType is 
 test("resolvePlanValue falls back to the persisted Codex chatgptPlanType when the live plan is unknown", () => {
   // Reproduces the exact shape open-sse/services/usage/codex.ts returns when
   // the upstream Codex usage endpoint omits plan_type/planType.
-  assert.equal(resolvePlanValue("unknown", { chatgptPlanType: "Pro" }), "Pro");
+  assert.equal(resolvePlanValue("unknown", { chatgptPlanType: "Pro" }, "codex"), "Pro");
 });
 
 test("resolvePlanValue still prefers a real live plan over the persisted Codex fallback", () => {
-  assert.equal(resolvePlanValue("Team", { chatgptPlanType: "Pro" }), "Team");
+  assert.equal(resolvePlanValue("Team", { chatgptPlanType: "Pro" }, "codex"), "Team");
 });
 
 test("resolvePlanValue returns null when neither live nor persisted Codex plan is available", () => {
-  assert.equal(resolvePlanValue("unknown", {}), null);
-  assert.equal(resolvePlanValue(null, null), null);
+  assert.equal(resolvePlanValue("unknown", {}, "codex"), null);
+  assert.equal(resolvePlanValue(null, null, "codex"), null);
 });

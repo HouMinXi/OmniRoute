@@ -15,9 +15,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { ChatAdmissionController, admitChatRequest } = await import(
-  "../../src/shared/middleware/chatBodyAdmission.ts"
-);
+const { ChatAdmissionController, admitChatRequest } =
+  await import("../../src/shared/middleware/chatBodyAdmission.ts");
 
 const silentSink = () => {};
 
@@ -78,10 +77,17 @@ test("FIX: the same 8-request agent fan-out all admit under the byte-budget gate
   // Shape of the fixed production singleton: legacy count cap disabled
   // (Number.MAX_SAFE_INTEGER — matches resolveLegacyCountCap()'s unset-env
   // default) and a real ingest byte budget generously larger than the burst.
-  const controller = new ChatAdmissionController(Number.MAX_SAFE_INTEGER, undefined, 0, silentSink, {
-    maxInflightBytes: 8 * 1024 * 1024, // 8 MiB — 8 x ~400 KB bodies fit comfortably
-    checkPressureSeverity: () => "normal",
-  });
+  const controller = new ChatAdmissionController(
+    Number.MAX_SAFE_INTEGER,
+    undefined,
+    0,
+    silentSink,
+    {
+      maxInflightBytes: 8 * 1024 * 1024, // 8 MiB — 8 x ~400 KB bodies fit comfortably
+      budgetSource: "override",
+      checkPressureSeverity: () => "normal",
+    }
+  );
   const body = agentBody();
   const requests = Array.from({ length: 8 }, () => agentRequest(body));
 
@@ -120,10 +126,17 @@ test("FIX: the same 8-request agent fan-out all admit under the byte-budget gate
 });
 
 test("FIX: distinct sessions in the same fan-out are also all admitted (not just a shared API key)", async () => {
-  const controller = new ChatAdmissionController(Number.MAX_SAFE_INTEGER, undefined, 0, silentSink, {
-    maxInflightBytes: 8 * 1024 * 1024,
-    checkPressureSeverity: () => "normal",
-  });
+  const controller = new ChatAdmissionController(
+    Number.MAX_SAFE_INTEGER,
+    undefined,
+    0,
+    silentSink,
+    {
+      maxInflightBytes: 8 * 1024 * 1024,
+      budgetSource: "override",
+      checkPressureSeverity: () => "normal",
+    }
+  );
   const body = agentBody();
 
   const results = await Promise.all(
@@ -150,10 +163,17 @@ test("FIX: distinct sessions in the same fan-out are also all admitted (not just
 });
 
 test("critical resource pressure still sheds the entire fan-out (the gate is pressure-driven, not removed)", async () => {
-  const controller = new ChatAdmissionController(Number.MAX_SAFE_INTEGER, undefined, 0, silentSink, {
-    maxInflightBytes: 8 * 1024 * 1024,
-    checkPressureSeverity: () => "critical",
-  });
+  const controller = new ChatAdmissionController(
+    Number.MAX_SAFE_INTEGER,
+    undefined,
+    0,
+    silentSink,
+    {
+      maxInflightBytes: 8 * 1024 * 1024,
+      budgetSource: "override",
+      checkPressureSeverity: () => "critical",
+    }
+  );
   const body = agentBody();
 
   const results = await Promise.all(

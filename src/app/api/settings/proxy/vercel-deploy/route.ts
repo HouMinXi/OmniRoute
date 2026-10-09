@@ -136,7 +136,7 @@ async function buildDeployErrorResponse(deployRes: Response) {
   return createErrorResponse({
     status: deployRes.status,
     message: `Vercel deployment failed: ${upstreamMessage}`,
-    type: "upstream_error",
+    type: "server_error",
   });
 }
 
@@ -250,7 +250,7 @@ export async function POST(request: Request) {
       return createErrorResponse({
         status: 502,
         message: "Vercel returned no deployment URL",
-        type: "upstream_error",
+        type: "server_error",
       });
     }
 
@@ -275,7 +275,7 @@ export async function POST(request: Request) {
         status: 504,
         message:
           "Deployment did not reach READY state within 2 minutes. Check your Vercel dashboard.",
-        type: "timeout",
+        type: "server_error",
       });
     }
 

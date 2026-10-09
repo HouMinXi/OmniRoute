@@ -193,8 +193,8 @@ export async function exchangeAdobeCookieForAccessToken(
 export async function resolveAdobeAccessToken(
   credentials:
     | {
-        apiKey?: string;
-        accessToken?: string;
+        apiKey?: string | null;
+        accessToken?: string | null;
         providerSpecificData?: {
           cookie?: unknown;
           access_token?: unknown;

@@ -27,7 +27,7 @@ import { join } from "node:path";
 // for the same pattern). JSON to a temp file keeps test (c)'s capture deterministic.
 const logDir = mkdtempSync(join(tmpdir(), "omniroute-admission-11244-"));
 const logFile = join(logDir, "app.log");
-process.env.NODE_ENV = "production";
+(process.env as Record<string, string | undefined>).NODE_ENV = "production";
 process.env.APP_LOG_TO_FILE = "true";
 process.env.APP_LOG_FILE_PATH = logFile;
 

@@ -8,6 +8,16 @@ import { getModelSpec } from "../../src/shared/constants/modelSpecs.ts";
 import { getPricingForModel } from "../../src/shared/constants/pricing.ts";
 import { getCodexFastCostMultiplier } from "../../src/lib/usage/costCalculator.ts";
 
+function asCodexRequest(value: unknown): {
+  model?: unknown;
+  reasoning?: { effort?: unknown; summary?: unknown };
+} {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    throw new Error("expected a Codex request object");
+  }
+  return value as { model?: unknown; reasoning?: { effort?: unknown; summary?: unknown } };
+}
+
 const MODEL = "gpt-6-astra";
 const EFFORTS = ["ultra", "max", "xhigh", "high", "medium", "low"] as const;
 
@@ -56,10 +66,13 @@ test("Astra effort aliases reach Codex as the base model and supported wire effo
   const executor = new CodexExecutor();
   for (const effort of EFFORTS) {
     const model = `${MODEL}-${effort}`;
-    const result = executor.transformRequest(model, { model, input: [] }, false, {
-      requestEndpointPath: "/responses",
-    });
+    const result = asCodexRequest(
+      executor.transformRequest(model, { model, input: [] }, false, {
+        requestEndpointPath: "/responses",
+      })
+    );
     assert.equal(result.model, MODEL, effort);
+    assert.ok(result.reasoning, effort);
     assert.equal(result.reasoning.effort, effort === "ultra" ? "max" : effort, effort);
   }
 });
@@ -71,23 +84,29 @@ test("Chat-to-Codex translation preserves Astra max reasoning", () => {
     true,
     {}
   );
-  const result = new CodexExecutor().transformRequest(MODEL, translated, true, {
-    requestEndpointPath: "/chat/completions",
-  });
+  const result = asCodexRequest(
+    new CodexExecutor().transformRequest(MODEL, translated, true, {
+      requestEndpointPath: "/chat/completions",
+    })
+  );
   assert.equal(result.model, MODEL);
+  assert.ok(result.reasoning);
   assert.equal(result.reasoning.effort, "max");
 });
 
 test("Astra parenthesized effort overrides preserve the reasoning summary", () => {
   for (const effort of ["max", "ultra"]) {
     const model = `${MODEL}(${effort})`;
-    const result = new CodexExecutor().transformRequest(
-      model,
-      { model, input: [], reasoning: { effort: "low", summary: "detailed" } },
-      false,
-      { requestEndpointPath: "/responses" }
+    const result = asCodexRequest(
+      new CodexExecutor().transformRequest(
+        model,
+        { model, input: [], reasoning: { effort: "low", summary: "detailed" } },
+        false,
+        { requestEndpointPath: "/responses" }
+      )
     );
     assert.equal(result.model, MODEL);
+    assert.ok(result.reasoning);
     assert.equal(result.reasoning.effort, "max");
     assert.equal(result.reasoning.summary, "detailed");
   }

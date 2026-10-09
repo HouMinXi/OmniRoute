@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { NextRequest } from "next/server";
+import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-admin-audit-"));
@@ -46,12 +48,20 @@ test("auth login/logout routes emit structured audit events with ip and request 
   const setCalls = [];
   const deleteCalls = [];
 
-  loginRoute.authRouteInternals.getCookieStore = async () => ({
-    set: (...args) => setCalls.push(args),
-  });
-  logoutRoute.logoutRouteInternals.getCookieStore = async () => ({
-    delete: (...args) => deleteCalls.push(args),
-  });
+  loginRoute.authRouteInternals.getCookieStore = async () =>
+    ({
+      set: (...args: [key: string, value: string] | [options: { name: string; value: string }]) => {
+        setCalls.push(args);
+        return setCalls.length;
+      },
+    }) as unknown as ReadonlyRequestCookies;
+  logoutRoute.logoutRouteInternals.getCookieStore = async () =>
+    ({
+      delete: (...args: [key: string] | [options: { name: string }]) => {
+        deleteCalls.push(args);
+        return deleteCalls.length;
+      },
+    }) as unknown as ReadonlyRequestCookies;
 
   const loginResponse = await loginRoute.POST(
     new Request("http://localhost/api/auth/login", {
@@ -62,7 +72,7 @@ test("auth login/logout routes emit structured audit events with ip and request 
         "x-request-id": "req-auth-login",
       },
       body: JSON.stringify({ password: "admin-secret" }),
-    })
+    }) as NextRequest
   );
 
   assert.equal(loginResponse.status, 200);
@@ -98,9 +108,8 @@ test("auth login/logout routes emit structured audit events with ip and request 
 });
 
 test("auth login route records failed password attempts", async () => {
-  loginRoute.authRouteInternals.getCookieStore = async () => ({
-    set() {},
-  });
+  loginRoute.authRouteInternals.getCookieStore = async () =>
+    ({ set() {} }) as unknown as ReadonlyRequestCookies;
 
   const response = await loginRoute.POST(
     new Request("http://localhost/api/auth/login", {
@@ -111,7 +120,7 @@ test("auth login route records failed password attempts", async () => {
         "x-request-id": "req-auth-failed",
       },
       body: JSON.stringify({ password: "wrong-password" }),
-    })
+    }) as NextRequest
   );
 
   assert.equal(response.status, 401);
@@ -236,13 +245,13 @@ test("deleting the final provider connection removes imported models but preserv
       { params: Promise.resolve({ id }) }
     );
 
-  assert.equal((await deleteConnection(first.id)).status, 200);
+  assert.equal((await deleteConnection(first.id as string)).status, 200);
   assert.deepEqual(
     (await modelsDb.getCustomModels("openai")).map((model: { id: string }) => model.id),
     ["manual-model", "imported-model", "api-sync-model", "auto-sync-model"]
   );
 
-  assert.equal((await deleteConnection(second.id)).status, 200);
+  assert.equal((await deleteConnection(second.id as string)).status, 200);
   assert.deepEqual(await modelsDb.getCustomModels("openai"), [
     {
       id: "manual-model",

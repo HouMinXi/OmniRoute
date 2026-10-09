@@ -99,9 +99,21 @@ test("cost ledger: amount-only row (unknown provider/model) is acceptable and tr
 });
 
 test("cost ledger: safe variant never throws and skips empty renders", () => {
-  assert.doesNotThrow(() => costLedger.recordLedgerEntrySafe({ apiKeyId: "", amountUsd: 1 }));
   assert.doesNotThrow(() =>
-    costLedger.recordLedgerEntrySafe({ apiKeyId: "key-1", amountUsd: 9.99 })
+    costLedger.recordLedgerEntrySafe({
+      apiKeyId: "",
+      provider: "unknown",
+      model: "unknown",
+      amountUsd: 1,
+    })
+  );
+  assert.doesNotThrow(() =>
+    costLedger.recordLedgerEntrySafe({
+      apiKeyId: "key-1",
+      provider: "unknown",
+      model: "unknown",
+      amountUsd: 9.99,
+    })
   );
   assert.equal(costLedger.listLedgerEntries("key-1").length, 1);
 });
@@ -225,7 +237,14 @@ test("key quota: monthly amount blocks when ledger month total reaches cap", () 
 
   // Clearing the ledger month (simulating a reset) re-allows.
   costLedger.recordLedgerEntries([
-    { apiKeyId: "key-1", provider: "openai", model: "gpt-4o", amountUsd: -3, success: true, timestamp: "2026-09-02T00:00:00.000Z" },
+    {
+      apiKeyId: "key-1",
+      provider: "openai",
+      model: "gpt-4o",
+      amountUsd: -3,
+      success: true,
+      timestamp: "2026-09-02T00:00:00.000Z",
+    },
   ]);
 });
 

@@ -203,7 +203,7 @@ export function toRouterObservation(input: unknown): RouterObservation | null {
 
   return {
     sampleId,
-    routeInput: asRecord(value.routeInput, {}),
+    routeInput: asRecord(value.routeInput),
     configId: asString(value.configId, "default"),
     selectedModel,
     expectedModel,

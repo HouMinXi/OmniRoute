@@ -8,6 +8,17 @@ import path from "node:path";
 const { ensureWindowsBuildProfileDirs, getWindowsBuildProfileDir, resolveNextBuildEnv } =
   await import("../../scripts/build/build-next-isolated.mjs");
 
+function profileEnv(env: unknown) {
+  const record = env && typeof env === "object" ? (env as Record<string, unknown>) : {};
+  const read = (key: string) => (typeof record[key] === "string" ? record[key] : undefined);
+  return {
+    HOME: read("HOME"),
+    USERPROFILE: read("USERPROFILE"),
+    APPDATA: read("APPDATA"),
+    LOCALAPPDATA: read("LOCALAPPDATA"),
+  };
+}
+
 // Port of decolua/9router#2402 ("fix(build): isolate Windows HOME/AppData during
 // next build"). Upstream wraps `npm run build` in a new `scripts/build-app.js`
 // entrypoint; OmniRoute's build already routes through
@@ -19,7 +30,7 @@ const { ensureWindowsBuildProfileDirs, getWindowsBuildProfileDir, resolveNextBui
 // touch.
 
 test("resolveNextBuildEnv leaves HOME/USERPROFILE/APPDATA untouched on non-Windows", () => {
-  const env = resolveNextBuildEnv({ NODE_ENV: "test", HOME: "/home/dev" }, "linux");
+  const env = profileEnv(resolveNextBuildEnv({ NODE_ENV: "test", HOME: "/home/dev" }, "linux"));
   assert.equal(env.HOME, "/home/dev");
   assert.equal(env.USERPROFILE, undefined);
   assert.equal(env.APPDATA, undefined);
@@ -27,11 +38,22 @@ test("resolveNextBuildEnv leaves HOME/USERPROFILE/APPDATA untouched on non-Windo
 });
 
 test("resolveNextBuildEnv isolates HOME/USERPROFILE/APPDATA/LOCALAPPDATA on win32", () => {
-  const env = resolveNextBuildEnv(
-    { NODE_ENV: "test", USERPROFILE: "C:\\Users\\ci-runner" },
-    "win32"
+  const env = profileEnv(
+    resolveNextBuildEnv({ NODE_ENV: "test", USERPROFILE: "C:\\Users\\ci-runner" }, "win32")
   );
 
+  assert.equal(typeof env.HOME, "string");
+  assert.equal(typeof env.USERPROFILE, "string");
+  assert.equal(typeof env.APPDATA, "string");
+  assert.equal(typeof env.LOCALAPPDATA, "string");
+  if (
+    typeof env.HOME !== "string" ||
+    typeof env.USERPROFILE !== "string" ||
+    typeof env.APPDATA !== "string" ||
+    typeof env.LOCALAPPDATA !== "string"
+  ) {
+    return;
+  }
   assert.ok(env.HOME, "HOME must be set to an isolated profile dir on win32");
   assert.equal(env.HOME, env.USERPROFILE, "HOME and USERPROFILE must point at the same sandbox");
   assert.notEqual(
@@ -46,9 +68,11 @@ test("resolveNextBuildEnv isolates HOME/USERPROFILE/APPDATA/LOCALAPPDATA on win3
 });
 
 test("resolveNextBuildEnv skips Windows isolation when a caller already sandboxed the build (NEXT_DIST_DIR)", () => {
-  const env = resolveNextBuildEnv(
-    { NODE_ENV: "test", USERPROFILE: "C:\\Users\\ci-runner", NEXT_DIST_DIR: ".build/cli-next" },
-    "win32"
+  const env = profileEnv(
+    resolveNextBuildEnv(
+      { NODE_ENV: "test", USERPROFILE: "C:\\Users\\ci-runner", NEXT_DIST_DIR: ".build/cli-next" },
+      "win32"
+    )
   );
 
   assert.equal(

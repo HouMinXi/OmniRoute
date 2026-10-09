@@ -125,6 +125,7 @@ test("updateCombo merges fields while preserving immutable data", async () => {
     config: { retries: 3, timeoutMs: 2000 },
     isHidden: true,
   });
+  assert.ok(updated);
 
   assert.equal(updated.id, combo.id);
   assert.equal(updated.name, "Routing Combo");
@@ -149,7 +150,13 @@ test("reorderCombos persists manual combo ordering in sqlite", async () => {
     models: [{ provider: "google", model: "gemini-2.5-pro" }],
   });
 
-  const reordered = await combosDb.reorderCombos([charlie.id, alpha.id, bravo.id]);
+  const charlieId = charlie.id;
+  const alphaId = alpha.id;
+  const bravoId = bravo.id;
+  if (typeof charlieId !== "string" || typeof alphaId !== "string" || typeof bravoId !== "string") {
+    throw new Error("created combos are missing ids");
+  }
+  const reordered = await combosDb.reorderCombos([charlieId, alphaId, bravoId]);
 
   assert.deepEqual(
     reordered.map((combo) => combo.name),

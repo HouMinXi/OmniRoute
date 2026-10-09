@@ -130,10 +130,8 @@ function resolveModePackName(config: Record<string, unknown>): string | null {
 /** Resolves an explicit, validated `weights` object from the config, if present. */
 function resolveExplicitWeights(config: Record<string, unknown>): ScoringWeights | undefined {
   if (!isRecord(config.weights)) return undefined;
-  const explicitWeights = config.weights as ScoringWeights;
-  if (validateWeights(explicitWeights)) return explicitWeights;
-  const normalized = normalizeScoringWeights(config.weights as Partial<ScoringWeights>);
-  return validateWeights(normalized) ? normalized : undefined;
+  const explicitWeights = normalizeScoringWeights(config.weights);
+  return validateWeights(explicitWeights) ? explicitWeights : undefined;
 }
 
 function resolveInspectorWeights(combo: ComboRecord | undefined): InspectorWeights {
@@ -194,6 +192,7 @@ function buildEmptyAutopilotReport(options: ComboScoringInspectorOptions): Combo
       degradedCount: 0,
       downCount: 0,
       issueCount: 0,
+      suggestionCount: 0,
       actionableCount: 0,
     },
     combos: [],

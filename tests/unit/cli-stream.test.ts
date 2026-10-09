@@ -12,13 +12,13 @@ function makeSseStream(lines: string[]) {
   });
 }
 
-function mockStreamFetch(chunks: string[], status = 200) {
+function mockStreamFetch(chunks: string[], _status = 200): typeof fetch {
   const sseLines = chunks.map((c) => `data: ${c}`);
   sseLines.push("data: [DONE]");
   return () => Promise.resolve(makeSseStream(sseLines));
 }
 
-async function captureStdout(fn: () => Promise<void>): Promise<string> {
+async function captureStdout(fn: () => Promise<unknown>): Promise<string> {
   const chunks: string[] = [];
   const orig = process.stdout.write.bind(process.stdout);
   process.stdout.write = (chunk: string | Uint8Array) => {
@@ -33,7 +33,7 @@ async function captureStdout(fn: () => Promise<void>): Promise<string> {
   return chunks.join("");
 }
 
-async function captureStderr(fn: () => Promise<void>): Promise<string> {
+async function captureStderr(fn: () => Promise<unknown>): Promise<string> {
   const chunks: string[] = [];
   const orig = process.stderr.write.bind(process.stderr);
   process.stderr.write = (chunk: string | Uint8Array) => {

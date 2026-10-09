@@ -22,5 +22,5 @@ test("dahl is accessible via the merged APIKEY_PROVIDERS barrel", () => {
 });
 
 test("dahl is NOT in NOAUTH_PROVIDERS (uses real apiKey, not synthetic)", () => {
-  assert.equal(NOAUTH_PROVIDERS.dahl, undefined, "dahl must not be noAuth");
+  assert.equal("dahl" in NOAUTH_PROVIDERS, false, "dahl must not be noAuth");
 });

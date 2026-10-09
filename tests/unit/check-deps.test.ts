@@ -4,7 +4,6 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { fileURLToPath } from "node:url";
-// @ts-expect-error — .mjs gate module has no type declarations
 import {
   findUnapprovedDeps,
   discoverManifests,
@@ -119,7 +118,6 @@ test("6A.8: all workspace package deps are in the allowlist (gate exits 0 with e
 });
 
 // --- 6A.8: stale-allowlist enforcement ---
-// @ts-expect-error — reportStaleEntries from mjs
 import { reportStaleEntries } from "../../scripts/check/lib/allowlist.mjs";
 
 test("6A.8 stale: a dep removed from all manifests is detected as stale in allowlist", () => {

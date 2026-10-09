@@ -133,7 +133,7 @@ function useProviderParamFilterConfig(providerId: string, t: Translate) {
         setAllowTextState(formatCommaList(outcome.config.allow));
         setAutoLearnState(outcome.config.autoLearn);
       } else {
-        notify.notify(t("paramFiltersLoadError", { error: outcome.error }), "error");
+        notify.error(t("paramFiltersLoadError", { error: outcome.error }));
       }
       setLoadedProviderId(providerId);
     };
@@ -151,9 +151,9 @@ function useProviderParamFilterConfig(providerId: string, t: Translate) {
       await putParamFilterConfig(providerId, body);
       setConfig(body);
       setDirty(false);
-      notify.notify(t("paramFiltersSaveSuccess"), "success");
+      notify.success(t("paramFiltersSaveSuccess"));
     } catch (err) {
-      notify.notify(t("paramFiltersSaveError", { error: errorMessage(err) }), "error");
+      notify.error(t("paramFiltersSaveError", { error: errorMessage(err) }));
     } finally {
       setSaving(false);
     }
@@ -168,9 +168,9 @@ function useProviderParamFilterConfig(providerId: string, t: Translate) {
       setAllowTextState("");
       setAutoLearnState(false);
       setDirty(false);
-      notify.notify(t("paramFiltersResetSuccess"), "success");
+      notify.success(t("paramFiltersResetSuccess"));
     } catch (err) {
-      notify.notify(t("paramFiltersResetError", { error: errorMessage(err) }), "error");
+      notify.error(t("paramFiltersResetError", { error: errorMessage(err) }));
     } finally {
       setSaving(false);
     }
@@ -204,7 +204,7 @@ function ParamFilterSectionSkeleton() {
   );
 }
 
-function ParamFilterSectionHeader({ t }: { t: (key: string) => string }) {
+function ParamFilterSectionHeader({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <>
       <h2 className="text-base font-semibold text-text-main mb-1">

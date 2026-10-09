@@ -82,7 +82,9 @@ async function extractEndpointFromConfig(
         return match ? match[1] : null;
       }
       case "omp": {
-        const omnirouteBlock = content.match(/omniroute:\s*\n(?:[^\n]+\n)*?\s*baseUrl:\s*["']?([^"'\r\n]+)["']?/i);
+        const omnirouteBlock = content.match(
+          /omniroute:\s*\n(?:[^\n]+\n)*?\s*baseUrl:\s*["']?([^"'\r\n]+)["']?/i
+        );
         if (omnirouteBlock) return omnirouteBlock[1].trim();
         const match =
           content.match(/baseUrl:\s*["']?([^"'\r\n]*(?:omniroute|20128)[^"'\r\n]*)["']?/i) ||
@@ -182,7 +184,7 @@ export async function GET(request: Request): Promise<Response> {
               installed: runtime.installed,
               runnable: runtime.runnable,
               version: (runtime as Record<string, unknown>).version as string | undefined,
-              command: runtime.command ?? undefined,
+              command: "command" in runtime ? (runtime.command ?? undefined) : undefined,
               commandPath: (runtime as Record<string, unknown>).commandPath as string | undefined,
               reason: runtime.reason ?? undefined,
             },

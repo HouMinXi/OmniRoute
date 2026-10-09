@@ -30,10 +30,8 @@ import {
   type ProviderMessageTranslator,
   type CompatByProtocolMap,
 } from "../providerPageHelpers";
-import { useNotificationStore } from "@/store/notificationStore";
+import { type NotificationStore } from "@/store/notificationStore";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
-
-type NotifyStore = ReturnType<typeof useNotificationStore>;
 
 // ──── types ──────────────────────────────────────────────────────────────────
 
@@ -54,7 +52,7 @@ export interface UseModelVisibilityHandlersParams {
   providerStorageAlias: string;
   fetchProviderModelMeta: () => Promise<void>;
   fetchAliases: () => Promise<void>;
-  notify: NotifyStore;
+  notify: NotificationStore;
   t: ProviderMessageTranslator;
   formatProviderModelsErrorResponse?: typeof formatProviderModelsErrorResponse;
   /** The current selected connection (may be null). */
@@ -116,7 +114,9 @@ export function useModelVisibilityHandlers({
   const [clearingModels, setClearingModels] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
   const [testingModelId, setTestingModelId] = useState<string | null>(null);
-  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>({});
+  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>(
+    {}
+  );
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
   const [autoHideFailed, setAutoHideFailed] = useState(false);

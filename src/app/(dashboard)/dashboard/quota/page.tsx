@@ -11,7 +11,7 @@ export default function QuotaPage() {
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => (r.ok ? r.json() : {}))
-      .then((data) => {
+      .then((data: Record<string, unknown>) => {
         if (typeof data.autoRefreshProviderQuota === "boolean") {
           setAutoRefreshEnabled(data.autoRefreshProviderQuota);
         }

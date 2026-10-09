@@ -16,17 +16,18 @@ const BASE_BODY = {
 };
 
 // Mutations that handleChatCore applies between cache read and cache write.
-function simulateSanitizeChatRequestBody(body: Record<string, unknown>): Record<string, unknown> {
+function simulateSanitizeChatRequestBody(
+  body: typeof BASE_BODY
+): typeof BASE_BODY & { _sanitized: boolean } {
   return { ...body, _sanitized: true };
 }
 
-function simulateInjectMemoryAndSkills(body: Record<string, unknown>): Record<string, unknown> {
+function simulateInjectMemoryAndSkills(
+  body: typeof BASE_BODY & { _sanitized?: boolean }
+): typeof BASE_BODY & { _sanitized?: boolean } {
   return {
     ...body,
-    messages: [
-      { role: "system", content: "[Memory: user likes programming]" },
-      ...(body.messages as Array<unknown>),
-    ],
+    messages: [{ role: "system", content: "[Memory: user likes programming]" }, ...body.messages],
   };
 }
 
@@ -40,7 +41,8 @@ test("cache signature must be identical before and after body mutations", async 
   );
 
   // Simulate the mutations that happen between cache read and cache write.
-  let mutatedBody = simulateSanitizeChatRequestBody(BASE_BODY);
+  let mutatedBody: typeof BASE_BODY & { _sanitized?: boolean } =
+    simulateSanitizeChatRequestBody(BASE_BODY);
   mutatedBody = simulateInjectMemoryAndSkills(mutatedBody);
 
   // Compute signature at write-time using the mutated body (the bug).

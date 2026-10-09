@@ -10,14 +10,14 @@
 
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  buildAntigravityAuthRequest,
-  runAntigravityLogin,
-} from "../../bin/cli/commands/login.mjs";
+import { buildAntigravityAuthRequest, runAntigravityLogin } from "../../bin/cli/commands/login.mjs";
 import { decodeCredentialBlob } from "../../src/lib/oauth/credentialBlob.ts";
 
 test("buildAntigravityAuthRequest: loopback redirect on 127.0.0.1 + no PKCE", async () => {
-  const { authUrl, redirectUri, state } = await buildAntigravityAuthRequest(54321, () => "fixed");
+  const { authUrl, redirectUri, state } = await buildAntigravityAuthRequest(
+    54321,
+    () => "fixed" as `${string}-${string}-${string}-${string}-${string}`
+  );
   assert.equal(redirectUri, "http://127.0.0.1:54321/callback");
   assert.equal(state, "fixed");
 

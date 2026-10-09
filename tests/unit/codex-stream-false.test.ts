@@ -226,6 +226,7 @@ test("CodexExecutor.transformRequest clones the request body before forcing stre
 
   assert.notStrictEqual(transformed, body);
   assert.deepEqual(body, original);
+  assert.ok(transformed && typeof transformed === "object" && "stream" in transformed);
   assert.equal(transformed.stream, true);
 });
 

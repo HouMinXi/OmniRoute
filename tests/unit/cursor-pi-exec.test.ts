@@ -14,6 +14,22 @@ import {
 import { newStreamCtx, processFrame } from "../../open-sse/executors/cursor.ts";
 import { CursorSessionManager } from "../../open-sse/services/cursorSessionManager.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
 const sources = [
   { field: 45, kind: "exec_pi_read", args: [encodeString(1, "/tmp/fixture.txt")] },
   { field: 46, kind: "exec_pi_bash", args: [encodeString(1, "pwd")] },
@@ -126,15 +142,13 @@ test("PI execs bridge to client tools and answer on result fields 46-52", () => 
   for (const [index, data] of written.entries()) {
     const agent = decodeFields(data.subarray(5)).find((field) => field.fieldNumber === 2);
     assert.ok(agent);
-    const exec = decodeFields(agent.bytes);
+    const exec = decodeFields(lenBytes(agent));
     const result = exec.find((field) => field.fieldNumber === sources[index].field + 1);
     assert.ok(result, `PI response field ${sources[index].field + 1}`);
-    const success = decodeFields(result.bytes).find((field) => field.fieldNumber === 1);
+    const success = decodeFields(lenBytes(result)).find((field) => field.fieldNumber === 1);
     assert.ok(success, `PI success ${sources[index].kind}`);
     assert.equal(
-      decodeFields(success.bytes)
-        .find((field) => field.fieldNumber === 1)
-        ?.bytes.toString(),
+      fieldText(decodeFields(lenBytes(success)).find((field) => field.fieldNumber === 1)),
       "done"
     );
   }
@@ -200,11 +214,13 @@ test("PI grep flags and multi-edit stay unavailable unless client tool can prese
   for (const [index, resultField] of [50, 48].entries()) {
     const agent = decodeFields(written[index].subarray(5)).find((part) => part.fieldNumber === 2);
     assert.ok(agent);
-    const result = decodeFields(agent.bytes).find((part) => part.fieldNumber === resultField);
+    const result = decodeFields(lenBytes(agent)).find((part) => part.fieldNumber === resultField);
     assert.ok(result, `PI result field ${resultField}`);
-    const error = decodeFields(result.bytes).find((part) => part.fieldNumber === 2);
+    const error = decodeFields(lenBytes(result)).find((part) => part.fieldNumber === 2);
     assert.ok(error, "typed PI error, not a success with fabricated output");
-    assert.ok(decodeFields(error.bytes).find((part) => part.fieldNumber === 1)?.bytes.length);
+    assert.ok(
+      lenBytes(decodeFields(lenBytes(error)).find((part) => part.fieldNumber === 1)).length
+    );
   }
 });
 

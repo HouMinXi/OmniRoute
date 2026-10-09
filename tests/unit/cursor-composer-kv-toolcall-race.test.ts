@@ -185,7 +185,7 @@ test("driveH2 buffers upstream frames while waiting for a client tool result", a
 
   req.write(nextFrame.subarray(3));
   const second = newStreamCtx("cursor/grok-4.7", () => {});
-  h2.initialBytes = first.leftoverBytes;
+  h2.initialBytes = Buffer.from(first.leftoverBytes);
   await driveH2(h2, second, undefined, undefined, undefined, undefined);
   assert.equal(second.toolCalls.length, 1, "buffered frame must be handled on resume");
   req.destroy();

@@ -20,6 +20,14 @@ function CompactDonutCard({
   labelClassName = "",
   getLegendKey,
   getLegendTitle,
+}: {
+  pieData: Array<{ name: string; value: number; fill: string; fullName?: string }>;
+  title: string;
+  formatter: (value: number) => string;
+  valueClassName?: string;
+  labelClassName?: string;
+  getLegendKey?: (seg: { fullName?: string }, i: number) => string;
+  getLegendTitle?: (seg: { fullName?: string }) => string;
 }) {
   const recharts = useRecharts();
 

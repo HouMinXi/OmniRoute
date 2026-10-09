@@ -30,6 +30,7 @@ test("ServerSupervisor surfaces the real spawn error (ENOENT) instead of swallow
     serverPath: "/definitely/does/not/exist/server.js",
     env: {},
     maxRestarts: 0,
+    onCrashCallback: undefined,
   });
 
   // Real spawn+'error' path the supervisor uses in production; ENOENT fires async.
@@ -74,6 +75,7 @@ test("ServerSupervisor.handleExit(code, err) logs err.code/err.path/err.message 
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 5,
+    onCrashCallback: undefined,
   });
   // @ts-ignore — stub start() so the scheduled restart never spawns a real process
   supervisor.start = () => null;
@@ -89,7 +91,10 @@ test("ServerSupervisor.handleExit(code, err) logs err.code/err.path/err.message 
   console.error = origErr;
 
   const printed = logs.join("\n");
-  assert.ok(printed.includes("ENOENT"), `expected err.code (ENOENT) to be printed, got: ${printed}`);
+  assert.ok(
+    printed.includes("ENOENT"),
+    `expected err.code (ENOENT) to be printed, got: ${printed}`
+  );
   assert.ok(
     printed.includes("/fake/server.js"),
     `expected err.path to be printed, got: ${printed}`

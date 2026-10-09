@@ -57,7 +57,7 @@ async function createAntigravityAccount(options: {
     priority: options.priority,
   });
   assert(connection && typeof connection.id === "string");
-  return connection;
+  return connection as typeof connection & { id: string };
 }
 
 test("Antigravity BYOP 422 rotates to a sibling account and the request succeeds", async () => {

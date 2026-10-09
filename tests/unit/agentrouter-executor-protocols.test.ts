@@ -38,6 +38,7 @@ test("AgentRouter default dispatch uses the Claude Code wire image and x-api-key
   }
 
   assert.ok(captured);
+  if (!captured) return;
   assert.equal(captured.url, "https://agentrouter.org/v1/messages?beta=true");
   assert.equal(captured.headers.get("x-api-key"), "test-agentrouter-key");
   assert.equal(captured.headers.get("authorization"), null);
@@ -82,6 +83,7 @@ test("AgentRouter OpenAI Chat dispatch uses Codex identity without Claude-only b
   }
 
   assert.ok(captured);
+  if (!captured) return;
   assert.equal(captured.url, "https://agentrouter.org/v1/chat/completions");
   assert.equal(captured.headers.get("authorization"), "Bearer test-agentrouter-key");
   assert.equal(captured.headers.get("x-api-key"), null);
@@ -129,6 +131,7 @@ test("AgentRouter OpenAI Responses dispatch uses the Responses endpoint and Code
   }
 
   assert.ok(captured);
+  if (!captured) return;
   assert.equal(captured.url, "https://agentrouter.org/v1/responses");
   assert.equal(captured.headers.get("authorization"), "Bearer test-agentrouter-key");
   assert.equal(captured.headers.get("user-agent"), `codex_cli_rs/${DEFAULT_CODEX_CLIENT_VERSION}`);

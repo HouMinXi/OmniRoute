@@ -12,10 +12,8 @@ interface ProviderStatusRow {
 function readProviderStatusRows(): ProviderStatusRow[] {
   const db = getDbInstance();
   return db
-    .prepare<ProviderStatusRow>(
-      "SELECT id, provider, is_active, test_status, last_error FROM provider_connections"
-    )
-    .all();
+    .prepare("SELECT id, provider, is_active, test_status, last_error FROM provider_connections")
+    .all() as ProviderStatusRow[];
 }
 
 export async function buildOmniRouteStatus() {

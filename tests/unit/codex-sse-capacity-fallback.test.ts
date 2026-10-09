@@ -9,7 +9,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { CodexExecutor, __setCodexWebSocketTransportForTesting } from "../../open-sse/executors/codex.ts";
+import {
+  CodexExecutor,
+  __setCodexWebSocketTransportForTesting,
+} from "../../open-sse/executors/codex.ts";
 
 test.afterEach(() => {
   __setCodexWebSocketTransportForTesting(undefined);
@@ -30,6 +33,11 @@ function sseStreamFromChunks(chunks: string[]): ReadableStream<Uint8Array> {
   });
 }
 
+function objectResult(value: unknown): { response: Response } {
+  assert.ok(!(value instanceof Response));
+  return value as { response: Response };
+}
+
 test("CodexExecutor.execute converts a 200-OK SSE stream carrying a model-at-capacity error into a 503 Response", async () => {
   const executor = new CodexExecutor();
   const originalFetch = globalThis.fetch;
@@ -46,12 +54,14 @@ test("CodexExecutor.execute converts a 200-OK SSE stream carrying a model-at-cap
     );
 
   try {
-    const result = await executor.execute({
-      model: "gpt-5.5",
-      body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
-      stream: true,
-      credentials: { accessToken: "codex-token" },
-    });
+    const result = objectResult(
+      await executor.execute({
+        model: "gpt-5.5",
+        body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
+        stream: true,
+        credentials: { accessToken: "codex-token" },
+      })
+    );
 
     assert.notEqual(result.response.status, 200);
     assert.equal(result.response.status, 503);
@@ -80,12 +90,14 @@ test("CodexExecutor.execute converts server_is_overloaded / service_unavailable_
     );
 
   try {
-    const result = await executor.execute({
-      model: "gpt-5.5",
-      body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
-      stream: true,
-      credentials: { accessToken: "codex-token" },
-    });
+    const result = objectResult(
+      await executor.execute({
+        model: "gpt-5.5",
+        body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
+        stream: true,
+        credentials: { accessToken: "codex-token" },
+      })
+    );
 
     assert.equal(result.response.status, 503);
   } finally {
@@ -108,12 +120,14 @@ test("CodexExecutor.execute reassembles a normal 200-OK SSE stream byte-intact a
     });
 
   try {
-    const result = await executor.execute({
-      model: "gpt-5.5",
-      body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
-      stream: true,
-      credentials: { accessToken: "codex-token" },
-    });
+    const result = objectResult(
+      await executor.execute({
+        model: "gpt-5.5",
+        body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
+        stream: true,
+        credentials: { accessToken: "codex-token" },
+      })
+    );
 
     assert.equal(result.response.status, 200);
     const text = await result.response.text();
@@ -141,12 +155,14 @@ test("CodexExecutor.execute reassembles a normal SSE stream split across multipl
     });
 
   try {
-    const result = await executor.execute({
-      model: "gpt-5.5",
-      body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
-      stream: true,
-      credentials: { accessToken: "codex-token" },
-    });
+    const result = objectResult(
+      await executor.execute({
+        model: "gpt-5.5",
+        body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
+        stream: true,
+        credentials: { accessToken: "codex-token" },
+      })
+    );
 
     assert.equal(result.response.status, 200);
     const text = await result.response.text();

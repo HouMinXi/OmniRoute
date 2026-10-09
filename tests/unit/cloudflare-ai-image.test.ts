@@ -50,8 +50,10 @@ test("handleImageGeneration rejects a Cloudflare Workers AI request with no Acco
   });
 
   assert.equal(result.success, false);
+  if (result.success !== false || !("status" in result))
+    throw new Error("expected a status on failure");
   assert.equal(result.status, 400);
-  assert.match(String(result.error), /Account ID/);
+  assert.match(String("error" in result ? result.error : ""), /Account ID/);
 });
 
 test("handleImageGeneration dispatches cloudflare-ai-image format to the Workers AI handler and normalizes the response", async () => {
@@ -89,8 +91,11 @@ test("handleImageGeneration dispatches cloudflare-ai-image format to the Workers
 
     assert.equal(fetchCalled, true, "expected the Workers AI handler to call fetch");
     assert.equal(result.success, true, `expected success, got: ${JSON.stringify(result)}`);
-    assert.ok(Array.isArray(result.data?.data) && result.data.data.length === 1);
-    assert.equal(result.data.data[0].b64_json, "ZmFrZS1iYXNlNjQtaW1hZ2U=");
+    if (!result.success || !("data" in result) || result.data == null)
+      throw new Error("expected success");
+    const data = result.data as { data: Array<{ b64_json: string }> };
+    assert.ok(Array.isArray(data.data) && data.data.length === 1);
+    assert.equal(data.data[0].b64_json, "ZmFrZS1iYXNlNjQtaW1hZ2U=");
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -122,6 +127,7 @@ test("handleImageGeneration surfaces Cloudflare Workers AI upstream errors witho
     });
 
     assert.equal(result.success, false);
+    if (result.success !== false || !("status" in result)) throw new Error("expected failure");
     assert.equal(result.status, 401);
   } finally {
     globalThis.fetch = originalFetch;

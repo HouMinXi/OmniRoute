@@ -90,16 +90,15 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
       ["max", 3],
     ] as const;
     for (const [effort, effortIndex] of expected) {
-      assert.equal(
-        prepareChatGptWebBrowserRequest("gpt-5.5", {
-          reasoning_effort: effort,
-          messages: [
-            { role: "system", content: "Be concise." },
-            { role: "user", content: [{ type: "text", text: "Question" }] },
-          ],
-        }).selection.effortIndex,
-        effortIndex
-      );
+      const selection = prepareChatGptWebBrowserRequest("gpt-5.5", {
+        reasoning_effort: effort,
+        messages: [
+          { role: "system", content: "Be concise." },
+          { role: "user", content: [{ type: "text", text: "Question" }] },
+        ],
+      }).selection;
+      assert.ok(selection.kind === "picker");
+      assert.equal(selection.effortIndex, effortIndex);
     }
 
     const prepared = prepareChatGptWebBrowserRequest("gpt-5.5", {
@@ -109,6 +108,7 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
         { role: "user", content: "Question" },
       ],
     });
+    assert.ok(prepared.selection.kind === "picker");
     assert.equal(prepared.selection.modelLabel, "GPT-5.5");
     assert.equal(prepared.prompt, "System:\nBe concise.\n\nUser:\nQuestion");
   });
@@ -349,7 +349,20 @@ describe("ChatGPT Web clean-room executor response adapter", () => {
       start: async () => async () => {},
       submitPrompt: async () => "",
     } satisfies ChatGptWebBrowserSession;
-    let observed: Record<string, unknown> | null = null;
+    const observed: {
+      selection?: unknown;
+      storageState?: unknown;
+      userAgent?: unknown;
+    } = {};
+    function noteObserved(input: {
+      selection?: unknown;
+      storageState?: unknown;
+      userAgent?: unknown;
+    }) {
+      observed.selection = input.selection;
+      observed.storageState = input.storageState;
+      observed.userAgent = input.userAgent;
+    }
     const response = await executeChatGptWebCleanRoom(
       {
         model: "gpt-5-6-pro",
@@ -365,7 +378,7 @@ describe("ChatGPT Web clean-room executor response adapter", () => {
       },
       {
         createSession: async (input) => {
-          observed = input;
+          noteObserved(input);
           return session;
         },
         runTurn: async (_session, request) => {
@@ -378,13 +391,13 @@ describe("ChatGPT Web clean-room executor response adapter", () => {
       }
     );
 
-    assert.deepEqual(observed?.selection, {
+    assert.deepEqual(observed.selection, {
       kind: "picker",
       modelLabel: "GPT-5.6 Sol",
       effortIndex: 4,
     });
-    assert.deepEqual(observed?.storageState, { cookies: [], origins: [] });
-    assert.equal(observed?.userAgent, "CleanRoomBrowser/1.0");
+    assert.deepEqual(observed.storageState, { cookies: [], origins: [] });
+    assert.equal(observed.userAgent, "CleanRoomBrowser/1.0");
     assert.equal(response.status, 200);
   });
 });

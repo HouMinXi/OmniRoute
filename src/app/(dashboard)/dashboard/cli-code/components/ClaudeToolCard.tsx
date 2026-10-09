@@ -256,7 +256,7 @@ export default function ClaudeToolCard({
 
   // Generate settings.json content for manual copy
   const getManualConfigs = () => {
-    const env = { ANTHROPIC_BASE_URL: getEffectiveBaseUrl() };
+    const env: Record<string, string> = { ANTHROPIC_BASE_URL: getEffectiveBaseUrl() };
     if (effectiveApiKey && effectiveApiKey.trim()) {
       env.ANTHROPIC_AUTH_TOKEN = "<API_KEY_FROM_DASHBOARD>";
     } else if (cloudEnabled) {

@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
 
 const { REGISTRY } = await import("../../open-sse/config/providerRegistry.ts");
 
-const blackbox = (REGISTRY as Record<string, Record<string, unknown>>).blackbox;
+const blackbox = REGISTRY.blackbox;
 
 // New model ids from upstream PR #2038 (upstreamModelId / thinkingConfig fields
 // are dropped — OmniRoute's RegistryModel only carries { id, name, ... })
@@ -45,7 +45,7 @@ test("blackbox provider is registered", () => {
 
 for (const id of NEW_MODEL_IDS) {
   test(`blackbox.models includes new model: ${id}`, () => {
-    const models = blackbox.models as { id: string; name: string }[];
+    const models = blackbox.models;
     const found = models.find((m) => m.id === id);
     assert.ok(found, `Expected model "${id}" to be present in blackbox.models`);
   });
@@ -53,7 +53,7 @@ for (const id of NEW_MODEL_IDS) {
 
 for (const id of STALE_MODEL_IDS) {
   test(`blackbox.models does NOT include stale model: ${id}`, () => {
-    const models = blackbox.models as { id: string; name: string }[];
+    const models = blackbox.models;
     const found = models.find((m) => m.id === id);
     assert.equal(found, undefined, `Stale model "${id}" should be absent from blackbox.models`);
   });

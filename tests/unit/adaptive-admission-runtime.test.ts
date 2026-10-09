@@ -282,7 +282,7 @@ describe("adaptive admission runtime env + defaults", () => {
       const snap = runtime.snapshot();
       assert.equal(snap.mode, "shadow");
       assert.equal(snap.minLimit, 8);
-      assert.equal(snap.initialLimit ?? snap.currentLimit >= 8, true);
+      assert.equal(snap.currentLimit >= 8, true);
       assert.equal(warnings.length, 1);
       assert.match(
         warnings[0]!,

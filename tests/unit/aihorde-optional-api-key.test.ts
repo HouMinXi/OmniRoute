@@ -47,7 +47,7 @@ test("aihorde prefers a stored API key over the anonymous fallback", async () =>
     apiKey: "horde-registered-key-123",
   });
   assert.ok(created?.id);
-  registeredKeyConnectionId = created.id;
+  registeredKeyConnectionId = String(created.id);
 
   const creds = await getProviderCredentials("aihorde");
   assert.ok(creds);
@@ -68,7 +68,7 @@ test("aihorde falls back to anonymous when the only stored key is rate-limited",
     apiKey: "horde-cooling-down-key",
   });
   assert.ok(created?.id);
-  await providersDb.updateProviderConnection(created.id, {
+  await providersDb.updateProviderConnection(String(created.id), {
     rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
     testStatus: "unavailable",
   });
@@ -87,7 +87,7 @@ test("aihorde falls back to anonymous when the only stored key is terminally ban
     apiKey: "horde-banned-key",
   });
   assert.ok(created?.id);
-  await providersDb.updateProviderConnection(created.id, { testStatus: "banned" });
+  await providersDb.updateProviderConnection(String(created.id), { testStatus: "banned" });
 
   const creds = await getProviderCredentials("aihorde");
   assert.ok(creds);
@@ -104,7 +104,7 @@ test("aihorde rotates past an unhealthy stored key to the next healthy one", asy
     priority: 1,
   });
   assert.ok(unhealthy?.id);
-  await providersDb.updateProviderConnection(unhealthy.id, {
+  await providersDb.updateProviderConnection(String(unhealthy.id), {
     rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
     testStatus: "unavailable",
   });

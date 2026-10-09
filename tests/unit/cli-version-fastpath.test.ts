@@ -33,14 +33,13 @@ test("fast-path selector: no args or a real command do not select the fast path"
 });
 
 test("fast-path selector: defensive on non-array input", () => {
-  // @ts-expect-error intentional bad input
-  assert.equal(isVersionFastPath(undefined), false);
+  assert.equal(isVersionFastPath(undefined as unknown as string[]), false);
 });
 
 test("omniroute CLI --version fast-path prints ONLY the version, skipping bootstrap output", async () => {
-  const pkg = JSON.parse(
-    readFileSync(join(process.cwd(), "package.json"), "utf8")
-  ) as { version: string };
+  const pkg = JSON.parse(readFileSync(join(process.cwd(), "package.json"), "utf8")) as {
+    version: string;
+  };
 
   const { stdout } = await execFileAsync(process.execPath, ["bin/omniroute.mjs", "--version"], {
     cwd: process.cwd(),

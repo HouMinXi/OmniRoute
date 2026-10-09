@@ -65,6 +65,7 @@ test("ServerSupervisor.handleExit com code=0 espontâneo reinicia em vez de sair
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 2,
+    onCrashCallback: undefined,
   });
   let started = 0;
   // Stub start() so the scheduled restart never spawns the fake server.
@@ -101,6 +102,7 @@ test("ServerSupervisor.handleExit com isShuttingDown=true chama process.exit ime
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 2,
+    onCrashCallback: undefined,
   });
   supervisor.isShuttingDown = true;
   supervisor.handleExit(1);
@@ -118,6 +120,7 @@ test("ServerSupervisor.handleExit incrementa restartCount e chama start() após 
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 5,
+    onCrashCallback: undefined,
   });
   supervisor.start = () => {
     startCalls++;
@@ -143,6 +146,7 @@ test("ServerSupervisor.handleExit exibe crash log ao reiniciar", async () => {
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 5,
+    onCrashCallback: undefined,
   });
   supervisor.start = () => null as any;
   supervisor.startedAt = Date.now() - 100;
@@ -213,6 +217,7 @@ test("ServerSupervisor reseta restartCount após viver >= RESTART_RESET_MS (#442
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 2,
+    onCrashCallback: undefined,
   });
   supervisor.start = () => null as any;
   supervisor.restartCount = 2;
@@ -237,6 +242,7 @@ test("ServerSupervisor.handleExit com string code não passa string para process
     serverPath: "/fake/server.js",
     env: {},
     maxRestarts: 0,
+    onCrashCallback: undefined,
   });
   // Simulates the 'error' event on child spawn failure: err.code = 'ENOENT' (string, not number).
   // maxRestarts=0 → restartCount(0) >= maxRestarts(0) → process.exit() is called immediately.

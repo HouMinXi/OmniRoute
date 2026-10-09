@@ -94,7 +94,8 @@ test("getDriverInfo returns driver info object", async () => {
   const info = core.getDriverInfo();
   assert.ok(info === null || typeof info === "object");
   if (info) {
-    assert.ok(typeof info.driver === "string");
+    assert.ok(typeof info.kind === "string");
+    assert.ok(typeof info.source === "string");
   }
 });
 

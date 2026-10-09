@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, type ReactElement } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import type { OmniSkill } from "./OmniSkillCard";
 
@@ -35,7 +35,7 @@ export function SkillInspectorPane({
   skill,
   onSetMode,
   onUninstall,
-}: SkillInspectorPaneProps): JSX.Element {
+}: SkillInspectorPaneProps): ReactElement {
   const locale = useLocale();
   const t = useTranslations("skills");
   const [activeTab, setActiveTab] = useState<InspectorTab>("schema");

@@ -1006,9 +1006,10 @@ export function isEarlyEofSiblingFailoverOn(): boolean {
 
 export function decideProxyResolutionFailure(
   err: unknown,
-  env: { PROXY_FAIL_OPEN?: string } = process.env
+  env: { PROXY_FAIL_OPEN?: string } | NodeJS.ProcessEnv = process.env
 ): null {
-  if ((env.PROXY_FAIL_OPEN ?? "").trim().toLowerCase() === "true") {
+  const failOpen = typeof env.PROXY_FAIL_OPEN === "string" ? env.PROXY_FAIL_OPEN : "";
+  if (failOpen.trim().toLowerCase() === "true") {
     log.warn(
       "PROXY",
       `Proxy resolution failed — PROXY_FAIL_OPEN=true, falling back to DIRECT: ${

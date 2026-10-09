@@ -634,401 +634,397 @@ export function createResponsesApiTransformStream(
     }
   };
 
-  return new TransformStream(
-    {
-      start(controller) {
-        // Periodic keepalive heartbeat to prevent client timeouts (Codex CLI #2544)
-        state.keepaliveTimer = setInterval(() => {
-          // If the stream has already been torn down (client disconnected, downstream
-          // cancelled), enqueue() throws on the closed/errored controller. Without this
-          // guard the interval keeps firing — and throwing — every keepaliveIntervalMs
-          // forever, leaking one live timer per aborted /v1/responses stream and burning
-          // CPU as these accumulate over time. Self-clear on the first failed enqueue.
-          try {
-            controller.enqueue(encoder.encode(": keepalive\n\n"));
-          } catch {
-            if (state.keepaliveTimer) {
-              clearInterval(state.keepaliveTimer);
-              state.keepaliveTimer = null;
+  const transformer: Transformer & {
+    cancel: (reason?: unknown) => void;
+  } = {
+    start(controller) {
+      // Periodic keepalive heartbeat to prevent client timeouts (Codex CLI #2544)
+      state.keepaliveTimer = setInterval(() => {
+        // If the stream has already been torn down (client disconnected, downstream
+        // cancelled), enqueue() throws on the closed/errored controller. Without this
+        // guard the interval keeps firing — and throwing — every keepaliveIntervalMs
+        // forever, leaking one live timer per aborted /v1/responses stream and burning
+        // CPU as these accumulate over time. Self-clear on the first failed enqueue.
+        try {
+          controller.enqueue(encoder.encode(": keepalive\n\n"));
+        } catch {
+          if (state.keepaliveTimer) {
+            clearInterval(state.keepaliveTimer);
+            state.keepaliveTimer = null;
+          }
+        }
+      }, keepaliveIntervalMs);
+      // Don't let the keepalive timer keep the event loop (process) alive on its own.
+      (state.keepaliveTimer as { unref?: () => void })?.unref?.();
+    },
+    transform(chunk, controller) {
+      const text = decoder.decode(chunk, { stream: true });
+      logger?.logInput(text.trim());
+      state.buffer += text;
+
+      const messages = state.buffer.split("\n\n");
+      state.buffer = messages.pop() || "";
+
+      for (const msg of messages) {
+        if (!msg.trim()) continue;
+
+        const dataMatch = msg.match(/^data:\s*(.+)$/m);
+        if (!dataMatch) continue;
+
+        const dataStr = dataMatch[1].trim();
+        if (dataStr === "[DONE]") continue;
+
+        let parsed;
+        try {
+          parsed = JSON.parse(dataStr);
+        } catch {
+          continue;
+        }
+
+        // #10223: strip request_id when it looks corrupted (suspiciously
+        // long — normal request IDs are <100 chars). Some providers
+        // (DeepSeek) have SSE encoder bugs that leak response-ID fragments
+        // into this field, producing 200+ char values. Well-behaved
+        // providers' request_id is preserved.
+        if (
+          typeof parsed.request_id === "string" &&
+          parsed.request_id.length >= CORRUPTED_REQUEST_ID_THRESHOLD
+        ) {
+          logger?.logInput(
+            `[ResponsesTransformer] stripped corrupted request_id (${parsed.request_id.length} chars)`
+          );
+          delete parsed.request_id;
+        }
+
+        if (parsed.usage) {
+          state.usage = normalizeResponsesUsage(state.usage, parsed.usage);
+        }
+
+        if (!parsed.choices?.length) {
+          // #6906: trailing usage-only chunk after finish_reason already deferred
+          // completion — send it now with the usage just captured above.
+          if (state.awaitingTrailingUsage && !state.completedSent) {
+            sendCompleted(controller);
+          }
+          continue;
+        }
+
+        const choice = parsed.choices[0];
+        const idx = choice.index || 0;
+        const delta = choice.delta || {};
+        if (state.parseTextualReasoningTags !== true && typeof parsed.model === "string") {
+          state.parseTextualReasoningTags = shouldParseTextualReasoningTags(
+            undefined,
+            parsed.model
+          );
+        }
+        const parseTextualReasoningTags = state.parseTextualReasoningTags === true;
+
+        // Emit initial events
+        if (!state.started) {
+          state.started = true;
+          state.responseId = parsed.id ? `resp_${parsed.id}` : state.responseId;
+
+          emit(controller, "response.created", {
+            type: "response.created",
+            response: {
+              id: state.responseId,
+              object: "response",
+              created_at: state.created,
+              status: "in_progress",
+              background: false,
+              error: null,
+              output: [],
+            },
+          });
+
+          emit(controller, "response.in_progress", {
+            type: "response.in_progress",
+            response: {
+              id: state.responseId,
+              object: "response",
+              created_at: state.created,
+              status: "in_progress",
+              background: false,
+              error: null,
+              output: [],
+            },
+          });
+        }
+
+        // Handle OpenAI-compatible reasoning fields. Some providers use the
+        // standard `reasoning_content` key while others use the string alias
+        // `reasoning`; prefer the standard key when both are present.
+        const reasoning = getReadableReasoningValue(delta);
+        if (reasoning && !isInternalReasoningPlaceholder(reasoning)) {
+          startReasoning(controller, idx);
+          emitReasoningDelta(controller, reasoning);
+        }
+
+        // Handle text content. Generic prompt-format tags are visible text;
+        // only tag-native models opt into textual reasoning extraction.
+        // Strip the internal reasoning placeholder if the model echoed it
+        // through ordinary content (#8081). Only the text-content emission
+        // is skipped when nothing meaningful remains — this must NOT skip
+        // this message's tool_calls / finish_reason handling below, so we
+        // gate the whole block on strippedContent instead of returning /
+        // continuing out of the msg loop early.
+        if (delta.content) {
+          const strippedContent = stripInternalReasoningPlaceholder(delta.content);
+          if (strippedContent) {
+            // Close reasoning if it was opened via native reasoning_content
+            // and is still open, before emitting message content. Without this
+            // the reasoning item is never closed and the message reuses the
+            // reasoning output_index, producing a protocol-invalid stream.
+            if (
+              state.reasoningId &&
+              !state.reasoningDone &&
+              (!parseTextualReasoningTags || !state.inThinking)
+            ) {
+              closeReasoning(controller);
             }
-          }
-        }, keepaliveIntervalMs);
-        // Don't let the keepalive timer keep the event loop (process) alive on its own.
-        (state.keepaliveTimer as { unref?: () => void })?.unref?.();
-      },
-      transform(chunk, controller) {
-        const text = decoder.decode(chunk, { stream: true });
-        logger?.logInput(text.trim());
-        state.buffer += text;
 
-        const messages = state.buffer.split("\n\n");
-        state.buffer = messages.pop() || "";
+            let content = strippedContent;
 
-        for (const msg of messages) {
-          if (!msg.trim()) continue;
+            if (parseTextualReasoningTags) {
+              if (content.includes("<think>")) {
+                state.inThinking = true;
+                content = content.replaceAll("<think>", "");
+                startReasoning(controller, idx);
+              }
 
-          const dataMatch = msg.match(/^data:\s*(.+)$/m);
-          if (!dataMatch) continue;
+              if (content.includes("</think>")) {
+                const parts = content.split("</think>");
+                const thinkPart = parts[0];
+                const textPart = parts.slice(1).join("</think>");
 
-          const dataStr = dataMatch[1].trim();
-          if (dataStr === "[DONE]") continue;
-
-          let parsed;
-          try {
-            parsed = JSON.parse(dataStr);
-          } catch {
-            continue;
-          }
-
-          // #10223: strip request_id when it looks corrupted (suspiciously
-          // long — normal request IDs are <100 chars). Some providers
-          // (DeepSeek) have SSE encoder bugs that leak response-ID fragments
-          // into this field, producing 200+ char values. Well-behaved
-          // providers' request_id is preserved.
-          if (
-            typeof parsed.request_id === "string" &&
-            parsed.request_id.length >= CORRUPTED_REQUEST_ID_THRESHOLD
-          ) {
-            logger?.logInput(
-              `[ResponsesTransformer] stripped corrupted request_id (${parsed.request_id.length} chars)`
-            );
-            delete parsed.request_id;
-          }
-
-          if (parsed.usage) {
-            state.usage = normalizeResponsesUsage(state.usage, parsed.usage);
-          }
-
-          if (!parsed.choices?.length) {
-            // #6906: trailing usage-only chunk after finish_reason already deferred
-            // completion — send it now with the usage just captured above.
-            if (state.awaitingTrailingUsage && !state.completedSent) {
-              sendCompleted(controller);
-            }
-            continue;
-          }
-
-          const choice = parsed.choices[0];
-          const idx = choice.index || 0;
-          const delta = choice.delta || {};
-          if (state.parseTextualReasoningTags !== true && typeof parsed.model === "string") {
-            state.parseTextualReasoningTags = shouldParseTextualReasoningTags(
-              undefined,
-              parsed.model
-            );
-          }
-          const parseTextualReasoningTags = state.parseTextualReasoningTags === true;
-
-          // Emit initial events
-          if (!state.started) {
-            state.started = true;
-            state.responseId = parsed.id ? `resp_${parsed.id}` : state.responseId;
-
-            emit(controller, "response.created", {
-              type: "response.created",
-              response: {
-                id: state.responseId,
-                object: "response",
-                created_at: state.created,
-                status: "in_progress",
-                background: false,
-                error: null,
-                output: [],
-              },
-            });
-
-            emit(controller, "response.in_progress", {
-              type: "response.in_progress",
-              response: {
-                id: state.responseId,
-                object: "response",
-                created_at: state.created,
-                status: "in_progress",
-                background: false,
-                error: null,
-                output: [],
-              },
-            });
-          }
-
-          // Handle OpenAI-compatible reasoning fields. Some providers use the
-          // standard `reasoning_content` key while others use the string alias
-          // `reasoning`; prefer the standard key when both are present.
-          const reasoning = getReadableReasoningValue(delta);
-          if (reasoning && !isInternalReasoningPlaceholder(reasoning)) {
-            startReasoning(controller, idx);
-            emitReasoningDelta(controller, reasoning);
-          }
-
-          // Handle text content. Generic prompt-format tags are visible text;
-          // only tag-native models opt into textual reasoning extraction.
-          // Strip the internal reasoning placeholder if the model echoed it
-          // through ordinary content (#8081). Only the text-content emission
-          // is skipped when nothing meaningful remains — this must NOT skip
-          // this message's tool_calls / finish_reason handling below, so we
-          // gate the whole block on strippedContent instead of returning /
-          // continuing out of the msg loop early.
-          if (delta.content) {
-            const strippedContent = stripInternalReasoningPlaceholder(delta.content);
-            if (strippedContent) {
-              // Close reasoning if it was opened via native reasoning_content
-              // and is still open, before emitting message content. Without this
-              // the reasoning item is never closed and the message reuses the
-              // reasoning output_index, producing a protocol-invalid stream.
-              if (
-                state.reasoningId &&
-                !state.reasoningDone &&
-                (!parseTextualReasoningTags || !state.inThinking)
-              ) {
+                if (thinkPart) emitReasoningDelta(controller, thinkPart);
                 closeReasoning(controller);
+                state.inThinking = false;
+                content = textPart;
               }
 
-              let content = strippedContent;
+              if (state.inThinking && content) {
+                emitReasoningDelta(controller, content);
+                // Pre-existing behaviour (unrelated to #8081): a still-open
+                // textual <think> block ends this message's handling early.
+                continue;
+              }
+            }
 
-              if (parseTextualReasoningTags) {
-                if (content.includes("<think>")) {
-                  state.inThinking = true;
-                  content = content.replaceAll("<think>", "");
-                  startReasoning(controller, idx);
-                }
-
-                if (content.includes("</think>")) {
-                  const parts = content.split("</think>");
-                  const thinkPart = parts[0];
-                  const textPart = parts.slice(1).join("</think>");
-
-                  if (thinkPart) emitReasoningDelta(controller, thinkPart);
-                  closeReasoning(controller);
-                  state.inThinking = false;
-                  content = textPart;
-                }
-
-                if (state.inThinking && content) {
-                  emitReasoningDelta(controller, content);
-                  // Pre-existing behaviour (unrelated to #8081): a still-open
-                  // textual <think> block ends this message's handling early.
-                  continue;
-                }
+            // Regular text content
+            if (content) {
+              // Use a distinct output_index for the message when reasoning was
+              // emitted, so the message item does not collide with the
+              // reasoning item's output_index.
+              let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+              // #13693: a done item must never receive new deltas — re-home
+              // the text on a fresh message item instead.
+              if (state.msgItemDone[msgIdx]) {
+                msgIdx = nextFreeMessageIndex(msgIdx);
               }
 
-              // Regular text content
-              if (content) {
-                // Use a distinct output_index for the message when reasoning was
-                // emitted, so the message item does not collide with the
-                // reasoning item's output_index.
-                let msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-                // #13693: a done item must never receive new deltas — re-home
-                // the text on a fresh message item instead.
-                if (state.msgItemDone[msgIdx]) {
-                  msgIdx = nextFreeMessageIndex(msgIdx);
-                }
+              // Fix for #1211: Strip leading double-newlines / blank spaces from the very first text chunk
+              if (!state.msgTextBuf[msgIdx]) {
+                content = content.trimStart();
+              }
 
-                // Fix for #1211: Strip leading double-newlines / blank spaces from the very first text chunk
-                if (!state.msgTextBuf[msgIdx]) {
-                  content = content.trimStart();
-                }
+              if (!content) continue;
 
-                if (!content) continue;
+              if (!state.msgItemAdded[msgIdx]) {
+                state.msgItemAdded[msgIdx] = true;
+                const msgId = `msg_${state.responseId}_${msgIdx}`;
 
-                if (!state.msgItemAdded[msgIdx]) {
-                  state.msgItemAdded[msgIdx] = true;
-                  const msgId = `msg_${state.responseId}_${msgIdx}`;
+                emit(controller, "response.output_item.added", {
+                  type: "response.output_item.added",
+                  output_index: msgIdx,
+                  item: {
+                    id: msgId,
+                    type: "message",
+                    content: [],
+                    role: "assistant",
+                    status: "in_progress",
+                  },
+                });
+              }
 
-                  emit(controller, "response.output_item.added", {
-                    type: "response.output_item.added",
-                    output_index: msgIdx,
-                    item: {
-                      id: msgId,
-                      type: "message",
-                      content: [],
-                      role: "assistant",
-                      status: "in_progress",
-                    },
-                  });
-                }
+              if (!state.msgContentAdded[msgIdx]) {
+                state.msgContentAdded[msgIdx] = true;
 
-                if (!state.msgContentAdded[msgIdx]) {
-                  state.msgContentAdded[msgIdx] = true;
-
-                  emit(controller, "response.content_part.added", {
-                    type: "response.content_part.added",
-                    item_id: `msg_${state.responseId}_${msgIdx}`,
-                    output_index: msgIdx,
-                    content_index: 0,
-                    part: { type: "output_text", annotations: [], logprobs: [], text: "" },
-                  });
-                }
-
-                emit(controller, "response.output_text.delta", {
-                  type: "response.output_text.delta",
+                emit(controller, "response.content_part.added", {
+                  type: "response.content_part.added",
                   item_id: `msg_${state.responseId}_${msgIdx}`,
                   output_index: msgIdx,
                   content_index: 0,
-                  delta: content,
-                  logprobs: [],
+                  part: { type: "output_text", annotations: [], logprobs: [], text: "" },
                 });
-
-                if (!state.msgTextBuf[msgIdx]) state.msgTextBuf[msgIdx] = "";
-                state.msgTextBuf[msgIdx] += content;
               }
+
+              emit(controller, "response.output_text.delta", {
+                type: "response.output_text.delta",
+                item_id: `msg_${state.responseId}_${msgIdx}`,
+                output_index: msgIdx,
+                content_index: 0,
+                delta: content,
+                logprobs: [],
+              });
+
+              if (!state.msgTextBuf[msgIdx]) state.msgTextBuf[msgIdx] = "";
+              state.msgTextBuf[msgIdx] += content;
             }
           }
+        }
 
-          // Handle tool_calls
-          if (delta.tool_calls?.length) {
-            // Close reasoning first so tool calls do not collide with an
-            // open reasoning item, then close the message at its real index.
-            if (state.reasoningId && !state.reasoningDone) {
-              closeReasoning(controller);
-            }
-            const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-            closeMessage(controller, msgIdx);
-
-            for (const tc of delta.tool_calls) {
-              const tcIdx = tc.index ?? 0;
-              const outputIndex = computeToolCallOutputIndex(idx, tcIdx);
-              const newCallId = tc.id;
-              const funcName = tc.function?.name;
-
-              // T37: Prevent merging if a new tool_call uses the same index
-              if (state.funcCallIds[tcIdx] && newCallId && state.funcCallIds[tcIdx] !== newCallId) {
-                // Superseded call: close and emit output_item.done but do NOT record as final output
-                // since this call was replaced by a new one at the same index.
-                closeToolCall(controller, tcIdx, false);
-                delete state.funcCallIds[tcIdx];
-                delete state.funcNames[tcIdx];
-                delete state.funcArgsBuf[tcIdx];
-                delete state.funcItemAdded[tcIdx];
-                delete state.funcItemTypes[tcIdx];
-                delete state.funcArgsDone[tcIdx];
-                delete state.funcItemDone[tcIdx];
-                // Deliberately keep funcOutputIndex[tcIdx]: the replacement call
-                // reuses the same positional slot, so it should keep the same
-                // output_index rather than recomputing (which could drift if
-                // msgItemAdded state shifted mid-turn).
-              }
-
-              if (funcName) state.funcNames[tcIdx] = funcName;
-
-              if (!state.funcCallIds[tcIdx] && newCallId) {
-                state.funcCallIds[tcIdx] = newCallId;
-              }
-
-              // The provider may send the call id before the function name. Defer the
-              // lifecycle item until the name is available so custom calls are not first
-              // announced as function calls.
-              if (state.funcCallIds[tcIdx] && state.funcNames[tcIdx]) {
-                const itemAdded = emitToolCallAdded(controller, tcIdx);
-                if (
-                  itemAdded &&
-                  state.funcItemTypes[tcIdx] !== "custom_tool_call" &&
-                  state.funcArgsBuf[tcIdx]
-                ) {
-                  emit(controller, "response.function_call_arguments.delta", {
-                    type: "response.function_call_arguments.delta",
-                    item_id: `fc_${state.funcCallIds[tcIdx]}`,
-                    output_index: outputIndex,
-                    delta: state.funcArgsBuf[tcIdx],
-                  });
-                }
-              }
-
-              if (!state.funcArgsBuf[tcIdx]) state.funcArgsBuf[tcIdx] = "";
-
-              if (tc.function?.arguments) {
-                const refCallId = state.funcCallIds[tcIdx] || newCallId;
-                let deltaStr = tc.function.arguments;
-
-                // Fix #1674 & #1852: Strip empty strings and empty arrays from streaming deltas
-                if (
-                  deltaStr.includes('""') ||
-                  deltaStr.includes("[]") ||
-                  deltaStr.includes("[ ]")
-                ) {
-                  deltaStr = deltaStr
-                    .replace(/,"[a-zA-Z0-9_]+":""/g, "")
-                    .replace(/"[a-zA-Z0-9_]+":"",/g, "")
-                    .replace(/,"[a-zA-Z0-9_]+":\s*\[\s*\]/g, "")
-                    .replace(/"[a-zA-Z0-9_]+":\s*\[\s*\],?/g, "");
-                }
-
-                const existingArgs = state.funcArgsBuf[tcIdx] || "";
-                const nextArgs = appendToolCallArgumentDelta(existingArgs, deltaStr);
-                const emittedDelta = nextArgs.slice(existingArgs.length);
-                state.funcArgsBuf[tcIdx] = nextArgs;
-
-                if (
-                  refCallId &&
-                  emittedDelta &&
-                  state.funcItemAdded[tcIdx] &&
-                  state.funcItemTypes[tcIdx] !== "custom_tool_call"
-                ) {
-                  emit(controller, "response.function_call_arguments.delta", {
-                    type: "response.function_call_arguments.delta",
-                    item_id: `fc_${refCallId}`,
-                    output_index: outputIndex,
-                    delta: emittedDelta,
-                  });
-                }
-              }
-            }
-          }
-
-          // Handle finish_reason
-          if (choice.finish_reason) {
-            // Read by sendCompleted() → finalizeResponsesTerminalStatus (length/filter → incomplete).
-            state.finishReason = choice.finish_reason;
-            for (const i in state.msgItemAdded) closeMessage(controller, i);
+        // Handle tool_calls
+        if (delta.tool_calls?.length) {
+          // Close reasoning first so tool calls do not collide with an
+          // open reasoning item, then close the message at its real index.
+          if (state.reasoningId && !state.reasoningDone) {
             closeReasoning(controller);
-            for (const i in state.funcCallIds) closeToolCall(controller, i);
-            if (state.usage) {
-              // Usage already captured — either it arrived in this same chunk, or an
-              // earlier usage-bearing chunk already populated state.usage. Either way
-              // there is nothing left to wait for, so complete right away.
-              sendCompleted(controller);
-            } else {
-              // #6906: defer response.completed — a trailing usage-only chunk may
-              // still arrive (stream_options.include_usage=true). The empty-choices
-              // branch above (or flush() at stream end, as a fallback) actually
-              // calls sendCompleted().
-              state.awaitingTrailingUsage = true;
+          }
+          const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
+          closeMessage(controller, msgIdx);
+
+          for (const tc of delta.tool_calls) {
+            const tcIdx = tc.index ?? 0;
+            const outputIndex = computeToolCallOutputIndex(idx, tcIdx);
+            const newCallId = tc.id;
+            const funcName = tc.function?.name;
+
+            // T37: Prevent merging if a new tool_call uses the same index
+            if (state.funcCallIds[tcIdx] && newCallId && state.funcCallIds[tcIdx] !== newCallId) {
+              // Superseded call: close and emit output_item.done but do NOT record as final output
+              // since this call was replaced by a new one at the same index.
+              closeToolCall(controller, tcIdx, false);
+              delete state.funcCallIds[tcIdx];
+              delete state.funcNames[tcIdx];
+              delete state.funcArgsBuf[tcIdx];
+              delete state.funcItemAdded[tcIdx];
+              delete state.funcItemTypes[tcIdx];
+              delete state.funcArgsDone[tcIdx];
+              delete state.funcItemDone[tcIdx];
+              // Deliberately keep funcOutputIndex[tcIdx]: the replacement call
+              // reuses the same positional slot, so it should keep the same
+              // output_index rather than recomputing (which could drift if
+              // msgItemAdded state shifted mid-turn).
+            }
+
+            if (funcName) state.funcNames[tcIdx] = funcName;
+
+            if (!state.funcCallIds[tcIdx] && newCallId) {
+              state.funcCallIds[tcIdx] = newCallId;
+            }
+
+            // The provider may send the call id before the function name. Defer the
+            // lifecycle item until the name is available so custom calls are not first
+            // announced as function calls.
+            if (state.funcCallIds[tcIdx] && state.funcNames[tcIdx]) {
+              const itemAdded = emitToolCallAdded(controller, tcIdx);
+              if (
+                itemAdded &&
+                state.funcItemTypes[tcIdx] !== "custom_tool_call" &&
+                state.funcArgsBuf[tcIdx]
+              ) {
+                emit(controller, "response.function_call_arguments.delta", {
+                  type: "response.function_call_arguments.delta",
+                  item_id: `fc_${state.funcCallIds[tcIdx]}`,
+                  output_index: outputIndex,
+                  delta: state.funcArgsBuf[tcIdx],
+                });
+              }
+            }
+
+            if (!state.funcArgsBuf[tcIdx]) state.funcArgsBuf[tcIdx] = "";
+
+            if (tc.function?.arguments) {
+              const refCallId = state.funcCallIds[tcIdx] || newCallId;
+              let deltaStr = tc.function.arguments;
+
+              // Fix #1674 & #1852: Strip empty strings and empty arrays from streaming deltas
+              if (deltaStr.includes('""') || deltaStr.includes("[]") || deltaStr.includes("[ ]")) {
+                deltaStr = deltaStr
+                  .replace(/,"[a-zA-Z0-9_]+":""/g, "")
+                  .replace(/"[a-zA-Z0-9_]+":"",/g, "")
+                  .replace(/,"[a-zA-Z0-9_]+":\s*\[\s*\]/g, "")
+                  .replace(/"[a-zA-Z0-9_]+":\s*\[\s*\],?/g, "");
+              }
+
+              const existingArgs = state.funcArgsBuf[tcIdx] || "";
+              const nextArgs = appendToolCallArgumentDelta(existingArgs, deltaStr);
+              const emittedDelta = nextArgs.slice(existingArgs.length);
+              state.funcArgsBuf[tcIdx] = nextArgs;
+
+              if (
+                refCallId &&
+                emittedDelta &&
+                state.funcItemAdded[tcIdx] &&
+                state.funcItemTypes[tcIdx] !== "custom_tool_call"
+              ) {
+                emit(controller, "response.function_call_arguments.delta", {
+                  type: "response.function_call_arguments.delta",
+                  item_id: `fc_${refCallId}`,
+                  output_index: outputIndex,
+                  delta: emittedDelta,
+                });
+              }
             }
           }
         }
-      },
 
-      flush(controller) {
-        // #10223: stream-end flush — drain any bytes the persistent decoder is
-        // still holding. With { stream:true } complete multi-byte chars are
-        // emitted within transform(), so normally there is nothing left; this
-        // only releases a terminating truncated byte and frees the decoder.
-        state.buffer += decoder.decode();
-        // Clear keepalive timer
-        if (state.keepaliveTimer) {
-          clearInterval(state.keepaliveTimer);
-          state.keepaliveTimer = null;
+        // Handle finish_reason
+        if (choice.finish_reason) {
+          // Read by sendCompleted() → finalizeResponsesTerminalStatus (length/filter → incomplete).
+          state.finishReason = choice.finish_reason;
+          for (const i in state.msgItemAdded) closeMessage(controller, i);
+          closeReasoning(controller);
+          for (const i in state.funcCallIds) closeToolCall(controller, i);
+          if (state.usage) {
+            // Usage already captured — either it arrived in this same chunk, or an
+            // earlier usage-bearing chunk already populated state.usage. Either way
+            // there is nothing left to wait for, so complete right away.
+            sendCompleted(controller);
+          } else {
+            // #6906: defer response.completed — a trailing usage-only chunk may
+            // still arrive (stream_options.include_usage=true). The empty-choices
+            // branch above (or flush() at stream end, as a fallback) actually
+            // calls sendCompleted().
+            state.awaitingTrailingUsage = true;
+          }
         }
-        for (const i in state.msgItemAdded) closeMessage(controller, i);
-        closeReasoning(controller);
-        for (const i in state.funcCallIds) closeToolCall(controller, i);
-        sendCompleted(controller);
-
-        logger?.logOutput("data: [DONE]");
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-        logger?.flush();
-      },
-
-      // flush() only runs when the writable side closes NORMALLY. When the client
-      // disconnects mid-stream the writable side is aborted and flush() never runs, so
-      // the keepalive timer must also be cleared here to avoid leaking it on cancellation.
-      cancel() {
-        if (state.keepaliveTimer) {
-          clearInterval(state.keepaliveTimer);
-          state.keepaliveTimer = null;
-        }
-      },
+      }
     },
-    { highWaterMark: 16384 },
-    { highWaterMark: 16384 }
-  );
+
+    flush(controller) {
+      // #10223: stream-end flush — drain any bytes the persistent decoder is
+      // still holding. With { stream:true } complete multi-byte chars are
+      // emitted within transform(), so normally there is nothing left; this
+      // only releases a terminating truncated byte and frees the decoder.
+      state.buffer += decoder.decode();
+      // Clear keepalive timer
+      if (state.keepaliveTimer) {
+        clearInterval(state.keepaliveTimer);
+        state.keepaliveTimer = null;
+      }
+      for (const i in state.msgItemAdded) closeMessage(controller, i);
+      closeReasoning(controller);
+      for (const i in state.funcCallIds) closeToolCall(controller, i);
+      sendCompleted(controller);
+
+      logger?.logOutput("data: [DONE]");
+      controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+      logger?.flush();
+    },
+
+    // flush() only runs when the writable side closes NORMALLY. When the client
+    // disconnects mid-stream the writable side is aborted and flush() never runs, so
+    // the keepalive timer must also be cleared here to avoid leaking it on cancellation.
+    cancel() {
+      if (state.keepaliveTimer) {
+        clearInterval(state.keepaliveTimer);
+        state.keepaliveTimer = null;
+      }
+    },
+  };
+
+  return new TransformStream(transformer, { highWaterMark: 16384 }, { highWaterMark: 16384 });
 }

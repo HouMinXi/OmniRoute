@@ -12,6 +12,26 @@ import {
 } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 import { encodeGitDiffResult } from "../../open-sse/utils/cursorAgentProtobuf/gitDiff.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
+function fieldVarint(field: WireField | undefined): bigint | undefined {
+  return field && field.wireType === 0 ? field.varint : undefined;
+}
+
 const request = encodeMessage(2, [
   encodeUInt32Field(1, 44),
   encodeString(15, "exec-diff-44"),
@@ -58,24 +78,19 @@ test("default git_diff_request delegates a read-only diff to a declared client b
 
   const agent = decodeFields(frames[0].subarray(5)).find((field) => field.fieldNumber === 2);
   assert.ok(agent);
-  const result = decodeFields(agent.bytes).find((field) => field.fieldNumber === 44);
+  const result = decodeFields(lenBytes(agent)).find((field) => field.fieldNumber === 44);
   assert.ok(result, "ExecClientMessage.git_diff_response");
-  const diff = decodeFields(result.bytes).find((field) => field.fieldNumber === 1);
+  const diff = decodeFields(lenBytes(result)).find((field) => field.fieldNumber === 1);
   assert.ok(diff, "GetDiffResponse.diff");
-  const fields = decodeFields(diff.bytes);
-  assert.equal(fields.find((field) => field.fieldNumber === 2)?.varint, 1n, "DIFF_TO_HEAD");
-  const file = decodeFields(fields.find((field) => field.fieldNumber === 1)!.bytes);
-  assert.equal(file.find((field) => field.fieldNumber === 1)?.bytes.toString(), "foo.c");
-  assert.equal(file.find((field) => field.fieldNumber === 2)?.bytes.toString(), "foo.c");
-  assert.equal(file.find((field) => field.fieldNumber === 4)?.varint, 1n);
-  assert.equal(file.find((field) => field.fieldNumber === 5)?.varint, 1n);
-  const chunk = decodeFields(file.find((field) => field.fieldNumber === 3)!.bytes);
-  assert.ok(
-    chunk
-      .find((field) => field.fieldNumber === 1)
-      ?.bytes.toString()
-      .includes("+new")
-  );
+  const fields = decodeFields(lenBytes(diff));
+  assert.equal(fieldVarint(fields.find((field) => field.fieldNumber === 2)), 1n, "DIFF_TO_HEAD");
+  const file = decodeFields(lenBytes(fields.find((field) => field.fieldNumber === 1)));
+  assert.equal(fieldText(file.find((field) => field.fieldNumber === 1)), "foo.c");
+  assert.equal(fieldText(file.find((field) => field.fieldNumber === 2)), "foo.c");
+  assert.equal(fieldVarint(file.find((field) => field.fieldNumber === 4)), 1n);
+  assert.equal(fieldVarint(file.find((field) => field.fieldNumber === 5)), 1n);
+  const chunk = decodeFields(lenBytes(file.find((field) => field.fieldNumber === 3)));
+  assert.ok(fieldText(chunk.find((field) => field.fieldNumber === 1))?.includes("+new"));
   manager.close(session);
 });
 
@@ -83,22 +98,25 @@ test("clean git diff stays empty, while a failed command reports a control error
   const clean = encodeGitDiffResult(12, "clean-diff", "(no output)");
   const exec = decodeFields(clean.subarray(5)).find((field) => field.fieldNumber === 2);
   assert.ok(exec);
-  const result = decodeFields(exec.bytes).find((field) => field.fieldNumber === 44);
+  const result = decodeFields(lenBytes(exec)).find((field) => field.fieldNumber === 44);
   assert.ok(result);
-  const response = decodeFields(result.bytes);
-  const diff = decodeFields(response.find((field) => field.fieldNumber === 1)!.bytes);
+  const response = decodeFields(lenBytes(result));
+  const diff = decodeFields(lenBytes(response.find((field) => field.fieldNumber === 1)));
   assert.equal(
     diff.some((field) => field.fieldNumber === 1),
     false
   );
-  assert.equal(response.find((field) => field.fieldNumber === 5)?.varint, 0n);
+  assert.equal(fieldVarint(response.find((field) => field.fieldNumber === 5)), 0n);
 
   const invalid = encodeGitDiffResult(13, "failed-diff", "fatal: not a git repository");
   const control = decodeFields(invalid.subarray(5)).find((field) => field.fieldNumber === 5);
   assert.ok(control, "a failed git command must not masquerade as an empty diff");
-  const thrown = decodeFields(control.bytes).find((field) => field.fieldNumber === 2);
+  const thrown = decodeFields(lenBytes(control)).find((field) => field.fieldNumber === 2);
   assert.ok(thrown);
-  assert.equal(decodeFields(thrown.bytes).find((field) => field.fieldNumber === 1)?.varint, 13n);
+  assert.equal(
+    fieldVarint(decodeFields(lenBytes(thrown)).find((field) => field.fieldNumber === 1)),
+    13n
+  );
 });
 
 test("a client bash error cannot be reported to Cursor as a clean git diff", () => {

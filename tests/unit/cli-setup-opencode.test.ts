@@ -49,6 +49,8 @@ function readConfig() {
 // (same pattern as tests/unit/cli/setup-claude.test.ts, #6019/#6021).
 const _console = { log: console.log, info: console.info, warn: console.warn };
 
+type OpenCodeSetupOpts = Parameters<typeof runSetupOpenCodeCommand>[0];
+
 describe("omniroute setup opencode", () => {
   before(() => {
     console.log = () => {};
@@ -77,7 +79,7 @@ describe("omniroute setup opencode", () => {
       // These tests exercise the plugin install/merge path, not the container
       // guard (#10057) — keep them hermetic on container devboxes/CI.
       allowContainerWrite: true,
-    });
+    } as unknown as OpenCodeSetupOpts);
     assert.equal(r.exitCode, 0);
 
     // dist copied into the OpenCode plugins dir
@@ -103,7 +105,7 @@ describe("omniroute setup opencode", () => {
       baseUrl: "http://10.0.0.9:20128",
       nonInteractive: true,
       allowContainerWrite: true,
-    });
+    } as unknown as OpenCodeSetupOpts);
     assert.equal(r.exitCode, 0);
 
     const cfg = readConfig();
@@ -135,7 +137,7 @@ describe("omniroute setup opencode", () => {
       configDir: CONFIG_DIR,
       nonInteractive: true,
       allowContainerWrite: true,
-    });
+    } as unknown as OpenCodeSetupOpts);
     assert.equal(r.exitCode, 0);
 
     const cfg = readConfig();
@@ -157,7 +159,7 @@ describe("omniroute setup opencode", () => {
         configDir: CONFIG_DIR,
         nonInteractive: true,
         allowContainerWrite: true,
-      });
+      } as unknown as OpenCodeSetupOpts);
       assert.equal(r.exitCode, 1);
     } finally {
       makeFakePluginDist();

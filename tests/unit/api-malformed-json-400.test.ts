@@ -20,6 +20,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { NextRequest } from "next/server";
 import test from "node:test";
 
 // ── DB / auth setup ─────────────────────────────────────────────────────────
@@ -44,8 +45,8 @@ const modelComboRoute = await import("../../src/app/api/model-combo-mappings/rou
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 /** Build a POST/PUT Request that CLAIMS to be JSON but carries a non-JSON body. */
-function malformedJsonRequest(url: string, method = "POST"): Request {
-  return new Request(url, {
+function malformedJsonRequest(url: string, method = "POST"): NextRequest {
+  return new NextRequest(url, {
     method,
     headers: { "content-type": "application/json" },
     body: "not-json",
@@ -53,8 +54,8 @@ function malformedJsonRequest(url: string, method = "POST"): Request {
 }
 
 /** Build a POST/PUT Request with a well-formed JSON body. */
-function jsonRequest(url: string, body: unknown, method = "POST"): Request {
-  return new Request(url, {
+function jsonRequest(url: string, body: unknown, method = "POST"): NextRequest {
+  return new NextRequest(url, {
     method,
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),

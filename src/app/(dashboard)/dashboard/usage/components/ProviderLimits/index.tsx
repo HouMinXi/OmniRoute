@@ -57,6 +57,15 @@ type PurchaseTypeKey = "all" | "oauth-free" | "oauth-sub" | "apikey";
 type StatusKey = "all" | "critical" | "alert" | "ok" | "empty";
 type LayoutMode = "full" | "compact";
 
+function tierLabel(
+  tier: (typeof TIER_FILTERS)[number] | undefined,
+  t: (key: string) => string
+): string {
+  if (!tier) return t("tierUnknown");
+  const fields: Record<string, unknown> = { ...tier };
+  return typeof fields.label === "string" ? fields.label : t(tier.labelKey);
+}
+
 const PURCHASE_TYPES: Array<{ key: PurchaseTypeKey; labelKey: string; fallback: string }> = [
   { key: "all", labelKey: "purchaseAll", fallback: "All" },
   { key: "oauth-sub", labelKey: "purchaseOauthSub", fallback: "Subscription" },
@@ -995,7 +1004,7 @@ export default function ProviderLimits({
                     color: active ? "var(--color-primary, #E54D5E)" : "var(--color-text-muted)",
                   }}
                 >
-                  <span>{tier.label || t(tier.labelKey!)}</span>
+                  <span>{tierLabel(tier, t)}</span>
                   <span className="opacity-85">{tierCounts[tier.key] || 0}</span>
                 </button>
               );
@@ -1071,7 +1080,7 @@ export default function ProviderLimits({
             <strong>
               {(() => {
                 const tier = TIER_FILTERS.find((tier) => tier.key === tierFilter);
-                return tier?.label || t(tier?.labelKey || "tierUnknown");
+                return tierLabel(tier, t);
               })()}
             </strong>
             .

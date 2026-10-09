@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { NextRequest } from "next/server";
+import type { ReadonlyRequestCookies } from "next/dist/server/web/spec-extension/adapters/request-cookies";
 
 /**
  * Regression test for issue #8336 — failed dashboard logins originating from
@@ -43,7 +45,8 @@ async function resetStorage() {
 
 test.beforeEach(async () => {
   await resetStorage();
-  loginRoute.authRouteInternals.getCookieStore = async () => ({ set() {} });
+  loginRoute.authRouteInternals.getCookieStore = async () =>
+    ({ set() {} }) as unknown as ReadonlyRequestCookies;
 });
 
 test.afterEach(() => {
@@ -89,7 +92,7 @@ async function postWrongPassword(forwardedFor: string) {
         "x-forwarded-for": forwardedFor,
       },
       body: JSON.stringify({ password: "wrong-password" }),
-    })
+    }) as NextRequest
   );
 }
 

@@ -37,6 +37,5 @@ test("storage key: real commands DO provision (preserves #1622 persistence)", ()
 test("storage key: defensive on non-array input → fail-safe to provisioning", () => {
   // Non-array argv collapses to [] → treated as a bare invocation (default serve),
   // so it provisions. Fail-safe: better to have the key than to skip it.
-  // @ts-expect-error intentional bad input
-  assert.equal(shouldProvisionStorageKey(undefined), true);
+  assert.equal(shouldProvisionStorageKey(undefined as unknown as string[]), true);
 });

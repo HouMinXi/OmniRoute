@@ -15,10 +15,12 @@ import {
 } from "@/app/api/v1/_shared/rateLimit";
 import {
   failedMediaGenerationResponse,
+  isMediaGenerationFailure,
   mediaGenerationOptionsResponse,
   promptRequiredResponse,
   readMediaGenerationBody,
   successfulMediaGenerationResponse,
+  type MediaGenerationResultLike,
 } from "@/app/api/v1/_shared/mediaGenerationRoute";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 
@@ -101,21 +103,21 @@ async function postHandler(request, context) {
     credentials = await resolveLocalOverrideCredentials(provider);
   }
 
-  const result = await handleMusicGeneration({ body, credentials, log });
+  const result: MediaGenerationResultLike = await handleMusicGeneration({ body, credentials, log });
 
-  if (result.success) {
-    await clearRecoveredProviderState(credentials);
-    return successfulMediaGenerationResponse({
-      result,
-      billingMode: "audio",
-      provider,
-      model: body.model,
-      startTime,
-      duration: body.duration,
-    });
+  if (isMediaGenerationFailure(result)) {
+    return failedMediaGenerationResponse(result, "Music generation provider error");
   }
 
-  return failedMediaGenerationResponse(result, "Music generation provider error");
+  await clearRecoveredProviderState(credentials);
+  return successfulMediaGenerationResponse({
+    result: { data: result.data },
+    billingMode: "audio",
+    provider,
+    model: body.model,
+    startTime,
+    duration: body.duration,
+  });
 }
 
 export const POST = withInjectionGuard(postHandler);

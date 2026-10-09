@@ -52,7 +52,7 @@ test("getClientIdentityProfileHeaders: known CLI profiles expose their preset he
 });
 
 test("getClientIdentityProfileHeaders: returns a fresh mutable copy (catalog stays frozen)", () => {
-  const headers = getClientIdentityProfileHeaders("claude-cli");
+  const headers = getClientIdentityProfileHeaders("claude-cli") as Record<string, string>;
   headers["User-Agent"] = "tampered";
   assert.equal(
     CLIENT_IDENTITY_PROFILES["claude-cli"].headers["User-Agent"],
@@ -81,12 +81,10 @@ test("a selected profile's headers land in providerSpecificData.customHeaders", 
     customHeaders: { ...profileHeaders, "X-Operator-Set": "keep-me" },
   };
 
-  assert.equal(
-    providerSpecificData.customHeaders["User-Agent"],
-    `codex_cli_rs/${DEFAULT_CODEX_CLIENT_VERSION}`
-  );
-  assert.equal(providerSpecificData.customHeaders.originator, "codex_cli_rs");
-  assert.equal(providerSpecificData.customHeaders["X-Operator-Set"], "keep-me");
+  const customHeaders = providerSpecificData.customHeaders as Record<string, string>;
+  assert.equal(customHeaders["User-Agent"], `codex_cli_rs/${DEFAULT_CODEX_CLIENT_VERSION}`);
+  assert.equal(customHeaders.originator, "codex_cli_rs");
+  assert.equal(customHeaders["X-Operator-Set"], "keep-me");
 });
 
 test("profile headers merged into customHeaders survive applyCustomHeaders sanitization via DefaultExecutor", () => {

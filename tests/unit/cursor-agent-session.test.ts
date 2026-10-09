@@ -4,6 +4,21 @@ import { CursorSessionManager } from "../../open-sse/services/cursorSessionManag
 import { flattenMessages } from "../../open-sse/utils/cursorAgentProtobuf";
 import { decodeFields } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+type WireField = { wireType: 0; varint: bigint } | { wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return field.bytes;
+}
+
+function fieldText(field: WireField | undefined): string | undefined {
+  return field && field.wireType === 2 ? field.bytes.toString() : undefined;
+}
+
+function fieldVarint(field: WireField | undefined): bigint | undefined {
+  return field && field.wireType === 0 ? field.varint : undefined;
+}
+
 // ─── Test doubles for h2 ───────────────────────────────────────────────────
 //
 // We don't open real h2 connections in unit tests. Sessions hold opaque
@@ -59,9 +74,9 @@ test("a failed client write must not tell Cursor that the existing file was over
   const frame = (calls.find((call) => call.kind === "write") as { data: Buffer }).data;
   const envelope = decodeFields(frame.subarray(5)).find((field) => field.fieldNumber === 2);
   assert.ok(envelope);
-  const result = decodeFields(envelope.bytes).find((field) => field.fieldNumber === 3);
+  const result = decodeFields(lenBytes(envelope)).find((field) => field.fieldNumber === 3);
   assert.ok(result, "ExecClientMessage.write_result");
-  const reply = decodeFields(result.bytes);
+  const reply = decodeFields(lenBytes(result));
   assert.ok(
     reply.some((field) => field.fieldNumber === 5),
     "WriteResult.error"
@@ -101,9 +116,9 @@ test("OpenAI tool errors without an isError flag do not become WriteResult.succe
   const frame = (calls.find((call) => call.kind === "write") as { data: Buffer }).data;
   const envelope = decodeFields(frame.subarray(5)).find((field) => field.fieldNumber === 2);
   assert.ok(envelope);
-  const result = decodeFields(envelope.bytes).find((field) => field.fieldNumber === 3);
+  const result = decodeFields(lenBytes(envelope)).find((field) => field.fieldNumber === 3);
   assert.ok(result);
-  assert.ok(decodeFields(result.bytes).some((field) => field.fieldNumber === 5));
+  assert.ok(decodeFields(lenBytes(result)).some((field) => field.fieldNumber === 5));
   manager.close(session);
 });
 
@@ -325,9 +340,9 @@ test("shell_stream follow-up sends stream events and closes the exec stream", ()
   for (const [index, variant] of [4, 1, 3].entries()) {
     const exec = decodeFields(messages[index]).find((field) => field.fieldNumber === 2);
     assert.ok(exec, "AgentClientMessage.exec_client_message");
-    const fields = decodeFields(exec.bytes);
-    assert.equal(fields.find((field) => field.fieldNumber === 1)?.varint, 9n);
-    assert.equal(fields.find((field) => field.fieldNumber === 15)?.bytes.toString(), "exec-shell");
+    const fields = decodeFields(lenBytes(exec));
+    assert.equal(fieldVarint(fields.find((field) => field.fieldNumber === 1)), 9n);
+    assert.equal(fieldText(fields.find((field) => field.fieldNumber === 15)), "exec-shell");
     assert.equal(
       fields.some((field) => field.fieldNumber === 2),
       false,
@@ -335,7 +350,7 @@ test("shell_stream follow-up sends stream events and closes the exec stream", ()
     );
     const shellStream = fields.find((field) => field.fieldNumber === 14);
     assert.ok(shellStream, "ExecClientMessage.shell_stream");
-    assert.ok(decodeFields(shellStream.bytes).some((field) => field.fieldNumber === variant));
+    assert.ok(decodeFields(lenBytes(shellStream)).some((field) => field.fieldNumber === variant));
   }
   assert.ok(messages[1].includes(Buffer.from("/tmp\n")));
   const control = decodeFields(messages[3]).find((field) => field.fieldNumber === 5);
@@ -398,18 +413,18 @@ test("a bridged web fetch returns FetchResult.success rather than a shell result
   );
   assert.ok(written);
   const ecm = decodeFields(
-    decodeFields(written.data.subarray(5)).find((field) => field.fieldNumber === 2)!.bytes
+    lenBytes(decodeFields(written.data.subarray(5)).find((field) => field.fieldNumber === 2))
   );
   const result = ecm.find((field) => field.fieldNumber === 20);
   assert.ok(result, "ExecClientMessage.fetch_result");
-  const success = decodeFields(result.bytes).find((field) => field.fieldNumber === 1);
+  const success = decodeFields(lenBytes(result)).find((field) => field.fieldNumber === 1);
   assert.ok(success, "FetchResult.success");
-  const fields = decodeFields(success.bytes);
+  const fields = decodeFields(lenBytes(success));
   assert.equal(
-    fields.find((field) => field.fieldNumber === 1)?.bytes.toString(),
+    fieldText(fields.find((field) => field.fieldNumber === 1)),
     "https://example.com/docs"
   );
-  assert.equal(fields.find((field) => field.fieldNumber === 2)?.bytes.toString(), "Article text");
+  assert.equal(fieldText(fields.find((field) => field.fieldNumber === 2)), "Article text");
   manager.close(session);
 });
 

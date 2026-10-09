@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactElement } from "react";
 import { useTranslations } from "next-intl";
 import type { SkillCoverage } from "@/lib/agentSkills/types";
 
@@ -21,7 +22,7 @@ function trackColor(have: number, total: number): string {
   return "bg-red-500/20";
 }
 
-export function CoverageBar({ coverage }: CoverageBarProps): JSX.Element {
+export function CoverageBar({ coverage }: CoverageBarProps): ReactElement {
   const t = useTranslations("agentSkills");
   const { api, cli, config } = coverage;
 

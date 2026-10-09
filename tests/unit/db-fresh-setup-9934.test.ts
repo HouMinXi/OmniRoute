@@ -51,7 +51,7 @@ function withNonTestEnvironment<R>(fn: () => R): R {
   const originalArgv = [...process.argv];
   const originalExecArgv = [...process.execArgv];
 
-  delete process.env.NODE_ENV;
+  delete process.env["NODE_ENV"];
   delete process.env.VITEST;
   delete process.env.DISABLE_SQLITE_AUTO_BACKUP;
   process.argv = process.argv.filter((arg) => !arg.includes("test"));
@@ -62,8 +62,8 @@ function withNonTestEnvironment<R>(fn: () => R): R {
   } finally {
     process.argv = originalArgv;
     process.execArgv = originalExecArgv;
-    if (originalNodeEnv === undefined) delete process.env.NODE_ENV;
-    else process.env.NODE_ENV = originalNodeEnv;
+    if (originalNodeEnv === undefined) delete process.env["NODE_ENV"];
+    else process.env["NODE_ENV"] = originalNodeEnv;
     if (originalVitest === undefined) delete process.env.VITEST;
     else process.env.VITEST = originalVitest;
     if (originalDisableAutoBackup === undefined) delete process.env.DISABLE_SQLITE_AUTO_BACKUP;
@@ -73,12 +73,14 @@ function withNonTestEnvironment<R>(fn: () => R): R {
 
 function cleanupGlobalDb() {
   try {
-    const g = globalThis as Record<string, { open?: boolean; close?: () => void }>;
+    const g = globalThis as typeof globalThis & {
+      __omnirouteDb?: { open?: boolean; close?: () => void };
+    };
     if (g.__omnirouteDb?.open) g.__omnirouteDb.close?.();
   } catch {
     /* ignore */
   }
-  delete (globalThis as Record<string, unknown>).__omnirouteDb;
+  delete (globalThis as typeof globalThis & { __omnirouteDb?: unknown }).__omnirouteDb;
 }
 
 test.after(() => {
@@ -131,12 +133,13 @@ test(
       cleanupGlobalDb();
       resetDbInstance();
 
-      let db: { prepare?: (sql: string) => { get: () => { maxV: number } | undefined } };
+      let db: { prepare: (sql: string) => { get: () => { maxV: number } | undefined } } | undefined;
       assert.doesNotThrow(() => {
         withNonTestEnvironment(() => {
           db = core.getDbInstance();
         });
       }, "first serve must not abort on a fresh setup DB that only has the 001 seed (#9934)");
+      if (!db?.prepare) throw new Error("fresh db was not opened");
 
       // Prove the fresh DB actually got migrated past 001 to the latest version.
       const maxRow = db

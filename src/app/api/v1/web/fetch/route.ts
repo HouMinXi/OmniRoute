@@ -295,7 +295,7 @@ export async function POST(request: Request) {
 
   // Resolve provider + credentials (explicit provider never falls back; #8297)
   const target = await resolveWebFetchTarget(body.provider);
-  if (!target.ok) return target.response;
+  if (target.ok === false) return target.response;
 
   log.info("WEB_FETCH", `${target.provider} | ${body.url} | format=${body.format}`);
 

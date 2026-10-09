@@ -22,7 +22,7 @@ async function getActiveProviderKeys(): Promise<Set<string>> {
     for (const conn of connections) {
       if (conn.isActive === false) continue;
       const provider = conn.provider;
-      if (!provider) continue;
+      if (typeof provider !== "string" || provider.length === 0) continue;
       keys.add(provider);
       const alias = (PROVIDER_ID_TO_ALIAS as Record<string, string>)[provider];
       if (alias) keys.add(alias);

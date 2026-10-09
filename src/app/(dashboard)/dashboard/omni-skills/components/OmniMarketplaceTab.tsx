@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactElement } from "react";
 import { useTranslations } from "next-intl";
 import { Card } from "@/shared/components";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
@@ -29,7 +29,7 @@ interface OmniMarketplaceTabProps {
 export function OmniMarketplaceTab({
   skillsProvider,
   onRefreshSkills,
-}: OmniMarketplaceTabProps): JSX.Element {
+}: OmniMarketplaceTabProps): ReactElement {
   const t = useTranslations("skills");
   const [mpQuery, setMpQuery] = useState("");
   const [mpResults, setMpResults] = useState<MarketplaceSkill[]>([]);
@@ -52,7 +52,9 @@ export function OmniMarketplaceTab({
       if (!res.ok) {
         setMpError((data as { error?: string }).error || t("marketplaceError"));
       } else {
-        setMpResults(Array.isArray(data) ? data : (data as { skills?: MarketplaceSkill[] }).skills || []);
+        setMpResults(
+          Array.isArray(data) ? data : (data as { skills?: MarketplaceSkill[] }).skills || []
+        );
       }
     } catch (err) {
       setMpError(err instanceof Error ? err.message : t("marketplaceError"));
@@ -151,7 +153,9 @@ export function OmniMarketplaceTab({
             type="text"
             value={skillsProvider === "skillsmp" ? mpQuery : shQuery}
             onChange={(e) =>
-              skillsProvider === "skillsmp" ? setMpQuery(e.target.value) : setShQuery(e.target.value)
+              skillsProvider === "skillsmp"
+                ? setMpQuery(e.target.value)
+                : setShQuery(e.target.value)
             }
             onKeyDown={(e) =>
               e.key === "Enter" &&

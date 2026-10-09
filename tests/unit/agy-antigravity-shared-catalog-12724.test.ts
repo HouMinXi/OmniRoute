@@ -51,7 +51,17 @@ test("#12724 — buildSurfaceCatalog remove delta works", serial, () => {
 
 test("#12724 — buildSurfaceCatalog add delta works", serial, () => {
   const extended = buildSurfaceCatalog(ANTIGRAVITY_SHARED_MODELS, {
-    add: [{ id: "custom-model-v1", name: "Custom Model" }],
+    add: [
+      {
+        id: "custom-model-v1",
+        name: "Custom Model",
+        contextLength: 8192,
+        maxOutputTokens: 1024,
+        supportsReasoning: false,
+        supportsVision: false,
+        toolCalling: false,
+      },
+    ],
   });
   assert.equal(extended.length, BASE_SIZE + 1);
   assert.ok(extended.some((m) => m.id === "custom-model-v1"));
@@ -59,7 +69,17 @@ test("#12724 — buildSurfaceCatalog add delta works", serial, () => {
 
 test("#12724 — buildSurfaceCatalog with both add and remove", serial, () => {
   const mixed = buildSurfaceCatalog(ANTIGRAVITY_SHARED_MODELS, {
-    add: [{ id: "custom-model-v1", name: "Custom Model" }],
+    add: [
+      {
+        id: "custom-model-v1",
+        name: "Custom Model",
+        contextLength: 8192,
+        maxOutputTokens: 1024,
+        supportsReasoning: false,
+        supportsVision: false,
+        toolCalling: false,
+      },
+    ],
     remove: ["gemini-3.7-flash-high", "gemini-3.7-flash-medium"],
   });
   assert.equal(mixed.length, BASE_SIZE - 2 + 1);

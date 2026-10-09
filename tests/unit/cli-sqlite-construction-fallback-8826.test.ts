@@ -20,8 +20,11 @@ register(hookPath, import.meta.url);
 
 // Patch Module._load so CJS createRequire("better-sqlite3") in driverFactory.ts
 // also gets a constructor that throws the bindings error.
-const originalLoad = Module._load;
-Module._load = function patchedLoad(request, parent, isMain) {
+const moduleWithLoad = Module as unknown as {
+  _load: (request: string, parent: unknown, isMain: boolean) => unknown;
+};
+const originalLoad = moduleWithLoad._load;
+moduleWithLoad._load = function patchedLoad(request, parent, isMain) {
   if (request === "better-sqlite3") {
     function FakeBetterSqlite() {
       throw new Error(
@@ -30,7 +33,6 @@ Module._load = function patchedLoad(request, parent, isMain) {
     }
     return FakeBetterSqlite;
   }
-  // @ts-expect-error Module._load is a CJS internal
   return originalLoad.call(this, request, parent, isMain);
 };
 
@@ -42,7 +44,7 @@ test("#8826: openOmniRouteDb() falls back to node:sqlite when better-sqlite3 nat
     try {
       fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     } catch {}
-    Module._load = originalLoad;
+    moduleWithLoad._load = originalLoad;
   });
 
   const origDataDir = process.env.DATA_DIR;

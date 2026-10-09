@@ -29,6 +29,36 @@ fs.writeFileSync(
 );
 
 const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+import type { SqliteAdapter } from "../../src/lib/db/adapters/types.ts";
+
+function asAdapter(db: Database.Database): SqliteAdapter {
+  return {
+    driver: "better-sqlite3",
+    open: db.open,
+    name: db.name,
+    inTransaction: db.inTransaction,
+    prepare: (sql) => db.prepare(sql),
+    exec: (sql) => {
+      db.exec(sql);
+    },
+    pragma: (pragmaStr, options) => db.pragma(pragmaStr, options),
+    transaction(fn) {
+      const wrapped = db.transaction((...args: unknown[]) => fn(...args));
+      return (...args: unknown[]) => wrapped(...args);
+    },
+    immediate: (fn) => {
+      db.transaction(fn).immediate();
+    },
+    backup: async () => {},
+    checkpoint: (mode) => {
+      db.pragma(`wal_checkpoint(${mode ?? "PASSIVE"})`);
+    },
+    close: () => {
+      db.close();
+    },
+    raw: db,
+  };
+}
 
 function createLegacyDb(appliedName: string) {
   const db = new Database(":memory:");
@@ -57,7 +87,7 @@ test.after(() => {
 test("renumbered CCR migration frees 134 for proxy_logs on existing databases", () => {
   const db = createLegacyDb("ccr_blocks");
   try {
-    assert.equal(runMigrations(db), 1);
+    assert.equal(runMigrations(asAdapter(db)), 1);
     assert.deepEqual(
       db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
       [
@@ -75,7 +105,7 @@ test("renumbered CCR migration frees 134 for proxy_logs on existing databases", 
 test("renumbered CCR migration marks an existing table without recreating it", () => {
   const db = createLegacyDb("proxy_logs_egress_ip");
   try {
-    assert.equal(runMigrations(db), 1);
+    assert.equal(runMigrations(asAdapter(db)), 1);
     assert.deepEqual(
       db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
       [

@@ -59,6 +59,9 @@ function makeCtx(response: Response) {
     accountId: "test-account",
     creditsMode: "off" as const,
     creditsRetryState: { attempted: false },
+    model: "gemini-2.5-pro",
+    physicalSendCounter: { value: 0 },
+    correlationId: null,
   };
 }
 

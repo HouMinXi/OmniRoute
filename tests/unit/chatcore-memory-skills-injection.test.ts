@@ -318,7 +318,7 @@ test("stream:true + skills enabled + registry has items → no custom skill tool
   assert.equal(hasCustomSkill, false, "stream:true must not inject custom skill tools");
 
   assert.deepEqual(
-    (result as Record<string, unknown>).injectedCustomSkillNames,
+    result.injectedCustomSkillNames,
     [],
     "injectedCustomSkillNames must be empty for stream requests"
   );
@@ -353,8 +353,7 @@ test("memory actual injection → builtinToolNames equals exactly the newly adde
     log: { debug: () => {} },
   });
 
-  const builtinToolNames = (result as Record<string, unknown>).builtinToolNames as
-    string[] | undefined;
+  const builtinToolNames = result.builtinToolNames;
   assert.ok(builtinToolNames, "builtinToolNames must be present in result");
 
   const expectedNewMemoryNames = [...MEMORY_BUILTIN_TOOL_NAMES];
@@ -399,15 +398,19 @@ test("client already has memory_search → not injected, not in builtinToolNames
     log: { debug: () => {} },
   });
 
-  const toolNames = (
-    (result.body.tools as { function?: { name?: string }[] | undefined }) ?? []
-  ).map((t: { function?: { name?: string } }) => t.function?.name);
+  const tools = result.body.tools;
+  const toolList = Array.isArray(tools) ? tools : [];
+  const toolNames = toolList.map((tool) => {
+    if (!tool || typeof tool !== "object" || !("function" in tool)) return undefined;
+    const fn = tool.function;
+    if (!fn || typeof fn !== "object" || !("name" in fn)) return undefined;
+    return typeof fn.name === "string" ? fn.name : undefined;
+  });
 
   const memorySearchCount = toolNames.filter((n) => n === MEMORY_SEARCH_TOOL_NAME).length;
   assert.equal(memorySearchCount, 1, "only one memory_search (client's) must exist");
 
-  const builtinToolNames = (result as Record<string, unknown>).builtinToolNames as
-    string[] | undefined;
+  const builtinToolNames = result.builtinToolNames;
   assert.ok(builtinToolNames, "builtinToolNames must be present");
   assert.equal(
     builtinToolNames.includes(MEMORY_SEARCH_TOOL_NAME),
@@ -458,15 +461,19 @@ test("custom skill client collision: client has same encoded skill name → not 
     log: { debug: () => {} },
   });
 
-  const toolNames = (
-    (result.body.tools as { function?: { name?: string }[] | undefined }) ?? []
-  ).map((t: { function?: { name?: string } }) => t.function?.name);
+  const collisionTools = result.body.tools;
+  const collisionList = Array.isArray(collisionTools) ? collisionTools : [];
+  const toolNames = collisionList.map((tool) => {
+    if (!tool || typeof tool !== "object" || !("function" in tool)) return undefined;
+    const fn = tool.function;
+    if (!fn || typeof fn !== "object" || !("name" in fn)) return undefined;
+    return typeof fn.name === "string" ? fn.name : undefined;
+  });
 
   const count = toolNames.filter((n) => n === encodedName).length;
   assert.equal(count, 1, "only one instance of encoded name must exist (client's)");
 
-  const injectedCustomSkillNames = (result as Record<string, unknown>).injectedCustomSkillNames as
-    string[] | undefined;
+  const injectedCustomSkillNames = result.injectedCustomSkillNames;
   assert.ok(injectedCustomSkillNames, "injectedCustomSkillNames must be present");
   assert.equal(
     injectedCustomSkillNames.includes(encodedName),
@@ -510,8 +517,7 @@ test("web-search fallback: client has same tool name → not added to builtinToo
     log: { debug: () => {} },
   });
 
-  const builtinToolNames = (result as Record<string, unknown>).builtinToolNames as
-    string[] | undefined;
+  const builtinToolNames = result.builtinToolNames;
   assert.ok(builtinToolNames, "builtinToolNames must be present");
   assert.equal(
     builtinToolNames.includes(OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME),

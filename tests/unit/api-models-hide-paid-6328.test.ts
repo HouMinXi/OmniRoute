@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import type { CustomModelVisionDatabase } from "../../src/lib/db/models/customVisionOverride.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-api-models-hidepaid-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -87,7 +88,7 @@ test("/api/models retains genuine resolved vision capability for the Video Bridg
 
 test("custom-model vision DB failures fail open through point, bulk, snapshot, and route reads", async () => {
   const failure = new Error("private sqlite failure");
-  const pointFactories: Array<() => unknown> = [
+  const pointFactories: Array<() => CustomModelVisionDatabase> = [
     () => {
       throw failure;
     },
@@ -100,6 +101,12 @@ test("custom-model vision DB failures fail open through point, bulk, snapshot, a
       prepare() {
         return {
           get() {
+            throw failure;
+          },
+          run() {
+            throw failure;
+          },
+          all() {
             throw failure;
           },
         };
@@ -115,11 +122,17 @@ test("custom-model vision DB failures fail open through point, bulk, snapshot, a
     );
   }
 
-  const bulkFactories: Array<() => unknown> = [
+  const bulkFactories: Array<() => CustomModelVisionDatabase> = [
     ...pointFactories.slice(0, 2),
     () => ({
       prepare() {
         return {
+          get() {
+            throw failure;
+          },
+          run() {
+            throw failure;
+          },
           all() {
             throw failure;
           },
@@ -129,6 +142,12 @@ test("custom-model vision DB failures fail open through point, bulk, snapshot, a
     () => ({
       prepare() {
         return {
+          get() {
+            throw failure;
+          },
+          run() {
+            throw failure;
+          },
           all() {
             return [
               {

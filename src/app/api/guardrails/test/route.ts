@@ -17,7 +17,7 @@ import { registerDefaultGuardrails } from "@/lib/guardrails/registry";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 
 const TestRequestSchema = z.object({
-  input: z.union([z.string(), z.record(z.unknown()), z.array(z.unknown())]),
+  input: z.union([z.string(), z.record(z.string(), z.unknown()), z.array(z.unknown())]),
   disabledGuardrails: z.array(z.string()).optional(),
 });
 
@@ -33,12 +33,21 @@ export async function POST(request: NextRequest) {
   try {
     rawBody = await request.json();
   } catch {
-    return createErrorResponse({ status: 400, message: "Invalid JSON body", type: "invalid_request" });
+    return createErrorResponse({
+      status: 400,
+      message: "Invalid JSON body",
+      type: "invalid_request",
+    });
   }
 
   const validation = validateBody(TestRequestSchema, rawBody);
   if (isValidationFailure(validation)) {
-    return createErrorResponse({ status: 400, message: "Invalid request body — expected { input: string | object | array, disabledGuardrails?: string[] }", type: "invalid_request" });
+    return createErrorResponse({
+      status: 400,
+      message:
+        "Invalid request body — expected { input: string | object | array, disabledGuardrails?: string[] }",
+      type: "invalid_request",
+    });
   }
   const parsed = validation.data;
 

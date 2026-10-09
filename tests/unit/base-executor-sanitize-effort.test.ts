@@ -114,8 +114,14 @@ test("sanitizeReasoningEffortForProvider: Ollama Cloud preserves nested max", ()
   };
   const result = sanitizeReasoningEffortForProvider(body, "ollama-cloud", "glm-5.2", null);
   assert.equal(result, body, "Ollama Cloud accepts max literally");
-  assert.equal((result as Record<string, unknown>).reasoning.effort, "max");
-  assert.equal((result as Record<string, unknown>).reasoning.summary, "auto");
+  assert.equal(
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.effort,
+    "max"
+  );
+  assert.equal(
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.summary,
+    "auto"
+  );
 });
 
 test("sanitizeReasoningEffortForProvider: Ollama Cloud maps registry model xhigh → max", () => {
@@ -231,9 +237,12 @@ test("sanitizeReasoningEffortForProvider: nested OpenAI reasoning max passes thr
     null
   );
   assert.equal(result, body, "max passes through unchanged");
-  assert.equal((result as Record<string, unknown>).reasoning.effort, "max");
   assert.equal(
-    (result as Record<string, unknown>).reasoning.summary,
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.effort,
+    "max"
+  );
+  assert.equal(
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.summary,
     "auto",
     "other reasoning fields preserved"
   );
@@ -291,9 +300,12 @@ test("sanitizeReasoningEffortForProvider: xiaomi-mimo preserves nested xhigh by 
   };
   const result = sanitizeReasoningEffortForProvider(body, "xiaomi-mimo", "mimo-v2.5-pro", null);
   assert.equal(result, body);
-  assert.equal((result as Record<string, unknown>).reasoning.effort, "xhigh");
   assert.equal(
-    (result as Record<string, unknown>).reasoning.summary,
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.effort,
+    "xhigh"
+  );
+  assert.equal(
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.summary,
     "auto",
     "other reasoning fields preserved"
   );
@@ -306,7 +318,7 @@ test("sanitizeReasoningEffortForProvider: explicit xhigh opt-out preserves Respo
     input: [],
   };
   const result = sanitizeReasoningEffortForProvider(body, "claude", "claude-opus-4-6", null);
-  assert.equal((result as Record<string, unknown>).reasoning.effort, "max");
+  assert.equal((result as { reasoning?: { effort?: string } }).reasoning?.effort, "max");
   assert.equal((result as Record<string, unknown>).reasoning_effort, undefined);
 });
 
@@ -763,9 +775,12 @@ test("sanitizeReasoningEffortForProvider: native deepseek maps nested reasoning.
     input: [],
   };
   const result = sanitizeReasoningEffortForProvider(body, "deepseek", "deepseek-v4-pro", null);
-  assert.equal((result as Record<string, unknown>).reasoning.effort, "max");
   assert.equal(
-    (result as Record<string, unknown>).reasoning.summary,
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.effort,
+    "max"
+  );
+  assert.equal(
+    (result as { reasoning?: { effort?: string; summary?: string } }).reasoning?.summary,
     "auto",
     "other reasoning fields preserved"
   );
@@ -948,7 +963,7 @@ test("sanitizeReasoningEffortForProvider: #7044 output_config.effort (Claude nat
   const result = sanitizeReasoningEffortForProvider(body, "claude", "claude-opus-4-6", log);
   assert.notEqual(result, body, "must return a new object when mutating");
   assert.equal(
-    (result as Record<string, unknown>).output_config.effort,
+    (result as { output_config?: { effort?: string } }).output_config?.effort,
     "max",
     "xhigh mapped to max on the output_config carrier"
   );
@@ -970,5 +985,5 @@ test("sanitizeReasoningEffortForProvider: #7044 output_config.effort high passes
   };
   const result = sanitizeReasoningEffortForProvider(body, "claude", "claude-opus-4-6", null);
   assert.equal(result, body, "high is supported — body returned unchanged");
-  assert.equal((result as Record<string, unknown>).output_config.effort, "high");
+  assert.equal((result as { output_config?: { effort?: string } }).output_config?.effort, "high");
 });

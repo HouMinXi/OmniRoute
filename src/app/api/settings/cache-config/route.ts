@@ -206,7 +206,7 @@ export async function PUT(request: NextRequest) {
     // which bumps the model-catalog cache version so in-flight responses pick
     // up the fresh TTL — no separate version bump needed here.
     if (Object.keys(updates).length > 0) {
-      updateDatabaseSettings({ cache: updates });
+      updateDatabaseSettings({ cache: { ...getDatabaseSettings().cache, ...updates } });
       // Drop the in-memory semantic cache manager so the next request rebuilds it
       // from the freshly-persisted databaseSettings (dual-layer cache work).
       resetSemanticCacheManager();

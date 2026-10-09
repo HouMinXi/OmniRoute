@@ -19,6 +19,13 @@ import assert from "node:assert/strict";
 
 const { injectCustomSystemPrompt } = await import("../../open-sse/services/systemPrompt.ts");
 
+type PromptMessage = { role?: unknown; content?: unknown };
+
+function messagesOf(result: { messages?: unknown }): PromptMessage[] {
+  if (!Array.isArray(result.messages)) throw new Error("expected messages array");
+  return result.messages as PromptMessage[];
+}
+
 // ─── injectCustomSystemPrompt ────────────────────────────────────────────────
 
 test("injectCustomSystemPrompt: appends to existing string system message", () => {
@@ -29,7 +36,7 @@ test("injectCustomSystemPrompt: appends to existing string system message", () =
     ],
   };
   const result = injectCustomSystemPrompt(body, "Always respond formally.");
-  const sysMsg = result.messages.find((m) => m.role === "system");
+  const sysMsg = messagesOf(result).find((m) => m.role === "system");
   assert.ok(sysMsg, "system message must exist");
   assert.ok(
     typeof sysMsg.content === "string" && sysMsg.content.includes("You are a helpful assistant."),
@@ -49,7 +56,7 @@ test("injectCustomSystemPrompt: appends to existing array-content system message
     ],
   };
   const result = injectCustomSystemPrompt(body, "Speak like a pirate.");
-  const sysMsg = result.messages.find((m) => m.role === "system");
+  const sysMsg = messagesOf(result).find((m) => m.role === "system");
   assert.ok(sysMsg, "system message must exist");
   assert.ok(Array.isArray(sysMsg.content), "content must remain array");
   const texts = (sysMsg.content as Array<{ type: string; text: string }>).map((c) => c.text);
@@ -62,9 +69,9 @@ test("injectCustomSystemPrompt: creates system message when none exists", () => 
     messages: [{ role: "user", content: "What is 2+2?" }],
   };
   const result = injectCustomSystemPrompt(body, "Think step by step.");
-  assert.equal(result.messages[0].role, "system", "system message prepended");
-  assert.equal(result.messages[0].content, "Think step by step.", "prompt is the content");
-  assert.equal(result.messages[1].role, "user", "user message preserved after system");
+  assert.equal(messagesOf(result)[0].role, "system", "system message prepended");
+  assert.equal(messagesOf(result)[0].content, "Think step by step.", "prompt is the content");
+  assert.equal(messagesOf(result)[1].role, "user", "user message preserved after system");
 });
 
 test("injectCustomSystemPrompt: injects into Claude-style string system field", () => {
@@ -155,8 +162,8 @@ test("injectCustomSystemPrompt: claude-shaped body keeps prompt out of messages[
     messages: [{ role: "user", content: "Hello" }],
   };
   const result = injectCustomSystemPrompt(body, "Always respond formally.");
-  assert.equal(result.messages.length, 1);
-  assert.equal(result.messages[0].role, "user");
+  assert.equal(messagesOf(result).length, 1);
+  assert.equal(messagesOf(result)[0].role, "user");
   assert.ok(String(result.system).includes("Always respond formally."));
 });
 
@@ -167,6 +174,6 @@ test("injectCustomSystemPrompt: malformed null system still receives the prompt 
   };
   const result = injectCustomSystemPrompt(body, "Always respond formally.");
   assert.equal(result.system, "Always respond formally.", "prompt is not silently dropped");
-  assert.equal(result.messages.length, 1, "prompt does not leak into messages");
-  assert.equal(result.messages[0].role, "user");
+  assert.equal(messagesOf(result).length, 1, "prompt does not leak into messages");
+  assert.equal(messagesOf(result)[0].role, "user");
 });

@@ -83,8 +83,8 @@ describe("accountId key consistency: executor vs fetcher derivation", () => {
   });
 
   it("falls back to sub when email is absent — both paths agree", () => {
-    const credentials = { sub: "sub-only-123" };
-    const providerSpecificData = { sub: "sub-only-123" };
+    const credentials: { email?: string; sub?: string } = { sub: "sub-only-123" };
+    const providerSpecificData: { email?: string; sub?: string } = { sub: "sub-only-123" };
 
     const executorAccountId = credentials.email || credentials.sub || "unknown";
     const fetcherAccountId = providerSpecificData.email || providerSpecificData.sub || "unknown";
@@ -95,8 +95,8 @@ describe("accountId key consistency: executor vs fetcher derivation", () => {
   });
 
   it("both paths return 'unknown' when email and sub are absent", () => {
-    const credentials = {};
-    const providerSpecificData = {};
+    const credentials: { email?: string; sub?: string } = {};
+    const providerSpecificData: { email?: string; sub?: string } = {};
 
     const executorAccountId = credentials.email || credentials.sub || "unknown";
     const fetcherAccountId = providerSpecificData.email || providerSpecificData.sub || "unknown";

@@ -131,12 +131,14 @@ export async function POST(request: Request): Promise<Response> {
 
   try {
     const configPaths = getPaths();
-    const bodyRecord = rawBody as Record<string, unknown>;
-    const keyId = typeof bodyRecord.keyId === "string" ? bodyRecord.keyId.trim() : "";
+    const bodyRecord =
+      rawBody && typeof rawBody === "object" && !Array.isArray(rawBody) ? rawBody : {};
+    const keyId =
+      "keyId" in bodyRecord && typeof bodyRecord.keyId === "string" ? bodyRecord.keyId.trim() : "";
     let apiKey = validation.data.apiKey || "";
     if (keyId) {
       const keyRecord = await getApiKeyById(keyId);
-      if (keyRecord?.key) apiKey = keyRecord.key;
+      if (typeof keyRecord?.key === "string" && keyRecord.key) apiKey = keyRecord.key;
     }
     if (!apiKey) apiKey = "sk_omniroute";
 

@@ -53,7 +53,11 @@ async function setupConnectionWithAssignment() {
     port: 8080,
   });
   assert.ok(proxy?.id, "proxy must be created");
-  const assignment = await proxiesDb.assignProxyToScope("account", created.id, proxy.id);
+  const assignment = await proxiesDb.assignProxyToScope(
+    "account",
+    typeof created.id === "string" ? created.id : String(created.id),
+    typeof proxy.id === "string" ? proxy.id : String(proxy.id)
+  );
   assert.ok(assignment, "assignment must be created");
   return created as { id: string };
 }

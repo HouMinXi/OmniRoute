@@ -77,8 +77,16 @@ async function readJsonFileWithRetry(filePath, attempts = 100) {
   throw lastError;
 }
 
-function createFakeChild(pid) {
-  const child = new EventEmitter();
+type FakeChild = EventEmitter & {
+  stdout: PassThrough;
+  stderr: PassThrough;
+  pid: number | undefined;
+  killed: boolean;
+  kill: (signal?: NodeJS.Signals | number) => boolean;
+};
+
+function createFakeChild(pid: number | undefined): FakeChild {
+  const child = new EventEmitter() as FakeChild;
   child.stdout = new PassThrough();
   child.stderr = new PassThrough();
   child.pid = pid;
@@ -227,7 +235,7 @@ test("startCloudflaredTunnel reaches running state and stopCloudflaredTunnel cle
   await fs.mkdir(path.dirname(binaryPath), { recursive: true });
   await fs.writeFile(binaryPath, "#!/bin/sh\necho cloudflared\n", { mode: 0o755 });
 
-  const alive = new Set();
+  const alive = new Set<number>();
   const killCalls = [];
   const spawnCalls = [];
 
@@ -245,11 +253,11 @@ test("startCloudflaredTunnel reaches running state and stopCloudflaredTunnel cle
   childProcess.spawn = (command, args, options) => {
     const child = createFakeChild(41001);
     spawnCalls.push({ command, args, options });
-    alive.add(child.pid);
+    if (typeof child.pid === "number") alive.add(child.pid);
 
     child.kill = (signal) => {
       child.killed = true;
-      alive.delete(child.pid);
+      if (typeof child.pid === "number") alive.delete(child.pid);
       child.emit("kill", signal);
       return true;
     };
@@ -314,7 +322,7 @@ test("startCloudflaredTunnel records an error state when the child exits before 
   await fs.mkdir(path.dirname(binaryPath), { recursive: true });
   await fs.writeFile(binaryPath, "#!/bin/sh\necho cloudflared\n", { mode: 0o755 });
 
-  const alive = new Set();
+  const alive = new Set<number>();
   process.kill = (pid, signal) => {
     if (signal === 0) {
       if (alive.has(pid)) return true;
@@ -327,14 +335,14 @@ test("startCloudflaredTunnel records an error state when the child exits before 
 
   childProcess.spawn = () => {
     const child = createFakeChild(41002);
-    alive.add(child.pid);
+    if (typeof child.pid === "number") alive.add(child.pid);
     setTimeout(() => {
       child.stderr.write(
         Buffer.from(
           'ERR failed to request quick Tunnel: Post "https://api.trycloudflare.com/tunnel": tls: failed to verify certificate: x509: certificate signed by unknown authority\n'
         )
       );
-      alive.delete(child.pid);
+      if (typeof child.pid === "number") alive.delete(child.pid);
       setTimeout(() => {
         child.emit("exit", 1, null);
       }, 5);
@@ -395,7 +403,7 @@ test("startCloudflaredTunnel runs a named tunnel from a config file and reports 
   await fs.mkdir(path.dirname(binaryPath), { recursive: true });
   await fs.writeFile(binaryPath, "#!/bin/sh\necho cloudflared\n", { mode: 0o755 });
 
-  const alive = new Set();
+  const alive = new Set<number>();
   const spawnCalls = [];
 
   process.kill = (pid, signal) => {
@@ -410,10 +418,10 @@ test("startCloudflaredTunnel runs a named tunnel from a config file and reports 
   childProcess.spawn = (command, args, options) => {
     const child = createFakeChild(41003);
     spawnCalls.push({ command, args, options });
-    alive.add(child.pid);
+    if (typeof child.pid === "number") alive.add(child.pid);
     child.kill = (signal) => {
       child.killed = true;
-      alive.delete(child.pid);
+      if (typeof child.pid === "number") alive.delete(child.pid);
       child.emit("kill", signal);
       return true;
     };

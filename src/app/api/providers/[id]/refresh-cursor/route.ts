@@ -75,9 +75,33 @@ export async function POST(_request: Request, { params }: { params: Promise<{ id
   try {
     const { id } = await params;
 
-    const connection = (await getCachedProviderConnectionById(id)) as CursorConnectionLike | null;
-    if (!connection) {
+    const rawConnection = await getCachedProviderConnectionById(id);
+    if (!rawConnection || typeof rawConnection.id !== "string") {
       return NextResponse.json({ error: "Connection not found" }, { status: 404 });
+    }
+    const connection: CursorConnectionLike = {
+      id: rawConnection.id,
+    };
+    if (typeof rawConnection.provider === "string") connection.provider = rawConnection.provider;
+    if (typeof rawConnection.accessToken === "string") {
+      connection.accessToken = rawConnection.accessToken;
+    }
+    if (typeof rawConnection.expiresAt === "string") {
+      connection.expiresAt = rawConnection.expiresAt;
+    } else if (rawConnection.expiresAt === null) {
+      connection.expiresAt = null;
+    }
+    const providerSpecificData = rawConnection.providerSpecificData;
+    if (
+      providerSpecificData &&
+      typeof providerSpecificData === "object" &&
+      !Array.isArray(providerSpecificData)
+    ) {
+      const fields: Record<string, unknown> = {};
+      for (const key of Object.keys(providerSpecificData)) {
+        fields[key] = (providerSpecificData as Record<string, unknown>)[key];
+      }
+      connection.providerSpecificData = fields;
     }
 
     if (connection.provider !== "cursor") {

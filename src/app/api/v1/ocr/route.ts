@@ -67,6 +67,37 @@ export async function OPTIONS() {
  * POST /v1/ocr — document OCR
  * Mistral OCR API compatible.
  */
+
+type OcrAccountCredentials = {
+  apiKey?: string;
+  accessToken?: string;
+  baseUrl?: string;
+  providerSpecificData?: Record<string, unknown>;
+};
+
+function toOcrAccount(credentials: object): OcrAccountCredentials | null {
+  const read = (key: string) => Reflect.get(credentials, key);
+  const narrowed: OcrAccountCredentials = {};
+  const key = read("apiKey");
+  const token = read("accessToken");
+  const baseUrl = read("baseUrl");
+  const providerSpecificData = read("providerSpecificData");
+  if (typeof key === "string") narrowed.apiKey = key;
+  if (typeof token === "string") narrowed.accessToken = token;
+  if (typeof baseUrl === "string") narrowed.baseUrl = baseUrl;
+  if (
+    providerSpecificData &&
+    typeof providerSpecificData === "object" &&
+    !Array.isArray(providerSpecificData)
+  ) {
+    const data: Record<string, unknown> = {};
+    for (const [field, value] of Object.entries(providerSpecificData)) data[field] = value;
+    narrowed.providerSpecificData = data;
+  }
+  if (typeof key !== "string" && typeof token !== "string") return null;
+  return narrowed;
+}
+
 async function postHandler(request, context) {
   let rawBody;
   try {
@@ -102,7 +133,15 @@ async function postHandler(request, context) {
     return rateLimitedProviderResponse(resolvedProvider, credentials);
   }
 
-  const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, credentials);
+  const ocrAccount = toOcrAccount(credentials);
+  if (!ocrAccount) {
+    return errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      `No credentials for provider: ${resolvedProvider}`
+    );
+  }
+
+  const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, ocrAccount);
   const ocrCredentials = resolveOcrCredentials(tokenReadyCredentials, resolvedProvider);
 
   const response = await handleOcr({ body: { ...body, model }, credentials: ocrCredentials });

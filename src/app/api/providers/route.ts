@@ -109,7 +109,7 @@ function projectCodexAccountPoolWithRoutingQuota(
         },
       },
     };
-  }) as typeof projection.children;
+  }) as unknown as typeof projection.children;
 
   return { ...projection, children };
 }
@@ -156,10 +156,12 @@ export async function GET(request: Request) {
           ? {
               codexAccountPool: projectCodexAccountPoolWithRoutingQuota(
                 {
-                  id: String(c.id),
-                  provider: c.provider,
+                  id: typeof c.id === "string" ? c.id : "",
+                  provider: typeof c.provider === "string" ? c.provider : "",
                   providerSpecificData:
-                    c.providerSpecificData && typeof c.providerSpecificData === "object"
+                    c.providerSpecificData &&
+                    typeof c.providerSpecificData === "object" &&
+                    !Array.isArray(c.providerSpecificData)
                       ? (c.providerSpecificData as Readonly<Record<string, unknown>>)
                       : {},
                 },
@@ -346,6 +348,7 @@ export async function POST(request: Request) {
       isActive: false,
       testStatus: testStatus || "unknown",
     });
+    const newConnectionId = typeof newConnection.id === "string" ? newConnection.id : "";
 
     // Auto-trigger model discovery only for an explicit autoFetchModels opt-in.
     // Fire-and-forget: model sync can take seconds and should NOT block the
@@ -374,7 +377,7 @@ export async function POST(request: Request) {
           ...(cookieHeader ? { cookie: cookieHeader } : {}),
           ...buildModelSyncInternalHeaders(),
         };
-        const syncUrl = `${internalOrigin}/api/providers/${encodeURIComponent(newConnection.id)}/sync-models?mode=import`;
+        const syncUrl = `${internalOrigin}/api/providers/${encodeURIComponent(newConnectionId)}/sync-models?mode=import`;
         // Intentionally not awaited: this is async/non-blocking work.
         void fetchModelSyncInternal(syncUrl, {
           method: "POST",
@@ -414,7 +417,7 @@ export async function POST(request: Request) {
     // GHSA-jmq6-8j86-8xqj: the local CLI probe spawns on the host — only for local callers.
     // S-01 (#15159): allowLocalSpawn covers the devin cloud-agent validator's CLI
     // fallback, which also spawns. Same gate, same reason.
-    void testSingleConnection(newConnection.id, undefined, {
+    void testSingleConnection(newConnectionId, undefined, {
       allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
       allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
     }).catch((testError: unknown) => {
@@ -499,7 +502,9 @@ export async function PATCH(request: Request) {
       const requestedIds = new Set(ids);
       const requestedConnections = (
         await getProviderConnections({}, undefined, undefined, ["id", "provider"])
-      ).filter((connection) => requestedIds.has(connection.id));
+      ).filter(
+        (connection) => typeof connection.id === "string" && requestedIds.has(connection.id)
+      );
       for (const connection of requestedConnections) {
         const retirementResponse = rejectRetiredCommonChatGptWebProvider(connection.provider);
         if (retirementResponse) return retirementResponse;

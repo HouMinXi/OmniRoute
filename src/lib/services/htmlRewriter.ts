@@ -23,6 +23,7 @@ import type { DefaultTreeAdapterMap } from "parse5";
 type Document = DefaultTreeAdapterMap["document"];
 type Element = DefaultTreeAdapterMap["element"];
 type Node = DefaultTreeAdapterMap["node"];
+type ParentNode = DefaultTreeAdapterMap["parentNode"];
 type Attr = { name: string; value: string; namespace?: string; prefix?: string };
 
 // Matches /foo but not //foo, http://, https://, mailto:, javascript:, #, etc.
@@ -90,9 +91,9 @@ function findOrCreateHead(doc: Document): Element {
   const head = makeElement("head");
   head.childNodes = [];
   (head as Element & { parentNode: Node }).parentNode = htmlEl;
-  htmlEl.childNodes = [head as Node];
-  (htmlEl as Element & { parentNode: Node }).parentNode = doc as unknown as Node;
-  doc.childNodes.push(htmlEl as unknown as Node);
+  htmlEl.childNodes = [head];
+  (htmlEl as Element & { parentNode: ParentNode }).parentNode = doc;
+  doc.childNodes.push(htmlEl);
   return head;
 }
 
@@ -118,8 +119,8 @@ function injectBase(head: Element, baseHref: string): void {
   const baseEl = makeElement("base");
   baseEl.attrs = [{ name: "href", value: baseHref }];
   baseEl.childNodes = [];
-  (baseEl as Element & { parentNode: Node }).parentNode = head;
-  head.childNodes.unshift(baseEl as unknown as Node);
+  (baseEl as Element & { parentNode: ParentNode }).parentNode = head;
+  head.childNodes.unshift(baseEl);
 }
 
 /** Recursively walk the parse5 tree and rewrite matching attrs. */

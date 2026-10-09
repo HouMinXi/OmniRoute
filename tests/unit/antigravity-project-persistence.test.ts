@@ -124,15 +124,22 @@ test("persistDiscoveredAntigravityProjectId writes projectId to SQLite", async (
     lastError: "old error",
   });
 
+  const providerSpecificData = connection.providerSpecificData;
   persistDiscoveredAntigravityProjectId(
-    connection.id,
+    typeof connection.id === "string" ? connection.id : "",
     "discovered-project-123",
-    connection.providerSpecificData as Record<string, unknown>
+    providerSpecificData &&
+      typeof providerSpecificData === "object" &&
+      !Array.isArray(providerSpecificData)
+      ? { ...providerSpecificData }
+      : null
   );
 
   await new Promise((resolve) => setTimeout(resolve, 50));
 
-  const updated = await providersDb.getProviderConnectionById(connection.id);
+  const updated = await providersDb.getProviderConnectionById(
+    typeof connection.id === "string" ? connection.id : ""
+  );
   assert.equal(updated?.projectId, "discovered-project-123");
   assert.equal(
     (updated?.providerSpecificData as Record<string, unknown>)?.projectId,

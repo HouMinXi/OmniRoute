@@ -6,6 +6,8 @@
  *   node --import tsx/esm scripts/ad-hoc/dump-auto-combos.ts > _tasks/research/auto-combos-snapshot.json
  */
 
+import type { ScoringWeights } from "@omniroute/open-sse/services/autoCombo/scoring";
+
 const { AUTO_TEMPLATE_VARIANTS, AUTO_SUFFIX_VARIANTS, AUTO_FAMILY_IDS } =
   await import("@omniroute/open-sse/services/autoCombo/builtinCatalog");
 const { createBuiltinAutoCombo, prepareBuiltinAutoComboInputs } =
@@ -23,7 +25,7 @@ const results: Array<{
   template: string;
   candidateCount: number;
   models: string[];
-  weightPack: Record<string, number>;
+  weightPack: Partial<ScoringWeights>;
   explorationRate: number;
 }> = [];
 

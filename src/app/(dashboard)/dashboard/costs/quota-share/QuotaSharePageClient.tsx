@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/shared/components";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
-import type { QuotaPool } from "@/lib/quota/dimensions";
+import type { QuotaPool, QuotaDimension } from "@/lib/quota/dimensions";
+import type { QuotaPool as WizardQuotaPool } from "@/lib/db/quotaPools";
 
 import { usePools } from "./hooks/usePools";
 import { usePoolUsage } from "./hooks/usePoolUsage";
@@ -40,8 +41,8 @@ interface ApiKey {
 }
 
 interface PlanDimension {
-  unit: string;
-  window: string;
+  unit: QuotaDimension["unit"];
+  window: QuotaDimension["window"];
   limit: number;
 }
 
@@ -53,6 +54,12 @@ interface PlanInfo {
 // ────────────────────────────────────────────────────────────────────────────
 // Stat card helper
 // ────────────────────────────────────────────────────────────────────────────
+
+function asWizardPool(pool: QuotaPool): WizardQuotaPool {
+  const groupId =
+    "groupId" in pool && typeof pool.groupId === "string" ? pool.groupId : "group-demo";
+  return { ...pool, groupId, connectionIds: pool.connectionIds ?? [pool.connectionId] };
+}
 
 function StatCard({
   label,
@@ -722,7 +729,7 @@ export default function QuotaSharePageClient() {
           void mutate();
           setEditing(null);
         }}
-        editPool={editing ?? undefined}
+        editPool={editing ? asWizardPool(editing) : undefined}
         editPoolExclusive={editingExclusive}
         connections={connections}
         apiKeys={apiKeys}

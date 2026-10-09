@@ -9,9 +9,8 @@ import assert from "node:assert/strict";
 // normalizeClaudeToolsForDispatch() routes per provider: agentrouter strips the
 // custom discriminator, every other Claude-format target keeps the #2195 default.
 
-const { normalizeClaudeToolsForDispatch } = await import(
-  "../../open-sse/handlers/chatCore/claudeToolDefaults.ts"
-);
+const { normalizeClaudeToolsForDispatch } =
+  await import("../../open-sse/handlers/chatCore/claudeToolDefaults.ts");
 
 test("agentrouter: strips an explicit type:'custom' discriminator, preserving all other fields", () => {
   const tools = [
@@ -58,18 +57,14 @@ test("agentrouter: preserves versioned/built-in tool types (only 'custom' is str
 test("non-agentrouter providers keep the #2195 behavior: missing type defaults to 'custom'", () => {
   const tools = [{ name: "get_weather", input_schema: {} }];
   for (const provider of ["minimax", "anthropic", "some-gateway"]) {
-    const out = normalizeClaudeToolsForDispatch(tools, provider) as Array<
-      Record<string, unknown>
-    >;
+    const out = normalizeClaudeToolsForDispatch(tools, provider) as Array<Record<string, unknown>>;
     assert.equal(out[0].type, "custom", `${provider} must keep the MiniMax #2195 default`);
   }
 });
 
 test("non-agentrouter providers leave an explicit type:'custom' untouched", () => {
   const tools = [{ type: "custom", name: "a", input_schema: {} }];
-  const out = normalizeClaudeToolsForDispatch(tools, "minimax") as Array<
-    Record<string, unknown>
-  >;
+  const out = normalizeClaudeToolsForDispatch(tools, "minimax") as Array<Record<string, unknown>>;
   assert.equal(out[0].type, "custom");
 });
 
@@ -83,7 +78,10 @@ test("returns non-array input unchanged for any provider", () => {
 
 test("does not mutate the original tool objects", () => {
   const explicit = { type: "custom", name: "x", input_schema: {} };
-  const typeless = { name: "y", input_schema: {} };
+  const typeless: { name: string; input_schema: object; type?: string } = {
+    name: "y",
+    input_schema: {},
+  };
   const out = normalizeClaudeToolsForDispatch([explicit, typeless], "agentrouter") as Array<
     Record<string, unknown>
   >;

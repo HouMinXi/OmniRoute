@@ -50,7 +50,16 @@ export async function onRequest(ctx) {
       source: "local",
       tags: [],
       requires: { permissions: [] },
-      hooks: { onRequest: true, onResponse: false, onError: false },
+      hooks: {
+        onRequest: true,
+        onResponse: false,
+        onError: false,
+        onInstall: false,
+        onActivate: false,
+        onDeactivate: false,
+        onUninstall: false,
+        onStreamComplete: false,
+      },
       skills: [],
       enabledByDefault: false,
       configSchema: {},
@@ -71,6 +80,7 @@ export async function onRequest(ctx) {
         requestId: "req-8395-marker",
         body: { model: "gpt-4" },
         model: "gpt-4",
+        provider: "openai",
         metadata: {},
       });
 
@@ -135,11 +145,17 @@ test("chatCore.ts calls runPluginOnResponseHook from both the non-streaming and 
   );
 
   const hookCallNeedle = "await runPluginOnResponseHook({";
-  const nonStreamingReturnIndex = nonStreamingSource.indexOf("maybeWrapForcedNonStreamingResponsesJson({");
+  const nonStreamingReturnIndex = nonStreamingSource.indexOf(
+    "maybeWrapForcedNonStreamingResponsesJson({"
+  );
   const hookCallIndex = nonStreamingSource.indexOf(hookCallNeedle);
   const streamingHookCallIndex = streamingSource.indexOf(hookCallNeedle);
 
-  assert.notEqual(hookCallIndex, -1, "expected a runPluginOnResponseHook call site in the non-streaming leg");
+  assert.notEqual(
+    hookCallIndex,
+    -1,
+    "expected a runPluginOnResponseHook call site in the non-streaming leg"
+  );
   assert.notEqual(
     streamingHookCallIndex,
     -1,

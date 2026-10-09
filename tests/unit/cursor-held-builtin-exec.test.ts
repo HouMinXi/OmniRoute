@@ -37,47 +37,100 @@ import {
 } from "../../open-sse/utils/cursorAgentProtobuf.ts";
 import { decodeFields } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
+function fieldVarint(field: WireField | undefined): bigint | undefined {
+  return field && field.wireType === 0 ? field.varint : undefined;
+}
+
 /** Unwrap connect frame -> AgentClientMessage.exec_client_message (2). */
 function execClientMessage(frame: Buffer) {
   const body = frame.subarray(5);
   assert.equal(frame.readUInt32BE(1), body.length, "connect envelope length");
   const acm = decodeFields(body).find((f) => f.fieldNumber === 2);
   assert.ok(acm, "AgentClientMessage.exec_client_message");
-  return decodeFields(acm.bytes);
+  return decodeFields(lenBytes(acm));
 }
 
 function successPayload(frame: Buffer, resultField: number) {
   const ecm = execClientMessage(frame);
   const result = ecm.find((f) => f.fieldNumber === resultField);
   assert.ok(result, `ExecClientMessage field ${resultField}`);
-  const success = decodeFields(result.bytes).find((f) => f.fieldNumber === 1);
+  const success = decodeFields(lenBytes(result)).find((f) => f.fieldNumber === 1);
   assert.ok(success, "result.success (field 1) — NOT rejected (field 2)");
-  return { ecm, fields: decodeFields(success.bytes) };
+  return { ecm, fields: decodeFields(lenBytes(success)) };
 }
 
 test("read success returns the client's file contents on ReadResult.success", () => {
   const frame = encodeExecReadSuccess(4, "exec-r", "/tmp/12/snake.cpp", "line1\nline2");
   const { ecm, fields } = successPayload(frame, 7); // ECM_READ_RESULT
 
-  assert.equal(ecm.find((f) => f.fieldNumber === 1)?.varint, 4n, "ExecClientMessage.id");
-  assert.equal(ecm.find((f) => f.fieldNumber === 15)?.bytes.toString("utf8"), "exec-r");
+  assert.equal(fieldVarint(ecm.find((f) => f.fieldNumber === 1)), 4n, "ExecClientMessage.id");
   assert.equal(
-    fields.find((f) => f.fieldNumber === 1)?.bytes.toString("utf8"),
+    fieldText(
+      ecm.find((f) => f.fieldNumber === 15),
+      "utf8"
+    ),
+    "exec-r"
+  );
+  assert.equal(
+    fieldText(
+      fields.find((f) => f.fieldNumber === 1),
+      "utf8"
+    ),
     "/tmp/12/snake.cpp"
   );
-  assert.equal(fields.find((f) => f.fieldNumber === 2)?.bytes.toString("utf8"), "line1\nline2");
-  assert.equal(fields.find((f) => f.fieldNumber === 3)?.varint, 2n, "total_lines");
-  assert.equal(fields.find((f) => f.fieldNumber === 4)?.varint, 11n, "file_size");
+  assert.equal(
+    fieldText(
+      fields.find((f) => f.fieldNumber === 2),
+      "utf8"
+    ),
+    "line1\nline2"
+  );
+  assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 3)), 2n, "total_lines");
+  assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 4)), 11n, "file_size");
 });
 
 test("shell success carries command, working dir, exit code and stdout", () => {
   const frame = encodeExecShellSuccess(5, "exec-s", "ls -la", "/tmp/12", "total 0", 0);
   const { fields } = successPayload(frame, 2); // ECM_SHELL_RESULT
 
-  assert.equal(fields.find((f) => f.fieldNumber === 1)?.bytes.toString("utf8"), "ls -la");
-  assert.equal(fields.find((f) => f.fieldNumber === 2)?.bytes.toString("utf8"), "/tmp/12");
-  assert.equal(fields.find((f) => f.fieldNumber === 3)?.varint, 0n, "exit_code");
-  assert.equal(fields.find((f) => f.fieldNumber === 5)?.bytes.toString("utf8"), "total 0");
+  assert.equal(
+    fieldText(
+      fields.find((f) => f.fieldNumber === 1),
+      "utf8"
+    ),
+    "ls -la"
+  );
+  assert.equal(
+    fieldText(
+      fields.find((f) => f.fieldNumber === 2),
+      "utf8"
+    ),
+    "/tmp/12"
+  );
+  assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 3)), 0n, "exit_code");
+  assert.equal(
+    fieldText(
+      fields.find((f) => f.fieldNumber === 5),
+      "utf8"
+    ),
+    "total 0"
+  );
 });
 
 test("write success reports the path and the number of lines written", () => {
@@ -86,12 +139,15 @@ test("write success reports the path and the number of lines written", () => {
   const { fields } = successPayload(frame, 3); // ECM_WRITE_RESULT
 
   assert.equal(
-    fields.find((f) => f.fieldNumber === 1)?.bytes.toString("utf8"),
+    fieldText(
+      fields.find((f) => f.fieldNumber === 1),
+      "utf8"
+    ),
     "/tmp/12/snake.cpp"
   );
-  assert.equal(fields.find((f) => f.fieldNumber === 2)?.varint, 2n, "lines_created");
-  assert.equal(fields.find((f) => f.fieldNumber === 3)?.varint, BigInt(content.length));
-  assert.equal(fields.find((f) => f.fieldNumber === 4)?.bytes.toString(), content);
+  assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 2)), 2n, "lines_created");
+  assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 3)), BigInt(content.length));
+  assert.equal(fieldText(fields.find((f) => f.fieldNumber === 4)), content);
 });
 
 test("WriteSuccess only returns file content when Cursor asked to read it back", () => {
@@ -107,28 +163,33 @@ test("an empty read result still encodes a success, never a rejection", () => {
   // the exec as completed, otherwise it retries the read forever.
   const frame = encodeExecReadSuccess(7, "exec-r2", "/missing", "");
   const { fields } = successPayload(frame, 7);
-  assert.equal(fields.find((f) => f.fieldNumber === 2)?.bytes.toString("utf8"), "");
-  assert.equal(fields.find((f) => f.fieldNumber === 3)?.varint, 0n, "total_lines of empty output");
+  assert.equal(
+    fieldText(
+      fields.find((f) => f.fieldNumber === 2),
+      "utf8"
+    ),
+    ""
+  );
+  assert.equal(
+    fieldVarint(fields.find((f) => f.fieldNumber === 3)),
+    0n,
+    "total_lines of empty output"
+  );
 });
 
 test("grep file search uses GrepUnionResult.files under the workspace map", () => {
   const frame = encodeExecGrepSuccess(8, "exec-g", "", "/tmp/project", "/tmp/project/snake.c\n");
   const { fields } = successPayload(frame, 5);
-  assert.equal(
-    fields.find((field) => field.fieldNumber === 3)?.bytes.toString(),
-    "files_with_matches"
-  );
+  assert.equal(fieldText(fields.find((field) => field.fieldNumber === 3)), "files_with_matches");
   const entry = fields.find((field) => field.fieldNumber === 4);
   assert.ok(entry);
-  const map = decodeFields(entry.bytes);
-  assert.equal(map.find((field) => field.fieldNumber === 1)?.bytes.toString(), "/tmp/project");
-  const union = decodeFields(map.find((field) => field.fieldNumber === 2)!.bytes);
+  const map = decodeFields(lenBytes(entry));
+  assert.equal(fieldText(map.find((field) => field.fieldNumber === 1)), "/tmp/project");
+  const union = decodeFields(lenBytes(map.find((field) => field.fieldNumber === 2)));
   const files = union.find((field) => field.fieldNumber === 2);
   assert.ok(files, "GrepUnionResult.files (field 2)");
   assert.equal(
-    decodeFields(files.bytes)
-      .find((field) => field.fieldNumber === 1)
-      ?.bytes.toString(),
+    fieldText(decodeFields(lenBytes(files)).find((field) => field.fieldNumber === 1)),
     "/tmp/project/snake.c"
   );
 });
@@ -142,25 +203,25 @@ test("grep success preserves opencode's grouped matches and line numbers", () =>
     "Found 2 matches\n/tmp/project/grep-fixture.txt:\n  Line 1: cursor_probe_alpha: first\n\n  Line 3: cursor_probe_alpha: second\n"
   );
   const { fields } = successPayload(frame, 5);
-  const map = decodeFields(fields.find((field) => field.fieldNumber === 4)!.bytes);
-  const union = decodeFields(map.find((field) => field.fieldNumber === 2)!.bytes);
-  const content = decodeFields(union.find((field) => field.fieldNumber === 3)!.bytes);
+  const map = decodeFields(lenBytes(fields.find((field) => field.fieldNumber === 4)));
+  const union = decodeFields(lenBytes(map.find((field) => field.fieldNumber === 2)));
+  const content = decodeFields(lenBytes(union.find((field) => field.fieldNumber === 3)));
   const matches = content.filter((field) => field.fieldNumber === 1);
   assert.equal(matches.length, 1, "one GrepFileMatch per file, not per output line");
-  const file = decodeFields(matches[0].bytes);
+  const file = decodeFields(lenBytes(matches[0]));
   assert.equal(
-    file.find((field) => field.fieldNumber === 1)?.bytes.toString(),
+    fieldText(file.find((field) => field.fieldNumber === 1)),
     "/tmp/project/grep-fixture.txt"
   );
   const lines = file
     .filter((field) => field.fieldNumber === 2)
-    .map((field) => decodeFields(field.bytes));
+    .map((field) => decodeFields(lenBytes(field)));
   assert.deepEqual(
-    lines.map((fields) => fields.find((field) => field.fieldNumber === 1)?.varint),
+    lines.map((fields) => fieldVarint(fields.find((field) => field.fieldNumber === 1))),
     [1n, 3n]
   );
   assert.deepEqual(
-    lines.map((fields) => fields.find((field) => field.fieldNumber === 2)?.bytes.toString()),
+    lines.map((fields) => fieldText(fields.find((field) => field.fieldNumber === 2))),
     ["cursor_probe_alpha: first", "cursor_probe_alpha: second"]
   );
 });
@@ -174,9 +235,9 @@ test("grep success does not turn no-match and summary text into fake matches", (
     "No matches found"
   );
   const { fields } = successPayload(frame, 5);
-  const entry = decodeFields(fields.find((field) => field.fieldNumber === 4)!.bytes);
-  const union = decodeFields(entry.find((field) => field.fieldNumber === 2)!.bytes);
-  const content = decodeFields(union.find((field) => field.fieldNumber === 3)!.bytes);
+  const entry = decodeFields(lenBytes(fields.find((field) => field.fieldNumber === 4)));
+  const union = decodeFields(lenBytes(entry.find((field) => field.fieldNumber === 2)));
+  const content = decodeFields(lenBytes(union.find((field) => field.fieldNumber === 3)));
   assert.equal(
     content.some((field) => field.fieldNumber === 1),
     false
@@ -193,15 +254,12 @@ test("grep honors files_with_matches even when a search pattern is present", () 
     "files_with_matches"
   );
   const { fields } = successPayload(frame, 5);
+  assert.equal(fieldText(fields.find((field) => field.fieldNumber === 3)), "files_with_matches");
+  const entry = decodeFields(lenBytes(fields.find((field) => field.fieldNumber === 4)));
+  const union = decodeFields(lenBytes(entry.find((field) => field.fieldNumber === 2)));
+  const files = decodeFields(lenBytes(union.find((field) => field.fieldNumber === 2)));
   assert.equal(
-    fields.find((field) => field.fieldNumber === 3)?.bytes.toString(),
-    "files_with_matches"
-  );
-  const entry = decodeFields(fields.find((field) => field.fieldNumber === 4)!.bytes);
-  const union = decodeFields(entry.find((field) => field.fieldNumber === 2)!.bytes);
-  const files = decodeFields(union.find((field) => field.fieldNumber === 2)!.bytes);
-  assert.equal(
-    files.find((field) => field.fieldNumber === 1)?.bytes.toString(),
+    fieldText(files.find((field) => field.fieldNumber === 1)),
     "/tmp/project/grep-fixture.txt"
   );
 });
@@ -216,18 +274,18 @@ test("grep count mode reports per-file and total matches from client content", (
     "count"
   );
   const { fields } = successPayload(frame, 5);
-  assert.equal(fields.find((field) => field.fieldNumber === 3)?.bytes.toString(), "count");
-  const entry = decodeFields(fields.find((field) => field.fieldNumber === 4)!.bytes);
-  const union = decodeFields(entry.find((field) => field.fieldNumber === 2)!.bytes);
-  const count = decodeFields(union.find((field) => field.fieldNumber === 1)!.bytes);
-  const file = decodeFields(count.find((field) => field.fieldNumber === 1)!.bytes);
+  assert.equal(fieldText(fields.find((field) => field.fieldNumber === 3)), "count");
+  const entry = decodeFields(lenBytes(fields.find((field) => field.fieldNumber === 4)));
+  const union = decodeFields(lenBytes(entry.find((field) => field.fieldNumber === 2)));
+  const count = decodeFields(lenBytes(union.find((field) => field.fieldNumber === 1)));
+  const file = decodeFields(lenBytes(count.find((field) => field.fieldNumber === 1)));
   assert.equal(
-    file.find((field) => field.fieldNumber === 1)?.bytes.toString(),
+    fieldText(file.find((field) => field.fieldNumber === 1)),
     "/tmp/project/fixture.txt"
   );
-  assert.equal(file.find((field) => field.fieldNumber === 2)?.varint, 2n);
-  assert.equal(count.find((field) => field.fieldNumber === 2)?.varint, 1n);
-  assert.equal(count.find((field) => field.fieldNumber === 3)?.varint, 2n);
+  assert.equal(fieldVarint(file.find((field) => field.fieldNumber === 2)), 2n);
+  assert.equal(fieldVarint(count.find((field) => field.fieldNumber === 2)), 1n);
+  assert.equal(fieldVarint(count.find((field) => field.fieldNumber === 3)), 2n);
 });
 
 test("ls success encodes child files as LsFile nodes", () => {
@@ -235,12 +293,10 @@ test("ls success encodes child files as LsFile nodes", () => {
   const { fields } = successPayload(frame, 8);
   const root = fields.find((field) => field.fieldNumber === 1);
   assert.ok(root);
-  const child = decodeFields(root.bytes).find((field) => field.fieldNumber === 3);
+  const child = decodeFields(lenBytes(root)).find((field) => field.fieldNumber === 3);
   assert.ok(child, "LsDirectoryTreeNode.children_files");
   assert.equal(
-    decodeFields(child.bytes)
-      .find((field) => field.fieldNumber === 1)
-      ?.bytes.toString(),
+    fieldText(decodeFields(lenBytes(child)).find((field) => field.fieldNumber === 1)),
     "snake.c"
   );
 });
@@ -253,13 +309,11 @@ test("ls success uses child names from opencode's absolute glob paths", () => {
     "/tmp/project/fixture.txt\n/tmp/project/snake.c\n"
   );
   const { fields } = successPayload(frame, 8);
-  const node = decodeFields(fields.find((field) => field.fieldNumber === 1)!.bytes);
+  const node = decodeFields(lenBytes(fields.find((field) => field.fieldNumber === 1)));
   const names = node
     .filter((field) => field.fieldNumber === 3)
     .map((field) =>
-      decodeFields(field.bytes)
-        .find((child) => child.fieldNumber === 1)
-        ?.bytes.toString()
+      fieldText(decodeFields(lenBytes(field)).find((child) => child.fieldNumber === 1))
     );
   assert.deepEqual(names, ["fixture.txt", "snake.c"]);
 });
@@ -299,7 +353,7 @@ test("exec failures use their own result oneof member from the CLI schema", () =
     const result = ecm.find((field) => field.fieldNumber === resultField);
     assert.ok(result, `ExecClientMessage.${resultField}`);
     assert.deepEqual(
-      decodeFields(result.bytes).map((field) => field.fieldNumber),
+      decodeFields(lenBytes(result)).map((field) => field.fieldNumber),
       [rejectedField],
       `result ${resultField} must reject on member ${rejectedField}`
     );
@@ -309,5 +363,5 @@ test("exec failures use their own result oneof member from the CLI schema", () =
 test("list_mcp_resources acknowledges the blocking exec on field 17", () => {
   const frame = encodeExecListMcpResourcesResult(3, "resources-3");
   const { ecm } = successPayload(frame, 17);
-  assert.equal(ecm.find((field) => field.fieldNumber === 15)?.bytes.toString(), "resources-3");
+  assert.equal(fieldText(ecm.find((field) => field.fieldNumber === 15)), "resources-3");
 });

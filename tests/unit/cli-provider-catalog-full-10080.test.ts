@@ -107,7 +107,9 @@ test("loadAvailableProviders reads the decomposed catalog, not the 6-entry fallb
   // Lower bound rather than an exact count so adding providers does not break this.
   assert.ok(providers.length > 200, `expected 200+ providers, got ${providers.length}`);
 
-  const byId = new Map(providers.map((p) => [p.id, p]));
+  const byId = new Map<string, { category?: string; hasFree?: boolean }>(
+    providers.map((p) => [p.id, p as { category?: string; hasFree?: boolean }])
+  );
   for (const id of ["cerebras", "groq", "gemini", "siliconflow", "opencode", "kiro"]) {
     assert.ok(byId.has(id), `${id} missing from the catalog`);
   }

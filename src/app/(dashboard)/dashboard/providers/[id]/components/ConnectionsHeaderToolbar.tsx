@@ -16,6 +16,7 @@ type ConnectionsHeaderToolbarProps = {
   batchTesting: boolean;
   batchRetesting: boolean;
   retestingId: string | null;
+  distributingProxies?: boolean;
   proxyConfig: any;
   reorderingByAvailability: boolean;
   handleReorderByAvailability: () => void | Promise<void>;
@@ -24,7 +25,7 @@ type ConnectionsHeaderToolbarProps = {
   claudeRoutingSettingsLoaded: boolean;
   claudeRoutingSettingsLoadError: string | null;
   savingClaudeRoutingPreference: boolean;
-  handleToggleClaudeRoutingPreference: () => void;
+  handleToggleClaudeRoutingPreference: (enabled: boolean) => void;
   loadClaudeRoutingSettings: () => Promise<void>;
   codexGlobalServiceMode: string;
   codexGlobalServiceModeOptions: Array<{ value: string; label: string }>;

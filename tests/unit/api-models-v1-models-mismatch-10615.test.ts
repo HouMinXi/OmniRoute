@@ -29,6 +29,8 @@ test("#10615: /api/models must agree with /v1/models on exclusive synced-listing
     accessToken: "cursor-access-token",
     isActive: true,
   });
+  assert.ok(connection && typeof connection.id === "string");
+  const connectionId = connection.id;
 
   const apiModelsRes = await modelsRoute.GET(new Request("http://localhost/api/models"));
   const apiModelsBody = (await apiModelsRes.json()) as {
@@ -38,7 +40,7 @@ test("#10615: /api/models must agree with /v1/models on exclusive synced-listing
   assert.ok(staticRow, "/api/models must list the static cursor model");
   assert.equal(staticRow!.available, true);
 
-  await localDb.replaceSyncedAvailableModelsForConnection("cursor", connection.id, [
+  await localDb.replaceSyncedAvailableModelsForConnection("cursor", connectionId, [
     { id: "composer-3", name: "Composer 3" },
   ]);
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();

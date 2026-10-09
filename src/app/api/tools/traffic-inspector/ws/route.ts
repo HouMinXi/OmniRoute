@@ -18,6 +18,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { Socket } from "node:net";
 import { globalTrafficBuffer } from "@/mitm/inspector/buffer";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 
@@ -49,7 +50,7 @@ function encodeWsFrame(opcode: number, payload: Buffer = Buffer.alloc(0)): Buffe
   return Buffer.concat([header, payload]);
 }
 
-function sendText(socket: import("node:net").Socket, data: unknown): void {
+function sendText(socket: Socket, data: unknown): void {
   try {
     const json = JSON.stringify(data);
     const payload = Buffer.from(json, "utf8");
@@ -59,7 +60,7 @@ function sendText(socket: import("node:net").Socket, data: unknown): void {
   }
 }
 
-function sendClose(socket: import("node:net").Socket): void {
+function sendClose(socket: Socket): void {
   try {
     socket.write(encodeWsFrame(0x08));
     socket.end();
@@ -85,9 +86,10 @@ export async function GET(request: Request): Promise<Response> {
     });
   }
 
-  // @ts-expect-error — Next.js standalone server exposes the raw socket via
-  // `request.socket` but the Request type does not declare it.
-  const socket = (request as unknown as { socket?: import("node:net").Socket }).socket;
+  // The standalone server exposes the raw socket on the request, but the
+  // Fetch Request type does not declare it.
+  const socket =
+    "socket" in request && request.socket instanceof Socket ? request.socket : undefined;
   if (!socket) {
     return new Response(JSON.stringify(buildErrorBody(500, "WebSocket upgrade unavailable")), {
       status: 500,

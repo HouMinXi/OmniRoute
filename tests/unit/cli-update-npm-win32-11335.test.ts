@@ -18,7 +18,7 @@ test("#11335 win32 resolves npm.cmd and runs it through a shell", () => {
 
   const win = npmExecOptions("win32", { timeoutMs: 15000 });
   assert.equal(win.shell, true, "win32 must enable the shell so npm.cmd can be spawned");
-  assert.equal(win.windowsHide, true);
+  assert.equal("windowsHide" in win && win.windowsHide, true);
   assert.equal(win.timeout, 15000);
 });
 

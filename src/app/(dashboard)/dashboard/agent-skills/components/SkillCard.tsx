@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, type ReactElement } from "react";
 import { useTranslations } from "next-intl";
 import type { AgentSkill } from "@/lib/agentSkills/types";
 
@@ -10,7 +10,7 @@ interface SkillCardProps {
   onClick: () => void;
 }
 
-export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Element {
+export function SkillCard({ skill, selected, onClick }: SkillCardProps): ReactElement {
   const t = useTranslations("agentSkills");
 
   const handleKeyDown = useCallback(
@@ -20,7 +20,7 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
         onClick();
       }
     },
-    [onClick],
+    [onClick]
   );
 
   const previewItems: string[] =

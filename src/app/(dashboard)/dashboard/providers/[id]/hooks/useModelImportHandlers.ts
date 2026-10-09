@@ -40,7 +40,10 @@ export interface ImportProgress {
 export interface UseModelImportHandlersParams {
   providerId: string;
   models: Array<{ id: string; name?: string }>;
-  modelMeta: { customModels: Array<{ id: string }>; modelCompatOverrides?: unknown[] };
+  modelMeta: {
+    customModels: Array<{ id?: string }>;
+    modelCompatOverrides?: unknown[];
+  };
   modelAliases: Record<string, string>;
   connections: Array<{
     id?: string;
@@ -235,7 +238,6 @@ export function useModelImportHandlers({
       for (let i = 0; i < newModels.length; i++) {
         const model = newModels[i];
         const rawId = model.id || model.name || model.model;
-        // Same coercion classifyModelImport uses for the "already imported" check.
         const modelId = typeof rawId === "string" ? rawId : String(rawId ?? "");
         if (!modelId) continue;
         const parts = modelId.split("/");

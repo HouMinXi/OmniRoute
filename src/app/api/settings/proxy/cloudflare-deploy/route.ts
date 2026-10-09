@@ -85,7 +85,7 @@ export async function POST(request: Request) {
     const uploadRes = await fetch(workerScriptUrl, {
       method: "PUT",
       headers: { Authorization: `Bearer ${apiToken}`, ...uploadHeaders },
-      body: uploadBody,
+      body: new Uint8Array(uploadBody),
     });
 
     if (!uploadRes.ok) {
@@ -106,7 +106,7 @@ export async function POST(request: Request) {
       return createErrorResponse({
         status: uploadRes.status,
         message: `Cloudflare Worker upload failed: ${upstreamMessage}`,
-        type: "upstream_error",
+        type: "server_error",
       });
     }
 
@@ -151,7 +151,7 @@ export async function POST(request: Request) {
         status: 400,
         message:
           "Worker deployed but failed to retrieve workers.dev subdomain. Set up a workers.dev subdomain in the Cloudflare dashboard first.",
-        type: "upstream_error",
+        type: "server_error",
       });
     }
 

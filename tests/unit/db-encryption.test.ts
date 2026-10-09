@@ -128,13 +128,12 @@ test("ensureSecretLoaded loads key from .env file when process.env.STORAGE_ENCRY
   delete process.env.STORAGE_ENCRYPTION_KEY;
   const originalNodeEnv = process.env.NODE_ENV;
   try {
-    delete process.env.NODE_ENV;
+    delete process.env["NODE_ENV"];
     const encryption = await importFresh("src/lib/db/encryption.ts");
     // Under non-test NODE_ENV, if a local .env exists with a key, it discovers it
     const enabled = encryption.isEncryptionEnabled();
     assert.equal(typeof enabled, "boolean");
   } finally {
-    process.env.NODE_ENV = originalNodeEnv;
+    process.env["NODE_ENV"] = originalNodeEnv;
   }
 });
-

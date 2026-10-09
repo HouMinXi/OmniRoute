@@ -18,6 +18,10 @@ import type {
 
 type JsonRecord = Record<string, unknown>;
 
+function isJsonRecord(value: unknown): value is JsonRecord {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
 type ResolvedComboTargetView = {
   stepId: string;
   executionKey: string;
@@ -263,9 +267,29 @@ async function buildComboForecast(
 ): Promise<ComboForecastMetrics | null> {
   const comboId = typeof combo.id === "string" ? combo.id : "";
   const comboName = typeof combo.name === "string" ? combo.name : "";
-  if (!comboId || !comboName) return null;
+  if (!comboId || !comboName || !Array.isArray(combo.models)) return null;
 
-  const targets = resolveNestedComboTargets(combo, allCombos) as ResolvedComboTargetView[];
+  const targets = resolveNestedComboTargets(
+    {
+      id: comboId,
+      name: comboName,
+      models: combo.models,
+      ...(typeof combo.strategy === "string" ? { strategy: combo.strategy } : {}),
+      ...(isJsonRecord(combo.config) ? { config: combo.config } : {}),
+    },
+    allCombos.flatMap((entry) => {
+      if (typeof entry.name !== "string" || !Array.isArray(entry.models)) return [];
+      return [
+        {
+          id: typeof entry.id === "string" ? entry.id : undefined,
+          name: entry.name,
+          models: entry.models,
+          ...(typeof entry.strategy === "string" ? { strategy: entry.strategy } : {}),
+          ...(isJsonRecord(entry.config) ? { config: entry.config } : {}),
+        },
+      ];
+    })
+  ) as ResolvedComboTargetView[];
   const rowsByTarget = groupRowsByExecutionKey(rows);
   const totalRequests = rows.reduce((sum, row) => sum + row.requests, 0);
   const totalCostUsd = rows.reduce((sum, row) => sum + row.costUsd, 0);

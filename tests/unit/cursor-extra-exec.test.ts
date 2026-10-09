@@ -10,6 +10,26 @@ import {
   encodeUInt32Field,
 } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
+function fieldVarint(field: WireField | undefined): bigint | undefined {
+  return field && field.wireType === 0 ? field.varint : undefined;
+}
+
 const variants = [
   {
     field: 18,
@@ -77,28 +97,30 @@ test("Cursor CLI auxiliary execs are recognized and answered without hanging", (
   for (const [index, frame] of responses.entries()) {
     const envelope = decodeFields(frame.subarray(5)).find((f) => f.fieldNumber === 2);
     assert.ok(envelope, "AgentClientMessage.exec_client_message");
-    const exec = decodeFields(envelope.bytes);
-    assert.equal(exec.find((f) => f.fieldNumber === 1)?.varint, BigInt(index + 1));
+    const exec = decodeFields(lenBytes(envelope));
+    assert.equal(fieldVarint(exec.find((f) => f.fieldNumber === 1)), BigInt(index + 1));
     const result = exec.find((f) => f.fieldNumber === variants[index].field);
     assert.ok(result, `ExecClientMessage result field ${variants[index].field}`);
-    const fields = decodeFields(result.bytes);
+    const fields = decodeFields(lenBytes(result));
     if (variants[index].field === 37) {
       const notFound = fields.find((f) => f.fieldNumber === 3);
       assert.ok(notFound);
       assert.equal(
-        decodeFields(notFound.bytes)
-          .find((f) => f.fieldNumber === 1)
-          ?.bytes.toString(),
+        fieldText(decodeFields(lenBytes(notFound)).find((f) => f.fieldNumber === 1)),
         "agent-37"
       );
     }
     if (variants[index].field === 56) {
-      assert.equal(fields.find((f) => f.fieldNumber === 1)?.bytes.toString(), "source-56");
+      assert.equal(fieldText(fields.find((f) => f.fieldNumber === 1)), "source-56");
     }
     if (variants[index].field === 30 || variants[index].field === 31) {
-      assert.equal(fields.find((f) => f.fieldNumber === 1)?.varint, 2n, "not found");
+      assert.equal(fieldVarint(fields.find((f) => f.fieldNumber === 1)), 2n, "not found");
     } else if (variants[index].field >= 41 && variants[index].field <= 43) {
-      assert.equal(fields.find((f) => f.fieldNumber === 1)?.varint, 0n, "not fully allowlisted");
+      assert.equal(
+        fieldVarint(fields.find((f) => f.fieldNumber === 1)),
+        0n,
+        "not fully allowlisted"
+      );
     } else {
       const errorField =
         variants[index].field === 29 || variants[index].field === 37
@@ -136,13 +158,15 @@ test("execute_hook mirrors each hook variant with an empty response and no permi
     assert.equal(written.length, 1);
     const envelope = decodeFields(written[0].subarray(5)).find((field) => field.fieldNumber === 2);
     assert.ok(envelope);
-    const result = decodeFields(envelope.bytes).find((field) => field.fieldNumber === 27);
+    const result = decodeFields(lenBytes(envelope)).find((field) => field.fieldNumber === 27);
     assert.ok(result);
-    const response = decodeFields(result.bytes).find((field) => field.fieldNumber === 1);
+    const response = decodeFields(lenBytes(result)).find((field) => field.fieldNumber === 1);
     assert.ok(response);
-    const echoed = decodeFields(response.bytes).find((field) => field.fieldNumber === hookField);
+    const echoed = decodeFields(lenBytes(response)).find(
+      (field) => field.fieldNumber === hookField
+    );
     assert.ok(echoed);
-    assert.deepEqual(decodeFields(echoed.bytes), [], "no synthetic approval or hook output");
+    assert.deepEqual(decodeFields(lenBytes(echoed)), [], "no synthetic approval or hook output");
   }
 });
 
@@ -158,11 +182,11 @@ test("unavailable git diff throws on ExecClientControlMessage instead of inventi
   assert.equal(written.length, 1);
   const control = decodeFields(written[0].subarray(5)).find((field) => field.fieldNumber === 5);
   assert.ok(control, "AgentClientMessage.exec_client_control_message");
-  const thrown = decodeFields(control.bytes).find((field) => field.fieldNumber === 2);
+  const thrown = decodeFields(lenBytes(control)).find((field) => field.fieldNumber === 2);
   assert.ok(thrown, "ExecClientControlMessage.throw");
-  const fields = decodeFields(thrown.bytes);
-  assert.equal(fields.find((field) => field.fieldNumber === 1)?.varint, 44n);
-  assert.ok(fields.find((field) => field.fieldNumber === 2)?.bytes.length);
+  const fields = decodeFields(lenBytes(thrown));
+  assert.equal(fieldVarint(fields.find((field) => field.fieldNumber === 1)), 44n);
+  assert.ok(lenBytes(fields.find((field) => field.fieldNumber === 2)).length);
   assert.equal(ctx.unknownExecField, 44, "retain bounded watchdog if throw goes unanswered");
 });
 

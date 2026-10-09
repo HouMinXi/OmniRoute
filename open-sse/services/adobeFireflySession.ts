@@ -46,8 +46,8 @@ export interface AdobeFireflySession {
 
 export interface AdobeFireflySessionResolveOpts {
   credentials?: {
-    apiKey?: string;
-    accessToken?: string;
+    apiKey?: string | null;
+    accessToken?: string | null;
     connectionId?: string;
     providerSpecificData?: {
       cookie?: unknown;

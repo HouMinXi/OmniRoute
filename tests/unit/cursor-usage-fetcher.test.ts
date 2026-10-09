@@ -3,6 +3,50 @@ import assert from "node:assert/strict";
 
 const usageService = await import("../../open-sse/services/usage.ts");
 
+type UsageWindow = {
+  total?: unknown;
+  used?: unknown;
+  remaining?: unknown;
+  remainingPercentage?: unknown;
+  unlimited?: unknown;
+  resetAt?: unknown;
+};
+
+type CursorUsage = {
+  plan?: unknown;
+  message?: unknown;
+  quotas?: unknown;
+};
+
+function readUsage(
+  usage: Awaited<ReturnType<typeof usageService.getUsageForProvider>>
+): CursorUsage {
+  if (!usage || typeof usage !== "object") throw new Error("expected a cursor usage payload");
+  const plan = "plan" in usage ? usage.plan : undefined;
+  const message = "message" in usage ? usage.message : undefined;
+  const quotas = "quotas" in usage ? usage.quotas : undefined;
+  return { plan, message, quotas };
+}
+
+function usageMessage(usage: CursorUsage): string {
+  return typeof usage.message === "string" ? usage.message : "";
+}
+
+function usagePlan(usage: CursorUsage): string | undefined {
+  return typeof usage.plan === "string" ? usage.plan : undefined;
+}
+
+function usageQuotas(usage: CursorUsage): Record<string, UsageWindow> | undefined {
+  const quotas = usage.quotas;
+  if (!quotas || typeof quotas !== "object" || Array.isArray(quotas)) return undefined;
+  const windows: Record<string, UsageWindow> = {};
+  for (const [name, value] of Object.entries(quotas)) {
+    if (!value || typeof value !== "object") continue;
+    windows[name] = value;
+  }
+  return windows;
+}
+
 const CURSOR_PERIOD_URL =
   "https://api2.cursor.sh/aiserver.v1.DashboardService/GetCurrentPeriodUsage";
 const CURSOR_SUMMARY_URL = "https://api2.cursor.sh/api/usage/summary";
@@ -60,41 +104,33 @@ function installFetchMock(
   };
 }
 
-function assertThreeWindows(usage: {
-  plan?: string;
-  quotas?: Record<
-    string,
-    {
-      total: number;
-      used: number;
-      remaining: number;
-      remainingPercentage?: number;
-      unlimited: boolean;
-      resetAt: string | null;
-    }
-  >;
-}) {
-  assert.equal(usage.plan, "Cursor Pro");
-  assert.ok(usage.quotas);
-  assert.deepEqual(Object.keys(usage.quotas!), ["Total", "Auto + Composer", "API"]);
+function windowNumber(value: unknown): number {
+  if (typeof value !== "number") throw new Error("expected a numeric usage window field");
+  return value;
+}
 
-  const total = usage.quotas!.Total;
+function assertThreeWindows(usage: CursorUsage) {
+  assert.equal(usagePlan(usage), "Cursor Pro");
+  assert.ok(usageQuotas(usage));
+  assert.deepEqual(Object.keys(usageQuotas(usage)!), ["Total", "Auto + Composer", "API"]);
+
+  const total = usageQuotas(usage)!.Total;
   assert.equal(total.total, 20);
   assert.equal(total.used, 15.29);
   assert.equal(total.remaining, 4.71);
-  assert.ok(Math.abs((total.remainingPercentage ?? 0) - (100 - 10.193333333333333)) < 1e-6);
+  assert.ok(Math.abs(windowNumber(total.remainingPercentage) - (100 - 10.193333333333333)) < 1e-6);
   assert.equal(total.unlimited, false);
   assert.equal(total.resetAt, new Date(Number("1779264371000")).toISOString());
 
-  const auto = usage.quotas!["Auto + Composer"];
+  const auto = usageQuotas(usage)!["Auto + Composer"];
   assert.equal(auto.total, 20);
   assert.equal(auto.used, 2.64);
-  assert.ok(Math.abs((auto.remainingPercentage ?? 0) - (100 - 13.20952380952381)) < 1e-6);
+  assert.ok(Math.abs(windowNumber(auto.remainingPercentage) - (100 - 13.20952380952381)) < 1e-6);
 
-  const api = usage.quotas!.API;
+  const api = usageQuotas(usage)!.API;
   assert.equal(api.total, 20);
   assert.equal(api.used, 0.63);
-  assert.ok(Math.abs((api.remainingPercentage ?? 0) - (100 - 3.155555555555556)) < 1e-6);
+  assert.ok(Math.abs(windowNumber(api.remainingPercentage) - (100 - 3.155555555555556)) < 1e-6);
 }
 
 test("cursor usage: Bearer period-usage happy path returns three windows", async () => {
@@ -116,7 +152,7 @@ test("cursor usage: Bearer period-usage happy path returns three windows", async
       accessToken,
       providerSpecificData: {},
     });
-    assertThreeWindows(usage);
+    assertThreeWindows(readUsage(usage));
     assert.equal(mock.calls.length, 1);
     assert.equal(mock.calls[0].url, CURSOR_PERIOD_URL);
     const headers = mock.calls[0].init.headers as Record<string, string>;
@@ -153,9 +189,9 @@ test("cursor usage: falls back to summary when period-usage fails", async () => 
       provider: "cursor",
       accessToken,
     });
-    assert.equal(usage.plan, "Cursor Pro");
-    assert.ok(usage.quotas?.Total);
-    assert.equal(usage.quotas!.Total.total, 20);
+    assert.equal(usagePlan(usage), "Cursor Pro");
+    assert.ok(usageQuotas(usage)?.Total);
+    assert.equal(usageQuotas(usage)!.Total.total, 20);
     assert.deepEqual(
       mock.calls.map((c) => c.url),
       [CURSOR_PERIOD_URL, CURSOR_SUMMARY_URL]
@@ -192,10 +228,10 @@ test("cursor usage: falls back to auth/usage when period and summary fail", asyn
       provider: "cursor",
       accessToken,
     });
-    assert.equal(usage.plan, "Cursor Pro");
-    assert.equal(usage.quotas?.Total.used, 40);
-    assert.equal(usage.quotas?.Total.total, 500);
-    assert.equal(usage.quotas?.Total.remaining, 460);
+    assert.equal(usagePlan(usage), "Cursor Pro");
+    assert.equal(usageQuotas(usage)?.Total.used, 40);
+    assert.equal(usageQuotas(usage)?.Total.total, 500);
+    assert.equal(usageQuotas(usage)?.Total.remaining, 460);
     assert.ok(!JSON.stringify(usage).includes(accessToken));
   } finally {
     mock.restore();
@@ -225,7 +261,7 @@ test("cursor usage: cookie dashboard is last fallback after Bearer APIs fail", a
       accessToken,
       providerSpecificData: { userId },
     });
-    assertThreeWindows(usage);
+    assertThreeWindows(readUsage(usage));
     assert.equal(mock.calls.length, 4);
     assert.equal(mock.calls[3].url, CURSOR_COOKIE_USAGE_URL);
     const headers = mock.calls[3].init.headers as Record<string, string>;
@@ -259,7 +295,7 @@ test("cursor usage: JWT sub used for cookie fallback when providerSpecificData.u
       accessToken,
       providerSpecificData: {},
     });
-    assert.equal(usage.plan, "Cursor Pro");
+    assert.equal(usagePlan(usage), "Cursor Pro");
     const headers = mock.calls[3].init.headers as Record<string, string>;
     assert.equal(
       headers.Cookie,
@@ -288,7 +324,7 @@ test("cursor usage: Bearer-only token without userId still works via period API"
       accessToken,
       providerSpecificData: {},
     });
-    assertThreeWindows(usage);
+    assertThreeWindows(readUsage(usage));
     assert.equal(mock.calls.length, 1);
   } finally {
     mock.restore();
@@ -305,8 +341,8 @@ test("cursor usage: all Bearer fail and no userId returns reauth message without
       providerSpecificData: {},
     });
     assert.equal(mock.calls.length, 3);
-    assert.match(usage.message ?? "", /Login \(PKCE\)|re-import/i);
-    assert.equal(usage.quotas, undefined);
+    assert.match(usageMessage(readUsage(usage)), /Login \(PKCE\)|re-import/i);
+    assert.equal(usageQuotas(usage), undefined);
     assert.ok(!JSON.stringify(usage).includes("not-a-jwt"));
   } finally {
     mock.restore();
@@ -331,9 +367,9 @@ test("cursor usage: cookie 307 redirect surfaces expired session with PKCE hint"
       accessToken,
       providerSpecificData: { userId: "user_01EXPIRED" },
     });
-    assert.equal(usage.plan, "Cursor");
-    assert.match(usage.message ?? "", /session expired/i);
-    assert.match(usage.message ?? "", /Login \(PKCE\)|re-import/i);
+    assert.equal(usagePlan(usage), "Cursor");
+    assert.match(usageMessage(readUsage(usage)), /session expired/i);
+    assert.match(usageMessage(readUsage(usage)), /Login \(PKCE\)|re-import/i);
   } finally {
     mock.restore();
   }
@@ -366,8 +402,8 @@ test("cursor usage: empty planUsage on period falls through to cookie empty mess
       accessToken,
       providerSpecificData: { userId: "user_01EMPTY" },
     });
-    assert.equal(usage.plan, "Cursor");
-    assert.match(usage.message ?? "", /No active plan usage/i);
+    assert.equal(usagePlan(usage), "Cursor");
+    assert.match(usageMessage(readUsage(usage)), /No active plan usage/i);
   } finally {
     mock.restore();
   }

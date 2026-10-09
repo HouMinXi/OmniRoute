@@ -18,7 +18,13 @@ test("registerRedis: attaches a `redis` command with up/down/status subcommands"
   const subCommands: Array<{ name: string; options: Set<string> }> = [];
   const fakeProgram = {
     command(name) {
-      const cmd = {
+      const cmd: {
+        name: string;
+        options?: Set<string>;
+        description: () => typeof cmd;
+        option: (flag: string) => typeof cmd;
+        action: () => typeof cmd;
+      } = {
         name,
         description() {
           return cmd;

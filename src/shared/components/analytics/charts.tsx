@@ -280,6 +280,11 @@ export function ActivityHeatmap({ activityMap }) {
     return "bg-primary/90";
   }
 
+  let activityTokenTotal = 0;
+  for (const value of Object.values(activityMap || {})) {
+    if (typeof value === "number") activityTokenTotal += value;
+  }
+
   return (
     <Card className="p-4 h-full min-w-0 overflow-hidden">
       <div className="flex items-center justify-between mb-3">
@@ -289,9 +294,7 @@ export function ActivityHeatmap({ activityMap }) {
         <span className="text-xs text-text-muted">
           {t("activitySummary", {
             active: Object.keys(activityMap || {}).length,
-            tokens: fmt(
-              Object.values(activityMap || {}).reduce((a: number, b: number) => a + b, 0)
-            ),
+            tokens: fmt(activityTokenTotal),
             days: 365,
           })}
         </span>

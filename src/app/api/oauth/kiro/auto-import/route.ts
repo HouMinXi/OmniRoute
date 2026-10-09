@@ -459,8 +459,9 @@ export function findKiroConnectionByProfileArn(
 
 // ── Save to OmniRoute DB ──────────────────────────────────────────────────────
 
-type SaveAndRespondResult = Awaited<ReturnType<typeof tryKiroCliSqlite>> & {
-  // Fields added by tryAwsSsoCache for IDC tokens (#2059)
+type SqliteImportResult = Awaited<ReturnType<typeof tryKiroCliSqlite>>;
+
+type SaveAndRespondResult = Omit<SqliteImportResult, "authMethod"> & {
   authMethod?: string | null;
   // Fields added by tryAwsSsoCache for External IdP (organization) tokens
   tokenEndpoint?: string | null;

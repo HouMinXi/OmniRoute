@@ -32,17 +32,23 @@ const repoRoot = path.join(path.dirname(new URL(import.meta.url).pathname), ".."
 
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-14298f-"));
 process.env.OMNIROUTE_API_KEY = "***";
-process.env.NODE_ENV = "test";
+(process.env as Record<string, string | undefined>).NODE_ENV = "test";
 
 const { runOAuthStart } = await import(path.join(repoRoot, "bin/cli/commands/oauth.mjs"));
 
-function startFakeServer(handler) {
-  const requests = [];
+function startFakeServer(
+  handler: (req: http.IncomingMessage, res: http.ServerResponse, n: number) => Promise<void> | void
+): Promise<{
+  server: http.Server;
+  requests: Array<{ method?: string; url?: string; body: unknown }>;
+  baseUrl: string;
+}> {
+  const requests: Array<{ method?: string; url?: string; body: unknown }> = [];
   const server = http.createServer((req, res) => {
     let rawBody = "";
     req.on("data", (c) => (rawBody += c));
     req.on("end", async () => {
-      let body = null;
+      let body: unknown = null;
       try {
         body = rawBody ? JSON.parse(rawBody) : null;
       } catch {
@@ -54,7 +60,9 @@ function startFakeServer(handler) {
   });
   return new Promise((resolve) => {
     server.listen(0, "127.0.0.1", () => {
-      resolve({ server, requests, baseUrl: `http://127.0.0.1:${server.address().port}` });
+      const address = server.address();
+      const port = address && typeof address === "object" ? address.port : 0;
+      resolve({ server, requests, baseUrl: `http://127.0.0.1:${port}` });
     });
   });
 }
@@ -329,11 +337,7 @@ test("#14298 + review: poll-callback 500 exchange failure fails fast", async () 
         timeout: 15000,
       })
     );
-    assert.equal(
-      exitCode,
-      1,
-      `the 500 exchange failure must exit 1 immediately (got ${exitCode})`
-    );
+    assert.equal(exitCode, 1, `the 500 exchange failure must exit 1 immediately (got ${exitCode})`);
 
     const pollReqs = requests.filter(
       (r) => r.method === "POST" && r.url === "/api/oauth/codex/poll-callback"

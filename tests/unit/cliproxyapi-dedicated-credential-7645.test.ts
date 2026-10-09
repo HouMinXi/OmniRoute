@@ -51,8 +51,8 @@ afterEach(async () => {
     process.env.CLIPROXYAPI_API_KEY = originalEnvKey;
   }
   clearUpstreamProxyConfigCache();
-  const { dbCache } = await import("../../src/lib/db/readCache.ts");
-  dbCache?.invalidate?.("settings");
+  const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
+  invalidateDbCache("settings");
 });
 
 after(() => {
@@ -84,8 +84,7 @@ async function withCapturedCliproxyapiRequest(fn: () => Promise<unknown>): Promi
   let capturedHeaders: Record<string, string> | null = null;
   let capturedBody: Record<string, unknown> | null = null;
   const originalFetch = globalThis.fetch;
-  // @ts-expect-error test stub
-  globalThis.fetch = async (url: string, init: RequestInit) => {
+  globalThis.fetch = (async (url: string, init: RequestInit) => {
     if (String(url).includes("8317")) {
       capturedHeaders = init.headers as Record<string, string>;
       capturedBody = JSON.parse(String(init.body)) as Record<string, unknown>;
@@ -95,7 +94,7 @@ async function withCapturedCliproxyapiRequest(fn: () => Promise<unknown>): Promi
       });
     }
     throw new Error("simulated native provider network failure");
-  };
+  }) as typeof fetch;
   try {
     await fn();
   } finally {

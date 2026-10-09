@@ -185,6 +185,25 @@ async function readEditInput(request: Request): Promise<EditInput | null> {
   return null;
 }
 
+type ImageEditCredentials = {
+  apiKey?: string | null;
+  accessToken?: string | null;
+  connectionId?: string;
+  baseUrl?: unknown;
+  providerSpecificData?: Record<string, unknown> | null;
+};
+
+function asImageEditCredentials(credentials: object): ImageEditCredentials | null {
+  if (
+    "allExpired" in credentials ||
+    "allRateLimited" in credentials ||
+    "leaseFenceStale" in credentials
+  ) {
+    return null;
+  }
+  return credentials as ImageEditCredentials;
+}
+
 function jsonResponse(data: unknown, status = 200): Response {
   return new Response(JSON.stringify(data), {
     status,
@@ -262,7 +281,7 @@ async function handleAdobeFireflyEditRequest(params: {
       `No credentials for provider: ${parsed.provider}`
     );
   }
-  if (credentials.allRateLimited) {
+  if ("allRateLimited" in credentials && credentials.allRateLimited) {
     return unavailableResponse(
       HTTP_STATUS.RATE_LIMITED,
       `[${parsed.provider}] All accounts rate limited`,
@@ -270,11 +289,25 @@ async function handleAdobeFireflyEditRequest(params: {
       credentials.retryAfterHuman
     );
   }
+  if ("allExpired" in credentials && credentials.allExpired) {
+    return errorResponse(
+      HTTP_STATUS.UNAUTHORIZED,
+      `[${parsed.provider}] All accounts expired (${credentials.expiredCount} ${credentials.expiredStatus})`
+    );
+  }
 
   // Prefer multi-image list when present; fall back to the primary imageBytes.
   const dataUrls = buildAdobeFireflyEditDataUrls(images, imageBytes, imageMime);
   if (dataUrls.length === 0) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, "Missing required field: image");
+  }
+
+  const editCredentials = asImageEditCredentials(credentials);
+  if (!editCredentials) {
+    return errorResponse(
+      HTTP_STATUS.UNAUTHORIZED,
+      `No credentials for provider: ${parsed.provider}`
+    );
   }
 
   const result = await handleAdobeFireflyImageGeneration({
@@ -291,7 +324,7 @@ async function handleAdobeFireflyEditRequest(params: {
       image_urls: dataUrls,
       images: dataUrls,
     },
-    credentials,
+    credentials: editCredentials,
     log,
   });
 
@@ -860,12 +893,18 @@ async function postHandler(request: Request, _context?: unknown) {
         `No credentials for provider: ${parsed.provider}`
       );
     }
-    if (credentials.allRateLimited) {
+    if ("allRateLimited" in credentials && credentials.allRateLimited) {
       return unavailableResponse(
         HTTP_STATUS.RATE_LIMITED,
         `[${parsed.provider}] All accounts rate limited`,
         credentials.retryAfter,
         credentials.retryAfterHuman
+      );
+    }
+    if ("allExpired" in credentials && credentials.allExpired) {
+      return errorResponse(
+        HTTP_STATUS.UNAUTHORIZED,
+        `[${parsed.provider}] All accounts expired (${credentials.expiredCount} ${credentials.expiredStatus})`
       );
     }
     const credentialDetails = credentials as {
@@ -937,12 +976,26 @@ async function postHandler(request: Request, _context?: unknown) {
         `No credentials for provider: ${parsed.provider}`
       );
     }
-    if (credentials.allRateLimited) {
+    if ("allRateLimited" in credentials && credentials.allRateLimited) {
       return unavailableResponse(
         HTTP_STATUS.RATE_LIMITED,
         `[${parsed.provider}] All accounts rate limited`,
         credentials.retryAfter,
         credentials.retryAfterHuman
+      );
+    }
+    if ("allExpired" in credentials && credentials.allExpired) {
+      return errorResponse(
+        HTTP_STATUS.UNAUTHORIZED,
+        `[${parsed.provider}] All accounts expired (${credentials.expiredCount} ${credentials.expiredStatus})`
+      );
+    }
+
+    const editCredentials = asImageEditCredentials(credentials);
+    if (!editCredentials) {
+      return errorResponse(
+        HTTP_STATUS.UNAUTHORIZED,
+        `No credentials for provider: ${parsed.provider}`
       );
     }
 
@@ -957,17 +1010,17 @@ async function postHandler(request: Request, _context?: unknown) {
         n: 1,
       },
       images,
-      credentials,
+      credentials: editCredentials,
       log,
     });
 
-    if (result.success) {
+    if (result.success && "data" in result) {
       await clearRecoveredProviderState(credentials);
       return jsonResponse(result.data);
     }
     return jsonResponse(
-      toJsonErrorPayload(result.error, "Image edit provider error"),
-      result.status
+      toJsonErrorPayload("error" in result ? result.error : undefined, "Image edit provider error"),
+      "status" in result ? result.status : 502
     );
   }
 
@@ -1019,7 +1072,7 @@ async function postHandler(request: Request, _context?: unknown) {
         `No credentials for provider: ${parsed.provider}`
       );
     }
-    if (credentials.allRateLimited) {
+    if ("allRateLimited" in credentials && credentials.allRateLimited) {
       return unavailableResponse(
         HTTP_STATUS.RATE_LIMITED,
         `[${parsed.provider}] All accounts rate limited`,
@@ -1027,12 +1080,26 @@ async function postHandler(request: Request, _context?: unknown) {
         credentials.retryAfterHuman
       );
     }
+    if ("allExpired" in credentials && credentials.allExpired) {
+      return errorResponse(
+        HTTP_STATUS.UNAUTHORIZED,
+        `[${parsed.provider}] All accounts expired (${credentials.expiredCount} ${credentials.expiredStatus})`
+      );
+    }
+
+    const editCredentials = asImageEditCredentials(credentials);
+    if (!editCredentials) {
+      return errorResponse(
+        HTTP_STATUS.UNAUTHORIZED,
+        `No credentials for provider: ${parsed.provider}`
+      );
+    }
 
     const result = await handleOpenRouterImageEdit({
       provider: parsed.provider,
       model: parsed.model,
       baseUrl: providerConfig.baseUrl,
-      credentials,
+      credentials: editCredentials,
       prompt,
       imageBytes,
       imageMime,
@@ -1041,13 +1108,13 @@ async function postHandler(request: Request, _context?: unknown) {
       log,
     });
 
-    if (result.success) {
+    if (result.success && "data" in result) {
       await clearRecoveredProviderState(credentials);
       return jsonResponse(result.data);
     }
     return jsonResponse(
-      toJsonErrorPayload(result.error, "Image edit provider error"),
-      result.status
+      toJsonErrorPayload("error" in result ? result.error : undefined, "Image edit provider error"),
+      "status" in result ? result.status : 502
     );
   }
 
@@ -1146,7 +1213,7 @@ async function postHandler(request: Request, _context?: unknown) {
       `No credentials for custom image provider: ${customProviderId}`
     );
   }
-  if (credentials.allRateLimited) {
+  if ("allRateLimited" in credentials && credentials.allRateLimited) {
     return unavailableResponse(
       HTTP_STATUS.RATE_LIMITED,
       `[${customProviderId}] All accounts rate limited`,
@@ -1154,11 +1221,25 @@ async function postHandler(request: Request, _context?: unknown) {
       credentials.retryAfterHuman
     );
   }
+  if ("allExpired" in credentials && credentials.allExpired) {
+    return errorResponse(
+      HTTP_STATUS.UNAUTHORIZED,
+      `[${customProviderId}] All accounts expired (${credentials.expiredCount} ${credentials.expiredStatus})`
+    );
+  }
+
+  const editCredentials = asImageEditCredentials(credentials);
+  if (!editCredentials) {
+    return errorResponse(
+      HTTP_STATUS.UNAUTHORIZED,
+      `No credentials for provider: ${customProviderId}`
+    );
+  }
 
   const result = await handleOpenAIImageEdit({
     provider: customProviderId,
     model: customModel,
-    credentials,
+    credentials: editCredentials,
     prompt,
     imageBytes,
     imageMime,

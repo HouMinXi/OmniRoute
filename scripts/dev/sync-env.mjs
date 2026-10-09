@@ -237,7 +237,7 @@ function parseExampleEntries(content, scope = "full") {
   return entries;
 }
 
-export function getEnvSyncPlan({ rootDir, scope = "full" } = {}) {
+export function getEnvSyncPlan({ rootDir = undefined, scope = "full" } = {}) {
   const root = resolveRootDir(rootDir);
   const envExamplePath = join(root, ".env.example");
   const envPath = join(root, ".env");
@@ -303,7 +303,7 @@ function replaceBlankSecret(content, key, value) {
   return pattern.test(content) ? content.replace(pattern, `${key}=${value}`) : content;
 }
 
-export function syncEnv({ rootDir, quiet = false, scope = "full" } = {}) {
+export function syncEnv({ rootDir = undefined, quiet = false, scope = "full" } = {}) {
   const log = quiet ? () => {} : (message) => process.stderr.write(`[sync-env] ${message}\n`);
   const root = resolveRootDir(rootDir);
   const envExamplePath = join(root, ".env.example");

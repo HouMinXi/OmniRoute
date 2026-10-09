@@ -4,6 +4,14 @@ import { prepareClaudeRequest } from "../../open-sse/translator/helpers/claudeHe
 import { FORMATS } from "../../open-sse/translator/formats.ts";
 import { translateRequest } from "../../open-sse/translator/index.ts";
 
+function messageCacheControl(
+  content: string | { cache_control?: unknown }[] | undefined,
+  index: number
+) {
+  if (!Array.isArray(content)) throw new Error("expected message content blocks");
+  return content[index]?.cache_control;
+}
+
 describe("Claude cache_control passthrough", () => {
   test("preserveCacheControl=true preserves cache_control in system blocks", () => {
     const body = {
@@ -63,9 +71,9 @@ describe("Claude cache_control passthrough", () => {
     const result = prepareClaudeRequest(body, "claude", true);
 
     assert.equal(result.messages.length, 2);
-    assert.equal(result.messages[0].content[0].cache_control, undefined);
-    assert.deepEqual(result.messages[0].content[1].cache_control, { type: "ephemeral" });
-    assert.deepEqual(result.messages[1].content[0].cache_control, {
+    assert.equal(messageCacheControl(result.messages[0].content, 0), undefined);
+    assert.deepEqual(messageCacheControl(result.messages[0].content, 1), { type: "ephemeral" });
+    assert.deepEqual(messageCacheControl(result.messages[1].content, 0), {
       type: "ephemeral",
       ttl: "10m",
     });
@@ -99,10 +107,10 @@ describe("Claude cache_control passthrough", () => {
     // Original cache_control should be stripped and OmniRoute's strategy applied
     assert.equal(result.messages.length, 2);
     // User message should not have cache_control (only second-to-last user gets it)
-    assert.equal(result.messages[0].content[0].cache_control, undefined);
-    assert.equal(result.messages[0].content[1].cache_control, undefined);
+    assert.equal(messageCacheControl(result.messages[0].content, 0), undefined);
+    assert.equal(messageCacheControl(result.messages[0].content, 1), undefined);
     // Last assistant should have cache_control added by OmniRoute
-    assert.deepEqual(result.messages[1].content[0].cache_control, { type: "ephemeral" });
+    assert.deepEqual(messageCacheControl(result.messages[1].content, 0), { type: "ephemeral" });
   });
 
   test("preserveCacheControl=true preserves cache_control in tools", () => {
@@ -178,9 +186,9 @@ describe("Claude cache_control passthrough", () => {
 
     // All original cache_control should be preserved
     assert.deepEqual(result.system[0].cache_control, { type: "ephemeral", ttl: "5m" });
-    assert.deepEqual(result.messages[0].content[0].cache_control, { type: "ephemeral" });
-    assert.equal(result.messages[1].content[0].cache_control, undefined);
-    assert.equal(result.messages[2].content[0].cache_control, undefined);
+    assert.deepEqual(messageCacheControl(result.messages[0].content, 0), { type: "ephemeral" });
+    assert.equal(messageCacheControl(result.messages[1].content, 0), undefined);
+    assert.equal(messageCacheControl(result.messages[2].content, 0), undefined);
     assert.deepEqual(result.tools[0].cache_control, { type: "ephemeral", ttl: "5m" });
   });
 

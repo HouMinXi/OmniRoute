@@ -15,6 +15,26 @@ import {
 } from "@/app/api/v1/_shared/rateLimit";
 import { JINA_FOUNDATION_BASE_URL, JINA_FOUNDATION_PROVIDER_ID } from "@/lib/providers/jina";
 
+type JinaFoundationCredentials = {
+  apiKey?: string | null;
+  accessToken?: string | null;
+  connectionId?: string | null;
+};
+
+function toJinaFoundationCredentials(credentials: object): JinaFoundationCredentials | null {
+  const read = (key: string) => Reflect.get(credentials, key);
+  const apiKey = read("apiKey");
+  const accessToken = read("accessToken");
+  const connectionId = read("connectionId");
+  const narrowed: JinaFoundationCredentials = {};
+  if (typeof apiKey === "string" || apiKey === null) narrowed.apiKey = apiKey;
+  if (typeof accessToken === "string" || accessToken === null) narrowed.accessToken = accessToken;
+  if (typeof connectionId === "string" || connectionId === null)
+    narrowed.connectionId = connectionId;
+  if (!("apiKey" in narrowed) && !("accessToken" in narrowed)) return null;
+  return narrowed;
+}
+
 /**
  * Handle CORS preflight
  */
@@ -62,11 +82,19 @@ async function postHandler(request: Request) {
     return rateLimitedProviderResponse(JINA_FOUNDATION_PROVIDER_ID, credentials);
   }
 
+  const jinaCredentials = toJinaFoundationCredentials(credentials);
+  if (!jinaCredentials) {
+    return errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      `No credentials for provider: ${JINA_FOUNDATION_PROVIDER_ID}`
+    );
+  }
+
   const response = await handleJinaFoundationProxy({
     path: "/v1/classify",
     upstreamUrl: `${JINA_FOUNDATION_BASE_URL}/v1/classify`,
     body,
-    credentials,
+    credentials: jinaCredentials,
     provider: JINA_FOUNDATION_PROVIDER_ID,
     model: model || null,
   });

@@ -98,7 +98,19 @@ async function createCodexConnection(
 // block) — `priority` is always resent unchanged (line: `priority:
 // formData.priority`), which is exactly what round-trips the pre-existing,
 // already-persisted value that triggers #6562.
-function buildCodexEditPayload(connection: Record<string, unknown>) {
+function buildCodexEditPayload(connection: Record<string, unknown>): {
+  name: unknown;
+  priority: unknown;
+  maxConcurrent: null;
+  healthCheckInterval: unknown;
+  rateLimitOverrides: null;
+  providerSpecificData: Record<string, unknown> & {
+    requestDefaults: { reasoningEffort: string };
+    openaiStoreEnabled: boolean;
+    codexFingerprintMode?: string | null;
+    codex_fingerprint_mode?: string | null;
+  };
+} {
   return {
     name: connection.name,
     priority: connection.priority,

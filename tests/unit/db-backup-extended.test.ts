@@ -11,6 +11,11 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const backupDb = await import("../../src/lib/db/backup.ts");
+
+function backupsDir(): string {
+  if (!core.DB_BACKUPS_DIR) throw new Error("db backups dir is unset");
+  return core.DB_BACKUPS_DIR;
+}
 const dbBackupsRoute = await import("../../src/app/api/db-backups/route.ts");
 
 async function resetStorage() {
@@ -18,7 +23,7 @@ async function resetStorage() {
   await new Promise((resolve) => setTimeout(resolve, 50));
   if (fs.existsSync(TEST_DATA_DIR)) {
     for (const entry of fs.readdirSync(TEST_DATA_DIR, { recursive: true }).sort().reverse()) {
-      const targetPath = path.join(TEST_DATA_DIR, entry);
+      const targetPath = path.join(TEST_DATA_DIR, entry.toString());
       const stat = fs.lstatSync(targetPath);
       if (stat.isDirectory()) {
         fs.rmSync(targetPath, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -87,7 +92,7 @@ test("backupDbFile creates manual backups and listDbBackups returns metadata", a
   const result = backupDb.backupDbFile("manual");
   assert.ok(result);
 
-  const backupPath = path.join(core.DB_BACKUPS_DIR, result.filename);
+  const backupPath = path.join(backupsDir(), result.filename);
   // Wait for the async backup to finish copying the 12 seeded connections, not
   // merely for the destination file to appear (see waitForBackupEntry).
   const entry = await waitForBackupEntry(result.filename, 12);
@@ -99,19 +104,19 @@ test("backupDbFile creates manual backups and listDbBackups returns metadata", a
 
 test("listDbBackups orders mixed timestamp and content-addressed names by mtime", async () => {
   seedConnections(2);
-  fs.mkdirSync(core.DB_BACKUPS_DIR, { recursive: true });
+  fs.mkdirSync(backupsDir(), { recursive: true });
 
   const lexicallyFutureButOld = "db_2099-01-01T00-00-00-000Z_manual.sqlite";
   const timestampMiddle = "db_2026-09-02T00-00-00-000Z_manual.sqlite";
   const contentAddressedNewest = `db_state-${"a".repeat(64)}_pre-migration.sqlite`;
   for (const filename of [lexicallyFutureButOld, timestampMiddle, contentAddressedNewest]) {
-    await core.getDbInstance().backup(path.join(core.DB_BACKUPS_DIR, filename));
+    await core.getDbInstance().backup(path.join(backupsDir(), filename));
   }
 
   const now = Date.now() / 1000;
-  fs.utimesSync(path.join(core.DB_BACKUPS_DIR, lexicallyFutureButOld), now - 120, now - 120);
-  fs.utimesSync(path.join(core.DB_BACKUPS_DIR, timestampMiddle), now - 60, now - 60);
-  fs.utimesSync(path.join(core.DB_BACKUPS_DIR, contentAddressedNewest), now, now);
+  fs.utimesSync(path.join(backupsDir(), lexicallyFutureButOld), now - 120, now - 120);
+  fs.utimesSync(path.join(backupsDir(), timestampMiddle), now - 60, now - 60);
+  fs.utimesSync(path.join(backupsDir(), contentAddressedNewest), now, now);
 
   const backups = await backupDb.listDbBackups();
   assert.deepEqual(
@@ -124,7 +129,7 @@ test("listDbBackups orders mixed timestamp and content-addressed names by mtime"
 });
 
 test("listDbBackups returns an empty list when the backup directory is missing", async () => {
-  fs.rmSync(core.DB_BACKUPS_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  fs.rmSync(backupsDir(), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   const backups = await backupDb.listDbBackups();
   assert.deepEqual(backups, []);
 });
@@ -138,12 +143,12 @@ test(
     const missingId = "db_2000-01-01T00-00-00-000Z_manual.sqlite";
     await assert.rejects(() => backupDb.restoreDbBackup(missingId), /Backup not found/);
 
-    fs.mkdirSync(core.DB_BACKUPS_DIR, { recursive: true });
+    fs.mkdirSync(backupsDir(), { recursive: true });
     const corruptId = "db_2001-01-01T00-00-00-000Z_manual.sqlite";
-    fs.writeFileSync(path.join(core.DB_BACKUPS_DIR, corruptId), "not a sqlite database");
+    fs.writeFileSync(path.join(backupsDir(), corruptId), "not a sqlite database");
 
     await assert.rejects(() => backupDb.restoreDbBackup(corruptId), /Backup file is corrupt/);
-    await backupDb.unlinkFileWithRetry(path.join(core.DB_BACKUPS_DIR, corruptId), {
+    await backupDb.unlinkFileWithRetry(path.join(backupsDir(), corruptId), {
       maxAttempts: 20,
       baseDelayMs: 25,
     });
@@ -154,8 +159,8 @@ test("restoreDbBackup restores SQLite contents and returns entity counts", async
   seedConnections(1);
 
   const backupId = "db_2002-01-01T00-00-00-000Z_manual.sqlite";
-  fs.mkdirSync(core.DB_BACKUPS_DIR, { recursive: true });
-  await core.getDbInstance().backup(path.join(core.DB_BACKUPS_DIR, backupId));
+  fs.mkdirSync(backupsDir(), { recursive: true });
+  await core.getDbInstance().backup(path.join(backupsDir(), backupId));
 
   core
     .getDbInstance()
@@ -178,10 +183,10 @@ test("restoreDbBackup restores SQLite contents and returns entity counts", async
 });
 
 test("cleanupDbBackups removes overflow families and orphaned sidecars", async () => {
-  fs.mkdirSync(core.DB_BACKUPS_DIR, { recursive: true });
+  fs.mkdirSync(backupsDir(), { recursive: true });
 
   const makeFamily = (baseName, minutesAgo) => {
-    const familyPath = path.join(core.DB_BACKUPS_DIR, baseName);
+    const familyPath = path.join(backupsDir(), baseName);
     fs.writeFileSync(familyPath, baseName);
     fs.writeFileSync(`${familyPath}-wal`, `${baseName}-wal`);
     fs.writeFileSync(`${familyPath}-shm`, `${baseName}-shm`);
@@ -196,12 +201,12 @@ test("cleanupDbBackups removes overflow families and orphaned sidecars", async (
   makeFamily("db_2026-04-10T02-00-00-000Z_manual.sqlite", 20);
 
   fs.writeFileSync(
-    path.join(core.DB_BACKUPS_DIR, "db_2026-04-09T00-00-00-000Z_manual.sqlite-wal"),
+    path.join(backupsDir(), "db_2026-04-09T00-00-00-000Z_manual.sqlite-wal"),
     "orphan-wal"
   );
 
   const result = backupDb.cleanupDbBackups({ maxFiles: 2, retentionDays: 0 });
-  const remaining = fs.readdirSync(core.DB_BACKUPS_DIR).sort();
+  const remaining = fs.readdirSync(backupsDir()).sort();
 
   assert.equal(result.deletedBackupFamilies, 2);
   assert.equal(
@@ -222,10 +227,10 @@ test("cleanupDbBackups removes overflow families and orphaned sidecars", async (
 });
 
 test("cleanupDbBackups honors retentionDays for older backups", async () => {
-  fs.mkdirSync(core.DB_BACKUPS_DIR, { recursive: true });
+  fs.mkdirSync(backupsDir(), { recursive: true });
 
-  const oldBackup = path.join(core.DB_BACKUPS_DIR, "db_2026-04-01T00-00-00-000Z_manual.sqlite");
-  const freshBackup = path.join(core.DB_BACKUPS_DIR, "db_2026-04-15T00-00-00-000Z_manual.sqlite");
+  const oldBackup = path.join(backupsDir(), "db_2026-04-01T00-00-00-000Z_manual.sqlite");
+  const freshBackup = path.join(backupsDir(), "db_2026-04-15T00-00-00-000Z_manual.sqlite");
   fs.writeFileSync(oldBackup, "old");
   fs.writeFileSync(freshBackup, "fresh");
 
@@ -311,9 +316,9 @@ test("DB_BACKUP_RETENTION_DAYS env override wins over the persisted value", () =
 test("PATCH /api/db-backups persists retention controls without cleanup", async () => {
   delete process.env.DB_BACKUP_MAX_FILES;
   delete process.env.DB_BACKUP_RETENTION_DAYS;
-  fs.mkdirSync(core.DB_BACKUPS_DIR, { recursive: true });
+  fs.mkdirSync(backupsDir(), { recursive: true });
 
-  const oldBackup = path.join(core.DB_BACKUPS_DIR, "db_2026-04-01T00-00-00-000Z_manual.sqlite");
+  const oldBackup = path.join(backupsDir(), "db_2026-04-01T00-00-00-000Z_manual.sqlite");
   fs.writeFileSync(oldBackup, "old");
   const oldTime = new Date(Date.now() - 10 * 24 * 60 * 60 * 1000);
   fs.utimesSync(oldBackup, oldTime, oldTime);

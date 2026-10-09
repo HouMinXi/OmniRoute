@@ -121,7 +121,10 @@ test("v1 models catalog exposes remote-only Codex IDs from the discovery cache",
     testStatus: "active",
   });
 
-  await modelsDb.replaceSyncedAvailableModelsForConnection("codex", connection.id, [
+  assert.ok(connection && typeof connection === "object" && typeof connection.id === "string");
+  const connectionId = connection.id;
+
+  await modelsDb.replaceSyncedAvailableModelsForConnection("codex", connectionId, [
     {
       id: "codex-auto-review",
       name: "Codex Auto Review Remote",

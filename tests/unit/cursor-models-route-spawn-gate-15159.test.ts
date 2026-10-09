@@ -29,6 +29,13 @@ const { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } =
 const { getImageProvider } = await import("../../open-sse/config/imageRegistry.ts");
 const { AUTHZ_HEADER_PEER_LOCALITY } = await import("../../src/server/authz/headers.ts");
 
+function connectionId(connection: { id?: unknown } | null): string {
+  if (!connection || typeof connection.id !== "string" || connection.id.length === 0) {
+    throw new Error("provider connection is missing an id");
+  }
+  return connection.id;
+}
+
 test.after(() => {
   process.env.HOME = originalHome;
   process.env.PATH = originalPath;
@@ -82,7 +89,9 @@ test("S-01 hop 2: non-loopback with empty cache AND empty local catalog is refus
   const connection = await cursorConnection();
 
   for (const locality of [undefined, "remote", "private-lan", ""]) {
-    const response = await withEmptyLocalCatalog(() => callModels(connection.id, locality));
+    const response = await withEmptyLocalCatalog(() =>
+      callModels(connectionId(connection), locality)
+    );
     const body = JSON.stringify(await response.json());
 
     assert.equal(response.status, 403, `locality=${String(locality)} must be refused: ${body}`);
@@ -95,7 +104,7 @@ test("S-01 hop 2: non-loopback with empty cache AND empty local catalog is refus
 test("S-01 hop 2: non-loopback with a local catalog still degrades to it (200, no spawn)", async () => {
   const connection = await cursorConnection();
 
-  const response = await callModels(connection.id);
+  const response = await callModels(connectionId(connection));
   const body = await response.json();
 
   assert.equal(response.status, 200);
@@ -107,7 +116,9 @@ test("S-01 hop 2: non-loopback with a local catalog still degrades to it (200, n
 test("S-01 hop 2: a loopback peer is NOT refused — it proceeds to the spawn path", async () => {
   const connection = await cursorConnection();
 
-  const response = await withEmptyLocalCatalog(() => callModels(connection.id, "loopback"));
+  const response = await withEmptyLocalCatalog(() =>
+    callModels(connectionId(connection), "loopback")
+  );
   const body = JSON.stringify(await response.json());
 
   // HOME/PATH are sandboxed, so the (allowed) spawn attempt finds no binary and the route

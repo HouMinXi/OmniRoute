@@ -36,6 +36,7 @@ export type ProviderPlan = z.infer<typeof ProviderPlanSchema>;
 export const QuotaPoolSchema = z.object({
   id: z.string().min(1),
   connectionId: z.string().min(1),
+  connectionIds: z.array(z.string()).optional(),
   name: z.string().min(1),
   createdAt: z.string().datetime(),
   allocations: z.array(PoolAllocationSchema).default([]),

@@ -23,8 +23,15 @@ export default function AppearanceTab() {
   const [autostartEnabled, setAutostartEnabled] = useState(false);
 
   useEffect(() => {
-    if (isElectron && window.electronAPI) {
-      window.electronAPI.getAutostartStatus().then(setAutostartEnabled).catch(console.error);
+    if (isElectron && window.electronAPI && "getAutostartStatus" in window.electronAPI) {
+      const status = window.electronAPI.getAutostartStatus;
+      if (typeof status === "function") {
+        void Promise.resolve(status())
+          .then((enabled) => {
+            if (typeof enabled === "boolean") setAutostartEnabled(enabled);
+          })
+          .catch(console.error);
+      }
     }
   }, [isElectron]);
   const [settings, setSettings] = useState<Record<string, any>>({});
@@ -734,12 +741,22 @@ export default function AppearanceTab() {
                 <Toggle
                   checked={autostartEnabled}
                   onChange={async (checked) => {
-                    if (checked) {
-                      const success = await window.electronAPI?.enableAutostart();
-                      if (success) setAutostartEnabled(true);
-                    } else {
-                      const success = await window.electronAPI?.disableAutostart();
-                      if (success) setAutostartEnabled(false);
+                    const api = window.electronAPI;
+                    if (!api) return;
+                    if (
+                      checked &&
+                      "enableAutostart" in api &&
+                      typeof api.enableAutostart === "function"
+                    ) {
+                      const success = await api.enableAutostart();
+                      if (success === true) setAutostartEnabled(true);
+                    } else if (
+                      !checked &&
+                      "disableAutostart" in api &&
+                      typeof api.disableAutostart === "function"
+                    ) {
+                      const success = await api.disableAutostart();
+                      if (success === true) setAutostartEnabled(false);
                     }
                   }}
                 />

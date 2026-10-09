@@ -21,6 +21,26 @@ import {
 } from "../../open-sse/utils/cursorAgentProtobuf/toolOutputLimit.ts";
 import { decodeFields } from "../../open-sse/utils/cursorAgentProtobuf/wire.ts";
 
+type WireField =
+  | { fieldNumber: number; wireType: 0; varint: bigint }
+  | { fieldNumber: number; wireType: 2; bytes: Buffer };
+
+function lenBytes(field: WireField | undefined): Buffer {
+  if (!field || field.wireType !== 2) throw new Error("expected a length-delimited field");
+  return lenBytes(field);
+}
+
+function fieldText(
+  field: WireField | undefined,
+  encoding: BufferEncoding = "utf8"
+): string | undefined {
+  return field && field.wireType === 2 ? lenBytes(field).toString(encoding) : undefined;
+}
+
+function fieldVarint(field: WireField | undefined): bigint | undefined {
+  return field && field.wireType === 0 ? field.varint : undefined;
+}
+
 function numbered(count: number, width: number, format = (n: number) => `${n}: `, first = 1) {
   return Array.from({ length: count }, (_, i) => {
     const prefix = format(first + i);
@@ -83,10 +103,10 @@ test("an MCP result over Cursor's inline limit is fitted before it is sent", () 
   const text = numbered(2000, 27);
   assert.ok(Buffer.byteLength(text) > 40000);
   const frame = encodeExecMcpResult(3, "exec-mcp-3", text, false);
-  const ecm = field(frame.subarray(5), 2)!.bytes;
-  const success = field(field(ecm, 11)!.bytes, 1)!.bytes;
-  const item = field(success, 1)!.bytes;
-  const sent = field(field(item, 1)!.bytes, 1)!.bytes.toString("utf8");
+  const ecm = lenBytes(field(frame.subarray(5), 2));
+  const success = lenBytes(field(lenBytes(field(ecm, 11)), 1));
+  const item = lenBytes(field(success, 1));
+  const sent = fieldText(field(lenBytes(field(item, 1)), 1), "utf8") ?? "";
   assert.ok(Buffer.byteLength(sent) <= CURSOR_MCP_TEXT_MAX_BYTES);
   assert.ok(CURSOR_MCP_TEXT_MAX_BYTES < 40000);
   assert.match(sent, /continue from line \d+/);
@@ -99,13 +119,17 @@ test("a held read over Cursor's read limit is fitted and marked truncated", () =
     offset: 1,
     limit: 3000,
   });
-  const ecm = field(frame.subarray(5), 2)!.bytes;
-  const success = field(field(ecm, 7)!.bytes, 1)!.bytes;
-  const content = field(success, 2)!.bytes.toString("utf8");
+  const ecm = lenBytes(field(frame.subarray(5), 2));
+  const success = lenBytes(field(lenBytes(field(ecm, 7)), 1));
+  const content = lenBytes(field(success, 2)).toString("utf8");
   assert.ok(Buffer.byteLength(content) <= CURSOR_READ_CONTENT_MAX_BYTES);
   assert.ok(CURSOR_READ_CONTENT_MAX_BYTES < 100000);
-  assert.equal(field(success, 6)?.varint, 1n, "truncated");
-  assert.equal(field(success, 3)?.varint, 3000n, "total_lines counts the client's whole result");
+  assert.equal(fieldVarint(field(success, 6)), 1n, "truncated");
+  assert.equal(
+    fieldVarint(field(success, 3)),
+    3000n,
+    "total_lines counts the client's whole result"
+  );
 });
 
 // A held read answers Cursor's own read tool, and Cursor renders the slice
@@ -115,12 +139,12 @@ test("a held read over Cursor's read limit is fitted and marked truncated", () =
 // where a full window of lines ends.
 function heldRead(content: string, range?: { offset?: number; limit?: number }) {
   const frame = encodeExecReadSuccess(3, "exec-read-3", "/repo/huge.py", content, range);
-  const ecm = field(frame.subarray(5), 2)!.bytes;
-  const success = field(field(ecm, 7)!.bytes, 1)!.bytes;
+  const ecm = lenBytes(field(frame.subarray(5), 2));
+  const success = lenBytes(field(lenBytes(field(ecm, 7)), 1));
   return {
-    content: field(success, 2)!.bytes.toString("utf8"),
-    totalLines: field(success, 3)?.varint,
-    rangeApplied: field(success, 8)?.varint,
+    content: lenBytes(field(success, 2)).toString("utf8"),
+    totalLines: fieldVarint(field(success, 3)),
+    rangeApplied: fieldVarint(field(success, 8)),
   };
 }
 

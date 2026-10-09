@@ -46,6 +46,7 @@ async function getActiveProviderSpecificData(provider?: string | null): Promise<
 async function getUnmanagedActiveConnection(provider: string) {
   const connections = await getProviderConnections({ provider });
   for (const connection of connections) {
+    if (typeof connection.id !== "string") continue;
     if (
       connection.isActive !== false &&
       !(await isConnectionUnavailableToAuxiliaryActivity(connection.id))
@@ -201,7 +202,7 @@ export async function POST(request) {
         const url = buildProviderUrl(provider, model, true, {
           baseUrlIndex: 0,
           baseUrl: getProviderBaseUrl(connection.providerSpecificData),
-          providerSpecificData: connection.providerSpecificData,
+          providerSpecificData: asJsonRecord(connection.providerSpecificData),
         });
         const headers = buildProviderHeaders(provider, credentials, true, actualBody);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import type { ReactElement } from "react";
 import { Card } from "@/shared/components";
 import { OmniSkillCard } from "./OmniSkillCard";
 import { SkillInspectorPane } from "./SkillInspectorPane";
@@ -42,7 +43,7 @@ export function OmniSkillsList({
   onSelectSkill,
   onSetMode,
   onUninstall,
-}: OmniSkillsListProps): JSX.Element {
+}: OmniSkillsListProps): ReactElement {
   const t = useTranslations("skills");
 
   const selectedSkill = selectedSkillId

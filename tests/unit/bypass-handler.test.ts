@@ -11,7 +11,7 @@ test("handleBypassRequest returns null for non-Claude clients or missing message
         messages: [{ role: "user", content: "Warmup" }],
       },
       "gpt-5",
-      { broken: true }
+      "not-a-string"
     ),
     null
   );

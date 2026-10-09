@@ -180,10 +180,10 @@ test("enable requires explicit credential-upload acknowledgment", () => {
 
 test("fetchWithTimeout aborts when the timeout elapses", async () => {
   process.env.NEXT_PUBLIC_CLOUD_URL = "https://cloud.example";
-  globalThis.fetch = (_url, options) =>
+  globalThis.fetch = ((_url, options) =>
     new Promise((_, reject) => {
       options.signal.addEventListener("abort", () => reject(createAbortError()));
-    });
+    })) as unknown as typeof fetch;
 
   const cloudSync = await loadCloudSync("timeout-helper");
 
@@ -196,10 +196,10 @@ test("cloudSync maps timeout and transport failures to stable error messages", a
   process.env.NEXT_PUBLIC_CLOUD_URL = "https://cloud.example";
   process.env.CLOUD_SYNC_TIMEOUT_MS = "5";
 
-  globalThis.fetch = (_url, options) =>
+  globalThis.fetch = ((_url, options) =>
     new Promise((_, reject) => {
       options.signal.addEventListener("abort", () => reject(createAbortError("timeout")));
-    });
+    })) as unknown as typeof fetch;
 
   let cloudSync = await loadCloudSync("sync-timeout");
   assert.deepEqual(await cloudSync.syncToCloud("machine-1"), { error: "Cloud sync timeout" });
@@ -279,7 +279,7 @@ test("cloudSync syncs data upstream and refreshes only locally stale provider to
       changes: { providers: 1 },
       data: {
         providers: {
-          [stale.id]: {
+          [String(stale.id)]: {
             updatedAt: "2026-04-01T00:00:00.000Z",
             accessToken: "new-token",
             refreshToken: "new-refresh",
@@ -292,7 +292,7 @@ test("cloudSync syncs data upstream and refreshes only locally stale provider to
             errorCode: null,
             rateLimitedUntil: null,
           },
-          [fresh.id]: {
+          [String(fresh.id)]: {
             updatedAt: "2026-02-01T00:00:00.000Z",
             accessToken: "should-not-overwrite",
             refreshToken: "should-not-overwrite",

@@ -29,6 +29,11 @@ function upstream400(error: Record<string, unknown>, status = 400): Response {
   return Response.json({ error }, { status });
 }
 
+function objectResult(value: unknown): { response: Response } {
+  assert.ok(!(value instanceof Response));
+  return value as { response: Response };
+}
+
 test.afterEach(() => __setCodexWebSocketTransportForTesting(undefined));
 // cleanupTempDataDir closes any DB handle the executor opened before deleting the dir.
 test.after(async () => {
@@ -71,12 +76,14 @@ async function executeAgainst(upstream: Response) {
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async () => upstream;
   try {
-    return await executor.execute({
-      model: "gpt-5.5",
-      body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
-      stream: true,
-      credentials: { accessToken: "codex-token" },
-    });
+    return objectResult(
+      await executor.execute({
+        model: "gpt-5.5",
+        body: { model: "gpt-5.5", input: [{ role: "user", content: "hello" }] },
+        stream: true,
+        credentials: { accessToken: "codex-token" },
+      })
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }

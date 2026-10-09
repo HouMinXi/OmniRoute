@@ -28,9 +28,9 @@ test("tunnel create subcommand declares exactly one positional argument (#12295)
   // Commander stores positional arguments in _args; the public args getter
   // returns only required args, so optional args (like [type]) only appear in _args.
   assert.equal(
-    createCmd._args.length,
+    (createCmd as unknown as { _args: unknown[] })._args.length,
     1,
-    `create subcommand must have exactly 1 positional argument, got ${createCmd._args.length}`
+    `create subcommand must have exactly 1 positional argument, got ${(createCmd as unknown as { _args: unknown[] })._args.length}`
   );
 });
 
@@ -42,9 +42,13 @@ test("tunnel create subcommand action handler accesses parent via Command instan
   registerTunnel(program);
 
   const tunnelCmd = program.commands.find((c) => c.name() === "tunnel");
+  assert.ok(tunnelCmd);
   const createCmd = tunnelCmd.commands.find((c) => c.name() === "create");
 
-  assert.ok(createCmd._actionHandler, "create subcommand must have an action handler");
+  assert.ok(
+    (createCmd as unknown as { _actionHandler?: unknown })._actionHandler,
+    "create subcommand must have an action handler"
+  );
 
   // Before the fix, the action callback received (type, type2, opts, command)
   // because of the double positional. Destructuring (type, opts, cmd) then
@@ -73,13 +77,20 @@ test("tunnel create subcommand accepts valid tunnel type choices", async () => {
   registerTunnel(program);
 
   const tunnelCmd = program.commands.find((c) => c.name() === "tunnel");
+  assert.ok(tunnelCmd);
   const createCmd = tunnelCmd.commands.find((c) => c.name() === "create");
 
   // The addArgument with choices should still be registered.
-  assert.equal(createCmd._args.length, 1, "must have exactly one positional after addArgument");
+  assert.equal(
+    (createCmd as unknown as { _args: unknown[] })._args.length,
+    1,
+    "must have exactly one positional after addArgument"
+  );
 
   // Verify choices are present on the argument.
-  const arg = createCmd._args[0];
+  const arg = (
+    createCmd as unknown as { _args: Array<{ argChoices?: string[]; defaultValue?: string }> }
+  )._args[0];
   assert.ok(arg, "first argument must exist");
   assert.deepEqual(
     arg.argChoices,

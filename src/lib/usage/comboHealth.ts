@@ -11,6 +11,10 @@ import type {
   UtilizationTimeRange,
 } from "@/shared/types/utilization";
 
+function isJsonRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
 type ModelUsageRow = {
   model: string | null;
   requests: number | null;
@@ -119,7 +123,10 @@ function calculateGini(values: number[]): number {
   return (2 * weightedSum) / (count * sum) - (count + 1) / count;
 }
 
-export function buildProviderHealth(provider: string, snapshots: QuotaSnapshotRow[]): ProviderHealth {
+export function buildProviderHealth(
+  provider: string,
+  snapshots: QuotaSnapshotRow[]
+): ProviderHealth {
   if (snapshots.length === 0) {
     return {
       provider,
@@ -328,7 +335,10 @@ function buildPerformance(comboName: string, since: string): ComboHealthMetrics[
   };
 }
 
-export function buildQuotaHealth(providers: string[], since: string): ComboHealthMetrics["quotaHealth"] {
+export function buildQuotaHealth(
+  providers: string[],
+  since: string
+): ComboHealthMetrics["quotaHealth"] {
   const providerHealth = providers.map((provider) =>
     buildProviderHealth(provider, getQuotaSnapshots({ provider, since }))
   );
@@ -504,9 +514,29 @@ function buildComboHealth(
 ): ComboHealthMetrics | null {
   const comboId = typeof combo.id === "string" ? combo.id : "";
   const comboName = typeof combo.name === "string" ? combo.name : "";
-  if (!comboId || !comboName) return null;
+  if (!comboId || !comboName || !Array.isArray(combo.models)) return null;
 
-  const targets = resolveNestedComboTargets(combo, allCombos) as ResolvedComboTargetView[];
+  const targets = resolveNestedComboTargets(
+    {
+      id: comboId,
+      name: comboName,
+      models: combo.models,
+      ...(typeof combo.strategy === "string" ? { strategy: combo.strategy } : {}),
+      ...(isJsonRecord(combo.config) ? { config: combo.config } : {}),
+    },
+    allCombos.flatMap((entry) => {
+      if (typeof entry.name !== "string" || !Array.isArray(entry.models)) return [];
+      return [
+        {
+          id: typeof entry.id === "string" ? entry.id : undefined,
+          name: entry.name,
+          models: entry.models,
+          ...(typeof entry.strategy === "string" ? { strategy: entry.strategy } : {}),
+          ...(isJsonRecord(entry.config) ? { config: entry.config } : {}),
+        },
+      ];
+    })
+  ) as ResolvedComboTargetView[];
   const models = targets.map((target) => target.modelStr);
   const providers = Array.from(new Set(targets.map((target) => target.provider)));
 

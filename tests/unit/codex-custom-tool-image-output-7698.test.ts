@@ -28,7 +28,16 @@ test("Codex passthrough preserves image-view custom tool output input parts (#76
   const result = executor.transformRequest("gpt-5.6", body, false, {
     requestEndpointPath: "/responses",
   });
-  const toolOutput = result.input.find((item) => item.type === "custom_tool_call_output");
+  assert.ok(
+    result && typeof result === "object" && "input" in result && Array.isArray(result.input)
+  );
+  const toolOutput = result.input.find(
+    (item) =>
+      !!item &&
+      typeof item === "object" &&
+      "type" in item &&
+      item.type === "custom_tool_call_output"
+  );
 
   assert.deepEqual(toolOutput, body.input[1]);
   assert.equal(JSON.stringify(toolOutput).includes('"type":"output_text"'), false);

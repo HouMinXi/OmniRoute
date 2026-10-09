@@ -227,17 +227,24 @@ test("#9708: getProviderCredentials does not report all-quota 429 when a sibling
     lastErrorType: "server_error",
   });
 
-  quotaCache.setQuotaCache(quotaA.id, "codex", {
+  const quotaAId = quotaA.id;
+  const quotaBId = quotaB.id;
+  assert.ok(typeof quotaAId === "string");
+  assert.ok(typeof quotaBId === "string");
+  quotaCache.setQuotaCache(quotaAId, "codex", {
     session: { remainingPercentage: 0, resetAt },
   });
-  quotaCache.setQuotaCache(quotaB.id, "codex", {
+  quotaCache.setQuotaCache(quotaBId, "codex", {
     session: { remainingPercentage: 0, resetAt },
   });
 
   const result = await auth.getProviderCredentials("codex");
+  assert.ok(result && typeof result === "object" && "allRateLimited" in result);
   assert.equal(result.allRateLimited, true);
+  assert.ok("lastErrorCode" in result);
   assert.notEqual(result.lastErrorCode, 429);
   assert.equal(result.lastErrorCode, 503);
+  assert.ok("lastError" in result);
   assert.match(String(result.lastError), /temporarily unavailable after upstream 507/i);
   assert.equal(isTransportCooldownErrorCode(507), true);
 });

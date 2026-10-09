@@ -20,6 +20,7 @@ const { nextDailyResetAtMs } = await import("../../open-sse/services/dailyQuotaR
 const { resolveComboDailyReset } =
   await import("../../open-sse/services/combo/comboDailyResetClock.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+import type { ComboLike } from "../../open-sse/services/combo/types.ts";
 const rrState = await import("../../open-sse/services/combo/rrState.ts");
 const { createProviderNode, updateProviderNode } =
   await import("../../src/lib/db/providers/nodes.ts");
@@ -58,7 +59,7 @@ function dailyQuotaResponse(status: number): Response {
 }
 
 async function dispatch(
-  combo: Record<string, unknown>,
+  combo: ComboLike,
   failingProvider: string,
   failStatus: number,
   calls: LogCall[]

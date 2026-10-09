@@ -33,6 +33,29 @@ import type { VertexModelMetadataProvenance } from "@/lib/providerModels/vertexM
 
 type JsonRecord = Record<string, unknown>;
 
+function asJsonRecord(model: SyncedAvailableModel): JsonRecord {
+  return {
+    id: model.id,
+    name: model.name,
+    source: model.source,
+    apiFormat: model.apiFormat,
+    targetFormat: model.targetFormat,
+    upstreamProtocol: model.upstreamProtocol,
+    supportedEndpoints: model.supportedEndpoints,
+    supportedThinkingEfforts: model.supportedThinkingEfforts,
+    defaultThinkingEffort: model.defaultThinkingEffort,
+    inputTokenLimit: model.inputTokenLimit,
+    contextWindow: model.contextWindow,
+    outputTokenLimit: model.outputTokenLimit,
+    metadataProvenance: model.metadataProvenance,
+    description: model.description,
+    supportsThinking: model.supportsThinking,
+    alwaysThinking: model.alwaysThinking,
+    supportsTools: model.supportsTools,
+    supportsVideo: model.supportsVideo,
+  };
+}
+
 export type ManagedModelImportMode = "merge" | "sync";
 
 export type ManagedImportedModel = {
@@ -113,7 +136,7 @@ function normalizeImportedModel(model: JsonRecord): ManagedImportedModel {
 function normalizeImportedModels(
   discoveredModels: readonly SyncedAvailableModel[]
 ): ManagedImportedModel[] {
-  return discoveredModels.map((model) => normalizeImportedModel(model as JsonRecord));
+  return discoveredModels.map((model) => normalizeImportedModel(asJsonRecord(model)));
 }
 
 function isImportedSource(source: unknown): boolean {
@@ -447,12 +470,12 @@ export async function importManagedModels({
   }
 
   const importedChanges = summarizeImportedChanges(
-    previousSyncedAvailableModels as JsonRecord[],
-    discoveredModels as JsonRecord[],
+    previousSyncedAvailableModels.map(asJsonRecord),
+    discoveredModels.map(asJsonRecord),
     importedIds
   );
   const importedModels = collectAddedImportedModels(
-    previousSyncedAvailableModels as JsonRecord[],
+    previousSyncedAvailableModels.map(asJsonRecord),
     candidateImportedModels
   );
 

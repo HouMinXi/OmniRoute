@@ -68,7 +68,7 @@ export default function CachePerformance({
   error = null,
   onRetry,
   stats,
-}: CachePerformanceProps) {
+}: CachePerformanceProps & { stats?: unknown }) {
   const t = useTranslations("cache");
   // Parse hitRate string (e.g. "85.0%") to number for the bar
   const hitRateNum = hitRate ? parseFloat(hitRate) : 0;

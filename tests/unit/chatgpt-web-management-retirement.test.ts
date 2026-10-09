@@ -33,7 +33,7 @@ async function resetStorage(): Promise<void> {
   networkCalls = 0;
 }
 
-async function managementPost(url: string, body: unknown): Promise<Request> {
+async function managementPost(url: string, body: Record<string, unknown>): Promise<Request> {
   return makeManagementSessionRequest(url, { method: "POST", body });
 }
 
@@ -167,6 +167,7 @@ test("retired legacy connections cannot be reactivated, updated or probed", asyn
       isActive: true,
       testStatus: "active",
     });
+    if (!connection) throw new Error("expected a retired connection");
     const id = String(connection.id);
 
     const updateRequest = await makeManagementSessionRequest(

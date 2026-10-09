@@ -32,13 +32,11 @@ test("ServerSupervisor surfaces a fatal [STARTUP] Fatal: boot diagnostic to the 
   const origStderrWrite = process.stderr.write.bind(process.stderr);
   process.stdout.write = ((chunk: unknown, ...rest: unknown[]) => {
     seenOnRealConsole.push(String(chunk));
-    // @ts-expect-error - forwarding varargs to the real writer
-    return origStdoutWrite(chunk, ...rest);
+    return origStdoutWrite(chunk as string | Uint8Array, ...(rest as []));
   }) as typeof process.stdout.write;
   process.stderr.write = ((chunk: unknown, ...rest: unknown[]) => {
     seenOnRealConsole.push(String(chunk));
-    // @ts-expect-error - forwarding varargs to the real writer
-    return origStderrWrite(chunk, ...rest);
+    return origStderrWrite(chunk as string | Uint8Array, ...(rest as []));
   }) as typeof process.stderr.write;
 
   const supervisor = new ServerSupervisor({
@@ -46,6 +44,7 @@ test("ServerSupervisor surfaces a fatal [STARTUP] Fatal: boot diagnostic to the 
     env: { ...process.env },
     maxRestarts: 2,
     memoryLimit: 256,
+    onCrashCallback: undefined,
   });
 
   try {

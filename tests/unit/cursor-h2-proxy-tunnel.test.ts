@@ -266,7 +266,7 @@ test("an https:// proxy receives a TLS ClientHello before any CONNECT bytes", as
   let firstBytes: Buffer | null = null;
   const proxy = net.createServer((client) => {
     client.once("data", (chunk) => {
-      firstBytes = chunk;
+      firstBytes = Buffer.from(chunk);
       client.destroy();
     });
     client.on("error", () => {});

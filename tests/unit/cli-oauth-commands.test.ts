@@ -259,9 +259,9 @@ test("runOAuthStart rejects retired Windsurf instead of starting a public OAuth 
 });
 
 test("providers lista provedores OAuth conhecidos", async () => {
-  const { PROVIDERS_WITH_OAUTH_TEST } = await import("../../bin/cli/commands/oauth.mjs").catch(
-    () => ({ PROVIDERS_WITH_OAUTH_TEST: null })
-  );
+  await import("../../bin/cli/commands/oauth.mjs").catch(() => ({
+    PROVIDERS_WITH_OAUTH_TEST: null,
+  }));
   // validate via runOAuthStart unknown provider exits
   const origExit = process.exit;
   let exitCode: number | undefined;
