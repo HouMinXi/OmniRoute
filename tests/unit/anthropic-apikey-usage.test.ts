@@ -32,9 +32,15 @@ test("anthropic is registered for both the fetcher and the dashboard gate", () =
 });
 
 test("getUsageForProvider reads the four rate-limit windows for an anthropic key", async () => {
-  let requested: { url: string; headers: Headers } | null = null;
+  let requested: { url: string; headers: Headers; model: string | null } | null = null;
   globalThis.fetch = (async (url: string | URL | Request, init?: RequestInit) => {
-    requested = { url: String(url), headers: new Headers(init?.headers) };
+    const rawBody = typeof init?.body === "string" ? init.body : null;
+    const parsed = rawBody ? (JSON.parse(rawBody) as { model?: unknown }) : null;
+    requested = {
+      url: String(url),
+      headers: new Headers(init?.headers),
+      model: typeof parsed?.model === "string" ? parsed.model : null,
+    };
     return new Response("{}", {
       status: 200,
       headers: {
@@ -61,6 +67,7 @@ test("getUsageForProvider reads the four rate-limit windows for an anthropic key
 
   assert.equal(requested?.url, "https://api.anthropic.com/v1/messages");
   assert.equal(requested?.headers.get("x-api-key"), "sk-ant-test");
+  assert.equal(requested?.model, "claude-haiku-4-5-20251001");
   assert.equal(result.plan, "API key");
   assert.equal(result.quotas?.requests.remaining, 999);
   assert.equal(result.quotas?.input_tokens.remaining, 1500000);
@@ -85,4 +92,18 @@ test("a missing rate-limit header is skipped instead of failing the whole read",
   })) as { quotas?: Record<string, unknown> };
 
   assert.deepEqual(Object.keys(result.quotas ?? {}), ["requests"]);
+});
+
+test("a thrown fetch error returns a fixed message and does not leak the cause", async () => {
+  globalThis.fetch = (async () => {
+    throw new Error("SECRET_LEAK /tmp/should-not-appear");
+  }) as typeof fetch;
+
+  const result = (await getUsageForProvider({
+    provider: "anthropic",
+    apiKey: "sk-ant-test",
+  })) as { message?: string };
+
+  assert.equal(result.message, "Anthropic usage request failed.");
+  assert.equal(result.message?.includes("SECRET_LEAK"), false);
 });

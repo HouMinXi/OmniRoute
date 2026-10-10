@@ -48,15 +48,13 @@ export async function getAnthropicApiKeyUsage(apiKey: string | undefined) {
         "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: "claude-haiku-5-5",
+        model: "claude-haiku-4-5-20251001",
         max_tokens: 1,
         messages: [{ role: "user", content: "hi" }],
       }),
     });
-  } catch (error) {
-    return {
-      message: `Anthropic usage request failed: ${error instanceof Error ? error.message : "network error"}`,
-    };
+  } catch {
+    return { message: "Anthropic usage request failed." };
   }
   if (!response.ok) {
     return { message: `Anthropic usage request returned ${response.status}` };
