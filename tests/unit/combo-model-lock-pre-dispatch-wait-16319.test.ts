@@ -23,7 +23,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const core = await import("../../src/lib/db/core.ts");
 const { resetAllComboMetrics } = await import("../../open-sse/services/comboMetrics.ts");
-const { recordModelLockoutFailure, clearAllModelLockouts } =
+const { recordModelLockoutFailure, clearAllModelLockouts, getModelLockoutInfo } =
   await import("../../open-sse/services/accountFallback.ts");
 
 const log = { info() {}, warn() {}, error() {}, debug() {} };
@@ -82,6 +82,26 @@ test("a short transient model lock is waited out and the combo re-dispatches (#1
   assert.equal(res.status, 200);
   assert.deepEqual(calls, ["zai/glm-5.3-flash"], "the target must be retried after the wait");
   assert.ok(elapsed >= 1100, `expected to wait out the ~1.2s lock, took ${elapsed}ms`);
+});
+
+test("an unpinned target finds a transient model lock recorded for its selected connection (#16551)", async () => {
+  // The combo target is not pinned to a connection, but auth records the 429
+  // lock against the concrete connection that served the failed attempt.
+  recordModelLockoutFailure("zai", "connection-1", "glm-5.3-flash", "rate_limit", 429, 0, null, {
+    exactCooldownMs: 1200,
+  });
+  assert.ok(getModelLockoutInfo("zai", "", "glm-5.3-flash"));
+  const started = Date.now();
+  const { promise, calls } = run({}, null);
+  const res = await promise;
+  const elapsed = Date.now() - started;
+
+  assert.equal(res.status, 200);
+  assert.deepEqual(calls, ["zai/glm-5.3-flash"], "the unpinned target must retry after the lock");
+  assert.ok(
+    elapsed >= 1100,
+    `expected the unpinned target to wait out the ~1.2s lock, took ${elapsed}ms`
+  );
 });
 
 test("a quota model lock is never waited out and advertises no model-lock retry-after", async () => {

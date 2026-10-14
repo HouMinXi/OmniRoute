@@ -1018,11 +1018,8 @@ export function isModelLocked(
   model: string | null | undefined
 ): boolean {
   if (!model) return false;
-  return exactModelLock.isAnyKeyLocked(
-    modelLockouts,
-    cleanupModelLockKey,
-    getModelLockKeys(provider, connectionId, model)
-  );
+  const info = getModelLockoutInfo(provider, connectionId, model);
+  return Boolean(info && info.remainingMs > 0);
 }
 
 /**
@@ -1034,6 +1031,7 @@ export function getModelLockoutInfo(
   model: string | null | undefined
 ) {
   if (!model) return null;
+  if (!connectionId) return getModelLockoutInfoAcrossConnections(provider, model);
   const entry = exactModelLock.findLatestLockEntry(
     modelLockouts,
     cleanupModelLockKey,
@@ -1045,6 +1043,39 @@ export function getModelLockoutInfo(
     remainingMs: entry.until - Date.now(),
     lockedAt: new Date(entry.lockedAt).toISOString(),
     failureCount: entry.failureCount,
+  };
+}
+
+function getModelLockoutInfoAcrossConnections(provider: string, model: string | null | undefined) {
+  if (!model) return null;
+  const marker = "__omniroute_connection_probe__";
+  const templates = getModelLockKeys(provider, marker, model)
+    .map((key) => {
+      const markerIndex = key.indexOf(`:${marker}:`);
+      if (markerIndex < 0) return null;
+      return {
+        prefix: key.slice(0, markerIndex + 1),
+        suffix: key.slice(markerIndex + marker.length + 1),
+      };
+    })
+    .filter((template): template is { prefix: string; suffix: string } => template !== null);
+  if (templates.length === 0) return null;
+
+  const now = Date.now();
+  let latest: ModelLockoutEntry | null = null;
+  for (const [key, entry] of modelLockouts) {
+    cleanupModelLockKey(key, now);
+    if (entry.until <= now) continue;
+    if (!templates.some(({ prefix, suffix }) => key.startsWith(prefix) && key.endsWith(suffix)))
+      continue;
+    if (!latest || entry.until > latest.until) latest = entry;
+  }
+  if (!latest) return null;
+  return {
+    reason: latest.reason,
+    remainingMs: latest.until - now,
+    lockedAt: new Date(latest.lockedAt).toISOString(),
+    failureCount: latest.failureCount,
   };
 }
 
