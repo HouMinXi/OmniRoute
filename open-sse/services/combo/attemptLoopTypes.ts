@@ -33,6 +33,8 @@ export type AttemptLoopState = {
   lastError: string | null;
   lastStatus: number | null;
   earliestRetryAfter: ComboRetryAfter | null;
+  /** Deadline from a target skipped by the credential availability gate. */
+  skippedConnectionCooldownUntil?: number;
   comboExpired: boolean;
   exhaustedProviders: Set<string>;
   exhaustedConnections: Set<string>;

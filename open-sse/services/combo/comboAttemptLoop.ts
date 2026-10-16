@@ -64,6 +64,7 @@ import { executeTargetAttempt } from "./executeTargetAttempt.ts";
 import { buildComboDiag } from "./executeTargetClassify.ts";
 import type { AttemptLoopDeps, AttemptLoopState, ExecuteTargetResult } from "./attemptLoopTypes.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
+import { resolveSkippedConnectionCooldownTerminal } from "./skippedConnectionCooldown.ts";
 
 /** A second in-flight copy of a body larger than this sits in the TLS send buffer. */
 const HEDGE_MAX_BODY_BYTES = 256 * 1024;
@@ -221,6 +222,7 @@ export async function dispatchWithCooldownRetry(opts: {
       state.transientRateLimitedProviders = new Set<string>();
       state.skippedForCircuitOpen = false;
       state.earliestCircuitOpenRetryMs = 0;
+      state.skippedConnectionCooldownUntil = undefined;
       if (setTry > 0) {
         deps.log.info(
           "COMBO",
@@ -701,7 +703,12 @@ export async function dispatchWithCooldownRetry(opts: {
       // classes (e.g. a quality failure + a sibling's 401) normalizes to a
       // 5xx-class status reflecting an infra/provider problem, not a client
       // error. See comboErrorAggregation.ts::resolveComboTerminalStatus.
-      const status = resolveComboTerminalStatus(state.comboErrors, state.lastStatus);
+      const terminal = resolveSkippedConnectionCooldownTerminal(
+        resolveComboTerminalStatus(state.comboErrors, state.lastStatus),
+        state
+      );
+      const status = terminal.status;
+      state.earliestRetryAfter = terminal.retryAfter ?? state.earliestRetryAfter;
       // #10314: build the terminal message from the structured per-target
       // outcomes (each distinct class+reason listed separately) instead of
       // mashing a single state.lastError with raw `[model (status)]` markers. Connection
@@ -777,7 +784,7 @@ export async function dispatchWithCooldownRetry(opts: {
         deps.log.warn("COMBO", `All models failed | ${msg} (${retryHuman})`);
         return withQuotaExhaustionClassification(
           unavailableResponse(status, msg, state.earliestRetryAfter, retryHuman),
-          state.observedFailure ? state.allObservedFailuresQuota : null
+          terminal.quotaExhausted
         );
       }
 

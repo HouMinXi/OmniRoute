@@ -42,6 +42,7 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/credential-scope-diagnostics-15889.test.ts",
       "tests/unit/account-weighted-runtime-16459.test.ts",
       "tests/unit/codex-reasoning-replay-retry.test.ts",
       "tests/unit/authz/local-only-bypass-spawn-denylist.test.ts",

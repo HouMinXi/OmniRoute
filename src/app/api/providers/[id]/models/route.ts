@@ -2171,7 +2171,7 @@ export async function GET(
         // web-cookie providers like voyage-ai, jina-ai, t3-web) are
         // intentionally local-catalog-only; model-sync imports rather than 502s.
         intentional: true,
-        warning: "API unavailable — using local catalog",
+        warning: "Model discovery is not configured for this provider — using local catalog",
       });
     }
     if (!config) {

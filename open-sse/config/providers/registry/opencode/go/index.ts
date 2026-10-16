@@ -110,6 +110,8 @@ export const opencode_goProvider: RegistryEntry = {
     {
       id: "qwen3.7-plus",
       name: "Qwen3.7 Plus",
+      contextLength: 1000000,
+      maxOutputTokens: 65536,
       targetFormat: "claude",
       supportsVision: false,
       supportsReasoning: true,
@@ -372,6 +374,8 @@ export const opencode_goProvider: RegistryEntry = {
     {
       id: "grok-4.6",
       name: "Grok 4.6",
+      contextLength: 500000,
+      maxOutputTokens: 500000,
       supportsReasoning: true,
       supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
       targetFormat: "openai-responses",
@@ -417,10 +421,73 @@ export const opencode_goProvider: RegistryEntry = {
     {
       id: "gpt-6-luna",
       name: "GPT-6 Luna",
+      contextLength: 1050000,
+      maxInputTokens: 922000,
       supportsReasoning: true,
       supportedThinkingEfforts: ["none", "low", "medium", "high", "xhigh", "max"],
       targetFormat: "openai-responses",
       maxOutputTokens: 128000,
+    },
+    // #16579: exact Go limits from anomalyco/models.dev at
+    // 26d4dc7b66c93470f4e5337708e794b62a589620, including base_model inheritance.
+    // Keep these provider-scoped so synced data and operator overrides retain precedence.
+    {
+      id: "deepseek-v4.1-flash",
+      name: "DeepSeek V4.1 Flash",
+      contextLength: 1000000,
+      maxOutputTokens: 384000,
+    },
+    {
+      id: "claude-haiku-5-5",
+      name: "Claude Haiku 5.5",
+      contextLength: 1000000,
+      maxOutputTokens: 128000,
+      targetFormat: "claude",
+    },
+    {
+      id: "grok-4.7",
+      name: "Grok 4.7",
+      contextLength: 500000,
+      maxOutputTokens: 500000,
+      targetFormat: "openai-responses",
+    },
+    {
+      id: "hy4-preview",
+      name: "HY4 Preview",
+      contextLength: 1024000,
+      maxOutputTokens: 64000,
+    },
+    {
+      id: "longcat-2.0",
+      name: "LongCat 2.0",
+      contextLength: 1000000,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "mimo-v2.6-flash",
+      name: "MiMo V2.6 Flash",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "mimo-v2.6-pro",
+      name: "MiMo V2.6 Pro",
+      contextLength: 1048576,
+      maxOutputTokens: 131072,
+    },
+    {
+      id: "qwen3.8-flash",
+      name: "Qwen3.8 Flash",
+      contextLength: 1000000,
+      maxOutputTokens: 131072,
+      targetFormat: "claude",
+    },
+    {
+      id: "space-bunny",
+      name: "Space Bunny",
+      contextLength: 1048576,
+      maxInputTokens: 524288,
+      maxOutputTokens: 524288,
     },
     // Console Go free GLM-tier model (live-verified 2026-08-23): the upstream
     // rejects every reasoning_effort outside {low, high, max} whenever tools

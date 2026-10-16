@@ -332,6 +332,7 @@ test("findMissingArtifactPaths flags missing root runtime files in the tarball",
     "config/release/wreq-js-native-manifest.json",
     "config/release/wreq-js-rust-license-inventory.json",
     "config/release/wreq-js-rust-notices.md",
+    "dist/h2c-upgrade-guard.cjs",
     "dist/head-response-guard.cjs",
     "dist/http-method-guard.cjs",
     // #13636/#14064: server-ws.mjs crash guard, enforced by the closure suites.

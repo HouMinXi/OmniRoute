@@ -13,6 +13,7 @@ import {
 import { incrementTokenUsage } from "../../services/geminiRateLimitTracker.ts";
 import { forgetClaudeThinkingForClientResponse } from "../../services/claudeThinkingStore.ts";
 import { requestTtftMs, streamEmittedOutput } from "../../utils/streamTiming.ts";
+import { readStreamPartialUsage } from "../../utils/streamPartialUsage.ts";
 import { clearPostOutputFailureStreak } from "../../services/accountFallback/postOutputFailureStreak.ts";
 import {
   createRoutingEvent,
@@ -60,6 +61,7 @@ import { calculateCost } from "@/lib/usage/costCalculator";
 import { appendRequestLog, trackPendingRequest } from "@/lib/usageDb";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
+import { resolveCredentialGate } from "@/lib/streamingCredentialTransform";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deps bag mirrors the barrel closure
 type Loose = any;
@@ -355,6 +357,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     firstOutputMs,
     itlMs: streamItlMs,
     interrupted: _streamInterrupted,
+    partialUsage: streamPartialUsage,
   }) => {
     const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
     const normalizedStreamStatus = streamStatus || 200;
@@ -510,7 +513,9 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     persistAttemptLogs({
       status: normalizedStreamStatus,
       error: streamError || undefined,
-      tokens: streamUsage || {},
+      // A stream that ended early (499 / mid-stream failure) has no `usage`, but its call log
+      // still shows the tokens already generated (estimates are flagged via `estimated`).
+      tokens: streamUsage || streamPartialUsage || {},
       responseBody: streamResponseBody ?? undefined,
       providerRequest: finalBody || translatedBody,
       providerResponse: providerPayload,
@@ -609,6 +614,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     persistFailureUsage,
     onStreamFailure,
     hasEmittedOutput: () => streamEmittedOutput(transformStream),
+    readPartialUsage: () => readStreamPartialUsage(transformStream),
   });
   const handleStreamFailure = streamFailureFinalizers.handleStreamFailure;
   onPipelineStreamError = streamFailureFinalizers.onPipelineStreamError;
@@ -722,6 +728,16 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     );
   }
 
+  // Per-request credential gate: same flag and opt-out name as the
+  // non-streaming post-call guardrail. Only data keys chatCore.ts already
+  // passes (apiKeyInfo, body, clientRawRequest) are read here; the readers
+  // default to the production modules inside resolveCredentialGate, and unit
+  // tests inject fakes by calling that helper directly.
+  const credentialGate = await resolveCredentialGate({
+    apiKeyInfo: deps.apiKeyInfo,
+    body: deps.body,
+    headers: deps.clientRawRequest?.headers,
+  });
   const finalStream = assembleStreamingPipeline({
     providerResponse,
     transformStream,
@@ -731,6 +747,8 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     clientResponseFormat,
     echoModel,
     responseHeaders,
+    credentialRedactionEnabled: credentialGate.credentialRedactionEnabled,
+    credentialDisabledGuardrails: credentialGate.credentialDisabledGuardrails,
     // Same adaptive budget the pre-handoff readiness gate above just used —
     // reasoning models that legitimately take a while to say anything keep
     // that same patience for their first REAL content, not just their first

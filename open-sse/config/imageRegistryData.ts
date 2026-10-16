@@ -264,6 +264,7 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
         name: "GPT 5.6 Luna (Codex Image)",
       },
       { id: "gpt-image-2.5-flare", name: "GPT Image 2.5 Flare (Codex)" },
+      { id: "gpt-image-2.5-sunburst", name: "GPT Image 2.5 Sunburst (Codex)" },
       { id: "gpt-image-2", name: "GPT Image 2 (Codex)" },
     ],
     supportedSizes: ["1024x1024", "1024x1536", "1536x1024"],

@@ -3384,6 +3384,10 @@
     "comboRefMember": "සංයෝජනය → {name}"
   },
   "combos": {
+    "autoTosIncludeLabel": "ToS: avoid ලෙස සලකුණු කළ සපයන්නන් auto වෙත ඇතුළත් කරන්න",
+    "autoTosDescription": "පෙරනිමියෙන් අක්‍රියයි. එක් ගිණුමකට පමණක් නොව සියලු auto සංයෝජනවලට අදාළ වේ. සපයන්නෙකු සම්බන්ධ කිරීමෙන් මෙම විකල්පය සක්‍රිය නොවේ.",
+    "autoTosSaveError": "ToS ප්‍රතිපත්තිය සුරැකිය නොහැකි විය. පෙර සැකසුම තවමත් පෙන්වයි. නැවත උත්සාහ කරන්න.",
+    "autoTosLoadError": "ToS ප්‍රතිපත්තිය පූරණය කළ නොහැකි විය. වෙනස් කිරීමට පෙර නැවත උත්සාහ කරන්න.",
     "title": "සංයෝජන",
     "description": "බරිත මාර්ගගත කිරීම සහ විකල්ප සහාය සහිත ආකෘති සංයෝජන සාදන්න",
     "autoCatalogTitle": "ස්වයංක්රීය මාර්ගගත කිරීමේ නාමාවලිය",
@@ -4090,6 +4094,9 @@
     "showingTopCostRows": "ගැළපෙන පේළි {total} න් {shown} ක් පෙන්වයි (ඉහළම 50)."
   },
   "endpoint": {
+    "cloudUploadDestination": "වලාකුළු සමමුහුර්ත කිරීමේ ගමනාන්තය (දේශීය උපස්ථ සඳහා නොවේ):",
+    "cloudUploadWarning": "නව ස්ථාපනයන්හි වලාකුළු සමමුහුර්ත කිරීම පෙරනිමියෙන් අක්‍රිය කර ඇත. එය සක්‍රිය කිරීමෙන් සැපයුම්කරුවන්ගේ API යතුරු, OAuth ප්‍රවේශ සහ නැවුම් කිරීමේ ටෝකන, OmniRoute API යතුරු සහ වින්‍යාසය ඉහත ගමනාන්තයට දැන් සහ අනාගත සමමුහුර්ත කිරීම්වලදී උඩුගත කෙරේ. මෙය ආචයනය කොටසේ ඇති දේශීය උපස්ථවලින් වෙන් වූවකි. එම සේවාදායකය විශ්වාස කරන්නේ නම් පමණක් මෙය සක්‍රිය කරන්න.",
+    "cloudUploadConsent": "මම මෙය තේරුම් ගෙන මගේ සත්‍යාපන තොරතුරු මෙම ගමනාන්තයට උඩුගත කිරීමට අවසර දෙමි.",
     "title": "API අන්ත ලක්ෂ්යය",
     "subtitle": "බොහෝ SDK සහ මෙවලම් සමඟ OpenAI-අනුකූල අන්ත ලක්ෂ්යය භාවිත කරන්න.",
     "testEndpoint": "අන්ත ලක්ෂ්යය පරීක්ෂා කරන්න →",
@@ -5268,6 +5275,9 @@
     }
   },
   "providers": {
+    "tosAvoidNoticeTitle": "මෙම සපයන්නා පෙරනිමියෙන් auto වෙතින් ඉවත් කර ඇත",
+    "tosAvoidNoticeDescription": "එහි ToS තත්ත්වය avoid ලෙස සලකුණු කර ඇත. ගිණුමක් සම්බන්ධ කිරීමෙන් මෙම ප්‍රතිපත්තිය වෙනස් නොවේ. සියලු auto සංයෝජන සඳහා පොදු විකල්පය සක්‍රිය කිරීමට පෙර සපයන්නාගේ කොන්දේසි කියවන්න.",
+    "tosAvoidNoticeAction": "auto ප්‍රතිපත්තිය බලන්න",
     "codexReleaseCooldown": "Clear local cooldown",
     "codexReleaseCooldownHint": "Allow this Codex account to be tried again. Does not redeem a reset credit or change upstream limits.",
     "codexReleasingCooldown": "Clearing…",
@@ -8683,6 +8693,7 @@
     "cliproxyapiPort": "පෝට් එක",
     "qdrantHost": "සත්කාරකය",
     "qdrantCollection": "එකතුව",
+    "catalogVisibilityHint": "සඟවා ඇති මාදිලි ID එම ප්‍රවේශ අවසර සමඟ තවමත් ඇමතිය හැක.",
     "catalogScopeTitle": "Models API ලැයිස්තුගත කිරීම",
     "catalogScopeDesc": "මෙම යතුර සඳහා GET /v1/models මඟින් ප්රචාරය කරන දේ. ලැයිස්තුව සීමා කිරීමෙන් යතුරට ඇමතිය හැකි දේ කිසිවිටෙක වෙනස් නොවේ.",
     "catalogScopeAll": "දෙකම",

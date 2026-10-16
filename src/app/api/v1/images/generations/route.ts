@@ -372,10 +372,9 @@ async function postHandler(request, context) {
 
   if (result.success) {
     await clearRecoveredProviderState(credentials);
-    const n = Math.max(
-      Number(body.n) || 1,
-      (result as { data?: { data?: unknown[] } }).data?.data?.length || 0
-    );
+    // Bill the images actually delivered: a provider that returns fewer than the
+    // requested `n` must not be charged for the missing ones (#16398 follow-up).
+    const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
     const costUsd = await calculateModalCost("image", provider, body.model, { n });
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {

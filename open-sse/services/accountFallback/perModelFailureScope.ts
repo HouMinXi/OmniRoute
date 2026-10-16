@@ -25,6 +25,33 @@ export function isModelNotFound404(status: number | undefined, errorText: unknow
   return MODEL_NOT_FOUND_404_REGEX.test(text);
 }
 
+/** Anthropic names a missing model without the generic "not found" wording. */
+function isAnthropicModelNotFound(
+  provider: string | null | undefined,
+  model: string | null | undefined,
+  status: number | undefined,
+  errorText: unknown
+): boolean {
+  if (status !== 404 || !model || !provider || resolveProviderId(provider) !== "anthropic") {
+    return false;
+  }
+  const expected = `model: ${model}`;
+  let body = errorText;
+  if (typeof body === "string") {
+    if (body.trim() === expected) return true;
+    try {
+      body = JSON.parse(body);
+    } catch {
+      return false;
+    }
+  }
+  if (!body || typeof body !== "object") return false;
+  const error = (body as { error?: unknown }).error;
+  if (!error || typeof error !== "object") return false;
+  const message = (error as { message?: unknown }).message;
+  return typeof message === "string" && message.trim() === expected;
+}
+
 function namesExactModel(
   text: string,
   marker: string,
@@ -77,6 +104,7 @@ export function hasPerModelFailureScope(
 ): boolean {
   if (
     isModelNotFound404(status, errorText) ||
+    isAnthropicModelNotFound(provider, model, status, errorText) ||
     isExplicitModelCapacityFailure(status, errorText, model)
   )
     return true;

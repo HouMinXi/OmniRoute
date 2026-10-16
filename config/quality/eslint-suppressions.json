@@ -131,7 +131,7 @@
   },
   "open-sse/executors/kiro.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 3
+      "count": 2
     }
   },
   "open-sse/executors/kiro/eventstream.ts": {
@@ -291,11 +291,6 @@
   "open-sse/mcp-server/tools/githubSkillTools.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
-    }
-  },
-  "open-sse/mcp-server/tools/obsidianTools.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
     }
   },
   "open-sse/mcp-server/tools/pickFastestModel.ts": {
@@ -645,7 +640,7 @@
   },
   "open-sse/utils/stream.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 2
+      "count": 1
     }
   },
   "open-sse/utils/streamHelpers.ts": {
@@ -1566,11 +1561,6 @@
       "count": 1
     }
   },
-  "src/lib/usage/costCalculator.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "src/lib/usage/fetcher.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 7
@@ -1626,7 +1616,7 @@
   },
   "src/mitm/manager.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 3
+      "count": 2
     }
   },
   "src/server/ws/liveServer.ts": {
@@ -2891,7 +2881,7 @@
   },
   "tests/unit/cli-sync-commands.test.ts": {
     "@typescript-eslint/no-explicit-any": {
-      "count": 21
+      "count": 11
     },
     "@typescript-eslint/no-unused-vars": {
       "count": 2

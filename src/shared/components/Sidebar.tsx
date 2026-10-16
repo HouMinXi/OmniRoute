@@ -803,15 +803,28 @@ export default function Sidebar({
             // Expanded mode: collapsible section with pin
             return (
               <div key={section.id} className={isFirst ? "space-y-0.5" : "mt-2"}>
-                <div
-                  className="flex items-center gap-0.5 px-2 py-1 rounded-md hover:bg-surface/30 transition-colors cursor-pointer group/header"
-                  onClick={() => toggleSection(sectionId)}
-                  role="button"
-                  aria-expanded={isExpanded}
-                >
-                  <span className="flex-1 text-[10px] font-semibold text-text-muted/60 uppercase tracking-wider group-hover/header:text-text-muted/90 transition-colors">
-                    {section.title}
-                  </span>
+                {/* UX-1 fix: native <button> gives click + keyboard (Enter/Space)
+                    + focus + WCAG semantics without onClick/onKeyDown hacks.
+                    The pin button is a SIBLING (nested <button> is invalid HTML). */}
+                <div className="flex items-center gap-0.5 px-2 py-1 rounded-md hover:bg-surface/30 transition-colors group/header">
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(sectionId)}
+                    aria-expanded={isExpanded}
+                    className="flex flex-1 items-center gap-0.5 text-left bg-transparent border-0 p-0 cursor-pointer"
+                  >
+                    <span className="flex-1 text-[10px] font-semibold text-text-muted/60 uppercase tracking-wider group-hover/header:text-text-muted/90 transition-colors">
+                      {section.title}
+                    </span>
+                    <span
+                      className={cn(
+                        "material-symbols-outlined text-[14px] text-text-muted/40 transition-all duration-200 group-hover/header:text-text-muted/70 shrink-0",
+                        isExpanded && "rotate-180"
+                      )}
+                    >
+                      expand_more
+                    </span>
+                  </button>
 
                   {/* Pin button — right side near chevron (only for standard sections) */}
                   {sectionId !== "pinned" && (
@@ -839,15 +852,6 @@ export default function Sidebar({
                       </span>
                     </button>
                   )}
-
-                  <span
-                    className={cn(
-                      "material-symbols-outlined text-[14px] text-text-muted/40 transition-all duration-200 group-hover/header:text-text-muted/70 shrink-0",
-                      isExpanded && "rotate-180"
-                    )}
-                  >
-                    expand_more
-                  </span>
                 </div>
 
                 {isExpanded && (

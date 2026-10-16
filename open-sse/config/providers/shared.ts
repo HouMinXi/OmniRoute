@@ -226,6 +226,13 @@ export interface RegistryEntry {
    */
   forceStream?: boolean;
   /**
+   * Opt-in for providers that use prompt-emulated tool calling (e.g. web-session
+   * providers like opencode, duckduckgo-web, cloudflare-playground). When set to
+   * "emulated", the combo tool-calling filter will keep these providers eligible
+   * even though their registry/capability rows report toolCalling:false.
+   */
+  toolCalling?: "emulated" | boolean;
+  /**
    * Literal API key sent as the bearer token when the request has no real
    * credential (synthetic noauth fallback). Lets a primarily-authenticated
    * provider expose its free tier anonymously: e.g. Kilo's gateway accepts
@@ -433,6 +440,8 @@ export const CHAT_OPENAI_COMPAT_MODELS: Record<string, RegistryModel[]> = {
     "Llama-4-Maverick-17B-128E-Instruct",
     "Meta-Llama-3.3-70B-Instruct",
     "gpt-oss-120b",
+    "DeepSeek-V3.1",
+    "gemma-4-31B-it",
   ]),
   nscale: buildModels([
     "moonshotai/Kimi-K2.5",
