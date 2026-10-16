@@ -104,6 +104,21 @@ test("an unpinned target finds a transient model lock recorded for its selected 
   );
 });
 
+test("an unpinned lookup returns the lock that expires first (#16551)", () => {
+  recordModelLockoutFailure("zai", "connection-late", "glm-5.3-flash", "rate_limit", 429, 0, null, {
+    exactCooldownMs: 5_000,
+  });
+  recordModelLockoutFailure("zai", "connection-soon", "glm-5.3-flash", "rate_limit", 429, 0, null, {
+    exactCooldownMs: 1_200,
+  });
+  const info = getModelLockoutInfo("zai", "", "glm-5.3-flash");
+  assert.ok(info, "the unpinned lookup must find a lock");
+  assert.ok(
+    info.remainingMs < 2_000,
+    `expected the 1.2s lock, not the 5s one, remaining ${info.remainingMs}ms`
+  );
+});
+
 test("a quota model lock is never waited out and advertises no model-lock retry-after", async () => {
   // quota_exhausted locks run to midnight — the cooldown-wait helper excludes
   // them, and the terminal response must not stitch their expiry onto a 429.

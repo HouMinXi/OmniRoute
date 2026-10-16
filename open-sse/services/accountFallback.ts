@@ -1048,34 +1048,21 @@ export function getModelLockoutInfo(
 
 function getModelLockoutInfoAcrossConnections(provider: string, model: string | null | undefined) {
   if (!model) return null;
-  const marker = "__omniroute_connection_probe__";
-  const templates = getModelLockKeys(provider, marker, model)
-    .map((key) => {
-      const markerIndex = key.indexOf(`:${marker}:`);
-      if (markerIndex < 0) return null;
-      return {
-        prefix: key.slice(0, markerIndex + 1),
-        suffix: key.slice(markerIndex + marker.length + 1),
-      };
-    })
-    .filter((template): template is { prefix: string; suffix: string } => template !== null);
-  if (templates.length === 0) return null;
-
   const now = Date.now();
-  let latest: ModelLockoutEntry | null = null;
+  let soonest: ModelLockoutEntry | null = null;
   for (const [key, entry] of modelLockouts) {
     cleanupModelLockKey(key, now);
     if (entry.until <= now) continue;
-    if (!templates.some(({ prefix, suffix }) => key.startsWith(prefix) && key.endsWith(suffix)))
-      continue;
-    if (!latest || entry.until > latest.until) latest = entry;
+    const parsed = exactModelLock.parseModelLockKey(key);
+    if (parsed.provider !== provider || parsed.model !== model) continue;
+    if (!soonest || entry.until < soonest.until) soonest = entry;
   }
-  if (!latest) return null;
+  if (!soonest) return null;
   return {
-    reason: latest.reason,
-    remainingMs: latest.until - now,
-    lockedAt: new Date(latest.lockedAt).toISOString(),
-    failureCount: latest.failureCount,
+    reason: soonest.reason,
+    remainingMs: soonest.until - now,
+    lockedAt: new Date(soonest.lockedAt).toISOString(),
+    failureCount: soonest.failureCount,
   };
 }
 

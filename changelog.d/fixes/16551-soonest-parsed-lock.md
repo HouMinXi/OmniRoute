@@ -1,0 +1,1 @@
+- **fix(resilience):** An unpinned model-lock lookup now returns the lock that expires first and matches the provider and model by their parsed fields, instead of the longest lock found by splitting the key around a sentinel connection id (#16551).
