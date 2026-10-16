@@ -1,11 +1,10 @@
 /**
- * A Codex model id that already names its effort (gpt-6.1-sol-ultra,
- * gpt-6.1-sol-max) was fed back through the catalog variant builder because
- * the shared capability block carries supportedThinkingEfforts. The builder
- * appended another tier, so the combo picker offered gpt-6.1-sol-ultra-max.
- *
- * The base id keeps its variants. An id that already ends in a tier does not
- * grow a second one.
+ * gpt-6.1-sol-ultra is already an effort alias. The shared capability block
+ * carries supportedThinkingEfforts, and the catalog builder appended another
+ * tier (gpt-6.1-sol-ultra-max). Codex -ultra aliases stay as they are, and a
+ * Codex -max/-high alias does too when its unsuffixed stem is in the same
+ * list. A non-Codex id ending in -ultra (nemotron) still exposes variants.
+ * A discovered Codex -high/-max id with no sibling stem still does (#13224).
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -43,4 +42,40 @@ test("codex effort aliases are not given a second tier suffix", () => {
     false,
     "max alias must not grow another tier"
   );
+});
+
+test("a lone Codex ultra alias does not grow another tier", () => {
+  const out = appendSyncedEffortVariants([codex("gpt-6.1-sol-ultra")]);
+  assert.deepEqual(
+    out.map((model) => model.id),
+    ["codex/gpt-6.1-sol-ultra"]
+  );
+});
+
+test("non-Codex ids ending in -ultra still expose effort variants", () => {
+  const out = appendSyncedEffortVariants([
+    {
+      id: "nvidia/nemotron-3-ultra",
+      owned_by: "nvidia",
+      root: "nemotron-3-ultra",
+      name: "Nemotron 3 Ultra",
+      capabilities: { effort_tiers: ["low", "high"] },
+    },
+  ]);
+  const ids = out.map((model) => model.id);
+
+  assert.ok(ids.includes("nvidia/nemotron-3-ultra"));
+  assert.ok(ids.includes("nvidia/nemotron-3-ultra-high"));
+  assert.ok(ids.includes("nvidia/nemotron-3-ultra-low"));
+});
+
+test("discovered Codex high/max ids without a sibling stem keep variants (#13224)", () => {
+  const out = appendSyncedEffortVariants([codex("future-codex-high"), codex("future-codex-max")]);
+  const ids = out.map((model) => model.id);
+
+  assert.ok(ids.includes("codex/future-codex-high"));
+  assert.ok(ids.includes("codex/future-codex-max"));
+  assert.ok(ids.includes("codex/future-codex-high-low"));
+  assert.ok(ids.includes("codex/future-codex-max-low"));
+  assert.equal(ids.includes("codex/future-codex"), false);
 });
