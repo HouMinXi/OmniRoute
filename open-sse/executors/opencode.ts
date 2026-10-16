@@ -485,11 +485,11 @@ export class OpencodeExecutor extends BaseExecutor {
               const normalized = normalizer(line);
               controller.enqueue(encoder.encode(normalized + "\n"));
               if (isResponsesTerminalLine(line)) {
-                // OpenCode Zen sends a ping after response.completed and may keep
-                // the HTTP connection alive. The Responses terminal event is
-                // authoritative; do not let those post-completion pings hold Chat Completions open.
+                // OpenCode Zen may ping after response.completed and hold the socket.
+                // Close on that terminal event so Chat Completions is not held open.
                 closed = true;
                 void reader.cancel().catch(() => undefined);
+                controller.enqueue(encoder.encode("\n"));
                 controller.close();
                 return;
               }

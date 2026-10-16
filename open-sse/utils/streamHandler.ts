@@ -672,7 +672,7 @@ export function createDisconnectAwareStream(
   let clientTerminalSeen = false;
   let bytesWereForwarded = false;
   const completionDrain = createCompletionDrain(reader, writer, streamController, () =>
-    clientTerminalSeen ? "client_terminal_grace_expired" : "completed_tool_handoff_grace_expired"
+    clientTerminalSeen ? "terminal_stream_grace_expired" : "completed_tool_handoff_grace_expired"
   );
   streamController.registerCompletedToolHandoffDrain?.(completionDrain.start);
 
@@ -713,12 +713,13 @@ export function createDisconnectAwareStream(
         if (!streamController.isConnected()) {
           // Closing our side alone leaves the upstream body being pulled by the
           // transform pipe. Cancel it so the provider stops generating for a
-          // client that is gone. Not on a completed stream (clientTerminalSeen)
-          // nor while a completed tool handoff is still draining the reader.
-          if (
-            !clientTerminalSeen &&
-            streamController.shouldDeferCompletedToolHandoff?.() !== true
-          ) {
+          // client that is gone. A completed terminal stream with a grace window
+          // hands the inner reader to the bounded drain so late usage can flush.
+          if (clientTerminalSeen) {
+            if (Number(streamController.clientDisconnectGracePeriodMs) > 0) {
+              completionDrain.start();
+            }
+          } else if (streamController.shouldDeferCompletedToolHandoff?.() !== true) {
             const reason = "client_disconnected";
             void Promise.allSettled([reader.cancel(reason), writer.abort(reason)]);
           }

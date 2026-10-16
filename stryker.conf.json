@@ -261,6 +261,7 @@
       "tests/unit/combo-lockout-quota-reset-6863.test.ts",
       "tests/unit/combo-max-depth-config.test.ts",
       "tests/unit/combo-model-lockout-honors-reset-1308.test.ts",
+      "tests/unit/combo-model-lock-pre-dispatch-wait-16319.test.ts",
       "tests/unit/combo-model-scoped-400-advance.test.ts",
       "tests/unit/combo-omnimodel-tag-stripping.test.ts",
       "tests/unit/combo-param-validation-fallback-4519.test.ts",

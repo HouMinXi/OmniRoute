@@ -217,7 +217,7 @@ export async function executeTargetAttempt(
       );
       if (persistedRetrySkip) {
         deps.log.info("COMBO", persistedRetrySkip);
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
     }
@@ -404,7 +404,7 @@ export async function executeTargetAttempt(
           error: quality.reason || "upstream response failed quality validation",
           kind: qualityFailure.kind,
         });
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         state.requestScopedFailureSeen ||= qualityFailure.requestScoped;
         if (qualityFailure.requestScoped)
           state.requestScopedRejectedModelKeys?.add(requestScopedReplayKey(modelStr));
@@ -756,7 +756,7 @@ export async function executeTargetAttempt(
       state.lastError = refusal.error;
       state.lastStatus = refusal.status;
       state.comboErrors.push(refusal.outcome);
-      if (i > 0) state.fallbackCount++;
+      state.fallbackCount++;
       return null;
     }
 
@@ -802,7 +802,8 @@ export async function executeTargetAttempt(
         target: toRecordedTarget(target),
       });
       state.recordedAttempts++;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop — the combo does not advance to another target, so no
+      // fallback was attempted here whatever the index of the failing target is.
       return { ok: false, response: result };
     }
 
@@ -859,7 +860,8 @@ export async function executeTargetAttempt(
         target: toRecordedTarget(target),
       });
       state.recordedAttempts++;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop: the same input would fail identically on every account, so
+      // the combo aborts instead of moving on — no fallback happened.
       return { ok: false, response: result };
     }
     const fallbackResult = checkFallbackError(
@@ -960,7 +962,8 @@ export async function executeTargetAttempt(
         code: structuredError?.code,
       });
       state.lastStatus = result.status;
-      if (i > 0) state.fallbackCount++;
+      // Terminal stop ("stopping combo"): no later target is tried, so this is not
+      // a fallback even when the failing target is not the first one.
       deps.log.warn("COMBO", `Model ${modelStr} failed with body-specific error, stopping combo`);
       deps.clearStaleLKGP(
         deps.combo.name,
@@ -1098,7 +1101,7 @@ export async function executeTargetAttempt(
         // was just observed. Recording it here mirrors the "done retrying" path.
         state.lastError = errorText || String(result.status);
         state.lastStatus = result.status;
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
       // Record model lockout immediately on the first transient failure —
@@ -1144,7 +1147,7 @@ export async function executeTargetAttempt(
         // first-failure lockout path, so lastStatus needs recording here too.
         state.lastError = errorText || String(result.status);
         state.lastStatus = result.status;
-        if (i > 0) state.fallbackCount++;
+        state.fallbackCount++;
         return null;
       }
       continue; // Retry same model (transient error, no lockout recorded)
@@ -1197,7 +1200,7 @@ export async function executeTargetAttempt(
       code: structuredError?.code,
     });
     state.lastStatus = result.status;
-    if (i > 0) state.fallbackCount++;
+    state.fallbackCount++;
     // Wire combo failures into the resilience dashboard (model-level lockout)
     // alongside the provider-level cooldown below — they govern different scopes.
     if (

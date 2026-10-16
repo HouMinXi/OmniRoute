@@ -1,3 +1,4 @@
+import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { buildErrorBody } from "../utils/error.ts";
 import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
@@ -539,6 +540,79 @@ export function filterNonstandardCodexSse(response: Response): Response {
   });
 }
 
+/**
+ * Codex Responses upstream sometimes leaves the HTTP connection open after
+ * emitting a terminal event (such as `response.completed` with tool calls or
+ * `response.incomplete`), sending keep-alive pings or idling until timeout.
+ * That post-completion silence holds downstream chat completions / SSE streams
+ * open, preventing clients (such as OpenCode or agent loops) from receiving
+ * the final [DONE] marker and executing tool calls.
+ *
+ * Wrap the HTTP SSE response body to cleanly close the stream as soon as an
+ * authoritative Responses terminal line has been forwarded to the client.
+ */
+export function terminateCodexHttpStreamOnTerminal(response: Response): Response {
+  const contentType = response.headers.get("content-type") || "";
+  if (!response.body || !contentType.includes("text/event-stream")) {
+    return response;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  let buffer = "";
+  let closed = false;
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        while (!closed) {
+          const { done, value } = await reader.read();
+          if (done) {
+            buffer += decoder.decode();
+            if (buffer.length > 0 && !closed) {
+              controller.enqueue(encoder.encode(buffer));
+            }
+            if (!closed) {
+              closed = true;
+              controller.close();
+            }
+            return;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            controller.enqueue(encoder.encode(line + "\n"));
+            if (isResponsesTerminalLine(line)) {
+              closed = true;
+              void reader.cancel().catch(() => undefined);
+              controller.enqueue(encoder.encode("\n"));
+              controller.close();
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        if (!closed) {
+          closed = true;
+          controller.error(err);
+        }
+      }
+    },
+    cancel(reason) {
+      closed = true;
+      reader.cancel(reason).catch(() => undefined);
+    },
+  });
+
+  return new Response(stream, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
 // ─── Sub-bug #3 of upstream decolua/9router#2452 (@ryanngit) ─────────────────
 // Codex sometimes answers with HTTP 200 and a text/event-stream body whose
 // payload carries a transient "model at capacity" / overloaded error mid-stream,
@@ -677,7 +751,7 @@ export function encodeResponseSseEvent(raw: string): { sse: string; terminal: bo
         payload = JSON.stringify(failed);
         eventType = "response.failed";
       }
-      terminal = eventType === "response.completed" || eventType === "response.failed";
+      terminal = RESPONSES_TERMINAL_EVENT_TYPES.has(eventType);
     }
   } catch {
     console.warn("[codex] SSE payload parse failed, using raw payload");
@@ -862,6 +936,15 @@ export class CodexExecutor extends BaseExecutor {
             headers: resp.headers,
           });
         }
+      }
+      const finalResp = (httpResult as { response?: Response }).response;
+      if (
+        finalResp?.ok &&
+        finalResp.body &&
+        finalResp.headers.get("content-type")?.includes("text/event-stream")
+      ) {
+        (httpResult as { response: Response }).response =
+          terminateCodexHttpStreamOnTerminal(finalResp);
       }
       return httpResult;
     }

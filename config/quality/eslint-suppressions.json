@@ -191,7 +191,7 @@
   },
   "open-sse/handlers/imageGeneration.ts": {
     "@typescript-eslint/no-unused-vars": {
-      "count": 5
+      "count": 4
     }
   },
   "open-sse/handlers/musicGeneration.ts": {

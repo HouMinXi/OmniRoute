@@ -104,12 +104,23 @@ export function createMuseSparkStreamFinishNormalizer(
   };
 }
 
+export const RESPONSES_TERMINAL_EVENT_TYPES = new Set([
+  "response.completed",
+  "response.done",
+  "response.cancelled",
+  "response.canceled",
+  "response.failed",
+  "response.incomplete",
+]);
+
 export function isResponsesTerminalLine(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed.startsWith("data:")) return false;
+  const rawData = trimmed.slice(5).trim();
+  if (!rawData || rawData === "[DONE]") return false;
   try {
-    const payload = JSON.parse(trimmed.slice(5).trim()) as Record<string, unknown>;
-    return payload.type === "response.completed";
+    const payload = JSON.parse(rawData) as Record<string, unknown>;
+    return typeof payload.type === "string" && RESPONSES_TERMINAL_EVENT_TYPES.has(payload.type);
   } catch {
     return false;
   }

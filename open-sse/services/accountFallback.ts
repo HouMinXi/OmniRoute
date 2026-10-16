@@ -103,6 +103,7 @@ import {
   parseIsoDateTimeResetMs,
   shouldPreserveQuotaSignals,
 } from "./quotaResetParsing.ts";
+import { isTransientComboCooldownReason } from "./combo/comboCooldownRetry.ts";
 import { evictLockoutOverflow } from "./accountFallback/lockoutEviction.ts";
 export { MODEL_LOCKOUT_EVICTION_CAP } from "./accountFallback/lockoutEviction.ts";
 export { hasPerModelFailureScope } from "./accountFallback/perModelFailureScope.ts";
@@ -1054,6 +1055,40 @@ export function getModelLockoutInfo(
     remainingMs: entry.until - Date.now(),
     lockedAt: new Date(entry.lockedAt).toISOString(),
     failureCount: entry.failureCount,
+  };
+}
+
+export function scanTransientModelLock(provider: string, model: string | null | undefined) {
+  if (!model) return null;
+  const marker = "__omniroute_connection_probe__";
+  const templates = getModelLockKeys(provider, marker, model)
+    .map((key) => {
+      const markerIndex = key.indexOf(`:${marker}:`);
+      if (markerIndex < 0) return null;
+      return {
+        prefix: key.slice(0, markerIndex + 1),
+        suffix: key.slice(markerIndex + marker.length + 1),
+      };
+    })
+    .filter((template): template is { prefix: string; suffix: string } => template !== null);
+  if (templates.length === 0) return null;
+
+  const now = Date.now();
+  let earliest: ModelLockoutEntry | null = null;
+  for (const [key, entry] of modelLockouts) {
+    cleanupModelLockKey(key, now);
+    if (entry.until <= now) continue;
+    if (!isTransientComboCooldownReason(entry.reason)) continue;
+    if (!templates.some(({ prefix, suffix }) => key.startsWith(prefix) && key.endsWith(suffix)))
+      continue;
+    if (!earliest || entry.until < earliest.until) earliest = entry;
+  }
+  if (!earliest) return null;
+  return {
+    reason: earliest.reason,
+    remainingMs: earliest.until - now,
+    lockedAt: new Date(earliest.lockedAt).toISOString(),
+    failureCount: earliest.failureCount,
   };
 }
 

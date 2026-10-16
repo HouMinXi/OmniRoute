@@ -877,12 +877,13 @@ async function handleChatCoreInner({
     body = bodyWithWebSearchFallback as typeof body;
     // Server-side web-search execution cannot be injected into an arbitrary
     // client SSE stream (streaming interception is not implemented — #9725), so
-    // a stream:true OpenAI Responses request whose web_search tool was converted
-    // to the fallback is executed non-streaming: the assembled response then
-    // carries the executed results (function_call_output + web_search_call) and
-    // JSON-tolerating Responses clients (pi-web-access) consume it directly.
+    // Responses clients and Claude clients on Cursor must execute the internal
+    // search loop non-streaming, then replay the final response as client-native
+    // SSE. Otherwise the client receives an undeclared omniroute_web_search call
+    // instead of the search result and final answer.
     if (
-      sourceFormat === FORMATS.OPENAI_RESPONSES &&
+      (sourceFormat === FORMATS.OPENAI_RESPONSES ||
+        (provider === "cursor" && sourceFormat === FORMATS.CLAUDE)) &&
       (body as Record<string, unknown>).stream === true
     ) {
       clientRequestedResponsesStream = true;
