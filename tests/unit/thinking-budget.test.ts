@@ -145,6 +145,21 @@ test("ADAPTIVE: a short request keeps the client's high effort", () => {
   setThinkingBudgetConfig(DEFAULT_THINKING_CONFIG);
 });
 
+test("ADAPTIVE: a short request with effortLevel max stays xhigh, never max", () => {
+  // effortLevel "max" is a valid setting, but "max" is not a reasoning_effort
+  // value OpenAI/Codex accept. The high-pin for #16662 must not write the raw
+  // selected level back: the ceiling budget keeps reading back as xhigh.
+  setThinkingBudgetConfig({ mode: ThinkingMode.ADAPTIVE, effortLevel: "max" });
+  const body = {
+    model: "agnes/agnes-2.5-flash",
+    messages: [{ role: "user", content: "say pong" }],
+    reasoning_effort: "high",
+  };
+  const result = applyThinkingBudget(body);
+  assert.equal(result.reasoning_effort, "xhigh");
+  setThinkingBudgetConfig(DEFAULT_THINKING_CONFIG);
+});
+
 test("ADAPTIVE: a complex request still raises a collapsed high ceiling", () => {
   // Counter-case: many messages and tools push the multiplier past 1, so the
   // scaled budget exceeds the selected effort's own budget and the ceiling
