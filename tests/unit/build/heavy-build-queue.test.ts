@@ -29,7 +29,10 @@ test("runner isolation still blocks fork code from the self-hosted build slot", 
   assert.match(workflow.jobs.build["runs-on"], /\|\| 'ubuntu-latest'/);
 });
 
-test("the existing webpack fallback follows the hosted build runner", () => {
+test("the Turbopack switch follows the self-hosted build slot; hosted stays on webpack", () => {
+  // The .113 build slot has 64 GB since 2026-10-16: the Turbopack build of this tree peaks at
+  // ~36 GB under a cgroup cap (49 GB uncapped) and finished in 23 min with three lint jobs
+  // alongside. Hosted runners (16 GB) cannot hold it and build with webpack (14 GB).
   const step = workflow.jobs.build.steps.find(
     (item: { run?: string }) => item.run === "npm run build"
   );

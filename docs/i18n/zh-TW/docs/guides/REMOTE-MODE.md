@@ -239,14 +239,18 @@ ssh -L 20128:127.0.0.1:20128 -L 1455:127.0.0.1:1455 <user>@192.168.0.15
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ 只顯示一次密鑰——請立即複製
-omniroute tokens list                 # 已遮罩：id、名稱、範圍、前綴、狀態、到期時間
+#   ↳ 僅顯示一次密鑰 — 請立即複製
+omniroute tokens list                 # 已遮蔽：id、名稱、範圍、前綴、狀態、到期時間
 omniroute tokens revoke <id|prefix>   # 立即撤銷
 omniroute tokens scopes               # 說明三種範圍
 ```
 
 `tokens` 命令需要 **admin** 憑證。您也可以在儀表板的
-**設定 → 存取權杖**中管理權杖（建立、撤銷、僅可複製一次）。
+**Settings → Access Tokens** 下管理權杖（建立、撤銷、僅限複製一次）。
+
+權杖的權限絕不可能高於其建立者所擁有的權限。`admin` 權杖只能由操作者建立，包括透過儀表板工作階段、伺服器本機上的 CLI、使用密碼執行 `omniroute connect`，或登入功能已停用的執行個體。機器憑證（`admin` 存取權杖，或具有 `manage`/`admin` 範圍的 API 金鑰）只能建立 `write` 和 `read` 權杖；若要求其使用 `--scope admin`，則會傳回 `403`。
+
+權杖的權限絕不能高於其建立者的權限。只有維運人員才能建立 `admin` 權杖：透過儀表板工作階段、伺服器本機的 CLI、使用密碼的 `omniroute connect`，或在停用登入的執行個體中建立。機器憑證（`admin` 存取權杖，或具有 `manage`/`admin` 範圍的 API 金鑰）只能建立 `write` 和 `read` 權杖；使用這些憑證要求 `--scope admin` 會傳回 `403`。
 
 ---
 

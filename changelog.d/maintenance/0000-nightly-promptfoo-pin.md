@@ -1,0 +1,1 @@
+- **ci:** the nightly LLM-security guard eval now runs the lockfile's `promptfoo` (pinned exactly at 0.123.0) instead of `promptfoo@latest`; releases ≥ 0.123.1 throw `result?.error?.includes is not a function` on the guard's 4xx JSON reply, which turned every blocked request into an eval error.

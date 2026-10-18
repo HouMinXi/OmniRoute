@@ -113,11 +113,16 @@ Socraigh `"geminiSanitization": false` chun é a mhúchadh.
 
 ## Fabhtcheartú
 
-| Siomptóm                                                  | Cúis                                                                                                               |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Ní thaispeánann an roghnóir aon samhail OmniRoute         | Níor réitíodh eochair ar bith (seiceáil an rabhadh tosaithe), nó ní féidir an geata a rochtain                     |
-| Aitheantais loma samhlacha, gan teaglamaí, gan phraghsáil | Dhiúltaigh na críochphointí bainistíochta don chomhartha — socraigh `managementReadToken`                          |
-| Seisiún pionnáilte le `opencode-<id>/…`                   | D’fhoilsigh breiseán v1 `opencode-<id>`; foilsíonn v2 `<id>` lom, mar sin roghnaigh an tsamhail arís faoi `<id>/…` |
+| Siomptóm                                                 | Cúis                                                                                                                                            |
+| -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ní thaispeánann an roghnóir aon samhail OmniRoute        | Níor réitíodh aon eochair (seiceáil an rabhadh tosaithe), nó ní féidir an geata a bhaint amach                                                  |
+| Aitheantais amh samhlacha, gan teaglamaí, gan phraghsáil | Dhiúltaigh na críochphointí bainistíochta don chomhartha — socraigh `managementReadToken`                                                       |
+| Catalóg `freeOnly` ghearr nó fholamh                     | Gan chomhartha bainistíochta nó diúltaíodh don chomhartha — léigh an líne achoimre athnuachana (comhaireamh `unmatched-free`) i loga an óstaigh |
+| Seisiún pionnáilte le `opencode-<id>/…`                  | D’fhoilsigh an breiseán v1 `opencode-<id>`; foilsíonn v2 `<id>` lom, mar sin roghnaigh an tsamhail arís faoi `<id>/…`                           |
+
+Ní mór do na hathróga timpeallachta próiseas freastalaí opencode a bhaint amach: nuair a
+ritheann an t-óstach mar sheirbhís, bíonn an bhlaosc a ritheann `opencode models` agus timpeallacht
+an fhreastalaí éagsúil, mar sin easpórtáil an eochair san áit a léann an freastalaí í.
 
 ## Féach freisin
 

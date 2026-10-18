@@ -125,11 +125,16 @@ Ak to chcete vypnúť, nastavte `"geminiSanitization": false`.
 
 ## Riešenie problémov
 
-| Príznak                                             | Príčina                                                                                                    |
-| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| Výber nezobrazuje žiadny model OmniRoute            | Nenašiel sa žiadny kľúč (skontrolujte upozornenie pri spustení) alebo je brána nedostupná                  |
-| Nespracované ID modelov, žiadne kombinácie ani ceny | Koncové body správy odmietli token — nastavte `managementReadToken`                                        |
-| Relácia pripnutá k `opencode-<id>/…`                | Doplnok v1 zverejnil `opencode-<id>`; v2 zverejňuje samotné `<id>`, preto model znova vyberte pod `<id>/…` |
+| Príznak                                             | Príčina                                                                                                                      |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Výber nezobrazuje žiadny model OmniRoute            | Nepodarilo sa nájsť žiadny kľúč (skontrolujte upozornenie pri spustení) alebo je brána nedostupná                            |
+| Nespracované ID modelov, žiadne kombinácie ani ceny | Koncové body správy odmietli token — nastavte `managementReadToken`                                                          |
+| Krátky alebo prázdny katalóg `freeOnly`             | Chýba token správy alebo bol odmietnutý — v protokole hostiteľa si pozrite súhrnný riadok obnovenia (počet `unmatched-free`) |
+| Relácia pripnutá k `opencode-<id>/…`                | Doplnok v1 zverejnil `opencode-<id>`; v2 zverejňuje iba `<id>`, preto znova vyberte model v rámci `<id>/…`                   |
+
+Premenné prostredia sa musia dostať do procesu servera opencode: keď hostiteľ
+beží ako služba, prostredie shellu, v ktorom sa spúšťa `opencode models`, sa líši
+od prostredia servera, preto exportujte kľúč tam, kde ho server načítava.
 
 ## Pozrite si tiež
 

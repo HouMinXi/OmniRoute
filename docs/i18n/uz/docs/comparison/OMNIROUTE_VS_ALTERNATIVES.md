@@ -39,11 +39,11 @@ Mashhur ochiq kodli AI routerlari bilan funksiyalarning xolis taqqoslanishi.
 
 ## OmniRoute’ni qachon tanlash kerak
 
-- Siz mustaqil joylashtirasiz va **provayderlarning maksimal qamrovini** xohlaysiz (329 ta provayder, 155 ta bepul/autentifikatsiyasiz katalog yozuvi)
-- Sizga **ichki MCP serveri** kerak (LLM vositalari, xotira va ko‘nikmalar vosita sifatida taqdim etiladi)
+- Siz tizimni o‘zingiz joylashtirasiz va **provayderlarning maksimal qamrovini** xohlaysiz (372 ta provayder, katalogda 155 ta bepul/autentifikatsiyasiz yozuv)
+- Sizga **o‘rnatilgan MCP serveri** kerak (LLM vositalari, xotira va ko‘nikmalar vositalar sifatida taqdim etiladi)
 - Agentlararo ish jarayonlari uchun sizga **A2A protokoli** kerak
-- Yuqori oqimdagi CAPTCHA’lar tomonidan aniqlanmaslik uchun **fingerprint yashirinligini** (JA3/JA4) xohlaysiz
-- Sizga SaaS hisobisiz **korporativ funksiyalar** (himoya cheklovlari, baholashlar, audit jurnali) kerak
+- Yuqori oqimdagi CAPTCHA’lar tomonidan aniqlanmaslik uchun sizga **brauzer izi yashirinligi** (JA3/JA4) kerak
+- SaaS uchun to‘lovsiz **korporativ funksiyalar** (himoya cheklovlari, baholashlar, audit jurnali) kerak
 
 ## LiteLLM’ni qachon tanlash kerak
 

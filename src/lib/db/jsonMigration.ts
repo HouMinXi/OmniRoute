@@ -15,9 +15,9 @@ import type { SqliteAdapter } from "./adapters/types";
 import { normalizeRoutingStrategy } from "@/shared/constants/routingStrategies";
 import { normalizeComboRecord } from "@/lib/combos/steps";
 import { validateComboInvariant } from "@/lib/combos/invariants";
-import { insertImportedApiKey } from "./apiKeys/importRow";
-import { normalizeBooleanColumn, serializeJsonField } from "./providers/columns";
-import { encryptConnectionFields } from "./encryption";
+import { getTableColumns } from "./jsonMigration/columnUpsert";
+import { getApiKeyImportColumns, importApiKeyRecord } from "./jsonMigration/apiKeysImport";
+import { importProviderConnectionRecord } from "./jsonMigration/connectionsImport";
 import {
   resolveImportedUsageAccountIdentity,
   resolveOrphanedUsageAccountIdentity,
@@ -65,32 +65,6 @@ export function runJsonMigration(
   domainCostHistory: number;
   domainBudgets: number;
 } {
-  const insertConn = db.prepare(`
-    INSERT OR REPLACE INTO provider_connections (
-      id, provider, auth_type, name, email, priority, is_active,
-      access_token, refresh_token, expires_at, token_expires_at,
-      scope, project_id, test_status, error_code, last_error,
-      last_error_at, last_error_type, last_error_source, backoff_level,
-      rate_limited_until, health_check_interval, last_health_check_at,
-      last_tested, api_key, id_token, provider_specific_data,
-      expires_in, display_name, global_priority, default_model,
-      token_type, consecutive_use_count, rate_limit_protection, last_used_at,
-      rate_limit_overrides_json, "group", max_concurrent, proxy_enabled,
-      per_key_proxy_enabled, quota_visible, quota_window_thresholds_json, created_at, updated_at
-    ) VALUES (
-      @id, @provider, @authType, @name, @email, @priority, @isActive,
-      @accessToken, @refreshToken, @expiresAt, @tokenExpiresAt,
-      @scope, @projectId, @testStatus, @errorCode, @lastError,
-      @lastErrorAt, @lastErrorType, @lastErrorSource, @backoffLevel,
-      @rateLimitedUntil, @healthCheckInterval, @lastHealthCheckAt,
-      @lastTested, @apiKey, @idToken, @providerSpecificData,
-      @expiresIn, @displayName, @globalPriority, @defaultModel,
-      @tokenType, @consecutiveUseCount, @rateLimitProtection, @lastUsedAt,
-      @rateLimitOverridesJson, @group, @maxConcurrent, @proxyEnabled,
-      @perKeyProxyEnabled, @quotaVisible, @quotaWindowThresholdsJson, @createdAt, @updatedAt
-    )
-  `);
-
   const insertNode = db.prepare(`
     INSERT OR REPLACE INTO provider_nodes (id, type, name, prefix, api_type, base_url, created_at, updated_at)
     VALUES (@id, @type, @name, @prefix, @apiType, @baseUrl, @createdAt, @updatedAt)
@@ -105,80 +79,16 @@ export function runJsonMigration(
     VALUES (@id, @name, @data, @sortOrder, @createdAt, @updatedAt)
   `);
 
-  const selectExistingOverrides = db.prepare(
-    "SELECT rate_limit_overrides_json FROM provider_connections WHERE id = ?"
-  );
+  // Columns come from the live schema so columns added by later migrations are
+  // restored too (jsonMigration/columnUpsert.ts).
+  const connectionColumns = getTableColumns(db, "provider_connections");
+  const apiKeyColumns = getApiKeyImportColumns(db);
 
   const migrate = db.transaction(() => {
-    // 1. Provider Connections
+    // 1. Provider Connections — credentials encrypted like normal writes; existing rows
+    // only get the columns the backup carries (jsonMigration/connectionsImport.ts).
     for (const conn of data.providerConnections ?? []) {
-      // Preserve operator overrides when the backup carries none: INSERT OR
-      // REPLACE would otherwise reset the column to NULL. Executed inside
-      // the transaction and reinjected into the INSERT - never a 2nd UPDATE.
-      const hasOverrides = conn.rateLimitOverrides != null;
-      let rateLimitOverridesJson = serializeJsonField(conn.rateLimitOverrides);
-      if (!hasOverrides && typeof conn.id === "string") {
-        const existing = selectExistingOverrides.get(conn.id) as
-          { rate_limit_overrides_json: string | null } | undefined;
-        if (existing) rateLimitOverridesJson = existing.rate_limit_overrides_json;
-      }
-      // GHSA-p42h: the export carries decrypted credentials; re-encrypt them like every other
-      // connection write (no-op when STORAGE_ENCRYPTION_KEY is unset, skips already-encrypted).
-      const creds = encryptConnectionFields({
-        apiKey: conn.apiKey as string | null | undefined,
-        accessToken: conn.accessToken as string | null | undefined,
-        refreshToken: conn.refreshToken as string | null | undefined,
-        idToken: conn.idToken as string | null | undefined,
-      });
-      insertConn.run({
-        id: conn.id,
-        provider: conn.provider,
-        authType: conn.authType ?? "oauth",
-        name: conn.name ?? null,
-        email: conn.email ?? null,
-        priority: conn.priority ?? 0,
-        isActive: conn.isActive === false ? 0 : 1,
-        accessToken: creds.accessToken ?? null,
-        refreshToken: creds.refreshToken ?? null,
-        expiresAt: conn.expiresAt ?? null,
-        tokenExpiresAt: conn.tokenExpiresAt ?? null,
-        scope: conn.scope ?? null,
-        projectId: conn.projectId ?? null,
-        testStatus: conn.testStatus ?? null,
-        errorCode: conn.errorCode ?? null,
-        lastError: conn.lastError ?? null,
-        lastErrorAt: conn.lastErrorAt ?? null,
-        lastErrorType: conn.lastErrorType ?? null,
-        lastErrorSource: conn.lastErrorSource ?? null,
-        backoffLevel: conn.backoffLevel ?? 0,
-        rateLimitedUntil: conn.rateLimitedUntil ?? null,
-        healthCheckInterval: conn.healthCheckInterval ?? null,
-        lastHealthCheckAt: conn.lastHealthCheckAt ?? null,
-        lastTested: conn.lastTested ?? null,
-        apiKey: creds.apiKey ?? null,
-        idToken: creds.idToken ?? null,
-        providerSpecificData: conn.providerSpecificData
-          ? JSON.stringify(conn.providerSpecificData)
-          : null,
-        expiresIn: conn.expiresIn ?? null,
-        displayName: conn.displayName ?? null,
-        globalPriority: conn.globalPriority ?? null,
-        defaultModel: conn.defaultModel ?? null,
-        tokenType: conn.tokenType ?? null,
-        consecutiveUseCount: conn.consecutiveUseCount ?? 0,
-        lastUsedAt: conn.lastUsedAt ?? null,
-        rateLimitProtection:
-          conn.rateLimitProtection === true || conn.rateLimitProtection === 1 ? 1 : 0,
-        rateLimitOverridesJson,
-        group: conn.group ?? null,
-        maxConcurrent: conn.maxConcurrent ?? null,
-        proxyEnabled: normalizeBooleanColumn(conn.proxyEnabled, true) ? 1 : 0,
-        perKeyProxyEnabled: normalizeBooleanColumn(conn.perKeyProxyEnabled, false) ? 1 : 0,
-        quotaVisible: normalizeBooleanColumn(conn.quotaVisible, true) ? 1 : 0,
-        quotaWindowThresholdsJson: serializeJsonField(conn.quotaWindowThresholds),
-        createdAt: conn.createdAt ?? new Date().toISOString(),
-        updatedAt: conn.updatedAt ?? new Date().toISOString(),
-      });
+      importProviderConnectionRecord(db, connectionColumns, conn);
     }
 
     // 2. Provider Nodes
@@ -248,12 +158,12 @@ export function runJsonMigration(
       });
     }
 
-    // 6. API Keys
-    // GHSA-p42h: every column the backup carries is restored (revocation, expiry, ban, scopes,
-    // allowlists, limits...) - see apiKeys/importRow.ts.
+    // 6. API Keys — lossless for every carried column; a restore never re-activates a
+    // revoked/banned/expired/inactive key (jsonMigration/apiKeysImport.ts).
     for (const apiKey of data.apiKeys ?? []) {
-      insertImportedApiKey(db, apiKey);
+      importApiKeyRecord(db, apiKeyColumns, apiKey);
     }
+
     // 7. Usage History
     if (data.usageHistory && data.usageHistory.length > 0) {
       const importedConnections = new Map(

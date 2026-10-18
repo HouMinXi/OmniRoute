@@ -111,13 +111,18 @@ Babu umarnin sabuntawa da hannu: umarnin OpenCode v2 samfuran prompt ne, ba call
 Gemini yana ƙin gabaɗayan request idan tool declarations ɗinsa suna ɗauke da `$schema` ko `additionalProperties`, yana amsawa da `400 INVALID_ARGUMENT`. Plugin ɗin yana cire waɗannan keywords daga tool schemas da aka nufa ga Gemini model na wannan provider, yana kuma barin duk sauran requests ba tare da taɓa su ba. Tool da ke ɗauke da `$ref` ana tura shi ba tare da an taɓa shi ba maimakon a cire wani abu, domin cire reference ɗin zai faɗaɗa schema ɗin zuwa “karɓi komai”.
 Saita `"geminiSanitization": false` don kashe shi.
 
-## Warware matsaloli
+## Shirya Matsaloli
 
-| Alama                                    | Dalili                                                                                                                    |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Picker bai nuna wani OmniRoute model ba  | Ba a samo key ba (duba gargaɗin farawa), ko kuma ba a iya isa ga gateway                                                  |
-| Raw model ids, babu combos, babu pricing | Management endpoints sun ƙi token ɗin — saita `managementReadToken`                                                       |
-| An manne session ga `opencode-<id>/…`    | Plugin na v1 ya wallafa `opencode-<id>`; v2 yana wallafa `<id>` kai tsaye, don haka sake zaɓar model a ƙarƙashin `<id>/…` |
+| Alama                                                           | Dalili                                                                                                                             |
+| --------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Mai zaɓi bai nuna kowane samfurin OmniRoute ba                  | Ba a samo maɓalli ba (duba gargaɗin farawa), ko kuma ba a iya isa ga gateway ɗin ba                                                |
+| ID ɗin samfura kai tsaye, babu haɗaɗɗun zaɓuɓɓuka, babu farashi | Management endpoints sun ƙi token ɗin — saita `managementReadToken`                                                                |
+| Kundin `freeOnly` gajere ne ko babu komai                       | Babu management token ko kuma an ƙi token ɗin — karanta layin taƙaitaccen sabuntawa (adadin `unmatched-free`) a cikin log ɗin host |
+| An ɗaure zaman zuwa `opencode-<id>/…`                           | Plugin na v1 ya wallafa `opencode-<id>`; v2 yana wallafa `<id>` kai tsaye, don haka sake zaɓar samfurin a ƙarƙashin `<id>/…`       |
+
+Dole ne environment variables su isa ga process ɗin opencode server: lokacin da host
+ke aiki a matsayin service, shell da ke gudanar da `opencode models` da environment na server
+sun bambanta, don haka a yi export na maɓallin a inda server ke karanta shi.
 
 ## Duba kuma
 

@@ -293,12 +293,12 @@ Amalda qoʻllangan misollar uchun `open-sse/utils/stream.ts` va `open-sse/utils/
 
 ---
 
-## Loyiha tuzilishi
+## Loyiha tuzilmasi
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta boʻlim)
+│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta bo‘lim)
 │   ├── api/                # API marshrutlari (51 ta katalog)
 │   └── login/              # Autentifikatsiya sahifalari (.tsx)
 ├── domain/                 # Siyosat mexanizmi (policyEngine, comboResolver, costRules va boshqalar)
@@ -309,31 +309,31 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── db/                 # SQLite domen modullari + 130 ta migratsiya
 │   ├── memory/             # Doimiy suhbat xotirasi
 │   ├── oauth/              # OAuth provayderlari, xizmatlari va yordamchi vositalari
-│   ├── skills/             # Kengaytiriladigan koʻnikmalar freymvorki
-│   ├── usage/              # Foydalanishni kuzatish va xarajatni hisoblash
-│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qoʻshmang
-├── middleware/              # Soʻrov vositachi dasturi (promptInjectionGuard)
-├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadni marshrutlash)
+│   ├── skills/             # Kengaytiriladigan ko‘nikmalar freymvorki
+│   ├── usage/              # Foydalanishni kuzatish va xarajatlarni hisoblash
+│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qo‘shmang
+├── middleware/              # So‘rovlar uchun oraliq dastur (promptInjectionGuard)
+├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadli marshrutlash)
 ├── shared/
 │   ├── components/         # React komponentlari (.tsx)
-│   ├── constants/          # Provayder taʼriflari (329 ta), MCP doiralari, 19 ta marshrutlash strategiyasi
-│   ├── utils/              # Avtomatik uzgich, sanitayzer, autentifikatsiya yordamchilari
+│   ├── constants/          # Provayder ta’riflari (329 ta), MCP qamrovlari, 19 ta marshrutlash strategiyasi
+│   ├── utils/              # Zanjir uzgich, sanitizator, autentifikatsiya yordamchilari
 │   └── validation/         # Zod v4 sxemalari
 └── sse/                    # SSE proksi konveyeri
 
 open-sse/                   # @omniroute/open-sse ish maydoni
-├── executors/              # 89 ta ijrochi amalga oshirish moduli
-├── handlers/               # 11 ta soʻrov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
-├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta doira)
+├── executors/              # 150 ta ijrochi modul (ijrochi sinflari + har bir provayder uchun yordamchilar)
+├── handlers/               # 11 ta so‘rov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
+├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta qamrov)
 ├── services/               # 178 ta yuqori darajadagi xizmat (combo, autoCombo, rateLimitManager va boshqalar)
 ├── translator/             # Format tarjimonlari (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformeri
-└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnalga yozish)
+├── transformer/            # Responses API transformatori
+└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnal yuritish)
 
 electron/                   # Electron ish stoli ilovasi (turli platformalar uchun)
 
 tests/
-├── unit/                   # Node.js test bajaruvchisi (1 574 ta test fayli)
+├── unit/                   # Node.js test ishga tushiruvchisi (1 574 ta test fayli)
 ├── integration/            # Integratsion testlar
 ├── e2e/                    # Playwright testlari
 ├── security/               # Xavfsizlik testlari
@@ -341,19 +341,19 @@ tests/
 └── load/                   # Yuklama testlari
 
 docs/
-├── adr/                     # Arxitektura qarorlari yozuvlari
-├── architecture/            # Tizim arxitekturasi va bardoshlilik
+├── adr/                     # Arxitektura qarorlari qaydlari
+├── architecture/            # Tizim arxitekturasi va bardoshliligi
 ├── comparison/              # OmniRoute va muqobil yechimlar taqqoslanishi
-├── compression/             # Siqish boʻyicha qoʻllanmalar va qoidalar
-├── dev/                     # Ishlab chiqish boʻyicha qoʻllanmalar
+├── compression/             # Siqish bo‘yicha qo‘llanmalar va qoidalar
+├── dev/                     # Ishlab chiqish bo‘yicha qo‘llanmalar
 ├── diagrams/                # Arxitektura diagrammalari
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Foydalanuvchi qoʻllanmasi, Docker, sozlash, muammolarni bartaraf etish
+├── guides/                  # Foydalanuvchi qo‘llanmasi, Docker, sozlash, nosozliklarni bartaraf etish
 ├── i18n/                    # Xalqarolashtirilgan README tarjimalari
 ├── marketing/               # Marketing materiallari
 ├── ops/                     # Joylashtirish, proksi, qamrov, relizlar
 ├── providers/               # Provayderlarga xos hujjatlar
-├── reference/               # API maʼlumotnomasi, muhit oʻzgaruvchilari, CLI vositalari, bepul tariflar
+├── reference/               # API ma’lumotnomasi, muhit o‘zgaruvchilari, CLI vositalari, bepul tariflar
 ├── releases/                # Reliz qaydlari
 ├── routing/                 # Avtomatik kombinatsiya mexanizmi, mulohazalarni qayta ijro etish
 ├── screenshots/             # Boshqaruv paneli skrinshotlari

@@ -288,65 +288,72 @@ npm run test:combo:live:vps:failover     # добавляет реальный �
 
 ---
 
-## Project Structure
+## Структура проекта
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Страницы панели управления (23 раздела)
+│   ├── api/                # Маршруты API (51 каталог)
+│   └── login/              # Страницы аутентификации (.tsx)
+├── domain/                 # Движок политик (policyEngine, comboResolver, costRules и т. д.)
+├── lib/                    # Основная бизнес-логика (.ts)
+│   ├── a2a/                # Сервер протокола Agent-to-Agent v0.3
+│   ├── acp/                # Реестр Agent Communication Protocol
+│   ├── compliance/         # Движок политик соответствия требованиям
+│   ├── db/                 # Доменные модули SQLite + 130 миграций
+│   ├── memory/             # Постоянная память диалогов
+│   ├── oauth/              # Провайдеры, сервисы и утилиты OAuth
+│   ├── skills/             # Расширяемый фреймворк навыков
+│   ├── usage/              # Отслеживание использования и расчёт стоимости
+│   └── localDb.ts          # Только слой реэкспорта — никогда не добавляйте сюда логику
+├── middleware/              # Промежуточное ПО для запросов (promptInjectionGuard)
+├── mitm/                   # MITM-прокси (сертификаты, DNS, маршрутизация к целевым узлам)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Компоненты React (.tsx)
+│   ├── constants/          # Определения провайдеров (329), области доступа MCP, 19 стратегий маршрутизации
+│   ├── utils/              # Автоматический выключатель, санитайзер, вспомогательные средства аутентификации
+│   └── validation/         # Схемы Zod v4
+└── sse/                    # Конвейер SSE-прокси
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Рабочая область @omniroute/open-sse
+├── executors/              # 150 модулей-исполнителей (классы исполнителей + вспомогательные средства для каждого провайдера)
+├── handlers/               # 11 обработчиков запросов (чат, ответы, эмбеддинги, изображения и т. д.)
+├── mcp-server/             # Сервер MCP (110 уникальных инструментов, 3 транспорта, 33 области доступа)
+├── services/               # 178 сервисов верхнего уровня (combo, autoCombo, rateLimitManager и т. д.)
+├── translator/             # Преобразователи форматов (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Преобразователь Responses API
+└── utils/                  # 22 служебных модуля (потоки, TLS, прокси, журналирование)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Кроссплатформенное настольное приложение Electron
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Средство запуска тестов Node.js (1 574 файла тестов)
+├── integration/            # Интеграционные тесты
+├── e2e/                    # Тесты Playwright
+├── security/               # Тесты безопасности
+├── translator/             # Тесты преобразователей
+└── load/                   # Нагрузочные тесты
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Записи архитектурных решений
+├── architecture/            # Архитектура и отказоустойчивость системы
+├── comparison/              # Сравнение OmniRoute с альтернативами
+├── compression/             # Руководства и правила сжатия
+├── dev/                     # Руководства по разработке
+├── diagrams/                # Архитектурные диаграммы
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Руководство пользователя, Docker, настройка, устранение неполадок
+├── i18n/                    # Локализованные переводы README
+├── marketing/               # Маркетинговые материалы
+├── ops/                     # Развёртывание, прокси, покрытие, выпуски
+├── providers/               # Документация для отдельных провайдеров
+├── reference/               # Справочник API, переменные окружения, инструменты CLI, бесплатные тарифы
+├── releases/                # Примечания к выпускам
+├── routing/                 # Движок автоматического комбинирования, повторное воспроизведение рассуждений
+├── screenshots/             # Снимки экрана панели управления
+├── security/                # Защитные механизмы, соответствие требованиям, скрытность, токены
+└── specs/                   # Проектные спецификации
 ```
 
 ---

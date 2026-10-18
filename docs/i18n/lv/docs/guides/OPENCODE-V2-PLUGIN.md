@@ -117,11 +117,16 @@ Lai to izslēgtu, iestatiet `"geminiSanitization": false`.
 
 ## Problēmu novēršana
 
-| Pazīme                                           | Cēlonis                                                                                                          |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| Atlasītājā nav redzams neviens OmniRoute modelis | Atslēga netika atrasta (pārbaudiet brīdinājumu palaišanas laikā), vai arī vārteja nav sasniedzama                |
-| Neapstrādāti modeļu ID, nav kombināciju un cenu  | Pārvaldības galapunkti noraidīja pilnvaru — iestatiet `managementReadToken`                                      |
-| Sesija ir piesaistīta `opencode-<id>/…`          | v1 spraudnis publicēja `opencode-<id>`; v2 publicē tikai `<id>`, tādēļ atkārtoti atlasiet modeli sadaļā `<id>/…` |
+| Simptoms                                                     | Cēlonis                                                                                                                                    |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Atlasītājā nav redzams neviens OmniRoute modelis             | Nav atrasta neviena atslēga (pārbaudiet brīdinājumu startēšanas laikā), vai arī vārteja nav sasniedzama                                    |
+| Neapstrādāti modeļu ID, nav kombināciju un cenu informācijas | Pārvaldības galapunkti noraidīja pilnvaru — iestatiet `managementReadToken`                                                                |
+| Īss vai tukšs `freeOnly` katalogs                            | Nav pārvaldības pilnvaras vai tā ir noraidīta — resursdatora žurnālā skatiet atsvaidzināšanas kopsavilkuma rindu (`unmatched-free` skaitu) |
+| Sesija ir piesaistīta `opencode-<id>/…`                      | v1 spraudnis publicēja `opencode-<id>`; v2 publicē tikai `<id>`, tāpēc atkārtoti atlasiet modeli sadaļā `<id>/…`                           |
+
+Vides mainīgajiem ir jāsasniedz opencode servera process: ja resursdators
+darbojas kā pakalpojums, čaulas, kurā tiek izpildīta komanda `opencode models`,
+un servera vides atšķiras, tāpēc eksportējiet atslēgu tur, kur serveris to nolasa.
 
 ## Skatiet arī
 

@@ -293,7 +293,7 @@ Consulte `open-sse/utils/stream.ts` e `open-sse/utils/streamHandler.ts` para ver
 
 ---
 
-## Estrutura do projeto
+## Estrutura do Projeto
 
 ```
 src/                        # TypeScript (.ts / .tsx)
@@ -307,43 +307,43 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── acp/                # Registro do Agent Communication Protocol
 │   ├── compliance/         # Mecanismo de políticas de conformidade
 │   ├── db/                 # Módulos de domínio SQLite + 130 migrações
-│   ├── memory/             # Memória conversacional persistente
+│   ├── memory/             # Memória persistente de conversas
 │   ├── oauth/              # Provedores, serviços e utilitários OAuth
 │   ├── skills/             # Framework extensível de habilidades
 │   ├── usage/              # Rastreamento de uso e cálculo de custos
 │   └── localDb.ts          # Apenas camada de reexportação — nunca adicione lógica aqui
-├── middleware/              # Middleware de solicitações (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (certificado, DNS, roteamento de destino)
+├── middleware/              # Middleware de requisições (promptInjectionGuard)
+├── mitm/                   # Proxy MITM (certificados, DNS, roteamento de destino)
 ├── shared/
 │   ├── components/         # Componentes React (.tsx)
 │   ├── constants/          # Definições de provedores (329), escopos MCP, 19 estratégias de roteamento
 │   ├── utils/              # Circuit breaker, sanitizador, auxiliares de autenticação
-│   └── validation/         # Esquemas do Zod v4
-└── sse/                    # Pipeline de proxy SSE
+│   └── validation/         # Esquemas Zod v4
+└── sse/                    # Pipeline do proxy SSE
 
 open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # 89 módulos de implementação de executores
-├── handlers/               # 11 manipuladores de solicitações (chat, respostas, embeddings, imagens etc.)
-├── mcp-server/             # Servidor MCP (110 ferramentas únicas, 3 transportes, 33 escopos)
+├── executors/              # 150 módulos executores (classes executoras + auxiliares por provedor)
+├── handlers/               # 11 manipuladores de requisição (chat, respostas, embeddings, imagens etc.)
+├── mcp-server/             # Servidor MCP (110 ferramentas exclusivas, 3 transportes, 33 escopos)
 ├── services/               # 178 serviços de nível superior (combo, autoCombo, rateLimitManager etc.)
 ├── translator/             # Tradutores de formato (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Transformador da Responses API
-└── utils/                  # 22 módulos utilitários (stream, TLS, proxy, logging)
+└── utils/                  # 22 módulos utilitários (stream, TLS, proxy, registro de logs)
 
 electron/                   # Aplicativo desktop Electron (multiplataforma)
 
 tests/
 ├── unit/                   # Executor de testes do Node.js (1.574 arquivos de teste)
 ├── integration/            # Testes de integração
-├── e2e/                    # Testes do Playwright
+├── e2e/                    # Testes Playwright
 ├── security/               # Testes de segurança
-├── translator/             # Testes específicos de tradução
+├── translator/             # Testes específicos do tradutor
 └── load/                   # Testes de carga
 
 docs/
 ├── adr/                     # Registros de Decisões de Arquitetura
 ├── architecture/            # Arquitetura e resiliência do sistema
-├── comparison/              # OmniRoute vs. alternativas
+├── comparison/              # OmniRoute versus alternativas
 ├── compression/             # Guias e regras de compressão
 ├── dev/                     # Guias de desenvolvimento
 ├── diagrams/                # Diagramas de arquitetura
@@ -353,11 +353,11 @@ docs/
 ├── marketing/               # Materiais de marketing
 ├── ops/                     # Implantação, proxy, cobertura, lançamentos
 ├── providers/               # Documentação específica dos provedores
-├── reference/               # Referência da API, variáveis de ambiente, ferramentas CLI, camadas gratuitas
+├── reference/               # Referência da API, variáveis de ambiente, ferramentas CLI, planos gratuitos
 ├── releases/                # Notas de versão
 ├── routing/                 # Mecanismo de combinação automática, repetição de raciocínio
 ├── screenshots/             # Capturas de tela do dashboard
-├── security/                # Barreiras de proteção, conformidade, furtividade, tokens
+├── security/                # Proteções, conformidade, modo furtivo, tokens
 └── specs/                   # Especificações de design
 ```
 

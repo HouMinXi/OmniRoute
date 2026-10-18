@@ -1,7 +1,7 @@
 {
   "name": "omniroute",
   "version": "3.8.52",
-  "description": "Unified AI router with 372 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
+  "description": "Unified AI router with 374 providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
     "omniroute": "bin/omniroute.mjs",
@@ -151,6 +151,8 @@
     "test:fixes": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/fixes-p1.test.ts",
     "test:security": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/security-fase01.test.ts",
     "test:property": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --test --test-force-exit tests/unit/correctness/*.property.test.ts",
+    "check:boundary": "node scripts/quality/measure-boundary.mjs",
+    "check:boundary:ratchet": "node scripts/quality/measure-boundary.mjs --ratchet",
     "check:cycles": "node scripts/check/check-cycles.mjs",
     "check:cycles:ratchet": "node scripts/check/check-cycles.mjs --ratchet",
     "vendor:chatgpt-web:status": "node scripts/dev/vendor-chatgpt-web.mjs status",
@@ -470,7 +472,7 @@
     "opencode-ai": "1.18.34",
     "playwright-ctrf-json-reporter": "^0.1.0",
     "prettier": "^3.9.6",
-    "promptfoo": "^0.123.0",
+    "promptfoo": "0.123.0",
     "size-limit": "^14.1.0",
     "tailwindcss": "^4.3.0",
     "type-coverage": "^2.30.1",

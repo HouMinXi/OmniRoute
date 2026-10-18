@@ -297,67 +297,67 @@ Przykłady zastosowania znajdują się w `open-sse/utils/stream.ts` i `open-sse/
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # App Router Next.js 16
+├── app/                    # Next.js 16 App Router
 │   ├── (dashboard)/        # Strony panelu (23 sekcje)
 │   ├── api/                # Trasy API (51 katalogów)
 │   └── login/              # Strony uwierzytelniania (.tsx)
 ├── domain/                 # Silnik zasad (policyEngine, comboResolver, costRules itd.)
-├── lib/                    # Podstawowa logika biznesowa (.ts)
+├── lib/                    # Główna logika biznesowa (.ts)
 │   ├── a2a/                # Serwer protokołu Agent-to-Agent v0.3
-│   ├── acp/                # Rejestr Agent Communication Protocol
+│   ├── acp/                # Rejestr protokołu komunikacji agentów
 │   ├── compliance/         # Silnik zasad zgodności
 │   ├── db/                 # Moduły domenowe SQLite + 130 migracji
 │   ├── memory/             # Trwała pamięć konwersacyjna
-│   ├── oauth/              # Dostawcy, usługi i narzędzia OAuth
-│   ├── skills/             # Rozszerzalny framework umiejętności
+│   ├── oauth/              # Dostawcy OAuth, usługi i narzędzia
+│   ├── skills/             # Rozszerzalna platforma umiejętności
 │   ├── usage/              # Śledzenie użycia i obliczanie kosztów
-│   └── localDb.ts          # Wyłącznie warstwa ponownego eksportu — nigdy nie dodawaj tutaj logiki
+│   └── localDb.ts          # Wyłącznie warstwa reeksportu — nigdy nie dodawaj tutaj logiki
 ├── middleware/              # Oprogramowanie pośredniczące żądań (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (certyfikaty, DNS, routing docelowy)
+├── mitm/                   # Serwer proxy MITM (certyfikaty, DNS, trasowanie docelowe)
 ├── shared/
 │   ├── components/         # Komponenty React (.tsx)
-│   ├── constants/          # Definicje dostawców (329), zakresy MCP, 19 strategii routingu
-│   ├── utils/              # Wyłącznik obwodu, sanityzator, narzędzia uwierzytelniania
+│   ├── constants/          # Definicje dostawców (329), zakresy MCP, 19 strategii trasowania
+│   ├── utils/              # Wyłącznik obwodu, moduł oczyszczania, narzędzia uwierzytelniania
 │   └── validation/         # Schematy Zod v4
 └── sse/                    # Potok proxy SSE
 
-open-sse/                   # Przestrzeń robocza @omniroute/open-sse
-├── executors/              # 89 modułów implementacji wykonawców
+open-sse/                   # Obszar roboczy @omniroute/open-sse
+├── executors/              # 150 modułów wykonawczych (klasy wykonawcze + narzędzia dla poszczególnych dostawców)
 ├── handlers/               # 11 procedur obsługi żądań (czat, odpowiedzi, osadzenia, obrazy itd.)
 ├── mcp-server/             # Serwer MCP (110 unikalnych narzędzi, 3 transporty, 33 zakresy)
 ├── services/               # 178 usług najwyższego poziomu (combo, autoCombo, rateLimitManager itd.)
 ├── translator/             # Translatory formatów (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Transformator Responses API
-└── utils/                  # 22 moduły narzędziowe (strumień, TLS, proxy, logowanie)
+└── utils/                  # 22 moduły narzędziowe (strumienie, TLS, proxy, rejestrowanie)
 
 electron/                   # Wieloplatformowa aplikacja komputerowa Electron
 
 tests/
-├── unit/                   # Mechanizm uruchamiania testów Node.js (1 574 pliki testowe)
+├── unit/                   # Narzędzie do uruchamiania testów Node.js (1574 pliki testowe)
 ├── integration/            # Testy integracyjne
 ├── e2e/                    # Testy Playwright
 ├── security/               # Testy bezpieczeństwa
-├── translator/             # Testy dotyczące translatora
+├── translator/             # Testy przeznaczone dla translatora
 └── load/                   # Testy obciążeniowe
 
 docs/
 ├── adr/                     # Rejestry decyzji architektonicznych
-├── architecture/            # Architektura i odporność systemu
-├── comparison/              # OmniRoute w porównaniu z alternatywami
+├── architecture/            # Architektura systemu i odporność
+├── comparison/              # OmniRoute a alternatywy
 ├── compression/             # Przewodniki i reguły kompresji
 ├── dev/                     # Przewodniki programistyczne
 ├── diagrams/                # Diagramy architektury
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── frameworks/              # MCP, A2A, OpenCode, pamięć, umiejętności
 ├── guides/                  # Podręcznik użytkownika, Docker, konfiguracja, rozwiązywanie problemów
-├── i18n/                    # Międzynarodowe tłumaczenia README
+├── i18n/                    # Umiędzynarodowione tłumaczenia README
 ├── marketing/               # Materiały marketingowe
-├── ops/                     # Wdrażanie, proxy, pokrycie, wydania
-├── providers/               # Dokumentacja dotycząca dostawców
-├── reference/               # Dokumentacja API, zmienne środowiskowe, narzędzia CLI, bezpłatne plany
+├── ops/                     # Wdrażanie, proxy, pokrycie testami, wydania
+├── providers/               # Dokumentacja poszczególnych dostawców
+├── reference/               # Dokumentacja API, zmienne środowiskowe, narzędzia CLI, bezpłatne poziomy
 ├── releases/                # Informacje o wydaniach
 ├── routing/                 # Silnik automatycznego łączenia, odtwarzanie rozumowania
 ├── screenshots/             # Zrzuty ekranu panelu
-├── security/                # Mechanizmy ochronne, zgodność, ukrywanie, tokeny
+├── security/                # Mechanizmy ochronne, zgodność, tryb dyskretny, tokeny
 └── specs/                   # Specyfikacje projektowe
 ```
 

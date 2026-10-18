@@ -383,107 +383,109 @@ v3.8.xリリースを公開する前に、以下の追加項目を確認して�
 
 ---
 
-## 3.9.0 LTS 分岐（3.8.58 でリハーサル済み）
+## 3.9.0 LTS カット（3.8.58 でリハーサル済み）
 
-v3.8.59 の次のバージョンは 3.9.0 で、その先端は 2 つの長期運用ブランチになります：
-`stable/v3`（v3 LTS ライン、npm `latest`）と `develop`（v4、4.0.0 にバージョンアップ、npm
-`nightly`）。ブランチ／チャンネルモデル、フォワードポート、ラベルについては
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) を、計画については [ROADMAP](../../ROADMAP.md)（Phase 3）を参照してください。この分岐は一度だけ実行します。
-3.8.58 ではフォーク上で最初から最後までリハーサルし、3.8.59 は
-[GO/NO-GO チェックリスト](./LTS_GO_NO_GO.md)で締めくくります。
+v3.8.59 の次のバージョンは 3.9.0 となり、その先端から長期運用される 2 つのブランチが作成されます：
+`stable/v3`（v3 LTS 系列、npm `latest`）と `develop`（v4、4.0.0 に更新、npm
+`nightly`）です。ブランチ／チャンネルモデル、フォワードポート、ラベルについては
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) を、計画については [ROADMAP](../../ROADMAP.md)（Phase 3）を参照してください。このカットは一度だけ実行されます。
+3.8.58 ではフォーク上で最初から最後までリハーサルを行い、3.8.59 は
+[GO/NO-GO チェックリスト](./LTS_GO_NO_GO.md)で完了します。
 
 ### ドライラン（読み取り専用、いつでも安全）
 
 ```bash
-npm run release:dry-run-lts-cut                       # 実際の分岐：HEAD から 3.9.0、直前のタグは v3.8.59
+npm run release:dry-run-lts-cut                       # 実際のカット：HEAD から 3.9.0、直前のタグは v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ソースコミットを固定
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` は何も実行しません。git と `gh` を読み取り、シーケンス全体を出力します。
-具体的には、事前条件（ソースが解決できること、直前のタグが存在すること、`package.json` が
-対象バージョンであること、`release-freeze` issue がオープンであること、既存のリリースブランチに
-オープンな `Release branch not green` issue がないこと—存在しないブランチは green ではなく
-`?` unknown と報告されます—、Mergify の `release` キューが構成されていること（G11：`queue_rules`、`checks_timeout`、
-ラベル `queue`）、`release/*` ルールセットが引き続き削除と force-push をブロックしていること、
-そして `stable/v3` と `develop` がまだ存在しないこと）、2 つのブランチ作成手順、どの休止中ワークフローの
-トリガーと `if:` 条件が true になるか（また、どれがリポジトリ変数によって引き続きゲートされるか、
-または canonical repository に固定されているか）、想定される dist-tags（`latest` → 3.9.0、`next` と
-`nightly` は空）、およびロールバックです。終了コード `0` = `RESULT: READY`、`1` = ブロッキング事前条件の
-失敗（`✗`）、`2` = 使用方法のエラーです。`--advisory <id,...>` はチェックを非表示にすることなく
-警告（`!`）へ格下げします。
+`scripts/release/dry-run-lts-cut.mjs` は何も実行しません。git と `gh` から情報を読み取り、
+一連の手順全体を出力します。これには、前提条件（ソースを解決できること、ソースリポジトリに完全な履歴があること —
+shallow clone からは `stable/v3` をプッシュできず、受信側が最初の
+grafted parent で pack を拒否するため、完全な clone からカットするか、先に
+`git fetch --unshallow origin` を実行すること —、直前の
+タグが存在すること、`package.json` が対象バージョンであること、`release-freeze` issue がオープンであること、既存のリリースブランチ上に
+`Release branch not green` issue がオープンされていないこと
+— 存在しないブランチは green ではなく、不明を示す `?` と報告されます —、Mergify の `release` キューが設定されていること（G11：`queue_rules`、`checks_timeout`、
+ラベル `queue`）、`release/*` ルールセットが削除と force-push を引き続きブロックしていること、さらに
+`stable/v3` と `develop` がまだ存在しないこと）、2 つのブランチ作成手順、休止中のどのワークフローの
+トリガーと `if:` 条件が真になるか（および、どれがリポジトリ変数によって引き続きゲートされるか、または
+canonical repository に固定されるか）、想定される dist-tag（`latest` → 3.9.0、`next` と
+`nightly` は空）、およびロールバックが含まれます。終了コード `0` = `RESULT: READY`、`1` = ブロッキング前提条件の
+失敗（`✗`）、`2` = 使用方法のエラーです。`--advisory <id,...>` は、チェックを非表示にすることなく警告（`!`）へ
+格下げします。
 
-3.9.0 のリリースフリーズがまだ有効な間に、実際の分岐のドライランを実行してください。ブランチは
-タグの後、かつ Phase 12c でフリーズを解除する前に作成されます。
+3.9.0 のリリースフリーズがまだ有効な間に、実際のカット用ドライランを実行してください。ブランチは
+タグの作成後、Phase 12c でフリーズを解除する前に作成されます。
 
 ### 3.8.58 のリハーサル（フォークのみ）
 
 ```bash
-# 1. リハーサル用パラメーターを指定して、現在の先端でドライラン
+# 1. リハーサル用パラメーターを使用して現在の先端でドライランを実行
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK リモートに対して実行（URL が canonical
-#    repository である origin またはその他のリモートは拒否されます。各手順でターミナル上の確認が求められます）
+# 2. FORK の remote に対して実行（origin、または URL が canonical
+#    repository である任意の remote は拒否されます。すべての手順でターミナル上の確認が求められます）
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. フォーク内の休止中ワークフローを動作確認（ドライランが
-#    canonical-repository への固定を報告する場合は workflow_dispatch）してから、ロールバック
+# 3. フォーク内で休止中のワークフローを実行（ドライランで canonical-repository への
+#    固定が報告される場合は workflow_dispatch を使用）し、その後ロールバック
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop のバージョンアップコミットは git plumbing を使用して作成され（作業ツリーには触れません）、
+develop のバンプコミットは git plumbing を使用して作成され（working tree には触れません）、
 サイクル開始コミットと同じ 5 つのファイルを更新します：`package.json`、`open-sse/package.json`、
-`electron/package.json`、`package-lock.json`、`docs/openapi.yaml`。その後、最初の
-PR より前に、`develop` 上で `[4.0.0]` CHANGELOG セクションとその i18n ミラーを開始します。
-スクリプトが npm dist-tags を変更することはありません。これらはスクラッチパッケージでリハーサルしてください。
+`electron/package.json`、`package-lock.json`、`docs/openapi.yaml`。`[4.0.0]`
+CHANGELOG セクションとその i18n ミラーは、その後 `develop` 上で、最初の
+PR より前に開かれます。このスクリプトが npm dist-tag を変更することはありません。dist-tag のリハーサルにはスクラッチ用パッケージを使用してください。
 
 ### PR プレビューアーティファクト（一度だけビルドし、同じバイト列を昇格）
 
-`.github/workflows/preview-artifact.yml` は PR の head から 1 つの本番用 tarball をビルドし、
-その同一のビルドを検証します（#8084 slice (a)）。同一リポジトリの PR のみが対象で、何も公開されません。
+`.github/workflows/preview-artifact.yml` は PR head から本番用 tarball を 1 つビルドし、
+そのビルド自体を検証します（#8084 slice (a)）。同一リポジトリの PR のみが対象で、何も公開されません。
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # または `preview-artifact` ラベルを追加
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # プレビューをインストール
+npm install -g ./omniroute-*.tgz                          # プレビュー版をインストール
 ```
 
-この実行では `npm ci`、`npm run build:release`、`npm run check:pack-artifact` を実行し、
-tarball をパックして `npm run check:pack-boot`（偽のシークレット、一時的なデータディレクトリ）を実行し、
-再度パックします。ダイジェストが同一でなければ失敗します。その後、`artifact-identity.json`（head SHA、base
+この run では `npm ci`、`npm run build:release`、`npm run check:pack-artifact` を実行し、tarball を
+pack した後、`npm run check:pack-boot`（偽のシークレット、一時データディレクトリ）を実行して再度 pack します。
+digest が一致しない場合は失敗します。その後、`artifact-identity.json`（head SHA、base
 SHA、lockfile hash、platform、arch、node ABI、bundler、build policy —
-`scripts/release/artifact-identity.mjs`）を記録し、別のジョブで tarball を attest します。プレビューの
-昇格とは、その tarball をインストールすることを意味します。ソースから再ビルドしてはいけません。
+`scripts/release/artifact-identity.mjs`）を記録し、別の job で tarball を attest します。プレビューを
+昇格するとは、その tarball をインストールすることです。ソースから再ビルドしてはなりません。
 
-### 分岐（3.9.0、GO 後）
+### カット（3.9.0、GO 後）
 
 1. GO が [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) に記録されていること。
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` が `RESULT: READY` を出力すること。
-3. ドライランが出力するコマンドを使用して、`origin` 上に手動でブランチを作成します。
-   スクリプトは `origin` への push を拒否します。レビュー済みの develop コミットを再利用するには、
-   まず 3.9.0 の先端からフォークに対して `--execute` リハーサルを実行します。これにより両方の SHA が
-   出力され、同じコミットを push できます：
+3. ドライランで出力されたコマンドを使用して、`origin` 上にブランチを手動で作成します。
+   スクリプトは `origin` へのプッシュを拒否します。レビュー済みの develop コミットを再利用するには、まず
+   フォークに対して 3.9.0 の先端で `--execute` リハーサルを実行してください。両方の SHA が出力され、
+   同じコミットをプッシュできます：
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. 最初の PR がマージされる前に、`stable/v3` と `develop` を保護します（rulesets + merge queue）。
-5. 休止中のワークフローはブランチの存在によって有効になります：`forward-port.yml`（`stable/v3` への
-   push）、`validate-stable-pr.yml`（`stable/v3` 向けの PR）、`nightly-v4-build.yml`
-   （`develop` をビルド）。本番稼働前に、`secrets.FORWARD_PORT_TOKEN` リポジトリシークレットを設定してください
-   （これにより CI がフォワードポート PR で実行されます）。nightly の公開は、所有者がリポジトリ変数
+4. 最初の PR がマージされる前に、`stable/v3` と `develop` を保護します（ルールセット + マージキュー）。
+5. 休止中のワークフローは、ブランチの存在によって有効になります：`forward-port.yml`（`stable/v3` への push）、
+   `validate-stable-pr.yml`（`stable/v3` への PR）、および `nightly-v4-build.yml`
+   （`develop` をビルド）。本稼働前に、リポジトリシークレット `secrets.FORWARD_PORT_TOKEN` を設定します
+   （forward-port PR で CI が実行されるようにするため）。nightly の公開は、オーナーがリポジトリ変数
    `vars.NIGHTLY_PUBLISH` を `true` に設定し、npm Trusted Publishing が
-   `nightly-v4-build.yml` を受け入れるまで無効のままです。チャンネル解決には
-   `scripts/release/dist-tag.mjs` を使用します。これは `npm-publish.yml` が使用するものと同じ
-   resolver です。
-6. チャンネルを検証します：`npm view omniroute dist-tags --json` で `latest` = 3.9.0 が表示され、
-   v4 が公開されるまで `next` / `nightly` が存在しないことを確認します。
+   `nightly-v4-build.yml` を受け入れるまで無効のままです。チャネルの解決には `scripts/release/dist-tag.mjs` を使用します。これは
+   `npm-publish.yml` が使用するものと同じリゾルバーです。
+6. チャネルを確認します：`npm view omniroute dist-tags --json` で `latest` = 3.9.0 と表示され、v4 が公開されるまでは
+   `next` / `nightly` が存在しないことを確認します。
 7. 必要な場合のロールバック：`git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    および `npm dist-tag add omniroute@3.8.59 latest`。
 

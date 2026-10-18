@@ -207,14 +207,18 @@ ssh -L 20128:127.0.0.1:20128 -L 1455:127.0.0.1:1455 <user>@192.168.0.15
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ 密钥仅显示一次——请立即复制
-omniroute tokens list                 # 已掩码：ID、名称、作用域、前缀、状态、过期时间
+#   ↳ 仅显示一次密钥——请立即复制
+omniroute tokens list                 # 已遮蔽：id、名称、作用域、前缀、状态、过期时间
 omniroute tokens revoke <id|prefix>   # 立即撤销
 omniroute tokens scopes               # 说明三种作用域
 ```
 
-`tokens` 命令需要**管理员**凭据。您也可以在仪表板的
-**设置 → 访问令牌**下管理令牌（创建、撤销、仅复制一次）。
+`tokens` 命令需要 **admin** 凭据。你也可以在仪表板的
+**设置 → 访问令牌** 下管理令牌（创建、撤销、仅可复制一次）。
+
+令牌的权限永远不能高于其创建者所拥有的权限。`admin` 令牌只能由操作员创建——通过仪表板会话、服务器本机上的本地 CLI、使用密码的 `omniroute connect`，或禁用了登录的实例。机器凭据（`admin` 访问令牌，或具有 `manage`/`admin` 作用域的 API 密钥）只能创建 `write` 和 `read` 令牌；请求其创建 `--scope admin` 令牌会返回 `403`。
+
+令牌的权限绝不能高于其创建者的权限。只有运维人员才能创建 `admin` 令牌：通过仪表板会话、服务器本机的 CLI、使用密码的 `omniroute connect`，或在禁用登录的实例中创建。机器凭据（`admin` 访问令牌，或具有 `manage`/`admin` 作用域的 API 密钥）只能创建 `write` 和 `read` 令牌；使用这些凭据请求 `--scope admin` 会返回 `403`。
 
 ---
 

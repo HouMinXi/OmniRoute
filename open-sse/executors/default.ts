@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { mapNvidiaGlm52ReasoningParams } from "./base/reasoningEffort.ts";
+import { mapBasetenReasoningParams } from "./base/basetenReasoning.ts";
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../config/constants.ts";
 import { getAccessToken } from "../services/tokenRefresh.ts";
 
@@ -20,7 +21,7 @@ import {
 import { isOfficialAnthropicBaseUrl } from "../utils/anthropicHost.ts";
 import { applyProviderRequestDefaults } from "../services/providerRequestDefaults.ts";
 import { stripUnsupportedParams } from "../translator/paramSupport.ts";
-import { normalizeOpenAIToolNames } from "../translator/helpers/toolCallHelper.ts";
+import { applyRegistryToolNameLengthAliases } from "./toolNameLengthAlias.ts";
 import {
   injectReasoningContentForThinkingModel,
   shouldInjectReasoningContentPlaceholder,
@@ -676,6 +677,10 @@ export class DefaultExecutor extends BaseExecutor {
 
     headers["Accept"] = stream ? "text/event-stream" : "application/json";
 
+    // Client attribution first; operator custom headers below still win.
+    if (clientHeaders) {
+      forwardOpencodeClientHeaders(headers, clientHeaders, { forwardUserAgent: false });
+    }
     const isCompatibleProvider =
       this.provider?.startsWith?.("openai-compatible-") ||
       this.provider?.startsWith?.("anthropic-compatible-");
@@ -684,11 +689,7 @@ export class DefaultExecutor extends BaseExecutor {
       applyCustomHeaders(headers, credentials.providerSpecificData?.customHeaders);
     }
 
-    // Forward client request metadata headers (from OpenCode or similar clients)
-    // Allowlist-based: x-opencode-* headers only; the caller's User-Agent is NOT forwarded (#15632)
     if (clientHeaders) {
-      forwardOpencodeClientHeaders(headers, clientHeaders, { forwardUserAgent: false });
-
       // #3974: merge the client's negotiated anthropic-beta (allowlisted) into the
       // outbound set. The registry's static ANTHROPIC_BETA_CLAUDE_OAUTH lacks
       // tool-search-tool-2025-10-19, so deferred-tool requests were rejected with
@@ -779,9 +780,16 @@ export class DefaultExecutor extends BaseExecutor {
   // `text` is an object missing `text.format` with a 400 missing_required_parameter.
   // The Responses API default for that field is { type: "text" }, so default it
   // for openai-compatible "responses" providers before forwarding upstream.
-  defaultResponsesTextFormat<T>(body: T): T {
+  // The type is resolved with the same anchored helper buildUrl uses, never a
+  // substring match: node IDs can carry an operator-chosen suffix (a chat node
+  // `openai-compatible-chat-my-responses` must stay chat).
+  defaultResponsesTextFormat<T>(
+    body: T,
+    credentials?: { providerSpecificData?: Record<string, unknown> | null } | null
+  ): T {
     if (!this.provider?.startsWith?.("openai-compatible-")) return body;
-    if (!this.provider.includes("responses")) return body;
+    const psd = credentials?.providerSpecificData ?? null;
+    if (getOpenAICompatibleType(this.provider, psd) !== "responses") return body;
     if (!body || typeof body !== "object" || Array.isArray(body)) return body;
     const record = body as Record<string, unknown>;
     const text = record.text;
@@ -817,7 +825,7 @@ export class DefaultExecutor extends BaseExecutor {
     }
 
     withDefaults = this.applyJsonSchemaFallback(withDefaults);
-    withDefaults = this.defaultResponsesTextFormat(withDefaults);
+    withDefaults = this.defaultResponsesTextFormat(withDefaults, credentials);
     if (this.provider === "perplexity-agent") {
       withDefaults = defaultPerplexityAgentMaxOutputTokens(withDefaults);
     }
@@ -1001,6 +1009,7 @@ export class DefaultExecutor extends BaseExecutor {
       const bodyRecord = withDefaults as Record<string, unknown>;
       const outboundModel = typeof bodyRecord.model === "string" ? bodyRecord.model : model;
       withDefaults = mapNvidiaGlm52ReasoningParams(bodyRecord, this.provider, outboundModel);
+      withDefaults = mapBasetenReasoningParams(withDefaults, this.provider, outboundModel);
       stripUnsupportedParams(this.provider, outboundModel, withDefaults as Record<string, unknown>);
     }
 
@@ -1047,33 +1056,7 @@ export class DefaultExecutor extends BaseExecutor {
       }
     }
 
-    const toolNameMaxLength = getRegistryEntry(this.provider)?.toolNameMaxLength;
-    if (
-      toolNameMaxLength &&
-      withDefaults &&
-      typeof withDefaults === "object" &&
-      !Array.isArray(withDefaults)
-    ) {
-      const toolNameMap = normalizeOpenAIToolNames(withDefaults, toolNameMaxLength);
-      if (toolNameMap.size > 0) {
-        const existingToolNameMap =
-          (withDefaults as Record<string, unknown>)._toolNameMap instanceof Map
-            ? ((withDefaults as Record<string, unknown>)._toolNameMap as Map<string, string>)
-            : null;
-        const responseToolNameMap = existingToolNameMap
-          ? new Map(existingToolNameMap)
-          : new Map<string, string>();
-        for (const [alias, original] of toolNameMap) {
-          responseToolNameMap.set(alias, original);
-        }
-        Object.defineProperty(withDefaults, "_toolNameMap", {
-          value: responseToolNameMap,
-          enumerable: false,
-          configurable: true,
-          writable: true,
-        });
-      }
-    }
+    applyRegistryToolNameLengthAliases(this.provider, withDefaults);
 
     return applyRegistryBodyRepairs(this.provider, withDefaults);
   }

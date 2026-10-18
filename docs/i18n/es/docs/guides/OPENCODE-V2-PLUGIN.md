@@ -113,11 +113,16 @@ Establezca `"geminiSanitization": false` para desactivarlo.
 
 ## Solución de problemas
 
-| Síntoma                                            | Causa                                                                                                                     |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| El selector no muestra ningún modelo de OmniRoute  | No se resolvió ninguna clave (compruebe la advertencia de inicio) o no se puede acceder al gateway                        |
-| IDs de modelos sin procesar, sin combos ni precios | Los endpoints de administración rechazaron el token; establezca `managementReadToken`                                     |
-| Una sesión fijada a `opencode-<id>/…`              | El plugin v1 publicaba `opencode-<id>`; v2 publica `<id>` sin prefijo, así que vuelva a seleccionar el modelo en `<id>/…` |
+| Síntoma                                                  | Causa                                                                                                                                                         |
+| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| El selector no muestra ningún modelo de OmniRoute        | No se pudo resolver ninguna clave (compruebe la advertencia de inicio) o no se puede acceder a la puerta de enlace                                            |
+| IDs de modelo sin procesar, sin combinaciones ni precios | Los endpoints de administración rechazaron el token; configure `managementReadToken`                                                                          |
+| Catálogo `freeOnly` corto o vacío                        | No hay token de administración o el token fue rechazado; consulte la línea de resumen de actualización (recuento de `unmatched-free`) en el registro del host |
+| Una sesión está anclada a `opencode-<id>/…`              | El complemento v1 publicó `opencode-<id>`; v2 publica `<id>` directamente, así que vuelva a seleccionar el modelo en `<id>/…`                                 |
+
+Las variables de entorno deben llegar al proceso del servidor de opencode: cuando el host
+se ejecuta como servicio, el shell que ejecuta `opencode models` y el entorno
+del servidor son diferentes, así que exporte la clave donde el servidor pueda leerla.
 
 ## Véase también
 

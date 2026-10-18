@@ -123,6 +123,20 @@ can emit it directly.
 Source: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (pure
 builder, unit-tested) rendered by `ClaudeGatewayOnboardingBlock`.
 
+### Pin one account (optional)
+
+To send every Claude Code request through one specific provider account, add the
+`x-omniroute-connection` header through `ANTHROPIC_CUSTOM_HEADERS` in the same `env` block:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Copy the id from the `xxxxxxxx…` chip on the connection row of the provider page. The pin only
+applies to single-model ids (`provider/model`), not to combos. See
+[Account pinning per request](../reference/API_REFERENCE.md#account-pinning-per-request) for the
+exact fallback behavior.
+
 ---
 
 ## Profiles (`CLAUDE_CONFIG_DIR`)

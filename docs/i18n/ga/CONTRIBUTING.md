@@ -298,21 +298,21 @@ Féach `open-sse/utils/stream.ts` agus `open-sse/utils/streamHandler.ts` le hagh
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
+├── app/                    # Ródaire Aipe Next.js 16
 │   ├── (dashboard)/        # Leathanaigh an deais (23 rannán)
 │   ├── api/                # Bealaí API (51 eolaire)
 │   └── login/              # Leathanaigh fíordheimhnithe (.tsx)
-├── domain/                 # Inneall beartais (policyEngine, comboResolver, costRules, etc.)
+├── domain/                 # Inneall polasaí (policyEngine, comboResolver, costRules, srl.)
 ├── lib/                    # Croíloighic ghnó (.ts)
-│   ├── a2a/                # Freastalaí prótacail Agent-to-Agent v0.3
-│   ├── acp/                # Clárlann Agent Communication Protocol
-│   ├── compliance/         # Inneall beartais comhlíonta
+│   ├── a2a/                # Freastalaí prótacail Gníomhaire-le-Gníomhaire v0.3
+│   ├── acp/                # Clárlann an Phrótacail Cumarsáide Gníomhairí
+│   ├── compliance/         # Inneall polasaí comhlíontachta
 │   ├── db/                 # Modúil fearainn SQLite + 130 aistriú
 │   ├── memory/             # Cuimhne chomhrá mharthanach
 │   ├── oauth/              # Soláthraithe, seirbhísí agus fóntais OAuth
 │   ├── skills/             # Creat scileanna insínte
 │   ├── usage/              # Rianú úsáide agus ríomh costas
-│   └── localDb.ts          # Ciseal athonnmhairithe amháin — ná cuir loighic anseo riamh
+│   └── localDb.ts          # Sraith athonnmhairithe amháin — ná cuir loighic anseo riamh
 ├── middleware/              # Meánearraí iarratais (promptInjectionGuard)
 ├── mitm/                   # Seachfhreastalaí MITM (teastas, DNS, ródú sprice)
 ├── shared/
@@ -323,18 +323,18 @@ src/                        # TypeScript (.ts / .tsx)
 └── sse/                    # Píblíne seachfhreastalaí SSE
 
 open-sse/                   # Spás oibre @omniroute/open-sse
-├── executors/              # 89 modúl cur chun feidhme riteora
-├── handlers/               # 11 láimhseálaí iarratais (comhrá, freagraí, leabuithe, íomhánna, etc.)
+├── executors/              # 150 modúl forghníomhaithe (aicmí forghníomhaithe + cúntóirí in aghaidh an tsoláthraí)
+├── handlers/               # 11 láimhseálaí iarratais (comhrá, freagraí, leabuithe, íomhánna, srl.)
 ├── mcp-server/             # Freastalaí MCP (110 uirlis uathúil, 3 iompar, 33 scóip)
-├── services/               # 178 seirbhís ardleibhéil (combo, autoCombo, rateLimitManager, etc.)
+├── services/               # 178 seirbhís ardleibhéil (combo, autoCombo, rateLimitManager, srl.)
 ├── translator/             # Aistritheoirí formáide (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Claochladán Responses API
+├── transformer/            # Trasfhoirmeoir API Responses
 └── utils/                  # 22 modúl fóntais (sruth, TLS, seachfhreastalaí, logáil)
 
 electron/                   # Aip deisce Electron (tras-ardán)
 
 tests/
-├── unit/                   # Riteoir tástálacha Node.js (1,574 comhad tástála)
+├── unit/                   # Reathaí tástála Node.js (1,574 comhad tástála)
 ├── integration/            # Tástálacha comhtháthaithe
 ├── e2e/                    # Tástálacha Playwright
 ├── security/               # Tástálacha slándála
@@ -349,16 +349,16 @@ docs/
 ├── dev/                     # Treoracha forbartha
 ├── diagrams/                # Léaráidí ailtireachta
 ├── frameworks/              # MCP, A2A, OpenCode, Cuimhne, Scileanna
-├── guides/                  # Treoir úsáideora, Docker, cumrú, fabhtcheartú
+├── guides/                  # Treoir úsáideora, Docker, cumraíocht, fabhtcheartú
 ├── i18n/                    # Aistriúcháin idirnáisiúnaithe README
 ├── marketing/               # Ábhair mhargaíochta
 ├── ops/                     # Imscaradh, seachfhreastalaí, cumhdach, eisiúintí
 ├── providers/               # Doiciméid a bhaineann go sonrach le soláthraithe
 ├── reference/               # Tagairt API, athróga timpeallachta, uirlisí CLI, sraitheanna saor in aisce
 ├── releases/                # Nótaí eisiúna
-├── routing/                 # Inneall auto-combo, athsheinm réasúnaíochta
+├── routing/                 # Inneall uath-theaglama, athsheinm réasúnaíochta
 ├── screenshots/             # Gabhálacha scáileáin den deais
-├── security/                # Ráillí cosanta, comhlíonadh, ceilteacht, comharthaí
+├── security/                # Ráillí cosanta, comhlíontacht, ceilteacht, comharthaí
 └── specs/                   # Sonraíochtaí dearaidh
 ```
 

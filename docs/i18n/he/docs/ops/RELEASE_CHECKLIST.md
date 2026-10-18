@@ -386,13 +386,13 @@ npm run build:release
 ## חיתוך 3.9.0 LTS (תורגל ב-3.8.58)
 
 לאחר v3.8.59 הגרסה הבאה היא 3.9.0, והקצה שלה הופך לשני ענפים ארוכי-חיים:
-`stable/v3` (קו ה-LTS של v3,‏ npm `latest`) ו-`develop` (‏v4, מוקפץ ל-4.0.0,‏ npm
+`stable/v3` (קו ה-LTS של v3, ‏npm `latest`) ו-`develop` (‏v4, מוקפץ ל-4.0.0, ‏npm
 `nightly`). מודל הענפים/ערוצים, ההעברה קדימה והתוויות מתוארים ב-
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); התוכנית נמצאת ב-[ROADMAP](../../ROADMAP.md) (שלב 3). החיתוך מתבצע פעם אחת;
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); התוכנית נמצאת ב-[מפת הדרכים](../../ROADMAP.md) (שלב 3). החיתוך מתבצע פעם אחת;
 3.8.58 מתרגל אותו מקצה לקצה על fork, ו-3.8.59 נסגרת עם
-[רשימת התיוג GO/NO-GO](./LTS_GO_NO_GO.md).
+[רשימת הבדיקה GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### הרצה יבשה (לקריאה בלבד, בטוחה בכל עת)
+### הרצה יבשה (קריאה בלבד, בטוחה בכל עת)
 
 ```bash
 npm run release:dry-run-lts-cut                       # החיתוך האמיתי: 3.9.0 מתוך HEAD, התג הקודם v3.8.59
@@ -400,50 +400,53 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # קיבוע commit המק
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` אינו מבצע דבר: הוא קורא את git ואת `gh` ומדפיס את
-הרצף המלא — תנאים מקדימים (המקור ניתן לפענוח, התג הקודם קיים, `package.json` הוא
-בגרסת היעד, קיימת issue פתוחה מסוג `release-freeze`, אין issue פתוחה מסוג `Release branch not green`
-בענף release קיים — ענף שאינו קיים מדווח כ-`?` לא ידוע, ולעולם לא
-כירוק — תור ה-`release` של Mergify מוגדר (G11:‏ `queue_rules`,‏ `checks_timeout`,
-התווית `queue`), ערכת הכללים של `release/*` עדיין חוסמת מחיקה ו-force-push, וכן
+הרצף המלא — תנאים מקדימים (המקור מזוהה, למאגר המקור יש היסטוריה מלאה —
+עותק משוכפל רדוד אינו יכול לדחוף את `stable/v3`, הצד המקבל דוחה את החבילה בהורה
+המורכב הראשון, לכן יש לבצע את החיתוך מעותק משוכפל מלא או להריץ תחילה `git fetch --unshallow origin` —
+התג הקודם קיים, `package.json` נמצא בגרסת היעד, קיימת סוגיה פתוחה עם `release-freeze`, אין
+סוגיה פתוחה מסוג `Release branch not green`
+בענף גרסה קיים — ענף שאינו קיים מדווח כ-`?` לא ידוע, ולעולם לא
+כירוק — תור `release` של Mergify מוגדר (G11: ‏`queue_rules`, ‏`checks_timeout`,
+התווית `queue`), מערכת הכללים `release/*` עדיין חוסמת מחיקה ודחיפה כפויה, ו-
 `stable/v3` ו-`develop` עדיין אינם קיימים), שני שלבי הענפים, אילו טריגרים של תהליכי עבודה
-רדומים ותנאי `if:` הופכים לאמיתיים (ואילו נותרים חסומים באמצעות משתנה מאגר או
-מקובעים למאגר הקנוני), תגי ההפצה הצפויים (`latest` ← 3.9.0,‏ `next` ו-
-`nightly` ריקים) והחזרה לאחור. קוד יציאה `0` = `RESULT: READY`,‏ `1` = תנאי מקדים חוסם
-נכשל (`✗`),‏ `2` = שגיאת שימוש. `--advisory <id,...>` מוריד בדיקה לדרגת אזהרה (`!`)
+רדומים ואילו תנאי `if:` הופכים לאמת (ואילו נשארים חסומים באמצעות משתנה מאגר או
+מקובעים למאגר הקנוני), תגי ההפצה הצפויים (`latest` ← 3.9.0, ‏`next` ו-
+`nightly` ריקים) והחזרה לאחור. יציאה עם `0` = ‏`RESULT: READY`, עם `1` = תנאי מקדים חוסם
+נכשל (`✗`), עם `2` = שגיאת שימוש. `--advisory <id,...>` מוריד בדיקה לרמת אזהרה (`!`)
 מבלי להסתיר אותה.
 
-הריצו את ההרצה היבשה של החיתוך האמיתי בעוד שהקפאת ה-release של 3.9.0 עדיין פתוחה — הענפים
-נוצרים אחרי התג ולפני ששלב 12c מסיר את ההקפאה.
+הריצו את ההרצה היבשה של החיתוך האמיתי בזמן שהקפאת הגרסה 3.9.0 עדיין פתוחה — הענפים
+נוצרים לאחר התג ולפני ששלב 12c מסיר את ההקפאה.
 
 ### תרגול 3.8.58 (ב-fork בלבד)
 
 ```bash
-# 1. הרצה יבשה על הקצה הנוכחי עם פרמטרי תרגול
+# 1. הרצה יבשה בקצה הנוכחי עם פרמטרי התרגול
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. ביצוע מול remote מסוג FORK (הפקודה מסרבת להשתמש ב-origin, או בכל remote שכתובת ה-URL שלו היא של המאגר
-#    הקנוני; כל שלב מבקש אישור במסוף)
+# 2. ביצוע מול remote של FORK (הפקודה מסרבת להשתמש ב-origin, או בכל remote שכתובת ה-URL שלו היא של המאגר
+#    הקנוני; בכל שלב מתבקש אישור במסוף)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. הפעלת תהליכי העבודה הרדומים ב-fork (באמצעות workflow_dispatch במקום שבו ההרצה היבשה
+# 3. הפעלת תהליכי העבודה הרדומים ב-fork (באמצעות workflow_dispatch כאשר ההרצה היבשה
 #    מדווחת על קיבוע למאגר הקנוני), ולאחר מכן חזרה לאחור
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-ה-commit שמקפיץ את develop נבנה באמצעות מנגנוני git ברמה נמוכה (ללא נגיעה בעץ העבודה) ומקפיץ
-את אותם חמשת הקבצים כמו commit של פתיחת מחזור: `package.json`,‏ `open-sse/package.json`,
-‏`electron/package.json`,‏ `package-lock.json` ו-`docs/openapi.yaml`. המקטע `[4.0.0]`
-ב-CHANGELOG והמקבילות המתורגמות שלו נפתחים לאחר מכן ב-`develop`, לפני ה-PR הראשון שלו.
-הסקריפט לעולם אינו משנה תגי הפצה של npm — תרגלו אותם על חבילת ניסוי.
+ה-commit שמקפיץ את develop נבנה באמצעות מנגנוני התשתית של git (ללא נגיעה בעץ העבודה) ומקפיץ
+את אותם חמישה קבצים כמו commit של פתיחת מחזור: `package.json`, ‏`open-sse/package.json`,
+‏`electron/package.json`, ‏`package-lock.json` ו-`docs/openapi.yaml`. המקטע `[4.0.0]`
+של CHANGELOG והגרסאות המקבילות שלו בשפות i18n נפתחים לאחר מכן ב-`develop`, לפני ה-PR
+הראשון שלו. הסקריפט לעולם אינו משנה תגי הפצה של npm — תרגלו אותם על חבילת ניסוי.
 
-### ארטיפקט תצוגה מקדימה של PR (בנייה פעם אחת, קידום אותם הבתים)
+### פריט תצוגה מקדימה של PR (בנייה פעם אחת, קידום של אותם בתים)
 
-`.github/workflows/preview-artifact.yml` בונה tarball יחיד לייצור מקצה של PR
-ומאמת את אותה בנייה בדיוק (מקטע (a) של #8084). רק PRs מאותו מאגר; דבר אינו מתפרסם.
+`.github/workflows/preview-artifact.yml` בונה חבילת tar אחת לייצור מראש PR
+ומאמת את אותה בנייה בדיוק (מקטע (a) של #8084). רק PR-ים מאותו מאגר; דבר אינו מתפרסם.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # או הוסיפו את התווית `preview-artifact`
@@ -453,37 +456,37 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # התקנת תצוגה מקדימה
 ```
 
-ההרצה מבצעת `npm ci`,‏ `npm run build:release`,‏ `npm run check:pack-artifact`, אורזת את
-ה-tarball, מריצה `npm run check:pack-boot` (סודות מזויפים, ספריית נתונים זמנית), אורזת מחדש
-ונכשלת אלא אם ה-digest זהה, ולאחר מכן מתעדת `artifact-identity.json` (‏SHA של הקצה,‏ SHA של הבסיס,
-hash של קובץ הנעילה, פלטפורמה, ארכיטקטורה, ABI של node, מאגד, מדיניות בנייה —
-`scripts/release/artifact-identity.mjs`) ומאשרת את ה-tarball במשימה נפרדת. קידום
-תצוגה מקדימה פירושו התקנת אותו tarball: לעולם אין לבנות מחדש מהמקור.
+ההרצה מבצעת `npm ci`, ‏`npm run build:release`, ‏`npm run check:pack-artifact`, אורזת את
+חבילת ה-tar, מריצה `npm run check:pack-boot` (סודות מזויפים, ספריית נתונים זמנית), אורזת מחדש
+ונכשלת אלא אם התקציר זהה, ולאחר מכן מתעדת את `artifact-identity.json` (‏SHA של הראש, ‏SHA של
+הבסיס, גיבוב קובץ הנעילה, פלטפורמה, ארכיטקטורה, ABI של node, מאגד, מדיניות בנייה —
+`scripts/release/artifact-identity.mjs`) ומאמתת את חבילת ה-tar במשימה נפרדת. קידום
+תצוגה מקדימה פירושו התקנת חבילת ה-tar הזו: לעולם אין לבנות מחדש מקוד המקור.
 
 ### החיתוך (3.9.0, לאחר GO)
 
-1. ‏GO מתועד ב-[LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. ‏`npm run release:dry-run-lts-cut -- --from v3.9.0` מדפיסה `RESULT: READY`.
-3. צרו את הענפים ב-`origin` ידנית באמצעות הפקודות שההרצה היבשה מדפיסה — הסקריפט
-   מסרב לבצע push אל `origin`. כדי לעשות שימוש חוזר ב-commit של develop שכבר עבר סקירה, הפעילו תחילה את
+1. ‏GO תועד ב-[LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` מדפיס `RESULT: READY`.
+3. צרו את הענפים ב-`origin` ידנית באמצעות הפקודות שההרצה היבשה מדפיסה —
+   הסקריפט מסרב לדחוף ל-`origin`. כדי להשתמש מחדש ב-commit של develop שעבר סקירה, הריצו תחילה את
    תרגול `--execute` על קצה 3.9.0 מול ה-fork שלכם; הוא מדפיס את שני ערכי ה-SHA, וניתן
-   לבצע push לאותם commits:
+   לדחוף את אותם commits:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. הגנו על `stable/v3` ועל `develop` (ערכות כללים + תור מיזוג) לפני שה-PR הראשון מתמזג.
-5. תהליכי העבודה הרדומים מופעלים בעקבות קיום הענפים: `forward-port.yml` (‏push אל
-   `stable/v3`),‏ `validate-stable-pr.yml` (‏PRs אל `stable/v3`) ו-`nightly-v4-build.yml`
-   (בונה את `develop`). לפני העלייה לאוויר, הגדירו את סוד המאגר `secrets.FORWARD_PORT_TOKEN` (כדי ש-CI ירוץ על
-   PRs של העברה קדימה); פרסום nightly נותר כבוי עד שהבעלים מגדירים את משתנה המאגר
-   `vars.NIGHTLY_PUBLISH` כ-`true` ו-npm Trusted Publishing מקבל את
-   `nightly-v4-build.yml`. פענוח הערוץ מתבצע ב-`scripts/release/dist-tag.mjs`, אותו
-   מפענח שבו משתמש `npm-publish.yml`.
-6. אמתו את הערוצים: `npm view omniroute dist-tags --json` מציגה `latest` = 3.9.0 וללא
+4. הגנו על `stable/v3` ועל `develop` (ערכות כללים + תור מיזוג) לפני שה-PR הראשון מתקבל.
+5. תהליכי העבודה הרדומים מופעלים עם קיום הענף: `forward-port.yml` (דחיפה אל
+   `stable/v3`),‏ `validate-stable-pr.yml` (בקשות משיכה אל `stable/v3`) ו-`nightly-v4-build.yml`
+   (בונה את `develop`). לפני ההשקה, הגדירו את סוד המאגר `secrets.FORWARD_PORT_TOKEN` (כדי שה-CI ירוץ על
+   בקשות משיכה של העברה קדימה); הפרסום הלילי נשאר כבוי עד שהבעלים מגדיר את משתנה המאגר
+   `vars.NIGHTLY_PUBLISH` לערך `true` ו-npm Trusted Publishing מאשר את
+   `nightly-v4-build.yml`. זיהוי הערוץ מתבצע באמצעות `scripts/release/dist-tag.mjs`, אותו
+   מנגנון זיהוי שבו משתמש `npm-publish.yml`.
+6. אמתו את הערוצים: `npm view omniroute dist-tags --json` מציג `latest` = 3.9.0 וללא
    `next` / `nightly` עד לפרסום v4.
-7. חזרה לאחור, אם נדרש: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+7. חזרה לאחור, במקרה הצורך: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    ו-`npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

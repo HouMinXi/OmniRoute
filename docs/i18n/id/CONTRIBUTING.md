@@ -297,7 +297,7 @@ Lihat `open-sse/utils/stream.ts` dan `open-sse/utils/streamHandler.ts` untuk con
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
+├── app/                    # App Router Next.js 16
 │   ├── (dashboard)/        # Halaman dasbor (23 bagian)
 │   ├── api/                # Rute API (51 direktori)
 │   └── login/              # Halaman autentikasi (.tsx)
@@ -309,7 +309,7 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── db/                 # Modul domain SQLite + 130 migrasi
 │   ├── memory/             # Memori percakapan persisten
 │   ├── oauth/              # Penyedia, layanan, dan utilitas OAuth
-│   ├── skills/             # Kerangka kerja skill yang dapat diperluas
+│   ├── skills/             # Kerangka kerja keterampilan yang dapat diperluas
 │   ├── usage/              # Pelacakan penggunaan dan penghitungan biaya
 │   └── localDb.ts          # Hanya lapisan ekspor ulang — jangan pernah menambahkan logika di sini
 ├── middleware/              # Middleware permintaan (promptInjectionGuard)
@@ -317,23 +317,23 @@ src/                        # TypeScript (.ts / .tsx)
 ├── shared/
 │   ├── components/         # Komponen React (.tsx)
 │   ├── constants/          # Definisi penyedia (329), cakupan MCP, 19 strategi perutean
-│   ├── utils/              # Circuit breaker, sanitizer, helper autentikasi
+│   ├── utils/              # Pemutus sirkuit, pembersih, pembantu autentikasi
 │   └── validation/         # Skema Zod v4
 └── sse/                    # Pipeline proksi SSE
 
-open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # 89 modul implementasi executor
-├── handlers/               # 11 handler permintaan (chat, respons, embedding, gambar, dll.)
-├── mcp-server/             # Server MCP (110 alat unik, 3 transport, 33 cakupan)
+open-sse/                   # Ruang kerja @omniroute/open-sse
+├── executors/              # 150 modul eksekutor (kelas eksekutor + pembantu per penyedia)
+├── handlers/               # 11 penangan permintaan (obrolan, respons, embedding, gambar, dll.)
+├── mcp-server/             # Server MCP (110 alat unik, 3 transportasi, 33 cakupan)
 ├── services/               # 178 layanan tingkat atas (combo, autoCombo, rateLimitManager, dll.)
 ├── translator/             # Penerjemah format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformer Responses API
-└── utils/                  # 22 modul utilitas (aliran, TLS, proksi, logging)
+├── transformer/            # Transformator Responses API
+└── utils/                  # 22 modul utilitas (stream, TLS, proksi, pencatatan)
 
 electron/                   # Aplikasi desktop Electron (lintas platform)
 
 tests/
-├── unit/                   # Test runner Node.js (1.574 file pengujian)
+├── unit/                   # Runner pengujian Node.js (1.574 berkas pengujian)
 ├── integration/            # Pengujian integrasi
 ├── e2e/                    # Pengujian Playwright
 ├── security/               # Pengujian keamanan
@@ -357,7 +357,7 @@ docs/
 ├── releases/                # Catatan rilis
 ├── routing/                 # Mesin auto-combo, pemutaran ulang penalaran
 ├── screenshots/             # Tangkapan layar dasbor
-├── security/                # Guardrail, kepatuhan, stealth, token
+├── security/                # Pembatas pengaman, kepatuhan, penyamaran, token
 └── specs/                   # Spesifikasi desain
 ```
 

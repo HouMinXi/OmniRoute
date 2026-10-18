@@ -289,66 +289,66 @@ Skatiet `open-sse/utils/stream.ts` un `open-sse/utils/streamHandler.ts`, lai iep
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
 │   ├── (dashboard)/        # Informācijas paneļa lapas (23 sadaļas)
-│   ├── api/                # API maršruti (51 direktorija)
+│   ├── api/                # API maršruti (51 direktorijs)
 │   └── login/              # Autentifikācijas lapas (.tsx)
-├── domain/                 # Politiku dzinis (policyEngine, comboResolver, costRules u.c.)
-├── lib/                    # Galvenā biznesa loģika (.ts)
+├── domain/                 # Politiku dzinējs (policyEngine, comboResolver, costRules u.c.)
+├── lib/                    # Biznesa pamatloģika (.ts)
 │   ├── a2a/                # Agent-to-Agent v0.3 protokola serveris
 │   ├── acp/                # Agent Communication Protocol reģistrs
-│   ├── compliance/         # Atbilstības politiku dzinis
+│   ├── compliance/         # Atbilstības politiku dzinējs
 │   ├── db/                 # SQLite domēna moduļi + 130 migrācijas
-│   ├── memory/             # Pastāvīga sarunu atmiņa
+│   ├── memory/             # Pastāvīgā sarunu atmiņa
 │   ├── oauth/              # OAuth nodrošinātāji, pakalpojumi un utilītas
-│   ├── skills/             # Paplašināma prasmju infrastruktūra
+│   ├── skills/             # Paplašināms prasmju ietvars
 │   ├── usage/              # Lietojuma uzskaite un izmaksu aprēķināšana
-│   └── localDb.ts          # Tikai atkārtotas eksportēšanas slānis — nekad šeit nepievienojiet loģiku
+│   └── localDb.ts          # Tikai atkārtota eksporta slānis — nekad nepievienojiet šeit loģiku
 ├── middleware/              # Pieprasījumu starpprogrammatūra (promptInjectionGuard)
 ├── mitm/                   # MITM starpniekserveris (sertifikāts, DNS, mērķa maršrutēšana)
 ├── shared/
 │   ├── components/         # React komponenti (.tsx)
 │   ├── constants/          # Nodrošinātāju definīcijas (329), MCP tvērumi, 19 maršrutēšanas stratēģijas
-│   ├── utils/              # Automātiskais slēdzis, sanitizētājs, autentifikācijas palīgi
+│   ├── utils/              # Ķēdes pārtraucējs, sanitizētājs, autentifikācijas palīgfunkcijas
 │   └── validation/         # Zod v4 shēmas
 └── sse/                    # SSE starpniekservera konveijers
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 izpildītāju ieviešanas moduļi
-├── handlers/               # 11 pieprasījumu apstrādātāji (chat, responses, embeddings, images u.c.)
+open-sse/                   # @omniroute/open-sse darbvieta
+├── executors/              # 150 izpildītāju moduļi (izpildītāju klases + katra nodrošinātāja palīgfunkcijas)
+├── handlers/               # 11 pieprasījumu apstrādātāji (tērzēšana, atbildes, iegulumi, attēli u.c.)
 ├── mcp-server/             # MCP serveris (110 unikāli rīki, 3 transporti, 33 tvērumi)
 ├── services/               # 178 augstākā līmeņa pakalpojumi (combo, autoCombo, rateLimitManager u.c.)
-├── translator/             # Formātu tulkotāji (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── translator/             # Formātu pārveidotāji (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API pārveidotājs
-└── utils/                  # 22 utilītas moduļi (straume, TLS, starpniekserveris, reģistrēšana)
+└── utils/                  # 22 utilītu moduļi (straumēšana, TLS, starpniekserveris, žurnalēšana)
 
-electron/                   # Electron darbvirsmas lietotne (daudzplatformu)
+electron/                   # Electron darbvirsmas lietotne (vairākplatformu)
 
 tests/
-├── unit/                   # Node.js testu palaidējs (1,574 testu faili)
+├── unit/                   # Node.js testu izpildītājs (1 574 testu faili)
 ├── integration/            # Integrācijas testi
 ├── e2e/                    # Playwright testi
 ├── security/               # Drošības testi
-├── translator/             # Tulkotājam specifiski testi
+├── translator/             # Pārveidotājam specifiski testi
 └── load/                   # Slodzes testi
 
 docs/
 ├── adr/                     # Arhitektūras lēmumu ieraksti
 ├── architecture/            # Sistēmas arhitektūra un noturība
 ├── comparison/              # OmniRoute salīdzinājumā ar alternatīvām
-├── compression/             # Saspiešanas ceļveži un noteikumi
-├── dev/                     # Izstrādes ceļveži
+├── compression/             # Saspiešanas rokasgrāmatas un noteikumi
+├── dev/                     # Izstrādes rokasgrāmatas
 ├── diagrams/                # Arhitektūras diagrammas
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Lietotāja ceļvedis, Docker, iestatīšana, problēmu novēršana
+├── guides/                  # Lietotāja rokasgrāmata, Docker, iestatīšana, problēmu novēršana
 ├── i18n/                    # Internacionalizēti README tulkojumi
 ├── marketing/               # Mārketinga materiāli
 ├── ops/                     # Izvietošana, starpniekserveris, pārklājums, laidieni
-├── providers/               # Konkrētiem nodrošinātājiem paredzēta dokumentācija
-├── reference/               # API atsauce, vides mainīgie, CLI rīki, bezmaksas līmeņi
+├── providers/               # Nodrošinātājiem specifiska dokumentācija
+├── reference/               # API uzziņas, vides mainīgie, CLI rīki, bezmaksas līmeņi
 ├── releases/                # Laidienu piezīmes
-├── routing/                 # Automātiskās kombinēšanas dzinis, spriešanas atkārtošana
-├── screenshots/              # Informācijas paneļa ekrānuzņēmumi
-├── security/                # Drošības vadīklas, atbilstība, slēpšana, pilnvarojuma marķieri
-└── specs/                   # Izstrādes specifikācijas
+├── routing/                 # Automātisko kombināciju dzinējs, spriešanas atkārtošana
+├── screenshots/             # Informācijas paneļa ekrānuzņēmumi
+├── security/                # Aizsargmehānismi, atbilstība, maskēšana, pilnvaras
+└── specs/                   # Projektējuma specifikācijas
 ```
 
 ---

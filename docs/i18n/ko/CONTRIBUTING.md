@@ -287,65 +287,72 @@ PR을 열기 전에
 
 ---
 
-## Project Structure
+## 프로젝트 구조
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # 대시보드 페이지(23개 섹션)
+│   ├── api/                # API 라우트(51개 디렉터리)
+│   └── login/              # 인증 페이지(.tsx)
+├── domain/                 # 정책 엔진(policyEngine, comboResolver, costRules 등)
+├── lib/                    # 핵심 비즈니스 로직(.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 프로토콜 서버
+│   ├── acp/                # Agent Communication Protocol 레지스트리
+│   ├── compliance/         # 컴플라이언스 정책 엔진
+│   ├── db/                 # SQLite 도메인 모듈 + 마이그레이션 130개
+│   ├── memory/             # 영구 대화 메모리
+│   ├── oauth/              # OAuth 공급자, 서비스 및 유틸리티
+│   ├── skills/             # 확장 가능한 스킬 프레임워크
+│   ├── usage/              # 사용량 추적 및 비용 계산
+│   └── localDb.ts          # 재내보내기 계층 전용 — 여기에 로직을 추가하지 마세요
+├── middleware/              # 요청 미들웨어(promptInjectionGuard)
+├── mitm/                   # MITM 프록시(인증서, DNS, 대상 라우팅)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React 컴포넌트(.tsx)
+│   ├── constants/          # 공급자 정의(329개), MCP 범위, 라우팅 전략 19개
+│   ├── utils/              # 서킷 브레이커, 새니타이저, 인증 헬퍼
+│   └── validation/         # Zod v4 스키마
+└── sse/                    # SSE 프록시 파이프라인
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse 워크스페이스
+├── executors/              # 실행기 모듈 150개(실행기 클래스 + 공급자별 헬퍼)
+├── handlers/               # 요청 핸들러 11개(채팅, 응답, 임베딩, 이미지 등)
+├── mcp-server/             # MCP 서버(고유 도구 110개, 전송 방식 3개, 범위 33개)
+├── services/               # 최상위 서비스 178개(combo, autoCombo, rateLimitManager 등)
+├── translator/             # 형식 변환기(OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API 변환기
+└── utils/                  # 유틸리티 모듈 22개(스트림, TLS, 프록시, 로깅)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron 데스크톱 앱(크로스 플랫폼)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js 테스트 러너(테스트 파일 1,574개)
+├── integration/            # 통합 테스트
+├── e2e/                    # Playwright 테스트
+├── security/               # 보안 테스트
+├── translator/             # 변환기 전용 테스트
+└── load/                   # 부하 테스트
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # 아키텍처 결정 기록
+├── architecture/            # 시스템 아키텍처 및 복원력
+├── comparison/              # OmniRoute와 대안 비교
+├── compression/             # 압축 가이드 및 규칙
+├── dev/                     # 개발 가이드
+├── diagrams/                # 아키텍처 다이어그램
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # 사용자 가이드, Docker, 설정, 문제 해결
+├── i18n/                    # 국제화된 README 번역
+├── marketing/               # 마케팅 자료
+├── ops/                     # 배포, 프록시, 커버리지, 릴리스
+├── providers/               # 공급자별 문서
+├── reference/               # API 참조, 환경 변수, CLI 도구, 무료 티어
+├── releases/                # 릴리스 노트
+├── routing/                 # 자동 조합 엔진, 추론 재현
+├── screenshots/             # 대시보드 스크린샷
+├── security/                # 가드레일, 컴플라이언스, 스텔스, 토큰
+└── specs/                   # 설계 사양
 ```
 
 ---

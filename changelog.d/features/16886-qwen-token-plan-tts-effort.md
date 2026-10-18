@@ -1,0 +1,1 @@
+- **feat(providers):** Qwen Cloud Token Plan text-to-speech (`qct/qwen-audio-3.0-tts-plus`, DashScope SpeechSynthesizer, region-aware) and per-model reasoning-effort enums so out-of-enum efforts are mapped on the first request ([#16886](https://github.com/diegosouzapw/OmniRoute/pull/16886)) — thanks @alysson-souza

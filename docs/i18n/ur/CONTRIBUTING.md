@@ -287,65 +287,72 @@ production build کی ذمہ داری CI کی ہے — انہیں مقامی ط�
 
 ---
 
-## Project Structure
+## پروجیکٹ کی ساخت
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # ڈیش بورڈ صفحات (23 حصے)
+│   ├── api/                # API روٹس (51 ڈائریکٹریاں)
+│   └── login/              # توثیقی صفحات (.tsx)
+├── domain/                 # پالیسی انجن (policyEngine، comboResolver، costRules وغیرہ)
+├── lib/                    # بنیادی کاروباری منطق (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 پروٹوکول سرور
+│   ├── acp/                # Agent Communication Protocol رجسٹری
+│   ├── compliance/         # تعمیل کا پالیسی انجن
+│   ├── db/                 # SQLite ڈومین ماڈیولز + 130 مائیگریشنز
+│   ├── memory/             # مستقل مکالماتی میموری
+│   ├── oauth/              # OAuth فراہم کنندگان، سروسز اور سہولیات
+│   ├── skills/             # قابلِ توسیع مہارتوں کا فریم ورک
+│   ├── usage/              # استعمال کی ٹریکنگ اور لاگت کا حساب
+│   └── localDb.ts          # صرف دوبارہ برآمد کی تہہ — یہاں کبھی منطق شامل نہ کریں
+├── middleware/              # درخواست کا مڈل ویئر (promptInjectionGuard)
+├── mitm/                   # MITM پراکسی (سرٹیفکیٹ، DNS، ہدف کی روٹنگ)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React اجزاء (.tsx)
+│   ├── constants/          # فراہم کنندگان کی تعریفیں (329)، MCP اسکوپس، روٹنگ کی 19 حکمتِ عملیاں
+│   ├── utils/              # سرکٹ بریکر، سینیٹائزر، توثیقی معاونات
+│   └── validation/         # Zod v4 اسکیماز
+└── sse/                    # SSE پراکسی پائپ لائن
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse ورک اسپیس
+├── executors/              # 150 ایگزیکیوٹر ماڈیولز (ایگزیکیوٹر کلاسز + ہر فراہم کنندہ کے معاونات)
+├── handlers/               # درخواست کے 11 ہینڈلرز (چیٹ، جوابات، ایمبیڈنگز، تصاویر وغیرہ)
+├── mcp-server/             # MCP سرور (110 منفرد ٹولز، 3 ٹرانسپورٹس، 33 اسکوپس)
+├── services/               # 178 اعلیٰ سطحی سروسز (combo، autoCombo، rateLimitManager وغیرہ)
+├── translator/             # فارمیٹ مترجمین (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ٹرانسفارمر
+└── utils/                  # 22 سہولتی ماڈیولز (اسٹریم، TLS، پراکسی، لاگنگ)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron ڈیسک ٹاپ ایپ (کثیر پلیٹ فارم)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js ٹیسٹ رنر (1,574 ٹیسٹ فائلیں)
+├── integration/            # انضمامی ٹیسٹس
+├── e2e/                    # Playwright ٹیسٹس
+├── security/               # سیکیورٹی ٹیسٹس
+├── translator/             # مترجم سے مخصوص ٹیسٹس
+└── load/                   # لوڈ ٹیسٹس
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # معماری فیصلوں کے ریکارڈز
+├── architecture/            # سسٹم کی معماری اور لچک
+├── comparison/              # OmniRoute بمقابلہ متبادلات
+├── compression/             # کمپریشن رہنما اور قواعد
+├── dev/                     # ترقیاتی رہنما
+├── diagrams/                # معماری کے خاکے
+├── frameworks/              # MCP، A2A، OpenCode، Memory، Skills
+├── guides/                  # صارف رہنما، Docker، سیٹ اپ، خرابیوں کا ازالہ
+├── i18n/                    # بین الاقوامی README تراجم
+├── marketing/               # مارکیٹنگ کا مواد
+├── ops/                     # تعیناتی، پراکسی، کوریج، ریلیزز
+├── providers/               # فراہم کنندہ سے مخصوص دستاویزات
+├── reference/               # API حوالہ، ماحولیاتی متغیرات، CLI ٹولز، مفت درجات
+├── releases/                # ریلیز نوٹس
+├── routing/                 # آٹو کومبو انجن، استدلال کا ری پلے
+├── screenshots/             # ڈیش بورڈ اسکرین شاٹس
+├── security/                # حفاظتی حدود، تعمیل، مخفی کاری، ٹوکنز
+└── specs/                   # ڈیزائن کی وضاحتیں
 ```
 
 ---

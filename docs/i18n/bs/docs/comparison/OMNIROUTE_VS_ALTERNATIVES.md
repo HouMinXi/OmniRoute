@@ -41,11 +41,11 @@ Objektivno poređenje funkcija u odnosu na popularne open-source AI rutere.
 
 ## Kada odabrati OmniRoute
 
-- Samostalno hostujete i želite **maksimalnu pokrivenost provajderima** (329 provajdera, 155 besplatnih/bez-autentifikacije kataloških unosa)
-- Potreban vam je **ugrađeni MCP server** (LLM alati, memorija, veštine izložene kao alati)
-- Potreban vam je **A2A protokol** za agent-to-agent radne procese
-- Želite **fingerprint stealth** (JA3/JA4) da izbegnete detekciju od strane upstream CAPTCHA-a
-- Potrebne su vam **enterprise funkcije** (guardrails, evals, revizijski trag) bez SaaS računa
+- Sami hostirate i želite **maksimalnu pokrivenost pružatelja usluga** (372 pružatelja, 155 besplatnih stavki u katalogu koje ne zahtijevaju autentifikaciju)
+- Potreban vam je **ugrađeni MCP server** (LLM alati, memorija i vještine izloženi kao alati)
+- Potreban vam je **A2A protokol** za tokove rada između agenata
+- Želite **prikrivanje otiska** (JA3/JA4) kako biste izbjegli detekciju pomoću CAPTCHA sistema uzvodnih servisa
+- Potrebne su vam **funkcionalnosti za poslovna okruženja** (zaštitne ograde, evaluacije, revizijski trag) bez troškova SaaS usluge
 
 ## Kada odabrati LiteLLM
 

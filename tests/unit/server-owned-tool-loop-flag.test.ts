@@ -75,8 +75,8 @@ describe("feature-flags-settings count update", () => {
     // (#14657, default off) to 80; PROXY_OPERATOR_EGRESS_ENABLED (#15314,
     // default off) to 82; USAGE_LIMIT_IGNORE_UNPRICED (#14799, default off) to 83;
     // REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
-    // (#13505, default off) to 85.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 85);
+    // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86.
+    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 86);
   });
 });
 

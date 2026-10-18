@@ -14,6 +14,7 @@ import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
 import { shouldShowConnectionLastError } from "./connectionRowHelpers";
+import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import type { ConnectionRowProps } from "./connectionRowTypes";
 import { getStatusPresentation } from "./connectionRowStatus";
 import { getCodexEffectiveServiceTier } from "@/lib/providers/codexFastTier";
@@ -21,11 +22,13 @@ import { normalizeCodexLimitPolicy, providerText } from "../providerPageHelpers"
 import { getCodexPlanLabel } from "../codexPlanLabel";
 import CodexAccountDetails from "./CodexAccountDetails";
 import ConnectionQuotaPanel from "./ConnectionQuotaPanel";
+import ConnectionIdChip from "./ConnectionIdChip";
 import {
   isProviderQuotaVisible,
   supportsProviderQuota,
 } from "@/shared/utils/providerQuotaVisibility";
 import ProviderQuotaVisibilityToggle from "./ProviderQuotaVisibilityToggle";
+import CodexPingNowButton from "./CodexPingNowButton";
 
 // ---------------------------------------------------------------------------
 // Types (exported so the client can reference them without re-importing)
@@ -156,6 +159,8 @@ export default function ConnectionRow({
   // #11497: cookie rows with a decodable JWT credential carry a persisted
   // cookieExpiresAt — feed it into the same countdown badge OAuth rows use.
   const cookieExpiresAt = readCookieExpiresAt(connection.providerSpecificData);
+  // Antigravity 403 VALIDATION_REQUIRED: Google link that unlocks the account (validated host).
+  const verificationUrl = readStoredVerificationUrl(connection.providerSpecificData);
   const effectiveExpiresAt = connection.tokenExpiresAt || connection.expiresAt || cookieExpiresAt;
   const hasExpirySource = isOAuth || Boolean(cookieExpiresAt);
   const getTokenMinsLeft = () => {
@@ -287,7 +292,7 @@ export default function ConnectionRow({
 
   return (
     <div
-      className={`group flex items-center justify-between p-3 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${connection.isActive === false ? "opacity-60" : ""}`}
+      className={`group flex ${isCodex ? "flex-col items-stretch gap-3" : "items-center justify-between"} p-3 rounded-lg hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors ${connection.isActive === false ? "opacity-60" : ""}`}
     >
       <div className="flex items-center gap-3 flex-1 min-w-0">
         {onToggleSelect && (
@@ -378,6 +383,7 @@ export default function ConnectionRow({
               </span>
             )}
             <span className="text-xs text-text-muted">#{connection.priority}</span>
+            <ConnectionIdChip connectionId={connection.id} />
             {connection.globalPriority && (
               <span className="text-xs text-text-muted">
                 {t("autoPriority", { priority: connection.globalPriority })}
@@ -633,7 +639,7 @@ export default function ConnectionRow({
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className={`flex items-center gap-2 ${isCodex ? "flex-wrap" : ""}`}>
         <ConnectionTestButton
           connectionId={connection.id}
           disabled={connection.isActive === false}
@@ -664,6 +670,12 @@ export default function ConnectionRow({
           >
             {t("tokenShort")}
           </Button>
+        )}
+        {isCodex && isOAuth && connection.provider === "codex" && (
+          <CodexPingNowButton
+            connectionId={connection.id}
+            disabled={connection.isActive === false}
+          />
         )}
         {isCodex && onApplyCodexAuthLocal && (
           <Button
@@ -736,6 +748,19 @@ export default function ConnectionRow({
             >
               <span className="material-symbols-outlined text-[18px]">passkey</span>
             </button>
+          )}
+          {verificationUrl && (
+            <a
+              href={verificationUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 hover:bg-amber-500/10 rounded text-amber-600 hover:text-amber-500"
+              title={t("verifyAccountHint")}
+              aria-label={t("verifyAccount")}
+              data-testid="connection-verify-account"
+            >
+              <span className="material-symbols-outlined text-[18px]">verified_user</span>
+            </a>
           )}
           <button
             onClick={onEdit}

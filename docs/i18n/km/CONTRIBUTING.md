@@ -298,66 +298,66 @@ PR មិនបានផ្ដល់ឱ្យអ្នករួចហើយទ�
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ទំព័រ dashboard (23 ផ្នែក)
-│   ├── api/                # route របស់ API (51 ថត)
+│   ├── (dashboard)/        # ទំព័រផ្ទាំងគ្រប់គ្រង (23 ផ្នែក)
+│   ├── api/                # ផ្លូវ API (51 ថត)
 │   └── login/              # ទំព័រផ្ទៀងផ្ទាត់អត្តសញ្ញាណ (.tsx)
 ├── domain/                 # ម៉ាស៊ីនគោលការណ៍ (policyEngine, comboResolver, costRules ជាដើម)
 ├── lib/                    # តក្កវិជ្ជាអាជីវកម្មស្នូល (.ts)
-│   ├── a2a/                # server សម្រាប់ protocol Agent-to-Agent v0.3
-│   ├── acp/                # បញ្ជីឈ្មោះ Agent Communication Protocol
+│   ├── a2a/                # ម៉ាស៊ីនបម្រើពិធីការ Agent-to-Agent v0.3
+│   ├── acp/                # បញ្ជីចុះឈ្មោះ Agent Communication Protocol
 │   ├── compliance/         # ម៉ាស៊ីនគោលការណ៍អនុលោមភាព
-│   ├── db/                 # module ដែន SQLite + migration ចំនួន 130
+│   ├── db/                 # ម៉ូឌុលដែន SQLite + ការធ្វើចំណាកស្រុកទិន្នន័យ 130
 │   ├── memory/             # អង្គចងចាំការសន្ទនាអចិន្ត្រៃយ៍
-│   ├── oauth/              # provider, service និង utility របស់ OAuth
-│   ├── skills/             # framework ជំនាញដែលអាចពង្រីកបាន
-│   ├── usage/              # ការតាមដានការប្រើប្រាស់ និងការគណនាចំណាយ
-│   └── localDb.ts          # ស្រទាប់ re-export ប៉ុណ្ណោះ — កុំបន្ថែមតក្កវិជ្ជានៅទីនេះ
-├── middleware/              # middleware សម្រាប់ request (promptInjectionGuard)
-├── mitm/                   # proxy MITM (វិញ្ញាបនបត្រ, DNS, ការកំណត់ route ទៅគោលដៅ)
+│   ├── oauth/              # អ្នកផ្តល់សេវា សេវាកម្ម និងឧបករណ៍ប្រើប្រាស់ OAuth
+│   ├── skills/             # ក្របខណ្ឌជំនាញដែលអាចពង្រីកបាន
+│   ├── usage/              # ការតាមដានការប្រើប្រាស់ និងការគណនាថ្លៃដើម
+│   └── localDb.ts          # ស្រទាប់នាំចេញឡើងវិញប៉ុណ្ណោះ — កុំបន្ថែមតក្កវិជ្ជានៅទីនេះ
+├── middleware/              # កម្មវិធីកណ្ដាលសម្រាប់សំណើ (promptInjectionGuard)
+├── mitm/                   # ប្រូកស៊ី MITM (វិញ្ញាបនបត្រ, DNS, ការកំណត់ផ្លូវគោលដៅ)
 ├── shared/
-│   ├── components/         # component របស់ React (.tsx)
-│   ├── constants/          # និយមន័យ provider (329), scope របស់ MCP, យុទ្ធសាស្ត្រកំណត់ route ចំនួន 19
-│   ├── utils/              # circuit breaker, sanitizer, helper សម្រាប់ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
-│   └── validation/         # schema របស់ Zod v4
-└── sse/                    # pipeline proxy របស់ SSE
+│   ├── components/         # សមាសភាគ React (.tsx)
+│   ├── constants/          # និយមន័យអ្នកផ្តល់សេវា (329), វិសាលភាព MCP, យុទ្ធសាស្ត្រកំណត់ផ្លូវ 19
+│   ├── utils/              # ឧបករណ៍កាត់ផ្ដាច់សៀគ្វី ឧបករណ៍សម្អាត និងកម្មវិធីជំនួយផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
+│   └── validation/         # គ្រោងការណ៍ Zod v4
+└── sse/                    # បំពង់ដំណើរការប្រូកស៊ី SSE
 
-open-sse/                   # workspace របស់ @omniroute/open-sse
-├── executors/              # module អនុវត្ត executor ចំនួន 89
-├── handlers/               # request handler ចំនួន 11 (chat, responses, embeddings, images ជាដើម)
-├── mcp-server/             # server MCP (tool ដាច់ដោយឡែកចំនួន 110, transport ចំនួន 3, scope ចំនួន 33)
-├── services/               # service កម្រិតកំពូលចំនួន 178 (combo, autoCombo, rateLimitManager ជាដើម)
-├── translator/             # ឧបករណ៍បកប្រែទ្រង់ទ្រាយ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # transformer សម្រាប់ Responses API
-└── utils/                  # module utility ចំនួន 22 (stream, TLS, proxy, logging)
+open-sse/                   # កន្លែងធ្វើការ @omniroute/open-sse
+├── executors/              # ម៉ូឌុលប្រតិបត្តិ 150 (ថ្នាក់ប្រតិបត្តិ + កម្មវិធីជំនួយតាមអ្នកផ្តល់សេវា)
+├── handlers/               # កម្មវិធីដោះស្រាយសំណើ 11 (ការជជែក ការឆ្លើយតប ការបង្កប់ រូបភាព ជាដើម)
+├── mcp-server/             # ម៉ាស៊ីនបម្រើ MCP (ឧបករណ៍ពិសេស 110, មធ្យោបាយបញ្ជូន 3, វិសាលភាព 33)
+├── services/               # សេវាកម្មកម្រិតកំពូល 178 (combo, autoCombo, rateLimitManager ជាដើម)
+├── translator/             # កម្មវិធីបកប្រែទម្រង់ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # កម្មវិធីបម្លែង Responses API
+└── utils/                  # ម៉ូឌុលឧបករណ៍ប្រើប្រាស់ 22 (ស្ទ្រីម, TLS, ប្រូកស៊ី, ការកត់ត្រា)
 
-electron/                   # កម្មវិធី desktop Electron (ឆ្លងវេទិកា)
+electron/                   # កម្មវិធីកុំព្យូទ័រលើតុ Electron (ឆ្លងវេទិកា)
 
 tests/
-├── unit/                   # ឧបករណ៍ដំណើរការ test របស់ Node.js (ឯកសារ test ចំនួន 1,574)
-├── integration/            # test សមាហរណកម្ម
-├── e2e/                    # test របស់ Playwright
-├── security/               # test សុវត្ថិភាព
-├── translator/             # test ជាក់លាក់សម្រាប់ translator
-└── load/                   # test បន្ទុក
+├── unit/                   # កម្មវិធីដំណើរការតេស្ត Node.js (ឯកសារតេស្ត 1,574)
+├── integration/            # តេស្តសមាហរណកម្ម
+├── e2e/                    # តេស្ត Playwright
+├── security/               # តេស្តសុវត្ថិភាព
+├── translator/             # តេស្តជាក់លាក់សម្រាប់កម្មវិធីបកប្រែ
+└── load/                   # តេស្តបន្ទុក
 
 docs/
-├── adr/                     # កំណត់ត្រាសេចក្ដីសម្រេចផ្នែកស្ថាបត្យកម្ម
+├── adr/                     # កំណត់ត្រាការសម្រេចចិត្តផ្នែកស្ថាបត្យកម្ម
 ├── architecture/            # ស្ថាបត្យកម្មប្រព័ន្ធ និងភាពធន់
-├── comparison/              # OmniRoute ប្រៀបធៀបនឹងជម្រើសផ្សេងៗ
-├── compression/             # មគ្គុទ្ទេសក៍ និងច្បាប់នៃការបង្ហាប់
+├── comparison/              # OmniRoute ធៀបនឹងជម្រើសផ្សេងៗ
+├── compression/             # មគ្គុទ្ទេសក៍ និងក្បួនបង្ហាប់
 ├── dev/                     # មគ្គុទ្ទេសក៍អភិវឌ្ឍន៍
 ├── diagrams/                # ដ្យាក្រាមស្ថាបត្យកម្ម
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
 ├── guides/                  # មគ្គុទ្ទេសក៍អ្នកប្រើប្រាស់, Docker, ការដំឡើង, ការដោះស្រាយបញ្ហា
-├── i18n/                    # ការបកប្រែ README ជាភាសាអន្តរជាតិ
+├── i18n/                    # ការបកប្រែ README ជាអន្តរជាតិ
 ├── marketing/               # សម្ភារៈទីផ្សារ
-├── ops/                     # ការដាក់ឱ្យប្រើប្រាស់, proxy, coverage, ការចេញផ្សាយ
-├── providers/               # ឯកសារជាក់លាក់សម្រាប់ provider
-├── reference/               # ឯកសារយោង API, env vars, ឧបករណ៍ CLI, កម្រិតប្រើប្រាស់ឥតគិតថ្លៃ
-├── releases/                # កំណត់សម្គាល់ការចេញផ្សាយ
-├── routing/                 # ម៉ាស៊ីន auto-combo, ការចាក់ឡើងវិញនូវការវែកញែក
-├── screenshots/             # screenshot របស់ dashboard
-├── security/                # របាំងការពារ, អនុលោមភាព, ការលាក់បាំង, token
+├── ops/                     # ការដាក់ឱ្យប្រើប្រាស់ ប្រូកស៊ី ការគ្របដណ្ដប់ និងការចេញផ្សាយ
+├── providers/               # ឯកសារជាក់លាក់សម្រាប់អ្នកផ្តល់សេវា
+├── reference/               # ឯកសារយោង API, អថេរបរិស្ថាន, ឧបករណ៍ CLI, កម្រិតឥតគិតថ្លៃ
+├── releases/                # កំណត់ត្រាការចេញផ្សាយ
+├── routing/                 # ម៉ាស៊ីន auto-combo, ការចាក់ឡើងវិញនូវដំណើរការហេតុផល
+├── screenshots/             # រូបថតអេក្រង់ផ្ទាំងគ្រប់គ្រង
+├── security/                # របាំងការពារ អនុលោមភាព ភាពសម្ងាត់ និងថូខឹន
 └── specs/                   # លក្ខណៈបច្ចេកទេសនៃការរចនា
 ```
 

@@ -288,65 +288,72 @@ Tingnan ang `open-sse/utils/stream.ts` at `open-sse/utils/streamHandler.ts` para
 
 ---
 
-## Project Structure
+## Estruktura ng Proyekto
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Mga pahina ng dashboard (23 seksyon)
+│   ├── api/                # Mga ruta ng API (51 direktoryo)
+│   └── login/              # Mga pahina ng awtentikasyon (.tsx)
+├── domain/                 # Engine ng patakaran (policyEngine, comboResolver, costRules, atbp.)
+├── lib/                    # Pangunahing lohika ng negosyo (.ts)
+│   ├── a2a/                # Server ng Agent-to-Agent v0.3 protocol
+│   ├── acp/                # Registry ng Agent Communication Protocol
+│   ├── compliance/         # Engine ng patakaran sa pagsunod
+│   ├── db/                 # Mga domain module ng SQLite + 130 migrasyon
+│   ├── memory/             # Persistent na memorya ng pag-uusap
+│   ├── oauth/              # Mga provider, serbisyo, at utility ng OAuth
+│   ├── skills/             # Napapalawak na framework ng kasanayan
+│   ├── usage/              # Pagsubaybay sa paggamit at pagkalkula ng gastos
+│   └── localDb.ts          # Layer para lamang sa muling pag-export — huwag kailanman magdagdag ng lohika rito
+├── middleware/              # Middleware ng kahilingan (promptInjectionGuard)
+├── mitm/                   # MITM proxy (sertipiko, DNS, pagruruta ng target)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Mga React component (.tsx)
+│   ├── constants/          # Mga depinisyon ng provider (329), mga saklaw ng MCP, 19 na estratehiya sa pagruruta
+│   ├── utils/              # Circuit breaker, sanitizer, mga helper sa awtentikasyon
+│   └── validation/         # Mga schema ng Zod v4
+└── sse/                    # Pipeline ng SSE proxy
 
 open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+├── executors/              # 150 executor module (mga executor class + mga helper para sa bawat provider)
+├── handlers/               # 11 handler ng kahilingan (chat, responses, embeddings, images, atbp.)
+├── mcp-server/             # MCP server (110 natatanging tool, 3 transport, 33 saklaw)
+├── services/               # 178 top-level na serbisyo (combo, autoCombo, rateLimitManager, atbp.)
+├── translator/             # Mga tagasalin ng format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Transformer ng Responses API
+└── utils/                  # 22 utility module (stream, TLS, proxy, logging)
 
 electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js test runner (1,574 test file)
+├── integration/            # Mga integration test
+├── e2e/                    # Mga Playwright test
+├── security/               # Mga security test
+├── translator/             # Mga test na partikular sa translator
+└── load/                   # Mga load test
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Mga Architecture Decision Record
+├── architecture/            # Arkitektura at katatagan ng system
+├── comparison/              # OmniRoute kumpara sa mga alternatibo
+├── compression/             # Mga gabay at panuntunan sa compression
+├── dev/                     # Mga gabay sa development
+├── diagrams/                # Mga diagram ng arkitektura
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Gabay ng user, Docker, pag-setup, pag-troubleshoot
+├── i18n/                    # Mga naisaling README na pang-internasyonal
+├── marketing/               # Mga materyal sa marketing
+├── ops/                     # Deployment, proxy, coverage, mga release
+├── providers/               # Dokumentasyong partikular sa provider
+├── reference/               # Sanggunian ng API, mga env var, CLI tool, mga libreng tier
+├── releases/                # Mga tala sa release
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Mga screenshot ng dashboard
+├── security/                # Mga guardrail, pagsunod, stealth, mga token
+└── specs/                   # Mga espesipikasyon ng disenyo
 ```
 
 ---

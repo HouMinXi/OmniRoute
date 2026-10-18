@@ -235,13 +235,23 @@ Pri pripájaní xAI alebo Grok CLI nahraďte `1455` hodnotou `56121`/`56122` a `
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ vypíše tajný údaj IBA RAZ — skopírujte ho teraz
+#   ↳ vypíše tajný kľúč IBA RAZ — skopírujte ho teraz
 omniroute tokens list                 # maskované: ID, názov, rozsah, predpona, stav, platnosť
 omniroute tokens revoke <id|prefix>   # okamžité odvolanie
-omniroute tokens scopes               # vysvetlenie troch rozsahov
+omniroute tokens scopes               # vysvetlí tri rozsahy
 ```
 
-Príkazy `tokens` vyžadujú poverenie **správcu**. Tokeny môžete spravovať aj v ovládacom paneli v časti **Nastavenia → Prístupové tokeny** (vytvorenie, odvolanie, jednorazové skopírovanie).
+Príkazy `tokens` vyžadujú prihlasovacie údaje s oprávnením **admin**. Tokeny môžete spravovať aj
+na ovládacom paneli v časti **Settings → Access Tokens** (vytvorenie, odvolanie, jednorazové skopírovanie).
+
+Token nikdy nemožno vytvoriť s vyššími oprávneniami, než má jeho tvorca. Token
+`admin` môže vytvoriť iba operátor — prostredníctvom relácie ovládacieho panela,
+lokálneho CLI priamo na serveri, príkazu `omniroute connect` s heslom alebo
+inštancie s vypnutým prihlasovaním. Strojové prihlasovacie údaje (prístupový token
+`admin` alebo API kľúč s rozsahom `manage`/`admin`) môžu vytvárať iba tokeny
+`write` a `read`; požiadavka s `--scope admin` vráti `403`.
+
+Token nikdy nemožno vytvoriť s väčšími oprávneniami, než má jeho tvorca. Token `admin` môže vytvoriť iba prevádzkovateľ: z relácie ovládacieho panela, miestnym CLI priamo na serveri, pomocou `omniroute connect` s heslom alebo v inštancii s vypnutým prihlasovaním. Strojové prihlasovacie údaje (prístupový token `admin` alebo API kľúč s rozsahom `manage`/`admin`) môžu vytvárať iba tokeny `write` a `read`; požiadavka na `--scope admin` s týmito údajmi vráti `403`.
 
 ---
 

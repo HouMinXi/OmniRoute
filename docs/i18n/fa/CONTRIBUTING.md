@@ -283,65 +283,72 @@ npm run test:combo:live:vps:failover     # یک سناریوی واقعی failov
 
 ---
 
-## Project Structure
+## ساختار پروژه
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+├── app/                    # مسیریاب App در Next.js 16
+│   ├── (dashboard)/        # صفحات داشبورد (۲۳ بخش)
+│   ├── api/                # مسیرهای API (۵۱ پوشه)
+│   └── login/              # صفحات احراز هویت (.tsx)
+├── domain/                 # موتور سیاستگذاری (policyEngine، comboResolver، costRules و غیره)
+├── lib/                    # منطق اصلی کسبوکار (.ts)
+│   ├── a2a/                # سرور پروتکل Agent-to-Agent v0.3
+│   ├── acp/                # رجیستری Agent Communication Protocol
+│   ├── compliance/         # موتور سیاستگذاری انطباق
+│   ├── db/                 # ماژولهای دامنه SQLite بههمراه ۱۳۰ مهاجرت
+│   ├── memory/             # حافظه پایدار مکالمات
+│   ├── oauth/              # ارائهدهندگان، سرویسها و ابزارهای OAuth
+│   ├── skills/             # چارچوب مهارت توسعهپذیر
+│   ├── usage/              # ردیابی مصرف و محاسبه هزینه
+│   └── localDb.ts          # فقط لایه بازصادرکردن — هرگز در اینجا منطق اضافه نکنید
+├── middleware/              # میانافزار درخواست (promptInjectionGuard)
+├── mitm/                   # پراکسی MITM (گواهی، DNS، مسیریابی مقصد)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # مؤلفههای React (.tsx)
+│   ├── constants/          # تعاریف ارائهدهندگان (۳۲۹)، محدودههای MCP، ۱۹ راهبرد مسیریابی
+│   ├── utils/              # مدارشکن، پاکساز و ابزارهای احراز هویت
+│   └── validation/         # طرحوارههای Zod v4
+└── sse/                    # خط لوله پراکسی SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # فضای کاری @omniroute/open-sse
+├── executors/              # ۱۵۰ ماژول اجراکننده (کلاسهای اجراکننده و ابزارهای ویژه هر ارائهدهنده)
+├── handlers/               # ۱۱ کنترلکننده درخواست (گفتوگو، پاسخها، تعبیهها، تصاویر و غیره)
+├── mcp-server/             # سرور MCP (۱۱۰ ابزار منحصربهفرد، ۳ روش انتقال، ۳۳ محدوده)
+├── services/               # ۱۷۸ سرویس سطحبالا (combo، autoCombo، rateLimitManager و غیره)
+├── translator/             # مترجمهای قالب (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # تبدیلکننده Responses API
+└── utils/                  # ۲۲ ماژول ابزاری (جریان، TLS، پراکسی، ثبت گزارش)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # برنامه دسکتاپ Electron (چندسکویی)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # اجراکننده آزمون Node.js (۱٬۵۷۴ فایل آزمون)
+├── integration/            # آزمونهای یکپارچهسازی
+├── e2e/                    # آزمونهای Playwright
+├── security/               # آزمونهای امنیتی
+├── translator/             # آزمونهای اختصاصی مترجم
+└── load/                   # آزمونهای بار
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # سوابق تصمیمهای معماری
+├── architecture/            # معماری و تابآوری سیستم
+├── comparison/              # مقایسه OmniRoute با گزینههای جایگزین
+├── compression/             # راهنماها و قواعد فشردهسازی
+├── dev/                     # راهنماهای توسعه
+├── diagrams/                # نمودارهای معماری
+├── frameworks/              # MCP، A2A، OpenCode، Memory، Skills
+├── guides/                  # راهنمای کاربر، Docker، راهاندازی، عیبیابی
+├── i18n/                    # ترجمههای بینالمللیشده README
+├── marketing/               # محتوای بازاریابی
+├── ops/                     # استقرار، پراکسی، پوشش آزمون، انتشارها
+├── providers/               # مستندات اختصاصی ارائهدهندگان
+├── reference/               # مرجع API، متغیرهای محیطی، ابزارهای CLI، سطوح رایگان
+├── releases/                # یادداشتهای انتشار
+├── routing/                 # موتور ترکیب خودکار، بازپخش استدلال
+├── screenshots/             # نماگرفتهای داشبورد
+├── security/                # حفاظها، انطباق، حالت پنهان، توکنها
+└── specs/                   # مشخصات طراحی
 ```
 
 ---

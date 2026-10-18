@@ -114,46 +114,46 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (էջեր + API երթուղիներ + կարգավիճակի էջեր + գլխավոր էջ)
-├── lib/                 # Հիմնական գրադարաններ / տիրույթի մոդուլներ (80 ենթապանակ + վերին մակարդակի մոտ 70 ֆայլ)
-├── domain/              # Մաքուր տիրույթային տրամաբանություն (քաղաքականությունների շարժիչ, պահուստային մեխանիզմ, ծախս, արգելափակում, comboResolver, գնահատում)
-├── server/              # Միայն սերվերի համար նախատեսված մոդուլներ (authz կոնվեյեր, cors, նույնականացման միջնաշերտ) — չեն կարող ներմուծվել հաճախորդային մասից
-├── shared/              # Անվտանգության դեպքում համօգտագործվում է սերվերի և հաճախորդի միջև (հաստատուններ, տիպեր, վավերացում, պայմանագրեր, օժանդակ գործիքներ)
-├── i18n/                # next-intl կազմաձևում + հաղորդագրությունների JSON՝ ըստ տեղայնացման (42 տեղայնացում)
-├── middleware/          # Next.js միջնաշերտ (հարցումների հարստացում, տեղայնացման հայտնաբերում)
-├── mitm/                # MITM պրոքսիի միջուկ՝ վկայագրերի ստեղծում/տեղադրում, մշակիչներ, թիրախներ, տեսուչ, դիմակներ, անմիջական փոխանցում
-│   ├── handlers/        # MitmHandlerBase-ը ընդլայնող IDE գործակալների մշակիչների 9 դաս (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Թրաֆիկի գրանցման շերտ՝ բուֆեր (օղակաձև՝ հիշողության մեջ), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Մոդելների ադապտերների կապակցող շերտ (ժառանգական համատեղելիության միջնաշերտ)
-├── scripts/             # Նախագծի ծառի ներսում գտնվող սպասարկման սկրիպտներ (օրինակ՝ backfillAggregation)
-├── sse/                 # Ժառանգական SSE մշակիչներ/ծառայություններ (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Ժառանգական՝ հիշողության մեջ պահվող պահոց (աստիճանաբար փոխարինվում է src/lib/db-ով)
+├── app/                 # App Router (էջեր + API երթուղիներ + կարգավիճակի էջեր + վայրէջքի էջ)
+├── lib/                 # Հիմնական գրադարաններ / դոմենային մոդուլներ (80 ենթապանակ + ~70 վերին մակարդակի ֆայլ)
+├── domain/              # Մաքուր դոմենային տրամաբանություն (քաղաքականությունների շարժիչ, պահուստային անցում, արժեք, արգելափակում, comboResolver, գնահատում)
+├── server/              # Միայն սերվերի համար նախատեսված մոդուլներ (authz խողովակաշար, cors, նույնականացման միջանկյալ շերտ) — չեն կարող ներմուծվել կլիենտից
+├── shared/              # Համօգտագործվում է սերվերի և կլիենտի միջև, երբ դա անվտանգ է (հաստատուններ, տիպեր, վավերացում, պայմանագրեր, օգտակար գործիքներ)
+├── i18n/                # next-intl կարգավորում + ըստ տեղայնացման հաղորդագրությունների JSON (42 տեղայնացում)
+├── middleware/          # Next.js միջանկյալ շերտ (հարցման հարստացում, տեղայնացման հայտնաբերում)
+├── mitm/                # MITM պրոքսիի միջուկ՝ վկայագրի գեներացում/տեղադրում, մշակիչներ, թիրախներ, տեսուչ, դիմակներ, անմիջական փոխանցում
+│   ├── handlers/        # MitmHandlerBase-ն ընդլայնող IDE գործակալների մշակիչների 9 դաս (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Երթևեկի որսման շերտ՝ բուֆեր (հիշողության մեջ գտնվող օղակաձև բուֆեր), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Մոդելի ադապտերի կապակցող շերտ (ժառանգված համատեղելիության շերտ)
+├── scripts/             # Նախագծի ներսում պահպանման սկրիպտներ (օրինակ՝ backfillAggregation)
+├── sse/                 # Ժառանգված SSE մշակիչներ/ծառայություններ (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Ժառանգված՝ հիշողության մեջ պահվող շտեմարան (աստիճանաբար փոխարինվում է src/lib/db-ով)
 ├── types/               # Համօգտագործվող TS տիպերի ֆայլեր
-├── instrumentation.ts   # Next.js հեռաչափության հանգույց (դիտարկիչ + edge)
+├── instrumentation.ts   # Next.js հեռաչափության կեռիկ (դիտարկիչ + եզրային միջավայր)
 ├── instrumentation-node.ts  # Միայն Node-ի համար նախատեսված գործիքավորում
-└── proxy.ts             # HTTP պրոքսիի մուտքային համատեղելիության միջնաշերտ
+└── proxy.ts             # HTTP պրոքսիի մուտքային համատեղելիության շերտ
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Path                                                                         | Purpose                                                                                                                                                                                                                                                                                                                   |
+| Ուղի                                                                         | Նպատակ                                                                                                                                                                                                                                                                                                                    |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Հանրային OpenAI-ի հետ համատեղելի API (~25 ենթաերթուղի՝ զրույց, լրացումներ, ներդրված ներկայացումներ, ֆայլեր, փաթեթներ, աուդիո, պատկերներ, տեսանյութեր, երաժշտություն, վերադասակարգում, մոդերացիա, որոնում, ws, գործակալներ, հաշիվներ, մատակարարներ և այլն)                                                                 |
+| `app/api/v1/`                                                                | Հանրային OpenAI-համատեղելի API (~25 ենթաերթուղի՝ chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers և այլն)                                                                                                                        |
 | `app/api/v1beta/`                                                            | Gemini ոճի API վերջնակետեր                                                                                                                                                                                                                                                                                                |
-| `app/api/playground/`                                                        | Playground Studio-ի երթուղիներ՝ `improve-prompt/` (POST — LLM հուշման վերաձևակերպիչ), `presets/` (GET ցուցակ / POST ստեղծում), `presets/[id]/` (GET / PUT / DELETE) — տե՛ս `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                         |
-| `app/api/` (ոչ v1)                                                           | Կառավարման/ադմինիստրատիվ երթուղիներ (~60 պանակ՝ մատակարարներ, համակցություններ, կարգավորումներ, mcp, a2a, գնահատումներ, հիշողություն, հմտություններ, վեբհուկեր, համապատասխանություն, կայունություն, մշտադիտարկում, թունելներ, cli գործիքներ և այլն)                                                                       |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 երթուղի (սերվերի կառավարում, գործակալի վիճակ/DNS/համապատասխանեցումներ, շրջանցում, վկայագիր, վերին մակարդակի CA)։ LOCAL_ONLY + SPAWN_CAPABLE։ Տե՛ս `docs/frameworks/AGENTBRIDGE.md §7`։                                                                                                          |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ երթուղի (հարցումներ, աշխատաշրջաններ, հոսթեր, գրանցման ռեժիմներ, արտահանում, ws)։ LOCAL_ONLY + SPAWN_CAPABLE։ Տե՛ս `docs/frameworks/TRAFFIC_INSPECTOR.md §8`։                                                                                                                        |
+| `app/api/playground/`                                                        | Playground Studio-ի երթուղիներ՝ `improve-prompt/` (POST — LLM հուշման վերաշարադրիչ), `presets/` (GET ցուցակ / POST ստեղծում), `presets/[id]/` (GET / PUT / DELETE) — տե՛ս `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                          |
+| `app/api/` (ոչ v1)                                                           | Կառավարման/ադմինիստրատիվ երթուղիներ (~60 պանակ՝ providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools և այլն)                                                                                                                                    |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 երթուղի (սերվերի կառավարում, գործակալի վիճակ/DNS/համապատասխանեցումներ, շրջանցում, վկայագիր, վերին մակարդակի CA): LOCAL_ONLY + SPAWN_CAPABLE։ Տե՛ս `docs/frameworks/AGENTBRIDGE.md §7`։                                                                                                          |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ երթուղի (հարցումներ, աշխատաշրջաններ, հոսթեր, գրանցման ռեժիմներ, արտահանում, ws): LOCAL_ONLY + SPAWN_CAPABLE։ Տե՛ս `docs/frameworks/TRAFFIC_INSPECTOR.md §8`։                                                                                                                        |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 մուտքի կետ (`POST /a2a`)                                                                                                                                                                                                                                                                                 |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (հայտնաբերում)                                                                                                                                                                                                                                                                                             |
-| `app/(dashboard)/dashboard/`                                                 | Վահանակի UI էջեր (50+ բաժին, ~118 page.tsx ֆայլ՝ մատակարարներ, համակցություններ, կարգավորումներ, հիշողություն, հմտություններ, վեբհուկեր, գնահատումներ, աուդիտ, փաթեթներ, քեշ, ծախսեր, առողջական վիճակ, համակարգ, ակտիվություն և այլն)                                                                                     |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio-ի UI (3 ներդիր՝ Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — տե՛ս `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                          |
+| `app/.well-known/agent.json/`                                                | A2A գործակալի քարտ (հայտնաբերում)                                                                                                                                                                                                                                                                                         |
+| `app/(dashboard)/dashboard/`                                                 | Կառավարման վահանակի UI էջեր (50+ բաժին, ~118 page.tsx ֆայլ՝ providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity և այլն)                                                                                                                                    |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ներդիր՝ Որոնում/Քերում/Համեմատում + SearchConceptCard + ProviderCatalog) — տե՛ս `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                        |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (պլան 21)՝ `page.tsx` (3 ներդիրով կաղապար), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge վահանակի էջ — սերվերի քարտ, 9 գործակալի քարտ, կարգավորման օգնական, մոդելների համապատասխանեցում, շրջանցման ցուցակ։ i18n PT-BR + EN։ Տե՛ս `docs/frameworks/AGENTBRIDGE.md`։                                                                                                                                     |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector վահանակի էջ — DevTools բաժանված տեսք, մանրամասների 7 ներդիր, գրանցման ռեժիմի 4 փոխարկիչ, աշխատաշրջանի գրանցիչ, համատեքստային գունավորում։ i18n PT-BR + EN։ Տե՛ս `docs/frameworks/TRAFFIC_INSPECTOR.md`։                                                                                                 |
-| `app/(dashboard)/dashboard/activity/`                                        | Ակտիվության հոսքի էջ (Խումբ B)՝ `page.tsx` (սերվերային) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — տե՛ս `docs/architecture/MONITORING_SECTIONS.md`                                                                                                             |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge կառավարման վահանակի էջ — սերվերի քարտ, գործակալի 9 քարտ, կարգավորման օգնական, մոդելների համապատասխանեցում, շրջանցման ցանկ։ i18n PT-BR + EN։ Տե՛ս `docs/frameworks/AGENTBRIDGE.md`։                                                                                                                            |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector կառավարման վահանակի էջ — DevTools բաժանված տեսք, մանրամասների 7 ներդիր, գրանցման ռեժիմի 4 փոխարկիչ, աշխատաշրջանի գրանցիչ, համատեքստային գունավորում։ i18n PT-BR + EN։ Տե՛ս `docs/frameworks/TRAFFIC_INSPECTOR.md`։                                                                                      |
+| `app/(dashboard)/dashboard/activity/`                                        | Գործունեության հոսքի էջ (Խումբ B)՝ `page.tsx` (սերվերային) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — տե՛ս `docs/architecture/MONITORING_SECTIONS.md`                                                                                                          |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Քվոտայի համօգտագործման էջ (Խումբ B)՝ `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Մատակարարի պլանի կազմաձևման էջ (Խումբ B)՝ `page.tsx` + `ProviderPlanConfigClient.tsx` — քվոտայի չափումներ՝ ըստ միացման վերագրմամբ                                                                                                                                                                                         |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Մատակարարի պլանի կազմաձևման էջ (Խումբ B)՝ `page.tsx` + `ProviderPlanConfigClient.tsx` — քվոտայի չափումներ՝ ըստ կապի վերագրմամբ                                                                                                                                                                                            |
 | `app/docs/`                                                                  | Ներկառուցված փաստաթղթերի դիտիչ (արտապատկերում է `docs/*.md`-ը)                                                                                                                                                                                                                                                            |
 | `app/landing/`                                                               | Մարքեթինգային վայրէջքի էջ                                                                                                                                                                                                                                                                                                 |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Նույնականացմանն առնչվող էջեր                                                                                                                                                                                                                                                                                              |
@@ -164,68 +164,68 @@ src/
 
 ### `src/lib/` — Հիմնական գրադարաններ (~50 մոդուլ)
 
-| Մոդուլ                                   | Նպատակ                                                                                                                                                                                                                                                                                                                               |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`                                   | A2A արձանագրության առաջադրանքների կառավարիչ, հմտություններ (5), հոսքային փոխանցում                                                                                                                                                                                                                                                   |
-| `acp/`                                   | CLI գործակալների գրանցամատյան (տեղային CLI-ի հայտնաբերում — տե՛ս `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                         |
-| `api/`                                   | Համօգտագործվող API օժանդակ գործիքներ (`requireManagementAuth`, վավերացում)                                                                                                                                                                                                                                                           |
-| `auth/`                                  | Նստաշրջան, գաղտնաբառերի հեշավորում, թոքենների վավերացում                                                                                                                                                                                                                                                                             |
-| `batches/`                               | OpenAI Batches API-ի մշակիչներ                                                                                                                                                                                                                                                                                                       |
-| `catalog/`                               | Մատակարարների կատալոգի Zod վավերացում + հնարավորությունների որոշում                                                                                                                                                                                                                                                                  |
-| `cloudAgent/`                            | Ամպային գործակալներ (Codex Cloud, Devin, Jules) — տե՛ս `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                              |
-| `combos/`                                | Համակցությունների որոշման + վերադասավորման օժանդակ գործիքներ                                                                                                                                                                                                                                                                         |
-| `audit/`                                 | Գործունեության հոսքի օժանդակ գործիքներ՝ `highLevelActions.ts` (թույլատրվածների ցանկ + `isHighLevelAction()`), `activityIcons.ts` (գործողություն → պատկերակ/բայ համապատասխանեցում), `timeline.ts` (groupByDay/relativeTime) — տե՛ս `docs/architecture/MONITORING_SECTIONS.md`                                                         |
-| `compliance/`                            | Աուդիտի մատյան + մատակարարի աուդիտ — տե՛ս `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                              |
-| `compression/`                           | Սեղմման շարժիչի կապակցող շերտ (շարժիչները գտնվում են `open-sse/services/compression/`-ում)                                                                                                                                                                                                                                           |
-| `config/`                                | Կատարման ժամանակի կազմաձևման օժանդակ գործիքներ                                                                                                                                                                                                                                                                                       |
-| `db/`                                    | Տիրույթի տվյալների բազայի 120+ մոդուլ + 168 միգրացիա (SQLite-ի համար միշտ աշխատեք այս շերտի միջոցով)                                                                                                                                                                                                                                 |
-| `quota/`                                 | Քվոտաների համօգտագործման շարժիչ՝ `dimensions.ts` (տեսակներ/Zod), `types.ts` (QuotaStore միջերես), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — տե՛ս `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radar-ի անվճար մոդելների կատալոգի հաճախորդ՝ `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — տե՛ս `docs/frameworks/RADAR.md`                                                                                                                                             |
-| `display/`                               | UI-ի ձևաչափման օժանդակ գործիքներ (արժեք, ուշացում և այլն)                                                                                                                                                                                                                                                                            |
-| `embeddings/`                            | Ներդրումների ծառայության օժանդակ գործիքներ                                                                                                                                                                                                                                                                                           |
-| `env/`                                   | Միջավայրի փոփոխականների վերլուծում + վավերացում                                                                                                                                                                                                                                                                                      |
-| `evals/`                                 | Գնահատման ֆրեյմվորք (հավաքածուներ, գործարկիչ, կատարման միջավայր) — տե՛ս `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                   |
-| `guardrails/`                            | PII քողարկիչ, հուշման ներարկում, տեսողական կամուրջ — տե՛ս `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                              |
-| `jobs/`                                  | Ֆոնային առաջադրանքներ (cron-ի նման)                                                                                                                                                                                                                                                                                                  |
-| `memory/`                                | Զրույցային հիշողություն (SQLite FTS5 + sqlite-vec հիբրիդային RRF + Qdrant-ի 2-րդ մակարդակ) — տե՛ս `docs/frameworks/MEMORY.md`                                                                                                                                                                                                        |
-| `memory/embedding/`                      | Բազմաղբյուր ներդրումների շերտ՝ `index.ts` (որոշիչ), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (պլան 21)                                                                                                                                                                                         |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9-ի փաթաթիչ — KNN-ի ամբողջական որոնում + հիբրիդային RRF (FTS5 + վեկտոր, k=60)։ Ծույլ սկզբնավորում, սահուն կերպով նվազեցնում է ֆունկցիոնալությունը, երբ sqlite-vec-ն անհասանելի է։ (պլան 21)                                                                                                                          |
-| `memory/reindex.ts`                      | `runReindexBatch()` — ֆոնային ռեժիմում մշակում է `needs_reindex=1` ունեցող հիշողությունները․ կանչվում է `POST /api/memory/reindex`-ի և ծույլ հետլրացման ուղու միջոցով։ (պլան 21)                                                                                                                                                     |
-| `monitoring/`                            | Առողջության ստուգումներ, մետրիկաների արտահանում                                                                                                                                                                                                                                                                                      |
-| `oauth/`                                 | OAuth/ներմուծման հոսքեր՝ 22 մատակարարի մոդուլների համար (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                  |
-| `plugins/`                               | Փլագինների ռեեստր                                                                                                                                                                                                                                                                                                                    |
-| `promptCache/`                           | Anthropic ոճի հուշումների քեշի ընդհատման կետեր                                                                                                                                                                                                                                                                                       |
-| `skills/`                                | Հմտությունների ֆրեյմվորք (ներկառուցված + մարքեթփլեյս + SkillsSH) — տե՛ս `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                  |
-| `playground/`                            | Playground Studio-ի համօգտագործվող օժանդակ գործիքներ՝ `codeExport.ts` (curl/Python/TS գեներատոր), `promptImprover.ts` (մետա-հուշման կառուցիչ), `streamMetrics.ts` (մաքուր TTFT/TPS), `types.ts` (գնագոյացման աղյուսակ) — տե՛ս `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                 |
-| `webhookDispatcher.ts`                   | HMAC webhook-ի առաքում — տե՛ս `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                          |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Թունելների կառավարիչներ — տե՛ս `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                           |
-| `cloudSync.ts`, `initCloudSync.ts`       | Վիճակի ընտրովի ամպային համաժամացում                                                                                                                                                                                                                                                                                                  |
-| `localDb.ts`                             | db մոդուլների վերաարտահանման barrel (առանց տրամաբանության՝ միայն վերաարտահանումներ)                                                                                                                                                                                                                                                  |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Հարցումների քեշավորում + իդեմպոտենտություն                                                                                                                                                                                                                                                                                           |
-| (ևս ~30 վերին մակարդակի ֆայլ)            | Մասնագիտացված օժանդակ գործիքներ (logEnv, modelsDevSync, piiSanitizer և այլն)                                                                                                                                                                                                                                                         |
+| Մոդուլ                                   | Նպատակ                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`                                   | A2A արձանագրության առաջադրանքների կառավարիչ, հմտություններ (5), հոսքային փոխանցում                                                                                                                                                                                                                                                         |
+| `acp/`                                   | CLI գործակալների ռեեստր (տեղային CLI-ի հայտնաբերում — տե՛ս `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                     |
+| `api/`                                   | Ընդհանուր API օժանդակ գործիքներ (`requireManagementAuth`, վավերացում)                                                                                                                                                                                                                                                                      |
+| `auth/`                                  | Սեսիա, գաղտնաբառերի հեշավորում, տոկենների վավերացում                                                                                                                                                                                                                                                                                       |
+| `batches/`                               | OpenAI Batches API-ի մշակիչներ                                                                                                                                                                                                                                                                                                             |
+| `catalog/`                               | Մատակարարների կատալոգի Zod վավերացում + հնարավորությունների որոշում                                                                                                                                                                                                                                                                        |
+| `cloudAgent/`                            | Ամպային գործակալներ (Codex Cloud, Devin, Jules) — տե՛ս `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                    |
+| `combos/`                                | Կոմբինացիաների որոշման + վերադասավորման օժանդակ գործիքներ                                                                                                                                                                                                                                                                                  |
+| `audit/`                                 | Գործունեության հոսքի օժանդակ գործիքներ՝ `highLevelActions.ts` (թույլատրելի գործողությունների ցանկ + `isHighLevelAction()`), `activityIcons.ts` (գործողություն → պատկերակ/բայ համապատասխանեցում), `timeline.ts` (groupByDay/relativeTime) — տե՛ս `docs/architecture/MONITORING_SECTIONS.md`                                                 |
+| `compliance/`                            | Աուդիտի մատյան + մատակարարների աուդիտ — տե՛ս `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                                 |
+| `compression/`                           | Սեղմման շարժիչի կապակցող շերտ (շարժիչները գտնվում են `open-sse/services/compression/`-ում)                                                                                                                                                                                                                                                 |
+| `config/`                                | Կատարման ժամանակի կազմաձևման օժանդակ գործիքներ                                                                                                                                                                                                                                                                                             |
+| `db/`                                    | Տիրույթային DB-ի 120+ մոդուլ + 168 միգրացիա (SQLite-ի համար միշտ աշխատեք այս շերտի միջոցով)                                                                                                                                                                                                                                                |
+| `quota/`                                 | Քվոտաների համատեղ օգտագործման շարժիչ՝ `dimensions.ts` (տիպեր/Zod), `types.ts` (`QuotaStore` ինտերֆեյս), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — տե՛ս `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Radar-ի անվճար մոդելների կատալոգի հաճախորդ՝ `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — տե՛ս `docs/frameworks/RADAR.md`                                                                                                                                                   |
+| `display/`                               | UI-ի ձևաչափման օժանդակ գործիքներ (արժեք, ուշացում և այլն)                                                                                                                                                                                                                                                                                  |
+| `embeddings/`                            | Ներդրումների ծառայության օժանդակ գործիքներ                                                                                                                                                                                                                                                                                                 |
+| `env/`                                   | Միջավայրի փոփոխականների վերլուծում + վավերացում                                                                                                                                                                                                                                                                                            |
+| `evals/`                                 | Գնահատման ենթակառուցվածք (հավաքածուներ, գործարկիչ, կատարման միջավայր) — տե՛ս `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                    |
+| `guardrails/`                            | PII քողարկիչ, հրահանգների ներարկումից պաշտպանություն, տեսողական կամուրջ — տե՛ս `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                               |
+| `jobs/`                                  | Ֆոնային առաջադրանքներ (cron-ի նման)                                                                                                                                                                                                                                                                                                        |
+| `memory/`                                | Զրույցային հիշողություն (SQLite FTS5 + sqlite-vec հիբրիդային RRF + Qdrant 2-րդ մակարդակ) — տե՛ս `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                |
+| `memory/embedding/`                      | Ներդրումների բազմաղբյուր շերտ՝ `index.ts` (լուծիչ), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (պլան 21)                                                                                                                                                                                               |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 փաթաթիչ — KNN ամբողջական որոնում + հիբրիդային RRF (FTS5 + վեկտոր, k=60)։ Ծույլ սկզբնավորում, sqlite-vec-ի անհասանելիության դեպքում աշխատունակությունը նրբորեն նվազում է։ (պլան 21)                                                                                                                                       |
+| `memory/reindex.ts`                      | `runReindexBatch()` — ֆոնային ռեժիմում մշակում է `needs_reindex=1` ունեցող հիշողությունները. կանչվում է `POST /api/memory/reindex`-ի և ծույլ հետլրացման ուղու միջոցով։ (պլան 21)                                                                                                                                                           |
+| `monitoring/`                            | Առողջական վիճակի ստուգումներ, չափիչների արտահանում                                                                                                                                                                                                                                                                                         |
+| `oauth/`                                 | OAuth/ներմուծման հոսքեր՝ մատակարարների 22 մոդուլների համար (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                     |
+| `plugins/`                               | Փլագինների ռեեստր                                                                                                                                                                                                                                                                                                                          |
+| `promptCache/`                           | Anthropic ոճի հուշումների քեշի բաժանման կետեր                                                                                                                                                                                                                                                                                              |
+| `skills/`                                | Հմտությունների ենթակառուցվածք (ներկառուցված + շուկա + SkillsSH) — տե՛ս `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                         |
+| `playground/`                            | Playground Studio-ի համօգտագործվող օժանդակ գործիքներ՝ `codeExport.ts` (curl/Python/TS գեներատոր), `promptImprover.ts` (մետա-հուշման կառուցիչ), `streamMetrics.ts` (մաքուր TTFT/TPS), `types.ts` (գնագոյացման աղյուսակ) — տե՛ս `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                       |
+| `webhookDispatcher.ts`                   | HMAC վեբհուկի առաքում — տե՛ս `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                                 |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Թունելների կառավարիչներ — տե՛ս `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                                 |
+| `cloudSync.ts`, `initCloudSync.ts`       | Վիճակի ընտրովի ամպային համաժամացում                                                                                                                                                                                                                                                                                                        |
+| `localDb.ts`                             | Վերաարտահանման կենտրոնական մոդուլ db մոդուլների համար (առանց տրամաբանության՝ միայն վերաարտահանումներ)                                                                                                                                                                                                                                      |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | Հարցումների քեշավորում + իդեմպոտենտություն                                                                                                                                                                                                                                                                                                 |
+| (~30 այլ վերին մակարդակի ֆայլեր)         | Մասնագիտացված օժանդակ գործիքներ (logEnv, modelsDevSync, piiSanitizer և այլն)                                                                                                                                                                                                                                                               |
 
 ### `src/lib/db/` — Տվյալների բազա (137 մոդուլ + 193 միգրացիա)
 
-| Ենթապանակ                 | Նպատակ                                                                                                                                                                                         |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton՝ WAL ժուռնալավորմամբ                                                                                                                                               |
-| `db/migrations/`          | Տարբերակավորված SQL ֆայլեր (իդեմպոտենտ, տրանզակցիոն)։ `073_memory_vec.sql`-ը ավելացնում է `memory_vec_meta` + `needs_reindex` սյունակը (պլան 21)։                                              |
-| `db/playgroundPresets.ts` | CRUD մոդուլ՝ Playground Studio-ի նախադրույթների համար (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)           |
-| `db/memoryVec.ts`         | CRUD՝ `memory_vec_meta`-ի համար (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` և այլն (պլան 21)                              |
-| `db/<domain>.ts`          | Մեկ մոդուլ յուրաքանչյուր տիրույթի համար՝ providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache և այլն։ |
+| Ենթապանակ                 | Նպատակ                                                                                                                                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` եզակի օրինակ՝ WAL մատենավորմամբ                                                                                                                                               |
+| `db/migrations/`          | Տարբերակավորված SQL ֆայլեր (իդեմպոտենտ, տրանզակցիոն)։ `073_memory_vec.sql`-ը ավելացնում է `memory_vec_meta` + `needs_reindex` սյունակը (պլան 21)։                                               |
+| `db/playgroundPresets.ts` | CRUD մոդուլ Playground Studio-ի նախակարգավորումների համար (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)        |
+| `db/memoryVec.ts`         | CRUD՝ `memory_vec_meta`-ի համար (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` և այլն (պլան 21)                               |
+| `db/<domain>.ts`          | Մեկ մոդուլ՝ յուրաքանչյուր տիրույթի համար՝ providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache և այլն։ |
 
 ### `src/domain/`
 
-| Մոդուլ                 | Նպատակ                                                              |
-| ---------------------- | ------------------------------------------------------------------- |
-| `policy.ts`            | Քաղաքականությունների շարժիչ                                         |
-| `fallbackPolicy.ts`    | Պահուստային տարբերակի ընտրության որոշումների ծառ                    |
-| `costRules.ts`         | Արժեքի հաշվարկման կանոններ                                          |
-| `lockoutPolicy.ts`     | Մոդելի/միացման արգելափակման քաղաքականություն                        |
-| `tagRouter.ts`         | Թեգերի վրա հիմնված երթուղավորում                                    |
-| `comboResolver.ts`     | Կոմբինացիայի որոշում (օգտագործվում է կոմբինացիաների շարժիչի կողմից) |
-| `modelAvailability.ts` | Յուրաքանչյուր մոդելի հասանելիության ստուգում                        |
-| `assessment/`          | Մոդելի գնահատում (RFC-AUTO-ASSESSMENT-ի փուլ 1)                     |
+| Մոդուլ                 | Նպատակ                                                                      |
+| ---------------------- | --------------------------------------------------------------------------- |
+| `policy.ts`            | Քաղաքականությունների շարժիչ                                                 |
+| `fallbackPolicy.ts`    | Պահուստային տարբերակի ընտրության որոշումների ծառ                            |
+| `costRules.ts`         | Արժեքի հաշվարկման կանոններ                                                  |
+| `lockoutPolicy.ts`     | Մոդելի/կապի արգելափակման քաղաքականություն                                   |
+| `tagRouter.ts`         | Պիտակների վրա հիմնված երթուղավորում                                         |
+| `comboResolver.ts`     | Համակցությունների լուծում (օգտագործվում է համակցությունների շարժիչի կողմից) |
+| `modelAvailability.ts` | Յուրաքանչյուր մոդելի հասանելիության ստուգում                                |
+| `assessment/`          | Մոդելի գնահատում (RFC-AUTO-ASSESSMENT-ի փուլ 1)                             |
 
 ### `src/server/`
 
@@ -233,66 +233,64 @@ src/
 | -------- | ---------------------------------------------------------------------------------------------------- |
 | `authz/` | Լիազորման խողովակաշար՝ `classify` → `policies` → `enforce` — տե՛ս `docs/architecture/AUTHZ_GUIDE.md` |
 | `cors/`  | CORS-ի կազմաձևում                                                                                    |
-| `auth/`  | Սեսիայի միջնաշերտ                                                                                    |
+| `auth/`  | Աշխատաշրջանի միջնաշերտ                                                                               |
 
 ### `src/shared/`
 
-| Մոդուլ                           | Նպատակ                                                                             |
-| -------------------------------- | ---------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **355 մատակարար**՝ Zod վավերացմամբ (ճշմարտության առաջնային աղբյուր)                |
-| `constants/cliTools.ts`          | Արտաքին CLI գործիքների ռեեստր                                                      |
-| `constants/routingStrategies.ts` | **19 երթուղավորման ռազմավարություն**՝ առաջնահերթություններով                       |
-| `constants/publicApiRoutes.ts`   | Երթուղիներ, որոնք պահանջում են Bearer (ի տարբերություն կառավարման) նույնականացում  |
-| `constants/upstreamHeaders.ts`   | Վերնագրերի արգելացանկ՝ վերին հոսքի հարցումների համար                               |
-| `validation/schemas.ts`          | ~80 Zod սխեմա (API պայմանագրերի ճշմարտության միակ աղբյուր)                         |
-| `validation/helpers.ts`          | Zod վավերացման օժանդակ գործառույթներ (`validateBody` և այլն)                       |
-| `types/`                         | Համօգտագործվող TS տեսակներ                                                         |
-| `contracts/`                     | Հանրային API պայմանագրեր (օգտագործվում են `package.json`-ի `files:`-ի կողմից)      |
-| `utils/circuitBreaker.ts`        | Մատակարարի շղթայի անջատիչ (տե՛ս `docs/architecture/RESILIENCE_GUIDE.md`)           |
-| `utils/apiAuth.ts`               | API բանալու վավերացում, հասանելիության տիրույթի ստուգում                           |
-| `utils/fetchTimeout.ts`          | Ժամանակի սպառման/ընդհատման փաթաթիչներ՝ վերին հոսքից տվյալների ստացման համար        |
-| `utils/releaseNotes.ts`          | Փակված v2/հին տարբերակի հայտարարությունների վերլուծիչ, տեղայնացում և ID-ի անտեսում |
+| Մոդուլ                           | Նպատակ                                                                            |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| `constants/providers.ts`         | **372 պրովայդեր**՝ Zod վավերացմամբ (ճշմարտության հիմնական աղբյուր)                |
+| `constants/cliTools.ts`          | Արտաքին CLI գործիքների ռեեստր                                                     |
+| `constants/routingStrategies.ts` | **19 երթուղավորման ռազմավարություն**՝ առաջնահերթություններով                      |
+| `constants/publicApiRoutes.ts`   | Երթուղիներ, որոնք պահանջում են Bearer (ի տարբերություն կառավարման) նույնականացում |
+| `constants/upstreamHeaders.ts`   | Վերնագրերի արգելացանկ՝ վերին հոսքի հարցումների համար                              |
+| `validation/schemas.ts`          | ~80 Zod սխեմա (API պայմանագրերի ճշմարտության միակ աղբյուր)                        |
+| `validation/helpers.ts`          | Zod վավերացման օժանդակիչներ (`validateBody` և այլն)                               |
+| `types/`                         | Համօգտագործվող TS տիպեր                                                           |
+| `contracts/`                     | Հանրային API պայմանագրեր (օգտագործվում են `package.json`-ի `files:`-ի կողմից)     |
+| `utils/circuitBreaker.ts`        | Պրովայդերի շղթայի անջատիչ (տե՛ս `docs/architecture/RESILIENCE_GUIDE.md`)          |
+| `utils/apiAuth.ts`               | API բանալու վավերացում, հասանելիության շրջանակի ստուգում                          |
+| `utils/fetchTimeout.ts`          | Ժամանակի սպառման/ընդհատման փաթեթիչներ՝ վերին հոսքից տվյալների ստացման համար       |
+| `utils/releaseNotes.ts`          | Փակ v2/հին հայտարարությունների վերլուծիչ, տեղայնացում և ID-ով անտեսում            |
 
 ---
 
-## `open-sse/` — Հոսքային շարժիչի աշխատանքային տարածք
+## `open-sse/` — Հոսքային մշակման շարժիչի աշխատանքային տարածք
 
-Առանձին npm աշխատանքային տարածք (`@omniroute/open-sse`)։ Կառավարում է հարցումների մշակումը և մատակարարների կատարումը։
+Առանձին npm աշխատանքային տարածք (`@omniroute/open-sse`)։ Մշակում է հարցումները և իրականացնում մատակարարների գործարկումը։
 
 ```
 open-sse/
-├── handlers/            # 16 ֆայլ (12 մշակիչ + 4 օժանդակ բաղադրիչ)՝ chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search և այլն։
-├── executors/           # Մատակարարներին հատուկ 67 կատարիչ (ընդլայնում են BaseExecutor-ը)
-├── translator/          # Ձևաչափի փոխարկիչներ (9 հարցման, 9 պատասխանի, 9 օժանդակ)
+├── handlers/            # 16 ֆայլ (12 մշակիչ + 4 օժանդակ բաղադրիչ)՝ chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search և այլն
+├── executors/           # Գործարկիչների 150 մոդուլ (BaseExecutor-ն ընդլայնող դասեր + յուրաքանչյուր մատակարարի համար նախատեսված օժանդակ բաղադրիչներ)
+├── translator/          # Ձևաչափի փոխարկիչներ (9 հարցման, 9 պատասխանի, 9 օժանդակ բաղադրիչ)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ ծառայության մոդուլ (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM և այլն)
-├── mcp-server/          # MCP սերվեր (110 գործիք, 3 փոխադրամիջոց, 33 տիրույթ)
-├── config/              # Մատակարարների/մոդելների գրանցամատյաններ, վերնագրերի կազմաձևում, մոդելների այլանուններ
-├── utils/               # TLS հաճախորդ, պրոքսի հարցում/դիսպետչեր, ցանցային օժանդակ բաղադրիչներ
-├── index.ts             # Աշխատանքային տարածքի մուտքային կետ
+├── mcp-server/          # MCP սերվեր (110 գործիք, 3 փոխադրամիջոց, 33 թույլտվության տիրույթ)
+├── config/              # Մատակարարների/մոդելների ռեեստրներ, վերնագրերի կազմաձևում, մոդելների այլանուններ
+├── utils/               # TLS հաճախորդ, պրոքսիով հարցումների ուղարկում/դիսպետչեր, ցանցային օժանդակ բաղադրիչներ
+├── index.ts             # Աշխատանքային տարածքի մուտքի կետ
 ├── package.json         # Աշխատանքային տարածքի մանիֆեստ
 ├── tsconfig.json        # Աշխատանքային տարածքի TS կազմաձևում
-└── types.d.ts           # Աշխատանքային տարածքի տիպերի հայտարարություններ
+└── types.d.ts           # Աշխատանքային տարածքի տիպերի հայտարարագրեր
 ```
 
 ### `open-sse/mcp-server/`
 
-| Ուղի                        | Նպատակ                                                                           |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP սերվերի կենսացիկլ (stdio + HTTP փոխադրամիջոցներ)                             |
-| `httpTransport.ts`          | HTTP Streamable + SSE փոխադրամիջոցներ (`/api/mcp/sse`, `/api/mcp/stream`)        |
-| `audit.ts`                  | Աուդիտի գրանցում `mcp_tool_audit` աղյուսակում                                    |
-| `scopeEnforcement.ts`       | Տիրույթի վավերացում՝ ըստ գործիքի                                                 |
-| `runtimeHeartbeat.ts`       | Առողջության պարբերական ազդանշան դեպի `DATA_DIR/runtime/mcp-heartbeat.json`       |
-| `descriptionCompressor.ts`  | Գործիքի նկարագրության մետատվյալների սեղմում՝ համատեքստը խնայելու համար           |
-| `schemas/tools.ts`          | 36 հիմնական գործիքի սահմանում + տիրույթներ                                       |
-| `tools/advancedTools.ts`    | Ընդլայնված գործիքների իրականացումներ                                             |
-| `tools/memoryTools.ts`      | Հիշողության 3 գործիք (որոնում/ավելացում/մաքրում)                                 |
-| `tools/skillTools.ts`       | Հմտությունների 4 գործիք (ցանկ/միացում/կատարում/կատարումներ)                      |
-| `tools/compressionTools.ts` | Սեղմման 5 գործիք                                                                 |
-| `README.md`                 | Ներքին MCP սերվերի README (փոխադարձ հղումով՝ `docs/frameworks/MCP-SERVER.md`-ից) |
-
----
+| Ուղի                        | Նպատակ                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP սերվերի կենսացիկլ (stdio + HTTP փոխադրամիջոցներ)                                |
+| `httpTransport.ts`          | HTTP Streamable + SSE փոխադրամիջոցներ (`/api/mcp/sse`, `/api/mcp/stream`)           |
+| `audit.ts`                  | Աուդիտի գրանցում `mcp_tool_audit` աղյուսակում                                       |
+| `scopeEnforcement.ts`       | Յուրաքանչյուր գործիքի թույլտվության տիրույթի վավերացում                             |
+| `runtimeHeartbeat.ts`       | Առողջական վիճակի պարբերական ազդանշան՝ `DATA_DIR/runtime/mcp-heartbeat.json` ֆայլում |
+| `descriptionCompressor.ts`  | Գործիքի նկարագրության մետատվյալների սեղմում՝ համատեքստ խնայելու համար               |
+| `schemas/tools.ts`          | 36 հիմնական գործիքի սահմանում + թույլտվության տիրույթներ                            |
+| `tools/advancedTools.ts`    | Ընդլայնված գործիքների իրականացումներ                                                |
+| `tools/memoryTools.ts`      | Հիշողության 3 գործիք (որոնում/ավելացում/մաքրում)                                    |
+| `tools/skillTools.ts`       | Հմտությունների 4 գործիք (ցուցակագրում/միացում/կատարում/կատարումներ)                 |
+| `tools/compressionTools.ts` | Սեղմման 5 գործիք                                                                    |
+| `README.md`                 | Ներքին MCP սերվերի README (`docs/frameworks/MCP-SERVER.md`-ից խաչաձև հղումով)       |
 
 ## `electron/` — Սեղանադիր հավելվածի փաթեթ
 
@@ -379,76 +377,76 @@ open-sse/
 
 ### Վերին մակարդակի ուղեցույցներ
 
-| Փաստաթուղթ                  | Նպատակ                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Բարձր մակարդակի ճարտարապետություն, ենթահամակարգերի քարտեզ, կառավարման վահանակի մակերես                 |
-| `CODEBASE_DOCUMENTATION.md` | Ինժեներական տեղեկատու՝ պանակներ, մոդուլներ, համաձայնություններ                                         |
-| `FEATURES.md`               | Հնարավորությունների մատրիցա՝ v3.8-ի կարևոր նորություններով                                             |
-| `USER_GUIDE.md`             | Վերջնական օգտագործողի ձեռնարկ (կարգավորում, մոդելներ, համակցություններ, CLI-ներ, ձայն և այլն)          |
-| `API_REFERENCE.md`          | API վերջնակետերի տեղեկատու՝ նույնականացման մոդելով                                                     |
-| `openapi.yaml`              | OpenAPI 3.0 մասնագիր (121 ուղի)                                                                        |
-| `SETUP_GUIDE.md`            | Տեղադրման եղանակներ (npm, npx, Docker, Electron, Termux, սկզբնաղբյուր)                                 |
-| `ENVIRONMENT.md`            | Բոլոր միջավայրի փոփոխականները (~800-ը փաստաթղթավորված է, `.env.example`-ում՝ ~3,050 տող)               |
-| `TROUBLESHOOTING.md`        | Տարածված սխալներ + v3.8.0-ի հայտնի խնդիրներ                                                            |
-| `RELEASE_CHECKLIST.md`      | Թողարկման ամբողջական հոսք (հմտություններ, husky, conventional commits, տեղակայում)                     |
-| `COVERAGE_PLAN.md`          | Ծածկույթի նպատակներ և ընթացիկ վիճակ                                                                    |
-| `FREE_TIERS.md`             | Ընտրված անվճար մակարդակի մատակարարներ (48+ անվճար + 11 OAuth)                                          |
-| `CLI-TOOLS.md`              | Արտաքին CLI ինտեգրումներ + ներքին OmniRoute CLI                                                        |
-| `I18N.md`                   | i18n ճարտարապետություն, լեզվի ավելացում, 42 տեղայնացում                                                |
-| `UNINSTALL.md`              | Մաքուր ապատեղադրման քայլեր                                                                             |
-| `PROVIDER_REFERENCE.md`     | **Ինքնաշխատ գեներացված**՝ 355 մատակարարների կատալոգ (վերագեներացում՝ `npm run gen:provider-reference`) |
+| Փաստաթուղթ                  | Նպատակ                                                                                                |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Բարձր մակարդակի ճարտարապետություն, ենթահամակարգերի քարտեզ, կառավարման վահանակի միջերես                |
+| `CODEBASE_DOCUMENTATION.md` | Մշակման տեղեկատու՝ պանակներ, մոդուլներ, ընդունված կանոններ                                            |
+| `FEATURES.md`               | Հնարավորությունների մատրիցա՝ v3.8-ի կարևոր նորություններով                                            |
+| `USER_GUIDE.md`             | Վերջնական օգտագործողի ձեռնարկ (կարգավորում, մոդելներ, համակցություններ, CLI-ներ, աուդիո և այլն)       |
+| `API_REFERENCE.md`          | API վերջնակետերի տեղեկատու՝ նույնականացման մոդելով                                                    |
+| `openapi.yaml`              | OpenAPI 3.0 մասնագիր (121 ուղի)                                                                       |
+| `SETUP_GUIDE.md`            | Տեղադրման եղանակներ (npm, npx, Docker, Electron, Termux, սկզբնաղբյուրից)                              |
+| `ENVIRONMENT.md`            | Բոլոր միջավայրի փոփոխականները (~800-ը փաստաթղթավորված, `.env.example`-ի ~3,050 տող)                   |
+| `TROUBLESHOOTING.md`        | Հաճախ հանդիպող սխալներ + v3.8.0-ի հայտնի խնդիրներ                                                     |
+| `RELEASE_CHECKLIST.md`      | Թողարկման ամբողջական գործընթաց (հմտություններ, husky, պայմանական commit-ներ, տեղակայում)              |
+| `COVERAGE_PLAN.md`          | Ծածկույթի նպատակները և ընթացիկ վիճակը                                                                 |
+| `FREE_TIERS.md`             | Ընտրված անվճար մակարդակով մատակարարներ (48+ անվճար + 11 OAuth)                                        |
+| `CLI-TOOLS.md`              | Արտաքին CLI ինտեգրումներ + ներքին OmniRoute CLI                                                       |
+| `I18N.md`                   | i18n ճարտարապետություն, լեզվի ավելացում, 42 տեղայնացում                                               |
+| `UNINSTALL.md`              | Մաքուր ապատեղադրման քայլեր                                                                            |
+| `PROVIDER_REFERENCE.md`     | 372 մատակարարների **ինքնաշխատ գեներացված** կատալոգ (վերագեներացում՝ `npm run gen:provider-reference`) |
 
-### Ենթահամակարգերի խորացված նկարագրություններ
+### Ենթահամակարգերի մանրամասն նկարագրություններ
 
 | Փաստաթուղթ                                       | Նպատակ                                                                            |
 | ------------------------------------------------ | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                  | MCP սերվեր՝ 110 գործիք, 3 փոխադրում, 33 շրջանակ, REST վերջնակետեր                 |
-| `A2A-SERVER.md`                                  | A2A v0.3՝ JSON-RPC, 6 հմտություն, REST օժանդակ գործիքներ, գործակալի քարտ          |
-| `AGENT_PROTOCOLS_GUIDE.md`                       | Միասնական ուղեցույց՝ A2A-ն՝ ընդդեմ ACP-ի և Cloud Agents-ի                         |
+| `MCP-SERVER.md`                                  | MCP սերվեր՝ 110 գործիք, 3 փոխադրամիջոց, 33 տիրույթ, REST վերջնակետեր              |
+| `A2A-SERVER.md`                                  | A2A v0.3՝ JSON-RPC, 6 հմտություն, REST օժանդակիչներ, գործակալի քարտ               |
+| `AGENT_PROTOCOLS_GUIDE.md`                       | Միասնական ուղեցույց՝ A2A-ն ընդդեմ ACP-ի և ամպային գործակալների                    |
 | `CLOUD_AGENT.md`                                 | Codex Cloud / Devin / Jules համակարգում                                           |
-| `SKILLS.md`                                      | Հմտությունների հենք (ներկառուցված + շուկա + SkillsSH + մեկուսացված միջավայր)      |
-| `RADAR.md`                                       | Անվճար մոդելների Radar կատալոգային վերադրում (`RADAR_ENABLED`, լռելյայն անջատված) |
+| `SKILLS.md`                                      | Հմտությունների շրջանակ (ներկառուցված + շուկա + SkillsSH + ավազարկղ)               |
+| `RADAR.md`                                       | Radar-ի անվճար մոդելների կատալոգի վերադիր (`RADAR_ENABLED`, լռելյայն անջատված)    |
 | `MEMORY.md`                                      | Հիշողության համակարգ (SQLite FTS5 + Qdrant)                                       |
-| `EVALS.md`                                       | Գնահատման հենք (հավաքածուներ, գործարկումներ, չափորոշիչներ)                        |
+| `EVALS.md`                                       | Գնահատման շրջանակ (հավաքածուներ, գործարկումներ, չափանիշներ)                       |
 | `GUARDRAILS.md`                                  | PII քողարկիչ, հուշման ներարկում, տեսողական կամուրջ                                |
 | `COMPLIANCE.md`                                  | Աուդիտի մատյան, պահպանման ժամկետ, noLog-ից հրաժարում                              |
 | `WEBHOOKS.md`                                    | HMAC-ով ստորագրված webhook-ների առաքում                                           |
 | `REASONING_REPLAY.md`                            | Հիբրիդային հիշողություն/SQLite քեշ՝ `reasoning_content`-ի համար                   |
 | `AUTHZ_GUIDE.md`                                 | Լիազորման խողովակաշար (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                            | Շղթայի անջատիչ + դադարեցման ժամանակահատված + մոդելի արգելափակում                  |
-| `docs/security/STEALTH_GUIDE.md` (միայն git-ում) | TLS մատնահետքավորում (JA3/JA4), Claude Code CCH, MITM վկայագիր                    |
-| `AUTO-COMBO.md`                                  | Auto Combo շարժիչ (16-գործոնային գնահատում, 6 ռեժիմային փաթեթ, վիրտուալ գործարան) |
+| `RESILIENCE_GUIDE.md`                            | Շղթայի անջատիչ + սառեցման շրջան + մոդելի արգելափակում                             |
+| `docs/security/STEALTH_GUIDE.md` (միայն git-ում) | TLS մատնահետքում (JA3/JA4), Claude Code CCH, MITM վկայական                        |
+| `AUTO-COMBO.md`                                  | Auto Combo շարժիչ (16-գործոնային գնահատում, ռեժիմների 6 փաթեթ, վիրտուալ գործարան) |
 
 ### Սեղմում
 
-| Փաստաթուղթ                      | Նպատակ                                                     |
-| ------------------------------- | ---------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Սեղմման ռեժիմների ընդհանուր նկարագիր + ճանապարհային քարտեզ |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK շարժիչներ, ռեեստրի պայմանագիր                |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman կանոնների փաթեթի JSON սխեմա                        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Յուրաքանչյուր լեզվի կանոնների փաթեթների ցանկ               |
-| `RTK_COMPRESSION.md`            | RTK հայտարարական խողովակաշար (49 զտիչ)                     |
+| Փաստաթուղթ                      | Նպատակ                                                   |
+| ------------------------------- | -------------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Սեղմման ռեժիմների ակնարկ + զարգացման ճանապարհային քարտեզ |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK շարժիչներ, ռեեստրի պայմանագիր              |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman կանոնների փաթեթի JSON սխեմա                      |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Յուրաքանչյուր լեզվի կանոնների փաթեթների ցանկ             |
+| `RTK_COMPRESSION.md`            | RTK հայտարարագրային խողովակաշար (49 զտիչ)                |
 
 ### Տեղակայում
 
-| Փաստաթուղթ                   | Նպատակ                                                                           |
-| ---------------------------- | -------------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker կառուցում, պրոֆիլներ (base/cli/host/cliproxyapi), Redis օժանդակ կոնտեյներ |
-| `VM_DEPLOYMENT_GUIDE.md`     | Ընդհանուր VM/VPS տեղակայում (Ubuntu/Debian + nginx + systemd)                    |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io տեղակայում (ներկայումս՝ միայն չինարեն)                                    |
-| `TERMUX_GUIDE.md`            | Android-ի առանց գրաֆիկական միջերեսի աշխատանք՝ Termux-ի միջոցով                   |
-| `PWA_GUIDE.md`               | Progressive Web App-ի տեղադրում + ծառայության աշխատիչ                            |
-| `ELECTRON_GUIDE.md`          | Սեղանադիր հավելվածի կառուցում + ստորագրում + տարածում                            |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                           |
-| `PROXY_GUIDE.md`             | 4-մակարդականի ելքային պրոքսի + 1proxy շուկա                                      |
+| Փաստաթուղթ                   | Նպատակ                                                                               |
+| ---------------------------- | ------------------------------------------------------------------------------------ |
+| `DOCKER_GUIDE.md`            | Docker-ի կառուցում, պրոֆիլներ (base/cli/host/cliproxyapi), Redis-ի օժանդակ կոնտեյներ |
+| `VM_DEPLOYMENT_GUIDE.md`     | Ընդհանուր VM/VPS տեղակայում (Ubuntu/Debian + nginx + systemd)                        |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-ում տեղակայում (ներկայումս միայն չինարեն)                                     |
+| `TERMUX_GUIDE.md`            | Android-ի առանց գրաֆիկական միջերեսի գործարկում Termux-ի միջոցով                      |
+| `PWA_GUIDE.md`               | Պրոգրեսիվ վեբ հավելվածի տեղադրում + service worker                                   |
+| `ELECTRON_GUIDE.md`          | Սեղանադիր հավելվածի կառուցում + ստորագրում + տարածում                                |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                               |
+| `PROXY_GUIDE.md`             | 4-մակարդակ ելքային պրոքսի + 1proxy շուկա                                             |
 
 ### Ենթապանակներ
 
-| Ենթապանակ             | Նպատակ                                                                                                                                                                                                                                             |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Փաստաթղթերի տեղայնացված թարգմանություններ (41 տեղայնացումներ)                                                                                                                                                                                      |
-| `docs/screenshots/`   | Ուղեցույցների պատկերային ռեսուրսներ                                                                                                                                                                                                                |
-| `_tasks/superpowers/` | Superpowers-ից ստացված պլաններ/մասնագրեր (`writing-plans`/`brainstorming`) + հետազոտություն՝ մեկուսացված, առանձին տարբերակավորվող պահոց, որը հիմնական ծառում անտեսվում է git-ի կողմից։ Տե՛ս CLAUDE.md → «Պլանավորման և հետազոտության արտեֆակտներ»։ |
+| Ենթապանակ             | Նպատակ                                                                                                                                                                                                                                     |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Փաստաթղթերի տեղայնացված թարգմանություններ (41 լեզվային տարբերակ)                                                                                                                                                                           |
+| `docs/screenshots/`   | Ուղեցույցների պատկերային ռեսուրսներ                                                                                                                                                                                                        |
+| `_tasks/superpowers/` | Պլաններ/մասնագրեր superpowers-ից (`writing-plans`/`brainstorming`) + հետազոտություններ՝ մեկուսացված, առանձին տարբերակավորվող շտեմարան, որն անտեսվում է հիմնական ծառի git-ի կողմից։ Տե՛ս CLAUDE.md → «Պլանավորման և հետազոտության նյութեր»։ |
 
 ---
 

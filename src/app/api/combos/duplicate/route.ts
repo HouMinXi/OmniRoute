@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getCombos, createCombo } from "@/lib/db/combos";
+import { normalizeSnapshotWeights } from "@/lib/combos/snapshotWeights";
 import { normalizeComboModels } from "@/lib/combos/steps";
 import { duplicateAutoComboSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -128,18 +129,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // Normalize scored weights so they sum to exactly 100.
-    const totalWeight = normalizedModels.reduce((s, m) => s + (m.weight ?? 0), 0);
-    if (totalWeight > 0 && normalizedModels.length > 0) {
-      for (const m of normalizedModels) {
-        m.weight = Math.max(1, Math.floor(((m.weight ?? 0) / totalWeight) * 100));
-      }
-      let remainder = 100 - normalizedModels.reduce((s, m) => s + m.weight, 0);
-      for (let i = 0; i < normalizedModels.length && remainder > 0; i++) {
-        normalizedModels[i].weight++;
-        remainder--;
-      }
-    }
+    normalizeSnapshotWeights(normalizedModels);
 
     // Generate a unique combo name based on the template (no "copy" appellation).
     const baseName = `static-${name.replace("auto/", "")}`;

@@ -113,11 +113,16 @@ Tuto funkci lze vypnout nastavením `"geminiSanitization": false`.
 
 ## Řešení problémů
 
-| Příznak                                          | Příčina                                                                                                   |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Výběr nezobrazuje žádný model OmniRoute          | Nebyl nalezen žádný klíč (zkontrolujte upozornění při spuštění), nebo je brána nedostupná                 |
-| Nezpracovaná ID modelů, žádné kombinace ani ceny | Koncové body pro správu odmítly token — nastavte `managementReadToken`                                    |
-| Relace připnutá k `opencode-<id>/…`              | Plugin v1 zveřejňoval `opencode-<id>`; v2 zveřejňuje přímo `<id>`, proto model znovu vyberte pod `<id>/…` |
+| Příznak                                                         | Příčina                                                                                                                             |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Výběr nezobrazuje žádný model OmniRoute                         | Nebyl nalezen žádný klíč (zkontrolujte varování při spuštění) nebo je brána nedostupná                                              |
+| Nezpracované identifikátory modelů, žádné kombinace, žádné ceny | Koncové body správy odmítly token — nastavte `managementReadToken`                                                                  |
+| Krátký nebo prázdný katalog `freeOnly`                          | Chybí token pro správu nebo byl token odmítnut — přečtěte si souhrnný řádek obnovení (počet `unmatched-free`) v protokolu hostitele |
+| Relace připnutá k `opencode-<id>/…`                             | Plugin v1 publikoval `opencode-<id>`; v2 publikuje pouze `<id>`, proto znovu vyberte model pod `<id>/…`                             |
+
+Proměnné prostředí se musí dostat k serverovému procesu opencode: když hostitel
+běží jako služba, prostředí shellu, ve kterém se spouští `opencode models`, a prostředí
+serveru se liší, proto klíč exportujte tam, odkud jej server načítá.
 
 ## Viz také
 

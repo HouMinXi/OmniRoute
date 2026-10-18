@@ -114,105 +114,105 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (kurasa + njia za API + kurasa za hali + ukurasa wa mwanzo)
-├── lib/                 # Maktaba za msingi / moduli za kikoa (saraka ndogo 80 + takriban faili 70 za ngazi ya juu)
-├── domain/              # Mantiki halisi ya kikoa (injini ya sera, chaguo la akiba, gharama, kufungiwa nje, comboResolver, tathmini)
-├── server/              # Moduli za seva pekee (mchakato wa authz, cors, middleware ya uthibitishaji) — haziwezi kuingizwa kutoka kwa mteja
-├── shared/              # Hutumiwa kwa pamoja na seva na mteja pale inapokuwa salama (konstanti, aina, uthibitishaji, mikataba, zana saidizi)
-├── i18n/                # Usanidi wa next-intl + JSON ya ujumbe kwa kila locale (locale 42)
-├── middleware/          # Middleware ya Next.js (uboreshaji wa ombi, utambuzi wa locale)
+├── app/                 # App Router (kurasa + njia za API + kurasa za hali + ukurasa wa utangulizi)
+├── lib/                 # Maktaba kuu / moduli za kikoa (sarakasi ndogo 80 + takriban faili 70 za kiwango cha juu)
+├── domain/              # Mantiki safi ya kikoa (injini ya sera, mbinu mbadala, gharama, ufungiaji, comboResolver, tathmini)
+├── server/              # Moduli za seva pekee (mfululizo wa authz, cors, programu ya kati ya uthibitishaji) — haziwezi kuletwa kutoka kwa mteja
+├── shared/              # Hushirikishwa kati ya seva na mteja pale ambapo ni salama (thabiti, aina, uthibitishaji, mikataba, zana saidizi)
+├── i18n/                # Usanidi wa next-intl + JSON ya ujumbe kwa kila lugha (lugha 42)
+├── middleware/          # Programu ya kati ya Next.js (uboreshaji wa ombi, utambuzi wa lugha)
 ├── mitm/                # Kiini cha proksi ya MITM: utengenezaji/usakinishaji wa cheti, vishughulikiaji, malengo, kikaguzi, barakoa, upitishaji wa moja kwa moja
 │   ├── handlers/        # Madarasa 9 ya vishughulikiaji vya wakala wa IDE yanayopanua MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Tabaka la kunasa trafiki: bafa (duara la ndani ya kumbukumbu), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Kiunganishi cha adapta ya modeli (shim ya zamani)
-├── scripts/             # Hati za matengenezo zilizo ndani ya mti (kwa mfano, backfillAggregation)
+│   └── inspector/       # Tabaka la kunasa trafiki: bafa (mzunguko wa ndani ya kumbukumbu), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Kiunganishi cha adapta ya modeli (kiambatisho cha mfumo wa zamani)
+├── scripts/             # Hati za matengenezo za ndani ya mradi (k.m., backfillAggregation)
 ├── sse/                 # Vishughulikiaji/huduma za zamani za SSE (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Hifadhi ya zamani ya ndani ya kumbukumbu (inaondolewa hatua kwa hatua na src/lib/db)
-├── types/               # Faili za aina za TS zinazoshirikiwa
-├── instrumentation.ts   # Hook ya telemetria ya Next.js (kivinjari + edge)
-├── instrumentation-node.ts  # Instrumentation ya Node pekee
-└── proxy.ts             # Shim ya kuingilia ya proksi ya HTTP
+├── store/               # Hifadhi ya zamani ya ndani ya kumbukumbu (inaondolewa hatua kwa hatua na nafasi yake kuchukuliwa na src/lib/db)
+├── types/               # Faili za aina za TS zinazoshirikishwa
+├── instrumentation.ts   # Kiunganishi cha telemetria cha Next.js (kivinjari + edge)
+├── instrumentation-node.ts  # Ufuatiliaji wa Node pekee
+└── proxy.ts             # Kiambatisho cha ingizo la proksi ya HTTP
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Njia                                                                         | Kusudi                                                                                                                                                                                                                                                                                                                            |
+| Njia                                                                         | Madhumuni                                                                                                                                                                                                                                                                                                                         |
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | API ya umma inayooana na OpenAI (~njia ndogo 25: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers, n.k.)                                                                                                                                 |
-| `app/api/v1beta/`                                                            | Vituo vya mwisho vya API vya mtindo wa Gemini                                                                                                                                                                                                                                                                                     |
+| `app/api/v1beta/`                                                            | Vituo vya API vya mtindo wa Gemini                                                                                                                                                                                                                                                                                                |
 | `app/api/playground/`                                                        | Njia za Playground Studio: `improve-prompt/` (POST — kiboreshaji cha prompt cha LLM), `presets/` (GET orodha / POST unda), `presets/[id]/` (GET / PUT / DELETE) — tazama `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                   |
-| `app/api/` (zisizo za v1)                                                    | Njia za usimamizi/msimamizi (~sarakasi 60: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, n.k.)                                                                                                                                                  |
-| `app/api/tools/agent-bridge/`                                                | API ya REST ya AgentBridge — njia 12 (udhibiti wa seva, hali/DNS/mipangilio ya agent, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Tazama `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                         |
-| `app/api/tools/traffic-inspector/`                                           | API ya REST + WS ya Traffic Inspector — njia 16+ (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Tazama `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                            |
-| `app/a2a/`                                                                   | Kiingilio cha A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                                      |
-| `app/.well-known/agent.json/`                                                | Kadi ya Agent ya A2A (ugunduzi)                                                                                                                                                                                                                                                                                                   |
+| `app/api/` (zisizo za v1)                                                    | Njia za usimamizi/utawala (~saraka 60: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, n.k.)                                                                                                                                                      |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — njia 12 (udhibiti wa seva, hali ya wakala/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Tazama `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                                |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — njia 16+ (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Tazama `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                                  |
+| `app/a2a/`                                                                   | Sehemu ya kuingilia ya A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                             |
+| `app/.well-known/agent.json/`                                                | Kadi ya Wakala ya A2A (ugunduzi)                                                                                                                                                                                                                                                                                                  |
 | `app/(dashboard)/dashboard/`                                                 | Kurasa za UI ya dashibodi (sehemu 50+, faili ~118 za page.tsx: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity, n.k.)                                                                                                                                          |
 | `app/(dashboard)/dashboard/search-tools/`                                    | UI ya Search Tools Studio (vichupo 3: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — tazama `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                              |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (mpango wa 21): `page.tsx` (ganda lenye vichupo 3), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Ukurasa wa dashibodi ya AgentBridge — kadi ya seva, kadi 9 za agent, mchawi wa usanidi, upangaji wa model, orodha ya bypass. i18n PT-BR + EN. Tazama `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                            |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Ukurasa wa dashibodi ya Traffic Inspector — mgawanyo wa DevTools, vichupo 7 vya maelezo, vigeuzi 4 vya hali ya kunasa, kinasa kipindi, uwekaji rangi wa muktadha. i18n PT-BR + EN. Tazama `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                 |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (mpango wa 21): `page.tsx` (gamba lenye vichupo 3), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Ukurasa wa dashibodi ya AgentBridge — kadi ya seva, kadi 9 za mawakala, mchawi wa usanidi, ulinganishaji wa modeli, orodha ya bypass. i18n PT-BR + EN. Tazama `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                   |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Ukurasa wa dashibodi ya Traffic Inspector — mgawanyiko wa DevTools, vichupo 7 vya maelezo, vitufe 4 vya kuwasha/kuzima hali za kunasa, kinasa kipindi, uwekaji rangi wa muktadha. i18n PT-BR + EN. Tazama `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                 |
 | `app/(dashboard)/dashboard/activity/`                                        | Ukurasa wa mtiririko wa shughuli (Kundi B): `page.tsx` (seva) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — tazama `docs/architecture/MONITORING_SECTIONS.md`                                                                                                             |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Ukurasa wa Kushiriki Kiasi (Kundi B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Ukurasa wa usanidi wa mpango wa mtoa huduma (Kundi B): `page.tsx` + `ProviderPlanConfigClient.tsx` — vipimo vya kiasi vinavyobatilishwa kwa kila muunganisho                                                                                                                                                                      |
-| `app/docs/`                                                                  | Kitazamaji cha nyaraka kilichopachikwa (huonyesha `docs/*.md`)                                                                                                                                                                                                                                                                    |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Ukurasa wa Kushiriki Kiwango (Kundi B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                               |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Ukurasa wa usanidi wa mpango wa mtoa huduma (Kundi B): `page.tsx` + `ProviderPlanConfigClient.tsx` — vipimo vya kiwango kwa kila muunganisho vinabatilisha mipangilio chaguo-msingi                                                                                                                                               |
+| `app/docs/`                                                                  | Kitazamaji cha hati kilichopachikwa (huonyesha `docs/*.md`)                                                                                                                                                                                                                                                                       |
 | `app/landing/`                                                               | Ukurasa wa kutua wa uuzaji                                                                                                                                                                                                                                                                                                        |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Kurasa zinazohusiana na uthibitishaji                                                                                                                                                                                                                                                                                             |
 | `app/{400,401,403,408,429,500,502,503}/`                                     | Kurasa za hitilafu za HTTP                                                                                                                                                                                                                                                                                                        |
 | `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Kurasa tuli/za hali                                                                                                                                                                                                                                                                                                               |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Mpangilio msingi, ukurasa wa mwanzo, manifesti ya PWA, CSS ya jumla                                                                                                                                                                                                                                                               |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Mpangilio mkuu, ukurasa wa mwanzo, faili ya maelezo ya PWA, CSS ya jumla                                                                                                                                                                                                                                                          |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Mipaka ya hitilafu                                                                                                                                                                                                                                                                                                                |
 
-### `src/lib/` — Maktaba msingi (~moduli 50)
+### `src/lib/` — Maktaba za msingi (~moduli 50)
 
-| Moduli                                   | Madhumuni                                                                                                                                                                                                                                                                                                                         |
+| Module                                   | Kusudi                                                                                                                                                                                                                                                                                                                            |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | Kidhibiti cha kazi za itifaki ya A2A, ujuzi (5), utiririshaji                                                                                                                                                                                                                                                                     |
-| `acp/`                                   | Sajili ya Mawakala wa CLI (ugunduzi wa CLI ya ndani — tazama `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                          |
+| `acp/`                                   | Sajili ya Mawakala wa CLI (ugunduzi wa CLI wa ndani — tazama `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                          |
 | `api/`                                   | Visaidizi vya API vinavyoshirikiwa (`requireManagementAuth`, uthibitishaji)                                                                                                                                                                                                                                                       |
-| `auth/`                                  | Kipindi, uwekaji hashi wa nenosiri, uthibitishaji wa tokeni                                                                                                                                                                                                                                                                       |
-| `batches/`                               | Vishughulikiaji vya OpenAI Batches API                                                                                                                                                                                                                                                                                            |
+| `auth/`                                  | Kipindi, uhifadhi wa nenosiri kwa kutumia hashi, uthibitishaji wa tokeni                                                                                                                                                                                                                                                          |
+| `batches/`                               | Vishughulikiaji vya API ya OpenAI Batches                                                                                                                                                                                                                                                                                         |
 | `catalog/`                               | Uthibitishaji wa Zod wa katalogi ya watoa huduma + utambuzi wa uwezo                                                                                                                                                                                                                                                              |
 | `cloudAgent/`                            | Mawakala wa Wingu (Codex Cloud, Devin, Jules) — tazama `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                           |
-| `combos/`                                | Utambuzi wa mchanganyiko + visaidizi vya kupanga upya                                                                                                                                                                                                                                                                             |
-| `audit/`                                 | Visaidizi vya mpasho wa shughuli: `highLevelActions.ts` (orodha ya yanayoruhusiwa + `isHighLevelAction()`), `activityIcons.ts` (kitendo → ramani ya ikoni/kitenzi), `timeline.ts` (groupByDay/relativeTime) — tazama `docs/architecture/MONITORING_SECTIONS.md`                                                                   |
+| `combos/`                                | Utatuzi wa michanganyiko + visaidizi vya kupanga upya                                                                                                                                                                                                                                                                             |
+| `audit/`                                 | Visaidizi vya mpasho wa shughuli: `highLevelActions.ts` (orodha ya kuruhusu + `isHighLevelAction()`), `activityIcons.ts` (kitendo → ramani ya ikoni/kitenzi), `timeline.ts` (groupByDay/relativeTime) — tazama `docs/architecture/MONITORING_SECTIONS.md`                                                                         |
 | `compliance/`                            | Kumbukumbu ya ukaguzi + ukaguzi wa mtoa huduma — tazama `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                             |
-| `compression/`                           | Kiunganishi cha injini ya mbanazo (injini zimo katika `open-sse/services/compression/`)                                                                                                                                                                                                                                           |
+| `compression/`                           | Kiunganishi cha injini ya mgandamizo (injini zipo katika `open-sse/services/compression/`)                                                                                                                                                                                                                                        |
 | `config/`                                | Visaidizi vya usanidi wa wakati wa utekelezaji                                                                                                                                                                                                                                                                                    |
-| `db/`                                    | Moduli 120+ za DB za kikoa + uhamishaji 168 (kwa SQLite, pitia hapa kila wakati)                                                                                                                                                                                                                                                  |
+| `db/`                                    | Moduli 120+ za hifadhidata za kikoa + uhamishaji 168 (kila mara pitia hapa kwa SQLite)                                                                                                                                                                                                                                            |
 | `quota/`                                 | Injini ya Kushiriki Mgao: `dimensions.ts` (aina/Zod), `types.ts` (kiolesura cha QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — tazama `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Kiteja cha katalogi ya modeli zisizolipishwa cha Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — tazama `docs/frameworks/RADAR.md`                                                                                                                            |
-| `display/`                               | Visaidizi vya uumbizaji wa UI (gharama, ucheleweshaji, n.k.)                                                                                                                                                                                                                                                                      |
+| `radar/`                                 | Kiteja cha katalogi ya modeli zisizolipishwa cha Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — angalia `docs/frameworks/RADAR.md`                                                                                                                           |
+| `display/`                               | Visaidizi vya uumbizaji wa UI (gharama, muda wa kusubiri, n.k.)                                                                                                                                                                                                                                                                   |
 | `embeddings/`                            | Visaidizi vya huduma ya embeddings                                                                                                                                                                                                                                                                                                |
 | `env/`                                   | Uchanganuzi + uthibitishaji wa vigeu vya mazingira                                                                                                                                                                                                                                                                                |
-| `evals/`                                 | Mfumo wa tathmini (mikusanyiko, kiendeshaji, mazingira ya utekelezaji) — tazama `docs/frameworks/EVALS.md`                                                                                                                                                                                                                        |
-| `guardrails/`                            | Kifichaji cha PII, uingizaji wa prompt, daraja la maono — tazama `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                    |
-| `jobs/`                                  | Kazi za usuli (kama cron)                                                                                                                                                                                                                                                                                                         |
-| `memory/`                                | Kumbukumbu ya mazungumzo (RRF mseto ya SQLite FTS5 + sqlite-vec + Qdrant daraja la 2) — tazama `docs/frameworks/MEMORY.md`                                                                                                                                                                                                        |
+| `evals/`                                 | Mfumo wa tathmini (makundi ya majaribio, kiendesha, mazingira ya utekelezaji) — angalia `docs/frameworks/EVALS.md`                                                                                                                                                                                                                |
+| `guardrails/`                            | Kifichaji cha PII, ulinzi dhidi ya uingizaji wa prompt, daraja la maono — angalia `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                   |
+| `jobs/`                                  | Kazi za chinichini (kama cron)                                                                                                                                                                                                                                                                                                    |
+| `memory/`                                | Kumbukumbu ya mazungumzo (RRF mseto ya SQLite FTS5 + sqlite-vec + Qdrant daraja la 2) — angalia `docs/frameworks/MEMORY.md`                                                                                                                                                                                                       |
 | `memory/embedding/`                      | Safu ya embedding yenye vyanzo vingi: `index.ts` (kisuluhishi), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (mpango wa 21)                                                                                                                                                                     |
-| `memory/vectorStore.ts`                  | Kifungashio cha sqlite-vec v0.1.9 — KNN ya kutafuta kwa nguvu ghafi + RRF mseto (FTS5 + vekta, k=60). Huanzishwa inapohitajika, na hupunguza utendaji kwa ustahimilivu wakati sqlite-vec haipatikani. (mpango wa 21)                                                                                                              |
-| `memory/reindex.ts`                      | `runReindexBatch()` — huchakata kumbukumbu zenye `needs_reindex=1` katika usuli; huitwa na `POST /api/memory/reindex` na njia ya kujaza data ya nyuma inapohitajika. (mpango wa 21)                                                                                                                                               |
-| `monitoring/`                            | Ukaguzi wa hali, utoaji wa vipimo                                                                                                                                                                                                                                                                                                 |
-| `oauth/`                                 | Mitiririko ya OAuth/uletaji kwa moduli 22 za watoa huduma (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                             |
+| `memory/vectorStore.ts`                  | Kifungashio cha sqlite-vec v0.1.9 — KNN ya brute-force + RRF mseto (FTS5 + vekta, k=60). Huanzishwa inapohitajika, hupunguza utendaji kwa utaratibu wakati sqlite-vec haipatikani. (mpango wa 21)                                                                                                                                 |
+| `memory/reindex.ts`                      | `runReindexBatch()` — huchakata kumbukumbu zenye `needs_reindex=1` chinichini; huitwa na `POST /api/memory/reindex` na njia ya lazy-backfill. (mpango wa 21)                                                                                                                                                                      |
+| `monitoring/`                            | Ukaguzi wa afya, utoaji wa vipimo                                                                                                                                                                                                                                                                                                 |
+| `oauth/`                                 | Mitiririko ya OAuth/uingizaji kwa moduli 22 za watoa huduma (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                           |
 | `plugins/`                               | Sajili ya programu-jalizi                                                                                                                                                                                                                                                                                                         |
-| `promptCache/`                           | Sehemu za kusitisha kache ya prompt kwa mtindo wa Anthropic                                                                                                                                                                                                                                                                       |
-| `skills/`                                | Mfumo wa ujuzi (uliojengewa ndani + soko + SkillsSH) — tazama `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                         |
-| `playground/`                            | Visaidizi vya pamoja vya Playground Studio: `codeExport.ts` (kizalishaji cha curl/Python/TS), `promptImprover.ts` (kiundaji cha meta-prompt), `streamMetrics.ts` (TTFT/TPS safi), `types.ts` (jedwali la bei) — tazama `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                     |
+| `promptCache/`                           | Vituo vya kusitisha kache ya prompt vya mtindo wa Anthropic                                                                                                                                                                                                                                                                       |
+| `skills/`                                | Mfumo wa ujuzi (uliojengewa ndani + soko + SkillsSH) — angalia `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                        |
+| `playground/`                            | Visaidizi vinavyoshirikiwa vya Playground Studio: `codeExport.ts` (kizalishaji cha curl/Python/TS), `promptImprover.ts` (kiunda meta-prompt), `streamMetrics.ts` (TTFT/TPS safi), `types.ts` (jedwali la bei) — tazama `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                     |
 | `webhookDispatcher.ts`                   | Uwasilishaji wa webhook wa HMAC — tazama `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                            |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Vidhibiti vya tunnel — tazama `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                         |
 | `cloudSync.ts`, `initCloudSync.ts`       | Usawazishaji wa hiari wa hali kwenye cloud                                                                                                                                                                                                                                                                                        |
-| `localDb.ts`                             | Barrel ya kusafirisha upya moduli za db (hakuna mantiki — usafirishaji upya pekee)                                                                                                                                                                                                                                                |
+| `localDb.ts`                             | Barrel ya kusafirisha upya moduli za db (haina mantiki — usafirishaji upya pekee)                                                                                                                                                                                                                                                 |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Uhifadhi wa muda wa maombi + idempotency                                                                                                                                                                                                                                                                                          |
-| (~faili 30 zaidi za kiwango cha juu)     | Visaidizi maalumu (logEnv, modelsDevSync, piiSanitizer, n.k.)                                                                                                                                                                                                                                                                     |
+| (~faili 30 zaidi za ngazi ya juu)        | Visaidizi maalumu (logEnv, modelsDevSync, piiSanitizer, n.k.)                                                                                                                                                                                                                                                                     |
 
 ### `src/lib/db/` — Hifadhidata (moduli 137 + uhamishaji 193)
 
-| Saraka ndogo              | Madhumuni                                                                                                                                                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `db/core.ts`              | Instansi moja ya `getDbInstance()` yenye uandishi wa journal wa WAL                                                                                                                              |
-| `db/migrations/`          | Faili za SQL zenye matoleo (idempotent, za kimiamala). `073_memory_vec.sql` huongeza `memory_vec_meta` + safu wima ya `needs_reindex` (mpango wa 21).                                            |
-| `db/playgroundPresets.ts` | Moduli ya CRUD kwa mipangilio iliyohifadhiwa ya Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
-| `db/memoryVec.ts`         | CRUD ya `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, n.k. (mpango wa 21)                                  |
-| `db/<domain>.ts`          | Moduli moja kwa kila kikoa: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, n.k.                  |
+| Saraka ndogo              | Madhumuni                                                                                                                                                                                           |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | Singleton ya `getDbInstance()` yenye uandishi wa jarida la WAL                                                                                                                                      |
+| `db/migrations/`          | Faili za SQL zenye matoleo (idempotent, za kimiamala). `073_memory_vec.sql` huongeza safu ya `memory_vec_meta` + `needs_reindex` (mpango wa 21).                                                    |
+| `db/playgroundPresets.ts` | Moduli ya CRUD kwa mipangilio iliyowekwa mapema ya Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
+| `db/memoryVec.ts`         | CRUD ya `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, n.k. (mpango wa 21)                                     |
+| `db/<domain>.ts`          | Moduli moja kwa kila domain: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, n.k.                    |
 
 ### `src/domain/`
 
@@ -222,36 +222,36 @@ src/
 | `fallbackPolicy.ts`    | Mti wa maamuzi ya mbadala                               |
 | `costRules.ts`         | Kanuni za ukokotoaji wa gharama                         |
 | `lockoutPolicy.ts`     | Sera ya kufungia modeli/muunganisho                     |
-| `tagRouter.ts`         | Uelekezaji kulingana na tag                             |
+| `tagRouter.ts`         | Uelekezaji unaotegemea tag                              |
 | `comboResolver.ts`     | Utatuzi wa combo (hutumiwa na injini ya combo)          |
 | `modelAvailability.ts` | Ukaguzi wa upatikanaji kwa kila modeli                  |
 | `assessment/`          | Tathmini ya modeli (Awamu ya 1 ya RFC-AUTO-ASSESSMENT ) |
 
 ### `src/server/`
 
-| Moduli   | Madhumuni                                                                                                |
-| -------- | -------------------------------------------------------------------------------------------------------- |
-| `authz/` | Msururu wa uidhinishaji: `classify` → `policies` → `enforce` — tazama `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | Usanidi wa CORS                                                                                          |
-| `auth/`  | Middleware ya kipindi                                                                                    |
+| Moduli   | Madhumuni                                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
+| `authz/` | Mtiririko wa uidhinishaji: `classify` → `policies` → `enforce` — tazama `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | Usanidi wa CORS                                                                                            |
+| `auth/`  | Middleware ya kipindi                                                                                      |
 
 ### `src/shared/`
 
-| Moduli                           | Madhumuni                                                                                      |
-| -------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **Watoa huduma 355** wenye uthibitishaji wa Zod (chanzo rasmi cha ukweli)                      |
-| `constants/cliTools.ts`          | Rejesta ya zana za nje za CLI                                                                  |
-| `constants/routingStrategies.ts` | **Mikakati 19 ya uelekezaji** yenye vipaumbele                                                 |
-| `constants/publicApiRoutes.ts`   | Njia zinazohitaji uthibitishaji wa Bearer (dhidi ya uthibitishaji wa usimamizi)                |
-| `constants/upstreamHeaders.ts`   | Orodha ya vichwa visivyoruhusiwa kwa maombi ya upstream                                        |
-| `validation/schemas.ts`          | Takriban skima 80 za Zod (chanzo kimoja cha ukweli kwa mikataba ya API)                        |
-| `validation/helpers.ts`          | Visaidizi vya uthibitishaji wa Zod (`validateBody`, n.k.)                                      |
-| `types/`                         | Aina za TS zinazoshirikiwa                                                                     |
-| `contracts/`                     | Mikataba ya API ya umma (inayotumiwa na `files:` katika `package.json`)                        |
-| `utils/circuitBreaker.ts`        | Kivunja mzunguko cha mtoa huduma (angalia `docs/architecture/RESILIENCE_GUIDE.md`)             |
-| `utils/apiAuth.ts`               | Uthibitishaji wa ufunguo wa API, ukaguzi wa mawanda                                            |
-| `utils/fetchTimeout.ts`          | Vifungashio vya muda wa kuisha/kukatisha kwa fetch ya upstream                                 |
-| `utils/releaseNotes.ts`          | Kichanganuzi cha matangazo yaliyofungwa ya v2/legacy, ujanibishaji na uondoaji wa arifa kwa ID |
+| Moduli                           | Madhumuni                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------ |
+| `constants/providers.ts`         | **Watoa huduma 372** wenye uthibitishaji wa Zod (chanzo kimoja cha ukweli)           |
+| `constants/cliTools.ts`          | Sajili ya zana za nje za CLI                                                         |
+| `constants/routingStrategies.ts` | **Mikakati 19 ya uelekezaji** yenye vipaumbele                                       |
+| `constants/publicApiRoutes.ts`   | Njia zinazohitaji uthibitishaji wa Bearer (badala ya uthibitishaji wa usimamizi)     |
+| `constants/upstreamHeaders.ts`   | Orodha ya vichwa vilivyokatazwa kwa maombi ya upstream                               |
+| `validation/schemas.ts`          | Skima ~80 za Zod (chanzo kimoja cha ukweli kwa mikataba ya API)                      |
+| `validation/helpers.ts`          | Vitendaji saidizi vya uthibitishaji wa Zod (`validateBody`, n.k.)                    |
+| `types/`                         | Aina za TS zinazoshirikiwa                                                           |
+| `contracts/`                     | Mikataba ya API ya umma (inayotumiwa na `files:` katika `package.json`)              |
+| `utils/circuitBreaker.ts`        | Kikatiza mzunguko cha mtoa huduma (angalia `docs/architecture/RESILIENCE_GUIDE.md`)  |
+| `utils/apiAuth.ts`               | Uthibitishaji wa ufunguo wa API, ukaguzi wa mawanda                                  |
+| `utils/fetchTimeout.ts`          | Vifungashio vya muda wa kuisha/kughairi kwa fetch ya upstream                        |
+| `utils/releaseNotes.ts`          | Kichanganuzi cha matangazo yaliyofungwa ya v2/legacy, ujanibishaji na uondoaji wa ID |
 
 ---
 
@@ -262,13 +262,13 @@ Nafasi tofauti ya kazi ya npm (`@omniroute/open-sse`). Hushughulikia uchakataji 
 ```
 open-sse/
 ├── handlers/            # Faili 16 (vishughulikiaji 12 + visaidizi 4): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, n.k.
-├── executors/           # Vitekelezaji 67 mahususi kwa watoa huduma (hupanua BaseExecutor)
+├── executors/           # Moduli 150 za utekelezaji (madarasa yanayopanua BaseExecutor + visaidizi vya kila mtoa huduma)
 ├── translator/          # Vigeuzi vya miundo (maombi 9, majibu 9, visaidizi 9)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # Moduli ~80+ za huduma (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, n.k.)
+├── services/            # ~Moduli 80+ za huduma (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, n.k.)
 ├── mcp-server/          # Seva ya MCP (zana 110, njia 3 za usafirishaji, mawanda 33)
-├── config/              # Sajili za watoa huduma/miundo, usanidi wa vichwa, lakabu za miundo
-├── utils/               # Kiteja cha TLS, fetch/dispatcher ya proksi, visaidizi vya mtandao
+├── config/              # Masajili ya watoa huduma/miundo, usanidi wa vichwa, majina mbadala ya miundo
+├── utils/               # Kiteja cha TLS, proxy fetch/dispatcher, visaidizi vya mtandao
 ├── index.ts             # Kiingilio cha nafasi ya kazi
 ├── package.json         # Manifesti ya nafasi ya kazi
 ├── tsconfig.json        # Usanidi wa TS wa nafasi ya kazi
@@ -277,20 +277,20 @@ open-sse/
 
 ### `open-sse/mcp-server/`
 
-| Njia                        | Kusudi                                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `server.ts`                 | Mzunguko wa maisha wa seva ya MCP (stdio + njia za usafirishaji za HTTP)                            |
-| `httpTransport.ts`          | Njia za usafirishaji za HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                   |
-| `audit.ts`                  | Uwekaji kumbukumbu za ukaguzi kwenye jedwali la `mcp_tool_audit`                                    |
-| `scopeEnforcement.ts`       | Uthibitishaji wa wigo kwa kila zana                                                                 |
-| `runtimeHeartbeat.ts`       | Mapigo ya afya kwenda `DATA_DIR/runtime/mcp-heartbeat.json`                                         |
-| `descriptionCompressor.ts`  | Hubana metadata ya maelezo ya zana ili kuokoa muktadha                                              |
-| `schemas/tools.ts`          | Ufafanuzi wa zana 36 za msingi + mawanda                                                            |
-| `tools/advancedTools.ts`    | Utekelezaji wa zana za hali ya juu                                                                  |
-| `tools/memoryTools.ts`      | Zana 3 za kumbukumbu (kutafuta/kuongeza/kufuta)                                                     |
-| `tools/skillTools.ts`       | Zana 4 za ujuzi (kuorodhesha/kuwezesha/kutekeleza/utekelezaji)                                      |
-| `tools/compressionTools.ts` | Zana 5 za ubanaji                                                                                   |
-| `README.md`                 | README ya ndani ya seva ya MCP (imeunganishwa kwa marejeleo kutoka `docs/frameworks/MCP-SERVER.md`) |
+| Njia                        | Kusudi                                                                                                |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `server.ts`                 | Mzunguko wa maisha wa seva ya MCP (stdio + njia za usafirishaji za HTTP)                              |
+| `httpTransport.ts`          | Njia za usafirishaji za HTTP Streamable + SSE (`/api/mcp/sse`, `/api/mcp/stream`)                     |
+| `audit.ts`                  | Uwekaji kumbukumbu za ukaguzi kwenye jedwali la `mcp_tool_audit`                                      |
+| `scopeEnforcement.ts`       | Uthibitishaji wa wigo kwa kila zana                                                                   |
+| `runtimeHeartbeat.ts`       | Mapigo ya uhai ya afya kwenda `DATA_DIR/runtime/mcp-heartbeat.json`                                   |
+| `descriptionCompressor.ts`  | Hubana metadata ya maelezo ya zana ili kuhifadhi muktadha                                             |
+| `schemas/tools.ts`          | Ufafanuzi 36 wa zana za msingi + mawanda                                                              |
+| `tools/advancedTools.ts`    | Utekelezaji wa zana za kina                                                                           |
+| `tools/memoryTools.ts`      | Zana 3 za kumbukumbu (tafuta/ongeza/futa)                                                             |
+| `tools/skillTools.ts`       | Zana 4 za ujuzi (orodhesha/wezesha/tekeleza/utekelezaji)                                              |
+| `tools/compressionTools.ts` | Zana 5 za ubanaji                                                                                     |
+| `README.md`                 | README ya ndani ya seva ya MCP (iliyounganishwa kwa marejeleo kutoka `docs/frameworks/MCP-SERVER.md`) |
 
 ---
 
@@ -375,80 +375,80 @@ open-sse/
 
 ---
 
-## `docs/` — Nyaraka za Umma (faili 7 za mzizi + saraka ndogo 17)
+## `docs/` — Nyaraka za Umma (faili 7 za msingi + saraka ndogo 17)
 
-### Miongozo ya ngazi ya juu
+### Miongozo ya kiwango cha juu
 
-| Hati                        | Madhumuni                                                                                                   |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Usanifu wa kiwango cha juu, ramani ya mifumo midogo, kiolesura cha dashibodi                                |
-| `CODEBASE_DOCUMENTATION.md` | Rejeleo la uhandisi: saraka, moduli, kanuni                                                                 |
-| `FEATURES.md`               | Jedwali la vipengele lenye vivutio vya v3.8                                                                 |
-| `USER_GUIDE.md`             | Mwongozo wa mtumiaji wa mwisho (usanidi, modeli, michanganyiko, CLI, sauti, n.k.)                           |
-| `API_REFERENCE.md`          | Rejeleo la endpoint za API lenye modeli ya uthibitishaji                                                    |
-| `openapi.yaml`              | Vipimo vya OpenAPI 3.0 (njia 121)                                                                           |
-| `SETUP_GUIDE.md`            | Mbinu za usakinishaji (npm, npx, Docker, Electron, Termux, msimbo chanzo)                                   |
-| `ENVIRONMENT.md`            | Vigeu vyote vya mazingira (~800 vimeandikwa, ~mistari 3,050 katika `.env.example`)                          |
-| `TROUBLESHOOTING.md`        | Hitilafu za kawaida + matatizo yanayojulikana ya v3.8.0                                                     |
-| `RELEASE_CHECKLIST.md`      | Mtiririko kamili wa utoaji (ujuzi, husky, conventional commits, usambazaji)                                 |
-| `COVERAGE_PLAN.md`          | Malengo ya ufunikaji na hali ya sasa                                                                        |
-| `FREE_TIERS.md`             | Watoa huduma wa viwango vya bure walioteuliwa (48+ bila malipo + 11 OAuth)                                  |
-| `CLI-TOOLS.md`              | Miunganisho ya CLI za nje + CLI ya ndani ya OmniRoute                                                       |
-| `I18N.md`                   | Usanifu wa i18n, kuongeza lugha, lokali 42                                                                  |
-| `UNINSTALL.md`              | Hatua za uondoaji safi                                                                                      |
-| `PROVIDER_REFERENCE.md`     | Katalogi ya watoa huduma 355 **iliyozalishwa kiotomatiki** (zalisha upya: `npm run gen:provider-reference`) |
+| Hati                        | Madhumuni                                                                                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Usanifu wa kiwango cha juu, ramani ya mifumo midogo, kiolesura cha dashibodi                                 |
+| `CODEBASE_DOCUMENTATION.md` | Rejea ya uhandisi: saraka, moduli, kaida                                                                     |
+| `FEATURES.md`               | Jedwali la vipengele lenye vivutio vya v3.8                                                                  |
+| `USER_GUIDE.md`             | Mwongozo wa mtumiaji wa mwisho (usanidi, modeli, michanganyiko, CLI, sauti, n.k.)                            |
+| `API_REFERENCE.md`          | Rejea ya endpoint za API pamoja na modeli ya uthibitishaji                                                   |
+| `openapi.yaml`              | Vipimo vya OpenAPI 3.0 (njia 121)                                                                            |
+| `SETUP_GUIDE.md`            | Mbinu za usakinishaji (npm, npx, Docker, Electron, Termux, msimbo chanzo)                                    |
+| `ENVIRONMENT.md`            | Vigeu vyote vya mazingira (~800 vimeandikwa, ~mistari 3,050 katika `.env.example`)                           |
+| `TROUBLESHOOTING.md`        | Hitilafu za kawaida + matatizo yanayojulikana ya v3.8.0                                                      |
+| `RELEASE_CHECKLIST.md`      | Mtiririko kamili wa toleo (ujuzi, husky, conventional commits, upelekaji)                                    |
+| `COVERAGE_PLAN.md`          | Malengo ya ufunikaji na hali ya sasa                                                                         |
+| `FREE_TIERS.md`             | Watoa huduma wa viwango vya bila malipo walioteuliwa (48+ bila malipo + 11 OAuth)                            |
+| `CLI-TOOLS.md`              | Miunganisho ya CLI za nje + OmniRoute CLI ya ndani                                                           |
+| `I18N.md`                   | Usanifu wa i18n, kuongeza lugha, lugha na maeneo 42                                                          |
+| `UNINSTALL.md`              | Hatua za uondoaji safi                                                                                       |
+| `PROVIDER_REFERENCE.md`     | Katalogi ya watoa huduma 372 **inayozalishwa kiotomatiki** (izalishe upya: `npm run gen:provider-reference`) |
 
 ### Uchambuzi wa kina wa mifumo midogo
 
-| Hati                                         | Madhumuni                                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | Seva ya MCP: zana 110, mbinu 3 za usafirishaji, mawanda 33, endpoint za REST              |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, ujuzi 6, visaidizi vya REST, kadi ya ajenti                           |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Mwongozo uliounganishwa: A2A dhidi ya ACP dhidi ya Cloud Agents                           |
-| `CLOUD_AGENT.md`                             | Uratibu wa Codex Cloud / Devin / Jules                                                    |
-| `SKILLS.md`                                  | Mfumo wa ujuzi (uliojengewa ndani + soko + SkillsSH + sandbox)                            |
-| `RADAR.md`                                   | Safu ya katalogi ya modeli za bure ya Radar (`RADAR_ENABLED`, imezimwa kwa chaguo-msingi) |
-| `MEMORY.md`                                  | Mfumo wa kumbukumbu (SQLite FTS5 + Qdrant)                                                |
-| `EVALS.md`                                   | Mfumo wa tathmini (vikusanyo, utekelezaji, rubriki)                                       |
-| `GUARDRAILS.md`                              | Kificha PII, udungaji wa prompt, daraja la picha                                          |
-| `COMPLIANCE.md`                              | Kumbukumbu ya ukaguzi, uhifadhi, kujiondoa kwa noLog                                      |
-| `WEBHOOKS.md`                                | Uwasilishaji wa webhook uliotiwa saini kwa HMAC                                           |
-| `REASONING_REPLAY.md`                        | Kache mseto ya kumbukumbu/SQLite kwa `reasoning_content`                                  |
-| `AUTHZ_GUIDE.md`                             | Mchakato wa uidhinishaji (`classify` → `policies` → `enforce`)                            |
-| `RESILIENCE_GUIDE.md`                        | Kivunja mzunguko + muda wa kusubiri + kufungiwa kwa modeli                                |
-| `docs/security/STEALTH_GUIDE.md` (git pekee) | Utambuzi wa alama za vidole za TLS (JA3/JA4), Claude Code CCH, cheti cha MITM             |
-| `AUTO-COMBO.md`                              | Injini ya Auto Combo (upimaji wa vipengele 16, vifurushi 6 vya modi, kiwanda pepe)        |
+| Hati                                         | Madhumuni                                                                                           |
+| -------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | Seva ya MCP: zana 110, njia 3 za usafirishaji, mawanda 33, endpoint za REST                         |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, ujuzi 6, visaidizi vya REST, kadi ya ajenti                                     |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Mwongozo jumuishi: A2A dhidi ya ACP dhidi ya Cloud Agents                                           |
+| `CLOUD_AGENT.md`                             | Uratibu wa Codex Cloud / Devin / Jules                                                              |
+| `SKILLS.md`                                  | Mfumo wa ujuzi (uliojengewa ndani + marketplace + SkillsSH + sandbox)                               |
+| `RADAR.md`                                   | Tabaka la katalogi ya modeli za bila malipo la Radar (`RADAR_ENABLED`, limezimwa kwa chaguo-msingi) |
+| `MEMORY.md`                                  | Mfumo wa kumbukumbu (SQLite FTS5 + Qdrant)                                                          |
+| `EVALS.md`                                   | Mfumo wa tathmini (makusanyo, utekelezaji, rubriki)                                                 |
+| `GUARDRAILS.md`                              | Kifichaji cha PII, udungaji wa prompt, daraja la maono                                              |
+| `COMPLIANCE.md`                              | Kumbukumbu ya ukaguzi, uhifadhi, kujiondoa kwa `noLog`                                              |
+| `WEBHOOKS.md`                                | Uwasilishaji wa webhook uliotiwa saini na HMAC                                                      |
+| `REASONING_REPLAY.md`                        | Kumbukumbu mseto/kache ya SQLite kwa `reasoning_content`                                            |
+| `AUTHZ_GUIDE.md`                             | Msururu wa uidhinishaji (`classify` → `policies` → `enforce`)                                       |
+| `RESILIENCE_GUIDE.md`                        | Kikatiza mzunguko + muda wa kusubiri + kufungiwa kwa modeli                                         |
+| `docs/security/STEALTH_GUIDE.md` (git pekee) | Utambuzi wa alama za TLS (JA3/JA4), Claude Code CCH, cheti cha MITM                                 |
+| `AUTO-COMBO.md`                              | Injini ya Auto Combo (upangaji alama wa vipengele 16, vifurushi 6 vya hali, kiwanda pepe)           |
 
 ### Mfinyazo
 
 | Hati                            | Madhumuni                                           |
 | ------------------------------- | --------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Muhtasari wa modi za mfinyazo + ramani ya maendeleo |
+| `COMPRESSION_GUIDE.md`          | Muhtasari wa hali za mfinyazo + ramani ya maendeleo |
 | `COMPRESSION_ENGINES.md`        | Injini za Caveman + RTK, mkataba wa sajili          |
-| `COMPRESSION_RULES_FORMAT.md`   | Schema ya JSON ya kifurushi cha sheria cha Caveman  |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Orodha ya vifurushi vya sheria kwa kila lugha       |
-| `RTK_COMPRESSION.md`            | Mchakato tangazaji wa RTK (vichujio 49)             |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema ya JSON ya kifurushi cha kanuni cha Caveman  |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Orodha ya vifurushi vya kanuni kwa kila lugha       |
+| `RTK_COMPRESSION.md`            | Msururu elekezi wa RTK (vichujio 49)                |
 
-### Usambazaji
+### Upelekaji
 
-| Hati                         | Madhumuni                                                               |
-| ---------------------------- | ----------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Uundaji wa Docker, wasifu (base/cli/host/cliproxyapi), sidecar ya Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Usambazaji wa kawaida wa VM/VPS (Ubuntu/Debian + nginx + systemd)       |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Usambazaji wa Fly.io (kwa sasa unapatikana kwa Kichina pekee)           |
-| `TERMUX_GUIDE.md`            | Android isiyo na kiolesura kupitia Termux                               |
-| `PWA_GUIDE.md`               | Usakinishaji wa Progressive Web App + service worker                    |
-| `ELECTRON_GUIDE.md`          | Uundaji + utiaji saini + usambazaji wa programu ya eneo-kazi            |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                  |
-| `PROXY_GUIDE.md`             | Proksi ya kutoka ya viwango 4 + soko la 1proxy                          |
+| Hati                         | Madhumuni                                                              |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Uundaji wa Docker, profaili (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Usambazaji wa kawaida wa VM/VPS (Ubuntu/Debian + nginx + systemd)      |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Usambazaji wa Fly.io (kwa sasa ni wa Kichina pekee)                    |
+| `TERMUX_GUIDE.md`            | Android isiyo na kiolesura kupitia Termux                              |
+| `PWA_GUIDE.md`               | Usakinishaji wa Progressive Web App + service worker                   |
+| `ELECTRON_GUIDE.md`          | Uundaji + utiaji saini + usambazaji wa programu ya eneo-kazi           |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
+| `PROXY_GUIDE.md`             | Proksi ya nje ya viwango 4 + soko la 1proxy                            |
 
 ### Saraka ndogo
 
-| Saraka ndogo          | Madhumuni                                                                                                                                                                                                                             |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Tafsiri za nyaraka zilizolokalishwa (lugha 41)                                                                                                                                                                                        |
-| `docs/screenshots/`   | Rasilimali za picha kwa ajili ya miongozo                                                                                                                                                                                             |
-| `_tasks/superpowers/` | Mipango/vipimo kutoka superpowers (`writing-plans`/`brainstorming`) + utafiti — hazina iliyotengwa, yenye matoleo yanayosimamiwa kando, na inayopuuzwa na git katika mti mkuu. Tazama CLAUDE.md → "Vielelezo vya Mipango na Utafiti". |
+| Saraka ndogo          | Madhumuni                                                                                                                                                                                                                           |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Tafsiri za hati zilizobinafsishwa kwa lugha na maeneo mbalimbali (maeneo 41)                                                                                                                                                        |
+| `docs/screenshots/`   | Rasilimali za picha kwa ajili ya miongozo                                                                                                                                                                                           |
+| `_tasks/superpowers/` | Mipango/vipimo kutoka superpowers (`writing-plans`/`brainstorming`) + utafiti — hazina iliyotengwa na yenye matoleo yanayosimamiwa kivyake, iliyopuuzwa na git katika mti mkuu. Tazama CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

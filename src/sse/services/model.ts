@@ -7,6 +7,7 @@ import { getSyncedAutoAliases } from "@/lib/providerModels/syncedAutoAliases.ts"
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
 import { getModelCompatOverrides } from "@/lib/db/models/compat";
 import { getNoAuthHydrationProviderIds } from "./noAuthProviderSiblings";
+import { inferGithubUnsyncedTargetFormat } from "./githubResponsesFallback";
 import {
   parseModel,
   getModelInfoCore,
@@ -409,9 +410,9 @@ async function lookupModelMeta(
       getActiveSyncedCatalog(providerId),
       // #10898 / #7620: model-compat overrides (apiFormat/targetFormat/
       // supportsVision, isHidden, ...) are stored keyed on the id the operator
-      // wrote them under. For a no-auth alias the model prefix resolves to the
-      // APIKEY gateway id (e.g. "opencode/x" -> providerId "opencode-zen") but
-      // the override was written on the sibling "opencode" row. Merge overrides
+      // wrote them under. For a no-auth alias the model prefix can resolve to an
+      // APIKEY gateway id while the override was written on the sibling no-auth
+      // row (see noAuthProviderSiblings.ts). Merge overrides
       // across the provider AND its no-auth sibling ids (requested id first)
       // instead of canonicalizing the low-level compat key, which would break
       // paths that legitimately key on the raw id (e.g. getHiddenModelsByProvider).
@@ -475,6 +476,10 @@ async function lookupModelMeta(
       compatOverrideMatch
     );
     if (effort) metadata.resolvedThinkingEffort = effort;
+    if (!metadata.targetFormat && !syncedMatch && !registryMatch) {
+      const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, resolvedModelId);
+      if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
+    }
 
     return { modelId: resolvedModelId, metadata, available };
   } catch {

@@ -384,37 +384,40 @@ Radar announcement-টি ইচ্ছাকৃতভাবে `active: false` �
 
 ---
 
-## 3.9.0 LTS কাট (3.8.58-এ মহড়া দেওয়া হয়েছে)
+## 3.9.0 LTS কাট (3.8.58-এ মহড়া করা হয়েছে)
 
-v3.8.59-এর পরের সংস্করণ হলো 3.9.0, এবং এর tip থেকে দুটি দীর্ঘস্থায়ী branch তৈরি হয়:
+v3.8.59-এর পরবর্তী সংস্করণ হলো 3.9.0, এবং এর সর্বশেষ কমিট থেকে দুটি দীর্ঘমেয়াদি ব্রাঞ্চ তৈরি হবে:
 `stable/v3` (v3 LTS লাইন, npm `latest`) এবং `develop` (v4, 4.0.0-এ উন্নীত, npm
-`nightly`)। branch/channel মডেল, forward-port এবং label-গুলো
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)-এ রয়েছে; পরিকল্পনাটি [ROADMAP](../../ROADMAP.md)-এ (Phase 3) রয়েছে। কাটটি একবারই চালানো হয়;
-3.8.58-এ একটি fork-এ শুরু থেকে শেষ পর্যন্ত এর মহড়া দেওয়া হয়, এবং 3.8.59
-[GO/NO-GO checklist](./LTS_GO_NO_GO.md) দিয়ে সমাপ্ত হয়।
+`nightly`)। ব্রাঞ্চ/চ্যানেল মডেল, ফরোয়ার্ড-পোর্ট এবং লেবেলসমূহ
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)-এ রয়েছে; পরিকল্পনাটি [ROADMAP](../../ROADMAP.md)-এ (Phase 3) রয়েছে। কাটটি একবারই চালানো হবে;
+3.8.58 একটি ফর্কে শুরু থেকে শেষ পর্যন্ত এর মহড়া করে, এবং 3.8.59
+[GO/NO-GO চেকলিস্ট](./LTS_GO_NO_GO.md) দিয়ে শেষ হয়।
 
-### Dry-run (শুধু পঠনযোগ্য, যেকোনো সময় নিরাপদ)
+### ড্রাই-রান (শুধু পঠনযোগ্য, যেকোনো সময় নিরাপদ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # প্রকৃত কাট: HEAD থেকে 3.9.0, আগের tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # source commit নির্দিষ্ট করুন
+npm run release:dry-run-lts-cut                       # প্রকৃত কাট: HEAD থেকে 3.9.0, পূর্ববর্তী ট্যাগ v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # সোর্স কমিট নির্দিষ্ট করুন
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` কিছুই কার্যকর করে না: এটি git এবং `gh` থেকে তথ্য পড়ে এবং
-সম্পূর্ণ ক্রমটি প্রিন্ট করে — পূর্বশর্তসমূহ (source resolve হয়, আগের tag বিদ্যমান,
-`package.json`-এ target version রয়েছে, একটি `release-freeze` issue খোলা আছে, বিদ্যমান
-release branch-এ কোনো খোলা `Release branch not green` issue নেই — যে branch বিদ্যমান নয়,
-সেটির জন্য `?` unknown দেখানো হয়, কখনোই green নয় — Mergify `release` queue কনফিগার করা
-আছে (G11: `queue_rules`, `checks_timeout`, label `queue`), `release/*` ruleset এখনও deletion
-ও force-push ব্লক করে, এবং `stable/v3` ও `develop` এখনও বিদ্যমান নয়), দুটি branch ধাপ,
-কোন dormant-workflow trigger এবং `if:` condition সত্য হয় (এবং কোনগুলো repository variable
-দ্বারা gated থাকে বা canonical repository-তে pinned থাকে), প্রত্যাশিত dist-tag-গুলো
-(`latest` → 3.9.0, `next` ও `nightly` খালি) এবং rollback। Exit `0` = `RESULT: READY`,
-`1` = কোনো blocking precondition ব্যর্থ হয়েছে (`✗`), `2` = usage error।
-`--advisory <id,...>` কোনো check গোপন না করে সেটিকে warning (`!`)-এ নামিয়ে আনে।
+`scripts/release/dry-run-lts-cut.mjs` কিছুই কার্যকর করে না: এটি git ও `gh` থেকে তথ্য পড়ে এবং
+সম্পূর্ণ ক্রমটি প্রিন্ট করে — পূর্বশর্তসমূহ (সোর্স রিজলভ হয়, সোর্স রিপোজিটরিতে সম্পূর্ণ ইতিহাস রয়েছে —
+একটি shallow clone থেকে `stable/v3` পুশ করা যায় না, প্রথম
+grafted parent-এ গ্রহণকারী পক্ষ pack প্রত্যাখ্যান করে, তাই সম্পূর্ণ clone থেকে কাট করুন অথবা প্রথমে
+`git fetch --unshallow origin` চালান — পূর্ববর্তী ট্যাগ বিদ্যমান, `package.json`-এ লক্ষ্য সংস্করণ রয়েছে,
+একটি `release-freeze` issue খোলা আছে, বিদ্যমান release branch-এ কোনো খোলা
+`Release branch not green` issue নেই — যে ব্রাঞ্চ বিদ্যমান নয় সেটি `?` অজানা হিসেবে রিপোর্ট হয়, কখনোই
+green নয় — Mergify `release` queue কনফিগার করা আছে (G11: `queue_rules`, `checks_timeout`,
+label `queue`), `release/*` ruleset এখনও মুছে ফেলা ও force-push ব্লক করে, এবং
+`stable/v3` ও `develop` এখনো বিদ্যমান নয়), দুটি branch ধাপ, কোন dormant-workflow
+trigger ও `if:` condition সত্য হয় (এবং কোনগুলো repository variable দ্বারা gated থাকে অথবা
+canonical repository-তে pin করা থাকে), প্রত্যাশিত dist-tagসমূহ (`latest` → 3.9.0, `next` ও
+`nightly` খালি) এবং rollback। Exit `0` = `RESULT: READY`, `1` = একটি বাধাদানকারী পূর্বশর্ত
+ব্যর্থ হয়েছে (`✗`), `2` = ব্যবহারজনিত ত্রুটি। `--advisory <id,...>` কোনো check-কে না লুকিয়ে
+warning (`!`)-এ নামিয়ে আনে।
 
-3.9.0 release freeze এখনও খোলা থাকা অবস্থায় প্রকৃত কাটের dry-run চালান — tag-এর পরে এবং
-Phase 12c freeze তুলে নেওয়ার আগে branch-গুলো তৈরি করা হয়।
+3.9.0 release freeze খোলা থাকা অবস্থাতেই প্রকৃত কাটের dry-run চালান — tag-এর পরে এবং
+Phase 12c freeze তুলে নেওয়ার আগে branchগুলো তৈরি করা হয়।
 
 ### 3.8.58 মহড়া (শুধু fork-এ)
 
@@ -423,30 +426,28 @@ Phase 12c freeze তুলে নেওয়ার আগে branch-গুল�
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. একটি FORK remote-এর বিরুদ্ধে কার্যকর করুন (origin, অথবা যেকোনো remote যার URL canonical
-#    repository-এর, প্রত্যাখ্যান করা হয়; প্রতিটি ধাপে terminal-এ নিশ্চিতকরণ চাওয়া হয়)
+# 2. একটি FORK remote-এর বিরুদ্ধে চালান (origin, অথবা canonical repository-এর URL-যুক্ত
+#    যেকোনো remote প্রত্যাখ্যান করা হয়; প্রতিটি ধাপে terminal-এ নিশ্চিতকরণ চাওয়া হয়)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. fork-এ dormant workflow-গুলো পরীক্ষা করুন (যেখানে dry-run একটি
-#    canonical-repository pin রিপোর্ট করে সেখানে workflow_dispatch), তারপর rollback করুন
+# 3. fork-এ dormant workflowগুলো পরীক্ষা করুন (যেখানে dry-run একটি canonical-repository
+#    pin রিপোর্ট করে সেখানে workflow_dispatch), এরপর rollback করুন
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop bump commit-টি git plumbing দিয়ে তৈরি করা হয় (কোনো working tree স্পর্শ করা হয় না)
-এবং cycle-open commit-এর মতো একই পাঁচটি file bump করে: `package.json`,
-`open-sse/package.json`, `electron/package.json`, `package-lock.json` এবং
-`docs/openapi.yaml`। পরে `develop`-এ, এর প্রথম PR-এর আগে, `[4.0.0]` CHANGELOG section এবং
-এর i18n mirror-গুলো খোলা হয়। script কখনো npm dist-tag পরিবর্তন করে না — সেগুলোর মহড়া
-একটি scratch package-এ করুন।
+develop bump commitটি git plumbing দিয়ে তৈরি হয় (কোনো working tree স্পর্শ করা হয় না) এবং
+cycle-open commit-এর মতো একই পাঁচটি file bump করে: `package.json`, `open-sse/package.json`,
+`electron/package.json`, `package-lock.json` এবং `docs/openapi.yaml`। এরপর `develop`-এ
+`[4.0.0]` CHANGELOG section ও এর i18n mirrorগুলো খোলা হয়, এর প্রথম PR-এর আগে।
+scriptটি কখনোই npm dist-tag পরিবর্তন করে না — সেগুলোর মহড়া একটি scratch package-এ করুন।
 
-### PR preview artifact (একবার build করুন, একই byte-গুলো promote করুন)
+### PR preview artifact (একবার build করুন, একই byte promote করুন)
 
-`.github/workflows/preview-artifact.yml` একটি PR head থেকে একটি production tarball build করে
-এবং ঠিক সেই build-টিকেই validate করে (#8084 slice (a))। শুধু একই repository-এর PR;
-কিছুই publish করা হয় না।
+`.github/workflows/preview-artifact.yml` একটি PR head থেকে একটি production tarball build করে এবং
+ঠিক সেই build-টিই যাচাই করে (#8084 slice (a))। শুধু একই repository-এর PR; কিছুই publish করা হয় না।
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # অথবা `preview-artifact` label যোগ করুন
@@ -456,40 +457,38 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-run-টি `npm ci`, `npm run build:release`, `npm run check:pack-artifact` চালায়, tarball-টি
-pack করে, `npm run check:pack-boot` চালায় (নকল secret, ephemeral data dir), পুনরায় pack
-করে এবং digest অভিন্ন না হলে ব্যর্থ হয়; এরপর `artifact-identity.json` (head SHA, base SHA,
-lockfile hash, platform, arch, node ABI, bundler, build policy —
-`scripts/release/artifact-identity.mjs`) রেকর্ড করে এবং আলাদা job-এ tarball-টির attestation
-তৈরি করে। preview promote করার অর্থ হলো সেই tarball install করা: source থেকে কখনোই
+runটি `npm ci`, `npm run build:release`, `npm run check:pack-artifact` চালায়, tarballটি pack করে,
+`npm run check:pack-boot` (নকল secret, ক্ষণস্থায়ী data dir) চালায়, পুনরায় pack করে এবং
+digest অভিন্ন না হলে ব্যর্থ হয়; এরপর `artifact-identity.json`-এ (head SHA, base
+SHA, lockfile hash, platform, arch, node ABI, bundler, build policy —
+`scripts/release/artifact-identity.mjs`) তথ্য রেকর্ড করে এবং একটি পৃথক job-এ tarballটির attestation
+তৈরি করে। কোনো preview promote করার অর্থ হলো সেই tarballটি install করা: source থেকে কখনোই
 পুনরায় build করবেন না।
 
 ### কাট (3.9.0, GO-এর পরে)
 
 1. [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)-এ GO রেকর্ড করা হয়েছে।
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` থেকে `RESULT: READY` প্রিন্ট হয়।
-3. dry-run যে command-গুলো প্রিন্ট করে সেগুলো দিয়ে হাতে `origin`-এ branch তৈরি করুন —
-   script `origin`-এ push করতে অস্বীকার করে। review করা develop commit পুনরায় ব্যবহার করতে,
-   প্রথমে আপনার fork-এর বিরুদ্ধে 3.9.0 tip-এ `--execute` মহড়াটি চালান; এটি উভয় SHA প্রিন্ট
-   করে, এবং একই commit-গুলো push করা যায়:
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` চালালে `RESULT: READY` প্রিন্ট হয়।
+3. dry-run যে commandগুলো প্রিন্ট করে, সেগুলো দিয়ে হাতে `origin`-এ branchগুলো তৈরি করুন —
+   scriptটি `origin`-এ push করতে অস্বীকার করে। review করা develop commit পুনরায় ব্যবহার করতে,
+   প্রথমে 3.9.0 tip থেকে আপনার fork-এর বিরুদ্ধে `--execute` মহড়া চালান; এটি উভয় SHA প্রিন্ট করে,
+   এবং একই commitগুলো push করা যাবে:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. প্রথম PR land করার আগে `stable/v3` এবং `develop` protect করুন (ruleset + merge queue)।
-5. branch-এর অস্তিত্ব অনুযায়ী dormant workflow-গুলো সক্রিয় হয়: `forward-port.yml`
-   (`stable/v3`-এ push), `validate-stable-pr.yml` (`stable/v3`-এর PR) এবং
-   `nightly-v4-build.yml` (`develop` build করে)। go-live-এর আগে
-   `secrets.FORWARD_PORT_TOKEN` repository secret সেট করুন (যাতে forward-port PR-এ CI
-   চলে); owner repository variable `vars.NIGHTLY_PUBLISH`-কে `true`-এ সেট না করা এবং npm
-   Trusted Publishing `nightly-v4-build.yml` গ্রহণ না করা পর্যন্ত nightly publishing বন্ধ
-   থাকে। Channel resolution হলো `scripts/release/dist-tag.mjs`, একই resolver
-   `npm-publish.yml` ব্যবহার করে।
-6. channel-গুলো যাচাই করুন: `npm view omniroute dist-tags --json`-এ `latest` = 3.9.0 দেখা
-   যায় এবং v4 publish না হওয়া পর্যন্ত কোনো `next` / `nightly` থাকে না।
-7. প্রয়োজন হলে rollback করুন:
-   `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+4. প্রথম PR মার্জ হওয়ার আগে `stable/v3` এবং `develop` সুরক্ষিত করুন (রুলসেট + মার্জ কিউ)।
+5. ব্রাঞ্চের অস্তিত্বের ভিত্তিতে নিষ্ক্রিয় ওয়ার্কফ্লোগুলো সক্রিয় হয়: `forward-port.yml` (`stable/v3`-এ push),
+   `validate-stable-pr.yml` (`stable/v3`-এর জন্য PR) এবং `nightly-v4-build.yml`
+   (`develop` বিল্ড করে)। চালু করার আগে `secrets.FORWARD_PORT_TOKEN` রিপোজিটরি সিক্রেট সেট করুন (যাতে
+   forward-port PR-গুলোতে CI চলে); মালিক রিপোজিটরি ভেরিয়েবল `vars.NIGHTLY_PUBLISH`-কে
+   `true` হিসেবে সেট না করা এবং npm Trusted Publishing কর্তৃক `nightly-v4-build.yml`
+   গৃহীত না হওয়া পর্যন্ত nightly প্রকাশনা বন্ধ থাকবে। চ্যানেল নির্ধারণের কাজটি করে
+   `scripts/release/dist-tag.mjs`, একই রিজলভার যা `npm-publish.yml` ব্যবহার করে।
+6. চ্যানেলগুলো যাচাই করুন: `npm view omniroute dist-tags --json`-এর আউটপুটে `latest` = 3.9.0 দেখায় এবং
+   v4 প্রকাশিত না হওয়া পর্যন্ত কোনো `next` / `nightly` থাকে না।
+7. প্রয়োজন হলে রোলব্যাক করুন: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    এবং `npm dist-tag add omniroute@3.8.59 latest`।
 
 ---

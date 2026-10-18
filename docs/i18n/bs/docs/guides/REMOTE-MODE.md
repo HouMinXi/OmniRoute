@@ -194,13 +194,23 @@ Zamijenite `1455` sa `56121`/`56122` kada povezujete xAI ili Grok CLI, a `20128`
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ispisuje tajnu SAMO JEDNOM — kopirajte je sada
-omniroute tokens list                 # maskirano: id, name, scope, prefix, status, expiry
-omniroute tokens revoke <id|prefix>   # opozovite odmah
-omniroute tokens scopes               # objasnite tri opsega
+#   ↳ ispisuje tajnu JEDNOM — kopirajte je odmah
+omniroute tokens list                 # maskirano: ID, naziv, opseg, prefiks, status, istek
+omniroute tokens revoke <id|prefix>   # odmah opozovite
+omniroute tokens scopes               # objašnjava tri opsega
 ```
 
-Komande `tokens` zahtijevaju **admin** akreditive. Tokenima takođe možete upravljati na kontrolnoj tabli pod **Settings → Access Tokens** (kreiranje, opoziv, kopiranje jednom).
+Naredbe `tokens` zahtijevaju **admin** vjerodajnicu. Tokenima možete upravljati i na
+kontrolnoj ploči pod **Postavke → Pristupni tokeni** (kreiranje, opozivanje, jednokratno kopiranje).
+
+Token se nikada ne može izdati s većim ovlastima od onih koje ima njegov kreator.
+Token `admin` može kreirati samo operater — putem sesije kontrolne ploče,
+lokalnog CLI-ja na samom serveru, naredbe `omniroute connect` s lozinkom ili
+instance s onemogućenom prijavom. Mašinske vjerodajnice (pristupni token `admin`
+ili API ključ s opsegom `manage`/`admin`) mogu izdavati samo tokene `write` i `read`;
+ako se od njih zatraži `--scope admin`, vraća se `403`.
+
+Token se nikada ne može kreirati s više privilegija nego što ih ima njegov kreator. Token `admin` može kreirati samo operater: putem sesije kontrolne ploče, lokalnog CLI-ja na samom serveru, naredbom `omniroute connect` s lozinkom ili u instanci s onemogućenom prijavom. Mašinski pristupni podaci (pristupni token `admin` ili API ključ s opsegom `manage`/`admin`) mogu kreirati samo tokene `write` i `read`; zahtjev za `--scope admin` s njima vraća `403`.
 
 ---
 

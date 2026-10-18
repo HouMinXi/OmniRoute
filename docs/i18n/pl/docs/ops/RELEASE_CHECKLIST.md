@@ -387,104 +387,108 @@ Przed wydaniem dowolnej wersji v3.8.x sprawdź także następujące elementy:
 
 ## Wydzielenie 3.9.0 LTS (przećwiczone w 3.8.58)
 
-Po v3.8.59 następną wersją jest 3.9.0, a jej wierzchołek staje się początkiem dwóch długowiecznych gałęzi:
+Po v3.8.59 następną wersją jest 3.9.0, a jej wierzchołek staje się początkiem dwóch długotrwałych gałęzi:
 `stable/v3` (linia v3 LTS, npm `latest`) oraz `develop` (v4, z wersją podniesioną do 4.0.0, npm
-`nightly`). Model gałęzi/kanałów, forward-port oraz etykiety opisano w
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); plan znajduje się w [ROADMAP](../../ROADMAP.md) (faza 3). Wydzielenie jest wykonywane tylko raz;
+`nightly`). Model gałęzi/kanałów, przenoszenie zmian do nowszych wersji oraz etykiety opisano w
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); plan znajduje się w [ROADMAP](../../ROADMAP.md) (faza 3). Wydzielenie wykonywane jest raz;
 w 3.8.58 zostaje przećwiczone od początku do końca na forku, a 3.8.59 kończy się
 [listą kontrolną GO/NO-GO](./LTS_GO_NO_GO.md).
 
 ### Przebieg próbny (tylko do odczytu, bezpieczny w dowolnym momencie)
 
 ```bash
-npm run release:dry-run-lts-cut                       # właściwe wydzielenie: 3.9.0 z HEAD, poprzedni tag v3.8.59
+npm run release:dry-run-lts-cut                       # rzeczywiste wydzielenie: 3.9.0 z HEAD, poprzedni tag v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # przypnij commit źródłowy
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` niczego nie wykonuje: odczytuje dane z git i `gh`, po czym wypisuje
-całą sekwencję — warunki wstępne (źródło zostaje rozwiązane, poprzedni tag istnieje, `package.json` ma
-wersję docelową, otwarte jest zgłoszenie `release-freeze`, nie ma otwartego zgłoszenia `Release branch not green`
-dla istniejącej gałęzi wydania — gałąź, która nie istnieje, jest zgłaszana jako `?` nieznana, nigdy
-jako zielona — kolejka Mergify `release` jest skonfigurowana (G11: `queue_rules`, `checks_timeout`,
-etykieta `queue`), zestaw reguł `release/*` nadal blokuje usuwanie i force-push, a
-`stable/v3` oraz `develop` jeszcze nie istnieją), dwa kroki dotyczące gałęzi, informacje o tym, które wyzwalacze
-nieaktywnych przepływów pracy i warunki `if:` stają się prawdziwe (a które pozostają zablokowane przez zmienną repozytorium lub
-przypięte do kanonicznego repozytorium), oczekiwane dist-tags (`latest` → 3.9.0, puste `next` i
-`nightly`) oraz wycofanie zmian. Kod wyjścia `0` = `RESULT: READY`, `1` = niespełniony blokujący warunek wstępny
-(`✗`), `2` = błąd użycia. `--advisory <id,...>` obniża rangę sprawdzenia do ostrzeżenia (`!`)
-bez jego ukrywania.
+`scripts/release/dry-run-lts-cut.mjs` niczego nie wykonuje: odczytuje dane z git i `gh`, po czym wyświetla
+całą sekwencję — warunki wstępne (źródło jest rozpoznawane, repozytorium źródłowe zawiera pełną historię —
+płytki klon nie może wypchnąć `stable/v3`, ponieważ strona odbierająca odrzuca pakiet przy pierwszym
+sztucznie dołączonym rodzicu, dlatego wydzielenie należy wykonać z pełnego klonu lub najpierw uruchomić
+`git fetch --unshallow origin` — poprzedni tag istnieje, `package.json` zawiera wersję docelową, otwarte jest
+zgłoszenie `release-freeze`, nie ma otwartego zgłoszenia `Release branch not green`
+dla istniejącej gałęzi wydania — nieistniejąca gałąź zwraca `?`, czyli stan nieznany, nigdy
+zielony — kolejka Mergify `release` jest skonfigurowana (G11: `queue_rules`, `checks_timeout`,
+etykieta `queue`), zestaw reguł `release/*` nadal blokuje usuwanie i wymuszone wypychanie, a
+`stable/v3` i `develop` jeszcze nie istnieją), dwa kroki tworzenia gałęzi, informację o tym, które wyzwalacze
+nieaktywnych przepływów pracy i warunki `if:` stają się prawdziwe (oraz które pozostają zablokowane przez
+zmienną repozytorium lub przypięte do repozytorium kanonicznego), oczekiwane dist-tagi (`latest` → 3.9.0,
+`next` i `nightly` puste) oraz procedurę wycofania. Kod zakończenia `0` = `RESULT: READY`, `1` = niespełniony
+blokujący warunek wstępny (`✗`), `2` = błąd użycia. `--advisory <id,...>` obniża rangę kontroli do
+ostrzeżenia (`!`), nie ukrywając jej.
 
-Uruchom przebieg próbny właściwego wydzielenia, gdy zamrożenie wydania 3.9.0 jest nadal aktywne — gałęzie są
-tworzone po tagu i przed zniesieniem zamrożenia w fazie 12c.
+Uruchom przebieg próbny rzeczywistego wydzielenia, gdy zamrożenie wydania 3.9.0 jest nadal aktywne — gałęzie
+są tworzone po tagu i przed zniesieniem zamrożenia w fazie 12c.
 
-### Próba 3.8.58 (tylko na forku)
+### Próba 3.8.58 (wyłącznie na forku)
 
 ```bash
 # 1. Przebieg próbny na bieżącym wierzchołku z parametrami próby
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Wykonanie względem zdalnego FORKA (origin ani żaden zdalny adres, którego URL wskazuje
-#    kanoniczne repozytorium, nie są akceptowane; każdy krok wymaga potwierdzenia w terminalu)
+# 2. Wykonanie względem zdalnego FORKA (origin ani żadne zdalne repozytorium, którego URL
+#    wskazuje repozytorium kanoniczne, nie jest dozwolone; każdy krok wymaga potwierdzenia w terminalu)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Przetestowanie nieaktywnych przepływów pracy na forku (workflow_dispatch tam, gdzie przebieg próbny
-#    zgłasza przypięcie do kanonicznego repozytorium), a następnie wycofanie zmian
+# 3. Uruchomienie nieaktywnych przepływów pracy w forku (workflow_dispatch tam, gdzie przebieg próbny
+#    zgłasza przypięcie do repozytorium kanonicznego), a następnie wycofanie zmian
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit podnoszący wersję w develop jest tworzony za pomocą niskopoziomowych mechanizmów git (bez modyfikowania drzewa roboczego) i aktualizuje
-te same pięć plików co commit otwierający cykl: `package.json`, `open-sse/package.json`,
+Commit podnoszący wersję w `develop` jest tworzony za pomocą niskopoziomowych mechanizmów git (bez modyfikowania
+drzewa roboczego) i aktualizuje te same pięć plików co commit otwierający cykl: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json` oraz `docs/openapi.yaml`. Sekcja `[4.0.0]`
-w CHANGELOG-u i jej odpowiedniki i18n są następnie otwierane na `develop`, przed pierwszym
-PR-em tej gałęzi. Skrypt nigdy nie zmienia dist-tags npm — przećwicz je na tymczasowym pakiecie.
+w CHANGELOG-u oraz jej odpowiedniki i18n są następnie otwierane na `develop`, przed pierwszym
+PR-em tej gałęzi. Skrypt nigdy nie zmienia dist-tagów npm — przećwicz to na pakiecie testowym.
 
-### Artefakt podglądowy PR-a (zbuduj raz, promuj te same bajty)
+### Artefakt podglądowy PR-a (zbuduj raz, promuj dokładnie te same bajty)
 
 `.github/workflows/preview-artifact.yml` buduje jeden produkcyjny tarball z wierzchołka PR-a i
-weryfikuje dokładnie ten sam build (fragment (a) zadania #8084). Tylko PR-y z tego samego repozytorium; nic nie jest publikowane.
+weryfikuje dokładnie ten build (fragment (a) zadania #8084). Obsługiwane są wyłącznie PR-y z tego samego repozytorium;
+nic nie jest publikowane.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # albo dodaj etykietę `preview-artifact`
+gh workflow run preview-artifact.yml -f pr_number=<N>   # lub dodaj etykietę `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # instalacja wersji podglądowej
+npm install -g ./omniroute-*.tgz                          # instalacja podglądowa
 ```
 
-Uruchomienie wykonuje `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakuje
-tarball, uruchamia `npm run check:pack-boot` (fikcyjne sekrety, efemeryczny katalog danych), ponownie pakuje artefakt i
-kończy się niepowodzeniem, jeśli skrót nie jest identyczny, a następnie zapisuje `artifact-identity.json` (SHA wierzchołka, SHA
-bazy, skrót pliku blokady, platformę, architekturę, ABI node, bundler, zasady budowania —
-`scripts/release/artifact-identity.mjs`) i w osobnym zadaniu poświadcza tarball. Promowanie
-wersji podglądowej oznacza instalację tego tarballa: nigdy nie przebudowuj go ze źródeł.
+Przebieg wykonuje `npm ci`, `npm run build:release` oraz `npm run check:pack-artifact`, pakuje
+tarball, uruchamia `npm run check:pack-boot` (fikcyjne sekrety, efemeryczny katalog danych), ponownie
+pakuje i kończy się niepowodzeniem, jeśli skrót nie jest identyczny, po czym zapisuje
+`artifact-identity.json` (SHA wierzchołka, SHA bazy, skrót pliku blokady, platforma, architektura,
+ABI node, bundler, zasady budowania — `scripts/release/artifact-identity.mjs`) i poświadcza tarball
+w osobnym zadaniu. Promowanie podglądu oznacza instalację tego tarballa: nigdy nie buduj go ponownie ze źródeł.
 
 ### Wydzielenie (3.9.0, po decyzji GO)
 
-1. Decyzja GO zapisana w [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` wypisuje `RESULT: READY`.
-3. Utwórz ręcznie gałęzie na `origin`, używając poleceń wypisanych przez przebieg próbny — skrypt
-   odmawia wysyłania zmian do `origin`. Aby ponownie wykorzystać sprawdzony commit develop, najpierw uruchom
-   próbę z opcją `--execute` na wierzchołku 3.9.0 względem swojego forka; skrypt wypisze oba SHA, a
-   te same commity będzie można wysłać:
+1. Decyzja GO jest zapisana w [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` wyświetla `RESULT: READY`.
+3. Utwórz ręcznie gałęzie w `origin`, używając poleceń wyświetlonych przez przebieg próbny —
+   skrypt odmawia wypychania do `origin`. Aby ponownie wykorzystać sprawdzony commit dla `develop`, najpierw uruchom
+   próbę `--execute` na wierzchołku 3.9.0 względem swojego forka; wyświetli ona oba SHA, a następnie
+   można wypchnąć te same commity:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Zabezpiecz `stable/v3` i `develop` (zestawy reguł + kolejka scalania), zanim zostanie scalony pierwszy PR.
-5. Nieaktywne przepływy pracy włączają się po wykryciu istnienia gałęzi: `forward-port.yml` (push do
+4. Zabezpiecz `stable/v3` i `develop` (zestawy reguł + kolejka scalania), zanim pierwszy PR zostanie scalony.
+5. Nieaktywne przepływy pracy zostaną włączone po utworzeniu odpowiednich gałęzi: `forward-port.yml` (push do
    `stable/v3`), `validate-stable-pr.yml` (PR-y do `stable/v3`) oraz `nightly-v4-build.yml`
-   (buduje `develop`). Przed uruchomieniem produkcyjnym ustaw sekret repozytorium `secrets.FORWARD_PORT_TOKEN` (aby CI uruchamiało się dla
-   PR-ów forward-port); nocne publikowanie pozostaje wyłączone, dopóki właściciel nie ustawi zmiennej repozytorium
-   `vars.NIGHTLY_PUBLISH` na `true`, a npm Trusted Publishing nie zaakceptuje
-   `nightly-v4-build.yml`. Rozwiązywanie kanałów obsługuje `scripts/release/dist-tag.mjs` — ten sam
+   (kompilacje gałęzi `develop`). Przed uruchomieniem ustaw sekret repozytorium `secrets.FORWARD_PORT_TOKEN` (aby CI uruchamiało się dla
+   PR-ów typu forward-port); publikowanie kompilacji nocnych pozostanie wyłączone, dopóki właściciel nie ustawi zmiennej repozytorium
+   `vars.NIGHTLY_PUBLISH` na `true`, a funkcja Trusted Publishing w npm nie zaakceptuje
+   `nightly-v4-build.yml`. Za rozpoznawanie kanałów odpowiada `scripts/release/dist-tag.mjs` — ten sam
    mechanizm, którego używa `npm-publish.yml`.
 6. Zweryfikuj kanały: `npm view omniroute dist-tags --json` pokazuje `latest` = 3.9.0 oraz brak
-   `next` / `nightly`, dopóki v4 nie zostanie opublikowane.
+   `next` / `nightly` do czasu opublikowania v4.
 7. W razie potrzeby wycofaj zmiany: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    oraz `npm dist-tag add omniroute@3.8.59 latest`.
 

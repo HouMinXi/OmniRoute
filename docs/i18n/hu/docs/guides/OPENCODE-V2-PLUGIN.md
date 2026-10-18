@@ -115,11 +115,16 @@ A kikapcsolásához állítsa be a `"geminiSanitization": false` értéket.
 
 ## Hibaelhárítás
 
-| Tünet                                                    | Ok                                                                                                                                               |
-| -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| A választó nem jelenít meg OmniRoute-modellt             | Nem sikerült kulcsot feloldani (ellenőrizze az indítási figyelmeztetést), vagy az átjáró nem érhető el                                           |
-| Nyers modellazonosítók, kombinációk és árazás nélkül     | A felügyeleti végpontok elutasították a tokent — állítsa be a `managementReadToken` értékét                                                      |
-| Egy munkamenet az `opencode-<id>/…` elemhez van rögzítve | A v1 bővítmény az `opencode-<id>` elemet tette közzé; a v2 a puszta `<id>` elemet teszi közzé, ezért válassza ki újra a modellt a `<id>/…` alatt |
+| Tünet                                                         | Ok                                                                                                                                                                |
+| ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A választó nem jelenít meg OmniRoute-modellt                  | Nem sikerült kulcsot feloldani (ellenőrizze az indítási figyelmeztetést), vagy az átjáró nem érhető el                                                            |
+| Nyers modellazonosítók, nincsenek kombinációk, nincsenek árak | A felügyeleti végpontok elutasították a tokent — állítsa be a `managementReadToken` értékét                                                                       |
+| Rövid vagy üres `freeOnly` katalógus                          | Nincs felügyeleti token, vagy a tokent elutasították — olvassa el a frissítési összegző sort (`unmatched-free` darabszám) a gazdagép naplójában                   |
+| Egy munkamenet az `opencode-<id>/…` elemhez van rögzítve      | A v1 beépülő modul az `opencode-<id>` azonosítót tette közzé; a v2 csak a nyers `<id>` azonosítót teszi közzé, ezért válassza ki újra a modellt az `<id>/…` alatt |
+
+A környezeti változóknak el kell jutniuk az opencode kiszolgálófolyamatához: amikor a gazdagép
+szolgáltatásként fut, az `opencode models` parancsot futtató parancsértelmező és a kiszolgáló
+környezete eltér, ezért ott exportálja a kulcsot, ahonnan a kiszolgáló beolvassa.
 
 ## Lásd még
 

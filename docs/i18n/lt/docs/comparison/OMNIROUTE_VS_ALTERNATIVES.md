@@ -39,10 +39,10 @@ Objektyvus funkcijų palyginimas su populiariais atvirojo kodo DI maršruto pari
 
 ## Kada rinktis OmniRoute
 
-- Savarankiškai talpinate sistemą ir norite **didžiausios teikėjų aprėpties** (329 teikėjai, 155 nemokami / autentifikavimo nereikalaujantys katalogo įrašai)
+- Savarankiškai talpinate ir norite **maksimalaus tiekėjų aprėpties** (372 tiekėjai, 155 nemokami katalogo įrašai, kuriems nereikia autentifikavimo)
 - Jums reikia **integruoto MCP serverio** (LLM įrankiai, atmintis ir gebėjimai pateikiami kaip įrankiai)
 - Jums reikia **A2A protokolo** agentų tarpusavio darbo eigoms
-- Norite **kontrolinio atspaudo maskavimo** (JA3/JA4), kad išvengtumėte aptikimo teikėjų CAPTCHA sistemose
+- Norite **skaitmeninio pėdsako maskavimo** (JA3/JA4), kad išvengtumėte aptikimo aukštesnio lygmens CAPTCHA sistemose
 - Jums reikia **įmonėms skirtų funkcijų** (apsaugos priemonių, vertinimų, audito žurnalo) be SaaS sąskaitos
 
 ## Kada rinktis LiteLLM

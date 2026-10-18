@@ -255,9 +255,17 @@ omniroute tokens revoke <id|prefix>   # återkalla omedelbart
 omniroute tokens scopes               # förklara de tre omfången
 ```
 
-`tokens`-kommandon kräver en **admin**-autentiseringsuppgift. Du kan även hantera
-tokens i kontrollpanelen under **Inställningar → Åtkomsttokens** (skapa,
-återkalla, kopiera en gång).
+`tokens`-kommandon kräver en **admin**-autentiseringsuppgift. Du kan även hantera tokens i
+kontrollpanelen under **Inställningar → Åtkomsttokens** (skapa, återkalla, kopiera en gång).
+
+En token kan aldrig skapas med högre behörighet än den som skaparen har. En
+`admin`-token kan endast skapas av operatören — via kontrollpanelssessionen, den
+lokala CLI:n på själva servern, `omniroute connect` med lösenordet eller en
+instans där inloggning är inaktiverad. Maskinautentiseringsuppgifter (en `admin`-åtkomsttoken
+eller en API-nyckel med omfånget `manage`/`admin`) kan endast skapa `write`- och `read`-tokens;
+om de begär `--scope admin` returneras `403`.
+
+En token kan aldrig skapas med fler behörigheter än skaparen har. Endast operatören kan skapa en `admin`-token: via panelsessionen, det lokala CLI:t på själva servern, `omniroute connect` med lösenordet eller en instans där inloggning är avstängd. Maskinautentiseringsuppgifter (en `admin`-åtkomsttoken eller en API-nyckel med omfånget `manage`/`admin`) kan bara skapa `write`- och `read`-token; en begäran om `--scope admin` med dessa returnerar `403`.
 
 ---
 

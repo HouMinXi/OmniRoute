@@ -386,105 +386,108 @@ Radar announcement کو دانستہ طور پر `active: false` کے ساتھ c
 
 ## 3.9.0 LTS کٹ (3.8.58 میں مشق شدہ)
 
-v3.8.59 کے بعد اگلا ورژن 3.9.0 ہے، اور اس کا تازہ ترین سرا دو طویل مدت تک برقرار رہنے والی برانچز بن جاتا ہے:
-`stable/v3` (v3 LTS سلسلہ، npm `latest`) اور `develop` (v4، جسے بڑھا کر 4.0.0 کیا گیا ہے، npm
+v3.8.59 کے بعد اگلا ورژن 3.9.0 ہے، اور اس کا ٹِپ دو طویل مدتی برانچوں میں تبدیل ہو جاتا ہے:
+`stable/v3` (v3 LTS لائن، npm `latest`) اور `develop` (v4، جسے 4.0.0 تک بڑھایا گیا، npm
 `nightly`)۔ برانچ/چینل ماڈل، فارورڈ پورٹ اور لیبلز
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) میں ہیں؛ منصوبہ [ROADMAP](../../ROADMAP.md) (مرحلہ 3) میں ہے۔ کٹ ایک بار چلتا ہے؛
-3.8.58 میں فورک پر ابتدا سے انتہا تک اس کی مشق کی جاتی ہے، اور 3.8.59
-[GO/NO-GO چیک لسٹ](./LTS_GO_NO_GO.md) کے ساتھ اختتام پذیر ہوتا ہے۔
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) میں ہیں؛ منصوبہ [ROADMAP](../../ROADMAP.md) (مرحلہ 3) میں ہے۔ کٹ صرف ایک بار چلتا ہے؛
+3.8.58 میں فورک پر شروع سے آخر تک اس کی مشق کی جاتی ہے، اور 3.8.59
+[GO/NO-GO چیک لسٹ](./LTS_GO_NO_GO.md) کے ساتھ مکمل ہوتا ہے۔
 
-### آزمائشی عمل (صرف پڑھنے کے لیے، کسی بھی وقت محفوظ)
+### آزمائشی اجرا (صرف پڑھنے کے لیے، کسی بھی وقت محفوظ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # اصل کٹ: HEAD سے 3.9.0، سابقہ ٹیگ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # سورس کمٹ کو مقرر کریں
+npm run release:dry-run-lts-cut                       # اصل کٹ: HEAD سے 3.9.0، پچھلا ٹیگ v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ماخذ کمٹ کو پن کریں
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` کچھ بھی عمل میں نہیں لاتا: یہ git اور `gh` کو پڑھتا ہے اور
-پورا سلسلہ پرنٹ کرتا ہے — پیشگی شرائط (سورس حل ہو جاتا ہے، سابقہ ٹیگ موجود ہے، `package.json`
-ہدف ورژن پر ہے، ایک `release-freeze` ایشو کھلا ہے، کسی موجودہ ریلیز برانچ پر کوئی کھلا
-`Release branch not green` ایشو نہیں ہے — جو برانچ موجود نہ ہو وہ `?` نامعلوم دکھاتی ہے، کبھی
-سبز نہیں — Mergify کی `release` قطار کنفیگر شدہ ہے (G11: `queue_rules`، `checks_timeout`،
-لیبل `queue`)، `release/*` رول سیٹ اب بھی حذف کرنے اور فورس پُش کو روکتا ہے، اور
-`stable/v3` اور `develop` ابھی موجود نہیں ہیں)، برانچ کے دو مراحل، کون سے غیر فعال ورک فلو
-ٹرگرز اور `if:` شرائط فعال ہو جاتی ہیں (اور کون سی ریپوزٹری ویری ایبل کے ذریعے محدود رہتی ہیں یا
-کینونیکل ریپوزٹری سے منسلک رہتی ہیں)، متوقع dist-tags (`latest` → 3.9.0، `next` اور
+`scripts/release/dry-run-lts-cut.mjs` کچھ بھی نافذ نہیں کرتا: یہ git اور `gh` کو پڑھتا ہے اور
+پورا سلسلہ پرنٹ کرتا ہے — پیشگی شرائط (ماخذ ریزولو ہو، ماخذ ریپوزٹری میں مکمل ہسٹری موجود ہو —
+ایک shallow clone، `stable/v3` کو پش نہیں کر سکتا، وصول کنندہ پہلا
+grafted parent ملنے پر پیک مسترد کر دیتا ہے، اس لیے مکمل clone سے کٹ کریں یا پہلے
+`git fetch --unshallow origin` چلائیں — پچھلا ٹیگ موجود ہو، `package.json` ہدف ورژن پر ہو، ایک
+`release-freeze` مسئلہ کھلا ہو، اور موجودہ ریلیز برانچ پر کوئی کھلا
+`Release branch not green` مسئلہ نہ ہو — جو برانچ موجود نہ ہو وہ `?` نامعلوم رپورٹ کرتی ہے، کبھی
+سبز نہیں — Mergify کی `release` قطار کنفیگر ہو (G11: `queue_rules`، `checks_timeout`،
+لیبل `queue`)، `release/*` ruleset اب بھی حذف کرنے اور force-push کو روکتا ہو، اور
+`stable/v3` اور `develop` ابھی موجود نہ ہوں)، دونوں برانچ مراحل، یہ کہ کون سے غیر فعال workflow
+ٹرگرز اور `if:` شرائط درست ہو جاتی ہیں (اور کون سی کسی ریپوزٹری متغیر کے ذریعے گیٹ رہتی ہیں یا
+canonical ریپوزٹری سے پن ہوتی ہیں)، متوقع dist-tags (`latest` → 3.9.0، `next` اور
 `nightly` خالی) اور رول بیک۔ خروج `0` = `RESULT: READY`، `1` = کوئی لازمی پیشگی شرط
-ناکام ہوئی (`✗`)، `2` = استعمال کی خرابی۔ `--advisory <id,...>` کسی چیک کو چھپائے بغیر
-انتباہ (`!`) میں گھٹا دیتا ہے۔
+ناکام ہوئی (`✗`)، `2` = استعمال کی خرابی۔ `--advisory <id,...>` کسی جانچ کو چھپائے بغیر
+انتباہ (`!`) میں تبدیل کر دیتا ہے۔
 
-اصل کٹ کا آزمائشی عمل اس وقت چلائیں جب 3.9.0 ریلیز فریز ابھی کھلا ہو — برانچز
-ٹیگ کے بعد اور مرحلہ 12c کے فریز ہٹانے سے پہلے بنائی جاتی ہیں۔
+اصل کٹ کا آزمائشی اجرا اس وقت چلائیں جب 3.9.0 کا ریلیز فریز اب بھی کھلا ہو — برانچیں
+ٹیگ کے بعد اور مرحلہ 12c میں فریز اٹھائے جانے سے پہلے بنائی جاتی ہیں۔
 
 ### 3.8.58 کی مشق (صرف فورک)
 
 ```bash
-# 1. موجودہ سرے پر مشق کے پیرامیٹرز کے ساتھ آزمائشی عمل چلائیں
+# 1. موجودہ ٹِپ پر مشقی پیرامیٹرز کے ساتھ آزمائشی اجرا
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. کسی FORK ریموٹ کے خلاف عمل کریں (origin، یا کوئی بھی ایسا ریموٹ جس کا URL کینونیکل
-#    ریپوزٹری ہو، مسترد کر دیا جاتا ہے؛ ہر مرحلہ ٹرمینل پر تصدیق طلب کرتا ہے)
+# 2. کسی FORK ریموٹ کے خلاف نافذ کریں (origin، یا کوئی بھی ایسا ریموٹ جس کا URL canonical
+#    ریپوزٹری کا ہو، مسترد کر دیا جاتا ہے؛ ہر مرحلہ ٹرمینل پر تصدیق مانگتا ہے)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. فورک میں غیر فعال ورک فلوز کو آزمائیں (جہاں آزمائشی عمل کینونیکل ریپوزٹری سے
-#    وابستگی کی اطلاع دے وہاں workflow_dispatch)، پھر رول بیک کریں
+# 3. فورک میں غیر فعال workflows کی مشق کریں (جہاں آزمائشی اجرا
+#    canonical ریپوزٹری پن رپورٹ کرے وہاں workflow_dispatch)، پھر رول بیک کریں
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop کا ورژن بڑھانے والا کمٹ git plumbing کے ذریعے بنایا جاتا ہے (ورکنگ ٹری کو چھوا نہیں جاتا) اور
-سائیکل کھولنے والے کمٹ جیسی انہی پانچ فائلوں کا ورژن بڑھاتا ہے: `package.json`، `open-sse/package.json`،
+develop bump کمٹ git plumbing کے ذریعے بنایا جاتا ہے (working tree کو نہیں چھیڑا جاتا) اور
+انہی پانچ فائلوں کا ورژن بڑھاتا ہے جو cycle-open کمٹ میں ہوتا ہے: `package.json`، `open-sse/package.json`،
 `electron/package.json`، `package-lock.json` اور `docs/openapi.yaml`۔ `[4.0.0]`
-CHANGELOG سیکشن اور اس کے i18n متبادل بعد میں `develop` پر، اس کی پہلی
-PR سے پہلے، کھولے جاتے ہیں۔ اسکرپٹ کبھی npm dist-tags تبدیل نہیں کرتا — ان کی مشق کسی عارضی پیکیج پر کریں۔
+CHANGELOG سیکشن اور اس کے i18n عکس بعد میں `develop` پر، اس کی پہلی
+PR سے پہلے، کھولے جاتے ہیں۔ اسکرپٹ کبھی npm dist-tags تبدیل نہیں کرتا — ان کی مشق کسی scratch package پر کریں۔
 
-### PR پیش منظر آرٹیفیکٹ (ایک بار بنائیں، انہی بائٹس کو آگے بڑھائیں)
+### PR پیش منظر آرٹیفیکٹ (ایک بار بنائیں، انہی بائٹس کو پروموٹ کریں)
 
-`.github/workflows/preview-artifact.yml` کسی PR ہیڈ سے ایک پروڈکشن tarball بناتا ہے اور
-اسی عین بلڈ کی توثیق کرتا ہے (#8084 حصہ (a))۔ صرف اسی ریپوزٹری کی PRs؛ کچھ بھی شائع نہیں کیا جاتا۔
+`.github/workflows/preview-artifact.yml` کسی PR head سے ایک production tarball بناتا ہے اور
+اسی عین build کی توثیق کرتا ہے (#8084 حصہ (a))۔ صرف اسی ریپوزٹری کی PRs؛ کچھ بھی شائع نہیں کیا جاتا۔
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # یا `preview-artifact` لیبل شامل کریں
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # پیش منظر انسٹال
+npm install -g ./omniroute-*.tgz                          # پیش منظر کی تنصیب
 ```
 
-یہ رن `npm ci`، `npm run build:release`، `npm run check:pack-artifact` انجام دیتا ہے، پھر
-tarball پیک کرتا ہے، `npm run check:pack-boot` چلاتا ہے (جعلی راز، عارضی ڈیٹا ڈائریکٹری)، دوبارہ پیک کرتا ہے اور
-اگر ڈائجسٹ یکساں نہ ہو تو ناکام ہو جاتا ہے، پھر `artifact-identity.json` ریکارڈ کرتا ہے (ہیڈ SHA، بیس
-SHA، lockfile ہیش، پلیٹ فارم، arch، node ABI، bundler، بلڈ پالیسی —
-`scripts/release/artifact-identity.mjs`) اور ایک الگ جاب میں tarball کی تصدیق کرتا ہے۔ پیش منظر کو
-آگے بڑھانے کا مطلب وہ tarball انسٹال کرنا ہے: سورس سے کبھی دوبارہ بلڈ نہ کریں۔
+اجرا `npm ci`، `npm run build:release`، `npm run check:pack-artifact` چلاتا ہے، پھر
+tarball پیک کرتا ہے، `npm run check:pack-boot` چلاتا ہے (جعلی secrets، عارضی data dir)، دوبارہ پیک کرتا ہے اور
+اگر digest یکساں نہ ہو تو ناکام ہو جاتا ہے، پھر `artifact-identity.json` ریکارڈ کرتا ہے (head SHA، base
+SHA، lockfile hash، platform، arch، node ABI، bundler، build policy —
+`scripts/release/artifact-identity.mjs`) اور ایک الگ job میں tarball کی تصدیق کرتا ہے۔ پیش منظر کو پروموٹ
+کرنے کا مطلب اسی tarball کو نصب کرنا ہے: ماخذ سے کبھی دوبارہ build نہ کریں۔
 
 ### کٹ (3.9.0، GO کے بعد)
 
-1. GO کو [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) میں ریکارڈ کیا گیا۔
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0`، `RESULT: READY` پرنٹ کرتا ہے۔
-3. آزمائشی عمل کے پرنٹ کردہ کمانڈز کے ساتھ `origin` پر برانچز دستی طور پر بنائیں — اسکرپٹ
-   `origin` پر پُش کرنے سے انکار کرتا ہے۔ نظرثانی شدہ develop کمٹ دوبارہ استعمال کرنے کے لیے، پہلے
-   اپنے فورک کے خلاف 3.9.0 سرے پر `--execute` مشق چلائیں؛ یہ دونوں SHAs پرنٹ کرتا ہے، اور
-   انہی کمٹس کو پُش کیا جا سکتا ہے:
+1. GO کو [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) میں ریکارڈ کیا گیا ہو۔
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0`، `RESULT: READY` پرنٹ کرے۔
+3. آزمائشی اجرا کے پرنٹ کردہ commands کے ساتھ `origin` پر برانچیں دستی طور پر بنائیں —
+   اسکرپٹ `origin` پر پش کرنے سے انکار کرتا ہے۔ جائزہ شدہ develop کمٹ دوبارہ استعمال کرنے کے لیے، پہلے
+   3.9.0 ٹِپ پر اپنے فورک کے خلاف `--execute` مشق چلائیں؛ یہ دونوں SHAs پرنٹ کرتا ہے، اور
+   انہی کمٹس کو پش کیا جا سکتا ہے:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. پہلی PR ضم ہونے سے پہلے `stable/v3` اور `develop` کو محفوظ کریں (رول سیٹس + مرج قطار)۔
-5. غیر فعال ورک فلوز برانچ کی موجودگی سے فعال ہو جاتے ہیں: `forward-port.yml` (`stable/v3` پر پُش)،
+4. پہلی PR کے ضم ہونے سے پہلے `stable/v3` اور `develop` کو محفوظ کریں (rulesets + merge queue)۔
+5. غیر فعال workflows شاخ کی موجودگی پر فعال ہوتے ہیں: `forward-port.yml` (`stable/v3` پر push)،
    `validate-stable-pr.yml` (`stable/v3` کے لیے PRs) اور `nightly-v4-build.yml`
-   (`develop` کو بلڈ کرتا ہے)۔ فعال کرنے سے پہلے، `secrets.FORWARD_PORT_TOKEN` ریپوزٹری سیکرٹ مقرر کریں (تاکہ CI
-   فارورڈ پورٹ PRs پر چلے)؛ nightly اشاعت اس وقت تک بند رہتی ہے جب تک مالک ریپوزٹری
-   ویری ایبل `vars.NIGHTLY_PUBLISH` کو `true` پر مقرر نہ کرے اور npm Trusted Publishing،
-   `nightly-v4-build.yml` کو قبول نہ کرے۔ چینل ریزولیوشن `scripts/release/dist-tag.mjs` ہے، یعنی وہی
-   ریزولور جسے `npm-publish.yml` استعمال کرتا ہے۔
-6. چینلز کی تصدیق کریں: `npm view omniroute dist-tags --json` میں `latest` = 3.9.0 دکھائی دیتا ہے اور
-   v4 کی اشاعت تک کوئی `next` / `nightly` نہیں ہوتا۔
-7. ضرورت پڑنے پر رول بیک کریں: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   (`develop` کو build کرتا ہے)۔ لائیو کرنے سے پہلے، `secrets.FORWARD_PORT_TOKEN` repository secret سیٹ کریں (تاکہ
+   forward-port PRs پر CI چلے)؛ nightly publishing اس وقت تک بند رہے گی جب تک مالک repository
+   variable `vars.NIGHTLY_PUBLISH` کو `true` پر سیٹ نہیں کرتا اور npm Trusted Publishing
+   `nightly-v4-build.yml` کو قبول نہیں کرتی۔ چینل کا تعین `scripts/release/dist-tag.mjs` کرتا ہے، یہی
+   resolver `npm-publish.yml` استعمال کرتا ہے۔
+6. چینلز کی تصدیق کریں: `npm view omniroute dist-tags --json` دکھائے کہ `latest` = 3.9.0 ہے اور
+   v4 کے publish ہونے تک کوئی `next` / `nightly` موجود نہیں۔
+7. اگر ضرورت ہو تو rollback کریں: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    اور `npm dist-tag add omniroute@3.8.59 latest`۔
 
 ---

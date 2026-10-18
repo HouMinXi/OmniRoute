@@ -383,104 +383,108 @@ Radar 公告已刻意以 `active: false` 提交。只有在下列每一項皆有
 
 ---
 
-## 3.9.0 LTS 分支切割（已於 3.8.58 中演練）
+## 3.9.0 LTS 切分（已於 3.8.58 演練）
 
-v3.8.59 之後的下一個版本是 3.9.0，其頂端提交將成為兩個長期維護的分支：
-`stable/v3`（v3 LTS 系列，npm `latest`）與 `develop`（v4，提升至 4.0.0，npm
+v3.8.59 之後的下一個版本是 3.9.0，其頂端提交會成為兩個長期維護的分支：
+`stable/v3`（v3 LTS 線，npm `latest`）與 `develop`（v4，提升至 4.0.0，npm
 `nightly`）。分支／頻道模型、向前移植與標籤記載於
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)；計畫記載於 [ROADMAP](../../ROADMAP.md)（階段 3）。此切割僅執行一次；
-3.8.58 會在分支複本上進行端對端演練，而 3.8.59 則以
-[GO/NO-GO 檢查清單](./LTS_GO_NO_GO.md)作結。
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)；計畫記載於 [ROADMAP](../../ROADMAP.md)（第 3 階段）。此切分只執行一次；
+3.8.58 會在分支版本庫上端到端演練，而 3.8.59 則以
+[GO/NO-GO 檢查清單](./LTS_GO_NO_GO.md)結束。
 
 ### 試執行（唯讀，可隨時安全執行）
 
 ```bash
-npm run release:dry-run-lts-cut                       # 實際切割：從 HEAD 建立 3.9.0，前一個標籤為 v3.8.59
+npm run release:dry-run-lts-cut                       # 實際切分：從 HEAD 建立 3.9.0，前一個標籤為 v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # 固定來源提交
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` 不會執行任何操作：它會讀取 git 與 `gh`，並列印
-完整流程——前置條件（來源可解析、前一個標籤存在、`package.json` 為
-目標版本、有開啟中的 `release-freeze` 議題、現有發布分支上沒有開啟中的 `Release branch not green` 議題
-——不存在的分支會回報 `?` 未知，絕不會回報為綠燈——已設定 Mergify `release`
-佇列（G11：`queue_rules`、`checks_timeout`、標籤 `queue`）、`release/*` 規則集仍會阻止
+`scripts/release/dry-run-lts-cut.mjs` 不會執行任何操作：它會讀取 git 與 `gh`，並輸出
+完整流程——前置條件（來源可解析、來源版本庫擁有完整歷史記錄——
+淺層複製無法推送 `stable/v3`，接收端會在第一個嫁接的父提交處拒絕該封包，
+因此請從完整複製進行切分，或先執行 `git fetch --unshallow origin`——前一個
+標籤存在、`package.json` 是目標版本、存在開啟中的 `release-freeze` 議題、現有
+發行分支上沒有開啟中的 `Release branch not green` 議題
+——不存在的分支會回報 `?` 未知，絕不會回報為綠燈——Mergify `release` 佇列已設定
+（G11：`queue_rules`、`checks_timeout`、標籤 `queue`）、`release/*` 規則集仍會阻止
 刪除與強制推送，且 `stable/v3` 與 `develop` 尚不存在）、兩個分支步驟、哪些休眠中的工作流程
-觸發條件與 `if:` 條件會成為 true（以及哪些仍受儲存庫變數控管，或固定於正式儲存庫）、
-預期的 dist-tag（`latest` → 3.9.0，`next` 與 `nightly` 為空）及回復步驟。結束碼 `0` =
-`RESULT: READY`，`1` = 某個阻斷性前置條件失敗（`✗`），`2` = 用法錯誤。`--advisory <id,...>`
-會將檢查降級為警告（`!`），但不會將其隱藏。
+觸發條件與 `if:` 條件會成立（以及哪些仍受版本庫變數限制，或固定至正式版本庫）、
+預期的 dist-tags（`latest` → 3.9.0，`next` 與 `nightly` 為空）以及復原操作。結束碼
+`0` = `RESULT: READY`、`1` = 阻斷性的前置條件失敗（`✗`）、`2` = 用法錯誤。
+`--advisory <id,...>` 會將檢查降級為警告（`!`），而不會將其隱藏。
 
-請在 3.9.0 發布凍結仍然生效時執行實際切割的試執行——分支會在建立標籤之後，
-且在階段 12c 解除凍結之前建立。
+請在 3.9.0 發行凍結仍生效時執行實際切分的試執行——分支會在建立標籤後、
+第 12c 階段解除凍結前建立。
 
-### 3.8.58 演練（僅限分支複本）
+### 3.8.58 演練（僅限分支版本庫）
 
 ```bash
-# 1. 使用演練參數，在目前的頂端提交上進行試執行
+# 1. 使用演練參數在目前頂端提交上進行試執行
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. 對分支複本遠端執行（會拒絕 origin 或 URL 為正式儲存庫的任何遠端；
-#    每個步驟都會在終端機上要求確認）
+# 2. 對分支版本庫遠端執行（會拒絕 origin 或 URL 為正式版本庫的任何遠端；
+#    每個步驟都會在終端機要求確認）
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. 在分支複本中演練休眠中的工作流程（若試執行回報固定於正式儲存庫，
-#    則使用 workflow_dispatch），然後回復
+# 3. 在分支版本庫中測試休眠中的工作流程（當試執行回報固定至正式版本庫時，
+#    使用 workflow_dispatch），然後復原
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop 版本提升提交是透過 git 底層指令建立的（不會觸及工作樹），並會提升與週期開啟提交
-相同的五個檔案：`package.json`、`open-sse/package.json`、
-`electron/package.json`、`package-lock.json` 與 `docs/openapi.yaml`。之後會在 `develop`
-上開啟 `[4.0.0]` CHANGELOG 章節及其 i18n 鏡像，並於其第一個 PR 之前完成。
-此指令碼絕不會變更 npm dist-tag——請使用臨時套件演練這些操作。
+develop 版本提升提交使用 git 底層命令建立（不會觸碰工作目錄），並會提升
+與週期開啟提交相同的五個檔案：`package.json`、`open-sse/package.json`、
+`electron/package.json`、`package-lock.json` 與 `docs/openapi.yaml`。之後會在
+`develop` 上、其第一個 PR 之前，開啟 `[4.0.0]` CHANGELOG 區段及其 i18n 鏡像。
+此指令碼絕不會變更 npm dist-tags——請使用暫存套件演練這些操作。
 
-### PR 預覽成品（建置一次，推廣相同位元組）
+### PR 預覽成品（建置一次，推廣完全相同的位元組）
 
-`.github/workflows/preview-artifact.yml` 會從 PR 頂端提交建置一個正式環境 tarball，
-並驗證該次確切建置（#8084 切片 (a)）。僅限同一儲存庫的 PR；不會發布任何內容。
+`.github/workflows/preview-artifact.yml` 會從 PR 頂端提交建置一個生產環境 tarball，
+並驗證該完全相同的建置（#8084 子項目 (a)）。僅限同一版本庫的 PR；不會發布任何內容。
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # 或新增 `preview-artifact` 標籤
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # 預覽安裝
+npm install -g ./omniroute-*.tgz                          # 安裝預覽版本
 ```
 
-該次執行會進行 `npm ci`、`npm run build:release`、`npm run check:pack-artifact`，封裝
-tarball，執行 `npm run check:pack-boot`（假祕密值、暫時性資料目錄），再次封裝，若摘要不完全相同
-即判定失敗；接著記錄 `artifact-identity.json`（頂端 SHA、基底 SHA、鎖定檔雜湊、平台、
-架構、node ABI、bundler、建置政策——`scripts/release/artifact-identity.mjs`），並在另一項工作中
-為 tarball 建立證明。推廣預覽版意指安裝該 tarball：絕不可從原始碼重新建置。
+該執行會依序執行 `npm ci`、`npm run build:release`、`npm run check:pack-artifact`，
+封裝 tarball、執行 `npm run check:pack-boot`（假密鑰、暫時性資料目錄）、重新封裝，
+若摘要不完全相同則失敗；接著記錄 `artifact-identity.json`（頂端提交 SHA、基底
+SHA、鎖定檔雜湊、平台、架構、node ABI、打包工具、建置政策——
+`scripts/release/artifact-identity.mjs`），並在獨立工作中證明該 tarball。
+推廣預覽版本代表安裝該 tarball：絕不可從原始碼重新建置。
 
-### 切割（3.9.0，GO 之後）
+### 切分（3.9.0，GO 之後）
 
 1. GO 已記錄於 [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)。
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` 會列印 `RESULT: READY`。
-3. 使用試執行所列印的命令，手動在 `origin` 上建立分支——該指令碼會拒絕推送至 `origin`。
-   若要重複使用已審查的 develop 提交，請先在 3.9.0 頂端提交上，對您的分支複本執行
-   `--execute` 演練；它會列印兩個 SHA，接著即可推送相同的提交：
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` 會輸出 `RESULT: READY`。
+3. 使用試執行輸出的命令，手動在 `origin` 上建立分支——該指令碼拒絕推送至
+   `origin`。若要重複使用已審查的 develop 提交，請先針對您的分支版本庫，
+   在 3.9.0 頂端提交上執行 `--execute` 演練；它會輸出兩個 SHA，之後即可推送
+   相同的提交：
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
 4. 在第一個 PR 合併前，保護 `stable/v3` 與 `develop`（規則集 + 合併佇列）。
-5. 休眠中的工作流程會因分支存在而啟用：`forward-port.yml`（推送至
-   `stable/v3`）、`validate-stable-pr.yml`（以 `stable/v3` 為目標的 PR）及 `nightly-v4-build.yml`
-   （建置 `develop`）。正式上線前，請設定 `secrets.FORWARD_PORT_TOKEN` 儲存庫祕密值（使 CI 能在
-   向前移植 PR 上執行）；夜間發布會維持關閉，直到擁有者將儲存庫變數
-   `vars.NIGHTLY_PUBLISH` 設為 `true`，且 npm Trusted Publishing 接受
-   `nightly-v4-build.yml`。頻道解析使用 `scripts/release/dist-tag.mjs`，與
-   `npm-publish.yml` 使用的是同一個解析器。
-6. 驗證頻道：`npm view omniroute dist-tags --json` 應顯示 `latest` = 3.9.0，且在 v4 發布前
+5. 休眠中的工作流程會依分支是否存在而啟用：`forward-port.yml`（推送至
+   `stable/v3`）、`validate-stable-pr.yml`（以 `stable/v3` 為目標的 PR）以及 `nightly-v4-build.yml`
+   （建置 `develop`）。正式啟用前，請設定 `secrets.FORWARD_PORT_TOKEN` 儲存庫密鑰（以便 CI 在
+   forward-port PR 上執行）；在擁有者將儲存庫變數 `vars.NIGHTLY_PUBLISH`
+   設為 `true`，且 npm 受信任發佈接受 `nightly-v4-build.yml` 之前，每夜發佈會維持停用狀態。
+   通道解析由 `scripts/release/dist-tag.mjs` 負責，與 `npm-publish.yml` 使用的解析器相同。
+6. 驗證通道：`npm view omniroute dist-tags --json` 會顯示 `latest` = 3.9.0，且在 v4 發佈前
    不會有 `next` / `nightly`。
-7. 如有需要，進行回復：`git push origin --delete refs/heads/stable/v3 refs/heads/develop`
-   及 `npm dist-tag add omniroute@3.8.59 latest`。
+7. 如有需要，請回復：`git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   以及 `npm dist-tag add omniroute@3.8.59 latest`。
 
 ---
 

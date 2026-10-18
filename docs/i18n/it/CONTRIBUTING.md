@@ -289,65 +289,72 @@ Consulta `open-sse/utils/stream.ts` e `open-sse/utils/streamHandler.ts` per alcu
 
 ---
 
-## Project Structure
+## Struttura del progetto
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+├── app/                    # App Router di Next.js 16
+│   ├── (dashboard)/        # Pagine della dashboard (23 sezioni)
+│   ├── api/                # Route API (51 directory)
+│   └── login/              # Pagine di autenticazione (.tsx)
+├── domain/                 # Motore delle policy (policyEngine, comboResolver, costRules, ecc.)
+├── lib/                    # Logica di business principale (.ts)
+│   ├── a2a/                # Server del protocollo Agent-to-Agent v0.3
+│   ├── acp/                # Registro dell'Agent Communication Protocol
+│   ├── compliance/         # Motore delle policy di conformità
+│   ├── db/                 # Moduli di dominio SQLite + 130 migrazioni
+│   ├── memory/             # Memoria conversazionale persistente
+│   ├── oauth/              # Provider, servizi e utilità OAuth
+│   ├── skills/             # Framework estensibile per le skill
+│   ├── usage/              # Monitoraggio dell'utilizzo e calcolo dei costi
+│   └── localDb.ts          # Solo livello di riesportazione — non aggiungere mai logica qui
+├── middleware/              # Middleware delle richieste (promptInjectionGuard)
+├── mitm/                   # Proxy MITM (certificati, DNS, instradamento delle destinazioni)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Componenti React (.tsx)
+│   ├── constants/          # Definizioni dei provider (329), ambiti MCP, 19 strategie di instradamento
+│   ├── utils/              # Circuit breaker, sanitizzatore, helper di autenticazione
+│   └── validation/         # Schemi Zod v4
+└── sse/                    # Pipeline del proxy SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Workspace @omniroute/open-sse
+├── executors/              # 150 moduli executor (classi executor + helper per provider)
+├── handlers/               # 11 gestori delle richieste (chat, risposte, embedding, immagini, ecc.)
+├── mcp-server/             # Server MCP (110 strumenti univoci, 3 trasporti, 33 ambiti)
+├── services/               # 178 servizi di primo livello (combo, autoCombo, rateLimitManager, ecc.)
+├── translator/             # Traduttori di formato (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Trasformatore dell'API Responses
+└── utils/                  # 22 moduli di utilità (stream, TLS, proxy, logging)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # App desktop Electron (multipiattaforma)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Test runner di Node.js (1.574 file di test)
+├── integration/            # Test di integrazione
+├── e2e/                    # Test Playwright
+├── security/               # Test di sicurezza
+├── translator/             # Test specifici del traduttore
+└── load/                   # Test di carico
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Record delle decisioni architetturali
+├── architecture/            # Architettura e resilienza del sistema
+├── comparison/              # OmniRoute rispetto alle alternative
+├── compression/             # Guide e regole per la compressione
+├── dev/                     # Guide per lo sviluppo
+├── diagrams/                # Diagrammi dell'architettura
+├── frameworks/              # MCP, A2A, OpenCode, memoria, skill
+├── guides/                  # Guida utente, Docker, configurazione, risoluzione dei problemi
+├── i18n/                    # Traduzioni internazionalizzate del README
+├── marketing/               # Materiali di marketing
+├── ops/                     # Distribuzione, proxy, copertura, release
+├── providers/               # Documentazione specifica dei provider
+├── reference/               # Riferimento API, variabili di ambiente, strumenti CLI, piani gratuiti
+├── releases/                # Note di rilascio
+├── routing/                 # Motore auto-combo, riproduzione del ragionamento
+├── screenshots/             # Screenshot della dashboard
+├── security/                # Protezioni, conformità, modalità invisibile, token
+└── specs/                   # Specifiche di progettazione
 ```
 
 ---

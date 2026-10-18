@@ -244,13 +244,22 @@ na-arụ ọrụ.
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
 #   ↳ na-ebipụta ihe nzuzo ahụ OTU UGBO — detuo ya ugbu a
-omniroute tokens list                 # ezoro akụkụ ya: id, aha, scope, prefix, ọnọdụ, ụbọchị ngwụcha
-omniroute tokens revoke <id|prefix>   # kagbuo ozugbo
+omniroute tokens list                 # ezoro akụkụ ya: id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # kagbuo ya ozugbo
 omniroute tokens scopes               # kọwaa scope atọ ahụ
 ```
 
-Iwu `tokens` chọrọ nzere **admin**. Ị nwekwara ike ijikwa token n’ime
-ogwe njikwa n’okpuru **Ntọala → Token Nnweta** (mepụta, kagbuo, detuo naanị otu ugboro).
+Iwu `tokens` chọrọ nzere **admin**. Ị nwekwara ike ijikwa token na
+dashboard n'okpuru **Settings → Access Tokens** (mepụta, kagbuo, detuo naanị otu ugboro).
+
+A pụghị imepụta token nwere ikike karịrị nke onye kere ya nwere. Naanị
+onye na-ahụ maka sistemụ nwere ike ịmepụta token `admin` — site na nnọkọ dashboard,
+CLI mpaghara dị na sava ahụ n'onwe ya, `omniroute connect` site na iji okwuntughe, ma ọ bụ
+instance ebe agbanyụrụ nbanye. Nzere igwe (token nnweta `admin`,
+ma ọ bụ API key nwere scope `manage`/`admin`) nwere ike ịmepụta naanị token `write` na `read`;
+ịrịọ ha `--scope admin` ga-eweghachi `403`.
+
+A pụghị ịmepụta token nwere ikike karịrị nke onye mepụtara ya. Naanị onye na-ahụ maka sistemụ nwere ike ịmepụta token `admin`: site na nnọkọ dashboard, CLI dị n'ime sava ahụ n'onwe ya, `omniroute connect` na paswọọdụ, ma ọ bụ instance agbanyụrụ nbanye ya. Nkwenye njirimara igwe (token nnweta `admin` ma ọ bụ igodo API nwere oke `manage`/`admin`) nwere ike ịmepụta naanị token `write` na `read`; ịrịọ `--scope admin` site na ha na-eweghachi `403`.
 
 ---
 

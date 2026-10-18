@@ -288,65 +288,72 @@ Tazama `open-sse/utils/stream.ts` na `open-sse/utils/streamHandler.ts` kwa mifan
 
 ---
 
-## Project Structure
+## Muundo wa Mradi
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Kurasa za dashibodi (sehemu 23)
+│   ├── api/                # Njia za API (saraka 51)
+│   └── login/              # Kurasa za uthibitishaji (.tsx)
+├── domain/                 # Injini ya sera (policyEngine, comboResolver, costRules, n.k.)
+├── lib/                    # Mantiki kuu ya biashara (.ts)
+│   ├── a2a/                # Seva ya itifaki ya Agent-to-Agent v0.3
+│   ├── acp/                # Sajili ya Agent Communication Protocol
+│   ├── compliance/         # Injini ya sera za uzingatiaji
+│   ├── db/                 # Moduli za kikoa za SQLite + uhamishaji 130
+│   ├── memory/             # Kumbukumbu endelevu ya mazungumzo
+│   ├── oauth/              # Watoa huduma, huduma, na zana za OAuth
+│   ├── skills/             # Mfumo unaoweza kupanuliwa wa ujuzi
+│   ├── usage/              # Ufuatiliaji wa matumizi na ukokotoaji wa gharama
+│   └── localDb.ts          # Safu ya kusafirisha upya pekee — usiongeze mantiki hapa kamwe
+├── middleware/              # Programu kati ya maombi (promptInjectionGuard)
+├── mitm/                   # Proksi ya MITM (cheti, DNS, uelekezaji lengwa)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Vipengele vya React (.tsx)
+│   ├── constants/          # Ufafanuzi wa watoa huduma (329), mawanda ya MCP, mikakati 19 ya uelekezaji
+│   ├── utils/              # Kivunja saketi, kisafishaji, visaidizi vya uthibitishaji
+│   └── validation/         # Skima za Zod v4
+└── sse/                    # Mchakato wa proksi ya SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Nafasi ya kazi ya @omniroute/open-sse
+├── executors/              # Moduli 150 za utekelezaji (madarasa ya utekelezaji + visaidizi vya kila mtoa huduma)
+├── handlers/               # Vishughulikiaji 11 vya maombi (gumzo, majibu, upachikaji, picha, n.k.)
+├── mcp-server/             # Seva ya MCP (zana 110 za kipekee, njia 3 za usafirishaji, mawanda 33)
+├── services/               # Huduma 178 za ngazi ya juu (combo, autoCombo, rateLimitManager, n.k.)
+├── translator/             # Vigeuzi vya umbizo (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Kigeuzi cha Responses API
+└── utils/                  # Moduli 22 za zana (mtiririko, TLS, proksi, uwekaji kumbukumbu)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Programu ya eneo-kazi ya Electron (majukwaa mbalimbali)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Kiendeshaji cha majaribio cha Node.js (faili 1,574 za majaribio)
+├── integration/            # Majaribio ya ujumuishaji
+├── e2e/                    # Majaribio ya Playwright
+├── security/               # Majaribio ya usalama
+├── translator/             # Majaribio mahususi ya kigeuzi
+└── load/                   # Majaribio ya mzigo
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Rekodi za Maamuzi ya Usanifu
+├── architecture/            # Usanifu na ustahimilivu wa mfumo
+├── comparison/              # OmniRoute dhidi ya mbadala
+├── compression/             # Miongozo na kanuni za mfinyazo
+├── dev/                     # Miongozo ya uendelezaji
+├── diagrams/                # Michoro ya usanifu
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Mwongozo wa mtumiaji, Docker, usanidi, utatuzi wa matatizo
+├── i18n/                    # Tafsiri za README za kimataifa
+├── marketing/               # Nyenzo za uuzaji
+├── ops/                     # Usambazaji, proksi, ufunikaji, matoleo
+├── providers/               # Nyaraka mahususi za watoa huduma
+├── reference/               # Marejeleo ya API, vigeu vya mazingira, zana za CLI, viwango vya bure
+├── releases/                # Maelezo ya matoleo
+├── routing/                 # Injini ya mchanganyiko otomatiki, urudiaji wa ureasonishaji
+├── screenshots/             # Picha za skrini za dashibodi
+├── security/                # Vizuizi vya usalama, uzingatiaji, usiri, tokeni
+└── specs/                   # Vipimo vya usanifu
 ```
 
 ---

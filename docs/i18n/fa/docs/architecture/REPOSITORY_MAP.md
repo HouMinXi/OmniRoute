@@ -115,117 +115,117 @@ OmniRoute/
 ```
 src/
 ├── app/                 # App Router (صفحهها + مسیرهای API + صفحههای وضعیت + صفحه فرود)
-├── lib/                 # کتابخانههای اصلی / ماژولهای دامنه (80 زیرپوشه + حدود 70 فایل سطحبالا)
-├── domain/              # منطق خالص دامنه (موتور سیاستگذاری، fallback، هزینه، lockout، comboResolver، ارزیابی)
+├── lib/                 # کتابخانههای اصلی / ماژولهای دامنه (80 زیرپوشه + حدود 70 فایل سطح بالا)
+├── domain/              # منطق خالص دامنه (موتور خطمشی، fallback، هزینه، lockout، comboResolver، ارزیابی)
 ├── server/              # ماژولهای مختص سرور (خط لوله authz، cors، میانافزار احراز هویت) — قابل import از کلاینت نیستند
-├── shared/              # اشتراکگذاریشده بین سرور و کلاینت، در موارد ایمن (ثابتها، نوعها، اعتبارسنجی، قراردادها، ابزارها)
-├── i18n/                # پیکربندی next-intl + پیامهای JSON برای هر locale ‏(42 locale)
+├── shared/              # مواردی که در صورت امن بودن بین سرور و کلاینت مشترکاند (ثابتها، نوعها، اعتبارسنجی، قراردادها، ابزارها)
+├── i18n/                # پیکربندی next-intl + پیامهای JSON برای هر locale (42 locale)
 ├── middleware/          # میانافزار Next.js (غنیسازی درخواست، تشخیص locale)
-├── mitm/                # هسته پراکسی MITM: تولید/نصب گواهی، handlerها، targetها، inspector، maskها، passthrough
+├── mitm/                # هسته پروکسی MITM: تولید/نصب گواهی، handlerها، targetها، inspector، maskها، passthrough
 │   ├── handlers/        # 9 کلاس handler عامل IDE که MitmHandlerBase را گسترش میدهند (antigravity، kiro، copilot، codex، cursor، zed، claudeCode، openCode، trae)
 │   └── inspector/       # لایه ثبت ترافیک: buffer (حلقه درونحافظهای)، sseMerger، conversationNormalizer، kindDetector، contextKey، httpProxyServer، systemProxyConfig
-├── models/              # کد واسط adapter مدل (shim قدیمی)
+├── models/              # کد اتصال adapter مدل (shim قدیمی)
 ├── scripts/             # اسکریپتهای نگهداری دروندرختی (برای مثال، backfillAggregation)
-├── sse/                 # handlerها/سرویسهای قدیمی SSE ‏(chat.ts، chatHelpers.ts، services/auth.ts)
-├── store/               # store درونحافظهای قدیمی (در حال کنار گذاشته شدن به نفع src/lib/db)
-├── types/               # فایلهای نوع TS اشتراکی
-├── instrumentation.ts   # هوک telemetry در Next.js (مرورگر + edge)
+├── sse/                 # handlerها/سرویسهای قدیمی SSE (chat.ts، chatHelpers.ts، services/auth.ts)
+├── store/               # store درونحافظهای قدیمی (در حال جایگزینی با src/lib/db)
+├── types/               # فایلهای نوع مشترک TS
+├── instrumentation.ts   # hook تلهمتری Next.js (مرورگر + edge)
 ├── instrumentation-node.ts  # instrumentation مختص Node
-└── proxy.ts             # shim ورودی HTTP-proxy
+└── proxy.ts             # shim ورودی پروکسی HTTP
 ```
 
-### `src/app/` — App Router ‏(Next.js 16)
+### `src/app/` — App Router (Next.js 16)
 
-| مسیر                                                                         | هدف                                                                                                                                                                                                                                                                                                                            |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/api/v1/`                                                                | API عمومی سازگار با OpenAI (حدود ۲۵ زیرمسیر: چت، تکمیلها، تعبیهسازیها، فایلها، پردازشهای دستهای، صوت، تصاویر، ویدئوها، موسیقی، رتبهبندی مجدد، تعدیل محتوا، جستجو، ws، عاملها، حسابها، ارائهدهندگان و غیره)                                                                                                                     |
-| `app/api/v1beta/`                                                            | نقاط پایانی API به سبک Gemini                                                                                                                                                                                                                                                                                                  |
-| `app/api/playground/`                                                        | مسیرهای Playground Studio: ‏`improve-prompt/`‏ (POST — بازنویسیکنندهٔ پرامپت مبتنی بر LLM)، ‏`presets/`‏ (GET برای فهرست / POST برای ایجاد)، ‏`presets/[id]/`‏ (GET / PUT / DELETE) — به `docs/frameworks/PLAYGROUND_STUDIO.md` مراجعه کنید                                                                                    |
-| `app/api/` (غیر v1)                                                          | مسیرهای مدیریتی/سرپرستی (حدود ۶۰ دایرکتوری: ارائهدهندگان، ترکیبها، تنظیمات، mcp، a2a، ارزیابیها، حافظه، مهارتها، وبهوکها، انطباق، تابآوری، پایش، تونلها، ابزارهای cli و غیره)                                                                                                                                                  |
-| `app/api/tools/agent-bridge/`                                                | API ‏REST مربوط به AgentBridge — شامل ۱۲ مسیر (کنترل سرور، وضعیت/DNS/نگاشتهای عامل، دور زدن، گواهی، مرجع صدور گواهی بالادستی). LOCAL_ONLY + SPAWN_CAPABLE. به `docs/frameworks/AGENTBRIDGE.md §7` مراجعه کنید.                                                                                                                 |
-| `app/api/tools/traffic-inspector/`                                           | API ‏REST + WS مربوط به Traffic Inspector — بیش از ۱۶ مسیر (درخواستها، نشستها، میزبانها، حالتهای ضبط، خروجی، ws). LOCAL_ONLY + SPAWN_CAPABLE. به `docs/frameworks/TRAFFIC_INSPECTOR.md §8` مراجعه کنید.                                                                                                                        |
-| `app/a2a/`                                                                   | نقطهٔ ورود A2A JSON-RPC 2.0 ‏(`POST /a2a`)                                                                                                                                                                                                                                                                                     |
-| `app/.well-known/agent.json/`                                                | کارت عامل A2A (کشف)                                                                                                                                                                                                                                                                                                            |
-| `app/(dashboard)/dashboard/`                                                 | صفحات رابط کاربری داشبورد (بیش از ۵۰ بخش و حدود ۱۱۸ فایل page.tsx: ارائهدهندگان، ترکیبها، تنظیمات، حافظه، مهارتها، وبهوکها، ارزیابیها، ممیزی، پردازش دستهای، کش، هزینهها، سلامت، سیستم، فعالیت و غیره)                                                                                                                         |
-| `app/(dashboard)/dashboard/search-tools/`                                    | رابط کاربری Search Tools Studio (۳ زبانه: جستجو/استخراج/مقایسه + SearchConceptCard + ProviderCatalog) — به `docs/frameworks/SEARCH_TOOLS_STUDIO.md` مراجعه کنید                                                                                                                                                                |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (طرح ۲۱): ‏`page.tsx`‏ (پوستهٔ ۳ زبانهای)، ‏`components/`‏ (MemoryConceptCard، MemoryEngineStatus، EmbeddingSourceSelector، EditMemoryModal، RetrievePreview، QdrantConfigCard، RerankConfigCard)، ‏`components/tabs/`‏ (MemoriesTab، PlaygroundTab، EngineTab)، ‏`hooks/`‏ (useEngineStatus، useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | صفحهٔ داشبورد AgentBridge — کارت سرور، ۹ کارت عامل، راهانداز گامبهگام، نگاشت مدل، فهرست دور زدن. بینالمللیسازی PT-BR + EN. به `docs/frameworks/AGENTBRIDGE.md` مراجعه کنید.                                                                                                                                                    |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | صفحهٔ داشبورد Traffic Inspector — نمای دوبخشی DevTools، ‏۷ زبانهٔ جزئیات، ‏۴ کلید تغییر حالت ضبط، ضبطکنندهٔ نشست، رنگآمیزی زمینهای. بینالمللیسازی PT-BR + EN. به `docs/frameworks/TRAFFIC_INSPECTOR.md` مراجعه کنید.                                                                                                           |
-| `app/(dashboard)/dashboard/activity/`                                        | صفحه خوراک فعالیت (گروه B): `page.tsx` (سمت سرور) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — رجوع کنید به `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | صفحه اشتراکگذاری سهمیه (گروه B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                   |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | صفحه پیکربندی طرح ارائهدهنده (گروه B): `page.tsx` + `ProviderPlanConfigClient.tsx` — بازنویسی ابعاد سهمیه برای هر اتصال                                                                                                                                                                                                        |
-| `app/docs/`                                                                  | نمایشگر مستندات توکار (`docs/*.md` را رندر میکند)                                                                                                                                                                                                                                                                              |
-| `app/landing/`                                                               | صفحه فرود بازاریابی                                                                                                                                                                                                                                                                                                            |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | صفحات مرتبط با احراز هویت                                                                                                                                                                                                                                                                                                      |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | صفحات خطای HTTP                                                                                                                                                                                                                                                                                                                |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | صفحات ایستا/وضعیت                                                                                                                                                                                                                                                                                                              |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | چیدمان ریشه، صفحه اصلی، مانیفست PWA، CSS سراسری                                                                                                                                                                                                                                                                                |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | مرزهای خطا                                                                                                                                                                                                                                                                                                                     |
+| مسیر                                                                         | هدف                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | API عمومی سازگار با OpenAI (حدود 25 زیرمسیر: چت، تکمیلها، تعبیهها، فایلها، دستهها، صدا، تصاویر، ویدئوها، موسیقی، بازرتبهبندی، تعدیل محتوا، جستوجو، ws، عاملها، حسابها، ارائهدهندگان و غیره)                                                                                                                            |
+| `app/api/v1beta/`                                                            | نقاط پایانی API به سبک Gemini                                                                                                                                                                                                                                                                                          |
+| `app/api/playground/`                                                        | مسیرهای Playground Studio: `improve-prompt/` (POST — بازنویسیکنندهٔ پرامپت مبتنی بر LLM)، `presets/` (GET برای فهرست / POST برای ایجاد)، `presets/[id]/` (GET / PUT / DELETE) — به `docs/frameworks/PLAYGROUND_STUDIO.md` مراجعه کنید                                                                                  |
+| `app/api/` (غیر از v1)                                                       | مسیرهای مدیریتی/سرپرستی (حدود 60 دایرکتوری: ارائهدهندگان، ترکیبها، تنظیمات، mcp، a2a، ارزیابیها، حافظه، مهارتها، وبهوکها، انطباق، تابآوری، پایش، تونلها، ابزارهای CLI و غیره)                                                                                                                                          |
+| `app/api/tools/agent-bridge/`                                                | API مبتنی بر REST برای AgentBridge — شامل 12 مسیر (کنترل سرور، وضعیت/DNS/نگاشتهای عامل، دور زدن، گواهی، CA بالادستی). LOCAL_ONLY + SPAWN_CAPABLE. به `docs/frameworks/AGENTBRIDGE.md §7` مراجعه کنید.                                                                                                                  |
+| `app/api/tools/traffic-inspector/`                                           | API مبتنی بر REST و WS برای Traffic Inspector — شامل بیش از 16 مسیر (درخواستها، نشستها، میزبانها، حالتهای ضبط، خروجی گرفتن، ws). LOCAL_ONLY + SPAWN_CAPABLE. به `docs/frameworks/TRAFFIC_INSPECTOR.md §8` مراجعه کنید.                                                                                                 |
+| `app/a2a/`                                                                   | نقطهٔ ورود A2A با JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                           |
+| `app/.well-known/agent.json/`                                                | کارت عامل A2A (کشف)                                                                                                                                                                                                                                                                                                    |
+| `app/(dashboard)/dashboard/`                                                 | صفحات رابط کاربری داشبورد (بیش از 50 بخش و حدود 118 فایل page.tsx: ارائهدهندگان، ترکیبها، تنظیمات، حافظه، مهارتها، وبهوکها، ارزیابیها، ممیزی، پردازش دستهای، کش، هزینهها، سلامت، سیستم، فعالیت و غیره)                                                                                                                 |
+| `app/(dashboard)/dashboard/search-tools/`                                    | رابط کاربری Search Tools Studio (سه زبانه: جستوجو/خزش/مقایسه + SearchConceptCard + ProviderCatalog) — به `docs/frameworks/SEARCH_TOOLS_STUDIO.md` مراجعه کنید                                                                                                                                                          |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (طرح 21): `page.tsx` (پوستهٔ سهزبانهای)، `components/` (MemoryConceptCard، MemoryEngineStatus، EmbeddingSourceSelector، EditMemoryModal، RetrievePreview، QdrantConfigCard، RerankConfigCard)، `components/tabs/` (MemoriesTab، PlaygroundTab، EngineTab)، `hooks/` (useEngineStatus، useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | صفحهٔ داشبورد AgentBridge — کارت سرور، 9 کارت عامل، راهانداز گامبهگام، نگاشت مدل و فهرست دور زدن. بینالمللیسازی PT-BR + EN. به `docs/frameworks/AGENTBRIDGE.md` مراجعه کنید.                                                                                                                                           |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | صفحهٔ داشبورد Traffic Inspector — نمای تقسیمشدهٔ DevTools، 7 زبانهٔ جزئیات، 4 کلید تغییر حالت ضبط، ضبطکنندهٔ نشست و رنگآمیزی زمینه. بینالمللیسازی PT-BR + EN. به `docs/frameworks/TRAFFIC_INSPECTOR.md` مراجعه کنید.                                                                                                   |
+| `app/(dashboard)/dashboard/activity/`                                        | صفحه خوراک فعالیت (گروه B): `page.tsx` (سمت سرور) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — مراجعه کنید به `docs/architecture/MONITORING_SECTIONS.md`                                                                                                      |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | صفحه اشتراکگذاری سهمیه (گروه B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                           |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | صفحه پیکربندی طرح ارائهدهنده (گروه B): `page.tsx` + `ProviderPlanConfigClient.tsx` — بازنویسی ابعاد سهمیه برای هر اتصال                                                                                                                                                                                                |
+| `app/docs/`                                                                  | نمایشگر مستندات تعبیهشده (`docs/*.md` را رندر میکند)                                                                                                                                                                                                                                                                   |
+| `app/landing/`                                                               | صفحه فرود بازاریابی                                                                                                                                                                                                                                                                                                    |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | صفحات مرتبط با احراز هویت                                                                                                                                                                                                                                                                                              |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | صفحات خطای HTTP                                                                                                                                                                                                                                                                                                        |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | صفحات ایستا/وضعیت                                                                                                                                                                                                                                                                                                      |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | چیدمان ریشه، صفحه اصلی، مانیفست PWA، CSS سراسری                                                                                                                                                                                                                                                                        |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | مرزهای خطا                                                                                                                                                                                                                                                                                                             |
 
-### `src/lib/` — کتابخانههای اصلی (~50 ماژول)
+### `src/lib/` — کتابخانههای اصلی (~۵۰ ماژول)
 
 | ماژول                                    | هدف                                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | مدیر وظایف پروتکل A2A، مهارتها (5)، استریمینگ                                                                                                                                                                                                                                                                                    |
+| `a2a/`                                   | مدیر وظایف پروتکل A2A، مهارتها (۵ مورد)، استریمینگ                                                                                                                                                                                                                                                                               |
 | `acp/`                                   | رجیستری عامل CLI (کشف CLI محلی — رجوع کنید به `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                        |
-| `api/`                                   | ابزارهای کمکی مشترک API (`requireManagementAuth`، اعتبارسنجی)                                                                                                                                                                                                                                                                    |
+| `api/`                                   | ابزارهای کمکی API مشترک (`requireManagementAuth`، اعتبارسنجی)                                                                                                                                                                                                                                                                    |
 | `auth/`                                  | نشست، هشکردن گذرواژه، اعتبارسنجی توکن                                                                                                                                                                                                                                                                                            |
-| `batches/`                               | هندلرهای OpenAI Batches API                                                                                                                                                                                                                                                                                                      |
+| `batches/`                               | کنترلکنندههای OpenAI Batches API                                                                                                                                                                                                                                                                                                 |
 | `catalog/`                               | اعتبارسنجی Zod برای کاتالوگ ارائهدهندگان + تشخیص قابلیتها                                                                                                                                                                                                                                                                        |
 | `cloudAgent/`                            | عاملهای ابری (Codex Cloud، Devin، Jules) — رجوع کنید به `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                         |
 | `combos/`                                | تشخیص ترکیبها + ابزارهای کمکی مرتبسازی مجدد                                                                                                                                                                                                                                                                                      |
-| `audit/`                                 | ابزارهای کمکی فید فعالیت: `highLevelActions.ts` (فهرست مجاز + `isHighLevelAction()`)، `activityIcons.ts` (نگاشت کنش ← آیکون/فعل)، `timeline.ts` (`groupByDay`/`relativeTime`) — رجوع کنید به `docs/architecture/MONITORING_SECTIONS.md`                                                                                          |
+| `audit/`                                 | ابزارهای کمکی خوراک فعالیت: `highLevelActions.ts` (فهرست مجاز + `isHighLevelAction()`)، `activityIcons.ts` (نگاشت کنش ← آیکون/فعل)، `timeline.ts` (`groupByDay`/`relativeTime`) — رجوع کنید به `docs/architecture/MONITORING_SECTIONS.md`                                                                                        |
 | `compliance/`                            | گزارش ممیزی + ممیزی ارائهدهنده — رجوع کنید به `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                      |
-| `compression/`                           | کد اتصال موتور فشردهسازی (موتورها در `open-sse/services/compression/` قرار دارند)                                                                                                                                                                                                                                                |
+| `compression/`                           | کد واسط موتور فشردهسازی (موتورها در `open-sse/services/compression/` قرار دارند)                                                                                                                                                                                                                                                 |
 | `config/`                                | ابزارهای کمکی پیکربندی زمان اجرا                                                                                                                                                                                                                                                                                                 |
-| `db/`                                    | بیش از 120 ماژول پایگاهداده دامنه + 168 مهاجرت (برای SQLite همیشه از اینجا اقدام کنید)                                                                                                                                                                                                                                           |
+| `db/`                                    | بیش از ۱۲۰ ماژول پایگاه داده دامنه + ۱۶۸ مهاجرت (برای SQLite همیشه از این مسیر استفاده کنید)                                                                                                                                                                                                                                     |
 | `quota/`                                 | موتور اشتراکگذاری سهمیه: `dimensions.ts` (نوعها/Zod)، `types.ts` (رابط `QuotaStore`)، `sqliteQuotaStore.ts`، `redisQuotaStore.ts`، `storeFactory.ts`، `fairShare.ts`، `burnRate.ts`، `planResolver.ts`، `planRegistry.ts`، `saturationSignals.ts`، `enforce.ts`، `spendRecorder.ts` — رجوع کنید به `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | کلاینت کاتالوگ مدلهای رایگان Radar: `feedSchema.ts`، `pinnedKeys.ts`، `verify.ts`، `sync.ts`، `applyFeed.ts`، `index.ts` (`getRadarCatalog()`) — رجوع کنید به `docs/frameworks/RADAR.md`                                                                                                                                         |
+| `radar/`                                 | کلاینت کاتالوگ مدلهای رایگان Radar:‏ `feedSchema.ts`، `pinnedKeys.ts`، `verify.ts`، `sync.ts`، `applyFeed.ts`، `index.ts` (`getRadarCatalog()`) — به `docs/frameworks/RADAR.md` مراجعه کنید                                                                                                                                      |
 | `display/`                               | توابع کمکی قالببندی رابط کاربری (هزینه، تأخیر و غیره)                                                                                                                                                                                                                                                                            |
 | `embeddings/`                            | توابع کمکی سرویس embedding                                                                                                                                                                                                                                                                                                       |
 | `env/`                                   | تجزیه و اعتبارسنجی متغیرهای محیطی                                                                                                                                                                                                                                                                                                |
-| `evals/`                                 | چارچوب ارزیابی (مجموعهها، اجراکننده، زمان اجرا) — رجوع کنید به `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                        |
-| `guardrails/`                            | پوشاننده اطلاعات قابل شناسایی شخصی (PII)، تزریق پرامپت، پل بینایی — رجوع کنید به `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                   |
+| `evals/`                                 | چارچوب ارزیابی (مجموعهها، اجراکننده، محیط اجرا) — به `docs/frameworks/EVALS.md` مراجعه کنید                                                                                                                                                                                                                                      |
+| `guardrails/`                            | پوشاننده اطلاعات قابلشناسایی شخصی (PII)، مقابله با تزریق پرامپت، پل بینایی — به `docs/security/GUARDRAILS.md` مراجعه کنید                                                                                                                                                                                                        |
 | `jobs/`                                  | کارهای پسزمینه (مشابه cron)                                                                                                                                                                                                                                                                                                      |
-| `memory/`                                | حافظه مکالمهای (RRF ترکیبی مبتنی بر SQLite FTS5 و sqlite-vec + سطح دوم Qdrant) — رجوع کنید به `docs/frameworks/MEMORY.md`                                                                                                                                                                                                        |
+| `memory/`                                | حافظه مکالمهای (ترکیب SQLite FTS5 و sqlite-vec با RRF + سطح دوم Qdrant) — به `docs/frameworks/MEMORY.md` مراجعه کنید                                                                                                                                                                                                             |
 | `memory/embedding/`                      | لایه embedding چندمنبعی: `index.ts` (حلکننده)، `remote.ts`، `staticPotion.ts`، `transformersLocal.ts`، `cache.ts`، `types.ts` (برنامه 21)                                                                                                                                                                                        |
-| `memory/vectorStore.ts`                  | پوششدهنده sqlite-vec v0.1.9 — جستوجوی فراگیر KNN + ‏RRF ترکیبی (FTS5 + بردار، k=60). مقداردهی اولیه تنبل دارد و در صورت در دسترس نبودن sqlite-vec، بهصورت کنترلشده سطح عملکرد را کاهش میدهد. (برنامه 21)                                                                                                                         |
-| `memory/reindex.ts`                      | `runReindexBatch()` — حافظههای دارای `needs_reindex=1` را در پسزمینه پردازش میکند؛ توسط `POST /api/memory/reindex` و مسیر پرسازی تنبل فراخوانی میشود. (برنامه 21)                                                                                                                                                                |
+| `memory/vectorStore.ts`                  | پوششدهنده sqlite-vec v0.1.9 — جستوجوی KNN به روش brute-force + ‏RRF ترکیبی (FTS5 + بردار، k=60). مقداردهی اولیه تنبل دارد و در صورت در دسترس نبودن sqlite-vec بدون اختلال جدی به حالت سادهتر تنزل مییابد. (برنامه 21)                                                                                                            |
+| `memory/reindex.ts`                      | `runReindexBatch()` — حافظههای دارای `needs_reindex=1` را در پسزمینه پردازش میکند؛ توسط `POST /api/memory/reindex` و مسیر lazy-backfill فراخوانی میشود. (برنامه 21)                                                                                                                                                              |
 | `monitoring/`                            | بررسیهای سلامت، انتشار معیارها                                                                                                                                                                                                                                                                                                   |
-| `oauth/`                                 | جریانهای OAuth/درونریزی برای 22 ماژول ارائهدهنده (agy، antigravity، claude، cline، codebuddy-cn، codex، cursor، devin-desktop، ghe-copilot، github، gitlab-duo، grok-cli-oauth، grok-cli، kilocode، kimi-coding، kiro، openference، qoder، trae، xai-oauth، zed-hosted، zed)                                                     |
+| `oauth/`                                 | جریانهای OAuth/واردسازی برای 22 ماژول ارائهدهنده (agy، antigravity، claude، cline، codebuddy-cn، codex، cursor، devin-desktop، ghe-copilot، github، gitlab-duo، grok-cli-oauth، grok-cli، kilocode، kimi-coding، kiro، openference، qoder، trae، xai-oauth، zed-hosted، zed)                                                     |
 | `plugins/`                               | رجیستری افزونهها                                                                                                                                                                                                                                                                                                                 |
 | `promptCache/`                           | نقاط شکست کش پرامپت به سبک Anthropic                                                                                                                                                                                                                                                                                             |
-| `skills/`                                | چارچوب مهارتها (داخلی + بازارچه + SkillsSH) — رجوع کنید به `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                           |
+| `skills/`                                | چارچوب مهارتها (داخلی + بازارچه + SkillsSH) — به `docs/frameworks/SKILLS.md` مراجعه کنید                                                                                                                                                                                                                                         |
 | `playground/`                            | ابزارهای کمکی مشترک Playground Studio: `codeExport.ts` (مولد curl/Python/TS)، `promptImprover.ts` (سازندهٔ متاپرامپت)، `streamMetrics.ts` (محاسبهٔ خالص TTFT/TPS)، `types.ts` (جدول قیمتگذاری) — مراجعه کنید به `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                           |
-| `webhookDispatcher.ts`                   | تحویل وبهوک مبتنی بر HMAC — مراجعه کنید به `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                         |
+| `webhookDispatcher.ts`                   | تحویل وبهوک با HMAC — مراجعه کنید به `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | مدیران تونل — مراجعه کنید به `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                         |
 | `cloudSync.ts`, `initCloudSync.ts`       | همگامسازی اختیاری وضعیت با فضای ابری                                                                                                                                                                                                                                                                                             |
-| `localDb.ts`                             | فایل تجمیعی بازصادرکردن ماژولهای پایگاه داده (بدون منطق — فقط بازصادرکردن)                                                                                                                                                                                                                                                       |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | کشکردن درخواستها + آیدمپوتنسی                                                                                                                                                                                                                                                                                                    |
-| (حدود ۳۰ فایل سطحبالای دیگر)             | ابزارهای کمکی تخصصی (logEnv، modelsDevSync، piiSanitizer و غیره)                                                                                                                                                                                                                                                                 |
+| `localDb.ts`                             | فایل تجمیعی بازصدور برای ماژولهای پایگاه داده (بدون منطق — فقط بازصدورها)                                                                                                                                                                                                                                                        |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | کشکردن درخواستها + تضمین عدم تکرار                                                                                                                                                                                                                                                                                               |
+| (~30 فایل سطحبالای دیگر)                 | ابزارهای کمکی تخصصی (logEnv، modelsDevSync، piiSanitizer و غیره)                                                                                                                                                                                                                                                                 |
 
-### `src/lib/db/` — پایگاه داده (۱۳۷ ماژول + ۱۹۳ مهاجرت)
+### `src/lib/db/` — پایگاه داده (137 ماژول + 193 مهاجرت)
 
 | زیردایرکتوری              | هدف                                                                                                                                                                           |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | سینگلتون `getDbInstance()` با ثبت وقایع WAL                                                                                                                                   |
-| `db/migrations/`          | فایلهای SQL نسخهبندیشده (آیدمپوتنت و تراکنشی). `073_memory_vec.sql`، `memory_vec_meta` و ستون `needs_reindex` را اضافه میکند (طرح ۲۱).                                        |
+| `db/core.ts`              | تکنمونهٔ `getDbInstance()` با ثبت وقایع WAL                                                                                                                                   |
+| `db/migrations/`          | فایلهای SQL نسخهبندیشده (تکرارپذیر و تراکنشی). `073_memory_vec.sql` ستون `needs_reindex` و `memory_vec_meta` را اضافه میکند (طرح 21).                                         |
 | `db/playgroundPresets.ts` | ماژول CRUD برای پیشتنظیمهای Playground Studio (`listPlaygroundPresets`، `getPlaygroundPreset`، `createPlaygroundPreset`، `updatePlaygroundPreset`، `deletePlaygroundPreset`)  |
-| `db/memoryVec.ts`         | عملیات CRUD برای `memory_vec_meta` (active_dim، embedding_signature، last_reset_at، vec_loaded) + `markMemoryNeedsReindex`، `getMemoryReindexQueue` و غیره (طرح ۲۱)           |
+| `db/memoryVec.ts`         | عملیات CRUD برای `memory_vec_meta` (active_dim، embedding_signature، last_reset_at، vec_loaded) + `markMemoryNeedsReindex`، `getMemoryReindexQueue` و غیره (طرح 21)           |
 | `db/<domain>.ts`          | یک ماژول برای هر دامنه: providers، combos، apiKeys، users، sessions، usage، audit*log، webhooks، skills، memory_entries، cloud_agent_tasks، evals*\*، reasoning_cache و غیره. |
 
 ### `src/domain/`
 
-| ماژول                  | هدف                                        |
-| ---------------------- | ------------------------------------------ |
-| `policy.ts`            | موتور خطمشی                                |
-| `fallbackPolicy.ts`    | درخت تصمیم بازگشت به گزینهٔ جایگزین        |
-| `costRules.ts`         | قواعد محاسبهٔ هزینه                        |
-| `lockoutPolicy.ts`     | خطمشی قفلکردن مدل/اتصال                    |
-| `tagRouter.ts`         | مسیریابی مبتنی بر برچسب                    |
-| `comboResolver.ts`     | حل ترکیب (مورداستفادهٔ موتور ترکیب)        |
-| `modelAvailability.ts` | بررسی دسترسپذیری برای هر مدل               |
-| `assessment/`          | ارزیابی مدل (مرحلهٔ ۱ RFC-AUTO-ASSESSMENT) |
+| ماژول                  | هدف                                           |
+| ---------------------- | --------------------------------------------- |
+| `policy.ts`            | موتور سیاستگذاری                              |
+| `fallbackPolicy.ts`    | درخت تصمیم جایگزینی                           |
+| `costRules.ts`         | قواعد محاسبهٔ هزینه                           |
+| `lockoutPolicy.ts`     | سیاست قفل مدل/اتصال                           |
+| `tagRouter.ts`         | مسیریابی مبتنی بر برچسب                       |
+| `comboResolver.ts`     | حل ترکیب (مورد استفادهٔ موتور ترکیب)          |
+| `modelAvailability.ts` | بررسی دسترسپذیری برای هر مدل                  |
+| `assessment/`          | ارزیابی مدل (مرحلهٔ 1 از RFC-AUTO-ASSESSMENT) |
 
 ### `src/server/`
 
@@ -237,21 +237,21 @@ src/
 
 ### `src/shared/`
 
-| ماژول                            | هدف                                                                             |
-| -------------------------------- | ------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | **355 ارائهدهنده** با اعتبارسنجی Zod (منبع حقیقت)                               |
-| `constants/cliTools.ts`          | رجیستری ابزارهای CLI خارجی                                                      |
-| `constants/routingStrategies.ts` | **19 راهبرد مسیریابی** همراه با اولویتها                                        |
-| `constants/publicApiRoutes.ts`   | مسیرهایی که به احراز هویت Bearer (در مقابل مدیریتی) نیاز دارند                  |
-| `constants/upstreamHeaders.ts`   | فهرست مسدودسازی هدرها برای درخواستهای بالادستی                                  |
-| `validation/schemas.ts`          | حدود 80 شِمای Zod (منبع واحد حقیقت برای قراردادهای API)                         |
-| `validation/helpers.ts`          | توابع کمکی اعتبارسنجی Zod (`validateBody` و غیره)                               |
-| `types/`                         | انواع مشترک TS                                                                  |
-| `contracts/`                     | قراردادهای API عمومی (استفادهشده توسط `files:` در `package.json`)               |
-| `utils/circuitBreaker.ts`        | قطعکننده مدار ارائهدهنده (نگاه کنید به `docs/architecture/RESILIENCE_GUIDE.md`) |
-| `utils/apiAuth.ts`               | اعتبارسنجی کلید API و بررسی دامنه دسترسی                                        |
-| `utils/fetchTimeout.ts`          | پوششدهندههای مهلت زمانی/لغو برای fetch بالادستی                                 |
-| `utils/releaseNotes.ts`          | تجزیهگر اعلانهای بستهشده v2/قدیمی، بومیسازی و رد کردن بر اساس ID                |
+| ماژول                            | هدف                                                                                |
+| -------------------------------- | ---------------------------------------------------------------------------------- |
+| `constants/providers.ts`         | **۳۷۲ ارائهدهنده** با اعتبارسنجی Zod (مرجع اصلی حقیقت)                             |
+| `constants/cliTools.ts`          | رجیستری ابزارهای CLI خارجی                                                         |
+| `constants/routingStrategies.ts` | **۱۹ راهبرد مسیریابی** بههمراه اولویتها                                            |
+| `constants/publicApiRoutes.ts`   | مسیرهایی که به احراز هویت Bearer (در مقابل مدیریتی) نیاز دارند                     |
+| `constants/upstreamHeaders.ts`   | فهرست مسدودشدهٔ هدرها برای درخواستهای بالادستی                                     |
+| `validation/schemas.ts`          | حدود ۸۰ شِمای Zod (مرجع واحد حقیقت برای قراردادهای API)                            |
+| `validation/helpers.ts`          | توابع کمکی اعتبارسنجی Zod (`validateBody` و غیره)                                  |
+| `types/`                         | انواع مشترک TS                                                                     |
+| `contracts/`                     | قراردادهای API عمومی (مصرفشده توسط `files:` در `package.json`)                     |
+| `utils/circuitBreaker.ts`        | قطعکنندهٔ مدار ارائهدهنده (به `docs/architecture/RESILIENCE_GUIDE.md` مراجعه کنید) |
+| `utils/apiAuth.ts`               | اعتبارسنجی کلید API و بررسی محدودهٔ دسترسی                                         |
+| `utils/fetchTimeout.ts`          | پوششدهندههای مهلت زمانی/لغو برای fetch بالادستی                                    |
+| `utils/releaseNotes.ts`          | تجزیهگر اعلان بستهشدهٔ v2/قدیمی، بومیسازی و رد کردن بر اساس ID                     |
 
 ---
 
@@ -261,12 +261,12 @@ src/
 
 ```
 open-sse/
-├── handlers/            # 16 فایل (12 کنترلگر + 4 تابع کمکی): chatCore، responsesHandler، embeddings، audio، image، video، music، rerank، moderations، search و غیره
-├── executors/           # 67 اجراکننده مختص ارائهدهندگان (از BaseExecutor ارثبری میکنند)
-├── translator/          # مبدلهای قالب (9 درخواست، 9 پاسخ، 9 تابع کمکی)
-├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # بیش از ~80 ماژول سرویس (combo، accountFallback، autoCombo، reasoningCache، claude code/chatgpt stealth، modelDeprecation، taskAwareRouter، workflowFSM و غیره)
-├── mcp-server/          # سرور MCP (110 ابزار، 3 انتقال، 33 محدوده)
+├── handlers/            # ۱۶ فایل (۱۲ هندلر + ۴ تابع کمکی): chatCore، responsesHandler، embeddings، audio، image، video، music، rerank، moderations، search و غیره
+├── executors/           # ۱۵۰ ماژول اجراکننده (کلاسهای توسعهدهنده BaseExecutor + توابع کمکی مختص هر ارائهدهنده)
+├── translator/          # مبدلهای قالب (۹ درخواست، ۹ پاسخ، ۹ تابع کمکی)
+├── transformer/         # Responses API ↔ Chat Completions ‏(TransformStream)
+├── services/            # بیش از حدود ۸۰ ماژول سرویس (combo، accountFallback، autoCombo، reasoningCache، حالت مخفی claude code/chatgpt، modelDeprecation، taskAwareRouter، workflowFSM و غیره)
+├── mcp-server/          # سرور MCP (۱۱۰ ابزار، ۳ انتقال، ۳۳ محدوده)
 ├── config/              # رجیستریهای ارائهدهنده/مدل، پیکربندی هدر، نامهای مستعار مدل
 ├── utils/               # کلاینت TLS، واکشی/توزیعکننده پروکسی، توابع کمکی شبکه
 ├── index.ts             # نقطه ورود فضای کاری
@@ -279,17 +279,17 @@ open-sse/
 
 | مسیر                        | هدف                                                                        |
 | --------------------------- | -------------------------------------------------------------------------- |
-| `server.ts`                 | چرخه حیات سرور MCP (انتقالهای stdio و HTTP)                                |
-| `httpTransport.ts`          | انتقالهای HTTP Streamable و SSE (`/api/mcp/sse`، `/api/mcp/stream`)        |
+| `server.ts`                 | چرخه حیات سرور MCP (انتقالهای stdio + HTTP)                                |
+| `httpTransport.ts`          | انتقالهای HTTP Streamable + SSE ‏(`/api/mcp/sse`، `/api/mcp/stream`)       |
 | `audit.ts`                  | ثبت گزارش ممیزی در جدول `mcp_tool_audit`                                   |
 | `scopeEnforcement.ts`       | اعتبارسنجی محدوده برای هر ابزار                                            |
-| `runtimeHeartbeat.ts`       | ضربان سلامت در `DATA_DIR/runtime/mcp-heartbeat.json`                       |
-| `descriptionCompressor.ts`  | فشردهسازی فراداده توضیحات ابزار برای صرفهجویی در زمینه                     |
-| `schemas/tools.ts`          | 36 تعریف پایه ابزار + محدودهها                                             |
+| `runtimeHeartbeat.ts`       | ارسال ضربان سلامت به `DATA_DIR/runtime/mcp-heartbeat.json`                 |
+| `descriptionCompressor.ts`  | فشردهسازی فراداده توضیحات ابزار برای صرفهجویی در فضای زمینه                |
+| `schemas/tools.ts`          | ۳۶ تعریف ابزار پایه + محدودهها                                             |
 | `tools/advancedTools.ts`    | پیادهسازی ابزارهای پیشرفته                                                 |
-| `tools/memoryTools.ts`      | 3 ابزار حافظه (جستوجو/افزودن/پاکسازی)                                      |
-| `tools/skillTools.ts`       | 4 ابزار مهارت (فهرست/فعالسازی/اجرا/اجراها)                                 |
-| `tools/compressionTools.ts` | 5 ابزار فشردهسازی                                                          |
+| `tools/memoryTools.ts`      | ۳ ابزار حافظه (جستوجو/افزودن/پاکسازی)                                      |
+| `tools/skillTools.ts`       | ۴ ابزار مهارت (فهرست/فعالسازی/اجرا/اجراها)                                 |
+| `tools/compressionTools.ts` | ۵ ابزار فشردهسازی                                                          |
 | `README.md`                 | README داخلی سرور MCP (با پیوند متقابل از `docs/frameworks/MCP-SERVER.md`) |
 
 ---
@@ -375,49 +375,49 @@ open-sse/
 
 ---
 
-## `docs/` — مستندات عمومی (7 فایل ریشه + 17 زیرشاخه)
+## `docs/` — مستندات عمومی (۷ فایل ریشه + ۱۷ زیرپوشه)
 
 ### راهنماهای سطح بالا
 
-| سند                         | هدف                                                                                               |
-| --------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | معماری سطح بالا، نقشهٔ زیرسیستمها، نمای داشبورد                                                   |
-| `CODEBASE_DOCUMENTATION.md` | مرجع مهندسی: شاخهها، ماژولها، قراردادها                                                           |
-| `FEATURES.md`               | ماتریس قابلیتها همراه با نکات برجستهٔ v3.8                                                        |
-| `USER_GUIDE.md`             | راهنمای کاربر نهایی (راهاندازی، مدلها، ترکیبها، رابطهای خط فرمان، صدا و غیره)                     |
-| `API_REFERENCE.md`          | مرجع نقاط پایانی API همراه با مدل احراز هویت                                                      |
-| `openapi.yaml`              | مشخصات OpenAPI 3.0 (121 مسیر)                                                                     |
-| `SETUP_GUIDE.md`            | روشهای نصب (npm، npx، Docker، Electron، Termux، کد منبع)                                          |
-| `ENVIRONMENT.md`            | همهٔ متغیرهای محیطی (حدود 800 مورد مستندشده، حدود 3,050 خط در `.env.example`)                     |
-| `TROUBLESHOOTING.md`        | خطاهای رایج + مشکلات شناختهشدهٔ v3.8.0                                                            |
-| `RELEASE_CHECKLIST.md`      | فرایند کامل انتشار (مهارتها، husky، conventional commits، استقرار)                                |
-| `COVERAGE_PLAN.md`          | اهداف پوشش و وضعیت فعلی                                                                           |
-| `FREE_TIERS.md`             | ارائهدهندگان منتخب دارای سطح رایگان (بیش از 48 مورد رایگان + 11 مورد OAuth)                       |
-| `CLI-TOOLS.md`              | یکپارچهسازیهای خارجی CLI + رابط خط فرمان داخلی OmniRoute                                          |
-| `I18N.md`                   | معماری i18n، افزودن زبان، 42 زبان محلی                                                            |
-| `UNINSTALL.md`              | مراحل حذف نصب پاک                                                                                 |
-| `PROVIDER_REFERENCE.md`     | فهرست **تولیدشده بهصورت خودکار** از 355 ارائهدهنده (تولید مجدد: `npm run gen:provider-reference`) |
+| سند                         | هدف                                                                                              |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | معماری سطح بالا، نقشهٔ زیرسیستمها، نمای داشبورد                                                  |
+| `CODEBASE_DOCUMENTATION.md` | مرجع مهندسی: دایرکتوریها، ماژولها، قراردادها                                                     |
+| `FEATURES.md`               | ماتریس قابلیتها با نکات برجستهٔ v3.8                                                             |
+| `USER_GUIDE.md`             | راهنمای کاربر نهایی (راهاندازی، مدلها، ترکیبها، رابطهای خط فرمان، صدا و غیره)                    |
+| `API_REFERENCE.md`          | مرجع نقاط پایانی API بههمراه مدل احراز هویت                                                      |
+| `openapi.yaml`              | مشخصات OpenAPI 3.0 (۱۲۱ مسیر)                                                                    |
+| `SETUP_GUIDE.md`            | روشهای نصب (npm، npx، Docker، Electron، Termux، کد منبع)                                         |
+| `ENVIRONMENT.md`            | همهٔ متغیرهای محیطی (حدود ۸۰۰ مورد مستندشده، حدود ۳٬۰۵۰ خط در `.env.example`)                    |
+| `TROUBLESHOOTING.md`        | خطاهای رایج + مشکلات شناختهشدهٔ v3.8.0                                                           |
+| `RELEASE_CHECKLIST.md`      | فرایند کامل انتشار (مهارتها، husky، کامیتهای متعارف، استقرار)                                    |
+| `COVERAGE_PLAN.md`          | اهداف پوشش و وضعیت فعلی                                                                          |
+| `FREE_TIERS.md`             | ارائهدهندگان منتخب دارای سطح رایگان (بیش از ۴۸ رایگان + ۱۱ OAuth)                                |
+| `CLI-TOOLS.md`              | یکپارچهسازیهای CLI خارجی + CLI داخلی OmniRoute                                                   |
+| `I18N.md`                   | معماری i18n، افزودن زبان، ۴۲ منطقهٔ زبانی                                                        |
+| `UNINSTALL.md`              | مراحل حذف نصب کامل                                                                               |
+| `PROVIDER_REFERENCE.md`     | کاتالوگ **تولیدشده بهصورت خودکار** از ۳۷۲ ارائهدهنده (بازسازی: `npm run gen:provider-reference`) |
 
 ### بررسی عمیق زیرسیستمها
 
-| سند                                           | هدف                                                                          |
-| --------------------------------------------- | ---------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | سرور MCP: 110 ابزار، 3 روش انتقال، 33 محدوده، نقاط پایانی REST               |
-| `A2A-SERVER.md`                               | A2A v0.3: ‏JSON-RPC، ‏6 مهارت، ابزارهای کمکی REST، کارت عامل                 |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | راهنمای یکپارچه: A2A در برابر ACP در برابر Cloud Agents                      |
-| `CLOUD_AGENT.md`                              | هماهنگسازی Codex Cloud / Devin / Jules                                       |
-| `SKILLS.md`                                   | چارچوب مهارتها (داخلی + بازارچه + SkillsSH + محیط ایزوله)                    |
-| `RADAR.md`                                    | لایهٔ رویی فهرست مدلهای رایگان Radar (`RADAR_ENABLED`، بهطور پیشفرض غیرفعال) |
-| `MEMORY.md`                                   | سیستم حافظه (SQLite FTS5 + Qdrant)                                           |
-| `EVALS.md`                                    | چارچوب ارزیابی (مجموعهها، اجراها، معیارها)                                   |
-| `GUARDRAILS.md`                               | پوشانندهٔ PII، تزریق پرامپت، پل بینایی                                       |
-| `COMPLIANCE.md`                               | گزارش ممیزی، نگهداشت، انصراف با noLog                                        |
-| `WEBHOOKS.md`                                 | تحویل وبهوک با امضای HMAC                                                    |
-| `REASONING_REPLAY.md`                         | حافظهٔ ترکیبی/حافظهٔ نهان SQLite برای `reasoning_content`                    |
-| `AUTHZ_GUIDE.md`                              | خط لولهٔ مجوزدهی (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                         | قطعکنندهٔ مدار + دورهٔ انتظار + قفل مدل                                      |
-| `docs/security/STEALTH_GUIDE.md` (فقط در git) | انگشتنگاری TLS ‏(JA3/JA4)، ‏Claude Code CCH، گواهی MITM                      |
-| `AUTO-COMBO.md`                               | موتور Auto Combo (امتیازدهی 16عاملی، 6 بستهٔ حالت، کارخانهٔ مجازی)           |
+| سند                                        | هدف                                                                         |
+| ------------------------------------------ | --------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                            | سرور MCP: ۱۱۰ ابزار، ۳ روش انتقال، ۳۳ دامنه، نقاط پایانی REST               |
+| `A2A-SERVER.md`                            | A2A v0.3:‏ JSON-RPC، ۶ مهارت، ابزارهای کمکی REST، کارت عامل                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | راهنمای یکپارچه: A2A در برابر ACP در برابر عاملهای ابری                     |
+| `CLOUD_AGENT.md`                           | هماهنگسازی Codex Cloud / Devin / Jules                                      |
+| `SKILLS.md`                                | چارچوب مهارتها (داخلی + بازارچه + SkillsSH + محیط ایزوله)                   |
+| `RADAR.md`                                 | لایهٔ کاتالوگ مدلهای رایگان Radar‏ (`RADAR_ENABLED`، بهصورت پیشفرض غیرفعال) |
+| `MEMORY.md`                                | سیستم حافظه (SQLite FTS5 + Qdrant)                                          |
+| `EVALS.md`                                 | چارچوب ارزیابی (مجموعهها، اجراها، معیارهای امتیازدهی)                       |
+| `GUARDRAILS.md`                            | پوشانندهٔ PII، تزریق پرامپت، پل بینایی                                      |
+| `COMPLIANCE.md`                            | گزارش حسابرسی، نگهداری، انصراف با noLog                                     |
+| `WEBHOOKS.md`                              | تحویل وبهوک با امضای HMAC                                                   |
+| `REASONING_REPLAY.md`                      | حافظهٔ ترکیبی/کش SQLite برای `reasoning_content`                            |
+| `AUTHZ_GUIDE.md`                           | خط لولهٔ مجوزدهی (`classify` → `policies` → `enforce`)                      |
+| `RESILIENCE_GUIDE.md`                      | قطعکنندهٔ مدار + دورهٔ انتظار + قفل مدل                                     |
+| `docs/security/STEALTH_GUIDE.md` (فقط git) | اثرانگشت TLS‏ (JA3/JA4)،‏ Claude Code CCH، گواهی MITM                       |
+| `AUTO-COMBO.md`                            | موتور ترکیب خودکار (امتیازدهی ۱۶عاملی، ۶ بستهٔ حالت، کارخانهٔ مجازی)        |
 
 ### فشردهسازی
 
@@ -426,29 +426,29 @@ open-sse/
 | `COMPRESSION_GUIDE.md`          | نمای کلی حالتهای فشردهسازی + نقشهٔ راه  |
 | `COMPRESSION_ENGINES.md`        | موتورهای Caveman + RTK، قرارداد رجیستری |
 | `COMPRESSION_RULES_FORMAT.md`   | شِمای JSON بستهٔ قواعد Caveman          |
-| `COMPRESSION_LANGUAGE_PACKS.md` | موجودی بستههای قواعد برای هر زبان       |
-| `RTK_COMPRESSION.md`            | خط لولهٔ اعلانی RTK ‏(49 فیلتر)         |
+| `COMPRESSION_LANGUAGE_PACKS.md` | فهرست بستههای قواعد برای هر زبان        |
+| `RTK_COMPRESSION.md`            | خط لولهٔ اعلانی RTK‏ (۴۹ فیلتر)         |
 
 ### استقرار
 
 | سند                          | هدف                                                                   |
 | ---------------------------- | --------------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | ساخت Docker، پروفایلها (base/cli/host/cliproxyapi)، سرویس جانبی Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | استقرار عمومی VM/VPS ‏(Ubuntu/Debian + nginx + systemd)               |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | استقرار Fly.io (در حال حاضر فقط به زبان چینی)                         |
-| `TERMUX_GUIDE.md`            | اجرای بدون رابط گرافیکی Android از طریق Termux                        |
-| `PWA_GUIDE.md`               | نصب برنامهٔ وب پیشرونده + service worker                              |
-| `ELECTRON_GUIDE.md`          | ساخت + امضا + توزیع برنامهٔ دسکتاپ                                    |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                |
-| `PROXY_GUIDE.md`             | پراکسی خروجی 4سطحی + بازارچهٔ 1proxy                                  |
+| `VM_DEPLOYMENT_GUIDE.md`     | استقرار عمومی روی VM/VPS‏ (Ubuntu/Debian‏ + nginx‏ + systemd)         |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | استقرار روی Fly.io‏ (در حال حاضر فقط به زبان چینی)                    |
+| `TERMUX_GUIDE.md`            | اجرای بدون رابط گرافیکی در Android از طریق Termux                     |
+| `PWA_GUIDE.md`               | نصب برنامه وب پیشرونده + service worker                               |
+| `ELECTRON_GUIDE.md`          | ساخت + امضا + توزیع برنامه دسکتاپ                                     |
+| `TUNNELS_GUIDE.md`           | Cloudflared‏ + ngrok‏ + Tailscale Funnel                              |
+| `PROXY_GUIDE.md`             | پروکسی خروجی ۴سطحی + بازار 1proxy                                     |
 
 ### زیرشاخهها
 
-| زیرشاخه               | هدف                                                                                                                                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ترجمههای بومیسازیشدهٔ مستندات (۴۱ زبان و منطقه)                                                                                                                                                         |
-| `docs/screenshots/`   | منابع تصویری برای راهنماها                                                                                                                                                                              |
-| `_tasks/superpowers/` | طرحها/مشخصات حاصل از superpowers (`writing-plans`/`brainstorming`) + پژوهش — مخزنی مجزا با نسخهبندی مستقل که توسط درخت اصلی gitignore شده است. به CLAUDE.md ← «مصنوعات برنامهریزی و پژوهش» مراجعه کنید. |
+| زیرشاخه               | هدف                                                                                                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | ترجمههای بومیسازیشده مستندات (۴۱ زبان)                                                                                                                                                                            |
+| `docs/screenshots/`   | فایلهای تصویری برای راهنماها                                                                                                                                                                                      |
+| `_tasks/superpowers/` | طرحها/مشخصات حاصل از superpowers‏ (`writing-plans`/`brainstorming`) + پژوهش — مخزنی مجزا با نسخهبندی مستقل که در درخت اصلی توسط git نادیده گرفته میشود. به CLAUDE.md‏ ← «مصنوعات برنامهریزی و پژوهش» مراجعه کنید. |
 
 ---
 

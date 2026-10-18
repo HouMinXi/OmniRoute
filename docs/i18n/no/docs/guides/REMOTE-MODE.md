@@ -244,15 +244,23 @@ tilkoblingen vises som aktiv.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ skriver ut hemmeligheten ÉN GANG — kopier den nå
-omniroute tokens list                 # maskert: id, navn, omfang, prefiks, status, utløpstid
+#   ↳ skriver ut hemmeligheten ÉN GANG – kopier den nå
+omniroute tokens list                 # maskert: ID, navn, omfang, prefiks, status, utløpstidspunkt
 omniroute tokens revoke <id|prefix>   # tilbakekall umiddelbart
 omniroute tokens scopes               # forklar de tre omfangene
 ```
 
-`tokens`-kommandoer krever en **admin**-legitimasjon. Du kan også administrere
-tokener i kontrollpanelet under **Innstillinger → Tilgangstokener** (opprett,
-tilbakekall, kopier én gang).
+`tokens`-kommandoer krever administratorlegitimasjon (**admin**). Du kan også administrere tokener i
+kontrollpanelet under **Innstillinger → Tilgangstokener** (opprett, tilbakekall, kopier én gang).
+
+Et token kan aldri utstedes med flere rettigheter enn oppretteren har. Et
+`admin`-token kan bare opprettes av operatøren – via kontrollpaneløkten, den
+lokale CLI-en på selve serveren, `omniroute connect` med passordet eller en
+instans der innlogging er deaktivert. Maskinlegitimasjon (et `admin`-tilgangstoken
+eller en API-nøkkel med omfanget `manage`/`admin`) kan bare utstede `write`- og
+`read`-tokener. Forespørsler om `--scope admin` returnerer `403`.
+
+Et token kan aldri opprettes med flere rettigheter enn oppretteren har. Bare operatøren kan opprette et `admin`-token: gjennom dashbordøkten, den lokale CLI-en på selve serveren, `omniroute connect` med passordet eller en instans med innlogging deaktivert. Maskinlegitimasjon (et `admin`-tilgangstoken eller en API-nøkkel med omfanget `manage`/`admin`) kan bare opprette `write`- og `read`-tokener; en forespørsel om `--scope admin` med disse returnerer `403`.
 
 ---
 

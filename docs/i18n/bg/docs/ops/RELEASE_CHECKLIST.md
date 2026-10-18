@@ -386,12 +386,12 @@ npm run build:release
 
 ## Отделяне на 3.9.0 LTS (репетирано в 3.8.58)
 
-След v3.8.59 следващата версия е 3.9.0 и върхът ѝ става основа на два дългосрочни клона:
-`stable/v3` (линията v3 LTS, npm `latest`) и `develop` (v4, увеличена до 4.0.0, npm
-`nightly`). Моделът за клонове/канали, пренасянето напред и етикетите са описани в
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); планът е в [ROADMAP](../../ROADMAP.md) (Фаза 3). Отделянето се изпълнява еднократно;
-3.8.58 го репетира от начало до край във fork, а 3.8.59 приключва с
-[контролния списък за GO/NO-GO](./LTS_GO_NO_GO.md).
+След v3.8.59 следващата версия е 3.9.0, а върхът ѝ става основа на два дългосрочни клона:
+`stable/v3` (линията v3 LTS, npm `latest`) и `develop` (v4, повишена до 4.0.0, npm
+`nightly`). Моделът на клоновете/каналите, пренасянето напред и етикетите са описани в
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); планът е в [ROADMAP](../../ROADMAP.md) (Фаза 3). Отделянето се изпълнява веднъж;
+3.8.58 го репетира от начало до край във fork, а 3.8.59 завършва с
+[контролния списък GO/NO-GO](./LTS_GO_NO_GO.md).
 
 ### Пробно изпълнение (само за четене, безопасно по всяко време)
 
@@ -400,20 +400,23 @@ npm run release:dry-run-lts-cut                       # реалното отд�
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # фиксиране на изходния commit
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` не изпълнява нищо: той чете git и `gh` и отпечатва
-цялата последователност — предварителните условия (източникът се разрешава, предишният таг съществува, `package.json` е с
-целевата версия, отворен е issue с `release-freeze`, няма отворен issue `Release branch not green`
-за съществуващ release клон — несъществуващ клон се отчита с `?` като неизвестен, никога
+`scripts/release/dry-run-lts-cut.mjs` не изпълнява нищо: той чете git и `gh` и извежда
+цялата последователност — предварителните условия (източникът се намира, изходното хранилище има пълна история —
+shallow clone не може да изпрати `stable/v3`, приемащата страна отхвърля пакета при първия
+присаден родител, затова първо извършете отделянето от пълен clone или изпълнете `git fetch --unshallow origin` —
+предишният таг съществува, `package.json` съдържа целевата версия, отворен е issue с `release-freeze`, няма отворен
+issue с `Release branch not green`
+за съществуващ release клон — несъществуващ клон се отчита като `?` неизвестен, никога
 като зелен — опашката `release` на Mergify е конфигурирана (G11: `queue_rules`, `checks_timeout`,
-етикет `queue`), наборът от правила `release/*` все още блокира изтриването и принудителния push и
-`stable/v3` и `develop` все още не съществуват), двете стъпки за клоновете, кои тригери на неактивни workflow-и
-и условия `if:` стават истинни (и кои остават ограничени от променлива на хранилището или
+етикет `queue`), наборът от правила за `release/*` все още блокира изтриването и принудителното изпращане, а
+`stable/v3` и `develop` все още не съществуват), двете стъпки за клоновете, кои тригери на
+неактивни workflow-и и условия `if:` стават истина (и кои остават блокирани от променлива на хранилището или
 фиксирани към каноничното хранилище), очакваните dist-tag-ове (`latest` → 3.9.0, `next` и
-`nightly` са празни) и връщането назад. Код за изход `0` = `RESULT: READY`, `1` = неизпълнено блокиращо предварително
+`nightly` са празни) и връщането назад. Изходен код `0` = `RESULT: READY`, `1` = неизпълнено блокиращо предварително
 условие (`✗`), `2` = грешка при употреба. `--advisory <id,...>` понижава проверка до предупреждение (`!`),
 без да я скрива.
 
-Изпълнете пробното изпълнение на реалното отделяне, докато замразяването на release-а 3.9.0 все още е активно — клоновете се
+Изпълнете пробното изпълнение на реалното отделяне, докато замразяването на release-а за 3.9.0 все още е активно — клоновете се
 създават след тага и преди Фаза 12c да отмени замразяването.
 
 ### Репетиция с 3.8.58 (само във fork)
@@ -423,25 +426,25 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # фиксиране на 
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Изпълнение спрямо remote на FORK (origin или всеки remote, чийто URL е този на каноничното
+# 2. Изпълнение спрямо отдалечен FORK (origin или всеки remote, чийто URL е на каноничното
 #    хранилище, се отказва; всяка стъпка изисква потвърждение в терминала)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Задействане на неактивните workflow-и във fork-а (workflow_dispatch, когато пробното изпълнение
+# 3. Изпробване на неактивните workflow-и във fork-а (workflow_dispatch там, където пробното изпълнение
 #    отчита фиксиране към каноничното хранилище), след което връщане назад
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit-ът за увеличаване на версията в develop се създава чрез нискониво операциите на git (работното дърво не се променя) и увеличава
-версията в същите пет файла като commit за отваряне на цикъл: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` и `docs/openapi.yaml`. Разделът `[4.0.0]` в
-CHANGELOG и неговите i18n еквиваленти се отварят в `develop` след това, преди първия
-PR. Скриптът никога не променя npm dist-tag-овете — репетирайте ги с временен пакет.
+Commit-ът за повишаване на `develop` се създава чрез git plumbing (работното дърво не се засяга) и повишава
+същите пет файла като commit за отваряне на цикъл: `package.json`, `open-sse/package.json`,
+`electron/package.json`, `package-lock.json` и `docs/openapi.yaml`. Секцията `[4.0.0]` в
+CHANGELOG и нейните i18n копия се отварят впоследствие в `develop`, преди първия му
+PR. Скриптът никога не променя npm dist-tag-ове — репетирайте ги с тестов пакет.
 
-### Артефакт за преглед на PR (изградете веднъж, повишете същите байтове)
+### Артефакт за предварителен преглед на PR (изграждане веднъж, повишаване на същите байтове)
 
 `.github/workflows/preview-artifact.yml` изгражда един production tarball от върха на PR и
 валидира точно тази компилация (част (a) от #8084). Само за PR-и от същото хранилище; нищо не се публикува.
@@ -451,39 +454,39 @@ gh workflow run preview-artifact.yml -f pr_number=<N>   # или добавет�
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # инсталиране на версията за преглед
+npm install -g ./omniroute-*.tgz                          # инсталиране на предварителния преглед
 ```
 
 Изпълнението стартира `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, пакетира
-tarball-а, стартира `npm run check:pack-boot` (фиктивни тайни, временна директория за данни), пакетира го отново и
-се проваля, освен ако дайджестът не е идентичен, след което записва `artifact-identity.json` (SHA на върха, SHA на базата,
-хеш на lockfile-а, платформа, архитектура, ABI на node, bundler, политика за изграждане —
-`scripts/release/artifact-identity.mjs`) и атестира tarball-а в отделна задача. Повишаването
-на версия за преглед означава инсталиране на този tarball: никога не изграждайте отново от изходния код.
+tarball-а, стартира `npm run check:pack-boot` (фиктивни тайни, временна директория за данни), пакетира отново и
+се проваля, освен ако digest-ът не е идентичен, след което записва `artifact-identity.json` (SHA на върха, SHA на основата,
+hash на lockfile-а, платформа, архитектура, node ABI, bundler, политика за компилация —
+`scripts/release/artifact-identity.mjs`) и атестира tarball-а в отделен job. Повишаването
+на предварителен преглед означава инсталиране на този tarball: никога не изграждайте повторно от изходния код.
 
 ### Отделянето (3.9.0, след GO)
 
 1. GO е записано в [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` отпечатва `RESULT: READY`.
-3. Създайте ръчно клоновете в `origin` с командите, отпечатани от пробното изпълнение — скриптът
-   отказва да изпълни push към `origin`. За да използвате повторно прегледан commit за develop, първо изпълнете
-   репетицията с `--execute` върху върха на 3.9.0 спрямо своя fork; тя отпечатва двата SHA, след което
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` извежда `RESULT: READY`.
+3. Създайте клоновете ръчно в `origin` с командите, изведени от пробното изпълнение —
+   скриптът отказва да изпраща към `origin`. За да използвате повторно прегледан commit за `develop`, първо изпълнете
+   репетицията с `--execute` върху върха на 3.9.0 спрямо своя fork; тя извежда и двата SHA, а
    същите commit-и могат да бъдат изпратени:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Защитете `stable/v3` и `develop` (набори от правила + опашка за сливане), преди да бъде слят първият PR.
-5. Неактивните workflow-и се включват при наличието на клоновете: `forward-port.yml` (push към
+4. Защитете `stable/v3` и `develop` (набори от правила + опашка за сливане), преди да бъде приета първата PR.
+5. Неактивните работни процеси се включват при съществуване на съответния клон: `forward-port.yml` (push към
    `stable/v3`), `validate-stable-pr.yml` (PR-и към `stable/v3`) и `nightly-v4-build.yml`
-   (изгражда `develop`). Преди пускането настройте тайната на хранилището `secrets.FORWARD_PORT_TOKEN` (така че CI да се изпълнява за
-   PR-ите за пренасяне напред); nightly публикуването остава изключено, докато собственикът не зададе променливата на хранилището
+   (компилира `develop`). Преди пускането задайте тайната `secrets.FORWARD_PORT_TOKEN` на хранилището (така че CI да се изпълнява при
+   PR-и за пренасяне напред); нощното публикуване остава изключено, докато собственикът не зададе променливата на хранилището
    `vars.NIGHTLY_PUBLISH` на `true` и npm Trusted Publishing не приеме
-   `nightly-v4-build.yml`. Разрешаването на канала е в `scripts/release/dist-tag.mjs` — същият
-   механизъм за разрешаване, който използва `npm-publish.yml`.
+   `nightly-v4-build.yml`. Определянето на канала се извършва от `scripts/release/dist-tag.mjs` — същата
+   логика за определяне, която използва `npm-publish.yml`.
 6. Проверете каналите: `npm view omniroute dist-tags --json` показва `latest` = 3.9.0 и липса на
-   `next` / `nightly`, докато v4 не бъде публикувана.
+   `next` / `nightly`, докато не бъде публикувана v4.
 7. Връщане назад, ако е необходимо: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    и `npm dist-tag add omniroute@3.8.59 latest`.
 

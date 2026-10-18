@@ -33,6 +33,7 @@ import {
 } from "../utils/opencodeHeaders.ts";
 import { projectOpencodeSessionBody } from "../utils/opencodeSessionIdentity.ts";
 import { listForRequest, releaseRequestList } from "./opencodeAccountScope.ts";
+import { applyOpencodeToolNameLengthAliases } from "./toolNameLengthAlias.ts";
 import type { ScopedAccount, ScopedAccountHealth } from "./opencodeAccountScope.ts";
 import { guardRequiredAccountProxies } from "./opencodeRequiredProxy.ts";
 import {
@@ -58,6 +59,7 @@ import {
   isOpencodeUserBlocked,
 } from "./opencodeGeoBlock.ts";
 import {
+  FREE_TIER_INFERENCE_BASE_URL,
   attemptFor,
   isGatedFreeTierRequest,
   isPremiumOpencodeModel,
@@ -67,7 +69,7 @@ import {
   surfaceFromBaseUrl,
 } from "./opencodeFreeTierContract.ts";
 import {
-  applyMuseSparkMinOutputTokens,
+  applyOpencodeOutputBudgetFloors,
   createMuseSparkStreamFinishNormalizer,
   isResponsesTerminalLine,
   normalizeMuseSparkFinishReason,
@@ -115,6 +117,7 @@ import {
   parkWaitMs,
   readPoolStrainMarker,
   runParkAndReplay,
+  setAsideParkWaitMs,
 } from "./opencodeParkResume.ts";
 
 /**
@@ -189,7 +192,7 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
 /**
  * Resolves the registry `targetFormat` for a model, aliasing `provider` first.
  *
- * `PROVIDER_MODELS` is keyed by the provider's public ALIAS (e.g. `"oc"`), not its
+ * `PROVIDER_MODELS` is keyed by the provider's public ALIAS (e.g. `"opencode-zen"`), not its
  * raw registry id (e.g. `"opencode"`) — mirrors `resolveChatCoreTargetFormat()`
  * (`handlers/chatCore/targetFormat.ts`), which already aliases before calling
  * `getModelTargetFormat()`. Calling it with the raw id here made every entry miss
@@ -485,11 +488,11 @@ export class OpencodeExecutor extends BaseExecutor {
               const normalized = normalizer(line);
               controller.enqueue(encoder.encode(normalized + "\n"));
               if (isResponsesTerminalLine(line)) {
-                // OpenCode Zen sends a ping after response.completed and may keep
-                // the HTTP connection alive. The Responses terminal event is
-                // authoritative; do not let those post-completion pings hold Chat Completions open.
+                // OpenCode Zen may ping after response.completed and hold the socket.
+                // Close on that terminal event so Chat Completions is not held open.
                 closed = true;
                 void reader.cancel().catch(() => undefined);
+                controller.enqueue(encoder.encode("\n"));
                 controller.close();
                 return;
               }
@@ -567,9 +570,9 @@ export class OpencodeExecutor extends BaseExecutor {
       // muse-spark reasoning models consume the entire output budget on hidden
       // server-side reasoning; small caller budgets come back as empty-message
       // 200s ("Provider returned empty content"). Raise tiny budgets to the
-      // floor before dispatch (see MUSE_SPARK_MIN_OUTPUT_TOKENS).
+      // floor before dispatch (see applyOpencodeOutputBudgetFloors).
       if (input.body && typeof input.body === "object" && !Array.isArray(input.body)) {
-        applyMuseSparkMinOutputTokens(
+        applyOpencodeOutputBudgetFloors(
           String(input.model ?? ""),
           input.body as Record<string, unknown>
         );
@@ -919,7 +922,7 @@ export class OpencodeExecutor extends BaseExecutor {
               stalled: headersWait.spent,
               cooldown: markCooldown,
               markDirect: () => (directTried = true),
-              slow: { account, enabled: skipRecentlyFailed, read: readAppliedKey },
+              slow: { account, enabled: skipRecentlyFailed, egress: appliedEgress },
             }); // same settle as the stall arm
             log?.warn?.(
               "OPENCODE",
@@ -927,7 +930,7 @@ export class OpencodeExecutor extends BaseExecutor {
             );
             continue;
           }
-          result = outcome.result;
+          result = appliedEgress.noteServed(account, outcome.result, waitMs, skipRecentlyFailed);
         } catch (err) {
           if (headersWait.policy.windowMs > 0 && input.signal?.aborted)
             egressPacing.throwPacedError(egressRelease, err); // client abort never rotates, slot released
@@ -1026,7 +1029,8 @@ export class OpencodeExecutor extends BaseExecutor {
             }
             if (!parked && isOpencodeParkAndResumeEnabled()) {
               const marker = await readPoolStrainMarker();
-              if (burstStreak >= BURST_PARK_THRESHOLD || marker.fresh) {
+              const setAsideWaitMs = setAsideParkWaitMs(accounts.map((a) => keyOfMember(a)));
+              if (burstStreak >= BURST_PARK_THRESHOLD || marker.fresh || setAsideWaitMs !== null) {
                 parked = true;
                 log?.warn?.(
                   "OPENCODE",
@@ -1044,7 +1048,10 @@ export class OpencodeExecutor extends BaseExecutor {
                     replayKeyOfMember: keyOfMember,
                   },
                   input,
-                  parkWaitMs(marker.fresh ? marker.ttlLeftMs : null),
+                  Math.min(
+                    setAsideWaitMs ?? Number.POSITIVE_INFINITY,
+                    parkWaitMs(marker.fresh ? marker.ttlLeftMs : null)
+                  ),
                   result,
                   log,
                   cid
@@ -1279,7 +1286,10 @@ export class OpencodeExecutor extends BaseExecutor {
     void urlIndex;
     void credentials;
 
-    const base = this.config.baseUrl;
+    const base =
+      Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
+        ? FREE_TIER_INFERENCE_BASE_URL
+        : this.config.baseUrl;
     switch (this._requestFormat) {
       case "claude":
         return `${base}/messages`;
@@ -1361,6 +1371,7 @@ export class OpencodeExecutor extends BaseExecutor {
         cliDefaults,
         keepAgentUserAgent: this._surface() === "go" && !gatedScope, // #15311
         sessionBody: projectOpencodeSessionBody(body),
+        reencodeSession: gatedScope,
       });
     }
 
@@ -1368,8 +1379,6 @@ export class OpencodeExecutor extends BaseExecutor {
     // produced is exactly what the upstream now refuses, and the canonical session it used
     // to overwrite is accepted on that surface (measured 2026-09-17, 200 on
     // muse-spark-1.3-contributor-free via /v1/responses).
-
-    void model;
 
     return headers;
   }
@@ -1526,6 +1535,8 @@ export class OpencodeExecutor extends BaseExecutor {
     if (isThinkingMessageModel(model)) {
       modifiedBody = injectReasoningContentForThinkingModel(modifiedBody);
     }
+    const toolFormat = this._requestFormat ?? resolveOpencodeTargetFormat(this.provider, model);
+    applyOpencodeToolNameLengthAliases(this.provider, modifiedBody, toolFormat);
     return modifiedBody;
   }
 }

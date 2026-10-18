@@ -19,19 +19,19 @@
 
 <div align="center">
 
-## 💰 ~1.62B token / hónap külső szolgáltatók ingyenes csomagjaiból
+## 💰 ~1,62 milliárd token / hónap külső szolgáltatók ingyenes csomagjaiból
 
 </div>
 
-> **Használd a saját szolgáltatói fiókjaidat.** Ez a külön-külön igénybe vehető, külső szolgáltatók által kínált ingyenes csomagok becsült összesített mennyisége, nem pedig az OmniRoute által biztosított tokenkeret. Regisztrálj, szerezd be a szükséges hitelesítő adatokat, és csatlakoztasd az általad használható szolgáltatókat; minden szolgáltató maga határozza meg a korlátait, elérhetőségét és feltételeit.
+> **Használd a saját szolgáltatói fiókjaidat.** Ez a külön-külön igénybe vehető külső ingyenes csomagok becsült összesítése, nem pedig az OmniRoute által biztosított tokenkeret. Regisztrálj, szerezd be a szükséges hitelesítő adatokat, és csatlakoztasd az általad használható szolgáltatókat; minden szolgáltató maga határozza meg a korlátait, az elérhetőségét és a feltételeit.
 >
-> Az ingyenes csomagok kézi összefűzése nehézkes — SDK-k tucatjai, sebességkorlátok tucatjai, és fogalmad sincs, valójában mekkora kerettel rendelkezel. Az OmniRoute **489 ingyenes csomagbejegyzést katalogizál 35 ismétlődő készletkulcson keresztül**, a tokenekre vonatkozó kiemelt értéket pedig a **17 közzétett, pozitív havi kerettel rendelkező készletből, valamint öt modellenkénti Groq-korlátból** számítja ki, a közös készletek szerinti duplikációk eltávolításával. A csak regionális személyazonosság-ellenőrzés után elérhető kvóták (jelenleg: ModelScope) külön jelennek meg, +~6M a regionális személyazonosság ellenőrzése mögött, és soha nem számítanak bele a kiemelt összegbe. Az eredmény folyamatosan látható az irányítópulton (`/dashboard/free-tiers`).
+> Az ingyenes csomagok kézi összevonása nehézkes — több tucat SDK, több tucat sebességkorlát, és fogalmad sincs arról, valójában mekkora kerettel rendelkezel. Az OmniRoute **485 ingyenes csomagbejegyzést tart nyilván 35 ismétlődő keretkulcshoz**, és a tokenek főösszegét abból a **17 keretből számítja ki, amelyekhez közzétett, pozitív havi költségkeret tartozik, valamint öt modellenkénti Groq-korlátból**, a közös keretek szerinti duplikációk eltávolításával. A csak regionális személyazonosság-ellenőrzés után elérhető keretek (jelenleg: ModelScope) külön jelennek meg, +~6M regionális személyazonosság-ellenőrzéshez kötve, és soha nem számítanak bele a főösszegbe. Az eredmény folyamatosan látható az irányítópulton (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ingyenes csomag költségkeretkártya: stabilan ~1.62B ingyenes token havonta, a regisztrációs jóváírásokkal pedig akár ~2.22B az első hónapban, 35 dokumentált, ismétlődő készletkulcsból, amelyek 489 katalogizált ingyenes csomagbejegyzést fednek le egyetlen végpont mögött. Átlátható, készletek szerint deduplikált számítás — minden közös készlet csak egyszer számít, beleértve a 17 közzétett, pozitív havi tokenkerettel rendelkező ismétlődő készletet és az öt modellenkénti Groq-korlátot; 13 szolgáltató kerülendőként van megjelölve a felhasználási feltételek kockázati katalógusában, így te dönthetsz. A költségkeretsáv tartalmazza a Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (öt modellenkénti korlát) és kisebb készleteket, továbbá az első havi regisztrációs jóváírásokat és a tartósan ingyenes, tokenkorlát nélküli szolgáltatókat külön jeleníti meg, így azok soha nem növelik mesterségesen a kiemelt összeget. Élő felhasznált/fennmaradó értékek a /dashboard/free-tiers oldalon."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute ingyenes csomagok költségkeretét bemutató kártya: stabilan ~1,62 milliárd ingyenes token havonta, a regisztrációs jóváírásokkal pedig akár ~2,22 milliárd az első hónapban, 35 dokumentált ismétlődő keretkulcsból, amelyek 485 katalogizált ingyenes csomagbejegyzést fednek le egyetlen végpont mögött. Átlátható, keretek szerint deduplikált számítás — minden közös keret csak egyszer számít, beleértve 17 ismétlődő keretet közzétett, pozitív havi tokenkerettel, valamint öt modellenkénti Groq-korlátot; 13 szolgáltató kerülendőként van megjelölve a feltételkockázati katalógusban, így te dönthetsz. A költségkeretsáv tartalmazza a Mistral 1 milliárdos, a Nara 210 milliós, az LLM7 150 milliós, az xKiro 150 milliós, a Groq 30 milliós keretét (öt modellenkénti korlát), valamint kisebb kereteket; emellett az első havi regisztrációs jóváírások és a tartósan ingyenes, tokenkorlát nélküli szolgáltatók külön jelennek meg, így soha nem növelik mesterségesen a főösszeget. Az élő felhasznált/fennmaradó mennyiség a /dashboard/free-tiers oldalon látható."/>
 
-> Az élő `/dashboard/free-tiers` oldal animált összefoglalója. Teljes módszertan (készletdeduplikáció, jóváírási szintek, szolgáltatói feltételek): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Az élő `/dashboard/free-tiers` oldal animált összefoglalója. Teljes módszertan (keretek deduplikálása, jóváírási szintek, szolgáltatói feltételek): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Ezeket az adatokat kéthetente újra ellenőrizzük az élő katalógus alapján, és **mindkét irányba változhatnak** — ha egy szolgáltató megszüntet egy ingyenes csomagot, a szám csökken; ha megjelenik egy új, növekszik. Mindig azt tesszük közzé, amit a katalógus ténylegesen kiszámít, soha nem egy felfelé kerekített legjobb esetet.</sub>
+> <sub>Ezeket az adatokat kéthetente újraellenőrizzük az élő katalógus alapján, és **mindkét irányban változhatnak** — ha egy szolgáltató megszüntet egy ingyenes csomagot, a szám csökken; ha új jelenik meg, növekszik. Mindig azt tesszük közzé, amit a katalógus ténylegesen kiszámít, soha nem egy felfelé kerekített, optimális esetet.</sub>
 
 <br/>
 
@@ -39,13 +39,13 @@
 
 <h3>
 
-⭐ Csillagozd meg a repót, ha az OMNIROUTE segített pénzt megtakarítani és megkönnyítette a munkádat.
+⭐ Adj csillagot a repónak, ha az OMNIROUTE segített pénzt megtakarítani és megkönnyítette a munkádat.
 
 </h3>
 
 [![Csillagok](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Csillagelőzményi helyezés](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Csillagelőzmény-rangsor](https://api.star-history.com/badge?repo=diegosouzapw/Omniroute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Csatlakozz a közösséghez
@@ -53,7 +53,7 @@
 **👋 Kövesd a karbantartót — értesülj elsőként az új szolgáltatókról, kiadásokról és tippekről:**
 
 [![Kövesd Diegót a LinkedInen](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Kövesd @diegosouzapw felhasználót a GitHubon](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Kövesd @diegosouzapw-t a GitHubon](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
@@ -100,13 +100,13 @@
     <td align="right"><b>🚀 Kezdés</b></td>
     <td align="center"><a href="#-quick-start">🚀 Gyors kezdés</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Telepítés</a></td>
-    <td align="center"><a href="#-works-the-second-you-install-it--no-keys-no-config">🆓 Konfigurációmentes</a></td>
+    <td align="center"><a href="#first-run">🆓 Szolgáltató csatlakoztatása</a></td>
   </tr>
   <tr>
     <td align="right"><b>💡 Ismerkedés</b></td>
     <td align="center"><a href="#-the-promise">💥 Az ígéret</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 Miért az OmniRoute?</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Mitől különleges?</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Ami megkülönbözteti</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ Funkciók</b></td>
@@ -121,7 +121,7 @@
     <td align="center"><a href="#-private--local-first">🔒 Privát</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Bemutató</b></td>
+    <td align="right"><b>👀 Megtekintés</b></td>
     <td align="center"><a href="#-omniroute-in-action">🎬 Működés közben</a></td>
     <td align="center"><a href="#-whats-new">✨ Újdonságok</a></td>
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Kompatibilis CLI-k</a></td>
@@ -185,7 +185,7 @@
   <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Arab (ar)" title="Arab (ar)"></a>
   <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Héber (he)" title="Héber (he)"></a>
   <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Török (tr)" title="Török (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azerbajdzsáni (az)" title="Azerbajdzsáni (az)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azeri (az)" title="Azeri (az)"></a>
   <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Szuahéli (sw)" title="Szuahéli (sw)"></a>
   <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Görög (el)" title="Görög (el)"></a>
   <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Horvát (hr)" title="Horvát (hr)"></a>
@@ -198,7 +198,7 @@
   <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Ír (ga)" title="Ír (ga)"></a>
   <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kannada (kn)" title="Kannada (kn)"></a>
   <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malajálam (ml)" title="Malajálam (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odia (or)" title="Odia (or)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Orija (or)" title="Orija (or)"></a>
   <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Pandzsábi (pa)" title="Pandzsábi (pa)"></a>
   <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepáli (ne)" title="Nepáli (ne)"></a>
   <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Szingaléz (si)" title="Szingaléz (si)"></a>
@@ -206,7 +206,7 @@
   <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Khmer (km)" title="Khmer (km)"></a>
   <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausza (ha)" title="Hausza (ha)"></a>
   <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Joruba (yo)" title="Joruba (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbó (ig)" title="Igbó (ig)"></a>
   <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amhara (am)" title="Amhara (am)"></a>
   <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Üzbég (uz)" title="Üzbég (uz)"></a>
   <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Grúz (ka)" title="Grúz (ka)"></a>
@@ -219,11 +219,13 @@
 
 <div align="center">
 
+<a id="first-run"></a>
+
 ## 🆓 Telepítsd, csatlakoztass egy szolgáltatót, majd irányíts mindent egyetlen végponton keresztül
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Három lépés: telepítsd és indítsd el az OmniRoute-ot, csatlakoztass egy jogosult szolgáltatót a saját fiókoddal vagy API-kulcsoddal, majd irányítsd az eszközödet a localhost:20128/v1 címre egy OmniRoute API-kulcs és az auto modell használatával. Az útválasztás az elérhető jogosult kapcsolatoktól és a szolgáltatói korlátoktól függ."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Három lépés: telepítsd és indítsd el az OmniRoute-ot, csatlakoztass egy jogosult szolgáltatót a saját fiókoddal vagy API-kulcsoddal, majd állítsd be az eszközödben a localhost:20128/v1 végpontot egy OmniRoute API-kulccsal és az auto modellel. Az útválasztás az elérhető jogosult kapcsolatoktól és a szolgáltatói korlátoktól függ."/>
 
 ```bash
 # Egy szolgáltató csatlakoztatása után másold ki az OmniRoute-kulcsodat a Dashboard → Endpoints menüpontból:
@@ -233,7 +235,7 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>Az `auto` használatához jogosult útvonal szükséges. Egy friss telepítésben előfordulhat, hogy nincs jogosult, kulcs nélküli célpont, és egy kulcs nélküli szolgáltató elutasíthatja a külső klienseket. A `tos: avoid` jelölésű szolgáltatók, köztük az OpenCode Free és a Kiro, alapértelmezés szerint ki vannak zárva az automatikus útválasztásból; egy fiók csatlakoztatása nem írja felül ezt a beállítást. Szolgáltató kiválasztása előtt tekintsd meg az [Ingyenes csomagok útmutatóját](docs/getting-started/FREE-TIERS-GUIDE.md).</sub>
+<sub>Az `auto` használatához jogosult útvonal szükséges. Egy friss telepítésben előfordulhat, hogy nincs jogosult, kulcs nélküli célpont, és egy kulcs nélküli szolgáltató elutasíthatja a harmadik féltől származó klienseket. A `tos: avoid` jelölésű szolgáltatók, köztük az OpenCode Free és a Kiro, alapértelmezés szerint ki vannak zárva az automatikus útválasztásból; egy fiók csatlakoztatása nem írja felül ezt a beállítást. Szolgáltató választása előtt tekintsd meg az [Ingyenes csomagok útmutatóját](docs/getting-started/FREE-TIERS-GUIDE.md).</sub>
 
 <sub>📦 Másolható és beilleszthető gyorsindító szkriptek **Pythonhoz, Node.jshez, PHP-hez és cURL-höz** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
@@ -245,7 +247,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az ígéret — Egy végpont és 372 szolgáltató. Az automatikus tartalék útvonalválasztás addig biztosítja a kérések továbbítását, amíg van másik működőképes célpont. Hat pillér: ellenálló tartalék útvonalválasztás 372 szolgáltató között · akár 95%-os tokenmegtakarítás a megfelelő munkaterheléseknél · $0 indulási költség több mint 150 ingyenes csomaggal és 54 ismétlődő vagy kulcs nélküli, örökre ingyenes szolgáltatóval · 36 CLI- és ügynökintegráció egyetlen konfiguráción keresztül · OpenAI-, Claude-, Gemini- és Responses API-kompatibilitás a /v1 címen · éles környezethez készült vezérlők, köztük megszakítók, TLS-rejtőzködés, 110 MCP-eszköz, A2A, memória, védőkorlátok, kiértékelések és több mint 39 000 statikus tesztdeklaráció több mint 5 100 nyomon követett tesztfájlban."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Az ígéret — Egy végpont és 372 szolgáltató. Az automatikus tartalékútvonal-választás fenntartja az útválasztást, amíg rendelkezésre áll egy másik működőképes célpont. Hat alappillér: ellenálló tartalékútvonal-választás 372 szolgáltató között · akár 95%-os tokenmegtakarítás az arra alkalmas munkafolyamatoknál · $0 indulási költség több mint 150 ingyenes csomaggal, valamint 53 ismétlődően ingyenes vagy kulcs nélküli, örökké ingyenes szolgáltatóval · 36 CLI-/ügynökintegráció egyetlen konfiguráción keresztül · OpenAI-, Claude-, Gemini- és Responses API-kompatibilitás a /v1 végponton · éles környezethez készült vezérlők, többek között megszakítók, TLS-rejtőzködés, MCP 110 eszközzel, A2A, memória, védőkorlátok, kiértékelések és több mint 39 000 statikus tesztdeklaráció több mint 5 100 nyomon követett tesztfájlban."/>
 
 <br/>
 <br/>
@@ -256,11 +258,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Miért az OmniRoute — ne kelljen többé 10 irányítópulttal, működésképtelen API-kulcsokkal és váratlan számlákkal zsonglőrködnöd. Tíz mindennapos probléma és megoldás: a kvóta felhasználatlanul lejár → az előfizetések maximális kihasználása; sebességkorlátok kódolás közben → négyszintű automatikus tartalék útvonalválasztás (Előfizetés → API → Olcsó → Ingyenes); az eszközkimenetek felemésztik a tokeneket → RTK + Caveman tömörítés (15–95%); drága API-k → költségoptimalizált útvonalválasztás; minden eszköz külön beállítást igényel → egy végpont, egy irányítópult; az AI blokkolva van → háromszintű proxy + TLS-rejtőzködés; működésképtelen kulcsok → háromrétegű hibatűrés (megszakítók, kulcs-várakozási idő, modellzárolás); egy előfizetést megosztó csapat → kulcskészletek méltányos kvótákkal; a promptok valaki más felhőjén haladnak át → helyi működés előnyben, AES-256-GCM-mel titkosított kulcsokkal; nincs rálátás a költésekre → valós idejű analitika (használat, kvóta, megtakarítás, p95 késleltetés)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Miért az OmniRoute — ne zsonglőrködj többé 10 irányítópulttal, lejárt API-kulcsokkal és váratlan számlákkal. Tíz mindennapos probléma és megoldás: felhasználatlanul lejáró kvóta → az előfizetések maximális kihasználása; kódolás közben elért sebességkorlátok → 4 szintű automatikus tartalékútvonal-választás (Előfizetés → API → Olcsó → Ingyenes); tokeneket felemésztő eszközkimenetek → RTK + Caveman tömörítés (15–95%); drága API-k → költségoptimalizált útválasztás; minden eszköz saját beállítást igényel → egy végpont, egy irányítópult; blokkolt AI → 3 szintű proxy + TLS-rejtőzködés; működésképtelen kulcsok → 3 rétegű ellenálló képesség (megszakítók, kulcs-várakoztatás, modellkizárás); egyetlen előfizetésen osztozó csapat → kulcskészletek méltányos kvótákkal; promptok valaki más felhőjén keresztül → helyi működés előnyben részesítve, AES-256-GCM titkosítású kulcsokkal; nincs átláthatóság a költésekről → élő analitika (használat, kvóta, megtakarítás, p95 késleltetés)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Az OmniRoute-kérések folyamata: az IDE-d vagy CLI-d (Claude Code, Cursor, Cline…) egyetlen helyi végpontot hív meg (http://localhost:20128/v1); az OmniRoute intelligens útválasztója (RTK + Caveman tömörítés, 19 útválasztási stratégia, megszakítók, TLS-rejtőzködés, MCP, A2A, védőkorlátok) 4 szolgáltatói szinten keresztül válthat tartalék útvonalra, amíg marad jogosult és működőképes célpont — 1. szint: Előfizetés, 2. szint: API-kulcs, 3. szint: Olcsó és 4. szint: Ingyenes."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="Az OmniRoute kérésfolyamata: az IDE-d vagy CLI-d (Claude Code, Cursor, Cline…) egyetlen helyi végpontot hív meg (http://localhost:20128/v1); az OmniRoute Smart Router (RTK + Caveman tömörítés, 19 útválasztási stratégia, megszakítók, TLS-rejtőzködés, MCP, A2A, védőkorlátok) 4 szolgáltatói szint között válthat tartalékútvonalra, amíg rendelkezésre áll egy jogosult, működőképes célpont — 1. szint: Előfizetés, 2. szint: API-kulcs, 3. szint: Olcsó és 4. szint: Ingyenes."/>
 
 </div>
 
@@ -570,27 +572,27 @@ A Radar használata opcionális, és kizárólag GET-kéréseket alkalmaz. Az Om
 
 > A **v3.8.20 → v3.8.50** verziók legfontosabb újdonságai. A teljes előzmény a [`CHANGELOG.md`](CHANGELOG.md) fájlban található.
 
-- **🎛️ OmniConductor** — bejövő A2A-delegálás az ügynökflottádhoz, Conductor-készségek az Agent Cardon, valamint egy irányítópult-panel Faro adóvevős hangcsevegéssel. → [A2A-kiszolgáló](docs/frameworks/A2A-SERVER.md)
-- **🛂 Adaptív beléptetés és túlterhelés elleni védelem** — az erőforrás-igényes csevegési kérések 503-as válasz helyett várólistára kerülnek, kapcsolatonkénti atomi, gördülő RPM-bérletekkel. → [Reziliencia-útmutató](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanonikus `/v1/models`-sorrend** — szolgáltatónként egyetlen összefüggő, szolgáltató szerint csoportosított blokk (a kombinációk elöl rögzítve), minden katalógusforrásban stabilan. → [API-referencia](docs/reference/API_REFERENCE.md)
-- **🗜️ Megerősített tömörítés** — alapértelmezetten bekapcsolt kibontási védelem, Caveman-csomagok némethez / franciához / japánhoz + kínaihoz (wényán), RTK-szűrők Gradle-höz és .NET-hez. → [Tömörítés](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Valós átalánydíjas költség** — az előfizetéses / kódolási csomagot kínáló szolgáltatók költségelemzésében **$0** jelenik meg; a költségkeret-, kvóta- és útválasztási funkciók továbbra is becsléseket használnak. → [API-referencia](docs/reference/API_REFERENCE.md)
-- **⚖️ Kvótamegosztásos útválasztás** — egy megosztott fiók kvótájának méltányos elosztása az összevont kulcsok között, munkamegőrző módon, így a tétlen részeket a rendszer kölcsönadja. → [Reziliencia-útmutató](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Egypárancsos CLI-/ügynökbeállítás** — 13 regisztrált `setup-*` parancs; az `omniroute run` 7 CLI-t indít el (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); az `omniroute configure` 10 célrendszert támogat interaktív szolgáltató- és modellválasztóval, valamint környezetenkénti kedvencekkel. → [CLI-integrációk](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Távoli mód** — távoli OmniRoute vezérlése hatókörrel korlátozott tokenekkel (`connect` / `contexts` / `tokens`), valamint egy `antigravity` OAuth-segéd VPS-telepítésekhez. → [Távoli mód](docs/guides/REMOTE-MODE.md)
-- **🧭 Intelligensebb automatikus útválasztás** — `auto/<category>:<tier>` kombinációk, **Fusion** (modellpanel + döntőbíró), feladattudatos útválasztás, kérésenkénti modell-, mód- és USD-költségkeret-felülbírálás. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Bővíthető tömörítés** — 12 kombinálható motor + Compression Studios: LLMLingua-2, kétszintű Ultra, omniglyph, lépésenkénti hűségkapu, GCF v3.2, húzással átrendezhető szerkesztő. → [Tömörítés](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Átlátszó MITM-visszafejtés (TPROXY)** — a proxykörnyezeti változókat figyelmen kívül hagyó CLI-k forgalmának elfogása SNI-nkénti hitelesítésszolgáltatóval és bizalmitár-telepítővel. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Költségtelemetria mindenhol** — `X-OmniRoute-*` költség-/használati fejlécek minden végponton, gyorsítótártalálati megtakarítási fejléc, kulcsonkénti USD-költési kvóták. → [API-referencia](docs/reference/API_REFERENCE.md)
-- **🧠 Általad vezérelt memória** — alapértelmezetten kikapcsolva, választható int8 vektorkvantálás + típusos lecsengés, kérésenkénti `x-omniroute-no-memory`. → [Memória](docs/frameworks/MEMORY.md)
-- **🛡️ Biztonság** — promptinjektálás elleni védelem minden LLM-útvonalon (red-team tesztcsomag), választható hitelesítőadat-maszkolási védőkorlát (mindkét irányban kitakarja a kiszivárgott API-kulcsokat/titkokat), ingyenes DuckDuckGo-webkeresés végső tartalékként, valamint opcionális OIDC-bejelentkezési kapu az irányítópulthoz (a jelszavas bejelentkezés mindig elérhető marad). → [Védőkorlátok](docs/security/GUARDRAILS.md)
-- **🖼️ Új végpontok** — a `/v1/ocr` (Mistral OCR) és a `/v1/audio/translations` (Whisper-stílusú) teszik teljessé a médiafunkciókat. → [API-referencia](docs/reference/API_REFERENCE.md)
+- **🎛️ OmniConductor** — bejövő A2A-delegálás az ügynökflottához, Conductor-képességek az Agent Cardon, valamint egy Faro adóvevős hangcsevegést kínáló irányítópulti panel. → [A2A-kiszolgáló](docs/frameworks/A2A-SERVER.md)
+- **🛂 Adaptív beléptetés és túlterhelés elleni védelem** — a nagy erőforrás-igényű csevegési kérések 503-as válasz helyett várólistára kerülnek, kapcsolatonkénti atomi RPM gördülő bérletekkel. → [Hibatűrési útmutató](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Kanonikus `/v1/models`-sorrend** — szolgáltatónként egyetlen összefüggő, szolgáltató szerint csoportosított blokk (a kombinációk elöl rögzítve), minden katalógusforrásban stabil sorrenddel. → [API-referencia](docs/reference/API_REFERENCE.md)
+- **🗜️ Megerősített tömörítés** — alapértelmezetten bekapcsolt kicsomagolási védelem, Caveman-csomagok némethez, franciához, japánhoz és kínaihoz (wényán), valamint RTK-szűrők Gradle-höz és .NET-hez. → [Tömörítés](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Valósághű átalánydíjas költségek** — az előfizetéses és programozási csomagot kínáló szolgáltatók költségelemzésében **$0** jelenik meg; a költségkeret, a kvóta és az útválasztás továbbra is becslést használ. → [API-referencia](docs/reference/API_REFERENCE.md)
+- **⚖️ Kvótamegosztásos útválasztás** — egy megosztott fiók kvótájának igazságos elosztása az összevont kulcsok között, munkamegőrző módon, így a kihasználatlan részek kölcsönadhatók. → [Hibatűrési útmutató](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 Egypárancsos CLI-/ügynökbeállítás** — 13 regisztrált `setup-*` parancs; az `omniroute run` 7 CLI-t indít el (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); az `omniroute configure` 10 célrendszert támogat interaktív szolgáltató- és modellválasztóval, valamint kontextusonkénti kedvencekkel. → [CLI-integrációk](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Távoli mód** — távoli OmniRoute vezérlése korlátozott hatókörű tokenekkel (`connect` / `contexts` / `tokens`), valamint egy `antigravity` OAuth-segédprogram VPS-telepítésekhez. → [Távoli mód](docs/guides/REMOTE-MODE.md)
+- **🧭 Intelligensebb automatikus útválasztás** — `auto/<category>:<tier>` kombinációk, **Fusion** (modellpanel + bíró), feladattudatos útválasztás, valamint kérésenkénti modell-, mód- és USD-költségkeret-felülbírálás. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **🗜️ Bővíthető tömörítés** — 12 kombinálható motor és Compression Studios: LLMLingua-2, kétszintű Ultra, omniglyph, lépésenkénti pontossági kapu, GCF v3.2, húzással átrendezhető szerkesztő. → [Tömörítés](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Transzparens MITM-visszafejtés (TPROXY)** — a proxykörnyezeti változókat figyelmen kívül hagyó CLI-k forgalmának elfogása SNI-nkénti CA-val és bizalmi tár telepítővel. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Költségtelemetria mindenhol** — `X-OmniRoute-*` költség- és használati fejlécek minden végponton, gyorsítótártalálatból származó megtakarítást jelző fejléc, valamint kulcsonkénti USD-költési kvóták. → [API-referencia](docs/reference/API_REFERENCE.md)
+- **🧠 Ön által felügyelt memória** — alapértelmezetten kikapcsolva, opcionálisan bekapcsolható int8 vektorkvantálás és típusos lecsengés, valamint kérésenkénti `x-omniroute-no-memory`. → [Memória](docs/frameworks/MEMORY.md)
+- **🛡️ Biztonság** — promptinjekció elleni védelem minden LLM-útvonalon (red-team tesztcsomag), opcionálisan bekapcsolható hitelesítőadat-maszkolási védőkorlát (mindkét irányban kitakarja a kiszivárgott API-kulcsokat és titkos adatokat), ingyenes DuckDuckGo végső tartalék webes keresés, valamint opcionális OIDC-bejelentkezési kapu az irányítópulthoz (a jelszavas bejelentkezés mindig elérhető marad). → [Védőkorlátok](docs/security/GUARDRAILS.md)
+- **🖼️ Új végpontok** — a `/v1/ocr` (Mistral OCR) és a `/v1/audio/translations` (Whisper-stílusú) teszi teljessé a médiafunkciókat. → [API-referencia](docs/reference/API_REFERENCE.md)
 - **🎨 Kép-, videó- és hanggenerálás** — egyetlen API a médiához: xAI Grok Imagine és Novita AI videó, ComfyUI, Magnific, Adobe Firefly, Segmind, valamint beszédszolgáltatók, például az ElevenLabs. → [API-referencia](docs/reference/API_REFERENCE.md)
-- **🌍 Telepítés és üzemeltetés** — fordított proxyhoz használható `basePath`, böngészőnyelv automatikus felismerése, kulcsonkénti eszközkövetés, root nélküli MITM-bizalom, zh-TW lokalizáció. → [Környezet](docs/reference/ENVIRONMENT.md)
-- **🤝 További szolgáltatók és ügynökök** — felhőügynökök (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) böngészős + OAuth-bejelentkezéssel, teljes értékű Ollama-kártya, Claude Opus 5 és Sonnet 5, hivatalos Kimi-partnerség (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… valamint egy frissített, **352 szolgáltatót tartalmazó katalógus**. → [Szolgáltatók](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Átlátható útválasztás** — minden válasz tartalmaz egy `X-OmniRoute-Decision` fejlécet, amely megnevezi az azt kiszolgáló stratégiát/szolgáltatót/késleltetést; az új `cache-optimized` kombinációs stratégia és az Auto-Combo `cacheAffinity` tényezője az ismételt kéréseket visszairányítja a gyorsítótárazott előtagot tároló kapcsolathoz; az írásvédett `/v1/auto-combo/{channel}/candidates` végpont pedig elérhetővé teszi egy `auto/*` csatorna élő jelöltkészletét. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Helyi teljesítmény és infrastruktúra** — egykattintásos helyi Redis, Cloudflare Workers / Deno Deploy relételepítők, valamint felügyelt beágyazott szolgáltatásként futó Bifrost és Mux. → [Beágyazott szolgáltatások](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 További beépített funkciók** — bővítménykeretrendszer + piactér, Omni/Agent/GitHub készségkeretrendszerek, Obsidian-vault-integráció (22 MCP-eszköz), OpenAI-kompatibilis Batch és Files API-k, szemantikus válaszgyorsítótár, ranglistás játékosítás, ACP-ügynökfelderítés (15 beépített ügynök), ütemezett naplóexport a BigQuerybe, `auto/chaos` párhuzamos, többmodelles szétágazás, Telegram-bot-híd, alkalmazáson belüli verziókezelő és LMArena-ELO rangsorok az ingyenes szolgáltatókhoz. → [Dokumentáció](docs/README.md)
+- **🌍 Telepítés és üzemeltetés** — fordított proxyhoz használható `basePath`, a böngésző nyelvének automatikus felismerése, kulcsonkénti eszközkövetés, root jogosultság nélküli MITM-bizalomtelepítés, zh-TW lokalizáció. → [Környezet](docs/reference/ENVIRONMENT.md)
+- **🤝 További szolgáltatók és ügynökök** — felhőügynökök (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) böngészős és OAuth-bejelentkezéssel, teljes értékű Ollama-kártya, Claude Opus 5 és Sonnet 5, hivatalos Kimi-partnerség (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… és egy frissített, **372 szolgáltatót tartalmazó katalógus**. → [Szolgáltatók](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Átlátható útválasztás** — minden válasz tartalmaz egy `X-OmniRoute-Decision` fejlécet, amely megnevezi a kiszolgáláshoz használt stratégiát, szolgáltatót és késleltetést; az új `cache-optimized` kombinációs stratégia és az Auto-Combo `cacheAffinity` tényezője az ismételt kéréseket visszairányítja a gyorsítótárazott előtagot tároló kapcsolathoz; az írásvédett `/v1/auto-combo/{channel}/candidates` végpont pedig elérhetővé teszi egy `auto/*` csatorna aktuális jelöltkészletét. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ Helyi teljesítmény és infrastruktúra** — egykattintásos helyi Redis, Cloudflare Workers- és Deno Deploy-relételepítők, valamint felügyelt beágyazott szolgáltatásként futó Bifrost és Mux. → [Beágyazott szolgáltatások](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 További beépített funkciók** — bővítménykeretrendszer és piactér, Omni-/Agent-/GitHub-képességkeretrendszerek, Obsidian-tárintegráció (22 MCP-eszköz), OpenAI-kompatibilis Batch és Files API-k, szemantikus válasz-gyorsítótár, ranglistákkal kiegészített játékosítás, ACP-ügynökfelderítés (15 beépített ügynök), ütemezett naplóexportálás BigQuerybe, `auto/chaos` párhuzamos, többmodelles kimenetosztás, Telegram-bot-híd, alkalmazáson belüli verziókezelő és LMArena-ELO ingyenesszolgáltatói rangsorok. → [Dokumentáció](docs/README.md)
 
 <br/>
 
@@ -671,11 +673,11 @@ a parancsérzékeny terminálelőzményektől. → [CLI-integrációk](docs/guid
 
 <div align="center">
 
-## 🌐 372 AI-szolgáltató — közülük 154 ingyenesként jelölve a katalógusban
+## 🌐 372 AI-szolgáltató — 154 ingyenesként megjelölve a katalógusban
 
 </div>
 
-> **372 regisztrált szolgáltató** a kanonikus csevegési, média-, keresési, helyi, felhőügynök- és rendszergyűjteményekben, köztük **154 olyan, amely `hasFree: true` felderítési metaadattal rendelkezik**. A csevegésimodell-nyilvántartás **237 szolgáltatót / 3 009 különálló szolgáltató–modell-párt / 1 443 nyers modellazonosítót** tartalmaz; a különálló ingyenes keretkatalógusban **491 modellenkénti sor**, **35 megújuló készlet** és **54 megújuló/kulcs nélküli, örökre ingyenes szolgáltató** található. Ezek szándékosan eltérő nevezők; a definíciók és a készletek szerinti duplikációmentes számítások a [Szolgáltatói referenciában](docs/reference/PROVIDER_REFERENCE.md) és az [Ingyenes csomagok](docs/reference/FREE_TIERS.md) dokumentumban találhatók.
+> **372 regisztrált szolgáltató** a kanonikus csevegési, média-, keresési, helyi, felhőügynök- és rendszergyűjteményekben, köztük **154, amely `hasFree: true` felderítési metaadatot tartalmaz**. A csevegésimodell-nyilvántartás **237 szolgáltatót / 3 009 egyedi szolgáltató–modell-párt / 1 443 nyers modellazonosítót** fed le; a különálló ingyenes keretkatalógus **485 modellenkénti sort**, **35 megújuló keretösszevonást** és **53 megújuló/kulcs nélküli, örökre ingyenes szolgáltatót** tartalmaz. Ezek szándékosan eltérő viszonyítási alapok; a definíciók és a keretösszevonások alapján deduplikált számítások a [Szolgáltatói referenciában](docs/reference/PROVIDER_REFERENCE.md) és az [Ingyenes csomagok](docs/reference/FREE_TIERS.md) dokumentációjában találhatók.
 
 <div align="center">
 
@@ -726,10 +728,10 @@ a parancsérzékeny terminálelőzményektől. → [CLI-integrációk](docs/guid
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Korlátlanul INGYENES</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Nincs szükség kulcsra</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ modell<br/>10 ezer neuron/nap</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ modell<br/>10K neuron/nap</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM ingyenesen</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Egyszeri 5 dolláros jóváírás; bankkártya szükséges</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free modellek<br/>+10 dollár → magasabb RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Egyszeri $5 kredit; bankkártya szükséges</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free modellek<br/>+$10 → magasabb RPM</sub></td>
   </tr>
 </table>
 
@@ -1288,7 +1290,7 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
   <tr><td nowrap><b>Futtatókörnyezet</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Nyelv</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> a <code>src/</code> és az <code>open-sse/</code> teljes területén (a v2.0 óta nulla <code>any</code> az alapkomponensekben)</td></tr>
   <tr><td nowrap><b>Keretrendszer</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 137 tartományi modul, 202 migráció</td></tr>
+  <tr><td nowrap><b>Adatbázis</b></td><td>better-sqlite3 (SQLite, WAL-naplózás) + LowDB (örökölt JSON) — 137 tartományi modul, 204 migráció</td></tr>
   <tr><td nowrap><b>Memória</b></td><td>SQLite FTS5 teljes szöveges keresés + int8-kvantált vektoros beágyazások, típusos lecsengés</td></tr>
   <tr><td nowrap><b>Sémák</b></td><td>Zod 4 — MCP-eszközök bemeneti/kimeneti validációja + API-szerződések</td></tr>
   <tr><td nowrap><b>Protokollok</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1317,24 +1319,24 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
 <table>
   <tr><th align="left">Dokumentum</th><th align="left">Leírás</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Felhasználói útmutató</a></b></td><td>Szolgáltatók, kombinációk, CLI-integráció, üzembe helyezés</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Telepítési útmutató</a></b></td><td>Az összes telepítési módszer, CLI-eszközök konfigurációja, protokollok beállítása, időtúllépések finomhangolása</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI-eszközök útmutatója</a></b></td><td>Eszközönkénti beállítás a Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo és Copilot használatához</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Távoli mód</a></b></td><td>Távoli OmniRoute (VPS) vezérlése a laptop CLI-jéről korlátozott hatókörű hozzáférési tokenekkel</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code konfigurációja</a></b></td><td>A Claude Code csatlakoztatása az OmniRoute-hoz (helyi/távoli) a <code>launch</code> és modellenkénti profilok segítségével</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">Gyors kezdés</a></b></td><td>3 lépéses telepítés → csatlakoztatás → konfigurálás</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Beállítási útmutató</a></b></td><td>Teljes telepítési módszerek, CLI-eszközök konfigurációi, protokollbeállítás, időtúllépések finomhangolása</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI-eszközök útmutatója</a></b></td><td>Eszközönkénti beállítás a Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo és Copilot számára</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Távoli mód</a></b></td><td>Távoli OmniRoute (VPS) vezérlése a laptop CLI-jéből korlátozott hatókörű hozzáférési tokenekkel</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code konfiguráció</a></b></td><td>A Claude Code csatlakoztatása az OmniRoute-hoz (helyi/távoli) a <code>launch</code> és modellenkénti profilok használatával</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">Gyors kezdés</a></b></td><td>Három lépés: telepítés → csatlakoztatás → konfigurálás</td></tr>
 </table>
 
 ### 🔧 Üzemeltetés és üzembe helyezés
 
 <table>
   <tr><th align="left">Dokumentum</th><th align="left">Leírás</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-útmutató</a></b></td><td>Docker-futtatás, Compose-profilok, Caddy HTTPS, alagutak, lemezképcímkék</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-útmutató</a></b></td><td>Docker-futtatás, Compose-profilok, Caddy HTTPS, alagutak, rendszerképcímkék</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-útmutató</a></b></td><td>Quadlet systemd-integráció, podman-compose, SELinux</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Virtuális gépes üzembe helyezés</a></b></td><td>Teljes útmutató: virtuális gép + nginx + Cloudflare beállítása</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io üzembe helyezés</a></b></td><td>Üzembe helyezés a Fly.io szolgáltatásban tartós tárhellyel</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Üzembe helyezés virtuális gépen</a></b></td><td>Teljes útmutató: virtuális gép + nginx + Cloudflare beállítása</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Üzembe helyezés a Fly.io-n</a></b></td><td>Üzembe helyezés a Fly.io-n állandó tárhellyel</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-útmutató</a></b></td><td>Az OmniRoute futtatása Androidon a Termux segítségével</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-útmutató</a></b></td><td>Progresszív webalkalmazás telepítése, gyorsítótárazás, architektúra</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Eltávolítási útmutató</a></b></td><td>Tiszta eltávolítás az összes telepítési módszerhez</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-útmutató</a></b></td><td>Progresszív webalkalmazás telepítése, gyorsítótárazása és architektúrája</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Eltávolítási útmutató</a></b></td><td>Tiszta eltávolítás minden telepítési módszer esetén</td></tr>
   <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Környezeti konfiguráció</a></b></td><td>A <code>.env</code> változók és hivatkozások teljes listája</td></tr>
 </table>
 
@@ -1343,15 +1345,15 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
 <table>
   <tr><th align="left">Dokumentum</th><th align="left">Leírás</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Architektúra</a></b></td><td>Rendszerarchitektúra, adatfolyam és belső működés</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Tömörítési útmutató</a></b></td><td>7 lehetőséget kínáló feldolgozási lánc: kikapcsolt / enyhe / normál / agresszív / ultra / RTK / halmozott</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-tömörítés</a></b></td><td>Parancskimenet tömörítése, szűrők, megbízhatóság, ellenőrzés, nyers kimenet helyreállítása</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Tömörítési motorok</a></b></td><td>Caveman, RTK, halmozott feldolgozási láncok, irányítópult-/API-/MCP-felületek</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Tömörítési szabályok formátuma</a></b></td><td>JSON-szabálycsomag-sémák a Caveman- és RTK-szűrőkhöz</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Tömörítési útmutató</a></b></td><td>Hétopciós folyamat: kikapcsolva / enyhe / normál / agresszív / ultra / RTK / halmozott</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-tömörítés</a></b></td><td>Parancskimenet-tömörítés, szűrők, megbízhatóság, ellenőrzés, nyers kimenet helyreállítása</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Tömörítőmotorok</a></b></td><td>Caveman, RTK, halmozott folyamatok, irányítópult-, API- és MCP-felületek</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Tömörítési szabályok formátuma</a></b></td><td>JSON-szabálycsomagok sémái a Caveman- és RTK-szűrőkhöz</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Tömörítési nyelvi csomagok</a></b></td><td>Nyelvfelismerés és Caveman-szabálycsomagok készítése</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Hibatűrési útmutató</a></b></td><td>Áramkör-megszakítók, várakozási idők, várólista, egyidejű lekérések viharának megakadályozása, TLS-megszemélyesítés</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Ellenálló képességi útmutató</a></b></td><td>Áramkör-megszakítók, várakozási idők, várólista, egyidejű lekérés elleni védelem, TLS-megszemélyesítés</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo motor</a></b></td><td>16 tényezős pontozás, módcsomagok, öngyógyítás</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyútmutató</a></b></td><td>3 szintű proxyrendszer, 1proxy piactér, beállításjegyzék-CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ingyenes csomagok</a></b></td><td>Összesített jegyzék: 35 dokumentált, ismétlődő erőforráskészlet / 489 katalogizált ingyenes csomagbejegyzés</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyútmutató</a></b></td><td>Háromszintű proxyrendszer, 1proxy piactér, beállításjegyzék-CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ingyenes csomagok</a></b></td><td>Összesített jegyzék: 35 dokumentált ismétlődő készlet / 485 katalogizált ingyenes csomagbejegyzés</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funkciógaléria</a></b></td><td>Az irányítópult vizuális bemutatása képernyőképekkel</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Kódbázis-dokumentáció</a></b></td><td>Kezdőbarát útmutató a kódbázishoz</td></tr>
 </table>
@@ -1360,12 +1362,12 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
 
 <table>
   <tr><th align="left">Dokumentum</th><th align="left">Leírás</th></tr>
-  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-referencia</a></b></td><td>Az összes végpont példákkal</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-referencia</a></b></td><td>Minden végpont példákkal</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI-specifikáció</a></b></td><td>OpenAPI 3.0 specifikáció</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP-kiszolgáló</a></b></td><td>110 MCP-eszköz, IDE-konfigurációk, Python-/TS-/Go-kliensek</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP-kiszolgáló útmutatója</a></b></td><td>MCP-telepítés, átviteli módok és eszközreferencia</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A-kiszolgáló</a></b></td><td>JSON-RPC 2.0 protokoll, képességek, streamelés, feladatkezelés</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A-kiszolgáló útmutatója</a></b></td><td>A2A-ügynökkártya, feladatok, képességek és streamelés</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP-kiszolgálói útmutató</a></b></td><td>MCP-telepítés, átviteli módok és eszközreferencia</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A-kiszolgáló</a></b></td><td>JSON-RPC 2.0 protokoll, képességek, adatfolyam-továbbítás, feladatkezelés</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A-kiszolgálói útmutató</a></b></td><td>A2A-ügynökkártya, feladatok, képességek és adatfolyam-továbbítás</td></tr>
 </table>
 
 ### 📋 Projekt és minőség
@@ -1373,12 +1375,12 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
 <table>
   <tr><th align="left">Dokumentum</th><th align="left">Leírás</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">Közreműködés</a></b></td><td>Fejlesztői környezet beállítása és irányelvek</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Ágkezelési és kiadási modell</a></b></td><td>Hová irányulnak a PR-ek (<code>release/*</code>), valamint mit jelent a <code>main</code> és a címkék</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Ágazási és kiadási modell</a></b></td><td>Hová irányulnak a PR-ek (<code>release/*</code>), és mit jelent a <code>main</code>, valamint a címkék</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Változásnapló</a></b></td><td>Teljes, verziónkénti kiadási előzmények</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Biztonsági szabályzat</a></b></td><td>Sérülékenységek bejelentése és biztonsági gyakorlatok</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-útmutató</a></b></td><td>42 nyelv támogatása, fordítási munkafolyamat, RTL</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Biztonsági szabályzat</a></b></td><td>Sérülékenységek jelentése és biztonsági gyakorlatok</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n útmutató</a></b></td><td>42 nyelv támogatása, fordítási munkafolyamat, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Kiadási ellenőrzőlista</a></b></td><td>Kiadás előtti ellenőrzési lépések</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Lefedettségi terv</a></b></td><td>Tesztlefedettségi stratégia több mint 39 000 statikus tesztdeklarációhoz, több mint 5 100 nyomon követett tesztfájlban</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Lefedettségi terv</a></b></td><td>Tesztlefedettségi stratégia 39 000+ statikus tesztdeklarációhoz, 5 100+ nyomon követett tesztfájlban</td></tr>
 </table>
 
 <br/>
@@ -1387,12 +1389,12 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
 
 # ⭐ Legkiemelkedőbb közreműködők
 
-> Az OmniRoute-ot egy lelkes nyílt forráskódú közösség alakítja. Ezek a személyek kivételes hozzájárulásokat tettek, amelyek közvetlenül befolyásolják a projekt minőségét, stabilitását és elérhetőségét. **Köszönjük.**
+> Az OmniRoute-ot egy lelkes nyílt forráskódú közösség formálja. Ezek a személyek kivételes hozzájárulásokkal közvetlenül befolyásolták a projekt minőségét, stabilitását és elérhetőségét. **Köszönjük.**
 
-### Külső közreműködők az egyesített pull requestek száma szerint
+### Külső közreműködők a beolvasztott pull requestek száma szerint
 
 <table>
-  <tr><th align="center">Helyezés</th><th align="left">Közreműködő</th><th align="center">Egyesített PR-ek</th><th align="right">~Módosított sorok</th></tr>
+  <tr><th align="center">Helyezés</th><th align="left">Közreműködő</th><th align="center">Beolvasztott PR-ek</th><th align="right">~Módosított sorok</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">190</td><td align="right">227,977</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/oyi77"><b>oyi77</b></a></td><td align="center">180</td><td align="right">407,678</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/rdself"><b>rdself</b></a></td><td align="center">145</td><td align="right">80,663</td></tr>
@@ -1416,9 +1418,9 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/Prudhvivuda"><b>Prudhvivuda</b></a></td><td align="center">24</td><td align="right">6,312</td></tr>
 </table>
 
-<sub>A <code>release/v3.8.50</code> élő ág <code>dafb4ae808</code> csúcsán rögzítve, a 2026-08-24 05:26:03 UTC időpontig végrehajtott egyesítésekkel. A lapozott GitHub GraphQL-felmérés 5 911 egyesített PR-t tartalmaz: 2 707-et a tároló tulajdonosától, 179-et a Dependabottól, valamint <b>3 025 külső PR-t 535 különböző közreműködőtől</b>. A „Módosított sorok” a GitHubon szereplő hozzáadások és törlések összege, és magában foglalja a generált fájlokat, zárolási fájlokat, katalógusokat, fordításokat és dokumentációt; ez a változtatások mennyiségét jelzi, nem a szerző által írt forráskódsorok számát. A határértéknél kialakult holtversenyeket megtartottuk.</sub>
+<sub>A <code>release/v3.8.50</code> élő ágának <code>dafb4ae808</code> csúcsán rögzítve, a 2026-08-24 05:26:03 UTC időpontig történt beolvasztásokkal. A lapozott GitHub GraphQL-összesítés 5,911 beolvasztott PR-t tartalmaz: 2,707-et a tároló tulajdonosától, 179-et a Dependabottól, valamint <b>3,025 külső PR-t 535 különböző közreműködőtől</b>. A „Módosított sorok” a GitHub szerinti hozzáadások és törlések összege, beleértve a generált fájlokat, zárolási fájlokat, katalógusokat, fordításokat és dokumentációt; ez a módosítási forgalmat jelzi, nem a szerző által írt forráskódsorok számát. A határértéken fennálló holtversenyek megmaradnak.</sub>
 
-### GitHubhoz rendelt commitok
+### GitHubhoz rendelt véglegesítések
 
 <table>
   <tr>
@@ -1504,9 +1506,9 @@ Kanonikus mérőszámok 2026-08-24-én: **1.029 egyedi videó** · **11.132.922 
   </tr>
 </table>
 
-<sub>Újraellenőrizve 2026-08-24 06:14:31 UTC időpontban: a tároló Contributors API-ja által a <code>release/v3.8.50</code> alapértelmezett ághoz jelentett, GitHubnak tulajdonított commitok. Az API 525 identitást adott vissza (415 felhasználó, 2 bot, 108 névtelen); ez a táblázat kizárja a karbantartót, a botokat és a névtelen identitásokat, a holtversenyeket pedig megtartja. Ez eltér mind a fenti, egyesített PR-okon alapuló rangsortól, mind az alábbi, 639 személyt tartalmazó Git-metaadat-összesítéstől.</sub>
+<sub>Újraellenőrizve 2026-08-24 06:14:31 UTC-kor: a tároló Contributors API-ja által az alapértelmezett <code>release/v3.8.50</code> ághoz jelentett, GitHubnak tulajdonított commitok. Az API 525 identitást adott vissza (415 felhasználó, 2 bot, 108 névtelen); ez a táblázat nem tartalmazza a karbantartót, a botokat és a névtelen identitásokat, a holtversenyeket viszont megőrzi. Ez eltér mind a fenti, egyesített PR-ok szerinti rangsortól, mind a lenti, 639 személyt tartalmazó Git-metaadat-összesítéstől.</sub>
 
-> 🙏 E közreműködők funkciói, hibajavításai és infrastruktúra-fejlesztései **alapvető részét** képezik annak, ami az OmniRoute-ot megbízhatóvá és funkciógazdaggá teszi. Minden pull request, minden teszteset és minden i18n fordítási fájl számít. A nyílt forráskódot hozzájuk hasonló emberek építik.
+> 🙏 E közreműködők funkciói, hibajavításai és infrastruktúra-fejlesztései **alapvető részét** képezik annak, ami az OmniRoute-ot megbízhatóvá és funkciókban gazdaggá teszi. Minden pull request, minden teszteset és minden i18n-fordítási fájl számít. A nyílt forráskódot hozzájuk hasonló emberek építik.
 
 </div>
 

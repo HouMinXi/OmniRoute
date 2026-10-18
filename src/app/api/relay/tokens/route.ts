@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { getRelayTokens, createRelayToken } from "@/lib/db/relayProxies";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
 const relayTokenInputSchema = z.object({
   name: z.string().trim().min(1, "name is required"),
@@ -16,7 +17,11 @@ const relayTokenInputSchema = z.object({
   metadata: z.record(z.string(), z.unknown()).optional(),
 });
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Relay tokens are credentials: inventory and minting stay authenticated even
+  // when the dashboard runs with login disabled (mirrors the ALWAYS_PROTECTED tier).
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
   const tokens = getRelayTokens();
   // Strip hash from response
   const safe = tokens.map((t) => ({
@@ -40,6 +45,8 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
   try {
     const rawBody = await request.json();
     const validation = validateBody(relayTokenInputSchema, rawBody);

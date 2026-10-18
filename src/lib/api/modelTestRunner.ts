@@ -24,6 +24,7 @@ import { looksLikeQuotaExhausted } from "@/shared/utils/classify429";
 import { getTrustedLocalRateLimitError } from "@omniroute/open-sse/services/rateLimitManager/errors";
 import { runAsProbe } from "@/shared/utils/probeOrigin";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
+import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 
 const INTERNAL_ORIGIN = "http://omniroute.internal";
 export const DEFAULT_MODEL_TEST_TIMEOUT_MS = 30_000;
@@ -184,6 +185,13 @@ export function buildInternalChatRequest(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      // In-process call: it never passes the authz proxy, and the /v1 handlers authenticate
+      // on their own (#16403). Present the per-process self-loop bearer so the test keeps
+      // working under REQUIRE_API_KEY=true for callers without a dashboard cookie.
+      Authorization: `Bearer ${resolveSelfLoopBearer()}`,
+      // The bearer gives the request a memory owner; a connection test must not receive
+      // injected memory/skills or feed memory extraction (same opt-out as #13139).
+      "x-omniroute-no-memory": "true",
       // Reuse the existing strict-mode internal bypass for live health checks.
       "X-Internal-Test": "combo-health-check",
       "X-OmniRoute-No-Cache": "true",
@@ -207,6 +215,9 @@ export function buildInternalResponsesRequest(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      // Same in-process authentication and memory opt-out as buildInternalChatRequest.
+      Authorization: `Bearer ${resolveSelfLoopBearer()}`,
+      "x-omniroute-no-memory": "true",
       "X-Internal-Test": "combo-health-check",
       "X-OmniRoute-No-Cache": "true",
       "X-OmniRoute-Compression": "off",
@@ -287,17 +298,25 @@ export function detectTestKind(modelStr: string, customModel: any, nodeApiType?:
   // "All AI backends exhausted for chat".
   const nodeType = typeof nodeApiType === "string" ? nodeApiType : "";
   const lowerModel = modelStr.toLowerCase();
+  // Only the model's own endpoint metadata counts as an explicit chat signal. The node
+  // apiType / apiFormat are fallbacks and must not override per-model detection or the
+  // name heuristics below (an embedding model can live on a chat-typed node).
+  const isExplicitChat =
+    supportedEndpoints.includes("chat") || supportedEndpoints.includes("responses");
   const isAudioTranscription =
-    apiFormat === "audio-transcriptions" ||
-    nodeType === "audio-transcriptions" ||
-    supportedEndpoints.includes("audio-transcriptions");
+    !isExplicitChat &&
+    (apiFormat === "audio-transcriptions" ||
+      nodeType === "audio-transcriptions" ||
+      supportedEndpoints.includes("audio-transcriptions"));
   const isRerank =
+    !isExplicitChat &&
     !isAudioTranscription &&
     (apiFormat === "rerank" ||
       nodeType === "rerank" ||
       supportedEndpoints.includes("rerank") ||
       lowerModel.includes("rerank"));
   const isEmbedding =
+    !isExplicitChat &&
     !isAudioTranscription &&
     !isRerank &&
     (apiFormat === "embeddings" ||

@@ -123,13 +123,18 @@ A na-ebufe tool nwere `$ref` ka ọ dị kama iwepụ ihe ọ bụla na ya, n'ih
 reference ahụ ga-eme ka schema gbasaa ruo n'ókè nke "ịnabata ihe ọ bụla".
 Tọọ `"geminiSanitization": false` iji gbanyụọ ya.
 
-## Ịdozi nsogbu
+## Nchọpụta na ndozi nsogbu
 
-| Ihe mgbaàmà                                    | Ihe kpatara ya                                                                                               |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Picker anaghị egosi model OmniRoute ọ bụla     | Enweghị key e nwetara (lelee warning mmalite), ma ọ bụ enweghị ike ijikọ na gateway                          |
-| ID model nkịtị, enweghị combo, enweghị pricing | Endpoint njikwa jụrụ token ahụ — tọọ `managementReadToken`                                                   |
-| Session etinyere kpọmkwem na `opencode-<id>/…` | Plugin v1 bipụtara `opencode-<id>`; v2 na-ebipụta naanị `<id>`, ya mere họrọ model ahụ ọzọ n'okpuru `<id>/…` |
+| Mgbaàmà                                                        | Ihe kpatara ya                                                                                                  |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Onye nhọpụta anaghị egosi model OmniRoute ọ bụla               | Ọ dịghị key a chọtara (lelee ịdọ aka ná ntị mgbe mmalite), ma ọ bụ enweghị ike iru gateway ahụ                  |
+| Model ids nkịtị, enweghị combos, enweghị ọnụahịa               | Management endpoints jụrụ token ahụ — tọọ `managementReadToken`                                                 |
+| Catalog `freeOnly` dị mkpụmkpụ ma ọ bụ tọgbọ chakoo            | Enweghị management token ma ọ bụ token a jụrụ — gụọ ahịrị nchịkọta refresh (`unmatched-free` count) na host log |
+| Session etinyere n’ụzọ na-adịgide adịgide na `opencode-<id>/…` | Plugin v1 bipụtara `opencode-<id>`; v2 na-ebipụta naanị `<id>`, ya mere họrọ model ahụ ọzọ n’okpuru `<id>/…`    |
+
+Environment variables ga-erurịrị server process nke opencode: mgbe host
+na-agba dịka service, shell nke na-agba `opencode models` na environment nke server
+dị iche, ya mere export key ahụ n’ebe server na-agụ ya.
 
 ## Hụkwa
 

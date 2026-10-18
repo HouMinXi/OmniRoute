@@ -246,18 +246,26 @@ amilifu.
 
 ---
 
-## Kudhibiti tokeni
+## Kusimamia tokeni
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
 #   ↳ huchapisha siri MARA MOJA — inakili sasa
-omniroute tokens list                 # imefichwa: id, jina, scope, prefix, hali, muda wa kuisha
+omniroute tokens list                 # zimefichwa: id, jina, wigo, kiambishi awali, hali, muda wa kuisha
 omniroute tokens revoke <id|prefix>   # batilisha mara moja
-omniroute tokens scopes               # eleza scope tatu
+omniroute tokens scopes               # eleza wigo hizo tatu
 ```
 
-Amri za `tokens` zinahitaji kitambulisho cha **admin**. Unaweza pia kudhibiti tokeni kwenye
-dashibodi chini ya **Mipangilio → Tokeni za Ufikiaji** (unda, batilisha, nakili mara moja).
+Amri za `tokens` zinahitaji kitambulisho cha **admin**. Unaweza pia kudhibiti tokeni katika
+dashibodi chini ya **Settings → Access Tokens** (unda, batilisha, nakili mara moja).
+
+Tokeni haiwezi kamwe kuundwa ikiwa na mamlaka zaidi ya aliyo nayo muiundaji wake. Tokeni ya
+`admin` inaweza kuundwa na mwendeshaji pekee — kupitia kikao cha dashibodi, CLI ya ndani kwenye seva yenyewe, `omniroute connect` kwa kutumia nenosiri, au
+nakala ya programu ambayo kuingia kumezimwa. Vitambulisho vya mashine (tokeni ya ufikiaji ya `admin`,
+au ufunguo wa API wenye wigo wa `manage`/`admin`) vinaweza kuunda tokeni za `write` na `read`
+pekee; kuviomba vitumie `--scope admin` hurejesha `403`.
+
+Tokeni haiwezi kamwe kuundwa ikiwa na ruhusa nyingi kuliko za aliyeiunda. Opereta pekee ndiye anayeweza kuunda tokeni ya `admin`: kupitia kipindi cha dashibodi, CLI ya ndani kwenye seva yenyewe, `omniroute connect` kwa nenosiri, au mfumo ambao kuingia kumezimwa. Vitambulisho vya mashine (tokeni ya ufikiaji ya `admin` au ufunguo wa API wenye wigo wa `manage`/`admin`) vinaweza kuunda tokeni za `write` na `read` pekee; kuomba `--scope admin` kwa vitambulisho hivyo kunarudisha `403`.
 
 ---
 

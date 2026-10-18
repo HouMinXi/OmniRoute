@@ -125,11 +125,16 @@ Ange `"geminiSanitization": false` för att stänga av detta.
 
 ## Felsökning
 
-| Symptom                                          | Orsak                                                                                                                   |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Modellväljaren visar ingen OmniRoute-modell      | Ingen nyckel kunde hittas (kontrollera varningen vid start), eller så kan gatewayen inte nås                            |
-| Råa modell-id:n, inga kombinationer, inga priser | Hanteringsslutpunkterna nekade token — ange `managementReadToken`                                                       |
-| En session är låst till `opencode-<id>/…`        | v1-insticksprogrammet publicerade `opencode-<id>`; v2 publicerar enbart `<id>`, så välj modellen på nytt under `<id>/…` |
+| Symptom                                          | Orsak                                                                                                                           |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------- |
+| Modellväljaren visar ingen OmniRoute-modell      | Ingen nyckel kunde hittas (kontrollera startvarningen), eller så går det inte att nå gatewayen                                  |
+| Råa modell-ID:n, inga kombinationer, inga priser | Hanteringsslutpunkterna nekade tokenen — ange `managementReadToken`                                                             |
+| Kort eller tom `freeOnly`-katalog                | Ingen hanteringstoken eller en nekad token — läs sammanfattningsraden för uppdateringen (antalet `unmatched-free`) i värdloggen |
+| En session är fäst vid `opencode-<id>/…`         | v1-pluginprogrammet publicerade `opencode-<id>`; v2 publicerar enbart `<id>`, så välj modellen igen under `<id>/…`              |
+
+Miljövariablerna måste nå opencode-serverprocessen: när värden
+körs som en tjänst är skalet som kör `opencode models` och serverns
+miljö åtskilda, så exportera nyckeln där servern läser den.
 
 ## Se även
 

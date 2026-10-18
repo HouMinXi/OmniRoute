@@ -80,11 +80,30 @@ const HARD_GATED_INVENTORY: ReadonlyArray<{ path: string; why: string }> = [
     path: "/api/providers/client",
     why: "returns every connection's decrypted apiKey/accessToken/refreshToken/idToken (GHSA-qxg2-rm3h-4cxp)",
   },
+  // ── Relay token issuance ─────────────────────────────────────────────────
+  // POST mints a reusable inference credential and returns it in clear once,
+  // GET lists every token's id/prefix/limits, and the [id] child edits, toggles
+  // or deletes one. Credential issuance stays authenticated in open mode, like
+  // the WebDAV credentials above — "anonymous" is never the right audience for
+  // "mint me a token".
+  {
+    path: "/api/relay/tokens",
+    why: "POST mints and returns a reusable relay token; GET lists the inventory",
+  },
+  {
+    path: "/api/relay/tokens/6f3c1b7e-0000-4000-8000-000000000000",
+    why: "PATCH re-scopes/toggles and DELETE revokes a relay token",
+  },
   // ── Already fixed; pinned so a refactor cannot silently drop them ────────
   { path: "/api/db-backups/export", why: "GHSA-mghq-58h3-qcqj" },
   { path: "/api/db-backups/exportAll", why: "GHSA-mghq-58h3-qcqj" },
   { path: "/api/settings/export-json", why: "GHSA-v7g9-7f55-5g46" },
   { path: "/api/settings/import-json", why: "GHSA-v7g9-7f55-5g46" },
+  {
+    path: "/api/settings/transfer/export",
+    why: "returns the selected accounts' credentials (passphrase-sealed)",
+  },
+  { path: "/api/settings/transfer/import", why: "writes provider connections and credentials" },
   { path: "/api/settings/database", why: "irreversible database replace" },
   { path: "/api/shutdown", why: "stops the server" },
   // ── Hard-gated by the LOCAL_ONLY tier instead ────────────────────────────
@@ -115,6 +134,7 @@ test("the trailing-slash spelling is gated too", () => {
     "/api/logs/export/",
     "/api/cli-tools/codex-profiles/",
     "/api/providers/client/",
+    "/api/relay/tokens/",
   ]) {
     assert.ok(isAlwaysProtectedPath(path) || isLocalOnlyPath(path), path);
   }
@@ -154,6 +174,7 @@ test("the plain-path allowlist keeps its existing entries", () => {
     "/api/settings/database",
     "/api/db-backups",
     "/api/settings/obsidian",
+    "/api/relay/tokens",
   ]) {
     assert.ok(ALWAYS_PROTECTED_API_PATHS.includes(p), p);
   }
@@ -163,6 +184,24 @@ test("the obsidian entry does not over-protect its /api/settings neighbours", ()
   // `/api/settings/obsidian` is a plain prefix; the sibling settings routes must
   // stay on the MANAGEMENT tier for keyless local-first installs.
   for (const path of ["/api/settings", "/api/settings/notion", "/api/settings/require-login"]) {
+    assert.equal(isAlwaysProtectedPath(path), false, path);
+  }
+});
+
+test("the relay-tokens entry is a prefix: it covers the [id] child without widening /api/relay", () => {
+  // isAlwaysProtectedPath() matches plain entries with `path === p || path.startsWith(p)`,
+  // so the single "/api/relay/tokens" entry must reach the dynamic child routes
+  // (PATCH/DELETE of one token) — proven here rather than assumed.
+  for (const path of [
+    "/api/relay/tokens",
+    "/api/relay/tokens/",
+    "/api/relay/tokens/abc",
+    "/api/relay/tokens/6f3c1b7e-0000-4000-8000-000000000000",
+  ]) {
+    assert.equal(isAlwaysProtectedPath(path), true, path);
+  }
+  // The parent and unrelated siblings are not hard-gated by this entry.
+  for (const path of ["/api/relay", "/api/relay/", "/api/relay/other"]) {
     assert.equal(isAlwaysProtectedPath(path), false, path);
   }
 });

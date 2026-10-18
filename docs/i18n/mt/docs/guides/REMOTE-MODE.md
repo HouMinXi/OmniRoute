@@ -249,15 +249,17 @@ il-konnessjoni tidher attiva.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ jistampa s-secret DARBA BISS — ikkopjah issa
-omniroute tokens list                 # moħbija: id, isem, scope, prefiss, status, skadenza
+#   ↳ jistampa s-sigriet DARBA WAĦDA — ikkopjah issa
+omniroute tokens list                 # moħbija: id, isem, ambitu, prefiss, status, skadenza
 omniroute tokens revoke <id|prefix>   # irrevoka immedjatament
-omniroute tokens scopes               # spjega t-tliet scopes
+omniroute tokens scopes               # spjega t-tliet ambiti
 ```
 
-Il-kmandi `tokens` jeħtieġu kredenzjali ta’ **admin**. Tista’ wkoll timmaniġġja
-t-tokens fid-dashboard taħt **Settings → Access Tokens** (oħloq, irrevoka,
-ikkopja darba biss).
+Il-kmandi `tokens` jeħtieġu kredenzjali **admin**. Tista’ wkoll timmaniġġja t-tokens fid-dashboard taħt **Settings → Access Tokens** (oħloq, irrevoka, ikkopja darba biss).
+
+Token qatt ma jista’ jinħoloq b’aktar privileġġi minn dawk li għandu min ħolqu. Token `admin` jista’ jinħoloq biss mill-operatur — mis-sessjoni tad-dashboard, mis-CLI lokali fuq is-server innifsu, permezz ta’ `omniroute connect` bil-password, jew minn istanza fejn il-login huwa diżattivat. Il-kredenzjali tal-magni (token ta’ aċċess `admin`, jew ċavetta tal-API bl-ambitu `manage`/`admin`) jistgħu joħolqu biss tokens `write` u `read`; jekk jintalbu joħolqu wieħed bi `--scope admin`, jirritornaw `403`.
+
+Token qatt ma jista’ jinħoloq bi privileġġi akbar minn dawk tal-kreatur tiegħu. L-operatur biss jista’ joħloq token `admin`: permezz tas-sessjoni tad-dashboard, il-CLI lokali fuq is-server innifsu, `omniroute connect` bil-password jew istanza fejn il-login huwa diżattivat. Il-kredenzjali tal-magna (token ta’ aċċess `admin` jew ċavetta API bl-ambitu `manage`/`admin`) jistgħu joħolqu biss tokens `write` u `read`; talba għal `--scope admin` b’dawn il-kredenzjali tirritorna `403`.
 
 ---
 

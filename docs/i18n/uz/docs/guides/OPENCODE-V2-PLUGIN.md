@@ -114,11 +114,16 @@ Buni oʻchirish uchun `"geminiSanitization": false` ni belgilang.
 
 ## Muammolarni bartaraf etish
 
-| Alomat                                                       | Sabab                                                                                                                                 |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| Tanlash vositasida OmniRoute modeli koʻrinmaydi              | Hech qanday kalit aniqlanmadi (ishga tushirishdagi ogohlantirishni tekshiring) yoki shlyuzga ulanib boʻlmayapti                       |
-| Xom model identifikatorlari, kombinatsiyalar va narxlar yoʻq | Boshqaruv endpointlari tokenni rad etdi — `managementReadToken` ni belgilang                                                          |
-| Seans `opencode-<id>/…` ga biriktirilgan                     | v1 plagini `opencode-<id>` ni eʼlon qilgan; v2 esa faqat `<id>` ni eʼlon qiladi, shuning uchun modelni `<id>/…` ostidan qayta tanlang |
+| Alomat                                                       | Sabab                                                                                                                                |
+| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Tanlash oynasida OmniRoute modeli ko‘rinmaydi                | Kalit aniqlanmagan (ishga tushirishdagi ogohlantirishni tekshiring) yoki shlyuzga ulanib bo‘lmaydi                                   |
+| Xom model identifikatorlari, kombinatsiyalar va narxlar yo‘q | Boshqaruv so‘nggi nuqtalari tokenni rad etdi — `managementReadToken` ni sozlang                                                      |
+| Qisqa yoki bo‘sh `freeOnly` katalogi                         | Boshqaruv tokeni yo‘q yoki token rad etilgan — xost jurnalidagi yangilash xulosasi satrini (`unmatched-free` soni) o‘qing            |
+| `opencode-<id>/…` ga biriktirilgan seans                     | v1 plagini `opencode-<id>` ni e’lon qilgan; v2 esa faqat `<id>` ni e’lon qiladi, shuning uchun modelni `<id>/…` ostida qayta tanlang |
+
+Muhit o‘zgaruvchilari opencode server jarayoniga yetib borishi kerak: xost
+xizmat sifatida ishlaganda, `opencode models` buyrug‘ini ishga tushiradigan qobiq va server
+muhiti bir-biridan farq qiladi, shuning uchun kalitni server o‘qiydigan joyda eksport qiling.
 
 ## Shuningdek qarang
 

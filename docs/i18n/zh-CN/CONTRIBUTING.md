@@ -295,39 +295,39 @@ npm run test:combo:live:vps:failover     # 添加一个真实的跨 provider 故
 ## 项目结构
 
 ```
-src/                        # TypeScript (.ts / .tsx)
+src/                        # TypeScript（.ts / .tsx）
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # 仪表板页面（23 个分区）
+│   ├── (dashboard)/        # 仪表板页面（23 个部分）
 │   ├── api/                # API 路由（51 个目录）
-│   └── login/              # 身份验证页面 (.tsx)
+│   └── login/              # 身份验证页面（.tsx）
 ├── domain/                 # 策略引擎（policyEngine、comboResolver、costRules 等）
-├── lib/                    # 核心业务逻辑 (.ts)
+├── lib/                    # 核心业务逻辑（.ts）
 │   ├── a2a/                # Agent-to-Agent v0.3 协议服务器
 │   ├── acp/                # Agent Communication Protocol 注册表
 │   ├── compliance/         # 合规策略引擎
 │   ├── db/                 # SQLite 领域模块 + 130 个迁移
 │   ├── memory/             # 持久化对话记忆
-│   ├── oauth/              # OAuth 提供者、服务和工具
+│   ├── oauth/              # OAuth 提供者、服务和实用工具
 │   ├── skills/             # 可扩展技能框架
-│   ├── usage/              # 使用量跟踪和成本计算
-│   └── localDb.ts          # 仅用于重新导出——切勿在此添加逻辑
+│   ├── usage/              # 使用情况跟踪和成本计算
+│   └── localDb.ts          # 仅用于重新导出的层——切勿在此添加逻辑
 ├── middleware/              # 请求中间件（promptInjectionGuard）
 ├── mitm/                   # MITM 代理（证书、DNS、目标路由）
 ├── shared/
-│   ├── components/         # React 组件 (.tsx)
+│   ├── components/         # React 组件（.tsx）
 │   ├── constants/          # 提供者定义（329 个）、MCP 作用域、19 种路由策略
-│   ├── utils/              # 断路器、清理器、身份验证辅助工具
-│   └── validation/         # Zod v4 schema
+│   ├── utils/              # 熔断器、清理器、身份验证辅助工具
+│   └── validation/         # Zod v4 模式
 └── sse/                    # SSE 代理管道
 
 open-sse/                   # @omniroute/open-sse 工作区
-├── executors/              # 89 个执行器实现模块
-├── handlers/               # 11 个请求处理器（聊天、响应、嵌入、图像等）
+├── executors/              # 150 个执行器模块（执行器类 + 各提供者辅助工具）
+├── handlers/               # 11 个请求处理程序（聊天、响应、嵌入、图像等）
 ├── mcp-server/             # MCP 服务器（110 个独立工具、3 种传输方式、33 个作用域）
 ├── services/               # 178 个顶层服务（combo、autoCombo、rateLimitManager 等）
 ├── translator/             # 格式转换器（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
 ├── transformer/            # Responses API 转换器
-└── utils/                  # 22 个工具模块（流、TLS、代理、日志记录）
+└── utils/                  # 22 个实用工具模块（流、TLS、代理、日志记录）
 
 electron/                   # Electron 桌面应用（跨平台）
 
@@ -341,22 +341,22 @@ tests/
 
 docs/
 ├── adr/                     # 架构决策记录
-├── architecture/            # 系统架构与韧性
-├── comparison/              # OmniRoute 与替代方案的比较
+├── architecture/            # 系统架构与弹性
+├── comparison/              # OmniRoute 与替代方案的对比
 ├── compression/             # 压缩指南与规则
 ├── dev/                     # 开发指南
 ├── diagrams/                # 架构图
 ├── frameworks/              # MCP、A2A、OpenCode、Memory、Skills
 ├── guides/                  # 用户指南、Docker、设置、故障排除
-├── i18n/                    # 国际化 README 翻译
+├── i18n/                    # 国际化 README 译文
 ├── marketing/               # 营销材料
 ├── ops/                     # 部署、代理、覆盖率、发布
-├── providers/               # 提供者专项文档
+├── providers/               # 提供者专属文档
 ├── reference/               # API 参考、环境变量、CLI 工具、免费套餐
-├── releases/                # 发布说明
+├── releases/                # 发行说明
 ├── routing/                 # 自动组合引擎、推理重放
 ├── screenshots/             # 仪表板截图
-├── security/                # 防护措施、合规、隐匿、令牌
+├── security/                # 防护机制、合规性、隐匿性、令牌
 └── specs/                   # 设计规范
 ```
 

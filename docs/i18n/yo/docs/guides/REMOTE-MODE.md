@@ -241,14 +241,23 @@ asopọ̀ náà yóò fi hàn bí èyí tó ń ṣiṣẹ́.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ó tẹ secret náà jáde LẸ́Ẹ̀KAN ṢOṢO — ṣe àdàkọ rẹ̀ báyìí
-omniroute tokens list                 # tí a bò mọ́lẹ̀: id, name, scope, prefix, status, expiry
+#   ↳ ó tẹ àṣírí náà jáde LẸ́Ẹ̀KAN ṢOṢO — ṣe ẹ̀dà rẹ̀ nísinsìnyí
+omniroute tokens list                 # tí a fi bojú: id, orúkọ, scope, prefix, ipò, ọjọ́ ìparí
 omniroute tokens revoke <id|prefix>   # fagilé lẹ́sẹ̀kẹsẹ̀
 omniroute tokens scopes               # ṣàlàyé àwọn scope mẹ́tẹ̀ẹ̀ta
 ```
 
-Àwọn àṣẹ `tokens` nílò credential **admin**. O tún lè ṣàkóso àwọn token nínú
-dashboard lábẹ́ **Settings → Access Tokens** (ṣẹ̀dá, fagilé, ṣe àdàkọ lẹ́ẹ̀kan ṣoṣo).
+Àwọn àṣẹ `tokens` nílò ìwé-ẹ̀rí **admin**. O tún lè ṣàkóso àwọn token nínú
+dashboard lábẹ́ **Àwọn Ààtò → Àwọn Token Ìwọlé** (ṣẹ̀dá, fagilé, ṣe ẹ̀dà lẹ́ẹ̀kan ṣoṣo).
+
+A kò lè ṣẹ̀dá token kan pẹ̀lú àṣẹ tó pọ̀ ju èyí tí olùṣẹ̀dá rẹ̀ ní lọ. Olùṣiṣẹ́ nìkan
+ló lè ṣẹ̀dá token `admin` — nípasẹ̀ session dashboard, CLI abẹ́lẹ̀ lórí server fúnra rẹ̀,
+`omniroute connect` pẹ̀lú ọ̀rọ̀ aṣínà, tàbí instance kan tí a ti pa login rẹ̀. Àwọn
+ìwé-ẹ̀rí ẹ̀rọ (token ìwọlé `admin`, tàbí API key kan pẹ̀lú scope `manage`/`admin`)
+lè ṣẹ̀dá àwọn token `write` àti `read` nìkan; bí wọ́n bá béèrè fún `--scope admin`,
+ó máa dá `403` padà.
+
+A kò lè dá token kan sílẹ̀ pẹ̀lú àṣẹ tó ju ti ẹni tó dá a lọ. Olùṣàkóso nìkan ló lè dá token `admin` sílẹ̀: nípasẹ̀ ìpàdé dashboard, CLI agbègbè lórí server fúnra rẹ̀, `omniroute connect` pẹ̀lú ọ̀rọ̀ aṣínà, tàbí instance tí a ti pa wíwọlé rẹ̀. Àwọn ẹ̀rí ìdánimọ̀ ẹ̀rọ (token ìwọlé `admin` tàbí kọ́kọ́rọ́ API tó ní ààlà `manage`/`admin`) lè dá token `write` àti `read` nìkan sílẹ̀; bí a bá béèrè fún `--scope admin` pẹ̀lú wọn, `403` ni yóò padà.
 
 ---
 

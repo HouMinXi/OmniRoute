@@ -39,11 +39,11 @@ Obhetibong paghahambing ng mga feature laban sa mga sikat na open-source AI rout
 
 ## Kailan pipiliin ang OmniRoute
 
-- Nagse-self-host ka at nais mo ng **pinakamalawak na saklaw ng provider** (329 provider, 155 entry sa katalogo na libre/walang auth)
+- Ikaw mismo ang nagho-host at gusto mo ng **pinakamalawak na saklaw ng provider** (372 provider, 155 libre/hindi nangangailangan ng authentication na entry sa catalog)
 - Kailangan mo ng **built-in na MCP server** (mga LLM tool, memory, at skill na inilalantad bilang mga tool)
-- Kailangan mo ng **A2A protocol** para sa mga agent-to-agent workflow
-- Nais mo ng **fingerprint stealth** (JA3/JA4) upang maiwasang matukoy ng mga upstream CAPTCHA
-- Kailangan mo ng **mga enterprise feature** (mga guardrail, eval, audit trail) nang walang bayarin sa SaaS
+- Kailangan mo ng **A2A protocol** para sa mga workflow na agent-to-agent
+- Gusto mo ng **fingerprint stealth** (JA3/JA4) upang maiwasang ma-detect ng mga upstream CAPTCHA
+- Kailangan mo ng **mga feature para sa enterprise** (guardrail, eval, audit trail) nang walang bayarin sa SaaS
 
 ## Kailan pipiliin ang LiteLLM
 

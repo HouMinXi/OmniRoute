@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Card, Button, CardSkeleton } from "@/shared/components";
+import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
 import {
   NOAUTH_PROVIDERS,
   getProviderAlias,
@@ -58,6 +59,7 @@ import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
 import CoolingConnectionsPanel from "./components/CoolingConnectionsPanel";
 import ConnectionsHeaderToolbar from "./components/ConnectionsHeaderToolbar";
+import { ConnectionPinTip } from "./components/ConnectionIdChip";
 import VolcengineConnectModal from "./components/VolcengineConnectModal";
 import ProviderAccountRoutingCard from "../../settings/components/ProviderAccountRoutingCard";
 import ZedImportCard from "./components/ZedImportCard";
@@ -576,6 +578,8 @@ export default function ProviderDetailPageClient() {
         isReferralLink={isReferralLink}
       />
 
+      <ProviderTosNotice providerId={providerId} />
+
       {providerId === "zed" && (
         <ZedImportCard fetchConnections={fetchConnections} notify={notify} />
       )}
@@ -690,6 +694,7 @@ export default function ProviderDetailPageClient() {
             />
           ) : (
             <>
+              <ConnectionPinTip />
               <CoolingConnectionsPanel
                 connections={connections}
                 onClearCooldown={handleClearCooldown}

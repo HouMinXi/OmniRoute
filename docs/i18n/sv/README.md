@@ -19,19 +19,19 @@
 
 <div align="center">
 
-## 💰 ~1,62 md tokens/månad via kostnadsfria nivåer från tredje part
+## 💰 ~1,62 miljarder token/månad via kostnadsfria nivåer hos tredjepartsleverantörer
 
 </div>
 
-> **Använd dina egna leverantörskonton.** Detta är en uppskattad totalsumma för separata kostnadsfria nivåer från tredje part som du kan vara berättigad till, inte en tokentilldelning från OmniRoute. Registrera dig, skaffa autentiseringsuppgifter där det krävs och anslut de leverantörer du kan använda. Varje leverantör bestämmer sina egna gränser, sin tillgänglighet och sina villkor.
+> **Använd dina egna leverantörskonton.** Detta är en uppskattad totalsumma för kostnadsfria nivåer hos separata, kvalificerade tredjepartsleverantörer, inte ett tokenbidrag från OmniRoute. Registrera dig, skaffa autentiseringsuppgifter där det krävs och anslut de leverantörer du kan använda. Varje leverantör bestämmer sina egna gränser, sin tillgänglighet och sina villkor.
 >
-> Att kombinera kostnadsfria nivåer manuellt är besvärligt — dussintals SDK:er, dussintals hastighetsgränser och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **489 poster för kostnadsfria nivåer fördelade på 35 återkommande poolnycklar** och beräknar antalet tokens i rubriken utifrån de **17 poolerna med en publicerad positiv månadsbudget plus fem Groq-gränser per modell**, deduplicerade per delad pool. Kvoter som endast blir tillgängliga efter en regional identitetskontroll (i dag: ModelScope) visas separat, +~6M bakom regional identitetsverifiering, och räknas aldrig in i rubriken. Resultatet visas fortlöpande på kontrollpanelen (`/dashboard/free-tiers`).
+> Att kombinera kostnadsfria nivåer manuellt är besvärligt — dussintals SDK:er, dussintals hastighetsgränser och ingen aning om hur mycket du faktiskt har. OmniRoute katalogiserar **485 poster för kostnadsfria nivåer fördelade på 35 återkommande poolnycklar** och beräknar huvudtalet för token utifrån de **17 poolerna med en publicerad positiv månadsbudget plus fem Groq-gränser per modell**, deduplicerade efter delad pool. Kvoter som endast blir tillgängliga efter en regional identitetskontroll (i dag: ModelScope) visas separat, +~6M bakom regional identitetsverifiering, och räknas aldrig in i huvudtalet. Resultatet visas löpande på instrumentpanelen (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes budgetkort för kostnadsfria nivåer: stabilt ~1,62 md kostnadsfria tokens per månad, upp till ~2,22 md under den första månaden med registreringskrediter, från 35 dokumenterade återkommande poolnycklar som omfattar 489 katalogiserade poster för kostnadsfria nivåer bakom en enda slutpunkt. Transparent matematik med deduplicering per pool — varje delad pool räknas en gång, inklusive 17 återkommande pooler med en publicerad positiv månatlig tokenbudget plus fem Groq-gränser per modell; 13 leverantörer är markerade som undvik i katalogen över villkorsrisker så att du själv kan avgöra. Budgetstapeln omfattar Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem gränser per modell) och mindre pooler, samt registreringskrediter för den första månaden och permanent kostnadsfria leverantörer utan tokengräns som visas separat så att de aldrig blåser upp rubriksiffran. Aktuell förbrukning/återstående mängd på /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoutes budgetkort för kostnadsfria nivåer: stabilt ~1,62 miljarder kostnadsfria token per månad, upp till ~2,22 miljarder under den första månaden med registreringskrediter, från 35 dokumenterade återkommande poolnycklar som omfattar 485 katalogiserade poster för kostnadsfria nivåer bakom en enda slutpunkt. Transparent matematik med deduplicering per pool — varje delad pool räknas en gång, inklusive 17 återkommande pooler med en publicerad positiv månatlig tokenbudget plus fem Groq-gränser per modell; 13 leverantörer är markerade som undvik i katalogen över villkorsrisker så att du själv kan välja. Budgetfältet inkluderar Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (fem gränser per modell) och mindre pooler, plus registreringskrediter för den första månaden och permanent kostnadsfria leverantörer utan tokengräns som visas separat så att de aldrig blåser upp huvudtalet. Aktuell användning/återstående mängd på /dashboard/free-tiers."/>
 
-> Animerad sammanfattning av den aktuella sidan `/dashboard/free-tiers`. Fullständig metodik (pooldeduplicering, kreditnivåer, leverantörsvillkor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Animerad sammanfattning av den aktiva sidan `/dashboard/free-tiers`. Fullständig metodik (pooldeduplicering, kreditnivåer, leverantörsvillkor): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Dessa siffror granskas på nytt varannan vecka mot den aktuella katalogen och **kan ändras i båda riktningarna** — om en leverantör avslutar en kostnadsfri nivå sjunker siffran, och om en ny tillkommer stiger den. Vi publicerar det som katalogen faktiskt beräknar, aldrig ett uppåtrundat bästa scenario.</sub>
+> <sub>Dessa siffror granskas på nytt varannan vecka mot den aktuella katalogen och **kan ändras åt båda hållen** — om en leverantör avslutar en kostnadsfri nivå sjunker siffran; om en ny tillkommer stiger den. Vi publicerar det som katalogen faktiskt beräknar, aldrig ett uppavrundat bästa scenario.</sub>
 
 <br/>
 
@@ -39,7 +39,7 @@
 
 <h3>
 
-⭐ Stjärnmarkera repot om OMNIROUTE har hjälpt dig att spara pengar och gjort ditt arbete enklare.
+⭐ Stjärnmarkera kodförrådet om OMNIROUTE har hjälpt dig att spara pengar och gjort ditt arbete enklare.
 
 </h3>
 
@@ -48,9 +48,9 @@
 [![Placering i stjärnhistoriken](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
-### 💬 Gå med i gemenskapen
+### 💬 Gå med i communityn
 
-**👋 Följ underhållaren — få information om nya leverantörer, utgåvor och tips först:**
+**👋 Följ underhållaren — få information om nya leverantörer, versioner och tips först:**
 
 [![Följ Diego på LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![Följ @diegosouzapw på GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
@@ -97,22 +97,22 @@
 
 <table>
   <tr>
-    <td align="right"><b>🚀 Kom igång</b></td>
+    <td align="right"><b>🚀 Börja</b></td>
     <td align="center"><a href="#-quick-start">🚀 Snabbstart</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Installera</a></td>
-    <td align="center"><a href="#-works-the-second-you-install-it--no-keys-no-config">🆓 Ingen konfiguration</a></td>
+    <td align="center"><a href="#first-run">🆓 Anslut en leverantör</a></td>
   </tr>
   <tr>
     <td align="right"><b>💡 Lär dig</b></td>
     <td align="center"><a href="#-the-promise">💥 Löftet</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 Varför OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Vad som utmärker OmniRoute</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 Det som utmärker OmniRoute</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ Funktioner</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinationer</a></td>
     <td align="center"><a href="#-372-ai-providers--154-catalog-marked-free">🌐 Leverantörer</a></td>
-    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
+    <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI och MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
@@ -145,73 +145,73 @@
 <div align="center">
   <b>🌐 På 67 språk</b>
   <br/><br/>
-  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
+  <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="Engelska (en)" title="Engelska (en)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Portugisiska — Brasilien (pt-BR)" title="Portugisiska — Brasilien (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Portugisiska (pt)" title="Portugisiska (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Spanska (es)" title="Spanska (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Franska (fr)" title="Franska (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italienska (it)" title="Italienska (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Tyska (de)" title="Tyska (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederländska (nl)" title="Nederländska (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Ryska (ru)" title="Ryska (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Ukrainska (uk-UA)" title="Ukrainska (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polska (pl)" title="Polska (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Tjeckiska (cs)" title="Tjeckiska (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovakiska (sk)" title="Slovakiska (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Rumänska (ro)" title="Rumänska (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Ungerska (hu)" title="Ungerska (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Bulgariska (bg)" title="Bulgariska (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Danska (da)" title="Danska (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Finska (fi)" title="Finska (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norska (no)" title="Norska (no)"></a>
   <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
-  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="Kinesiska — förenklad (zh-CN)" title="Kinesiska — förenklad (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="Kinesiska — traditionell (zh-TW)" title="Kinesiska — traditionell (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="Japanska (ja)" title="Japanska (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="Koreanska (ko)" title="Koreanska (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="Thailändska (th)" title="Thailändska (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Vietnamesiska (vi)" title="Vietnamesiska (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Indonesiska (id)" title="Indonesiska (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Malajiska (ms)" title="Malajiska (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filippinska (phi)" title="Filippinska (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Hindi (hi)" title="Hindi (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Gujarati (gu)" title="Gujarati (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Marathi (mr)" title="Marathi (mr)"></a>
+  <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Tamil (ta)" title="Tamil (ta)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Telugu (te)" title="Telugu (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="Bengali (bn)" title="Bengali (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="Urdu (ur)" title="Urdu (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="Persiska (fa)" title="Persiska (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="Arabiska (ar)" title="Arabiska (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="Hebreiska (he)" title="Hebreiska (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Turkiska (tr)" title="Turkiska (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azerbajdzjanska (az)" title="Azerbajdzjanska (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Swahili (sw)" title="Swahili (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Grekiska (el)" title="Grekiska (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Kroatiska (hr)" title="Kroatiska (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Serbiska (sr)" title="Serbiska (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Litauiska (lt)" title="Litauiska (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Estniska (et)" title="Estniska (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Lettiska (lv)" title="Lettiska (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenska (sl)" title="Slovenska (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Maltesiska (mt)" title="Maltesiska (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Iriska (ga)" title="Iriska (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Kannada (kn)" title="Kannada (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Malayalam (ml)" title="Malayalam (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Odia (or)" title="Odia (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="Punjabi (pa)" title="Punjabi (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="Nepali (ne)" title="Nepali (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="Singalesiska (si)" title="Singalesiska (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="Burmesiska (my)" title="Burmesiska (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="Khmer (km)" title="Khmer (km)"></a>
   <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yoruba (yo)" title="Yoruba (yo)"></a>
   <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="Amhariska (am)" title="Amhariska (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Uzbekiska (uz)" title="Uzbekiska (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="Georgiska (ka)" title="Georgiska (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Armeniska (hy)" title="Armeniska (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosniska (bs)" title="Bosniska (bs)"></a>
 </div>
 
 <br/>
@@ -219,21 +219,23 @@
 
 <div align="center">
 
+<a id="first-run"></a>
+
 ## 🆓 Installera, anslut en leverantör och dirigera sedan via en enda slutpunkt
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Tre steg: installera och starta OmniRoute, anslut en kompatibel leverantör med ditt eget konto eller din API-nyckel och dirigera sedan ditt verktyg till localhost:20128/v1 med hjälp av en OmniRoute-API-nyckel och modellen auto. Dirigeringen beror på tillgängliga kompatibla anslutningar och leverantörernas begränsningar."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Tre steg: installera och starta OmniRoute, anslut en kvalificerad leverantör med ditt eget konto eller din API-nyckel och konfigurera sedan ditt verktyg att använda localhost:20128/v1 med en OmniRoute API-nyckel och modellen auto. Dirigeringen beror på tillgängliga kvalificerade anslutningar och leverantörernas begränsningar."/>
 
 ```bash
-# När du har anslutit en leverantör kopierar du din OmniRoute-nyckel från Instrumentpanel → Slutpunkter:
+# När du har anslutit en leverantör kopierar du din OmniRoute-nyckel från Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` kräver en kompatibel rutt. En ny installation kan sakna kompatibla nyckellösa mål, och en nyckellös leverantör kan avvisa tredjepartsklienter. Leverantörer som är märkta med `tos: avoid`, däribland OpenCode Free och Kiro, undantas som standard från automatisk dirigering. Att ansluta ett konto åsidosätter inte den inställningen. Läs [Guiden till kostnadsfria nivåer](docs/getting-started/FREE-TIERS-GUIDE.md) innan du väljer en leverantör.</sub>
+<sub>`auto` behöver en kvalificerad rutt. En ny installation kan sakna kvalificerade nyckellösa mål, och en nyckellös leverantör kan avvisa tredjepartsklienter. Leverantörer märkta med `tos: avoid`, inklusive OpenCode Free och Kiro, undantas som standard från automatisk dirigering; att ansluta ett konto åsidosätter inte den inställningen. Läs [guiden om kostnadsfria nivåer](docs/getting-started/FREE-TIERS-GUIDE.md) innan du väljer en leverantör.</sub>
 
 <sub>📦 Kopiera-och-klistra-in-snabbstartsskript för **Python, Node.js, PHP och cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
@@ -245,7 +247,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet – en slutpunkt och 372 leverantörer. Automatisk redundans fortsätter dirigeringen så länge ett annat fungerande mål är tillgängligt. Sex grundpelare: motståndskraftig redundans mellan 372 leverantörer · upp till 95 % tokenbesparing för kompatibla arbetsbelastningar · $0 för att komma igång med över 150 kostnadsfria nivåer och 54 återkommande/nyckellösa leverantörer som är kostnadsfria för alltid · 36 CLI-/agentintegrationer via en enda konfiguration · kompatibilitet med OpenAI, Claude, Gemini och Responses API på /v1 · produktionskontroller, inklusive kretsbrytare, TLS-maskering, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 39 000 statiska testdeklarationer i över 5 100 spårade testfiler."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Löftet — En slutpunkt och 372 leverantörer. Automatisk reservväxling upprätthåller dirigeringen så länge ett annat fungerande mål är tillgängligt. Sex pelare: robust reservväxling mellan 372 leverantörer · upp till 95 % tokenbesparing för kvalificerade arbetslaster · 0 USD för att komma igång med över 150 kostnadsfria nivåer och 53 återkommande/nyckellösa leverantörer som är gratis för alltid · 36 CLI-/agentintegrationer via en enda konfiguration · kompatibilitet med OpenAI-, Claude-, Gemini- och Responses API vid /v1 · produktionskontroller, inklusive kretsbrytare, TLS-maskering, MCP med 110 verktyg, A2A, minne, skyddsräcken, utvärderingar och över 39 000 statiska testdeklarationer i över 5 100 spårade testfiler."/>
 
 <br/>
 <br/>
@@ -256,11 +258,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Varför OmniRoute – sluta jonglera med 10 instrumentpaneler, inaktiva API-nycklar och oväntade fakturor. Tio dagliga problem och lösningar: kvoter löper ut oanvända → maximera prenumerationerna; hastighetsbegränsningar mitt under kodningen → automatisk redundans i 4 nivåer (prenumeration → API → billigt → kostnadsfritt); verktygsutdata förbrukar token → RTK + Caveman-komprimering (15–95 %); dyra API:er → kostnadsoptimerad dirigering; varje verktyg har sin egen konfiguration → en slutpunkt, en instrumentpanel; AI blockeras → proxy i 3 nivåer + TLS-maskering; inaktiva nycklar → motståndskraft i 3 lager (kretsbrytare, nedkylningsperiod för nycklar, modellspärr); teamet delar på en prenumeration → nyckelpooler med rättvisa kvoter; prompter går via någon annans moln → lokalt först med AES-256-GCM-krypterade nycklar; ingen insyn i utgifterna → realtidsanalys (användning, kvot, besparingar, p95-latens)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Varför OmniRoute — sluta jonglera 10 kontrollpaneler, ogiltiga API-nycklar och oväntade fakturor. Tio dagliga problem och lösningar: kvoter förfaller oanvända → maximera prenumerationerna; hastighetsgränser mitt under kodning → automatisk reservväxling i fyra nivåer (prenumeration → API → billigt → gratis); verktygsutdata förbrukar tokens → RTK + Caveman-komprimering (15–95 %); dyra API:er → kostnadsoptimerad dirigering; varje verktyg har en egen konfiguration → en slutpunkt, en kontrollpanel; AI blockeras → proxy i tre nivåer + TLS-maskering; ogiltiga nycklar → motståndskraft i tre lager (kretsbrytare, nedkylning av nycklar, modellspärr); team delar en prenumeration → nyckelpooler med rättvisa kvoter; prompter skickas genom någon annans moln → lokalt först med AES-256-GCM-krypterade nycklar; ingen insyn i utgifter → realtidsanalys (användning, kvot, besparingar, p95-latens)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoutes begärandeflöde: din IDE eller CLI (Claude Code, Cursor, Cline…) anropar en lokal slutpunkt (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Caveman-komprimering, 19 dirigeringsstrategier, kretsbrytare, TLS-maskering, MCP, A2A, skyddsräcken) kan växla mellan 4 leverantörsnivåer så länge ett kompatibelt och fungerande mål återstår – nivå 1: prenumeration, nivå 2: API-nyckel, nivå 3: billigt och nivå 4: kostnadsfritt."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoutes förfrågningsflöde: din IDE eller CLI (Claude Code, Cursor, Cline…) anropar en enda lokal slutpunkt (http://localhost:20128/v1); OmniRoute Smart Router (RTK + Caveman-komprimering, 19 dirigeringsstrategier, kretsbrytare, TLS-maskering, MCP, A2A, skyddsräcken) kan växla mellan fyra leverantörsnivåer så länge ett kvalificerat och fungerande mål återstår — nivå 1: prenumeration, nivå 2: API-nyckel, nivå 3: billigt och nivå 4: gratis."/>
 
 </div>
 
@@ -578,27 +580,27 @@ den aktuella katalogen på **[radar.omniroute.online/planos](https://radar.omnir
 
 > De senaste höjdpunkterna från **v3.8.20 → v3.8.50**. Fullständig historik finns i [`CHANGELOG.md`](CHANGELOG.md).
 
-- **🎛️ OmniConductor** — inkommande A2A-delegering till din agentflotta, Conductor-färdigheter på agentkortet och en instrumentpanel med Faro-röstchatt med talknapp. → [A2A-server](docs/frameworks/A2A-SERVER.md)
-- **🛂 Adaptiv åtkomst- och överbelastningshantering** — resurskrävande chattförfrågningar köas i stället för att ge 503-fel, med atomära rullande RPM-leasingavtal per anslutning. → [Resiliensguide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanonisk ordning för `/v1/models`** — ett sammanhängande, leverantörsgrupperat block per leverantör (kombinationer fästs först), stabilt över alla katalogkällor. → [API-referens](docs/reference/API_REFERENCE.md)
-- **🗜️ Förstärkt komprimering** — inflationsskydd aktiverat som standard, Caveman-paket för DE / FR / JA + kinesiska (wényán), RTK-filter för Gradle och .NET. → [Komprimering](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Korrekt fast kostnad** — leverantörer med prenumerations-/kodningsabonnemang visar **$0** i kostnadsanalysen; budget, kvot och dirigering fortsätter att göra uppskattningar. → [API-referens](docs/reference/API_REFERENCE.md)
-- **⚖️ Kvotdelningsdirigering** — fördela ett delat kontos kvot rättvist mellan poolade nycklar, med arbetsbevarande utlåning av oanvända andelar. → [Resiliensguide](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 Konfiguration av CLI/agent med ett kommando** — 13 registrerade `setup-*`-kommandon; `omniroute run` startar 7 CLI-verktyg (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` stöder 10 mål med en interaktiv väljare för leverantör och modell samt favoriter per kontext. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Fjärrläge** — styr en fjärransluten OmniRoute med avgränsade token (`connect` / `contexts` / `tokens`) samt en `antigravity`-OAuth-hjälpare för VPS-installationer. → [Fjärrläge](docs/guides/REMOTE-MODE.md)
+- **🎛️ OmniConductor** — inkommande A2A-delegering till din agentflotta, Conductor-färdigheter på Agent Card och en instrumentpanel med Faro-röstchatt via push-to-talk. → [A2A-server](docs/frameworks/A2A-SERVER.md)
+- **🛂 Adaptiv åtkomst- och överbelastningshantering** — resurskrävande chattförfrågningar köas i stället för att returnera 503, med atomiska rullande RPM-leasingar per anslutning. → [Guide om motståndskraft](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Kanonisk ordning för `/v1/models`** — ett sammanhängande block grupperat per leverantör (kombinationer fästs först), stabilt för samtliga katalogkällor. → [API-referens](docs/reference/API_REFERENCE.md)
+- **🗜️ Förstärkt komprimering** — inflationsskydd aktiverat som standard, Caveman-paket för DE/FR/JA samt kinesiska (wényán), RTK-filter för Gradle och .NET. → [Komprimering](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Korrekt fastpriskostnad** — leverantörer med abonnemang/kodningsplan visar **$0** i kostnadsanalysen; budget, kvot och dirigering fortsätter att göra uppskattningar. → [API-referens](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share-dirigering** — fördela ett gemensamt kontos kvot rättvist mellan poolade nycklar, med arbetsbevarande hantering så att oanvända andelar lånas ut. → [Guide om motståndskraft](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 CLI-/agentkonfiguration med ett enda kommando** — 13 registrerade `setup-*`-kommandon; `omniroute run` startar 7 CLI-verktyg (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` stöder 10 mål med en interaktiv väljare för leverantör och modell samt kontextspecifika favoriter. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Fjärrläge** — styr en OmniRoute-instans på distans med avgränsade token (`connect` / `contexts` / `tokens`) samt ett OAuth-hjälpverktyg, `antigravity`, för VPS-installationer. → [Fjärrläge](docs/guides/REMOTE-MODE.md)
 - **🧭 Smartare automatisk dirigering** — `auto/<category>:<tier>`-kombinationer, **Fusion** (modellpanel + domare), uppgiftsmedveten dirigering samt åsidosättningar per begäran för modell, läge och USD-budget. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Utbytbar komprimering** — 12 kombinerbara motorer + Compression Studios: LLMLingua-2, Ultra i två nivåer, omniglyph, tillförlitlighetskontroll per steg, GCF v3.2 och dra-och-släpp-redigerare för omordning. → [Komprimering](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Transparent MITM-dekryptering (TPROXY)** — fånga upp CLI-verktyg som ignorerar proxymiljövariabler, med en CA per SNI samt installation i betrodda certifikatarkiv. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Kostnadstelemetri överallt** — `X-OmniRoute-*`-huvuden för kostnad/användning på varje slutpunkt, ett huvud för besparing vid cache-HIT samt USD-utgiftskvoter per nyckel. → [API-referens](docs/reference/API_REFERENCE.md)
-- **🧠 Minne som du kontrollerar** — avstängt som standard, valfri int8-vektorkvantisering + typad avklingning samt `x-omniroute-no-memory` per begäran. → [Minne](docs/frameworks/MEMORY.md)
-- **🛡️ Säkerhet** — skydd mot promptinjektion på varje LLM-rutt (red-team-svit), valfritt skydd för maskering av autentiseringsuppgifter (maskerar läckta API-nycklar/hemligheter i båda riktningarna), kostnadsfri DuckDuckGo-webbsökning som sista utväg samt en valfri OIDC-inloggningsspärr för instrumentpanelen (lösenordsinloggning förblir alltid tillgänglig). → [Skyddsmekanismer](docs/security/GUARDRAILS.md)
-- **🖼️ Nya slutpunkter** — `/v1/ocr` (Mistral OCR) och `/v1/audio/translations` (i Whisper-stil) kompletterar mediestödet. → [API-referens](docs/reference/API_REFERENCE.md)
-- **🎨 Bild-, video- och ljudgenerering** — ett API för medier: xAI Grok Imagine och Novita AI-video, ComfyUI, Magnific, Adobe Firefly, Segmind samt talleverantörer som ElevenLabs. → [API-referens](docs/reference/API_REFERENCE.md)
-- **🌍 Driftsättning och drift** — omvänd proxy med `basePath`, automatisk identifiering av webbläsarspråk, enhetsspårning per nyckel, root-fritt MITM-förtroende och zh-TW-lokalisering. → [Miljö](docs/reference/ENVIRONMENT.md)
-- **🤝 Fler leverantörer och agenter** — molnagenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med webbläsare + OAuth-inloggning, fullvärdigt Ollama-kort, Claude Opus 5 och Sonnet 5, officiellt Kimi-partnerskap (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… samt en uppdaterad **katalog med 352 leverantörer**. → [Leverantörer](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Transparent dirigering** — varje svar innehåller ett `X-OmniRoute-Decision`-huvud som anger strategin/leverantören/latensen som hanterade det, en ny `cache-optimized`-kombinationsstrategi + Auto-Combo-faktorn `cacheAffinity` dirigerar upprepade begäranden tillbaka till anslutningen som innehåller det cachade prefixet, och en skrivskyddad `/v1/auto-combo/{channel}/candidates`-slutpunkt visar den aktuella kandidatpoolen för en `auto/*`-kanal. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Lokal prestanda och infrastruktur** — lokal Redis med ett klick, relädistributionsverktyg för Cloudflare Workers / Deno Deploy samt Bifrost och Mux som övervakade inbäddade tjänster. → [Inbäddade tjänster](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Ingår också** — ramverk för insticksprogram + marknadsplats, färdighetsramverk för Omni/Agent/GitHub, Obsidian-valvintegration (22 MCP-verktyg), OpenAI-kompatibla Batch- och Files-API:er, semantisk svarscache, spelifiering med topplistor, ACP-agentidentifiering (15 inbyggda agenter), schemalagd loggexport till BigQuery, parallell multimodellsutspridning med `auto/chaos`, en Telegram-botbrygga, en versionshanterare i appen samt LMArena-ELO-rankningar för kostnadsfria leverantörer. → [Dokumentation](docs/README.md)
+- **🗜️ Utbytbar komprimering** — 12 kombinerbara motorer samt Compression Studios: LLMLingua-2, Ultra i två nivåer, omniglyph, exakthetsgrind per steg, GCF v3.2 och en redigerare med dra-och-släpp-omordning. → [Komprimering](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Transparent MITM-dekryptering (TPROXY)** — fånga upp CLI-verktyg som ignorerar proxymiljövariabler, med en CA per SNI samt ett installationsprogram för betrodda certifikat. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Kostnadstelemetri överallt** — kostnads-/användningsrubriker av typen `X-OmniRoute-*` på varje slutpunkt, rubrik för besparingar vid cache-HIT och utgiftskvoter i USD per nyckel. → [API-referens](docs/reference/API_REFERENCE.md)
+- **🧠 Minne som du styr** — avstängt som standard, valbar int8-vektorkvantisering och typanpassad avklingning samt `x-omniroute-no-memory` per begäran. → [Minne](docs/frameworks/MEMORY.md)
+- **🛡️ Säkerhet** — skydd mot promptinjektion på varje LLM-rutt (red-team-testsvit), valbart skydd för maskering av autentiseringsuppgifter (maskerar läckta API-nycklar/hemligheter i båda riktningarna), kostnadsfri DuckDuckGo-webbsökning som sista utväg och en valbar OIDC-inloggningsspärr för instrumentpanelen (lösenordsinloggning förblir alltid tillgänglig). → [Skyddsräcken](docs/security/GUARDRAILS.md)
+- **🖼️ Nya slutpunkter** — `/v1/ocr` (Mistral OCR) och `/v1/audio/translations` (i Whisper-stil) kompletterar medieutbudet. → [API-referens](docs/reference/API_REFERENCE.md)
+- **🎨 Bild-/video-/ljudgenerering** — ett API för medier: xAI Grok Imagine och Novita AI-video, ComfyUI, Magnific, Adobe Firefly, Segmind samt talleverantörer som ElevenLabs. → [API-referens](docs/reference/API_REFERENCE.md)
+- **🌍 Driftsättning och drift** — `basePath` för omvänd proxy, automatisk identifiering av webbläsarspråk, enhetsspårning per nyckel, root-löst MITM-förtroende och zh-TW-lokalisering. → [Miljö](docs/reference/ENVIRONMENT.md)
+- **🤝 Fler leverantörer och agenter** — molnagenter (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) med webbläsar- och OAuth-inloggning, ett fullvärdigt Ollama-kort, Claude Opus 5 och Sonnet 5, officiellt partnerskap med Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI … samt en uppdaterad **katalog med 372 leverantörer**. → [Leverantörer](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Transparent dirigering** — varje svar innehåller en `X-OmniRoute-Decision`-rubrik som anger strategin/leverantören/latensen som hanterade det, en ny kombinationsstrategi, `cache-optimized`, samt Auto-Combo-faktorn `cacheAffinity` dirigerar upprepade begäranden tillbaka till anslutningen som har det cachade prefixet, och en skrivskyddad slutpunkt, `/v1/auto-combo/{channel}/candidates`, visar den aktuella kandidatpoolen för en `auto/*`-kanal. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
+- **⚡ Lokal prestanda och infrastruktur** — lokal Redis med ett klick, driftsättare för reläer via Cloudflare Workers/Deno Deploy samt Bifrost och Mux som övervakade inbäddade tjänster. → [Inbäddade tjänster](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 Dessutom ingår** — pluginramverk och marknadsplats, färdighetsramverk för Omni/Agent/GitHub, Obsidian-valvintegration (22 MCP-verktyg), OpenAI-kompatibla Batch- och Files-API:er, semantisk svarscache, spelifiering med topplistor, ACP-agentidentifiering (15 inbyggda agenter), schemalagd loggexport till BigQuery, parallell multimodellsförgrening med `auto/chaos`, en Telegram-brygga för bottar, en versionshanterare i appen och LMArena-ELO-rankningar av kostnadsfria leverantörer. → [Dokumentation](docs/README.md)
 
 <br/>
 
@@ -683,7 +685,7 @@ från din skikhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 
 </div>
 
-> **372 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokala tjänster, molnagenter och system, varav **154 har identifieringsmetadata med `hasFree: true`**. Chattmodellregistret omfattar **237 leverantörer / 3 009 unika par av leverantör och modell / 1 443 råa modell-ID:n**; den separata katalogen över kostnadsfria budgetar har **491 rader per modell**, **35 återkommande pooler** och **54 återkommande/nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa har avsiktligt olika nämnare; definitioner och pooldeduplicerade beräkningar finns i [Leverantörsreferensen](docs/reference/PROVIDER_REFERENCE.md) och [Kostnadsfria nivåer](docs/reference/FREE_TIERS.md).
+> **372 registrerade leverantörer** i de kanoniska samlingarna för chatt, media, sökning, lokala tjänster, molnagenter och system, inklusive **154 med identifieringsmetadata `hasFree: true`**. Chattmodellregistret omfattar **237 leverantörer / 3 009 unika kombinationer av leverantör och modell / 1 443 råa modell-ID:n**; den separata katalogen över kostnadsfria budgetar har **485 rader per modell**, **35 återkommande pooler** och **53 återkommande/nyckellösa leverantörer som är kostnadsfria för alltid**. Dessa har avsiktligt olika nämnare; definitioner och beräkningar där pooler har deduplicerats finns i [Leverantörsreferensen](docs/reference/PROVIDER_REFERENCE.md) och [Kostnadsfria nivåer](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -716,7 +718,7 @@ från din skikhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
   </tr>
 </table>
 
-<sub>…och fler än 330 andra — varje ikon hämtas direkt från instrumentpanelens leverantörskatalog. 📖 [Leverantörsreferens](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…och ytterligare 330+ — varje ikon hämtas direkt från instrumentpanelens leverantörskatalog. 📖 [Leverantörsreferens](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -725,16 +727,16 @@ från din skikhistorik. → [CLI-integrationer](docs/guides/CLI-INTEGRATIONS.md)
 <table>
   <tr>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Ingen tokengräns</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Automatisk dirigering, Tencent Hy3<br/>Gratis för alltid</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Automatisk router, Tencent Hy3<br/>Gratis för alltid</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Gratis för alltid</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Gratisnivå</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>Gratis för alltid</sub></td>
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>Gratis för alltid</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Obegränsat GRATIS</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>Obegränsat och GRATIS</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Ingen nyckel krävs</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ modeller<br/>10 000 neuroner/dag</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>Fler än 50 modeller<br/>10 000 neuroner/dag</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM gratis</sub></td>
     <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Engångskredit på $5; kort krävs</sub></td>
     <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free-modeller<br/>+$10 → högre RPM</sub></td>
@@ -1297,7 +1299,7 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
   <tr><td nowrap><b>Körmiljö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> i <code>src/</code> och <code>open-sse/</code> (inga <code>any</code> i kärnan sedan v2.0)</td></tr>
   <tr><td nowrap><b>Ramverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON-format) — 137 domänmoduler, 202 migreringar</td></tr>
+  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (äldre JSON-format) — 137 domänmoduler, 204 migreringar</td></tr>
   <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5-fulltextsökning + int8-kvantiserade vektorinbäddningar, typad avklingning</td></tr>
   <tr><td nowrap><b>Scheman</b></td><td>Zod 4 — validering av in- och utdata för MCP-verktyg + API-kontrakt</td></tr>
   <tr><td nowrap><b>Protokoll</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1328,7 +1330,7 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Användarhandbok</a></b></td><td>Leverantörer, kombinationer, CLI-integration, driftsättning</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Installationsguide</a></b></td><td>Fullständiga installationsmetoder, konfigurationer för CLI-verktyg, protokollkonfiguration, justering av tidsgränser</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">Guide för CLI-verktyg</a></b></td><td>Verktygsspecifik konfiguration för Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Fjärrläge</a></b></td><td>Styr en fjärransluten OmniRoute (VPS) från CLI:n på din bärbara dator via åtkomsttoken med begränsad behörighet</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Fjärrläge</a></b></td><td>Styr en fjärrinstans av OmniRoute (VPS) från din bärbara dators CLI via åtkomsttoken med begränsad behörighet</td></tr>
   <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code-konfiguration</a></b></td><td>Anslut Claude Code till OmniRoute (lokalt/fjärranslutet) med <code>launch</code> + profiler per modell</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">Snabbstart</a></b></td><td>Installation i 3 steg → anslut → konfigurera</td></tr>
 </table>
@@ -1338,29 +1340,29 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker-guide</a></b></td><td>Docker run, Compose-profiler, Caddy HTTPS, tunnlar, avbildningstaggar</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-guide</a></b></td><td>Quadlet systemd-integration, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman-guide</a></b></td><td>Quadlet-systemd-integration, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM-driftsättning</a></b></td><td>Komplett guide: konfiguration av VM + nginx + Cloudflare</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-driftsättning</a></b></td><td>Driftsätt på Fly.io med beständig lagring</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io-driftsättning</a></b></td><td>Driftsätt till Fly.io med beständig lagring</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux-guide</a></b></td><td>Kör OmniRoute på Android via Termux</td></tr>
   <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA-guide</a></b></td><td>Installation, cachelagring och arkitektur för progressiva webbappar</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Avinstallationsguide</a></b></td><td>Ren borttagning för alla installationsmetoder</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Miljökonfiguration</a></b></td><td>Kompletta variabler och referenser för <code>.env</code></td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Miljökonfiguration</a></b></td><td>Fullständig lista över <code>.env</code>-variabler och referenser</td></tr>
 </table>
 
 ### 🧠 Funktioner och arkitektur
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arkitektur</a></b></td><td>Systemarkitektur, dataflöde och intern funktion</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Arkitektur</a></b></td><td>Systemarkitektur, dataflöde och interna funktioner</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Komprimeringsguide</a></b></td><td>Pipeline med 7 alternativ: av / lätt / standard / aggressiv / ultra / RTK / staplad</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-komprimering</a></b></td><td>Komprimering av kommandoutdata, filter, betrodda källor, verifiering, återställning av rådata</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK-komprimering</a></b></td><td>Komprimering av kommandoutdata, filter, förtroende, verifiering, återställning av rådata</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Komprimeringsmotorer</a></b></td><td>Caveman, RTK, staplade pipelines, gränssnitt för instrumentpanel/API/MCP</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Format för komprimeringsregler</a></b></td><td>Scheman för JSON-regelpaket till Caveman- och RTK-filter</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Språkpaket för komprimering</a></b></td><td>Språkidentifiering och framtagning av Caveman-regelpaket</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Guide för feltålighet</a></b></td><td>Kretsbrytare, väntetider, kö, skydd mot samtidiga anropsstormar, TLS-förfalskning</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Format för komprimeringsregler</a></b></td><td>JSON-scheman för regelpaket till Caveman- och RTK-filter</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Språkpaket för komprimering</a></b></td><td>Språkidentifiering och skapande av Caveman-regelpaket</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Guide för feltålighet</a></b></td><td>Kretsbrytare, nedkylningsperioder, kö, skydd mot samtidiga anropsstormar, TLS-förfalskning</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-motor</a></b></td><td>Poängsättning med 16 faktorer, lägespaket, självläkning</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyguide</a></b></td><td>Proxysystem med 3 nivåer, 1proxy-marknadsplats, CRUD för register</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Kostnadsfria nivåer</a></b></td><td>Samlad katalog: 35 dokumenterade återkommande pooler / 489 katalogiserade poster på kostnadsfri nivå</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxyguide</a></b></td><td>Proxysystem i 3 nivåer, marknadsplatsen 1proxy, CRUD för register</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Gratisnivåer</a></b></td><td>Samlad katalog: 35 dokumenterade återkommande pooler / 485 katalogiserade poster på gratisnivå</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktionsgalleri</a></b></td><td>Visuell rundtur i instrumentpanelen med skärmbilder</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentation av kodbasen</a></b></td><td>Nybörjarvänlig genomgång av kodbasen</td></tr>
 </table>
@@ -1371,23 +1373,23 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API-referens</a></b></td><td>Alla slutpunkter med exempel</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI-specifikation</a></b></td><td>OpenAPI 3.0-specifikation</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP-server</a></b></td><td>110 MCP-verktyg, IDE-konfigurationer, Python/TS/Go-klienter</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Guide för MCP-server</a></b></td><td>MCP-installation, transporter och verktygsreferens</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP-server</a></b></td><td>110 MCP-verktyg, IDE-konfigurationer, Python-/TS-/Go-klienter</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">Guide för MCP-servern</a></b></td><td>MCP-installation, transporter och verktygsreferens</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A-server</a></b></td><td>JSON-RPC 2.0-protokoll, färdigheter, strömning, uppgiftshantering</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Guide för A2A-server</a></b></td><td>A2A-agentkort, uppgifter, färdigheter och strömning</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">Guide för A2A-servern</a></b></td><td>A2A-agentkort, uppgifter, färdigheter och strömning</td></tr>
 </table>
 
 ### 📋 Projekt och kvalitet
 
 <table>
   <tr><th align="left">Dokument</th><th align="left">Beskrivning</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Bidra</a></b></td><td>Utvecklingsmiljö och riktlinjer</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Gren- och utgivningsmodell</a></b></td><td>Vilka grenar PR:er riktas mot (<code>release/*</code>) samt vad <code>main</code> och taggar innebär</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Bidra</a></b></td><td>Konfiguration och riktlinjer för utveckling</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Förgrenings- och utgivningsmodell</a></b></td><td>Vilka grenar PR:er riktas mot (<code>release/*</code>) samt vad <code>main</code> och taggar betyder</td></tr>
   <tr><td nowrap><b><a href="CHANGELOG.md">Ändringslogg</a></b></td><td>Fullständig utgivningshistorik per version</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">Säkerhetspolicy</a></b></td><td>Rapportering av sårbarheter och säkerhetsrutiner</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-guide</a></b></td><td>Stöd för 42 språk, arbetsflöde för översättning och RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n-guide</a></b></td><td>Stöd för 42 språk, arbetsflöde för översättning, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Checklista för utgivning</a></b></td><td>Valideringssteg före utgivning</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Plan för testtäckning</a></b></td><td>Strategi för testtäckning av fler än 39 000 statiska testdeklarationer i fler än 5 100 spårade testfiler</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Täckningsplan</a></b></td><td>Strategi för testtäckning av över 39 000 statiska testdeklarationer i över 5 100 spårade testfiler</td></tr>
 </table>
 
 <br/>
@@ -1396,9 +1398,9 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
 
 # ⭐ Främsta bidragsgivare
 
-> OmniRoute formas av en engagerad öppen källkodsgemenskap. Dessa personer har gjort exceptionella insatser som direkt påverkar projektets kvalitet, stabilitet och räckvidd. **Tack.**
+> OmniRoute formas av en passionerad gemenskap för öppen källkod. Dessa personer har gjort exceptionella insatser som direkt påverkar projektets kvalitet, stabilitet och räckvidd. **Tack.**
 
-### Externa bidragsgivare efter antal sammanslagna pull requests
+### Externa bidragsgivare efter sammanslagna pull requests
 
 <table>
   <tr><th align="center">Placering</th><th align="left">Bidragsgivare</th><th align="center">Sammanslagna PR:er</th><th align="right">~Ändrade rader</th></tr>
@@ -1425,7 +1427,7 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/Prudhvivuda"><b>Prudhvivuda</b></a></td><td align="center">24</td><td align="right">6,312</td></tr>
 </table>
 
-<sub>Fryst vid den aktuella spetsen <code>dafb4ae808</code> för <code>release/v3.8.50</code>, med sammanslagningar till och med 2026-08-24 05:26:03 UTC. Den sidindelade kartläggningen via GitHub GraphQL omfattar 5 911 sammanslagna PR:er: 2 707 av lagrets ägare, 179 av Dependabot och <b>3 025 externa PR:er från 535 unika bidragsgivare</b>. ”Ändrade rader” är summan av tillägg och borttagningar på GitHub och inkluderar genererade filer, låsfiler, kataloger, översättningar och dokumentation; det är kodomsättning, inte författade kodrader. Delade placeringar vid gränsen behålls.</sub>
+<sub>Fryst vid den aktuella spetsen <code>dafb4ae808</code> för <code>release/v3.8.50</code>, med sammanslagningar till och med 2026-08-24 05:26:03 UTC. Den sidindelade GitHub GraphQL-inventeringen innehåller 5 911 sammanslagna PR:er: 2 707 av lagringsplatsens ägare, 179 av Dependabot och <b>3 025 externa PR:er från 535 unika bidragsgivare</b>. ”Ändrade rader” är GitHubs tillägg + borttagningar och omfattar genererade filer, låsfiler, kataloger, översättningar och dokumentation; det mäter kodomsättning, inte författade LOC. Delade placeringar vid gränsen behålls.</sub>
 
 ### Commits tillskrivna av GitHub
 
@@ -1436,42 +1438,42 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🥇 220 GitHub-tillskrivna commits</sub>
+      <sub>🥇 220 GitHub-tillskrivna incheckningar</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥈 219 GitHub-tillskrivna commits</sub>
+      <sub>🥈 219 GitHub-tillskrivna incheckningar</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🥉 108 GitHub-tillskrivna commits</sub>
+      <sub>🥉 108 GitHub-tillskrivna incheckningar</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 81 GitHub-tillskrivna commits</sub>
+      <sub>🏅 81 GitHub-tillskrivna incheckningar</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 70 GitHub-tillskrivna commits</sub>
+      <sub>🏅 70 GitHub-tillskrivna incheckningar</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/hartmark">
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 69 GitHub-tillskrivna commits · delad plats 6</sub>
+      <sub>🏅 69 GitHub-tillskrivna incheckningar · delad plats 6</sub>
     </td>
   </tr>
   <tr>
@@ -1480,42 +1482,42 @@ Kanoniska mätvärden den 2026-08-24: **1.029 unika videor** · **11.132.922 kä
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🏅 69 GitHub-tillskrivna commits · delad plats 6</sub>
+      <sub>🏅 69 GitHub-tillskrivna incheckningar · delad plats 6</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 64 GitHub-tillskrivna commits</sub>
+      <sub>🏅 64 GitHub-tillskrivna incheckningar</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/zen0bit">
         <img src="https://github.com/zen0bit.png" width="40" style="border-radius:50%" alt="zenobit"/><br/>
         <b>zenobit</b>
       </a><br/>
-      <sub>🏅 62 GitHub-tillskrivna commits</sub>
+      <sub>🏅 62 GitHub-tillskrivna incheckningar</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🏅 51 GitHub-tillskrivna commits · delad plats 10</sub>
+      <sub>🏅 51 GitHub-tillskrivna incheckningar · delad plats 10</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/xz-dev">
         <img src="https://github.com/xz-dev.png" width="40" style="border-radius:50%" alt="Xiangzhe"/><br/>
         <b>Xiangzhe</b>
       </a><br/>
-      <sub>🏅 51 GitHub-tillskrivna commits · delad plats 10</sub>
+      <sub>🏅 51 GitHub-tillskrivna incheckningar · delad plats 10</sub>
     </td>
   </tr>
 </table>
 
-<sub>Kontrollerades på nytt 2026-08-24 06:14:31 UTC: GitHub-tillskrivna commits som rapporterats av datalagrets Contributors API för standardgrenen <code>release/v3.8.50</code>. API:et returnerade 525 identiteter (415 användare, 2 botar, 108 anonyma); den här tabellen exkluderar underhållaren, botar och anonyma identiteter samt behåller delade placeringar. Den skiljer sig både från rankningen över sammanslagna PR:er ovan och inventeringen av Git-metadata för 639 personer nedan.</sub>
+<sub>Kontrollerades på nytt 2026-08-24 06:14:31 UTC: GitHub-tillskrivna incheckningar som rapporterats av kodförrådets Contributors API för standardgrenen <code>release/v3.8.50</code>. API:et returnerade 525 identiteter (415 användare, 2 bottar, 108 anonyma); den här tabellen exkluderar underhållaren, bottar och anonyma identiteter och behåller delade placeringar. Den skiljer sig från både rankningen för sammanslagna pull requests ovan och inventeringen av Git-metadata för 639 personer nedan.</sub>
 
-> 🙏 Dessa bidragsgivares funktioner, felrättningar och förbättringar av infrastrukturen är en **central del** av det som gör OmniRoute tillförlitligt och funktionsrikt. Varje pull request, varje testfall och varje i18n-översättningsfil spelar roll. Öppen källkod byggs av människor som dem.
+> 🙏 Dessa bidragsgivares funktioner, buggfixar och infrastrukturförbättringar är en **central del** av det som gör OmniRoute tillförlitligt och funktionsrikt. Varje pull request, varje testfall och varje i18n-översättningsfil spelar roll. Öppen källkod byggs av människor som dem.
 
 </div>
 

@@ -384,90 +384,93 @@ Hər hansı v3.8.x buraxılışını yayımlamazdan əvvəl bu əlavə elementl�
 
 ---
 
-## 3.9.0 LTS ayrılması (3.8.58-də məşq edilib)
+## 3.9.0 LTS ayrılması (3.8.58-də sınaqdan keçirilib)
 
-v3.8.59-dan sonra növbəti versiya 3.9.0-dır və onun son kommiti iki uzunömürlü budağın əsasını təşkil edir:
-`stable/v3` (v3 LTS xətti, npm `latest`) və `develop` (v4, 4.0.0-a yüksəldilib, npm
+v3.8.59-dan sonra növbəti versiya 3.9.0-dır və onun son kommiti iki uzunömürlü budağın əsasına çevrilir:
+`stable/v3` (v3 LTS xətti, npm `latest`) və `develop` (v4, 4.0.0-a yüksəldilmiş, npm
 `nightly`). Budaq/kanal modeli, irəli daşıma və etiketlər
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) sənədindədir; plan isə [ROADMAP](../../ROADMAP.md) sənədindədir (Mərhələ 3). Ayrılma bir dəfə icra edilir;
-3.8.58 bunu fork üzərində əvvəldən sona qədər məşq edir, 3.8.59 isə
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) sənədində, plan isə [ROADMAP](../../ROADMAP.md) sənədindədir (Mərhələ 3). Ayırma bir dəfə icra edilir;
+3.8.58 bunu fork üzərində başdan sona sınaqdan keçirir, 3.8.59 isə
 [GO/NO-GO yoxlama siyahısı](./LTS_GO_NO_GO.md) ilə tamamlanır.
 
 ### Sınaq icrası (yalnız oxuma, istənilən vaxt təhlükəsizdir)
 
 ```bash
-npm run release:dry-run-lts-cut                       # real ayrılma: HEAD-dən 3.9.0, əvvəlki teq v3.8.59
+npm run release:dry-run-lts-cut                       # həqiqi ayırma: HEAD-dən 3.9.0, əvvəlki teq v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # mənbə kommitini sabitlə
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` heç nə icra etmir: git və `gh` məlumatlarını oxuyur və
-bütün ardıcıllığı çap edir — ilkin şərtlər (mənbə müəyyən edilir, əvvəlki teq mövcuddur, `package.json`
-hədəf versiyadadır, açıq `release-freeze` məsələsi var, mövcud buraxılış budağında açıq
-`Release branch not green` məsələsi yoxdur — mövcud olmayan budaq yaşıl deyil, `?` naməlum
-kimi göstərilir — Mergify `release` növbəsi konfiqurasiya edilib (G11: `queue_rules`, `checks_timeout`,
+`scripts/release/dry-run-lts-cut.mjs` heç nə icra etmir: o, git və `gh` məlumatlarını oxuyur və
+bütün ardıcıllığı çap edir — ilkin şərtlər (mənbə müəyyən edilir, mənbə repozitoriyası tam tarixçəyə malikdir —
+dayaz klon `stable/v3` budağını göndərə bilməz, qəbul edən tərəf ilk
+birləşdirilmiş üst kommitdə paketi rədd edir, buna görə əvvəlcə tam klondan ayırın və ya `git fetch --unshallow origin` icra edin —
+əvvəlki teq mövcuddur, `package.json` hədəf versiyadadır, açıq `release-freeze` məsələsi var, mövcud buraxılış budağında açıq
+`Release branch not green` məsələsi
+yoxdur — mövcud olmayan budaq yaşıl deyil, `?` naməlum kimi göstərilir —
+Mergify `release` növbəsi konfiqurasiya edilib (G11: `queue_rules`, `checks_timeout`,
 `queue` etiketi), `release/*` qaydalar dəsti silinməni və məcburi göndərişi hələ də bloklayır və
-`stable/v3` ilə `develop` hələ mövcud deyil), iki budaq addımı, hansı passiv iş axını
-tətikləyicilərinin və `if:` şərtlərinin doğru olduğu (və hansılarının repozitoriya dəyişəni ilə
-məhdud qaldığı və ya kanonik repozitoriyaya sabitləndiyi), gözlənilən dist-tag-lər (`latest` → 3.9.0,
-`next` və `nightly` boşdur) və geri qaytarma. Çıxış `0` = `RESULT: READY`, `1` = bloklayıcı ilkin şərt
-uğursuz oldu (`✗`), `2` = istifadə xətası. `--advisory <id,...>` yoxlamanı gizlətmədən xəbərdarlıq (`!`)
-səviyyəsinə endirir.
+`stable/v3` ilə `develop` hələ mövcud deyil), iki budaq addımı, hansı fəaliyyətsiz iş axını
+tetiklərinin və `if:` şərtlərinin doğru olduğu (və hansılarının repozitoriya dəyişəni ilə
+məhdudlaşdırıldığı və ya kanonik repozitoriyaya sabitləndiyi), gözlənilən dist-tag-lər (`latest` → 3.9.0, `next` və
+`nightly` boşdur) və geri qaytarma. Çıxış `0` = `RESULT: READY`, `1` = bloklayıcı ilkin şərt
+uğursuz oldu (`✗`), `2` = istifadə xətası. `--advisory <id,...>` yoxlamanı gizlətmədən
+xəbərdarlıq (`!`) səviyyəsinə endirir.
 
-Real ayrılmanın sınaq icrasını 3.9.0 buraxılış dondurması hələ açıq ikən başladın — budaqlar
-teqdən sonra və Mərhələ 12c dondurmanı aradan qaldırmazdan əvvəl yaradılır.
+Həqiqi ayırmanın sınaq icrasını 3.9.0 buraxılış dondurması hələ açıq olarkən başladın — budaqlar
+teqdən sonra və Mərhələ 12c dondurmanı ləğv etməzdən əvvəl yaradılır.
 
-### 3.8.58 məşqi (yalnız fork)
+### 3.8.58 sınağı (yalnız fork)
 
 ```bash
-# 1. Cari son kommitdə məşq parametrləri ilə sınaq icrası
+# 1. Cari son kommitdə sınaq parametrləri ilə sınaq icrası
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
 # 2. FORK uzaq repozitoriyasına qarşı icra edin (origin və ya URL-i kanonik
-#    repozitoriya olan istənilən uzaq mənbə rədd edilir; hər addım terminalda təsdiq tələb edir)
+#    repozitoriyaya aid olan hər hansı uzaq repozitoriya rədd edilir; hər addım terminalda təsdiq tələb edir)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Fork-da passiv iş axınlarını sınaqdan keçirin (sınaq icrasının kanonik repozitoriyaya
-#    sabitlənmə bildirdiyi hallarda workflow_dispatch), sonra geri qaytarın
+# 3. Fork-dakı fəaliyyətsiz iş axınlarını sınaqdan keçirin (sınaq icrasının kanonik
+#    repozitoriyaya sabitlənmə bildirdiyi hallarda workflow_dispatch), sonra geri qaytarın
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop versiyasını yüksəldən kommit git-in aşağı səviyyəli mexanizmləri ilə yaradılır (işçi ağaca toxunulmur) və
-dövrü açan kommitlə eyni beş faylı yeniləyir: `package.json`, `open-sse/package.json`,
+develop versiyasını yüksəldən kommit git plumbing vasitələri ilə yaradılır (işçi ağaca toxunulmur) və
+dövrü açan kommitlə eyni beş faylda versiyanı yüksəldir: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json` və `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG bölməsi və onun i18n nüsxələri daha sonra, ilk PR-dan əvvəl `develop` üzərində açılır.
-Skript heç vaxt npm dist-tag-lərini dəyişmir — onları müvəqqəti paket üzərində məşq edin.
+CHANGELOG bölməsi və onun i18n nüsxələri daha sonra, ilk
+PR-dən əvvəl `develop` üzərində açılır. Skript heç vaxt npm dist-tag-lərini dəyişmir — onları sınaq paketində məşq edin.
 
-### PR önbaxış artefaktı (bir dəfə qurun, eyni baytları irəli daşıyın)
+### PR önizləmə artefaktı (bir dəfə qurun, eyni baytları təşviq edin)
 
-`.github/workflows/preview-artifact.yml` PR-ın son kommitindən bir istehsal tarball-ı qurur və
-məhz həmin quruluşu yoxlayır (#8084 hissə (a)). Yalnız eyni repozitoriyadan olan PR-lar; heç nə dərc edilmir.
+`.github/workflows/preview-artifact.yml` PR-ın son kommitindən bir istehsal tarball-u qurur və
+məhz həmin quruluşu doğrulayır (#8084 hissə (a)). Yalnız eyni repozitoriyadan olan PR-lar; heç nə dərc edilmir.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # və ya `preview-artifact` etiketini əlavə edin
+gh workflow run preview-artifact.yml -f pr_number=<N>   # yaxud `preview-artifact` etiketini əlavə edin
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # önbaxış quraşdırması
+npm install -g ./omniroute-*.tgz                          # önizləmə quraşdırması
 ```
 
-İcra `npm ci`, `npm run build:release`, `npm run check:pack-artifact` əmrlərini yerinə yetirir, tarball-ı
-paketləyir, `npm run check:pack-boot` əmrini işlədir (saxta məxfi məlumatlar, müvəqqəti məlumat kataloqu), yenidən paketləyir və
-daycest eyni olmadıqda uğursuz olur, sonra `artifact-identity.json` faylını (son kommit SHA-sı, əsas
-SHA, kilid faylının heşi, platforma, arxitektura, node ABI, paketləyici, qurma siyasəti —
-`scripts/release/artifact-identity.mjs`) qeydə alır və ayrıca tapşırıqda tarball üçün attestasiya yaradır. Önbaxışı
-irəli daşımaq həmin tarball-ı quraşdırmaq deməkdir: heç vaxt mənbədən yenidən qurmayın.
+İcra `npm ci`, `npm run build:release`, `npm run check:pack-artifact` əmrlərini yerinə yetirir, tarball-u
+paketləyir, `npm run check:pack-boot` əmrini icra edir (saxta məxfi məlumatlar, müvəqqəti məlumat kataloqu), yenidən paketləyir və
+həzm eyni olmadıqda uğursuz olur, sonra `artifact-identity.json` faylını (son kommit SHA-sı, baza
+SHA-sı, kilid faylının heşi, platforma, arxitektura, node ABI-si, paketləyici, qurma siyasəti —
+`scripts/release/artifact-identity.mjs`) qeydə alır və ayrıca işdə tarball-u attestasiya edir. Önizləməni
+təşviq etmək həmin tarball-u quraşdırmaq deməkdir: heç vaxt mənbədən yenidən qurmayın.
 
-### Ayrılma (3.9.0, GO-dan sonra)
+### Ayırma (3.9.0, GO-dan sonra)
 
-1. GO [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) sənədində qeydə alınıb.
+1. GO qərarı [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) sənədində qeydə alınıb.
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` əmri `RESULT: READY` çap edir.
 3. Sınaq icrasının çap etdiyi əmrlərlə `origin` üzərində budaqları əl ilə yaradın —
-   skript `origin`-ə göndərməkdən imtina edir. Yoxlanılmış develop kommitini təkrar istifadə etmək üçün
-   əvvəlcə 3.9.0 son kommitində fork-unuza qarşı `--execute` məşqini başladın; o, hər iki SHA-nı çap edir və
+   skript `origin`-ə göndərməkdən imtina edir. Nəzərdən keçirilmiş develop kommitini təkrar istifadə etmək üçün əvvəlcə
+   3.9.0 son kommitində fork-unuz üzərində `--execute` sınağını başladın; o, hər iki SHA-nı çap edir və
    eyni kommitlər göndərilə bilər:
 
    ```bash
@@ -475,16 +478,16 @@ irəli daşımaq həmin tarball-ı quraşdırmaq deməkdir: heç vaxt mənbədə
    ```
 
 4. İlk PR birləşdirilməzdən əvvəl `stable/v3` və `develop` budaqlarını qoruyun (qaydalar dəstləri + birləşdirmə növbəsi).
-5. Passiv iş axınları budağın mövcudluğu ilə aktivləşir: `forward-port.yml` (`stable/v3` budağına
-   göndəriş), `validate-stable-pr.yml` (`stable/v3` üçün PR-lar) və `nightly-v4-build.yml`
-   (`develop` budağını qurur). İşə salmazdan əvvəl `secrets.FORWARD_PORT_TOKEN` repozitoriya məxfiliyini təyin edin (beləliklə CI
-   irəli daşıma PR-larında işləyəcək); sahib repozitoriya dəyişəni `vars.NIGHTLY_PUBLISH` üçün
-   `true` təyin edənə və npm Trusted Publishing `nightly-v4-build.yml` faylını qəbul edənə qədər
-   gecəlik dərcetmə deaktiv qalır. Kanalın müəyyən edilməsi `scripts/release/dist-tag.mjs` vasitəsilə həyata keçirilir; bu,
-   `npm-publish.yml` tərəfindən istifadə edilən eyni həlledicidir.
-6. Kanalları yoxlayın: `npm view omniroute dist-tags --json` əmri `latest` = 3.9.0 göstərir və
-   v4 dərc edilənə qədər `next` / `nightly` yoxdur.
-7. Lazım olarsa, geri qaytarma: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+5. Qeyri-aktiv iş axınları budağın mövcudluğuna əsasən işə düşür: `forward-port.yml` (`stable/v3`
+   budağına push), `validate-stable-pr.yml` (`stable/v3` budağına PR-lər) və `nightly-v4-build.yml`
+   (`develop` budağını qurur). İstifadəyə verməzdən əvvəl `secrets.FORWARD_PORT_TOKEN` repozitoriya məxfisini təyin edin (beləliklə, CI
+   forward-port PR-lərində işləyəcək); sahib `vars.NIGHTLY_PUBLISH` repozitoriya
+   dəyişənini `true` olaraq təyin edənə və npm Trusted Publishing
+   `nightly-v4-build.yml` faylını qəbul edənə qədər gecəlik dərc deaktiv qalır. Kanalın müəyyənləşdirilməsi `scripts/release/dist-tag.mjs` tərəfindən həyata keçirilir; bu,
+   `npm-publish.yml` faylının istifadə etdiyi eyni müəyyənləşdiricidir.
+6. Kanalları yoxlayın: `npm view omniroute dist-tags --json` əmri `latest` = 3.9.0 göstərir və v4 dərc edilənədək
+   `next` / `nightly` mövcud deyil.
+7. Lazım gələrsə, geri qaytarma: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    və `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

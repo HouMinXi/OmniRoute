@@ -125,11 +125,16 @@ Indstil `"geminiSanitization": false` for at slå det fra.
 
 ## Fejlfinding
 
-| Symptom                                           | Årsag                                                                                                   |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Vælgeren viser ingen OmniRoute-model              | Ingen nøgle blev fundet (tjek advarslen ved opstart), eller gatewayen kan ikke nås                      |
-| Rå model-id'er, ingen kombinationer, ingen priser | Administrations-endpoints afviste tokenet — indstil `managementReadToken`                               |
-| En session er fastgjort til `opencode-<id>/…`     | v1-pluginet udgav `opencode-<id>`; v2 udgiver `<id>` uden præfiks, så vælg modellen igen under `<id>/…` |
+| Symptom                                           | Årsag                                                                                                                          |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Modelvælgeren viser ingen OmniRoute-model         | Ingen nøgle blev fundet (kontrollér opstartsadvarslen), eller gatewayen kan ikke nås                                           |
+| Rå model-id'er, ingen kombinationer, ingen priser | Administrationsendepunkterne afviste tokenet — indstil `managementReadToken`                                                   |
+| Kort eller tomt `freeOnly`-katalog                | Intet administrationstoken eller et afvist token — læs oversigtslinjen for opdateringen (`unmatched-free`-antal) i værtsloggen |
+| En session fastgjort til `opencode-<id>/…`        | v1-pluginet publicerede `opencode-<id>`; v2 publicerer kun `<id>`, så vælg modellen igen under `<id>/…`                        |
+
+Miljøvariabler skal nå opencode-serverprocessen: Når værten
+kører som en tjeneste, er den shell, der kører `opencode models`, og serverens
+miljø forskellige, så eksportér nøglen dér, hvor serveren læser den.
 
 ## Se også
 

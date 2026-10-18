@@ -125,11 +125,16 @@ Postavite `"geminiSanitization": false` da biste to isključili.
 
 ## Rješavanje problema
 
-| Simptom                                             | Uzrok                                                                                                        |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Izbornik ne prikazuje nijedan OmniRoute model       | Nije pronađen ključ (provjerite upozorenje pri pokretanju) ili pristupnik nije dostupan                      |
-| Neobrađeni ID-jevi modela, bez kombinacija i cijena | Krajnje točke za upravljanje odbile su token — postavite `managementReadToken`                               |
-| Sesija prikvačena na `opencode-<id>/…`              | Dodatak v1 objavio je `opencode-<id>`; v2 objavljuje samo `<id>`, stoga ponovno odaberite model pod `<id>/…` |
+| Simptom                                            | Uzrok                                                                                                                                           |
+| -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Birač ne prikazuje nijedan OmniRoute model         | Nije pronađen nijedan ključ (provjerite upozorenje pri pokretanju) ili pristupnik nije dostupan                                                 |
+| Neobrađeni ID-ovi modela, bez kombinacija i cijena | Krajnje točke za upravljanje odbile su token — postavite `managementReadToken`                                                                  |
+| Kratak ili prazan katalog `freeOnly`               | Nema tokena za upravljanje ili je token odbijen — pročitajte redak sa sažetkom osvježavanja (broj `unmatched-free`) u zapisniku glavnog procesa |
+| Sesija prikvačena na `opencode-<id>/…`             | Dodatak v1 objavio je `opencode-<id>`; v2 objavljuje samo `<id>`, stoga ponovno odaberite model pod `<id>/…`                                    |
+
+Varijable okruženja moraju biti dostupne procesu opencode poslužitelja: kada se glavni proces
+izvršava kao servis, ljuska u kojoj se izvršava `opencode models` i okruženje poslužitelja
+razlikuju se, stoga izvezite ključ tamo gdje ga poslužitelj učitava.
 
 ## Pogledajte također
 

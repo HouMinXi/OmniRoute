@@ -113,11 +113,16 @@ Issettja `"geminiSanitization": false` biex titfiha.
 
 ## Soluzzjoni tal-problemi
 
-| Sintomu                                                         | Kawża                                                                                                               |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| Is-selettur ma juri l-ebda mudell OmniRoute                     | Ma ġiet riżolta l-ebda ċavetta (iċċekkja t-twissija waqt l-istartjar), jew il-gateway ma jistax jintlaħaq           |
-| IDs mhux ipproċessati tal-mudelli, ebda combos, ebda prezzijiet | L-endpoints tal-ġestjoni rrifjutaw it-token — issettja `managementReadToken`                                        |
-| Sessjoni marbuta ma’ `opencode-<id>/…`                          | Il-plugin v1 ippubblika `opencode-<id>`; v2 jippubblika `<id>` waħdu, għalhekk erġa’ agħżel il-mudell taħt `<id>/…` |
+| Sintomu                                                               | Kawża                                                                                                                                                    |
+| --------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Is-selettur ma juri l-ebda mudell OmniRoute                           | Ma ġiet riżolta l-ebda ċavetta (iċċekkja t-twissija waqt l-istartjar), jew il-gateway mhuwiex aċċessibbli                                                |
+| IDs mhux ipproċessati tal-mudelli, l-ebda kombinazzjoni, l-ebda prezz | L-endpoints tal-ġestjoni rrifjutaw it-token — issettja `managementReadToken`                                                                             |
+| Katalgu `freeOnly` qasir jew vojt                                     | M'hemm l-ebda token tal-ġestjoni jew it-token ġie rrifjutat — aqra l-linja tas-sommarju tal-aġġornament (l-għadd `unmatched-free`) fir-reġistru tal-host |
+| Sessjoni marbuta ma' `opencode-<id>/…`                                | Il-plugin v1 ippubblika `opencode-<id>`; v2 jippubblika `<id>` waħdu, għalhekk erġa' agħżel il-mudell taħt `<id>/…`                                      |
+
+Il-varjabbli tal-ambjent iridu jaslu sal-proċess tas-server opencode: meta l-host
+jaħdem bħala servizz, ix-shell li jħaddem `opencode models` u l-ambjent tas-server
+ikunu differenti, għalhekk esporta ċ-ċavetta fil-post minn fejn jaqraha s-server.
 
 ## Ara wkoll
 

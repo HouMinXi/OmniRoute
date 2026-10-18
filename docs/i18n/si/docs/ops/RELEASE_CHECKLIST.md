@@ -387,105 +387,107 @@ Embedded Services වෙනස්කම් ඇතුළත් ඕනෑම න�
 
 ## 3.9.0 LTS වෙන් කිරීම (3.8.58 හි පෙරහුරු කරන ලදී)
 
-v3.8.59 පසු ඊළඟ අනුවාදය 3.9.0 වන අතර, එහි tip එක දිගුකාලීන ශාඛා දෙකක් බවට පත් වේ:
-`stable/v3` (v3 LTS පෙළ, npm `latest`) සහ `develop` (v4, 4.0.0 දක්වා ඉහළ නංවන ලද, npm
-`nightly`). ශාඛා/නාලිකා ආකෘතිය, forward-port ක්රියාවලිය සහ ලේබල
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) තුළ ඇත; සැලැස්ම [ROADMAP](../../ROADMAP.md) හි (අදියර 3) ඇත. වෙන් කිරීම එක් වරක් ක්රියාත්මක වේ;
-3.8.58 එය fork එකක් මත ආරම්භයේ සිට අවසානය දක්වා පෙරහුරු කරන අතර, 3.8.59
+v3.8.59 ට පසු ඊළඟ අනුවාදය 3.9.0 වන අතර, එහි අග්රය දිගුකාලීන ශාඛා දෙකක් බවට පත්වේ:
+`stable/v3` (v3 LTS පෙළ, npm `latest`) සහ `develop` (v4, 4.0.0 දක්වා ඉහළ නංවා ඇත, npm
+`nightly`). ශාඛා/නාලිකා ආකෘතිය, ඉදිරියට ගෙනයාම සහ ලේබල
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) හි ඇත; සැලැස්ම [ROADMAP](../../ROADMAP.md) හි (අදියර 3) ඇත. වෙන් කිරීම එක් වරක් ක්රියාත්මක වේ;
+3.8.58 මඟින් fork එකක් මත එය මුල සිට අග දක්වා පෙරහුරු කරන අතර, 3.8.59
 [GO/NO-GO පිරික්සුම් ලැයිස්තුව](./LTS_GO_NO_GO.md) සමඟ අවසන් වේ.
 
-### අත්හදා බැලීමේ ධාවනය (කියවීමට පමණි, ඕනෑම වේලාවක ආරක්ෂිතයි)
+### වියළි ධාවනය (කියවීමට පමණි, ඕනෑම වේලාවක ආරක්ෂිතයි)
 
 ```bash
-npm run release:dry-run-lts-cut                       # සැබෑ වෙන් කිරීම: HEAD වෙතින් 3.9.0, පෙර tag එක v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # මූලාශ්ර commit එක ස්ථිර කරන්න
+npm run release:dry-run-lts-cut                       # සැබෑ වෙන් කිරීම: HEAD වෙතින් 3.9.0, පෙර ටැගය v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # මූලාශ්ර commit එක නිශ්චිත කරන්න
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` කිසිවක් ක්රියාත්මක නොකරයි: එය git සහ `gh` කියවා
-සම්පූර්ණ අනුපිළිවෙළ මුද්රණය කරයි — පූර්ව කොන්දේසි (මූලාශ්රය resolve වේ, පෙර tag එක පවතී, `package.json`
-ඉලක්ක අනුවාදයේ ඇත, `release-freeze` issue එකක් විවෘතව ඇත, පවතින release ශාඛාවක විවෘත
-`Release branch not green` issue එකක් නැත — නොපවතින ශාඛාවක් `?` නොදන්නා ලෙස වාර්තා කරයි,
-කිසිවිටෙක green ලෙස නොවේ — Mergify `release` පෝලිම වින්යාස කර ඇත (G11: `queue_rules`, `checks_timeout`,
-`queue` ලේබලය), `release/*` ruleset එක තවමත් මැකීම සහ force-push අවහිර කරයි, සහ
-`stable/v3` හා `develop` තවම නොපවතී), ශාඛා පියවර දෙක, සක්රිය වන dormant-workflow
-trigger සහ `if:` කොන්දේසි (සහ repository variable එකකින් තවමත් සීමා කර ඇති හෝ
-canonical repository එකට ස්ථිර කර ඇති ඒවා), අපේක්ෂිත dist-tags (`latest` → 3.9.0, `next` සහ
-`nightly` හිස්) සහ rollback එක. Exit `0` = `RESULT: READY`, `1` = අවහිර කරන පූර්ව කොන්දේසියක්
-අසමත් විය (`✗`), `2` = භාවිත දෝෂයකි. `--advisory <id,...>` මඟින් පරීක්ෂාවක් සඟවා නොගෙන
-අනතුරු ඇඟවීමක් (`!`) බවට පහත හෙළයි.
+සම්පූර්ණ අනුපිළිවෙළ මුද්රණය කරයි — පූර්ව කොන්දේසි (මූලාශ්රය නිරාකරණය වේ, මූලාශ්ර repository එකට සම්පූර්ණ ඉතිහාසය ඇත —
+shallow clone එකකට `stable/v3` push කළ නොහැක, පළමු
+බද්ධ කළ parent එකේදීම ලැබෙන පාර්ශ්වය pack එක ප්රතික්ෂේප කරයි, එබැවින් සම්පූර්ණ clone එකකින් වෙන් කිරීම සිදු කරන්න, නැතහොත් පළමුව `git fetch --unshallow origin` ක්රියාත්මක කරන්න —
+පෙර ටැගය පවතී, `package.json` ඉලක්ක අනුවාදය වේ, `release-freeze` issue එකක් විවෘතව ඇත, පවතින release ශාඛාවක විවෘත
+`Release branch not green` issue එකක් නොමැත —
+නොපවතින ශාඛාවක් හරිත ලෙස නොව, `?` නොදන්නා ලෙස වාර්තා වේ — Mergify `release` පෝලිම වින්යාස කර ඇත (G11: `queue_rules`, `checks_timeout`,
+`queue` ලේබලය), `release/*` ruleset එක තවමත් මකා දැමීම සහ force-push අවහිර කරයි, සහ
+`stable/v3` හා `develop` තවම නොපවතී), ශාඛා පියවර දෙක, සක්රිය නොවූ කාර්යප්රවාහවල කුමන
+ප්රේරක සහ `if:` කොන්දේසි සත්ය වන්නේද (සහ repository විචල්යයකින් තවමත් අවහිර කර ඇති හෝ
+canonical repository එකට නිශ්චිත කර ඇති ඒවා), අපේක්ෂිත dist-tags (`latest` → 3.9.0, `next` සහ
+`nightly` හිස්) සහ ආපසු පෙරළීම. පිටවීම `0` = `RESULT: READY`, `1` = අවහිර කරන පූර්ව කොන්දේසියක්
+අසාර්ථක විය (`✗`), `2` = භාවිත දෝෂයකි. `--advisory <id,...>` මඟින් පරීක්ෂාවක් සඟවා නොගෙන අනතුරු ඇඟවීමක් (`!`)
+දක්වා පහත හෙළයි.
 
-3.9.0 release freeze එක තවමත් විවෘතව තිබියදී සැබෑ වෙන් කිරීමේ dry-run එක ක්රියාත්මක කරන්න — ශාඛා
-tag එකෙන් පසුව සහ අදියර 12c විසින් freeze එක ඉවත් කිරීමට පෙර සාදනු ලැබේ.
+3.9.0 release freeze එක තවමත් විවෘතව තිබියදී සැබෑ වෙන් කිරීමේ වියළි ධාවනය ක්රියාත්මක කරන්න — ශාඛා
+ටැගයට පසුව සහ අදියර 12c මඟින් freeze එක ඉවත් කිරීමට පෙර නිර්මාණය කෙරේ.
 
 ### 3.8.58 පෙරහුරුව (fork සඳහා පමණි)
 
 ```bash
-# 1. පෙරහුරු පරාමිති සමඟ වත්මන් tip එක මත dry-run කරන්න
+# 1. පෙරහුරු පරාමිති සමඟ වත්මන් අග්රය මත වියළි ධාවනයක් සිදු කරන්න
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. FORK remote එකකට එරෙහිව ක්රියාත්මක කරන්න (origin, හෝ canonical repository එකේ URL එක ඇති
-#    ඕනෑම remote එකක් ප්රතික්ෂේප කෙරේ; සෑම පියවරකදීම terminal එකෙන් තහවුරු කිරීම ඉල්ලයි)
+# 2. FORK remote එකකට එරෙහිව ක්රියාත්මක කරන්න (origin, හෝ URL එක canonical
+#    repository එක වන ඕනෑම remote එකක් ප්රතික්ෂේප කෙරේ; සෑම පියවරකදීම terminal එකේ තහවුරු කිරීම ඉල්ලයි)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. fork එක තුළ dormant workflow අත්හදා බලන්න (dry-run එක canonical-repository pin එකක්
-#    වාර්තා කරන තැන්වල workflow_dispatch), ඉන්පසු rollback කරන්න
+# 3. fork එකේ සක්රිය නොවූ කාර්යප්රවාහ අත්හදා බලන්න (වියළි ධාවනය
+#    canonical-repository pin එකක් වාර්තා කරන තැන්වල workflow_dispatch), පසුව ආපසු පෙරළන්න
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop bump commit එක git plumbing භාවිතයෙන් සාදනු ලැබේ (working tree එක ස්පර්ශ නොවේ) සහ
-cycle-open commit එකක් මෙන් එම ගොනු පහම ඉහළ නංවයි: `package.json`, `open-sse/package.json`,
+develop වැඩි කිරීමේ commit එක git plumbing භාවිතයෙන් ගොඩනඟයි (working tree එක ස්පර්ශ නොවේ) සහ
+cycle-open commit එකක් මෙන් එකම ගොනු පහ වැඩි කරයි: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json` සහ `docs/openapi.yaml`. `[4.0.0]`
-CHANGELOG කොටස සහ එහි i18n පිටපත්, එහි පළමු PR එකට පෙර `develop` මත පසුව විවෘත කෙරේ.
-script එක කිසිවිටෙක npm dist-tags වෙනස් නොකරයි — ඒවා scratch package එකක් මත පෙරහුරු කරන්න.
+CHANGELOG කොටස සහ එහි i18n පිටපත්, එහි පළමු
+PR එකට පෙර, පසුව `develop` මත විවෘත කෙරේ. script එක කිසිවිටෙක npm dist-tags වෙනස් නොකරයි — ඒවා තාවකාලික පරීක්ෂණ package එකක් මත පෙරහුරු කරන්න.
 
-### PR පෙරදසුන් artifact එක (එක් වරක් build කර, එම bytes ම ප්රවර්ධනය කරන්න)
+### PR පෙරදසුන් artifact එක (වරක් ගොඩනඟා, එම bytes ම ප්රවර්ධනය කරන්න)
 
-`.github/workflows/preview-artifact.yml` මඟින් PR head එකකින් එක් production tarball එකක් build කර
-එම නිශ්චිත build එක validate කරයි (#8084 කොටස (a)). එකම repository එකේ PR සඳහා පමණි; කිසිවක් publish නොකෙරේ.
+`.github/workflows/preview-artifact.yml` මඟින් PR head එකකින් එක් production tarball එකක් ගොඩනඟා
+එම නිශ්චිත build එක වලංගු කරයි (#8084 කොටස (a)). එකම repository එකේ PR සඳහා පමණි; කිසිවක් publish නොකෙරේ.
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # හෝ `preview-artifact` ලේබලය එක් කරන්න
+gh workflow run preview-artifact.yml -f pr_number=<N>   # නැතහොත් `preview-artifact` ලේබලය එක් කරන්න
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # පෙරදසුන් ස්ථාපනය
 ```
 
-ධාවනය `npm ci`, `npm run build:release`, `npm run check:pack-artifact` සිදු කර, tarball එක
-pack කර, `npm run check:pack-boot` (ව්යාජ secrets, තාවකාලික data dir) ක්රියාත්මක කර, නැවත pack කර
-digest එක සමාන නොවේ නම් අසමත් වේ; ඉන්පසු `artifact-identity.json` (head SHA, base
+ධාවනය `npm ci`, `npm run build:release`, `npm run check:pack-artifact` ක්රියාත්මක කර, tarball එක
+pack කර, `npm run check:pack-boot` (ව්යාජ secrets, තාවකාලික data dir) ක්රියාත්මක කර, නැවත pack කර,
+digest එක සමාන නොවේ නම් අසාර්ථක වේ; ඉන්පසු `artifact-identity.json` (head SHA, base
 SHA, lockfile hash, platform, arch, node ABI, bundler, build policy —
-`scripts/release/artifact-identity.mjs`) සටහන් කර වෙනම job එකකදී tarball එක සනාථ කරයි. පෙරදසුනක්
-ප්රවර්ධනය කිරීම යනු එම tarball එක ස්ථාපනය කිරීමයි: කිසිවිටෙක source වෙතින් නැවත build නොකරන්න.
+`scripts/release/artifact-identity.mjs`) වාර්තා කර වෙනම job එකකදී tarball එක සහතික කරයි. පෙරදසුනක්
+ප්රවර්ධනය කිරීම යනු එම tarball එක ස්ථාපනය කිරීමයි: මූලාශ්රයෙන් කිසිවිටෙක නැවත ගොඩනඟන්න එපා.
 
 ### වෙන් කිරීම (3.9.0, GO පසු)
 
-1. GO එක [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) තුළ සටහන් කර ඇත.
+1. GO [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) හි වාර්තා කර ඇත.
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` මඟින් `RESULT: READY` මුද්රණය කරයි.
-3. dry-run එක මුද්රණය කරන විධාන භාවිතයෙන් `origin` මත ශාඛා අතින් සාදන්න —
+3. වියළි ධාවනය මුද්රණය කරන විධාන භාවිතයෙන් `origin` මත ශාඛා අතින් නිර්මාණය කරන්න —
    script එක `origin` වෙත push කිරීම ප්රතික්ෂේප කරයි. සමාලෝචනය කළ develop commit එකක් නැවත භාවිත කිරීමට,
-   පළමුව 3.9.0 tip එක මත ඔබේ fork එකට එරෙහිව `--execute` පෙරහුරුව ක්රියාත්මක කරන්න; එය SHA දෙකම මුද්රණය කරන අතර,
+   පළමුව ඔබේ fork එකට එරෙහිව 3.9.0 අග්රය මත `--execute` පෙරහුරුව ක්රියාත්මක කරන්න; එය SHA දෙකම මුද්රණය කරන අතර,
    එම commits ම push කළ හැක:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. පළමු PR එක එක් කිරීමට පෙර `stable/v3` සහ `develop` ආරක්ෂා කරන්න (rulesets + merge queue).
-5. ශාඛා පැවතීම මත dormant workflow සක්රිය වේ: `forward-port.yml` (`stable/v3` වෙත push කිරීම),
+4. පළමු PR එක ඒකාබද්ධ කිරීමට පෙර `stable/v3` සහ `develop` ආරක්ෂා කරන්න (රීති කට්ටල + ඒකාබද්ධ කිරීමේ පෝලිම).
+5. අක්රිය කාර්ය ප්රවාහ ශාඛා පැවතීම මත සක්රිය වේ: `forward-port.yml` (`stable/v3` වෙත push කිරීම),
    `validate-stable-pr.yml` (`stable/v3` වෙත PR) සහ `nightly-v4-build.yml`
-   (`develop` build කරයි). සජීවී කිරීමට පෙර, `secrets.FORWARD_PORT_TOKEN` repository secret එක සකසන්න (එවිට
-   forward-port PR මත CI ක්රියාත්මක වේ); හිමිකරු repository variable එක වන
-   `vars.NIGHTLY_PUBLISH` `true` ලෙස සකසා npm Trusted Publishing විසින්
-   `nightly-v4-build.yml` පිළිගන්නා තුරු nightly publishing අක්රියව පවතී. නාලිකා resolution එක
-   `scripts/release/dist-tag.mjs` වන අතර, `npm-publish.yml` භාවිත කරන resolver එකද එයම වේ.
-6. නාලිකා සත්යාපනය කරන්න: `npm view omniroute dist-tags --json` මඟින් `latest` = 3.9.0 සහ
-   v4 publish කරන තුරු `next` / `nightly` නොමැති බව පෙන්වයි.
-7. අවශ්ය නම් rollback කරන්න: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   (`develop` ගොඩනඟයි). සජීවී කිරීමට පෙර, `secrets.FORWARD_PORT_TOKEN` repository secret එක සකසන්න (එවිට
+   ඉදිරියට-port කරන PR මත CI ක්රියාත්මක වේ); හිමිකරු repository
+   variable එක වන `vars.NIGHTLY_PUBLISH`, `true` ලෙස සකසා npm Trusted Publishing විසින්
+   `nightly-v4-build.yml` පිළිගන්නා තෙක් රාත්රී ප්රකාශනය අක්රියව පවතී. නාලිකා නිර්ණය `scripts/release/dist-tag.mjs` මඟින් සිදු වේ; එය
+   `npm-publish.yml` භාවිත කරන නිර්ණයකයම වේ.
+6. නාලිකා සත්යාපනය කරන්න: `npm view omniroute dist-tags --json` මඟින් `latest` = 3.9.0 ලෙසත්, v4 ප්රකාශනය වන තෙක්
+   `next` / `nightly` නොමැති බවත් පෙන්වයි.
+7. අවශ්ය නම් ආපසු හැරවීම: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    සහ `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

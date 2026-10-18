@@ -290,39 +290,39 @@ npm run test:combo:live:vps:failover     # 新增真實的跨 provider 容錯移
 ## 專案結構
 
 ```
-src/                        # TypeScript（.ts / .tsx）
+src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
 │   ├── (dashboard)/        # 儀表板頁面（23 個區段）
 │   ├── api/                # API 路由（51 個目錄）
-│   └── login/              # 驗證頁面（.tsx）
+│   └── login/              # 驗證頁面 (.tsx)
 ├── domain/                 # 政策引擎（policyEngine、comboResolver、costRules 等）
-├── lib/                    # 核心業務邏輯（.ts）
+├── lib/                    # 核心業務邏輯 (.ts)
 │   ├── a2a/                # Agent-to-Agent v0.3 協定伺服器
-│   ├── acp/                # Agent Communication Protocol 註冊表
+│   ├── acp/                # Agent Communication Protocol 登錄檔
 │   ├── compliance/         # 合規政策引擎
 │   ├── db/                 # SQLite 領域模組 + 130 個遷移
-│   ├── memory/             # 持久性對話記憶
-│   ├── oauth/              # OAuth 提供者、服務與工具
-│   ├── skills/             # 可擴展技能框架
+│   ├── memory/             # 持久化對話記憶體
+│   ├── oauth/              # OAuth 提供者、服務與公用程式
+│   ├── skills/             # 可擴充技能框架
 │   ├── usage/              # 使用量追蹤與成本計算
-│   └── localDb.ts          # 僅為重新匯出層 — 絕不在此加入邏輯
+│   └── localDb.ts          # 僅限重新匯出層——切勿在此新增邏輯
 ├── middleware/              # 請求中介軟體（promptInjectionGuard）
-├── mitm/                   # MITM 代理（憑證、DNS、目標路由）
+├── mitm/                   # MITM Proxy（憑證、DNS、目標路由）
 ├── shared/
-│   ├── components/         # React 元件（.tsx）
-│   ├── constants/          # 提供者定義（329）、MCP 範圍、19 種路由策略
+│   ├── components/         # React 元件 (.tsx)
+│   ├── constants/          # 提供者定義（329 個）、MCP 範圍、19 種路由策略
 │   ├── utils/              # 斷路器、清理器、驗證輔助工具
-│   └── validation/         # Zod v4 schema
-└── sse/                    # SSE 代理管線
+│   └── validation/         # Zod v4 結構描述
+└── sse/                    # SSE Proxy 管線
 
 open-sse/                   # @omniroute/open-sse 工作區
-├── executors/              # 89 個執行器實作模組
-├── handlers/               # 11 個請求處理器（chat、responses、embeddings、images 等）
-├── mcp-server/             # MCP 伺服器（110 個獨特工具、3 種傳輸、33 個範圍）
+├── executors/              # 150 個執行器模組（執行器類別 + 各提供者的輔助工具）
+├── handlers/               # 11 個請求處理常式（聊天、回應、嵌入、圖像等）
+├── mcp-server/             # MCP 伺服器（110 個獨立工具、3 種傳輸方式、33 個範圍）
 ├── services/               # 178 個頂層服務（combo、autoCombo、rateLimitManager 等）
 ├── translator/             # 格式轉換器（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
 ├── transformer/            # Responses API 轉換器
-└── utils/                  # 22 個工具模組（stream、TLS、proxy、logging）
+└── utils/                  # 22 個公用程式模組（串流、TLS、Proxy、記錄）
 
 electron/                   # Electron 桌面應用程式（跨平台）
 
@@ -335,23 +335,23 @@ tests/
 └── load/                   # 負載測試
 
 docs/
-├── adr/                     # 架構決策記錄
+├── adr/                     # 架構決策紀錄
 ├── architecture/            # 系統架構與韌性
-├── comparison/              # OmniRoute 與替代方案
+├── comparison/              # OmniRoute 與替代方案的比較
 ├── compression/             # 壓縮指南與規則
 ├── dev/                     # 開發指南
-├── diagrams/                # 架構圖表
+├── diagrams/                # 架構圖
 ├── frameworks/              # MCP、A2A、OpenCode、Memory、Skills
 ├── guides/                  # 使用者指南、Docker、設定、疑難排解
 ├── i18n/                    # 國際化 README 翻譯
 ├── marketing/               # 行銷素材
-├── ops/                     # 部署、代理、覆蓋率、發布
-├── providers/               # 提供者專屬文件
+├── ops/                     # 部署、Proxy、覆蓋率、版本發布
+├── providers/               # 提供者專用文件
 ├── reference/               # API 參考、環境變數、CLI 工具、免費方案
-├── releases/                # 版本說明
+├── releases/                # 版本資訊
 ├── routing/                 # 自動組合引擎、推理重播
-├── screenshots/             # 儀表板螢幕截圖
-├── security/                # 護欄、合規、隱匿、權杖
+├── screenshots/             # 儀表板螢幕擷取畫面
+├── security/                # 防護機制、合規、隱匿、權杖
 └── specs/                   # 設計規格
 ```
 

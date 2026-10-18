@@ -385,42 +385,45 @@ npm run build:release
 
 ---
 
-## 3.9.0 LTS ቅርንጫፍ መለያየት (በ3.8.58 የተለማመደ)
+## 3.9.0 LTS መቁረጥ (በ3.8.58 የተለማመደ)
 
-ከv3.8.59 በኋላ የሚመጣው ስሪት 3.9.0 ሲሆን፣ የዚህ የቅርብ ጊዜ ኮሚት ለረጅም ጊዜ ወደሚቆዩ ሁለት ቅርንጫፎች ይከፈላል፦
-`stable/v3` (የv3 LTS መስመር፣ npm `latest`) እና `develop` (v4፣ ወደ 4.0.0 የተሻሻለ፣ npm
+ከv3.8.59 በኋላ ቀጣዩ ስሪት 3.9.0 ነው፣ እና የመጨረሻው commit ሁለት ረጅም ጊዜ የሚቆዩ ቅርንጫፎች ይሆናል፦
+`stable/v3` (የv3 LTS መስመር፣ npm `latest`) እና `develop` (v4፣ ወደ 4.0.0 የተጨመረ፣ npm
 `nightly`)። የቅርንጫፍ/ቻናል ሞዴሉ፣ forward-port እና መለያዎቹ በ
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ውስጥ ይገኛሉ፤ ዕቅዱም በ[ROADMAP](../../ROADMAP.md) (ደረጃ 3) ውስጥ ይገኛል። መለያየቱ አንድ ጊዜ ብቻ ይካሄዳል፤
-3.8.58 ሂደቱን ከመጀመሪያ እስከ መጨረሻ በfork ላይ ይለማመዳል፣ 3.8.59 ደግሞ በ
-[GO/NO-GO ማረጋገጫ ዝርዝር](./LTS_GO_NO_GO.md) ይዘጋል።
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md) ውስጥ ይገኛሉ፤ ዕቅዱም በ[ROADMAP](../../ROADMAP.md) (ደረጃ 3) ውስጥ ይገኛል። መቁረጡ አንድ ጊዜ ብቻ ይከናወናል፤
+3.8.58 በfork ላይ ከመጀመሪያ እስከ መጨረሻ ልምምድ ያደርግበታል፣ 3.8.59 ደግሞ በ
+[GO/NO-GO የማረጋገጫ ዝርዝር](./LTS_GO_NO_GO.md) ይዘጋል።
 
-### የሙከራ አሂድ (ለንባብ ብቻ፣ በማንኛውም ጊዜ አስተማማኝ)
+### የሙከራ አሂድ (ለንባብ ብቻ፣ በማንኛውም ጊዜ ደህንነቱ የተጠበቀ)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ትክክለኛው መለያየት፦ 3.9.0 ከHEAD፣ ቀዳሚው tag v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # የምንጩን commit ይወስኑ
+npm run release:dry-run-lts-cut                       # እውነተኛው መቁረጥ፦ 3.9.0 ከHEAD፣ የቀድሞው tag v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # የምንጭ commitን አስ固定
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ምንም ነገር አያስፈጽምም፤ git እና `gh`ን አንብቦ
-ሙሉውን ቅደም ተከተል ያትማል — ቅድመ ሁኔታዎች (ምንጩ ሊፈታ የሚችል መሆኑ፣ ቀዳሚው tag መኖሩ፣ `package.json`
-የዒላማው ስሪት መሆኑ፣ አንድ `release-freeze` issue ክፍት መሆኑ፣ ባለው የልቀት ቅርንጫፍ ላይ
-ክፍት `Release branch not green` issue አለመኖሩ — የማይኖር ቅርንጫፍ `?` ያልታወቀ ብሎ ያሳያል፣ በፍጹም
-green አይባልም — የMergify `release` queue መዋቀሩ (G11፦ `queue_rules`፣ `checks_timeout`፣
-መለያ `queue`)፣ የ`release/*` ruleset አሁንም መሰረዝን እና force-pushን መከልከሉ፣ እንዲሁም
-`stable/v3` እና `develop` ገና አለመኖራቸው)፣ ሁለቱ የቅርንጫፍ ደረጃዎች፣ የትኞቹ የቦዘኑ workflow
-triggerዎች እና `if:` ሁኔታዎች true እንደሚሆኑ (እና የትኞቹ በrepository variable እንደታገዱ ወይም
-ወደ canonical repository እንደተወሰኑ)፣ የሚጠበቁት dist-tagዎች (`latest` → 3.9.0፣ `next` እና
-`nightly` ባዶ) እና rollback። Exit `0` = `RESULT: READY`፣ `1` = አንድ ከልካይ ቅድመ ሁኔታ
-አልተሳካም (`✗`)፣ `2` = የአጠቃቀም ስህተት። `--advisory <id,...>` አንድን ማረጋገጫ ሳይደብቀው
+`scripts/release/dry-run-lts-cut.mjs` ምንም ነገር አያስፈጽምም፦ git እና `gh`ን አንብቦ
+ሙሉውን ቅደም ተከተል ያትማል — ቅድመ ሁኔታዎች (ምንጩ ይፈታል፣ የምንጭ repositoryው ሙሉ history አለው —
+shallow clone `stable/v3`ን push ማድረግ አይችልም፣ ተቀባዩ ወገን በመጀመሪያው
+grafted parent ላይ packን ውድቅ ያደርጋል፤ ስለዚህ ከሙሉ clone ላይ ይቁረጡ ወይም መጀመሪያ `git fetch --unshallow origin` ያሂዱ —
+የቀድሞው tag አለ፣ `package.json` የዒላማው ስሪት ነው፣ የ`release-freeze` issue ክፍት ነው፣
+እና በነባር release branch ላይ ክፍት `Release branch not green` issue የለም —
+የሌለ branch `?` ያልታወቀ ብሎ ይመልሳል፣ ፈጽሞ green አይባልም —
+የMergify `release` queue ተዋቅሯል (G11፦ `queue_rules`፣ `checks_timeout`፣
+መለያ `queue`)፣ የ`release/*` ruleset አሁንም መሰረዝን እና force-pushን ይከለክላል፣ እንዲሁም
+`stable/v3` እና `develop` ገና የሉም)፣ ሁለቱን የbranch ደረጃዎች፣ የትኞቹ የቦዘኑ workflow
+triggerዎች እና `if:` ሁኔታዎች true እንደሚሆኑ (እና የትኞቹ በrepository variable
+እንደታገዱ ወይም ወደ canonical repository እንደተወሰኑ)፣ የሚጠበቁ dist-tagዎችን (`latest` → 3.9.0፣
+`next` እና `nightly` ባዶ) እና rollbackን ያትማል። መውጫ `0` = `RESULT: READY`፣ `1` = አጋጅ ቅድመ ሁኔታ
+አልተሳካም (`✗`)፣ `2` = የአጠቃቀም ስህተት። `--advisory <id,...>` ማረጋገጫን ሳይደብቀው
 ወደ ማስጠንቀቂያ (`!`) ዝቅ ያደርገዋል።
 
-የትክክለኛውን መለያየት የሙከራ አሂድ የ3.9.0 release freeze ገና ክፍት እያለ ያከናውኑ — ቅርንጫፎቹ
+የ3.9.0 release freeze ክፍት እያለ የእውነተኛውን መቁረጥ dry-run ያሂዱ — ቅርንጫፎቹ
 ከtag በኋላ እና ደረጃ 12c freezeን ከማንሳቱ በፊት ይፈጠራሉ።
 
 ### የ3.8.58 ልምምድ (በfork ላይ ብቻ)
 
 ```bash
-# 1. በአሁኑ tip ላይ በልምምድ መለኪያዎች የሙከራ አሂዱን ያከናውኑ
+# 1. በአሁኑ tip ላይ በልምምድ መለኪያዎች dry-run ያሂዱ
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
@@ -430,45 +433,45 @@ git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. በfork ውስጥ ያሉትን የቦዘኑ workflows ይሞክሩ (የሙከራ አሂዱ canonical-repository pin
-#    ባመለከተበት ቦታ workflow_dispatchን ይጠቀሙ)፣ ከዚያ rollback ያድርጉ
+# 3. በfork ውስጥ የቦዘኑ workflowዎችን ይሞክሩ (dry-run
+#    የcanonical-repository pin በሚዘግብበት ቦታ workflow_dispatch)፣ ከዚያ rollback ያድርጉ
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
 የdevelop bump commit በgit plumbing ይገነባል (ምንም working tree አይነካም) እና
-ከcycle-open commit ጋር ተመሳሳይ የሆኑትን አምስት ፋይሎች ያሻሽላል፦ `package.json`፣ `open-sse/package.json`፣
+ከcycle-open commit ጋር ተመሳሳይ የሆኑትን አምስት ፋይሎች ይጨምራል፦ `package.json`፣ `open-sse/package.json`፣
 `electron/package.json`፣ `package-lock.json` እና `docs/openapi.yaml`። የ`[4.0.0]`
-CHANGELOG ክፍል እና የi18n ተጓዳኞቹ በ`develop` ላይ ከመጀመሪያው
-PR በፊት ይከፈታሉ። scriptው የnpm dist-tagዎችን በፍጹም አይለውጥም — እነዚያን በscratch package ላይ ይለማመዱ።
+CHANGELOG ክፍል እና የi18n አቻዎቹ በ`develop` ላይ ከመጀመሪያው PR በፊት ይከፈታሉ።
+scriptው የnpm dist-tagዎችን ፈጽሞ አይለውጥም — እነዚያን በscratch package ላይ ይለማመዱ።
 
-### የPR ቅድመ-ዕይታ artifact (አንድ ጊዜ ይገንቡ፣ ተመሳሳይ bytes ያስተዋውቁ)
+### የPR ቅድመ-ዕይታ artifact (አንድ ጊዜ ይገንቡ፣ ተመሳሳዩን bytes ያስተዋውቁ)
 
 `.github/workflows/preview-artifact.yml` ከPR head አንድ የproduction tarball ይገነባል እና
-ያንኑ ትክክለኛ build ያረጋግጣል (#8084 ክፍል (a))። ለተመሳሳይ repository PRዎች ብቻ፤ ምንም ነገር አይታተምም።
+ያንኑ ትክክለኛ build ያረጋግጣል (#8084 ክፍል (a))። በተመሳሳይ repository ውስጥ ያሉ PRዎች ብቻ፤ ምንም ነገር አይታተምም።
 
 ```bash
-gh workflow run preview-artifact.yml -f pr_number=<N>   # ወይም `preview-artifact` መለያን ያክሉ
+gh workflow run preview-artifact.yml -f pr_number=<N>   # ወይም የ`preview-artifact` መለያን ያክሉ
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # የቅድመ-ዕይታ ጭነት
 ```
 
-አሂዱ `npm ci`፣ `npm run build:release`፣ `npm run check:pack-artifact`ን ያከናውናል፣
-tarballን ያሽጋል፣ `npm run check:pack-boot`ን ያስኬዳል (ሐሰተኛ secrets፣ ጊዜያዊ data dir)፣ እንደገና ያሽጋል እና
-digestው ተመሳሳይ ካልሆነ ያልፋል፤ ከዚያ `artifact-identity.json`ን (head SHA፣ base
+አሂዱ `npm ci`፣ `npm run build:release`፣ `npm run check:pack-artifact`ን ያስፈጽማል፣
+tarballን ያሽጋል፣ `npm run check:pack-boot`ን (ሐሰተኛ secrets፣ ጊዜያዊ data dir) ያሂዳል፣ እንደገና ያሽጋል እና
+digestው ተመሳሳይ ካልሆነ ያልተሳካ ይሆናል፤ ከዚያ `artifact-identity.json`ን (head SHA፣ base
 SHA፣ lockfile hash፣ platform፣ arch፣ node ABI፣ bundler፣ build policy —
-`scripts/release/artifact-identity.mjs`) ይመዘግባል እና tarballን በተለየ job ያረጋግጣል። ቅድመ-ዕይታን ማስተዋወቅ
-ማለት ያንን tarball መጫን ነው፦ ከsource ዳግም አይገንቡ።
+`scripts/release/artifact-identity.mjs`) ይመዘግባል እና tarballን በተለየ job ያረጋግጣል።
+ቅድመ-ዕይታን ማስተዋወቅ ማለት ያንን tarball መጫን ነው፦ ከsource ፈጽሞ እንደገና አይገንቡ።
 
-### መለያየቱ (3.9.0፣ ከGO በኋላ)
+### መቁረጡ (3.9.0፣ ከGO በኋላ)
 
 1. GO በ[LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md) ውስጥ ተመዝግቧል።
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY`ን ያትማል።
-3. የሙከራ አሂዱ ባተማቸው ትዕዛዞች ቅርንጫፎቹን በ`origin` ላይ በእጅ ይፍጠሩ — scriptው
-   ወደ `origin` push ለማድረግ ፈቃደኛ አይሆንም። የተገመገመ develop commitን እንደገና ለመጠቀም፣ መጀመሪያ
-   በ3.9.0 tip ላይ የ`--execute` ልምምድን በforkዎ ላይ ያከናውኑ፤ ሁለቱንም SHAዎች ያትማል፣ እና
+3. dry-run በሚያትማቸው commands `origin` ላይ ቅርንጫፎቹን በእጅ ይፍጠሩ —
+   scriptው ወደ `origin` push ማድረግን ውድቅ ያደርጋል። የተገመገመ develop commitን እንደገና ለመጠቀም
+   መጀመሪያ በforkዎ ላይ የ`--execute` ልምምዱን ከ3.9.0 tip ጋር ያሂዱ፤ ሁለቱንም SHAዎች ያትማል፣ እና
    ተመሳሳይ commits push ሊደረጉ ይችላሉ፦
 
    ```bash
@@ -476,16 +479,15 @@ SHA፣ lockfile hash፣ platform፣ arch፣ node ABI፣ bundler፣ build policy 
    ```
 
 4. የመጀመሪያው PR ከመዋሃዱ በፊት `stable/v3` እና `develop`ን ይጠብቁ (rulesets + merge queue)።
-5. የቦዘኑ workflows ቅርንጫፎቹ በመኖራቸው ይነቃሉ፦ `forward-port.yml` (ወደ
-   `stable/v3` push)፣ `validate-stable-pr.yml` (ወደ `stable/v3` የሚደረጉ PRዎች) እና `nightly-v4-build.yml`
-   (`develop`ን ይገነባል)። በቀጥታ ከመጀመሩ በፊት የ`secrets.FORWARD_PORT_TOKEN` repository secretን ያዘጋጁ (CI በ
-   forward-port PRዎች ላይ እንዲሰራ)፤ ባለቤቱ repository
+5. የቦዘኑት workflows ቅርንጫፎቹ ሲኖሩ ይነቃሉ፦ `forward-port.yml` (ወደ
+   `stable/v3` push ሲደረግ)፣ `validate-stable-pr.yml` (ወደ `stable/v3` የሚቀርቡ PRs) እና `nightly-v4-build.yml`
+   (`develop`ን ይገነባል)። በቀጥታ ሥራ ከመጀመሩ በፊት የ`secrets.FORWARD_PORT_TOKEN` repository secretን ያዘጋጁ (በዚህም CI በ
+   forward-port PRs ላይ እንዲሠራ)፤ ባለቤቱ የrepository
    variable `vars.NIGHTLY_PUBLISH`ን ወደ `true` እስኪያዘጋጅ እና npm Trusted Publishing
-   `nightly-v4-build.yml`ን እስኪቀበል ድረስ nightly publishing ጠፍቶ ይቆያል። የቻናል መፍቻው `scripts/release/dist-tag.mjs` ነው፤
-   `npm-publish.yml` የሚጠቀምበትም ያው resolver ነው።
-6. ቻናሎቹን ያረጋግጡ፦ `npm view omniroute dist-tags --json` `latest` = 3.9.0 እንደሆነ እና
-   v4 እስኪታተም ድረስ `next` / `nightly` አለመኖራቸውን ያሳያል።
-7. ካስፈለገ rollback፦ `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   `nightly-v4-build.yml`ን እስኪቀበል ድረስ የሌሊት ህትመት እንደቦዘነ ይቆያል። የchannel መወሰኛው `scripts/release/dist-tag.mjs` ሲሆን፣ `npm-publish.yml` የሚጠቀምበትም ይኸው መወሰኛ ነው።
+6. Channelsን ያረጋግጡ፦ `npm view omniroute dist-tags --json` `latest` = 3.9.0 እንደሆነ እና v4 እስኪታተም ድረስ
+   `next` / `nightly` እንደሌሉ ያሳያል።
+7. ካስፈለገ rollback ለማድረግ፦ `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    እና `npm dist-tag add omniroute@3.8.59 latest`።
 
 ---

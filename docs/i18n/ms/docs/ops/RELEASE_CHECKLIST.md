@@ -384,16 +384,16 @@ Sebelum menerbitkan sebarang keluaran v3.8.x, sahkan perkara tambahan berikut:
 
 ---
 
-## Pemotongan 3.9.0 LTS (diraptai dalam 3.8.58)
+## Pemotongan LTS 3.9.0 (diraptai dalam 3.8.58)
 
-Selepas v3.8.59, versi seterusnya ialah 3.9.0 dan tipnya menjadi dua cabang jangka panjang:
-`stable/v3` (barisan v3 LTS, npm `latest`) dan `develop` (v4, dinaikkan kepada 4.0.0, npm
-`nightly`). Model cabang/saluran, forward-port dan label terdapat dalam
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); pelannya terdapat dalam [ROADMAP](../../ROADMAP.md) (Fasa 3). Pemotongan dijalankan sekali;
-3.8.58 meraptainya dari awal hingga akhir pada fork, dan 3.8.59 ditutup dengan
+Selepas v3.8.59, versi seterusnya ialah 3.9.0 dan tipnya menjadi dua cabang berjangka panjang:
+`stable/v3` (barisan LTS v3, npm `latest`) dan `develop` (v4, dinaikkan kepada 4.0.0, npm
+`nightly`). Model cabang/saluran, port ke hadapan dan label terdapat dalam
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); pelannya terdapat dalam [ROADMAP](../../ROADMAP.md) (Fasa 3). Pemotongan dilaksanakan sekali;
+3.8.58 meraptainya dari awal hingga akhir pada fork, manakala 3.8.59 ditutup dengan
 [senarai semak GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Ujian percubaan (baca sahaja, selamat pada bila-bila masa)
+### Percubaan kering (baca sahaja, selamat pada bila-bila masa)
 
 ```bash
 npm run release:dry-run-lts-cut                       # pemotongan sebenar: 3.9.0 daripada HEAD, tag sebelumnya v3.8.59
@@ -401,25 +401,28 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # tetapkan commit sumber
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` tidak melaksanakan apa-apa: ia membaca git dan `gh` serta mencetak
-seluruh urutan — prasyarat (sumber dapat diselesaikan, tag sebelumnya wujud, `package.json` ialah
-versi sasaran, isu `release-freeze` terbuka, tiada isu `Release branch not green` yang terbuka
-pada cabang keluaran sedia ada — cabang yang tidak wujud dilaporkan sebagai `?` tidak diketahui, bukan
+keseluruhan urutan — prasyarat (sumber dapat diselesaikan, repositori sumber mempunyai sejarah penuh —
+klon cetek tidak boleh menolak `stable/v3`, pihak penerima menolak pek pada induk tercantum yang pertama,
+jadi lakukan pemotongan daripada klon penuh atau jalankan `git fetch --unshallow origin` terlebih dahulu — tag
+sebelumnya wujud, `package.json` ialah versi sasaran, isu `release-freeze` dibuka, tiada isu
+`Release branch not green` yang terbuka
+pada cabang keluaran sedia ada — cabang yang tidak wujud melaporkan `?` tidak diketahui, tidak sekali-kali
 hijau — baris gilir `release` Mergify dikonfigurasikan (G11: `queue_rules`, `checks_timeout`,
-label `queue`), set peraturan `release/*` masih menyekat pemadaman dan force-push, serta
+label `queue`), set peraturan `release/*` masih menyekat pemadaman dan tolakan paksa, serta
 `stable/v3` dan `develop` belum wujud), dua langkah cabang, pencetus aliran kerja dorman
 dan syarat `if:` yang menjadi benar (serta yang kekal disekat oleh pemboleh ubah repositori atau
 ditetapkan kepada repositori kanonik), dist-tag yang dijangkakan (`latest` → 3.9.0, `next` dan
-`nightly` kosong) serta pengunduran. Keluar dengan `0` = `RESULT: READY`, `1` = prasyarat penyekat
+`nightly` kosong) dan pengunduran. Kod keluar `0` = `RESULT: READY`, `1` = prasyarat penyekat
 gagal (`✗`), `2` = ralat penggunaan. `--advisory <id,...>` menurunkan taraf semakan kepada amaran (`!`)
 tanpa menyembunyikannya.
 
-Jalankan ujian percubaan pemotongan sebenar semasa pembekuan keluaran 3.9.0 masih dibuka — cabang
-dicipta selepas tag dan sebelum Fasa 12c menamatkan pembekuan.
+Jalankan percubaan kering bagi pemotongan sebenar sementara pembekuan keluaran 3.9.0 masih dibuka — cabang
+dicipta selepas tag dan sebelum Fasa 12c menarik balik pembekuan.
 
 ### Raptai 3.8.58 (fork sahaja)
 
 ```bash
-# 1. Ujian percubaan pada tip semasa dengan parameter raptai
+# 1. Percubaan kering pada tip semasa dengan parameter raptai
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
@@ -429,22 +432,22 @@ git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Uji aliran kerja dorman dalam fork (workflow_dispatch apabila ujian percubaan
-#    melaporkan penetapan kepada repositori kanonik), kemudian undur semula
+# 3. Jalankan aliran kerja dorman dalam fork (workflow_dispatch apabila percubaan kering
+#    melaporkan penetapan repositori kanonik), kemudian undur semula
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit kenaikan versi develop dibina dengan perpaipan git (tiada pepohon kerja disentuh) dan menaikkan
+Commit peningkatan develop dibina dengan paip dalaman git (tiada pepohon kerja disentuh) dan menaikkan
 lima fail yang sama seperti commit pembukaan kitaran: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` dan `docs/openapi.yaml`. Bahagian `[4.0.0]`
-CHANGELOG dan cerminan i18n-nya dibuka pada `develop` selepas itu, sebelum PR pertamanya.
-Skrip tersebut tidak pernah mengubah dist-tag npm — raptai perubahan itu pada pakej sementara.
+`electron/package.json`, `package-lock.json` dan `docs/openapi.yaml`. Bahagian CHANGELOG `[4.0.0]`
+dan cerminan i18n-nya dibuka pada `develop` selepas itu, sebelum PR pertamanya. Skrip tidak pernah
+mengubah dist-tag npm — raptai perubahan tersebut pada pakej sementara.
 
 ### Artifak pratonton PR (bina sekali, promosikan bait yang sama)
 
-`.github/workflows/preview-artifact.yml` membina satu tarball pengeluaran daripada head PR dan
-mengesahkan binaan tepat tersebut (#8084 bahagian (a)). PR daripada repositori yang sama sahaja; tiada apa-apa diterbitkan.
+`.github/workflows/preview-artifact.yml` membina satu tarball pengeluaran daripada kepala PR dan
+mengesahkan binaan tepat tersebut (bahagian (a) #8084). PR daripada repositori yang sama sahaja; tiada apa-apa diterbitkan.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # atau tambahkan label `preview-artifact`
@@ -454,37 +457,37 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # pemasangan pratonton
 ```
 
-Jalankan `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, bungkus
-tarball, jalankan `npm run check:pack-boot` (rahsia palsu, direktori data sementara), bungkus semula dan
-gagal melainkan cernanya seiras, kemudian rekodkan `artifact-identity.json` (SHA head, SHA asas,
-cincangan lockfile, platform, seni bina, ABI node, pembundel, dasar binaan —
-`scripts/release/artifact-identity.mjs`) dan sahkan tarball dalam tugas berasingan. Mempromosikan
-pratonton bermaksud memasang tarball tersebut: jangan sekali-kali bina semula daripada sumber.
+Proses tersebut menjalankan `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, membungkus
+tarball, menjalankan `npm run check:pack-boot` (rahsia palsu, direktori data sementara), membungkus semula dan
+gagal melainkan cernanya sepadan, kemudian merekodkan `artifact-identity.json` (SHA kepala, SHA asas,
+hash fail kunci, platform, seni bina, ABI node, pembundel, dasar binaan —
+`scripts/release/artifact-identity.mjs`) serta mengesahkan tarball dalam tugas berasingan. Mempromosikan
+pratonton bermaksud memasang tarball tersebut: jangan sekali-kali membina semula daripada sumber.
 
 ### Pemotongan (3.9.0, selepas GO)
 
 1. GO direkodkan dalam [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` mencetak `RESULT: READY`.
-3. Cipta cabang pada `origin` secara manual menggunakan perintah yang dicetak oleh ujian percubaan —
-   skrip enggan melakukan push ke `origin`. Untuk menggunakan semula commit develop yang telah disemak, jalankan
+3. Cipta cabang pada `origin` secara manual menggunakan perintah yang dicetak oleh percubaan kering —
+   skrip enggan menolak ke `origin`. Untuk menggunakan semula commit develop yang telah disemak, jalankan
    raptai `--execute` pada tip 3.9.0 terhadap fork anda terlebih dahulu; ia mencetak kedua-dua SHA dan
-   commit yang sama boleh dipush:
+   commit yang sama boleh ditolak:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Lindungi `stable/v3` dan `develop` (set peraturan + baris gilir penggabungan) sebelum PR pertama digabungkan.
-5. Aliran kerja dorman diaktifkan mengikut kewujudan cabang: `forward-port.yml` (push ke
+4. Lindungi `stable/v3` dan `develop` (set peraturan + baris gilir penggabungan) sebelum PR pertama diterima.
+5. Aliran kerja dorman diaktifkan berdasarkan kewujudan cabang: `forward-port.yml` (tolakan ke
    `stable/v3`), `validate-stable-pr.yml` (PR ke `stable/v3`) dan `nightly-v4-build.yml`
    (membina `develop`). Sebelum pelancaran, tetapkan rahsia repositori `secrets.FORWARD_PORT_TOKEN` (supaya CI berjalan pada
-   PR forward-port); penerbitan nightly kekal dimatikan sehingga pemilik menetapkan pemboleh ubah repositori
+   PR port ke hadapan); penerbitan setiap malam kekal dimatikan sehingga pemilik menetapkan pemboleh ubah repositori
    `vars.NIGHTLY_PUBLISH` kepada `true` dan npm Trusted Publishing menerima
-   `nightly-v4-build.yml`. Penyelesaian saluran dilakukan oleh `scripts/release/dist-tag.mjs`, penyelesai sama
-   yang digunakan oleh `npm-publish.yml`.
+   `nightly-v4-build.yml`. Penentuan saluran dilakukan oleh `scripts/release/dist-tag.mjs`, penentu yang sama
+   digunakan oleh `npm-publish.yml`.
 6. Sahkan saluran: `npm view omniroute dist-tags --json` menunjukkan `latest` = 3.9.0 dan tiada
    `next` / `nightly` sehingga v4 diterbitkan.
-7. Pengunduran, jika diperlukan: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+7. Undur semula, jika perlu: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    dan `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

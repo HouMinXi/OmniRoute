@@ -253,14 +253,22 @@ dtí go dtaispeántar go bhfuil an nasc gníomhach.
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
 #   ↳ priontálann sé an rún UAIR AMHÁIN — cóipeáil anois é
-omniroute tokens list                 # folaithe: aitheantas, ainm, scóip, réimír, stádas, dul in éag
+omniroute tokens list                 # folaithe: aitheantas, ainm, raon feidhme, réimír, stádas, dul in éag
 omniroute tokens revoke <id|prefix>   # cúlghair láithreach
-omniroute tokens scopes               # mínigh na trí scóip
+omniroute tokens scopes               # mínigh na trí raon feidhme
 ```
 
-Teastaíonn dintiúr **riarthóra** ó na horduithe `tokens`. Is féidir leat
-comharthaí a bhainistiú sa phainéal freisin faoi **Socruithe → Comharthaí
-Rochtana** (cruthaigh, cúlghair, cóipeáil uair amháin).
+Teastaíonn dintiúr **admin** ó orduithe `tokens`. Is féidir leat comharthaí a bhainistiú freisin sa
+deais faoi **Socruithe → Comharthaí Rochtana** (cruthaigh, cúlghair, cóipeáil uair amháin).
+
+Ní féidir comhartha a chruthú riamh le níos mó pribhléide ná mar atá ag a chruthaitheoir. Ní féidir
+comhartha `admin` a chruthú ach amháin ag an oibreoir — trí sheisiún na deaise, an
+CLI áitiúil ar an bhfreastalaí féin, `omniroute connect` leis an bhfocal faire, nó
+ásc a bhfuil logáil isteach díchumasaithe air. Ní féidir le dintiúir mheaisín (comhartha rochtana `admin`,
+nó eochair API leis an raon feidhme `manage`/`admin`) ach comharthaí `write` agus `read`
+a chruthú; má iarrtar `--scope admin` orthu, seoltar `403` ar ais.
+
+Ní féidir comhartha a chruthú riamh le níos mó pribhléidí ná mar atá ag a chruthaitheoir. Is é an t-oibreoir amháin atá in ann comhartha `admin` a chruthú: trí sheisiún an deais, an CLI áitiúil ar an bhfreastalaí féin, `omniroute connect` leis an bhfocal faire, nó in ásc ina bhfuil logáil isteach díchumasaithe. Ní féidir le dintiúir mheaisín (comhartha rochtana `admin` nó eochair API le scóip `manage`/`admin`) ach comharthaí `write` agus `read` a chruthú; tugann iarratas ar `--scope admin` leo `403` ar ais.
 
 ---
 

@@ -245,15 +245,23 @@ ativa.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ exibe o segredo UMA VEZ — copie-o agora
-omniroute tokens list                 # mascarado: id, nome, escopo, prefixo, status, expiração
+#   ↳ exibe o segredo UMA ÚNICA VEZ — copie-o agora
+omniroute tokens list                 # mascarado: ID, nome, escopo, prefixo, status, expiração
 omniroute tokens revoke <id|prefix>   # revoga imediatamente
 omniroute tokens scopes               # explica os três escopos
 ```
 
-Os comandos `tokens` exigem uma credencial de **administrador**. Você também pode
-gerenciar tokens no painel, em **Configurações → Tokens de acesso** (criar,
-revogar, copiar uma única vez).
+Os comandos `tokens` exigem uma credencial de **administrador**. Você também pode gerenciar tokens no
+painel em **Configurações → Tokens de acesso** (criar, revogar, copiar uma única vez).
+
+Um token nunca pode ser emitido com mais privilégios do que seu criador possui. Um
+token `admin` só pode ser criado pelo operador — pela sessão do painel, pela
+CLI local no próprio servidor, por `omniroute connect` com a senha ou por uma
+instância com o login desabilitado. Credenciais de máquina (um token de acesso
+`admin` ou uma chave de API com o escopo `manage`/`admin`) podem emitir apenas
+tokens `write` e `read`; solicitar `--scope admin` com essas credenciais retorna `403`.
+
+Um token nunca pode ser criado com mais privilégios do que seu criador possui. Somente o operador pode criar um token `admin`: pela sessão do painel, pela CLI local no próprio servidor, por `omniroute connect` com a senha ou em uma instância com login desativado. Credenciais de máquina (um token de acesso `admin` ou uma chave de API com escopo `manage`/`admin`) só podem criar tokens `write` e `read`; solicitar `--scope admin` com essas credenciais retorna `403`.
 
 ---
 

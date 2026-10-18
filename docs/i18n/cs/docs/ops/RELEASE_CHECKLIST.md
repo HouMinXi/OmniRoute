@@ -389,45 +389,48 @@ Před vydáním jakékoli verze v3.8.x ověřte také následující položky:
 
 ## Vydání 3.9.0 LTS (nacvičeno ve verzi 3.8.58)
 
-Po verzi v3.8.59 následuje verze 3.9.0 a její špička se stane základem dvou dlouhodobých větví:
-`stable/v3` (řada v3 LTS, npm `latest`) a `develop` (v4, navýšená na 4.0.0, npm
-`nightly`). Model větví/kanálů, dopředné portování a štítky jsou popsány v
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); plán je v dokumentu [ROADMAP](../../ROADMAP.md) (fáze 3). Vydání proběhne pouze jednou;
-verze 3.8.58 jej kompletně nacvičí na forku a verze 3.8.59 bude uzavřena pomocí
+Po v3.8.59 následuje verze 3.9.0 a její vrchol se stane základem dvou dlouhodobých větví:
+`stable/v3` (řada v3 LTS, npm `latest`) a `develop` (v4, zvýšená na 4.0.0, npm
+`nightly`). Model větví/kanálů, forward-port a štítky jsou popsány v
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); plán je v dokumentu [ROADMAP](../../ROADMAP.md) (fáze 3). Vydání se provede jednou;
+ve verzi 3.8.58 se celý postup od začátku do konce nacvičí na forku a verze 3.8.59 bude uzavřena pomocí
 [kontrolního seznamu GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Zkušební běh (pouze pro čtení, kdykoli bezpečný)
+### Zkušební běh (pouze pro čtení, bezpečný kdykoli)
 
 ```bash
 npm run release:dry-run-lts-cut                       # skutečné vydání: 3.9.0 z HEAD, předchozí značka v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # připnutí zdrojového commitu
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` nic neprovádí: čte informace z git a `gh` a vypíše
-celou posloupnost — předpoklady (zdroj lze přeložit na commit, předchozí značka existuje, soubor `package.json` obsahuje
-cílovou verzi, je otevřen issue `release-freeze`, není otevřen žádný issue `Release branch not green`
-pro existující release větev — neexistující větev je hlášena jako `?` neznámá, nikdy jako
-zelená — je nakonfigurována fronta Mergify `release` (G11: `queue_rules`, `checks_timeout`,
-štítek `queue`), sada pravidel `release/*` stále blokuje odstranění a vynucené pushnutí a
-`stable/v3` ani `develop` zatím neexistují), dva kroky vytvoření větví, které spouštěče neaktivních workflow
-a podmínky `if:` se stanou pravdivými (a které zůstanou blokované proměnnou repozitáře nebo
-připnuté ke kanonickému repozitáři), očekávané dist-tag značky (`latest` → 3.9.0, `next` a
+`scripts/release/dry-run-lts-cut.mjs` nic nevykonává: načte git a `gh` a vypíše
+celou posloupnost — předpoklady (zdroj lze přeložit, zdrojový repozitář má úplnou historii —
+mělký klon nemůže odeslat `stable/v3`, přijímající strana odmítne balíček u prvního
+naroubovaného rodiče, proto vydání proveďte z úplného klonu nebo nejprve spusťte `git fetch --unshallow origin` —
+předchozí značka existuje, `package.json` obsahuje cílovou verzi, je otevřen problém se štítkem
+`release-freeze`, na existující vydávací větvi není otevřen žádný problém
+`Release branch not green` — u větve, která neexistuje, se zobrazí neznámý stav `?`, nikdy
+zelený — fronta Mergify `release` je nakonfigurována (G11: `queue_rules`, `checks_timeout`,
+štítek `queue`), sada pravidel `release/*` stále blokuje odstranění a vynucené odeslání a
+`stable/v3` ani `develop` dosud neexistují), dva kroky pro větve, které spouštěče neaktivních
+workflow a podmínky `if:` se stanou pravdivými (a které zůstanou blokovány proměnnou repozitáře
+nebo připnuty ke kanonickému repozitáři), očekávané dist-tag (`latest` → 3.9.0, `next` a
 `nightly` prázdné) a postup vrácení změn. Návratový kód `0` = `RESULT: READY`, `1` = nesplněný
 blokující předpoklad (`✗`), `2` = chyba použití. `--advisory <id,...>` sníží závažnost kontroly
 na varování (`!`), aniž by ji skryl.
 
-Spusťte zkušební běh skutečného vydání, dokud je zmrazení vydání 3.9.0 stále aktivní — větve
-se vytvoří po značce a před tím, než fáze 12c zmrazení ukončí.
+Zkušební běh skutečného vydání spusťte, dokud je zmrazení vydání 3.9.0 stále aktivní — větve
+se vytvoří po značce a předtím, než fáze 12c zmrazení zruší.
 
-### Nácvik verze 3.8.58 (pouze fork)
+### Nácvik verze 3.8.58 (pouze na forku)
 
 ```bash
-# 1. Zkušební běh na aktuální špičce s parametry nácviku
+# 1. Zkušební běh na aktuálním vrcholu s parametry nácviku
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Provedení vůči vzdálenému FORKU (origin nebo jakýkoli vzdálený repozitář, jehož URL odpovídá
-#    kanonickému repozitáři, bude odmítnut; každý krok vyžaduje potvrzení v terminálu)
+# 2. Provedení vůči vzdálenému FORKU (origin ani žádný vzdálený repozitář, jehož URL odpovídá
+#    kanonickému repozitáři, není povolen; každý krok vyžaduje potvrzení v terminálu)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
@@ -438,16 +441,18 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit navyšující verzi ve větvi develop je vytvořen pomocí nízkoúrovňových nástrojů git (pracovní strom
-se nemění) a aktualizuje stejných pět souborů jako commit otevírající cyklus: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` a `docs/openapi.yaml`. Sekce `[4.0.0]`
-v souboru CHANGELOG a její lokalizované varianty se následně otevřou ve větvi `develop`, ještě před jejím prvním
-PR. Skript nikdy nemění dist-tag značky npm — nacvičte je na pomocném balíčku.
+Commit zvyšující verzi ve větvi develop se vytvoří pomocí nízkoúrovňových nástrojů gitu
+(pracovní strom zůstane nedotčen) a aktualizuje stejných pět souborů jako commit otevírající
+cyklus: `package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json`
+a `docs/openapi.yaml`. Sekce `[4.0.0]` souboru CHANGELOG a její lokalizované kopie se následně
+otevřou ve větvi `develop`, ještě před jejím prvním PR. Skript nikdy nemění npm dist-tag —
+jejich postup nacvičte na pomocném balíčku.
 
-### Artefakt náhledu PR (sestavit jednou, propagovat stejné bajty)
+### Artefakt náhledu PR (sestavte jednou, propagujte stejné bajty)
 
-`.github/workflows/preview-artifact.yml` sestaví jeden produkční tarball ze špičky PR a
-ověří přesně toto sestavení (část (a) úkolu #8084). Pouze PR ze stejného repozitáře; nic se nepublikuje.
+`.github/workflows/preview-artifact.yml` vytvoří jeden produkční tarball z hlavičky PR a
+ověří přesně toto sestavení (část (a) problému #8084). Pouze PR ze stejného repozitáře;
+nic se nepublikuje.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # nebo přidejte štítek `preview-artifact`
@@ -458,36 +463,37 @@ npm install -g ./omniroute-*.tgz                          # instalace náhledu
 ```
 
 Běh provede `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, zabalí
-tarball, spustí `npm run check:pack-boot` (falešné tajné údaje, dočasný datový adresář), znovu jej zabalí a
-selže, pokud kontrolní součet není totožný. Poté zaznamená `artifact-identity.json` (SHA špičky, SHA
-základní větve, hash zamykacího souboru, platforma, architektura, ABI Node, bundler, zásady sestavení —
-`scripts/release/artifact-identity.mjs`) a v samostatném jobu vytvoří atestaci tarballu. Propagace
-náhledu znamená instalaci tohoto tarballu: nikdy jej znovu nesestavujte ze zdrojového kódu.
+tarball, spustí `npm run check:pack-boot` (falešné tajné údaje, dočasný datový adresář),
+znovu jej zabalí a selže, pokud kontrolní součet není totožný; poté zaznamená
+`artifact-identity.json` (SHA hlavičky, SHA základu, hash zamykacího souboru, platformu,
+architekturu, ABI Node, bundler, zásady sestavení —
+`scripts/release/artifact-identity.mjs`) a v samostatné úloze vytvoří atestaci tarballu.
+Propagovat náhled znamená nainstalovat tento tarball: nikdy jej znovu nesestavujte ze zdrojového kódu.
 
 ### Vydání (3.9.0, po rozhodnutí GO)
 
 1. Rozhodnutí GO je zaznamenáno v [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` vypíše `RESULT: READY`.
-3. Vytvořte větve na `origin` ručně pomocí příkazů vypsaných zkušebním během — skript
-   odmítne pushnout do `origin`. Chcete-li znovu použít zkontrolovaný commit pro větev develop, spusťte nejprve
-   nácvik s parametrem `--execute` na špičce 3.9.0 vůči svému forku; vypíše obě SHA a
-   stejné commity lze pushnout:
+3. Větve na `origin` vytvořte ručně pomocí příkazů vypsaných zkušebním během — skript
+   odmítne odesílat změny do `origin`. Chcete-li znovu použít zkontrolovaný commit pro
+   větev develop, nejprve spusťte nácvik s `--execute` na vrcholu 3.9.0 vůči svému forku;
+   vypíše obě SHA a stejné commity pak lze odeslat:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Před začleněním prvního PR nastavte ochranu větví `stable/v3` a `develop` (sady pravidel + fronta začlenění).
-5. Neaktivní workflow se zapnou na základě existence větví: `forward-port.yml` (push do
-   `stable/v3`), `validate-stable-pr.yml` (PR do `stable/v3`) a `nightly-v4-build.yml`
-   (sestavuje `develop`). Před ostrým spuštěním nastavte tajný údaj repozitáře `secrets.FORWARD_PORT_TOKEN` (aby se CI spouštělo
-   pro PR s dopředným portem); publikování nočních sestavení zůstane vypnuté, dokud vlastník nenastaví proměnnou repozitáře
-   `vars.NIGHTLY_PUBLISH` na `true` a služba npm Trusted Publishing nepovolí
-   `nightly-v4-build.yml`. Kanál určuje `scripts/release/dist-tag.mjs`, stejný
+4. Chraňte `stable/v3` a `develop` (sady pravidel + fronta slučování) ještě před začleněním prvního PR.
+5. Neaktivní pracovní postupy se zapnou existencí větve: `forward-port.yml` (push do
+   `stable/v3`), `validate-stable-pr.yml` (PR směřující do `stable/v3`) a `nightly-v4-build.yml`
+   (sestavuje `develop`). Před spuštěním nastavte tajný údaj repozitáře `secrets.FORWARD_PORT_TOKEN` (aby CI běželo u
+   PR pro přenos změn vpřed); noční publikování zůstane vypnuté, dokud vlastník nenastaví proměnnou repozitáře
+   `vars.NIGHTLY_PUBLISH` na `true` a npm Trusted Publishing nepovolí
+   `nightly-v4-build.yml`. Určení kanálu zajišťuje `scripts/release/dist-tag.mjs`, stejný
    resolver, který používá `npm-publish.yml`.
 6. Ověřte kanály: `npm view omniroute dist-tags --json` zobrazí `latest` = 3.9.0 a žádné
-   `next` / `nightly`, dokud nebude publikována v4.
-7. Vrácení změn v případě potřeby: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   `next` / `nightly`, dokud nebude publikována verze v4.
+7. V případě potřeby proveďte návrat zpět: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    a `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

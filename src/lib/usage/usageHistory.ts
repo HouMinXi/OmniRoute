@@ -858,9 +858,21 @@ export interface UsageEntry {
 }
 
 /**
+ * Controls the legacy natural-key guard for one usage write.
+ *
+ * Normal callers keep the default so repeated callbacks for one request remain
+ * one row. A writer that already owns a distinct physical-attempt boundary may
+ * explicitly disable that guard without changing the row, cache, event, or
+ * account-attribution paths below.
+ */
+export interface SaveRequestUsageOptions {
+  deduplicate?: boolean;
+}
+
+/**
  * Save request usage entry to SQLite.
  */
-export async function saveRequestUsage(entry: UsageEntry) {
+export async function saveRequestUsage(entry: UsageEntry, options: SaveRequestUsageOptions = {}) {
   if (!shouldPersistToDisk) return;
 
   // Freeze the timestamp on the first attempt so the deferred retry replays
@@ -868,13 +880,13 @@ export async function saveRequestUsage(entry: UsageEntry) {
   const frozenEntry = { ...entry, timestamp: entry.timestamp || new Date().toISOString() };
 
   try {
-    attemptWrite(frozenEntry);
+    attemptWrite(frozenEntry, options);
   } catch (error) {
     if (!isWriteLockError(error)) {
       console.error("Failed to save usage stats:", error);
       return;
     }
-    scheduleWriteRetry(frozenEntry);
+    scheduleWriteRetry(frozenEntry, options);
   }
 }
 

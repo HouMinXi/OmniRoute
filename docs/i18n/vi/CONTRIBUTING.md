@@ -288,65 +288,72 @@ Xem `open-sse/utils/stream.ts` và `open-sse/utils/streamHandler.ts` để biế
 
 ---
 
-## Project Structure
+## Cấu trúc dự án
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Các trang bảng điều khiển (23 phần)
+│   ├── api/                # Các tuyến API (51 thư mục)
+│   └── login/              # Các trang xác thực (.tsx)
+├── domain/                 # Công cụ chính sách (policyEngine, comboResolver, costRules, v.v.)
+├── lib/                    # Logic nghiệp vụ cốt lõi (.ts)
+│   ├── a2a/                # Máy chủ giao thức Agent-to-Agent v0.3
+│   ├── acp/                # Sổ đăng ký Agent Communication Protocol
+│   ├── compliance/         # Công cụ chính sách tuân thủ
+│   ├── db/                 # Các mô-đun miền SQLite + 130 bản di chuyển
+│   ├── memory/             # Bộ nhớ hội thoại liên tục
+│   ├── oauth/              # Các nhà cung cấp, dịch vụ và tiện ích OAuth
+│   ├── skills/             # Khung kỹ năng có thể mở rộng
+│   ├── usage/              # Theo dõi mức sử dụng và tính toán chi phí
+│   └── localDb.ts          # Chỉ là lớp tái xuất — tuyệt đối không thêm logic tại đây
+├── middleware/              # Middleware xử lý yêu cầu (promptInjectionGuard)
+├── mitm/                   # Proxy MITM (chứng chỉ, DNS, định tuyến đích)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Các thành phần React (.tsx)
+│   ├── constants/          # Định nghĩa nhà cung cấp (329), phạm vi MCP, 19 chiến lược định tuyến
+│   ├── utils/              # Bộ ngắt mạch, trình làm sạch, trình hỗ trợ xác thực
+│   └── validation/         # Các lược đồ Zod v4
+└── sse/                    # Quy trình proxy SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Không gian làm việc @omniroute/open-sse
+├── executors/              # 150 mô-đun thực thi (các lớp thực thi + trình hỗ trợ cho từng nhà cung cấp)
+├── handlers/               # 11 trình xử lý yêu cầu (trò chuyện, phản hồi, embedding, hình ảnh, v.v.)
+├── mcp-server/             # Máy chủ MCP (110 công cụ riêng biệt, 3 phương thức truyền tải, 33 phạm vi)
+├── services/               # 178 dịch vụ cấp cao nhất (combo, autoCombo, rateLimitManager, v.v.)
+├── translator/             # Trình chuyển đổi định dạng (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Trình chuyển đổi Responses API
+└── utils/                  # 22 mô-đun tiện ích (luồng, TLS, proxy, ghi nhật ký)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Ứng dụng máy tính Electron (đa nền tảng)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Trình chạy kiểm thử Node.js (1.574 tệp kiểm thử)
+├── integration/            # Kiểm thử tích hợp
+├── e2e/                    # Kiểm thử Playwright
+├── security/               # Kiểm thử bảo mật
+├── translator/             # Kiểm thử dành riêng cho trình chuyển đổi
+└── load/                   # Kiểm thử tải
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Hồ sơ quyết định kiến trúc
+├── architecture/            # Kiến trúc hệ thống và khả năng phục hồi
+├── comparison/              # So sánh OmniRoute với các giải pháp thay thế
+├── compression/             # Hướng dẫn và quy tắc nén
+├── dev/                     # Hướng dẫn phát triển
+├── diagrams/                # Sơ đồ kiến trúc
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Hướng dẫn người dùng, Docker, thiết lập, khắc phục sự cố
+├── i18n/                    # Các bản dịch README được quốc tế hóa
+├── marketing/               # Tài liệu tiếp thị
+├── ops/                     # Triển khai, proxy, độ bao phủ, bản phát hành
+├── providers/               # Tài liệu dành riêng cho từng nhà cung cấp
+├── reference/               # Tham chiếu API, biến môi trường, công cụ CLI, các gói miễn phí
+├── releases/                # Ghi chú phát hành
+├── routing/                 # Công cụ auto-combo, phát lại quá trình suy luận
+├── screenshots/             # Ảnh chụp màn hình bảng điều khiển
+├── security/                # Rào chắn bảo vệ, tuân thủ, chế độ ẩn, token
+└── specs/                   # Đặc tả thiết kế
 ```
 
 ---

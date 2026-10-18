@@ -18,6 +18,15 @@ const context = {
   runAttempt: "1",
   draft: false,
 };
+const queueContext = {
+  ...context,
+  draft: true,
+  headRef: "mergify/merge-queue/5cff6771d5",
+  author: { id: 37929162, login: "mergify[bot]", type: "Bot" },
+  repositoryId: 1157102282,
+  headRepositoryId: 1157102282,
+  baseRepositoryId: 1157102282,
+};
 function needsFor(
   profile,
   outputs = { code: "true", docs: "true", i18n: "true", workflow: "true", testsOnly: "false" }
@@ -95,12 +104,61 @@ test("real CLI binds receipts to checkout SHA/run/attempt and preserves rejectio
       JSON.parse(readFileSync(join(root, ".artifacts/ci-admission.json"), "utf8")).verdict,
       "FAIL"
     );
+    const queueEvent = {
+      repository: { id: queueContext.repositoryId },
+      pull_request: {
+        draft: true,
+        user: queueContext.author,
+        head: { ref: queueContext.headRef, repo: { id: queueContext.headRepositoryId } },
+        base: { repo: { id: queueContext.baseRepositoryId } },
+      },
+    };
+    writeFileSync(eventPath, JSON.stringify(queueEvent));
+    assert.equal(invoke().status, 0, "a complete official queue candidate must pass the CLI");
+    assert.equal(invoke({ NEEDS_JSON: JSON.stringify(failed) }).status, 1);
+    queueEvent.pull_request.user = { id: 1, login: "contributor", type: "User" };
+    writeFileSync(eventPath, JSON.stringify(queueEvent));
+    assert.equal(invoke().status, 1, "a forged branch prefix must not grant draft admission");
     writeFileSync(eventPath, JSON.stringify({ merge_group: { head_sha: "c".repeat(40) } }));
     assert.equal(invoke({ GITHUB_EVENT_NAME: "merge_group" }).status, 1);
   } finally {
     rmSync(root, { recursive: true, force: true });
   }
 });
+
+for (const profile of ["ci", "quality"]) {
+  test(`${profile}: official same-repository Mergify drafts require every applicable result`, () => {
+    const needs = needsFor(profile);
+    assert.equal(run(needs, queueContext, profile).verdict, "PASS");
+    for (const [id, rule] of Object.entries(policy.profiles[profile].jobs)) {
+      if (rule.disposition !== "required") continue;
+      for (const status of ["failure", "cancelled", "skipped", "pending"]) {
+        const changed = structuredClone(needs);
+        changed[id].result = status;
+        assert.equal(run(changed, queueContext, profile).verdict, "FAIL", `${id}: ${status}`);
+      }
+      const missing = structuredClone(needs);
+      delete missing[id];
+      assert.equal(run(missing, queueContext, profile).verdict, "FAIL", `${id}: missing`);
+    }
+  });
+  test(`${profile}: ordinary drafts and forged queue identities stay rejected`, () => {
+    for (const patch of [
+      { headRef: "release/v3.8.52" },
+      { headRef: "mergify/merge-queue" },
+      { author: { id: 1, login: "mergify[bot]", type: "Bot" } },
+      { author: { id: 37929162, login: "contributor", type: "Bot" } },
+      { author: { id: 37929162, login: "mergify[bot]", type: "User" } },
+      { headRepositoryId: 42 },
+      { baseRepositoryId: 42 },
+      { repositoryId: undefined },
+      { author: undefined },
+      { draft: undefined },
+    ]) {
+      assert.equal(run(needsFor(profile), { ...queueContext, ...patch }, profile).verdict, "FAIL");
+    }
+  });
+}
 
 for (const profile of ["ci", "quality"]) {
   test(`${profile}: complete applicable job results pass`, () => {

@@ -432,64 +432,67 @@ Aniq vazifalarga yoʻnaltirilgan quyi kataloglarga ajratilgan:
 
 ---
 
-## 4. `open-sse/` — Oqimli uzatish mexanizmi ish maydoni
+## 4. `open-sse/` — Striming mexanizmi ish maydoni
 
-`@omniroute/open-sse` sifatida nashr etiladigan alohida npm ish maydoni. Soʻrovlarni
+`@omniroute/open-sse` nomi bilan eʼlon qilinadigan alohida npm ish maydoni. U soʻrovlarni
 qayta ishlash, ijrochilar, tarjimonlar, xizmatlar, transformator va MCP serverini boshqaradi.
 
 ```
 open-sse/
-├── index.ts                Ochiq eksportlar
+├── index.ts                Ommaviy eksportlar
 ├── package.json            Ish maydoni manifesti
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provayder reyestrlari, sarlavha profillari, identifikatsiya, …
+├── config/                 Provayder registrlari, sarlavha profillari, identifikatsiya, …
 ├── handlers/               Soʻrov ishlovchilari (chat, embeddinglar, audio, tasvir, …)
-├── executors/              Provayderga xos 108 ta HTTP ijrochisi
-├── translator/             Formatlarni oʻgirish (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── executors/              150 ta provayder ijrochi moduli (ijrochi sinflari + har bir provayder uchun yordamchilar)
+├── translator/             Formatlarni oʻzgartirish (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions oqim transformatori
-├── services/               80 dan ortiq xizmat moduli (kombinatsiyalar, zaxira, kvotalar, identifikatsiya, …)
-├── utils/                  Oqimli uzatish yordamchilari, TLS mijozi, AWS SigV4, proksi orqali olish, …
+├── services/               80 dan ortiq xizmat moduli (kombinatsiyalar, zaxira variantlar, kvotalar, identifikatsiya, …)
+├── utils/                  Striming yordamchilari, TLS mijozi, AWS SigV4, proksi orqali olish, …
 └── mcp-server/             MCP serveri (3 ta transport, 33 ta qamrov, 110 ta vosita)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Ishlovchi               | Maqsadi                                                                                       |
-| ----------------------- | --------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Asosiy chat konveyeri (kesh, tezlik cheklovi, kombinatsion yoʻnaltirish, ijrochini chaqirish) |
-| `responsesHandler.ts`   | OpenAI Responses API kirish nuqtasi                                                           |
-| `embeddings.ts`         | Embeddinglar                                                                                  |
-| `imageGeneration.ts`    | Tasvir yaratish                                                                               |
-| `audioSpeech.ts`        | Matndan nutqqa                                                                                |
-| `audioTranscription.ts` | Nutqdan matnga                                                                                |
-| `videoGeneration.ts`    | Video yaratish                                                                                |
-| `musicGeneration.ts`    | Musiqa yaratish                                                                               |
-| `rerank.ts`             | Qayta tartiblash                                                                              |
-| `moderations.ts`        | Moderatsiya                                                                                   |
-| `search.ts`             | Veb-qidiruv                                                                                   |
-| `sseParser.ts`          | SSE hodisalari tahlilchisi                                                                    |
-| `usageExtractor.ts`     | Yuqori oqimlardan tokenlar sonini ajratib olish                                               |
-| `responseSanitizer.ts`  | Provayderga xos shovqinni olib tashlash                                                       |
-| `responseTranslator.ts` | Provayder javobi va tarjimon qatlami oʻrtasidagi bogʻlovchi                                   |
+| Ishlovchi               | Maqsadi                                                                                               |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Asosiy chat konveyeri (kesh, tezlik cheklovi, kombinatsiyali yoʻnaltirish, ijrochini ishga tushirish) |
+| `responsesHandler.ts`   | OpenAI Responses API kirish nuqtasi                                                                   |
+| `embeddings.ts`         | Embeddinglar                                                                                          |
+| `imageGeneration.ts`    | Tasvir yaratish                                                                                       |
+| `audioSpeech.ts`        | Matndan nutqqa                                                                                        |
+| `audioTranscription.ts` | Nutqdan matnga                                                                                        |
+| `videoGeneration.ts`    | Video yaratish                                                                                        |
+| `musicGeneration.ts`    | Musiqa yaratish                                                                                       |
+| `rerank.ts`             | Qayta saralash                                                                                        |
+| `moderations.ts`        | Moderatsiya                                                                                           |
+| `search.ts`             | Veb-qidiruv                                                                                           |
+| `sseParser.ts`          | SSE hodisalari tahlilchisi                                                                            |
+| `usageExtractor.ts`     | Yuqori oqimlardan tokenlar sonini ajratib olish                                                       |
+| `responseSanitizer.ts`  | Provayderga xos ortiqcha maʼlumotlarni olib tashlash                                                  |
+| `responseTranslator.ts` | Provayder javobi va tarjimon qatlami oʻrtasidagi bogʻlovchi                                           |
 
 ### 4.2 `open-sse/executors/`
 
-Har biri `BaseExecutor` (`base.ts`) dan kengaytirilgan 148 ta provayder ijrochisi:
+150 ta yuqori darajadagi ijrochi moduli (`*.ts` dan `base.ts`, `index.ts` va testlar chiqarib
+tashlanganda — bu sonni `npm run check:docs-counts` oʻlchaydi). Har bir ijrochi sinfi `BaseExecutor` (`base.ts`) sinfini
+bevosita yoki `DefaultExecutor` yoxud boshqa ijrochi orqali kengaytiradi; qolgan modullar har bir provayderga
+xos yordamchilardir (vosita sxemalari, fetch/TTS adapterlari, oʻziga xos holatlar ishlovchilari). Ijrochilar quyidagilarni oʻz ichiga oladi:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, shuningdek `claudeIdentity.ts`
-(umumiy identifikatsiya yordamchisi) va `index.ts` (reyestr).
+(umumiy identifikatsiya yordamchisi) va `index.ts` (registr).
 
-> Eslatma: bu yerda keltirilmagan provayderlarga umumiy OpenAI-mos ijrochi yordamida
-> `default.ts` xizmat koʻrsatadi. Toʻliq provayderlar katalogi (355 ta provayder)
+> Eslatma: bu yerda keltirilmagan provayderlarga umumiy
+> OpenAI bilan mos ijrochidan foydalanadigan `default.ts` xizmat koʻrsatadi. Toʻliq provayderlar katalogi (372 ta provayder)
 > `src/shared/constants/providers.ts` ichida joylashgan.
 
 ### 4.3 `open-sse/translator/`
 
-Markaz va tarmoqlar tamoyiliga asoslangan tarjima (OpenAI — markaz).
+Markaz va yoʻnalishlar asosidagi tarjima (OpenAI — markaz).
 
 - **9 ta soʻrov tarjimoni** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -509,7 +512,7 @@ Markaz va tarmoqlar tamoyiliga asoslangan tarjima (OpenAI — markaz).
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — `TransformStream` asosidagi Responses API ↔ Chat
-  Completions oʻgiruvchisi (`responses/` marshrutining barcha qolgan holatlarni tutuvchi qismi tomonidan ishlatiladi).
+  Completions konvertori (`responses/` yoʻnalishining barcha qolgan holatlarni qamrab oluvchi ishlovchisi tomonidan ishlatiladi).
 
 ### 4.5 `open-sse/services/`
 
@@ -519,13 +522,13 @@ Asosiylari (toʻliq roʻyxat `open-sse/services/` ichida):
 | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Combo marshrutlash      | `combo.ts` (19 ta strategiya), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                 |
 | Auto Combo mexanizmi    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Barqarorlik             | `accountFallback.ts` (sovish davri + bloklash), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                    |
+| Bardoshlilik            | `accountFallback.ts` (sovish davri + bloklash), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                    |
 | Kvotalar                | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | Keshlash                | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Marshrutlash intellekti | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Model bilan ishlash     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Siqish                  | `compression/` — toʻliq siqish mexanizmi integratsiyasi                                                                                                                                                                                                  |
-| Token + sessiya         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Siqish                  | `compression/` — toʻliq siqish mexanizmini ulash                                                                                                                                                                                                         |
+| Token + seans           | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Daraja / manifest       | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / tarmoq             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | Paketlar                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
@@ -533,17 +536,17 @@ Asosiylari (toʻliq roʻyxat `open-sse/services/` ichida):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` ichida **110 ta noyob vosita** ulangan (`schemas/tools.ts` ichidagi 45 ta kanonik vosita +
-  xotira, koʻnikmalar, GitHub-koʻnikmalar, pul, geymifikatsiya, plagin, Notion, Obsidian,
+- `server.ts` faylida **110 ta noyob vosita** ulangan (`schemas/tools.ts` faylida 45 ta kanonik vosita +
+  xotira, koʻnikmalar, GitHub koʻnikmalari, pul, geymifikatsiya, plagin, Notion, Obsidian,
   mahalliy korpus va siqish modullari — birlashma `countUniqueMcpTools` orqali hisoblangan).
 - **3 ta transport**: stdio, HTTP Streamable, SSE.
-- Ishlash vaqtida **33 ta qamrov** qoʻllanadi — asosiy roʻyxat `src/shared/constants/mcpScopes.ts` ichida, toʻliq toʻplam esa har bir vosita moduli eʼlon qilgan qamrovlarning birlashmasidir.
+- Ishlash vaqtida **33 ta qamrov** majburiy qoʻllanadi — asosiy roʻyxat `src/shared/constants/mcpScopes.ts` faylida, toʻliq toʻplam esa har bir vosita moduli eʼlon qilgan qamrovlarning birlashmasidir.
 - Audit jadvali: `mcp_tool_audit` (`audit.ts` tomonidan toʻldiriladi).
 - Fayllar: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   shuningdek, `__tests__/` ichidagi testlar.
-- Vositalarning toʻliq katalogi uchun [MCP-SERVER.md](../frameworks/MCP-SERVER.md) sahifasiga qarang.
+- Vositalarning toʻliq katalogi uchun [MCP-SERVER.md](../frameworks/MCP-SERVER.md) fayliga qarang.
 
 ### 4.7 `open-sse/config/`
 
@@ -561,7 +564,7 @@ adapterlari (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 
 ### 4.8 `open-sse/utils/`
 
-Oqim uzatish primitivlari va provayder yordamchilari: `stream.ts`, `streamHandler.ts`,
+Oqim primitivlari va provayder yordamchilari: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -654,7 +657,7 @@ Koʻp ishlatiladigan buyruqlar:
 
 ## 8. `scripts/`
 
-Maqsadiga ko‘ra 6 ta quyi papkaga ajratilgan.
+Maqsadiga ko‘ra 6 ta quyi jildga ajratilgan.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,

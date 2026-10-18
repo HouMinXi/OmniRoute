@@ -113,11 +113,16 @@ Imposta `"geminiSanitization": false` per disattivare questa funzionalità.
 
 ## Risoluzione dei problemi
 
-| Sintomo                                         | Causa                                                                                                                        |
-| ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Il selettore non mostra alcun modello OmniRoute | Non è stata trovata alcuna chiave (controlla l'avviso all'avvio), oppure il gateway non è raggiungibile                      |
-| ID modello grezzi, nessuna combo, nessun prezzo | Gli endpoint di gestione hanno rifiutato il token: imposta `managementReadToken`                                             |
-| Una sessione è vincolata a `opencode-<id>/…`    | Il plugin v1 pubblicava `opencode-<id>`; v2 pubblica direttamente `<id>`, quindi seleziona nuovamente il modello in `<id>/…` |
+| Sintomo                                                | Causa                                                                                                                                  |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Il selettore non mostra alcun modello OmniRoute        | Nessuna chiave risolta (controllare l'avviso all'avvio) oppure il gateway non è raggiungibile                                          |
+| ID modello grezzi, nessuna combinazione, nessun prezzo | Gli endpoint di gestione hanno rifiutato il token — impostare `managementReadToken`                                                    |
+| Catalogo `freeOnly` breve o vuoto                      | Token di gestione assente o rifiutato — leggere la riga di riepilogo dell'aggiornamento (conteggio `unmatched-free`) nel log dell'host |
+| Una sessione associata a `opencode-<id>/…`             | Il plugin v1 pubblicava `opencode-<id>`; la v2 pubblica direttamente `<id>`, quindi riselezionare il modello sotto `<id>/…`            |
+
+Le variabili d'ambiente devono raggiungere il processo server di opencode: quando l'host
+viene eseguito come servizio, la shell che esegue `opencode models` e l'ambiente
+del server sono distinti, quindi esportare la chiave dove il server può leggerla.
 
 ## Vedi anche
 

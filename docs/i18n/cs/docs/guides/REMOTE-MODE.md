@@ -248,14 +248,23 @@ nezobrazí jako aktivní.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ tajný údaj se vypíše POUZE JEDNOU — nyní jej zkopírujte
-omniroute tokens list                 # maskované údaje: ID, název, rozsah, prefix, stav, vypršení platnosti
-omniroute tokens revoke <id|prefix>   # okamžité odvolání
-omniroute tokens scopes               # vysvětlení tří rozsahů
+#   ↳ vypíše tajný klíč POUZE JEDNOU — ihned si ho zkopírujte
+omniroute tokens list                 # maskováno: ID, název, rozsah, prefix, stav, vypršení platnosti
+omniroute tokens revoke <id|prefix>   # okamžitě zneplatní token
+omniroute tokens scopes               # vysvětlí tři rozsahy
 ```
 
-Příkazy `tokens` vyžadují přihlašovací údaj s oprávněním **správce**. Tokeny lze také spravovat
-v řídicím panelu v části **Nastavení → Přístupové tokeny** (vytvoření, odvolání, jednorázové zkopírování).
+Příkazy `tokens` vyžadují přihlašovací údaj s oprávněním **admin**. Tokeny můžete také spravovat
+na ovládacím panelu v části **Nastavení → Přístupové tokeny** (vytvoření, zneplatnění, jednorázové zkopírování).
+
+Token nikdy nelze vydat s vyšším oprávněním, než jaké má jeho tvůrce. Token
+`admin` může vytvořit pouze provozovatel — prostřednictvím relace ovládacího panelu,
+lokálního CLI přímo na serveru, příkazu `omniroute connect` s heslem nebo
+instance s vypnutým přihlašováním. Přihlašovací údaje stroje (přístupový token `admin`
+nebo klíč API s rozsahem `manage`/`admin`) mohou vydávat pouze tokeny `write` a `read`;
+požadavek na `--scope admin` vrátí `403`.
+
+Token nikdy nelze vytvořit s většími oprávněními, než má jeho tvůrce. Token `admin` může vytvořit pouze provozovatel: z relace řídicího panelu, místním CLI přímo na serveru, pomocí `omniroute connect` s heslem nebo v instanci s vypnutým přihlašováním. Strojové přihlašovací údaje (přístupový token `admin` nebo API klíč s rozsahem `manage`/`admin`) mohou vytvářet pouze tokeny `write` a `read`; požadavek na `--scope admin` s těmito údaji vrátí `403`.
 
 ---
 

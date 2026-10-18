@@ -386,65 +386,68 @@ Sula seoltar aon eisiúint v3.8.x, deimhnigh na míreanna breise seo:
 
 ## Gearradh 3.9.0 LTS (cleachtaithe in 3.8.58)
 
-Tar éis v3.8.59 is é 3.9.0 an chéad leagan eile, agus déantar dhá bhrainse fhadtéarmacha dá bharr:
+Tar éis v3.8.59 is é 3.9.0 an chéad leagan eile, agus déantar dhá bhrainse fadsaolacha dá bharr:
 `stable/v3` (líne v3 LTS, npm `latest`) agus `develop` (v4, ardaithe go 4.0.0, npm
 `nightly`). Tá samhail na mbrainsí/na gcainéal, an réamhphortáil agus na lipéid in
 [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); tá an plean sa [ROADMAP](../../ROADMAP.md) (Céim 3). Ní dhéantar an gearradh ach uair amháin;
-cleachtann 3.8.58 é ó thús deireadh ar fhórc, agus cuirtear clabhsúr ar 3.8.59 leis an
+cleachtann 3.8.58 é ó cheann ceann ar fhorc, agus cuirtear clabhsúr le 3.8.59 leis an
 [seicliosta GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Rith trialach (inléite amháin, sábháilte am ar bith)
+### Rith thirim (inléite amháin, sábháilte am ar bith)
 
 ```bash
-npm run release:dry-run-lts-cut                       # an fíorghearradh: 3.9.0 ó HEAD, an chlib roimhe seo v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # socraigh an tiomantas foinseach
+npm run release:dry-run-lts-cut                       # an fíorghearradh: 3.9.0 ó HEAD, clib roimhe seo v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # pionnáil an tiomantas foinseach
 ```
 
-Ní fheidhmíonn `scripts/release/dry-run-lts-cut.mjs` aon rud: léann sé git agus `gh` agus priontálann sé an
-seicheamh iomlán — réamhchoinníollacha (réitítear an fhoinse, tá an chlib roimhe seo ann, is é `package.json` an
-spriocleagan, tá saincheist `release-freeze` oscailte, níl aon saincheist oscailte `Release branch not green`
-ar bhrainse eisiúna atá ann cheana — tuairiscíonn brainse nach ann dó `?` anaithnid, agus ní
-tuairiscítear mar ghlas riamh é — tá scuaine `release` Mergify cumraithe (G11: `queue_rules`, `checks_timeout`,
-lipéad `queue`), cuireann tacar rialacha `release/*` bac fós ar scriosadh agus ar bhrú éigeantach, agus
-níl `stable/v3` ná `develop` ann fós), an dá chéim bhrainse, na truicir sreafa oibre dhíomhaoine
-agus na coinníollacha `if:` a thagann chun bheith fíor (agus na cinn a fhanann faoi gheata ag athróg stórtha nó
-atá socraithe leis an stór canónach), na dist-tags a bhfuiltear ag súil leo (`latest` → 3.9.0, `next` agus
-`nightly` folamh) agus an t-aisiompú. Scoir `0` = `RESULT: READY`, `1` = theip ar réamhchoinníoll blocála
+Ní fhorghníomhaíonn `scripts/release/dry-run-lts-cut.mjs` aon rud: léann sé git agus `gh` agus priontálann sé an
+t-ord iomlán — réamhchoinníollacha (réitítear an fhoinse, tá stair iomlán ag an stór foinseach —
+ní féidir le clón éadomhain `stable/v3` a bhrú, diúltaíonn an taobh glactha don phacáiste ag an gcéad
+tuismitheoir grafáilte, mar sin déan an gearradh ó chlón iomlán nó rith `git fetch --unshallow origin` ar dtús —
+tá an chlib roimhe seo ann, is é `package.json` an spriocleagan, tá saincheist `release-freeze` oscailte, níl aon
+saincheist oscailte `Release branch not green`
+ar bhrainse eisiúna atá ann cheana — tuairiscíonn brainse nach bhfuil ann `?` anaithnid, agus ní
+glas riamh — tá scuaine `release` Mergify cumraithe (G11: `queue_rules`, `checks_timeout`,
+lipéad `queue`), cuireann an tacar rialacha `release/*` bac fós ar scriosadh agus ar bhrú éigeantach, agus
+níl `stable/v3` ná `develop` ann fós), an dá chéim brainse, cé na truicear sreafa oibre díomhaoine
+agus na coinníollacha `if:` a éiríonn fíor (agus cé acu a fhanann faoi ghlas ag athróg stórais nó
+pionnáilte leis an stór canónach), na dist-tags a bhfuiltear ag súil leo (`latest` → 3.9.0, `next` agus
+`nightly` folamh) agus an rolladh siar. Scoir `0` = `RESULT: READY`, `1` = theip ar réamhchoinníoll blocála
 (`✗`), `2` = earráid úsáide. Íosghrádaíonn `--advisory <id,...>` seiceáil go rabhadh (`!`)
-gan í a cheilt.
+gan í a chur i bhfolach.
 
-Rith rith trialach an fhíorghearrtha agus reo eisiúna 3.9.0 fós oscailte — cruthaítear na brainsí
+Rith an rith thirim don fhíorghearradh agus reo eisiúna 3.9.0 fós oscailte — cruthaítear na brainsí
 tar éis na clibe agus sula gcuireann Céim 12c deireadh leis an reo.
 
-### Cleachtadh 3.8.58 (fórc amháin)
+### Cleachtadh 3.8.58 (forc amháin)
 
 ```bash
-# 1. Rith trialach ar an mbarr reatha le paraiméadair chleachtaidh
+# 1. Rith thirim ar an mbarr reatha le paraiméadair chleachtaidh
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Rith i gcoinne cianda FÓIRC (diúltaítear do origin, nó d'aon chianda arb é an stór
-#    canónach a URL; iarrann gach céim deimhniú sa teirminéal)
+# 2. Forghníomhaigh i gcoinne cianstórais FORC (diúltaítear do origin, nó d’aon chianstór arb é a URL an stór
+#    canónach; iarrann gach céim dearbhú ar an teirminéal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Cleachtaigh na sreafaí oibre díomhaoine san fhórc (workflow_dispatch nuair a thuairiscíonn
-#    an rith trialach socrú leis an stór canónach), agus ansin ais-rollaigh
+# 3. Tástáil na sreafaí oibre díomhaoine san fhorc (workflow_dispatch nuair a thuairiscíonn an rith thirim
+#    pionnáil leis an stór canónach), ansin rollaigh siar
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Tógtar an tiomantas ardaithe do develop le pluiméireacht git (ní theagmhaítear le haon chrann oibre) agus ardaítear
-na cúig chomhad chéanna agus a ardaítear le tiomantas oscailte timthrialla: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` agus `docs/openapi.yaml`. Osclaítear rannán `[4.0.0]`
-CHANGELOG agus a mhacasamhla i18n ar `develop` ina dhiaidh sin, roimh a chéad
+Tógtar tiomantas ardaithe `develop` le pluiméireacht git (ní theagmhaítear leis an gcrann oibre) agus ardaíonn sé
+na cúig chomhad chéanna le tiomantas oscailte timthrialla: `package.json`, `open-sse/package.json`,
+`electron/package.json`, `package-lock.json` agus `docs/openapi.yaml`. Osclaítear an mhír `[4.0.0]`
+sa CHANGELOG agus a scátháin i18n ar `develop` ina dhiaidh sin, roimh a chéad
 PR. Ní athraíonn an script dist-tags npm riamh — cleachtaigh iad sin ar phacáiste sealadach.
 
 ### Déantán réamhamhairc PR (tóg uair amháin, cuir na bearta céanna chun cinn)
 
-Tógann `.github/workflows/preview-artifact.yml` tarball táirgthe amháin ó cheann PR agus
-bailíochtaíonn sé an tógáil bheacht sin (slis (a) de #8084). PRanna ón stór céanna amháin; ní fhoilsítear aon rud.
+Tógann `.github/workflows/preview-artifact.yml` tarball táirgeachta amháin ó cheann PR agus
+fíoraíonn sé an tógáil chruinn sin (slis #8084 (a)). PRanna ón stór céanna amháin; ní fhoilsítear aon rud.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # nó cuir an lipéad `preview-artifact` leis
@@ -454,37 +457,37 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # suiteáil réamhamhairc
 ```
 
-Déanann an rith `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pacálann sé an
-tarball, ritheann sé `npm run check:pack-boot` (rúin bhréige, comhadlann sonraí ghearrshaolach), athphacálann sé agus
-teipeann air mura bhfuil an achoimre comhionann, ansin taifeadann sé `artifact-identity.json` (SHA an chinn, SHA na
-bunlíne, hais an chomhaid ghlais, ardán, ailtireacht, ABI node, cuachtaire, beartas tógála —
-`scripts/release/artifact-identity.mjs`) agus fianaíonn sé an tarball i jab ar leith. Is éard is cur chun cinn
-réamhamhairc ann ná an tarball sin a shuiteáil: ná déan atógáil ón bhfoinse riamh.
+Ritheann an rith `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pacálann sé an
+tarball, ritheann sé `npm run check:pack-boot` (rúin bhréige, eolaire sonraí neamhbhuan), athphacálann sé agus
+teipeann sé mura bhfuil an díolaim mar an gcéanna, ansin taifeadann sé `artifact-identity.json` (SHA an chinn, SHA an bhoinn,
+hais an chomhaid ghlais, ardán, ailtireacht, ABI node, cuachtaire, polasaí tógála —
+`scripts/release/artifact-identity.mjs`) agus fianaíonn sé an tarball i jab ar leith. Is éard atá i gceist le
+réamhamharc a chur chun cinn ná an tarball sin a shuiteáil: ná déan atógáil ón bhfoinse riamh.
 
 ### An gearradh (3.9.0, tar éis GO)
 
-1. Taifeadtar GO in [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
+1. GO taifeadta in [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. Priontálann `npm run release:dry-run-lts-cut -- --from v3.9.0` `RESULT: READY`.
-3. Cruthaigh na brainsí ar `origin` de láimh leis na horduithe a phriontálann an rith trialach — diúltaíonn an
-   script brú chuig `origin`. Chun tiomantas develop athbhreithnithe a athúsáid, rith an
-   cleachtadh `--execute` ar bharr 3.9.0 i gcoinne d’fhórc ar dtús; priontálann sé an dá SHA, agus
+3. Cruthaigh na brainsí ar `origin` de láimh leis na horduithe a phriontálann an rith thirim — diúltaíonn an
+   script brú chuig `origin`. Chun tiomantas `develop` athbhreithnithe a athúsáid, rith an cleachtadh
+   `--execute` ar bharr 3.9.0 i gcoinne d’fhorc ar dtús; priontálann sé an dá SHA, agus
    is féidir na tiomantais chéanna a bhrú:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Cosain `stable/v3` agus `develop` (tacair rialacha + scuaine chumaisc) sula dtagann an chéad PR i dtír.
-5. Cuirtear na sreafaí oibre díomhaoine ar siúl de bharr na mbrainsí a bheith ann: `forward-port.yml` (brú chuig
+4. Cosain `stable/v3` agus `develop` (tacair rialacha + scuaine cumaisc) sula ndéantar an chéad PR a chumasc.
+5. Cuirtear na sreafaí oibre díomhaoine ar siúl de réir bhrainsí a bheith ann: `forward-port.yml` (brú chuig
    `stable/v3`), `validate-stable-pr.yml` (PRanna chuig `stable/v3`) agus `nightly-v4-build.yml`
-   (tógann sé `develop`). Roimh dhul beo, socraigh rún stórtha `secrets.FORWARD_PORT_TOKEN` (ionas go ritheann CI ar
-   PRanna réamhphortála); fanann foilsiú oíche múchta go dtí go socraíonn an t-úinéir athróg stórtha
+   (tógálacha `develop`). Roimh dhul beo, socraigh rún stórtha `secrets.FORWARD_PORT_TOKEN` (ionas go rithfidh CI ar
+   PRanna réamhphortála); fanann foilsiú oíche múchta go dtí go socraíonn an t-úinéir athróg an stórtha
    `vars.NIGHTLY_PUBLISH` go `true` agus go nglacann npm Trusted Publishing le
-   `nightly-v4-build.yml`. Is é `scripts/release/dist-tag.mjs` a réitíonn an cainéal, an
-   réiteoir céanna a úsáideann `npm-publish.yml`.
-6. Fíoraigh na cainéil: taispeánann `npm view omniroute dist-tags --json` `latest` = 3.9.0 agus gan aon
-   `next` / `nightly` go dtí go bhfoilsítear v4.
-7. Aisiompú, más gá: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   `nightly-v4-build.yml`. Is é `scripts/release/dist-tag.mjs` a réitíonn na cainéil, an réiteoir céanna
+   a úsáideann `npm-publish.yml`.
+6. Fíoraigh na cainéil: taispeánann `npm view omniroute dist-tags --json` gurb é 3.9.0 luach `latest` agus nach bhfuil
+   `next` / `nightly` ann go dtí go bhfoilseofar v4.
+7. Aischur, más gá: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    agus `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

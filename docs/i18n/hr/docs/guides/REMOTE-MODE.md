@@ -246,15 +246,17 @@ veza ne prikaže kao aktivna.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ispisuje tajnu SAMO JEDNOM — kopirajte je odmah
+#   ↳ ispisuje tajnu samo JEDNOM — kopirajte je odmah
 omniroute tokens list                 # maskirano: ID, naziv, opseg, prefiks, status, istek
-omniroute tokens revoke <id|prefix>   # odmah opozovite
+omniroute tokens revoke <id|prefix>   # odmah opoziva
 omniroute tokens scopes               # objašnjava tri opsega
 ```
 
-Naredbe `tokens` zahtijevaju vjerodajnicu **administratora**. Tokenima možete
-upravljati i na nadzornoj ploči u odjeljku **Postavke → Pristupni tokeni**
-(stvaranje, opozivanje, jednokratno kopiranje).
+Naredbe `tokens` zahtijevaju vjerodajnicu s ovlastima **administratora**. Tokenima možete upravljati i na nadzornoj ploči u odjeljku **Postavke → Pristupni tokeni** (izrada, opoziv, jednokratno kopiranje).
+
+Token nikada ne može biti izdan s većim ovlastima nego što ih ima njegov stvaratelj. Token `admin` može izraditi samo operater — putem sesije nadzorne ploče, lokalnog CLI-ja na samom poslužitelju, naredbe `omniroute connect` s lozinkom ili instance na kojoj je prijava onemogućena. Strojne vjerodajnice (pristupni token `admin` ili API ključ s opsegom `manage`/`admin`) mogu izdavati samo tokene `write` i `read`; ako se od njih zatraži `--scope admin`, vraća se `403`.
+
+Token se nikada ne može stvoriti s više ovlasti nego što ih ima njegov stvaratelj. Token `admin` može stvoriti samo operator: putem sesije nadzorne ploče, lokalnog CLI-ja na samom poslužitelju, naredbom `omniroute connect` s lozinkom ili u instanci s onemogućenom prijavom. Strojne vjerodajnice (pristupni token `admin` ili API ključ s opsegom `manage`/`admin`) mogu stvarati samo tokene `write` i `read`; zahtjev za `--scope admin` s njima vraća `403`.
 
 ---
 

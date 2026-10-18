@@ -291,72 +291,72 @@ Wo `open-sse/utils/stream.ts` àti `open-sse/utils/streamHandler.ts` fún àwọ
 
 ---
 
-## Ìṣètò Project
+## Ìṣètò Iṣẹ́-Àkànṣe
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Àwọn ojú-ewé dashboard (ẹ̀ka 23)
-│   ├── api/                # Àwọn route API (directory 51)
-│   └── login/              # Àwọn ojú-ewé ìfàṣẹ̀sí (.tsx)
-├── domain/                 # Ẹ̀rọ policy (policyEngine, comboResolver, costRules, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
-├── lib/                    # Kókó business logic (.ts)
-│   ├── a2a/                # Server protocol Agent-to-Agent v0.3
-│   ├── acp/                # Registry Agent Communication Protocol
-│   ├── compliance/         # Ẹ̀rọ policy ìbámu
-│   ├── db/                 # Àwọn module domain SQLite + migration 130
-│   ├── memory/             # Iranti ìjíròrò tí ó dúró pẹ́
-│   ├── oauth/              # Àwọn provider OAuth, service, àti utility
-│   ├── skills/             # Framework skill tí a lè mú gbòòrò sí i
-│   ├── usage/              # Ìtọ́pa lílò àti ìṣírò iye owó
-│   └── localDb.ts          # Layer àtún-gbé-jáde nìkan — má ṣe ṣàfikún logic síbí láéláé
-├── middleware/              # Middleware request (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (cert, DNS, ìdarí target)
+│   ├── (dashboard)/        # Àwọn ojú-ìwé dashboard (abala 23)
+│   ├── api/                # Àwọn ipa-ọ̀nà API (àpò-ọ̀nà 51)
+│   └── login/              # Àwọn ojú-ìwé ìfàṣẹsí (.tsx)
+├── domain/                 # Ẹ́ńjìnnì ìlànà (policyEngine, comboResolver, costRules, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
+├── lib/                    # Lọ́jììkì pàtàkì fún iṣẹ́-ajé (.ts)
+│   ├── a2a/                # Sẹ́fà ìlànà Agent-to-Agent v0.3
+│   ├── acp/                # Ìforúkọsílẹ̀ Agent Communication Protocol
+│   ├── compliance/         # Ẹ́ńjìnnì ìlànà ìbámu
+│   ├── db/                 # Àwọn módùùlù domain SQLite + ìṣíkiri 130
+│   ├── memory/             # Ìrántí ìjíròrò tó máa ń wà pẹ́
+│   ├── oauth/              # Àwọn olupèsè, iṣẹ́, àti irinṣẹ́ OAuth
+│   ├── skills/             # Ìlànà iṣẹ́ ọgbọ́n tí a lè fẹ̀ sí i
+│   ├── usage/              # Ìtọ́pinpin lílò àti ìṣírò iye owó
+│   └── localDb.ts          # Ìpele àtún-gbéjáde nìkan — má ṣe fi lọ́jììkì kún un níbí
+├── middleware/              # Middleware ìbéèrè (promptInjectionGuard)
+├── mitm/                   # Proxy MITM (cert, DNS, ìdarí ibi-àfojúsùn)
 ├── shared/
-│   ├── components/         # Àwọn component React (.tsx)
-│   ├── constants/          # Àwọn ìtumọ̀ provider (329), àwọn scope MCP, ọ̀nà ìdarí 19
-│   ├── utils/              # Circuit breaker, sanitizer, àwọn olùrànlọ́wọ́ auth
+│   ├── components/         # Àwọn kọ́ńpónẹ́ǹtì React (.tsx)
+│   ├── constants/          # Àwọn ìtumọ̀ olupèsè (329), àwọn scope MCP, ọ̀nà ìdarí 19
+│   ├── utils/              # Olùdáwọ́lé circuit, sanitizer, àwọn olùrànlọ́wọ́ ìfàṣẹsí
 │   └── validation/         # Àwọn schema Zod v4
 └── sse/                    # Pipeline proxy SSE
 
 open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # Module ìmúlò executor 89
-├── handlers/               # Olùṣàkóso request 11 (chat, responses, embeddings, images, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
-├── mcp-server/             # Server MCP (irinṣẹ́ aláìlẹ́ẹ̀mejì 110, transport 3, scope 33)
-├── services/               # Service ipele-òkè 178 (combo, autoCombo, rateLimitManager, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
-├── translator/             # Àwọn olùtumọ̀ format (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformer Responses API
-└── utils/                  # Module utility 22 (stream, TLS, proxy, logging)
+├── executors/              # Módùùlù executor 150 (àwọn class executor + àwọn olùrànlọ́wọ́ fún olupèsè kọ̀ọ̀kan)
+├── handlers/               # Olùṣàkóso ìbéèrè 11 (chat, responses, embeddings, images, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
+├── mcp-server/             # Sẹ́fà MCP (irinṣẹ́ aláìlẹ́gbẹ́ 110, ọ̀nà gbigbe 3, scope 33)
+├── services/               # Iṣẹ́ ipele-òkè 178 (combo, autoCombo, rateLimitManager, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)
+├── translator/             # Àwọn olùtumọ̀ fọ́ọ̀mù (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Olùyípadà Responses API
+└── utils/                  # Módùùlù irinṣẹ́ 22 (stream, TLS, proxy, logging)
 
-electron/                   # App desktop Electron (oríṣiríṣi platform)
+electron/                   # Ìṣàfilọ́lẹ̀ desktop Electron (fún ọ̀pọ̀ platform)
 
 tests/
-├── unit/                   # Olùṣiṣẹ́ test Node.js (fáìlì test 1,574)
-├── integration/            # Àwọn test integration
-├── e2e/                    # Àwọn test Playwright
-├── security/               # Àwọn test ààbò
-├── translator/             # Àwọn test pàtó fún translator
-└── load/                   # Àwọn test ẹrù
+├── unit/                   # Ẹ̀rọ ìdánwò Node.js (fáìlì ìdánwò 1,574)
+├── integration/            # Àwọn ìdánwò ìṣọ̀kan
+├── e2e/                    # Àwọn ìdánwò Playwright
+├── security/               # Àwọn ìdánwò ààbò
+├── translator/             # Àwọn ìdánwò pàtó fún olùtumọ̀
+└── load/                   # Àwọn ìdánwò ẹrù
 
 docs/
-├── adr/                     # Àwọn Àkọsílẹ̀ Ìpinnu Architecture
-├── architecture/            # Architecture ètò àti agbára ìfaradà
-├── comparison/              # OmniRoute pẹ̀lú àwọn àṣàyàn mìíràn
-├── compression/             # Àwọn ìtọ́sọ́nà àti òfin compression
-├── dev/                     # Àwọn ìtọ́sọ́nà development
-├── diagrams/                # Àwọn àwòrán architecture
+├── adr/                     # Àwọn Àkọsílẹ̀ Ìpinnu Ìmọ̀-ẹ̀rọ
+├── architecture/            # Ìmọ̀-ẹ̀rọ ètò àti agbára ìfaradà
+├── comparison/              # OmniRoute ní ìfiwéra pẹ̀lú àwọn àṣàyàn mìíràn
+├── compression/             # Àwọn ìtọ́sọ́nà àti òfin ìfúnpọ̀
+├── dev/                     # Àwọn ìtọ́sọ́nà ìdàgbàsókè
+├── diagrams/                # Àwọn àwòrán atọ́ka ìmọ̀-ẹ̀rọ
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Ìtọ́sọ́nà olumulo, Docker, setup, ìyanjú ìṣòro
+├── guides/                  # Ìtọ́sọ́nà onílò, Docker, ìṣètò, ìyanjú ìṣòro
 ├── i18n/                    # Àwọn ìtumọ̀ README sí onírúurú èdè
-├── marketing/               # Àwọn ohun èlò marketing
-├── ops/                     # Deployment, proxy, coverage, releases
-├── providers/               # Àwọn doc pàtó fún provider
-├── reference/               # Ìtọ́kasí API, env vars, àwọn irinṣẹ́ CLI, free tiers
-├── releases/                # Àwọn àkọsílẹ̀ release
-├── routing/                 # Ẹ̀rọ auto-combo, àtúnṣeré reasoning
-├── screenshots/             # Àwọn screenshot dashboard
-├── security/                # Guardrails, compliance, stealth, tokens
-└── specs/                   # Àwọn spec design
+├── marketing/               # Àwọn ohun èlò ìtajà
+├── ops/                     # Ìmúlọ, proxy, coverage, àwọn ìtújáde
+├── providers/               # Àwọn ìwé àkọsílẹ̀ pàtó fún olupèsè
+├── reference/               # Ìtọ́kasí API, env vars, irinṣẹ́ CLI, àwọn ipele ọ̀fẹ́
+├── releases/                # Àwọn àkọsílẹ̀ ìtújáde
+├── routing/                 # Ẹ́ńjìnnì auto-combo, àtúnṣe ìrònú
+├── screenshots/             # Àwọn àwòrán ojú-iboju dashboard
+├── security/                # Àwọn òfin ààbò, ìbámu, ìfarapamọ́, àwọn token
+└── specs/                   # Àwọn àlàyé ìṣètò
 ```
 
 ---

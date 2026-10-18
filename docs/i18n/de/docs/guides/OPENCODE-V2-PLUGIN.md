@@ -118,11 +118,17 @@ Legen Sie `"geminiSanitization": false` fest, um diese Funktion zu deaktivieren.
 
 ## Fehlerbehebung
 
-| Symptom                                                      | Ursache                                                                                                                            |
-| ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| Die Modellauswahl zeigt kein OmniRoute-Modell                | Es wurde kein Schlüssel aufgelöst (prüfen Sie die Startwarnung), oder das Gateway ist nicht erreichbar                             |
-| Unverarbeitete Modell-IDs, keine Kombinationen, keine Preise | Die Verwaltungsendpunkte haben das Token abgelehnt — legen Sie `managementReadToken` fest                                          |
-| Eine Sitzung ist an `opencode-<id>/…` gebunden               | Das v1-Plugin veröffentlichte `opencode-<id>`; v2 veröffentlicht nur `<id>`, wählen Sie das Modell daher erneut unter `<id>/…` aus |
+| Symptom                                                | Ursache                                                                                                                                               |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Der Modellauswahldialog zeigt kein OmniRoute-Modell an | Es wurde kein Schlüssel ermittelt (prüfen Sie die Warnung beim Start), oder das Gateway ist nicht erreichbar                                          |
+| Rohe Modell-IDs, keine Kombinationen, keine Preise     | Die Verwaltungsendpunkte haben das Token abgelehnt — setzen Sie `managementReadToken`                                                                 |
+| Kurzer oder leerer `freeOnly`-Katalog                  | Kein Verwaltungstoken oder ein abgelehntes Token — lesen Sie die Zusammenfassungszeile der Aktualisierung (Anzahl `unmatched-free`) im Host-Protokoll |
+| Eine Sitzung ist an `opencode-<id>/…` gebunden         | Das v1-Plugin hat `opencode-<id>` veröffentlicht; v2 veröffentlicht nur `<id>`, wählen Sie daher das Modell unter `<id>/…` erneut aus                 |
+
+Umgebungsvariablen müssen den opencode-Serverprozess erreichen: Wenn der Host
+als Dienst ausgeführt wird, unterscheiden sich die Shell, in der `opencode models`
+ausgeführt wird, und die Serverumgebung. Exportieren Sie den Schlüssel daher dort,
+wo der Server ihn einliest.
 
 ## Siehe auch
 

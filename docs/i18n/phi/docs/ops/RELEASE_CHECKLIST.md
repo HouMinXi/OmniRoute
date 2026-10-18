@@ -384,42 +384,45 @@ Bago maglabas ng anumang v3.8.x release, tiyakin din ang mga sumusunod:
 
 ---
 
-## Pag-cut ng 3.9.0 LTS (inensayo sa 3.8.58)
+## Pag-cut ng 3.9.0 LTS (iniensayo sa 3.8.58)
 
 Pagkatapos ng v3.8.59, ang susunod na bersyon ay 3.9.0, at ang tip nito ay magiging dalawang pangmatagalang branch:
-`stable/v3` (ang linya ng v3 LTS, npm `latest`) at `develop` (v4, itataas sa 4.0.0, npm
+`stable/v3` (ang v3 LTS line, npm `latest`) at `develop` (v4, iaangat sa 4.0.0, npm
 `nightly`). Ang modelo ng branch/channel, forward-port, at mga label ay nasa
 [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); ang plano ay nasa [ROADMAP](../../ROADMAP.md) (Phase 3). Isang beses lang tatakbo ang cut;
-iniensayo ito ng 3.8.58 mula simula hanggang dulo sa isang fork, at magtatapos ang 3.8.59 gamit ang
-[checklist ng GO/NO-GO](./LTS_GO_NO_GO.md).
+iniensayo ito ng 3.8.58 mula simula hanggang dulo sa isang fork, at nagtatapos ang 3.8.59 gamit ang
+[GO/NO-GO checklist](./LTS_GO_NO_GO.md).
 
 ### Dry-run (read-only, ligtas anumang oras)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ang aktuwal na cut: 3.9.0 mula sa HEAD, dating tag na v3.8.59
+npm run release:dry-run-lts-cut                       # ang totoong cut: 3.9.0 mula sa HEAD, dating tag na v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # i-pin ang source commit
 ```
 
 Walang ine-execute ang `scripts/release/dry-run-lts-cut.mjs`: binabasa nito ang git at `gh` at ini-print ang
-buong pagkakasunod-sunod — mga precondition (mare-resolve ang source, umiiral ang dating tag, ang `package.json` ay nasa
-target na bersyon, may bukas na `release-freeze` issue, walang bukas na `Release branch not green` issue
-sa isang umiiral na release branch — ang branch na hindi umiiral ay nag-uulat ng `?` na unknown, at hindi kailanman
+buong pagkakasunod-sunod — mga precondition (nare-resolve ang source, may kumpletong history ang source repository —
+hindi makakapag-push ng `stable/v3` ang isang shallow clone, tatanggihan ng receiving side ang pack sa unang
+grafted parent, kaya gawin ang cut mula sa isang full clone o patakbuhin muna ang `git fetch --unshallow origin` — umiiral ang dating
+tag, target na bersyon ang nasa `package.json`, may bukas na `release-freeze` issue, walang bukas na
+`Release branch not green` issue
+sa isang umiiral na release branch — ang branch na hindi umiiral ay nag-uulat ng `?` unknown, at hindi kailanman
 green — naka-configure ang Mergify `release` queue (G11: `queue_rules`, `checks_timeout`,
-label na `queue`), hinaharangan pa rin ng `release/*` ruleset ang deletion at force-push, at
-hindi pa umiiral ang `stable/v3` at `develop`), ang dalawang hakbang para sa branch, kung aling mga dormant-workflow
-trigger at `if:` condition ang magiging true (at kung alin ang mananatiling gated ng repository variable o
+label na `queue`), hinaharang pa rin ng `release/*` ruleset ang deletion at force-push, at
+hindi pa umiiral ang `stable/v3` at `develop`), ang dalawang hakbang sa branch, kung aling mga dormant-workflow
+trigger at `if:` condition ang nagiging true (at kung alin ang nananatiling naka-gate ng repository variable o
 naka-pin sa canonical repository), ang inaasahang mga dist-tag (`latest` → 3.9.0, walang laman ang `next` at
-`nightly`) at ang rollback. Exit `0` = `RESULT: READY`, `1` = may nabigong blocking precondition
+`nightly`) at ang rollback. Exit `0` = `RESULT: READY`, `1` = nabigo ang isang blocking precondition
 (`✗`), `2` = error sa paggamit. Ibinababa ng `--advisory <id,...>` ang isang check upang maging warning (`!`)
 nang hindi ito itinatago.
 
-Patakbuhin ang dry-run ng aktuwal na cut habang bukas pa ang release freeze ng 3.9.0 — ginagawa ang mga branch
+Patakbuhin ang dry-run ng totoong cut habang bukas pa ang 3.9.0 release freeze — ginagawa ang mga branch
 pagkatapos ng tag at bago alisin ng Phase 12c ang freeze.
 
 ### Pag-eensayo sa 3.8.58 (fork lamang)
 
 ```bash
-# 1. Mag-dry-run sa kasalukuyang tip gamit ang mga parameter ng ensayo
+# 1. Dry-run sa kasalukuyang tip gamit ang mga parameter ng rehearsal
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
@@ -435,16 +438,16 @@ node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Binubuo ang develop bump commit gamit ang git plumbing (walang working tree na ginagalaw) at ina-update nito
+Binubuo ang develop bump commit gamit ang git plumbing (walang working tree na naaapektuhan) at inaangat nito
 ang parehong limang file gaya ng isang cycle-open commit: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json`, at `docs/openapi.yaml`. Pagkatapos, binubuksan sa `develop` ang seksyong `[4.0.0]`
-ng CHANGELOG at ang mga i18n mirror nito, bago ang una nitong
+`electron/package.json`, `package-lock.json`, at `docs/openapi.yaml`. Binubuksan pagkatapos sa `develop` ang
+seksyong `[4.0.0]` ng CHANGELOG at ang mga i18n mirror nito, bago ang una nitong
 PR. Hindi kailanman binabago ng script ang mga npm dist-tag — ensayuhin ang mga iyon sa isang scratch package.
 
 ### PR preview artifact (bumuo nang isang beses, i-promote ang parehong mga byte)
 
-Bumubuo ang `.github/workflows/preview-artifact.yml` ng isang production tarball mula sa PR head at
-bine-validate ang eksaktong build na iyon (#8084 slice (a)). Para lamang sa mga PR sa parehong repository; walang pinu-publish.
+Bumubuo ang `.github/workflows/preview-artifact.yml` ng isang production tarball mula sa isang PR head at
+vina-validate ang eksaktong build na iyon (#8084 slice (a)). Para lamang sa mga PR sa parehong repository; walang pino-publish.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # o idagdag ang label na `preview-artifact`
@@ -454,8 +457,8 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview install
 ```
 
-Pinapatakbo ng run ang `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pine-pack ang
-tarball, pinapatakbo ang `npm run check:pack-boot` (mga pekeng secret, ephemeral na data dir), muling pine-pack at
+Pinapatakbo ng run ang `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pini-pack ang
+tarball, pinapatakbo ang `npm run check:pack-boot` (mga pekeng secret, pansamantalang data dir), muling nagpa-pack at
 nabibigo maliban kung magkapareho ang digest, pagkatapos ay itinatala ang `artifact-identity.json` (head SHA, base
 SHA, lockfile hash, platform, arch, node ABI, bundler, build policy —
 `scripts/release/artifact-identity.mjs`) at ina-attest ang tarball sa isang hiwalay na job. Ang pag-promote
@@ -466,7 +469,7 @@ ng preview ay nangangahulugang pag-install ng tarball na iyon: huwag kailanman m
 1. Naitala ang GO sa [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. Ini-print ng `npm run release:dry-run-lts-cut -- --from v3.9.0` ang `RESULT: READY`.
 3. Gawin nang manu-mano ang mga branch sa `origin` gamit ang mga command na ini-print ng dry-run — tumatanggi ang
-   script na mag-push sa `origin`. Upang muling gamitin ang isang na-review na develop commit, patakbuhin muna ang
+   script na mag-push sa `origin`. Upang muling gumamit ng na-review na develop commit, patakbuhin muna ang
    `--execute` rehearsal sa 3.9.0 tip laban sa iyong fork; ini-print nito ang parehong SHA, at
    maaaring i-push ang parehong mga commit:
 
@@ -474,16 +477,16 @@ ng preview ay nangangahulugang pag-install ng tarball na iyon: huwag kailanman m
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Protektahan ang `stable/v3` at `develop` (mga ruleset + merge queue) bago ma-land ang unang PR.
-5. Mag-a-activate ang mga dormant workflow kapag umiral na ang branch: `forward-port.yml` (push sa
-   `stable/v3`), `validate-stable-pr.yml` (mga PR patungo sa `stable/v3`), at `nightly-v4-build.yml`
+4. Protektahan ang `stable/v3` at `develop` (mga ruleset + merge queue) bago ma-merge ang unang PR.
+5. Naa-activate ang mga dormanteng workflow kapag umiiral ang branch: `forward-port.yml` (push sa
+   `stable/v3`), `validate-stable-pr.yml` (mga PR sa `stable/v3`) at `nightly-v4-build.yml`
    (binubuo ang `develop`). Bago ang go-live, itakda ang repository secret na `secrets.FORWARD_PORT_TOKEN` (upang tumakbo ang CI sa
    mga forward-port PR); mananatiling naka-off ang nightly publishing hanggang itakda ng may-ari ang repository
    variable na `vars.NIGHTLY_PUBLISH` sa `true` at tanggapin ng npm Trusted Publishing ang
    `nightly-v4-build.yml`. Ang channel resolution ay nasa `scripts/release/dist-tag.mjs`, ang parehong
    resolver na ginagamit ng `npm-publish.yml`.
 6. I-verify ang mga channel: ipinapakita ng `npm view omniroute dist-tags --json` na ang `latest` = 3.9.0 at walang
-   `next` / `nightly` hanggang mag-publish ang v4.
+   `next` / `nightly` hanggang ma-publish ang v4.
 7. Rollback, kung kinakailangan: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    at `npm dist-tag add omniroute@3.8.59 latest`.
 

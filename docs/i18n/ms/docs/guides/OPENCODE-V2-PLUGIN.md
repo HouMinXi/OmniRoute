@@ -123,13 +123,18 @@ Alat yang mengandungi `$ref` dimajukan tanpa perubahan dan bukannya dibuang, ker
 rujukan tersebut akan meluaskan skema kepada "terima apa sahaja".
 Tetapkan `"geminiSanitization": false` untuk mematikannya.
 
-## Penyelesaian masalah
+## Penyelesaian Masalah
 
-| Gejala                                    | Punca                                                                                                                 |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Pemilih tidak menunjukkan model OmniRoute | Tiada kekunci berjaya dikenal pasti (semak amaran permulaan), atau get laluan tidak dapat dicapai                     |
-| ID model mentah, tiada kombo, tiada harga | Titik akhir pengurusan menolak token — tetapkan `managementReadToken`                                                 |
-| Sesi dipinkan kepada `opencode-<id>/…`    | Pemalam v1 menerbitkan `opencode-<id>`; v2 menerbitkan `<id>` tanpa awalan, jadi pilih semula model di bawah `<id>/…` |
+| Gejala                                       | Punca                                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Pemilih tidak memaparkan model OmniRoute     | Tiada kunci yang berjaya dikenal pasti (semak amaran permulaan), atau get laluan tidak dapat dicapai                     |
+| ID model mentah, tiada gabungan, tiada harga | Titik akhir pengurusan menolak token — tetapkan `managementReadToken`                                                    |
+| Katalog `freeOnly` pendek atau kosong        | Tiada token pengurusan atau token ditolak — baca baris ringkasan muat semula (kiraan `unmatched-free`) dalam log hos     |
+| Sesi disematkan pada `opencode-<id>/…`       | Pemalam v1 menerbitkan `opencode-<id>`; v2 menerbitkan `<id>` secara langsung, jadi pilih semula model di bawah `<id>/…` |
+
+Pemboleh ubah persekitaran mesti sampai kepada proses pelayan opencode: apabila hos
+berjalan sebagai perkhidmatan, shell yang menjalankan `opencode models` dan persekitaran
+pelayan adalah berbeza, jadi eksport kunci di tempat pelayan membacanya.
 
 ## Lihat juga
 

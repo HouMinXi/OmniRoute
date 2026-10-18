@@ -13,30 +13,30 @@
 
 ## Mene Ne
 
-OmniRoute yana rajistar masu samar da sabis 329, ciki har da shigarwar katalog 155 da aka yi wa alamar **kyauta/babu-tantancewa**
-(babu-tantancewa,
-OAuth mai matakin kyauta, ko API key mai matakin kyauta — duba
+OmniRoute yana rajistar masu samarwa 372, ciki har da shigarwar kasida 155 da aka yi wa alamar **kyauta/ba ya buƙatar tantancewa**
+(ba ya buƙatar tantancewa,
+OAuth na matakin kyauta, ko maɓallin API na matakin kyauta — duba
 [Jagorar Matakan Kyauta](../getting-started/FREE-TIERS-GUIDE.md) da cikakken
-[kundin Matakan Kyauta](../reference/FREE_TIERS.md)). Matsalar ita ce: masu samar da sabis na kyauta suna
-da bambance-bambancen ingancin samfuri sosai. Mai samar da sabis marar buƙatar tantancewa da ke bayar da frontier model ya fi amfani sosai
-fiye da wanda ke bayar da ƙaramin legacy model.
+[kundin Matakan Kyauta](../reference/FREE_TIERS.md)). Matsalar ita ce: masu samarwa na kyauta sun bambanta
+sosai wajen ingancin samfuri. Mai samarwa da ba ya buƙatar tantancewa wanda ke ba da samfurin frontier ya fi amfani sosai
+fiye da wanda ke ba da ƙaramin tsohon samfuri.
 
-**Jerin Matsayin Masu Samar da Sabis na Kyauta** yana amsa "**wane mai samar da sabis na kyauta ne yake ba ni mafi kyawun samfuri?**" ta hanyar
-haɗa katalog na kowane mai samar da sabis na kyauta da **makan inganci da taron jama'a ya samar** daga
-**teburin shugabannin Arena AI** (ELO na zaɓin ɗan Adam, irin wannan ra'ayin ne ke bayan filin gasar chatbot na LMArena).
-Sannan ana jera masu samar da sabis bisa ƙarfin **mafi kyawun samfurinsu na kyauta**.
+**Matsayin Masu Samarwa na Kyauta** yana amsa "**wane mai samarwa na kyauta ne yake ba ni samfurin da ya fi kyau?**" ta hanyar
+haɗa kasidar kowane mai samarwa na kyauta da **makan inganci da jama'a suka samar** daga
+**allon jagorancin Arena AI** (ELO na fifikon ɗan Adam, irin ra'ayin da ke bayan filin
+chatbot na LMArena). Sannan ana jera masu samarwa bisa ƙarfin **mafi kyawun samfurinsu na kyauta**.
 
-Ana lissafa jerin matsayin daga tushe na ainihi guda uku:
+Ana lissafa matsayin daga ainihin tushe guda uku:
 
-1. Jerin masu samar da sabis na kyauta — `NOAUTH_PROVIDERS`, tare da shigarwar `OAUTH_PROVIDERS` /
+1. Jerin masu samarwa na kyauta — `NOAUTH_PROVIDERS`, tare da shigarwar `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` da aka yi wa alamar `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalog ɗin samfuran kowane mai samar da sabis daga rajistar masu samar da sabis
+2. Kasidar samfuran kowane mai samarwa daga rajistar masu samarwa
    (`open-sse/config/providerRegistry.ts`).
-3. Makan dacewa da aiki da aka samo daga ELO waɗanda injin daidaitawar Arena ELO ya adana a teburin DB na `model_intelligence`
+3. Makan dacewa da aiki da aka samo daga ELO, waɗanda injin daidaitawar Arena ELO ya adana a cikin teburin DB na `model_intelligence`
    (`src/lib/arenaEloSync.ts`).
 
-Dabarar haɗawa tana cikin `src/lib/freeProviderRankings.ts`.
+Dabarar haɗin tana cikin `src/lib/freeProviderRankings.ts`.
 
 ---
 

@@ -1,3 +1,4 @@
+import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { buildErrorBody } from "../utils/error.ts";
 import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
@@ -54,6 +55,7 @@ import {
 } from "../utils/responsesSequence.ts";
 import { hasCodexSsePeekProgress } from "./codex/ssePeekProgress.ts";
 import * as overloadedOutput from "./codex/sseOverloadedOutput.ts";
+import * as modelUnavailable from "./codex/sseModelUnavailable.ts";
 import { normalizeCodexResponsesInput } from "../utils/responsesInputNormalization.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
 import { createRequire } from "module";
@@ -538,6 +540,79 @@ export function filterNonstandardCodexSse(response: Response): Response {
   });
 }
 
+/**
+ * Codex Responses upstream sometimes leaves the HTTP connection open after
+ * emitting a terminal event (such as `response.completed` with tool calls or
+ * `response.incomplete`), sending keep-alive pings or idling until timeout.
+ * That post-completion silence holds downstream chat completions / SSE streams
+ * open, preventing clients (such as OpenCode or agent loops) from receiving
+ * the final [DONE] marker and executing tool calls.
+ *
+ * Wrap the HTTP SSE response body to cleanly close the stream as soon as an
+ * authoritative Responses terminal line has been forwarded to the client.
+ */
+export function terminateCodexHttpStreamOnTerminal(response: Response): Response {
+  const contentType = response.headers.get("content-type") || "";
+  if (!response.body || !contentType.includes("text/event-stream")) {
+    return response;
+  }
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
+  let buffer = "";
+  let closed = false;
+
+  const stream = new ReadableStream<Uint8Array>({
+    async start(controller) {
+      try {
+        while (!closed) {
+          const { done, value } = await reader.read();
+          if (done) {
+            buffer += decoder.decode();
+            if (buffer.length > 0 && !closed) {
+              controller.enqueue(encoder.encode(buffer));
+            }
+            if (!closed) {
+              closed = true;
+              controller.close();
+            }
+            return;
+          }
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          buffer = lines.pop() ?? "";
+          for (const line of lines) {
+            controller.enqueue(encoder.encode(line + "\n"));
+            if (isResponsesTerminalLine(line)) {
+              closed = true;
+              void reader.cancel().catch(() => undefined);
+              controller.enqueue(encoder.encode("\n"));
+              controller.close();
+              return;
+            }
+          }
+        }
+      } catch (err) {
+        if (!closed) {
+          closed = true;
+          controller.error(err);
+        }
+      }
+    },
+    cancel(reason) {
+      closed = true;
+      reader.cancel(reason).catch(() => undefined);
+    },
+  });
+
+  return new Response(stream, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
 // ─── Sub-bug #3 of upstream decolua/9router#2452 (@ryanngit) ─────────────────
 // Codex sometimes answers with HTTP 200 and a text/event-stream body whose
 // payload carries a transient "model at capacity" / overloaded error mid-stream,
@@ -560,12 +635,19 @@ const CODEX_SSE_TRANSIENT_ERROR_PATTERNS = [
 const CODEX_SSE_PEEK_MAX_BYTES = 8192;
 
 type CodexSseTransientErrorPeek =
-  | { matched: string; message: string; replacementBody: null; timedOut?: false }
+  | {
+      matched: string;
+      message: string;
+      replacementBody: null;
+      timedOut?: false;
+      modelUnavailable?: boolean;
+    }
   | {
       matched: null;
       message: null;
       replacementBody: ReadableStream<Uint8Array> | null;
       timedOut?: boolean;
+      modelUnavailable?: false;
     };
 
 /**
@@ -609,10 +691,8 @@ export async function peekCodexSseTransientError(
       text += decoder.decode(value, { stream: true });
       const lower = text.toLowerCase();
       const hit = CODEX_SSE_TRANSIENT_ERROR_PATTERNS.find((pattern) => lower.includes(pattern));
-      if (hit) {
-        matched = hit;
-        break;
-      }
+      matched = hit ?? modelUnavailable.matchCodexSseModelUnavailable(text);
+      if (matched) break;
       // Fake-200 overload delivered as output text (decolua/9router#3232).
       const overloadStep = overloadedOutput.codexOverloadedOutputPeekStep(text);
       if (overloadStep === "settled") break;
@@ -631,7 +711,9 @@ export async function peekCodexSseTransientError(
     );
   }
 
-  matched ??= overloadedOutput.matchCodexOverloadedOutput(text);
+  matched ??=
+    modelUnavailable.matchCodexSseModelUnavailable(text, true) ??
+    overloadedOutput.matchCodexOverloadedOutput(text);
   if (matched) {
     try {
       await reader.cancel();
@@ -639,7 +721,8 @@ export async function peekCodexSseTransientError(
       // Upstream socket may already be closing; nothing to clean up.
     }
     const message = overloadedOutput.extractCodexSseErrorMessage(text, matched);
-    return { matched, message, replacementBody: null };
+    const isModelUnavailable = modelUnavailable.isCodexSseModelUnavailableMatch(matched);
+    return { matched, message, replacementBody: null, modelUnavailable: isModelUnavailable };
   }
 
   // Re-assemble the stream: peeked prefix chunks, then continue draining the
@@ -668,7 +751,7 @@ export function encodeResponseSseEvent(raw: string): { sse: string; terminal: bo
         payload = JSON.stringify(failed);
         eventType = "response.failed";
       }
-      terminal = eventType === "response.completed" || eventType === "response.failed";
+      terminal = RESPONSES_TERMINAL_EVENT_TYPES.has(eventType);
     }
   } catch {
     console.warn("[codex] SSE payload parse failed, using raw payload");
@@ -815,7 +898,18 @@ export class CodexExecutor extends BaseExecutor {
       const resp = (httpResult as { response?: Response }).response;
       if (resp) {
         const peek = await peekCodexSseTransientError(resp);
-        if (peek.matched) {
+        if (peek.modelUnavailable) {
+          // Model + account scoped: a 400 lets isModelScoped400 lock the model on this
+          // connection and advance the combo; a 503 would feed the provider breaker.
+          input.log?.warn?.(
+            "FALLBACK",
+            `CODEX | 200-OK SSE reported model unavailable "${peek.matched}" — converting to 400`
+          );
+          (httpResult as { response: Response }).response = errorResponse(
+            HTTP_STATUS.BAD_REQUEST,
+            peek.message
+          );
+        } else if (peek.matched) {
           input.log?.warn?.(
             "RETRY",
             `CODEX | 200-OK SSE carried transient error "${peek.matched}" — converting to 503 for account fallback`
@@ -842,6 +936,15 @@ export class CodexExecutor extends BaseExecutor {
             headers: resp.headers,
           });
         }
+      }
+      const finalResp = (httpResult as { response?: Response }).response;
+      if (
+        finalResp?.ok &&
+        finalResp.body &&
+        finalResp.headers.get("content-type")?.includes("text/event-stream")
+      ) {
+        (httpResult as { response: Response }).response =
+          terminateCodexHttpStreamOnTerminal(finalResp);
       }
       return httpResult;
     }

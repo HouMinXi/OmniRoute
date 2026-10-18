@@ -244,18 +244,27 @@ tutun.
 
 ---
 
-## Belirteçleri yönetme
+## Tokenları yönetme
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ gizli değeri YALNIZCA BİR KEZ yazdırır — şimdi kopyalayın
-omniroute tokens list                 # maskelenmiş: kimlik, ad, kapsam, ön ek, durum, süre sonu
+#   ↳ gizli değeri YALNIZCA BİR KEZ yazdırır — hemen kopyalayın
+omniroute tokens list                 # maskelenmiş: kimlik, ad, kapsam, ön ek, durum, sona erme
 omniroute tokens revoke <id|prefix>   # hemen iptal et
 omniroute tokens scopes               # üç kapsamı açıkla
 ```
 
-`tokens` komutları bir **admin** kimlik bilgisi gerektirir. Belirteçleri
-panoda **Ayarlar → Erişim Belirteçleri** altında da yönetebilirsiniz (oluşturma, iptal etme, tek seferlik kopyalama).
+`tokens` komutları bir **admin** kimlik bilgisi gerektirir. Tokenları ayrıca
+panodaki **Settings → Access Tokens** bölümünden yönetebilirsiniz (oluşturma, iptal etme, yalnızca bir kez kopyalama).
+
+Bir token, oluşturucusunun sahip olduğundan daha fazla yetkiyle asla oluşturulamaz. Bir
+`admin` tokenı yalnızca operatör tarafından oluşturulabilir: pano oturumu, doğrudan
+sunucunun kendisindeki yerel CLI, parola ile `omniroute connect` veya oturum açmanın
+devre dışı bırakıldığı bir örnek üzerinden. Makine kimlik bilgileri (bir `admin` erişim tokenı
+veya `manage`/`admin` kapsamına sahip bir API anahtarı) yalnızca `write` ve `read`
+tokenları oluşturabilir; bunlarla `--scope admin` istendiğinde `403` döndürülür.
+
+Bir token hiçbir zaman kendisini oluşturanın sahip olduğundan daha fazla ayrıcalıkla oluşturulamaz. `admin` tokenini yalnızca operatör oluşturabilir: pano oturumu, sunucunun kendisindeki yerel CLI, parola ile `omniroute connect` veya oturum açmanın devre dışı olduğu bir örnek üzerinden. Makine kimlik bilgileri (bir `admin` erişim tokeni veya `manage`/`admin` kapsamlı API anahtarı) yalnızca `write` ve `read` tokenleri oluşturabilir; bunlarla `--scope admin` istemek `403` döndürür.
 
 ---
 

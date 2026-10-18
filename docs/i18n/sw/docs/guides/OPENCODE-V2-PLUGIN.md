@@ -111,13 +111,18 @@ Hakuna amri ya kuonyesha upya kwa mikono: amri za OpenCode v2 ni violezo vya mae
 Gemini hukataa ombi zima ambalo matamko yake ya zana yana `$schema` au `additionalProperties`, kwa kujibu `400 INVALID_ARGUMENT`. Programu-jalizi huondoa maneno hayo muhimu kutoka kwenye skimu za zana zinazoelekezwa kwa modeli ya Gemini ya mtoa huduma huyu na huacha kila ombi jingine bila kubadilishwa. Zana yenye `$ref` hutumwa bila kubadilishwa badala ya kuondolewa vipengele, kwa sababu kuondoa rejeleo kungepanua skimu hadi "kukubali chochote".
 Weka `"geminiSanitization": false` ili kukizima.
 
-## Utatuzi wa matatizo
+## Utatuzi wa Matatizo
 
-| Dalili                                                          | Sababu                                                                                                                    |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Kiteuzi hakionyeshi modeli ya OmniRoute                         | Hakuna ufunguo uliopatikana (angalia onyo la kuanzisha), au lango halifikiki                                              |
-| Vitambulisho ghafi vya modeli, hakuna michanganyiko, hakuna bei | Vituo vya mwisho vya usimamizi vilikataa tokeni — weka `managementReadToken`                                              |
-| Kipindi kimefungwa kwenye `opencode-<id>/…`                     | Programu-jalizi ya v1 ilichapisha `opencode-<id>`; v2 huchapisha `<id>` pekee, hivyo chagua tena modeli chini ya `<id>/…` |
+| Dalili                                                          | Sababu                                                                                                                                                        |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kiteuzi hakionyeshi modeli yoyote ya OmniRoute                  | Hakuna ufunguo uliopatikana (angalia onyo la wakati wa kuanza), au lango halifikiki                                                                           |
+| Vitambulisho ghafi vya modeli, hakuna michanganyiko, hakuna bei | Miisho ya usimamizi ilikataa tokeni — weka `managementReadToken`                                                                                              |
+| Katalogi ya `freeOnly` ni fupi au tupu                          | Hakuna tokeni ya usimamizi au tokeni ilikataliwa — soma mstari wa muhtasari wa uonyeshaji upya (idadi ya `unmatched-free`) kwenye kumbukumbu ya seva pangishi |
+| Kipindi kimefungwa kwa `opencode-<id>/…`                        | Programu-jalizi ya v1 ilichapisha `opencode-<id>`; v2 huchapisha `<id>` moja kwa moja, kwa hivyo chagua tena modeli chini ya `<id>/…`                         |
+
+Vigezo vya mazingira lazima vifikie mchakato wa seva ya opencode: seva pangishi
+inapoendeshwa kama huduma, mazingira ya shell yanayoendesha `opencode models` na
+mazingira ya seva ni tofauti, kwa hivyo hamisha ufunguo mahali ambapo seva inausoma.
 
 ## Tazama pia
 

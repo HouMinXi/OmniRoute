@@ -12,6 +12,8 @@ export const opencode_zenProvider: RegistryEntry = {
   authHeader: "Authorization",
   authPrefix: "Bearer",
   defaultContextLength: 200000,
+  // Upstream 400s "name must be at most 64 characters" on chat-completions tools.
+  toolNameMaxLength: 64,
   // Sync with https://opencode.ai/zen/v1/models — this list is regenerated
   // from the live API response so new models work without a code deploy.
   passthroughModels: true,

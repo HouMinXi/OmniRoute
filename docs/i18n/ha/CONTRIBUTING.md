@@ -303,61 +303,61 @@ src/                        # TypeScript (.ts / .tsx)
 │   └── login/              # Shafukan tantancewa (.tsx)
 ├── domain/                 # Injin manufofi (policyEngine, comboResolver, costRules, da sauransu)
 ├── lib/                    # Babban dabarun kasuwanci (.ts)
-│   ├── a2a/                # Uwar garken yarjejeniyar Agent-to-Agent v0.3
+│   ├── a2a/                # Sabar yarjejeniyar Agent-to-Agent v0.3
 │   ├── acp/                # Rijistar Agent Communication Protocol
-│   ├── compliance/         # Injin manufofin bin ƙa'ida
-│   ├── db/                 # Domain modules na SQLite + migrations 130
-│   ├── memory/             # Ƙwaƙwalwar tattaunawa mai ɗorewa
-│   ├── oauth/              # Masu samar da OAuth, services, da utilities
-│   ├── skills/             # Tsarin skill mai iya faɗaɗawa
-│   ├── usage/              # Bibiyar amfani da ƙididdige kuɗi
-│   └── localDb.ts          # Re-export layer kawai — kada a taɓa ƙara logic a nan
+│   ├── compliance/         # Injin manufofin bin ƙa’idoji
+│   ├── db/                 # Modulolin yanki na SQLite + ƙaura 130
+│   ├── memory/             # Ma’adanar tattaunawa mai ɗorewa
+│   ├── oauth/              # Masu samar da OAuth, ayyuka, da kayan aiki
+│   ├── skills/             # Tsarin ƙwarewa mai faɗaɗawa
+│   ├── usage/              # Bibiyar amfani da lissafin kuɗi
+│   └── localDb.ts          # Matakin sake-fitarwa kawai — kada a taɓa ƙara dabaru a nan
 ├── middleware/              # Middleware na buƙata (promptInjectionGuard)
-├── mitm/                   # Wakilin MITM (cert, DNS, target routing)
+├── mitm/                   # Wakilin MITM (takardar shaida, DNS, tura manufa)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Ma'anar providers (329), MCP scopes, routing strategies 19
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
+│   ├── components/         # Komponentocin React (.tsx)
+│   ├── constants/          # Ma’anonin masu samarwa (329), iyakokin MCP, dabarun turawa 19
+│   ├── utils/              # Mai katse da'ira, mai tsabtace bayanai, mataimakan tantancewa
+│   └── validation/         # Tsare-tsaren Zod v4
 └── sse/                    # Bututun wakilin SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # Modules 89 na aiwatar da executor
-├── handlers/               # Request handlers 11 (chat, responses, embeddings, images, da sauransu)
-├── mcp-server/             # Uwar garken MCP (tools na musamman 110, transports 3, scopes 33)
-├── services/               # Manyan services 178 (combo, autoCombo, rateLimitManager, da sauransu)
+open-sse/                   # Wurin aiki na @omniroute/open-sse
+├── executors/              # Modulolin aiwatarwa 150 (azuzuwan aiwatarwa + mataimaka na kowane mai samarwa)
+├── handlers/               # Masu sarrafa buƙata 11 (taɗi, martani, embeddings, hotuna, da sauransu)
+├── mcp-server/             # Sabar MCP (kayan aiki na musamman 110, hanyoyin sufuri 3, iyakoki 33)
+├── services/               # Manyan ayyuka 178 (combo, autoCombo, rateLimitManager, da sauransu)
 ├── translator/             # Masu fassara tsari (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformer na Responses API
-└── utils/                  # Utility modules 22 (stream, TLS, proxy, logging)
+├── transformer/            # Mai sauya Responses API
+└── utils/                  # Modulolin kayan aiki 22 (stream, TLS, proxy, logging)
 
 electron/                   # Manhajar tebur ta Electron (mai aiki a dandamali daban-daban)
 
 tests/
-├── unit/                   # Node.js test runner (fayilolin test 1,574)
-├── integration/            # Gwaje-gwajen integration
+├── unit/                   # Mai gudanar da gwajin Node.js (fayilolin gwaji 1,574)
+├── integration/            # Gwaje-gwajen haɗin kai
 ├── e2e/                    # Gwaje-gwajen Playwright
 ├── security/               # Gwaje-gwajen tsaro
-├── translator/             # Gwaje-gwaje na musamman ga translator
-└── load/                   # Gwaje-gwajen load
+├── translator/             # Gwaje-gwaje na musamman ga mai fassara
+└── load/                   # Gwaje-gwajen nauyi
 
 docs/
-├── adr/                     # Rubuce-rubucen Shawarar Gine-gine
+├── adr/                     # Bayanan Shawarwarin Gine-gine
 ├── architecture/            # Gine-ginen tsarin da juriya
-├── comparison/              # OmniRoute da madadansa
-├── compression/             # Jagorori da ƙa'idojin compression
+├── comparison/              # Kwatanta OmniRoute da sauran zaɓuɓɓuka
+├── compression/             # Jagorori da ƙa’idojin matsewa
 ├── dev/                     # Jagororin haɓakawa
-├── diagrams/                # Zanen gine-gine
+├── diagrams/                # Zane-zanen gine-gine
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Jagorar mai amfani, Docker, setup, warware matsaloli
+├── guides/                  # Jagorar mai amfani, Docker, saiti, warware matsaloli
 ├── i18n/                    # Fassarar README zuwa harsuna daban-daban
 ├── marketing/               # Kayan talla
-├── ops/                     # Deployment, proxy, coverage, releases
-├── providers/               # Takardu na musamman ga provider
-├── reference/               # Bayanin API, env vars, kayan aikin CLI, free tiers
-├── releases/                # Bayanan release
-├── routing/                 # Injin auto-combo, sake kunna reasoning
+├── ops/                     # Turawa, wakili, ɗaukar gwaji, fitowar siga
+├── providers/               # Takardu na musamman ga masu samarwa
+├── reference/               # Manazartar API, sauye-sauyen muhalli, kayan aikin CLI, matakan kyauta
+├── releases/                # Bayanan fitowar siga
+├── routing/                 # Injin haɗawa ta atomatik, sake kunna tunani
 ├── screenshots/             # Hotunan allo na dashboard
-├── security/                # Guardrails, compliance, stealth, tokens
+├── security/                # Matakan kariya, bin ƙa’idoji, ɓoyewa, tokens
 └── specs/                   # Ƙayyadaddun ƙira
 ```
 

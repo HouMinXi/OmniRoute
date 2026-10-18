@@ -1,0 +1,1 @@
+- **fix(db):** migration `207_remove_opencode_free_provider` no longer aborts the migration run with `no such column: api_key` on a `provider_connections` table that predates the credential columns — the runner adds the missing nullable columns first (base-red #15306, regression from #16310).

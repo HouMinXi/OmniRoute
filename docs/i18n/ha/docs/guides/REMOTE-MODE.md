@@ -236,18 +236,27 @@ aiki.
 
 ---
 
-## Sarrafa tokens
+## Sarrafa token
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ yana buga secret ɗin SAU ƊAYA — kwafe shi yanzu
-omniroute tokens list                 # an ɓoye: id, suna, scope, prefix, matsayi, ranar ƙarewa
+#   ↳ yana nuna sirrin sau ƊAYA TAK — kwafe shi yanzu
+omniroute tokens list                 # an ɓoye wasu sassa: id, suna, izini, prefix, matsayi, ranar ƙarewa
 omniroute tokens revoke <id|prefix>   # soke nan take
-omniroute tokens scopes               # bayyana scopes guda uku
+omniroute tokens scopes               # bayyana nau'ikan izini guda uku
 ```
 
-Umarnin `tokens` suna buƙatar credential na **admin**. Haka kuma za ka iya sarrafa tokens a cikin
-dashboard ƙarƙashin **Saituna → Access Tokens** (ƙirƙira, sokewa, kwafewa sau ɗaya).
+Umarnin `tokens` suna buƙatar shaidar **admin**. Hakanan za ka iya sarrafa token a
+dashboard ƙarƙashin **Settings → Access Tokens** (ƙirƙira, sokewa, kwafewa sau ɗaya tak).
+
+Ba za a taɓa iya ƙirƙirar token mai izini fiye da wanda mahaliccinsa yake da shi ba. Mai
+gudanarwa ne kaɗai zai iya ƙirƙirar token na `admin` — ta zaman dashboard, CLI na
+gida a kan uwar garken kanta, `omniroute connect` tare da kalmar sirri, ko kuma
+instance da aka kashe shiga cikinsa. Shaidun na'ura (access token na `admin`,
+ko API key mai izinin `manage`/`admin`) za su iya ƙirƙirar token na `write` da `read`
+kawai; neman su ƙirƙiri `--scope admin` yana mayar da `403`.
+
+Ba za a taɓa ƙirƙirar token da izini fiye da na wanda ya ƙirƙire shi ba. Mai gudanarwa kaɗai zai iya ƙirƙirar token na `admin`: ta zaman dashboard, CLI na cikin uwar garken da kanta, `omniroute connect` da kalmar sirri, ko a wata instance da aka kashe shiga cikinta. Bayanan shaidar na'ura (token na samun dama na `admin` ko maɓallin API mai iyakar `manage`/`admin`) za su iya ƙirƙirar token na `write` da `read` kawai; neman `--scope admin` da su yana mayar da `403`.
 
 ---
 

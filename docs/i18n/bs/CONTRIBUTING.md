@@ -293,67 +293,67 @@ Pogledajte `open-sse/utils/stream.ts` i `open-sse/utils/streamHandler.ts` za pri
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard stranice (23 sekcije)
+│   ├── (dashboard)/        # Stranice kontrolne ploče (23 odjeljka)
 │   ├── api/                # API rute (51 direktorij)
-│   └── login/              # Auth stranice (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, itd.)
-├── lib/                    # Core poslovna logika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registar
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite domain moduli + 130 migracija
-│   ├── memory/             # Persistent konverzacijska memorija
-│   ├── oauth/              # OAuth provajderi, servisi i utility funkcije
-│   ├── skills/             # Proširivi skill framework
-│   ├── usage/              # Praćenje upotrebe i kalkulacija troškova
-│   └── localDb.ts          # Samo sloj za re-export — nikada ovdje ne dodajte logiku
-├── middleware/              # Middleware za zahtjeve (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   └── login/              # Stranice za autentifikaciju (.tsx)
+├── domain/                 # Mehanizam pravila (policyEngine, comboResolver, costRules itd.)
+├── lib/                    # Osnovna poslovna logika (.ts)
+│   ├── a2a/                # Server protokola Agent-to-Agent v0.3
+│   ├── acp/                # Registar protokola Agent Communication Protocol
+│   ├── compliance/         # Mehanizam pravila usklađenosti
+│   ├── db/                 # SQLite domenski moduli + 130 migracija
+│   ├── memory/             # Trajna konverzacijska memorija
+│   ├── oauth/              # OAuth pružaoci, servisi i pomoćni alati
+│   ├── skills/             # Proširivi okvir vještina
+│   ├── usage/              # Praćenje korištenja i izračun troškova
+│   └── localDb.ts          # Samo sloj za ponovni izvoz — ovdje nikada ne dodavati logiku
+├── middleware/              # Posrednički softver zahtjeva (promptInjectionGuard)
+├── mitm/                   # MITM proxy (certifikat, DNS, usmjeravanje cilja)
 ├── shared/
 │   ├── components/         # React komponente (.tsx)
-│   ├── constants/          # Definicije provajdera (329), MCP scope-ovi, 19 strategija rutiranja
-│   ├── utils/              # Circuit breaker, sanitizer, auth helperi
+│   ├── constants/          # Definicije pružalaca (329), MCP opsezi, 19 strategija usmjeravanja
+│   ├── utils/              # Prekidač strujnog kruga, sanitizator, pomoćne funkcije za autentifikaciju
 │   └── validation/         # Zod v4 sheme
-└── sse/                    # SSE proxy pipeline
+└── sse/                    # SSE proxy cjevovod
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 modula za implementaciju executora
-├── handlers/               # 11 handlera za zahtjeve (chat, responses, embeddings, images, itd.)
-├── mcp-server/             # MCP server (110 jedinstvenih alata, 3 transporta, 33 scope-a)
-├── services/               # 178 top-level servisa (combo, autoCombo, rateLimitManager, itd.)
-├── translator/             # Translatori formata (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modula (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse radni prostor
+├── executors/              # 150 izvršnih modula (klase izvršilaca + pomoćne funkcije po pružaocu)
+├── handlers/               # 11 obrađivača zahtjeva (razgovor, odgovori, ugrađivanja, slike itd.)
+├── mcp-server/             # MCP server (110 jedinstvenih alata, 3 transporta, 33 opsega)
+├── services/               # 178 servisa najvišeg nivoa (combo, autoCombo, rateLimitManager itd.)
+├── translator/             # Prevodioci formata (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Transformator Responses API-ja
+└── utils/                  # 22 pomoćna modula (tok, TLS, proxy, evidentiranje)
 
-electron/                   # Electron desktop aplikacija (cross-platform)
+electron/                   # Electron desktop aplikacija (višeplatformska)
 
 tests/
-├── unit/                   # Node.js test runner (1,574 test datoteke)
-├── integration/            # Integracioni testovi
+├── unit/                   # Node.js pokretač testova (1.574 testne datoteke)
+├── integration/            # Integracijski testovi
 ├── e2e/                    # Playwright testovi
 ├── security/               # Sigurnosni testovi
-├── translator/             # Specifični testovi za translator
-└── load/                   # Load testovi
+├── translator/             # Testovi specifični za prevodioce
+└── load/                   # Testovi opterećenja
 
 docs/
-├── adr/                     # Architecture Decision Records
-├── architecture/            # Sistemska arhitektura i otpornost
-├── comparison/              # OmniRoute naspram alternativa
-├── compression/             # Vodiči i pravila kompresije
+├── adr/                     # Zapisi o arhitektonskim odlukama
+├── architecture/            # Arhitektura i otpornost sistema
+├── comparison/              # OmniRoute u odnosu na alternative
+├── compression/             # Vodiči i pravila za kompresiju
 ├── dev/                     # Vodiči za razvoj
-├── diagrams/                # Arhitektonski dijagrami
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Korisnički vodič, Docker, setup, rješavanje problema
-├── i18n/                    # Internacionalizovani prevodi README-a
+├── diagrams/                # Dijagrami arhitekture
+├── frameworks/              # MCP, A2A, OpenCode, memorija, vještine
+├── guides/                  # Korisnički vodič, Docker, postavljanje, rješavanje problema
+├── i18n/                    # Internacionalizirani prijevodi README-a
 ├── marketing/               # Marketinški materijali
-├── ops/                     # Deployment, proxy, coverage, release-ovi
-├── providers/               # Dokumentacija specifična za provajdere
-├── reference/               # API referenca, env varijable, CLI alati, besplatni nivoi
-├── releases/                # Bilješke o verzijama (release notes)
-├── routing/                 # Auto-combo engine, reasoning replay
-├── screenshots/             # Screenshot-ovi dashboarda
-├── security/                # Guardrails, compliance, stealth, tokeni
-└── specs/                   # Design specifikacije
+├── ops/                     # Implementacija, proxy, pokrivenost, izdanja
+├── providers/               # Dokumentacija specifična za pružaoce
+├── reference/               # API referenca, varijable okruženja, CLI alati, besplatni paketi
+├── releases/                # Napomene o izdanjima
+├── routing/                 # Mehanizam automatskih kombinacija, ponovno izvođenje zaključivanja
+├── screenshots/             # Snimci ekrana kontrolne ploče
+├── security/                # Zaštitne mjere, usklađenost, prikrivanje, tokeni
+└── specs/                   # Specifikacije dizajna
 ```
 
 ---

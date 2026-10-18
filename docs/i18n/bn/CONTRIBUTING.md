@@ -286,65 +286,72 @@ check-গুলো ইতোমধ্যে দেবে না, এবং ছ�
 
 ---
 
-## Project Structure
+## প্রজেক্টের কাঠামো
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # ড্যাশবোর্ড পৃষ্ঠা (২৩টি বিভাগ)
+│   ├── api/                # API রুট (৫১টি ডিরেক্টরি)
+│   └── login/              # প্রমাণীকরণ পৃষ্ঠা (.tsx)
+├── domain/                 # পলিসি ইঞ্জিন (policyEngine, comboResolver, costRules ইত্যাদি)
+├── lib/                    # মূল ব্যবসায়িক লজিক (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 প্রোটোকল সার্ভার
+│   ├── acp/                # Agent Communication Protocol রেজিস্ট্রি
+│   ├── compliance/         # কমপ্লায়েন্স পলিসি ইঞ্জিন
+│   ├── db/                 # SQLite ডোমেইন মডিউল + ১৩০টি মাইগ্রেশন
+│   ├── memory/             # স্থায়ী কথোপকথনমূলক মেমরি
+│   ├── oauth/              # OAuth প্রোভাইডার, সার্ভিস এবং ইউটিলিটি
+│   ├── skills/             # সম্প্রসারণযোগ্য স্কিল ফ্রেমওয়ার্ক
+│   ├── usage/              # ব্যবহার ট্র্যাকিং এবং খরচ গণনা
+│   └── localDb.ts          # শুধুমাত্র পুনরায় এক্সপোর্টের স্তর — এখানে কখনো লজিক যোগ করবেন না
+├── middleware/              # রিকোয়েস্ট মিডলওয়্যার (promptInjectionGuard)
+├── mitm/                   # MITM প্রক্সি (সার্টিফিকেট, DNS, টার্গেট রাউটিং)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React কম্পোনেন্ট (.tsx)
+│   ├── constants/          # প্রোভাইডার সংজ্ঞা (৩২৯টি), MCP স্কোপ, ১৯টি রাউটিং কৌশল
+│   ├── utils/              # সার্কিট ব্রেকার, স্যানিটাইজার, প্রমাণীকরণ সহায়ক
+│   └── validation/         # Zod v4 স্কিমা
+└── sse/                    # SSE প্রক্সি পাইপলাইন
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse ওয়ার্কস্পেস
+├── executors/              # ১৫০টি এক্সিকিউটর মডিউল (এক্সিকিউটর ক্লাস + প্রতি-প্রোভাইডার সহায়ক)
+├── handlers/               # ১১টি রিকোয়েস্ট হ্যান্ডলার (চ্যাট, রেসপন্স, এমবেডিং, ইমেজ ইত্যাদি)
+├── mcp-server/             # MCP সার্ভার (১১০টি অনন্য টুল, ৩টি ট্রান্সপোর্ট, ৩৩টি স্কোপ)
+├── services/               # ১৭৮টি শীর্ষ-স্তরের সার্ভিস (combo, autoCombo, rateLimitManager ইত্যাদি)
+├── translator/             # ফরম্যাট অনুবাদক (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ট্রান্সফরমার
+└── utils/                  # ২২টি ইউটিলিটি মডিউল (স্ট্রিম, TLS, প্রক্সি, লগিং)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron ডেস্কটপ অ্যাপ (ক্রস-প্ল্যাটফর্ম)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js টেস্ট রানার (১,৫৭৪টি টেস্ট ফাইল)
+├── integration/            # ইন্টিগ্রেশন টেস্ট
+├── e2e/                    # Playwright টেস্ট
+├── security/               # নিরাপত্তা টেস্ট
+├── translator/             # অনুবাদক-নির্দিষ্ট টেস্ট
+└── load/                   # লোড টেস্ট
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # আর্কিটেকচার সিদ্ধান্তের রেকর্ড
+├── architecture/            # সিস্টেম আর্কিটেকচার ও স্থিতিস্থাপকতা
+├── comparison/              # OmniRoute বনাম বিকল্পসমূহ
+├── compression/             # কম্প্রেশন নির্দেশিকা ও নিয়ম
+├── dev/                     # ডেভেলপমেন্ট নির্দেশিকা
+├── diagrams/                # আর্কিটেকচার ডায়াগ্রাম
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # ব্যবহারকারী নির্দেশিকা, Docker, সেটআপ, সমস্যা সমাধান
+├── i18n/                    # আন্তর্জাতিকীকৃত README অনুবাদ
+├── marketing/               # বিপণন উপকরণ
+├── ops/                     # ডিপ্লয়মেন্ট, প্রক্সি, কভারেজ, রিলিজ
+├── providers/               # প্রোভাইডার-নির্দিষ্ট ডকুমেন্টেশন
+├── reference/               # API রেফারেন্স, পরিবেশ ভেরিয়েবল, CLI টুল, বিনামূল্যের স্তর
+├── releases/                # রিলিজ নোট
+├── routing/                 # অটো-কম্বো ইঞ্জিন, রিজনিং রিপ্লে
+├── screenshots/             # ড্যাশবোর্ড স্ক্রিনশট
+├── security/                # গার্ডরেল, কমপ্লায়েন্স, স্টেলথ, টোকেন
+└── specs/                   # ডিজাইন স্পেসিফিকেশন
 ```
 
 ---

@@ -288,65 +288,72 @@ npm run test:combo:live:vps:failover     # يضيف سيناريو تجاوز ف
 
 ---
 
-## Project Structure
+## بنية المشروع
 
 ```
-src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+src/                        # TypeScript ‏(.ts / .tsx)
+├── app/                    # موجّه التطبيقات في Next.js 16
+│   ├── (dashboard)/        # صفحات لوحة التحكم (23 قسمًا)
+│   ├── api/                # مسارات API ‏(51 دليلًا)
+│   └── login/              # صفحات المصادقة (.tsx)
+├── domain/                 # محرك السياسات (policyEngine وcomboResolver وcostRules وغيرها)
+├── lib/                    # منطق الأعمال الأساسي (.ts)
+│   ├── a2a/                # خادم بروتوكول Agent-to-Agent v0.3
+│   ├── acp/                # سجل Agent Communication Protocol
+│   ├── compliance/         # محرك سياسات الامتثال
+│   ├── db/                 # وحدات نطاق SQLite و130 عملية ترحيل
+│   ├── memory/             # ذاكرة محادثات دائمة
+│   ├── oauth/              # موفّرو OAuth وخدماته وأدواته المساعدة
+│   ├── skills/             # إطار عمل مهارات قابل للتوسعة
+│   ├── usage/              # تتبّع الاستخدام وحساب التكلفة
+│   └── localDb.ts          # طبقة إعادة تصدير فقط — لا تُضف منطقًا هنا مطلقًا
+├── middleware/              # برمجيات وسيطة للطلبات (promptInjectionGuard)
+├── mitm/                   # وكيل MITM ‏(الشهادة وDNS وتوجيه الهدف)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # مكوّنات React ‏(.tsx)
+│   ├── constants/          # تعريفات الموفّرين (329)، ونطاقات MCP، و19 استراتيجية توجيه
+│   ├── utils/              # قاطع الدارة، وأداة التنقية، ومساعدات المصادقة
+│   └── validation/         # مخططات Zod v4
+└── sse/                    # مسار معالجة وكيل SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # مساحة عمل @omniroute/open-sse
+├── executors/              # 150 وحدة تنفيذ (فئات المنفّذات ومساعدات خاصة بكل موفّر)
+├── handlers/               # 11 معالج طلبات (الدردشة، والاستجابات، والتضمينات، والصور، وغيرها)
+├── mcp-server/             # خادم MCP ‏(110 أدوات فريدة، و3 وسائل نقل، و33 نطاقًا)
+├── services/               # 178 خدمة من المستوى الأعلى (combo وautoCombo وrateLimitManager وغيرها)
+├── translator/             # محوّلات التنسيقات (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # محوّل Responses API
+└── utils/                  # 22 وحدة أدوات مساعدة (البث، وTLS، والوكيل، والتسجيل)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # تطبيق Electron لسطح المكتب (متعدد المنصات)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # مشغّل اختبارات Node.js ‏(1,574 ملف اختبار)
+├── integration/            # اختبارات التكامل
+├── e2e/                    # اختبارات Playwright
+├── security/               # اختبارات الأمان
+├── translator/             # اختبارات خاصة بالمحوّل
+└── load/                   # اختبارات الحمل
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # سجلات قرارات البنية المعمارية
+├── architecture/            # بنية النظام ومرونته
+├── comparison/              # مقارنة OmniRoute بالبدائل
+├── compression/             # أدلة الضغط وقواعده
+├── dev/                     # أدلة التطوير
+├── diagrams/                # مخططات البنية المعمارية
+├── frameworks/              # MCP وA2A وOpenCode والذاكرة والمهارات
+├── guides/                  # دليل المستخدم وDocker والإعداد واستكشاف الأخطاء وإصلاحها
+├── i18n/                    # ترجمات README المدوّلة
+├── marketing/               # مواد تسويقية
+├── ops/                     # النشر والوكيل والتغطية والإصدارات
+├── providers/               # وثائق خاصة بالموفّرين
+├── reference/               # مرجع API ومتغيرات البيئة وأدوات CLI والطبقات المجانية
+├── releases/                # ملاحظات الإصدار
+├── routing/                 # محرك الدمج التلقائي وإعادة تشغيل الاستدلال
+├── screenshots/             # لقطات شاشة لوحة التحكم
+├── security/                # ضوابط الحماية والامتثال والتخفي والرموز المميزة
+└── specs/                   # مواصفات التصميم
 ```
 
 ---

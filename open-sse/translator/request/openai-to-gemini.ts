@@ -28,6 +28,7 @@ import {
   cleanJSONSchemaForAntigravity,
 } from "../helpers/geminiHelper.ts";
 import { buildGeminiTools, sanitizeGeminiToolName } from "../helpers/geminiToolsSanitizer.ts";
+import { createSchemaBudget } from "../helpers/schemaBudget.ts";
 import {
   isGeminiTrailingModelTurnRejectingModel,
   stripTrailingGeminiModelTurns,
@@ -688,9 +689,12 @@ function openaiToGeminiBase(
 
   // Convert tools
   const bodyTools = body.tools as Array<Record<string, unknown>> | undefined;
+  // One `$ref` expansion budget for every schema of this request (tools + response).
+  const schemaBudget = createSchemaBudget();
   const geminiTools = buildGeminiTools(bodyTools, {
     ...toolNameOptions,
     toolNameMap,
+    schemaBudget,
   });
 
   // Support for Google Search grounding if requested via 'google_search' tool
@@ -730,6 +734,8 @@ function openaiToGeminiBase(
         // parameters (geminiToolsSanitizer) keep the default flattening.
         result.generationConfig.responseSchema = cleanJSONSchemaForAntigravity(schema, {
           preserveNullable: true,
+          budget: schemaBudget,
+          location: "response_format",
         });
       }
     } else if (responseFormat.type === "json_object") {

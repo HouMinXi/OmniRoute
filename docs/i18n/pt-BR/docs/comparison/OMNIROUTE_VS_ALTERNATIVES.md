@@ -39,11 +39,11 @@ Comparação objetiva de recursos com roteadores de IA populares de código aber
 
 ## Quando escolher o OmniRoute
 
-- Você se auto-hospeda e quer a **maior cobertura possível de provedores** (329 provedores, 155 entradas gratuitas/sem autenticação no catálogo)
+- Você hospeda sua própria instância e quer **cobertura máxima de provedores** (372 provedores, 155 entradas gratuitas/sem autenticação no catálogo)
 - Você precisa de um **servidor MCP integrado** (ferramentas de LLM, memória e habilidades expostas como ferramentas)
 - Você precisa do **protocolo A2A** para fluxos de trabalho entre agentes
-- Você quer **disfarce de impressão digital** (JA3/JA4) para evitar a detecção por CAPTCHAs dos serviços upstream
-- Você precisa de **recursos empresariais** (proteções, avaliações e trilha de auditoria) sem pagar por um SaaS
+- Você quer **furtividade de impressão digital** (JA3/JA4) para evitar a detecção por CAPTCHAs upstream
+- Você precisa de **recursos empresariais** (barreiras de proteção, avaliações e trilha de auditoria) sem pagar por um SaaS
 
 ## Quando escolher o LiteLLM
 

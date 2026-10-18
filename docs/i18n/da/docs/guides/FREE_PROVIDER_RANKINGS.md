@@ -13,18 +13,18 @@
 
 ## Hvad det er
 
-OmniRoute registrerer 329 udbydere, herunder 155 katalogposter markeret som **gratis/uden godkendelse**
+OmniRoute registrerer 372 udbydere, herunder 155 katalogposter markeret som **gratis/uden godkendelse**
 (uden godkendelse,
-OAuth på gratisniveau eller API-nøgle på gratisniveau — se
-[Vejledning til gratisniveauer](../getting-started/FREE-TIERS-GUIDE.md) og den komplette
-[mappe over gratisniveauer](../reference/FREE_TIERS.md)). Udfordringen er, at gratis udbyderes
-modelkvalitet varierer meget. En udbyder uden godkendelse, der tilbyder en banebrydende model, er langt mere nyttig
-end en, der tilbyder en lille ældre model.
+OAuth med gratis niveau eller API-nøgle med gratis niveau — se
+[vejledningen til gratis niveauer](../getting-started/FREE-TIERS-GUIDE.md) og den komplette
+[oversigt over gratis niveauer](../reference/FREE_TIERS.md)). Udfordringen er, at gratis udbydere varierer
+markant i modelkvalitet. En udbyder uden godkendelse, der tilbyder en avanceret model, er langt mere nyttig
+end en, der tilbyder en lille, ældre model.
 
-**Rangering af gratis udbydere** besvarer spørgsmålet "**hvilken gratis udbyder giver mig den bedste model?**" ved at
-sammenkoble hver gratis udbyders katalog med **crowdsourcede kvalitetsscorer** fra
-**Arena AI-resultatlisten** (ELO baseret på menneskelige præferencer, samme idé som bag LMArena-
-chatbotarenaen). Udbyderne rangeres derefter efter styrken af deres **bedste gratis model**.
+**Rangeringer af gratis udbydere** besvarer spørgsmålet "**hvilken gratis udbyder giver mig den bedste model?**" ved at
+kombinere hver gratis udbyders katalog med **crowdsourcede kvalitetsscorer** fra
+**Arena AI-ranglisten** (ELO baseret på menneskelige præferencer, samme idé som bag LMArena-
+chatbotarenaen). Udbyderne rangeres derefter efter kvaliteten af deres **bedste gratis model**.
 
 Rangeringen beregnes ud fra tre reelle kilder:
 
@@ -36,7 +36,7 @@ Rangeringen beregnes ud fra tre reelle kilder:
 3. ELO-afledte scorer for opgaveegnethed, som gemmes i DB-tabellen `model_intelligence` af
    Arena ELO-synkroniseringsmotoren (`src/lib/arenaEloSync.ts`).
 
-Sammenkoblingslogikken findes i `src/lib/freeProviderRankings.ts`.
+Sammenkædningslogikken findes i `src/lib/freeProviderRankings.ts`.
 
 ---
 

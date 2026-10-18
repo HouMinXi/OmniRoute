@@ -29,7 +29,7 @@ import {
 import { RateLimitReason } from "../../config/constants.ts";
 import { isProviderCircuitOpenResult, isRequestScopedUpstreamFailure } from "./comboPredicates.ts";
 import { isCloudflareFingerprintRejection } from "../errorClassifier.ts";
-import { isLocalModelPolicyResponse } from "../../../src/shared/utils/resolvedModelAccess.ts";
+import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
 // #10334 — connection-scope predicate shared with the persistence layer
 // (markAccountUnavailable) so the same-request combo skip and the persisted
 // connection cooldown agree on exactly which fallbackResult shapes qualify.
@@ -43,6 +43,7 @@ import { getCachedClaudeQuotaScopeDecision } from "@/domain/quotaCache";
 import { resolveProviderId } from "@/shared/constants/providers";
 import { LOCAL_MODEL_COOLDOWN_HEADER } from "../../utils/localCooldownHeader.ts";
 import { isExplicitModelCapacityFailure } from "../accountFallback/perModelFailureScope.ts";
+import { isModelScopedAccessDenial } from "../accountFallback/modelScopedAccessDenial.ts";
 import type { ComboLogger, ResolvedComboTarget } from "./types.ts";
 
 // Connection-level failure statuses: the provider connection itself is likely bad (upstream
@@ -313,6 +314,9 @@ export function applyComboTargetExhaustion(
       .join(" ")
   );
   const quotaMisclassifiedAsAuth = isQuotaOrCreditsError(errorText, structuredError);
+  if (isModelScopedAccessDenial(provider, result.status, errorText, structuredError)) {
+    return { ...derived, providerExhausted: false };
+  }
   if (
     AUTH_LEVEL_ERROR_STATUSES.includes(result.status) &&
     // Cloudflare 1010 is a 403-ONLY fingerprint rejection. A 401 that merely happens to

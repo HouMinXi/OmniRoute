@@ -1142,6 +1142,7 @@ async function handleComboChatInner({
     traceInvocationId,
     clientRequestedStream,
     handleSingleModelWithTimeout,
+    requestHeaders,
     isModelAvailable,
     perTargetAdmission,
     signal,

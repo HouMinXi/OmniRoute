@@ -384,67 +384,70 @@ Sebelum merilis versi v3.8.x apa pun, verifikasi item-item tambahan berikut:
 
 ---
 
-## Pemotongan LTS 3.9.0 (direhearsal pada 3.8.58)
+## Pemotongan 3.9.0 LTS (direhearsalkan di 3.8.58)
 
-Setelah v3.8.59, versi berikutnya adalah 3.9.0, dan tip-nya menjadi dua branch berumur panjang:
-`stable/v3` (jalur LTS v3, npm `latest`) dan `develop` (v4, dinaikkan ke 4.0.0, npm
-`nightly`). Model branch/channel, forward-port, dan label tersedia di
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); rencananya tersedia di [ROADMAP](../../ROADMAP.md) (Fase 3). Pemotongan dijalankan sekali;
-3.8.58 merehearsalnya dari awal hingga akhir pada fork, dan 3.8.59 ditutup dengan
+Setelah v3.8.59, versi berikutnya adalah 3.9.0, dan tip-nya menjadi dua cabang berumur panjang:
+`stable/v3` (jalur v3 LTS, npm `latest`) dan `develop` (v4, dinaikkan ke 4.0.0, npm
+`nightly`). Model cabang/channel, forward-port, dan label tersedia di
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); rencananya tersedia di [ROADMAP](../../ROADMAP.md) (Fase 3). Pemotongan dijalankan satu kali;
+3.8.58 merehearsalkannya dari awal hingga akhir pada sebuah fork, dan 3.8.59 ditutup dengan
 [daftar periksa GO/NO-GO](./LTS_GO_NO_GO.md).
 
 ### Dry-run (hanya baca, aman kapan saja)
 
 ```bash
 npm run release:dry-run-lts-cut                       # pemotongan sebenarnya: 3.9.0 dari HEAD, tag sebelumnya v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # tetapkan commit sumber
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # sematkan commit sumber
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` tidak mengeksekusi apa pun: skrip ini membaca git dan `gh` serta mencetak
-seluruh urutan — prasyarat (sumber dapat di-resolve, tag sebelumnya tersedia, `package.json` memiliki
-versi target, issue `release-freeze` terbuka, tidak ada issue `Release branch not green` yang terbuka
-pada branch rilis yang sudah ada — branch yang tidak ada dilaporkan sebagai `?` tidak diketahui, tidak pernah
-hijau — antrean `release` Mergify dikonfigurasi (G11: `queue_rules`, `checks_timeout`,
+`scripts/release/dry-run-lts-cut.mjs` tidak mengeksekusi apa pun: skrip ini membaca git dan `gh`, lalu mencetak
+seluruh urutan — prasyarat (sumber dapat di-resolve, repositori sumber memiliki riwayat lengkap —
+shallow clone tidak dapat melakukan push ke `stable/v3`, sisi penerima menolak pack pada parent hasil graft pertama,
+jadi lakukan pemotongan dari clone lengkap atau jalankan `git fetch --unshallow origin` terlebih dahulu — tag
+sebelumnya tersedia, `package.json` berisi versi target, issue `release-freeze` sedang terbuka, tidak ada
+issue `Release branch not green` yang terbuka
+pada cabang rilis yang ada — cabang yang tidak ada melaporkan `?` unknown, tidak pernah
+green — antrean `release` Mergify telah dikonfigurasi (G11: `queue_rules`, `checks_timeout`,
 label `queue`), ruleset `release/*` masih memblokir penghapusan dan force-push, serta
-`stable/v3` dan `develop` belum ada), kedua langkah branch, trigger workflow dorman
-dan kondisi `if:` mana yang menjadi true (serta mana yang tetap dibatasi oleh variabel repositori atau
-ditetapkan ke repositori kanonis), dist-tag yang diharapkan (`latest` → 3.9.0, `next` dan
-`nightly` kosong), dan rollback. Exit `0` = `RESULT: READY`, `1` = prasyarat pemblokir
+`stable/v3` dan `develop` belum tersedia), kedua langkah cabang, trigger workflow dorman dan
+kondisi `if:` mana yang menjadi true (serta mana yang tetap dibatasi oleh variabel repositori atau
+disematkan ke repositori kanonis), dist-tag yang diharapkan (`latest` → 3.9.0, `next` dan
+`nightly` kosong), serta rollback. Exit `0` = `RESULT: READY`, `1` = prasyarat pemblokir
 gagal (`✗`), `2` = kesalahan penggunaan. `--advisory <id,...>` menurunkan pemeriksaan menjadi peringatan (`!`)
 tanpa menyembunyikannya.
 
-Jalankan dry-run pemotongan sebenarnya selagi freeze rilis 3.9.0 masih terbuka — branch
+Jalankan dry-run pemotongan sebenarnya selagi release freeze 3.9.0 masih terbuka — cabang
 dibuat setelah tag dan sebelum Fase 12c mencabut freeze.
 
 ### Rehearsal 3.8.58 (khusus fork)
 
 ```bash
-# 1. Dry-run pada tip saat ini dengan parameter rehearsal
+# 1. Jalankan dry-run pada tip saat ini dengan parameter rehearsal
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Eksekusi terhadap remote FORK (origin, atau remote mana pun yang URL-nya merupakan
+# 2. Eksekusi terhadap remote FORK (origin, atau remote apa pun yang URL-nya merupakan
 #    repositori kanonis, akan ditolak; setiap langkah meminta konfirmasi di terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Jalankan workflow dorman di fork (workflow_dispatch saat dry-run
-#    melaporkan penetapan repositori kanonis), lalu lakukan rollback
+# 3. Uji workflow dorman di fork (workflow_dispatch jika dry-run
+#    melaporkan penyematan repositori kanonis), lalu lakukan rollback
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit kenaikan versi develop dibuat dengan plumbing git (working tree tidak disentuh) dan menaikkan
-lima file yang sama seperti commit pembukaan siklus: `package.json`, `open-sse/package.json`,
+Commit bump develop dibuat dengan git plumbing (working tree tidak disentuh) dan menaikkan
+lima file yang sama seperti commit cycle-open: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json`, dan `docs/openapi.yaml`. Bagian `[4.0.0]`
-CHANGELOG dan mirror i18n-nya dibuka di `develop` setelahnya, sebelum PR pertamanya.
-Skrip tidak pernah mengubah dist-tag npm — rehearsal hal tersebut pada package sementara.
+CHANGELOG beserta mirror i18n-nya kemudian dibuka di `develop`, sebelum PR pertamanya.
+Skrip tidak pernah mengubah npm dist-tag — lakukan rehearsal terhadapnya pada package sementara.
 
 ### Artefak pratinjau PR (build sekali, promosikan byte yang sama)
 
 `.github/workflows/preview-artifact.yml` membuat satu tarball produksi dari head PR dan
-memvalidasi build yang sama persis (#8084 bagian (a)). Hanya untuk PR dalam repositori yang sama; tidak ada yang dipublikasikan.
+memvalidasi build yang sama persis (#8084 bagian (a)). Hanya untuk PR dari repositori yang sama; tidak ada yang dipublikasikan.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # atau tambahkan label `preview-artifact`
@@ -456,33 +459,33 @@ npm install -g ./omniroute-*.tgz                          # instalasi pratinjau
 
 Proses tersebut menjalankan `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, mengemas
 tarball, menjalankan `npm run check:pack-boot` (secret palsu, direktori data sementara), mengemas ulang, dan
-gagal kecuali digest-nya identik, lalu mencatat `artifact-identity.json` (SHA head, SHA base,
-hash lockfile, platform, arsitektur, ABI node, bundler, kebijakan build —
-`scripts/release/artifact-identity.mjs`) dan mengatestasikan tarball dalam job terpisah. Mempromosikan
+gagal kecuali digest-nya identik, kemudian mencatat `artifact-identity.json` (head SHA, base
+SHA, hash lockfile, platform, arch, node ABI, bundler, kebijakan build —
+`scripts/release/artifact-identity.mjs`) serta mengatestasi tarball dalam job terpisah. Mempromosikan
 pratinjau berarti menginstal tarball tersebut: jangan pernah melakukan build ulang dari sumber.
 
 ### Pemotongan (3.9.0, setelah GO)
 
 1. GO dicatat di [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` mencetak `RESULT: READY`.
-3. Buat branch di `origin` secara manual dengan perintah yang dicetak oleh dry-run — skrip
-   menolak melakukan push ke `origin`. Untuk menggunakan kembali commit develop yang telah ditinjau, jalankan
-   rehearsal `--execute` pada tip 3.9.0 terhadap fork Anda terlebih dahulu; skrip mencetak kedua SHA, dan
+3. Buat cabang di `origin` secara manual menggunakan perintah yang dicetak oleh dry-run —
+   skrip menolak melakukan push ke `origin`. Untuk menggunakan kembali commit develop yang telah ditinjau, jalankan
+   rehearsal `--execute` pada tip 3.9.0 terhadap fork Anda terlebih dahulu; perintah tersebut mencetak kedua SHA, dan
    commit yang sama dapat di-push:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Lindungi `stable/v3` dan `develop` (ruleset + antrean merge) sebelum PR pertama masuk.
-5. Workflow dorman diaktifkan berdasarkan keberadaan branch: `forward-port.yml` (push ke
+4. Lindungi `stable/v3` dan `develop` (ruleset + antrean penggabungan) sebelum PR pertama masuk.
+5. Workflow yang tidak aktif akan diaktifkan berdasarkan keberadaan cabang: `forward-port.yml` (push ke
    `stable/v3`), `validate-stable-pr.yml` (PR ke `stable/v3`), dan `nightly-v4-build.yml`
-   (melakukan build pada `develop`). Sebelum go-live, atur secret repositori `secrets.FORWARD_PORT_TOKEN` (agar CI berjalan pada
+   (membangun `develop`). Sebelum peluncuran, atur secret repositori `secrets.FORWARD_PORT_TOKEN` (agar CI berjalan pada
    PR forward-port); publikasi nightly tetap dinonaktifkan hingga pemilik mengatur variabel repositori
    `vars.NIGHTLY_PUBLISH` menjadi `true` dan npm Trusted Publishing menerima
-   `nightly-v4-build.yml`. Resolusi channel berada di `scripts/release/dist-tag.mjs`, resolver yang sama
+   `nightly-v4-build.yml`. Resolusi kanal dilakukan oleh `scripts/release/dist-tag.mjs`, resolver yang sama
    dengan yang digunakan `npm-publish.yml`.
-6. Verifikasi channel: `npm view omniroute dist-tags --json` menampilkan `latest` = 3.9.0 dan tidak ada
+6. Verifikasi kanal: `npm view omniroute dist-tags --json` menampilkan `latest` = 3.9.0 dan tidak ada
    `next` / `nightly` hingga v4 dipublikasikan.
 7. Rollback, jika diperlukan: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    dan `npm dist-tag add omniroute@3.8.59 latest`.

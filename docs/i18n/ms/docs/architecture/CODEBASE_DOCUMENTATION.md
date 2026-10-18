@@ -436,8 +436,8 @@ Dibahagikan kepada subdirektori khusus:
 
 ## 4. `open-sse/` — Ruang kerja enjin penstriman
 
-Ruang kerja npm berasingan yang diterbitkan sebagai `@omniroute/open-sse`. Mengurus pemprosesan
-permintaan, pelaksana, penterjemah, perkhidmatan, pengubah dan pelayan MCP.
+Ruang kerja npm berasingan yang diterbitkan sebagai `@omniroute/open-sse`. Mengendalikan pemprosesan
+permintaan, pelaksana, penterjemah, perkhidmatan, pengubah, dan pelayan MCP.
 
 ```
 open-sse/
@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Daftar penyedia, profil pengepala, identiti, …
 ├── handlers/               Pengendali permintaan (sembang, pembenaman, audio, imej, …)
-├── executors/              108 pelaksana HTTP khusus penyedia
+├── executors/              150 modul pelaksana penyedia (kelas pelaksana + pembantu bagi setiap penyedia)
 ├── translator/             Penukaran format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Pengubah strim Responses API ↔ Chat Completions
 ├── services/               80+ modul perkhidmatan (gabungan, sandaran, kuota, identiti, …)
@@ -457,27 +457,30 @@ open-sse/
 
 ### 4.1 `open-sse/handlers/`
 
-| Pengendali              | Tujuan                                                                                |
-| ----------------------- | ------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Saluran utama sembang (cache, had kadar, penghalaan gabungan, penghantaran pelaksana) |
-| `responsesHandler.ts`   | Titik masuk OpenAI Responses API                                                      |
-| `embeddings.ts`         | Pembenaman                                                                            |
-| `imageGeneration.ts`    | Penjanaan imej                                                                        |
-| `audioSpeech.ts`        | Teks kepada pertuturan                                                                |
-| `audioTranscription.ts` | Pertuturan kepada teks                                                                |
-| `videoGeneration.ts`    | Penjanaan video                                                                       |
-| `musicGeneration.ts`    | Penjanaan muzik                                                                       |
-| `rerank.ts`             | Penyusunan semula kedudukan                                                           |
-| `moderations.ts`        | Penyederhanaan                                                                        |
-| `search.ts`             | Carian web                                                                            |
-| `sseParser.ts`          | Penghurai peristiwa SSE                                                               |
-| `usageExtractor.ts`     | Mengambil kiraan token daripada strim huluan                                          |
-| `responseSanitizer.ts`  | Membuang hingar khusus penyedia                                                       |
-| `responseTranslator.ts` | Penghubung antara respons penyedia dengan lapisan penterjemah                         |
+| Pengendali              | Tujuan                                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Talian paip sembang utama (cache, had kadar, penghalaan gabungan, penghantaran pelaksana) |
+| `responsesHandler.ts`   | Titik masuk OpenAI Responses API                                                          |
+| `embeddings.ts`         | Pembenaman                                                                                |
+| `imageGeneration.ts`    | Penjanaan imej                                                                            |
+| `audioSpeech.ts`        | Teks kepada pertuturan                                                                    |
+| `audioTranscription.ts` | Pertuturan kepada teks                                                                    |
+| `videoGeneration.ts`    | Penjanaan video                                                                           |
+| `musicGeneration.ts`    | Penjanaan muzik                                                                           |
+| `rerank.ts`             | Pengisihan semula                                                                         |
+| `moderations.ts`        | Penyederhanaan                                                                            |
+| `search.ts`             | Carian web                                                                                |
+| `sseParser.ts`          | Penghurai peristiwa SSE                                                                   |
+| `usageExtractor.ts`     | Mengeluarkan kiraan token daripada strim huluan                                           |
+| `responseSanitizer.ts`  | Membuang hingar khusus penyedia                                                           |
+| `responseTranslator.ts` | Penghubung antara respons penyedia dengan lapisan penterjemah                             |
 
 ### 4.2 `open-sse/executors/`
 
-148 pelaksana penyedia, setiap satunya melanjutkan `BaseExecutor` (`base.ts`):
+150 modul pelaksana peringkat atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan yang
+diukur oleh `npm run check:docs-counts`). Setiap kelas pelaksana melanjutkan `BaseExecutor` (`base.ts`),
+secara langsung atau melalui `DefaultExecutor` atau pelaksana lain; modul selebihnya ialah pembantu bagi setiap penyedia
+(skema alat, penyesuai pengambilan/TTS, pengendali kelainan). Pelaksana termasuk:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -485,13 +488,13 @@ open-sse/
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, serta `claudeIdentity.ts`
 (pembantu identiti dikongsi) dan `index.ts` (daftar).
 
-> Nota: penyedia yang tidak disenaraikan di sini dilayan oleh `default.ts` menggunakan pelaksana generik
-> yang serasi dengan OpenAI. Katalog penuh penyedia (355 penyedia) terletak dalam
+> Nota: penyedia yang tidak disenaraikan di sini dikendalikan oleh `default.ts` menggunakan pelaksana generik
+> yang serasi dengan OpenAI. Katalog penyedia penuh (372 penyedia) terletak dalam
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Penterjemahan hab dan jejari (OpenAI ialah hab).
+Penterjemahan hab-dan-jejari (OpenAI ialah hab).
 
 - **9 penterjemah permintaan** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -511,7 +514,7 @@ Penterjemahan hab dan jejari (OpenAI ialah hab).
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — Penukar Responses API ↔ Chat Completions berasaskan
-  `TransformStream` (digunakan oleh pengendali menyeluruh laluan `responses/`).
+  `TransformStream` (digunakan oleh laluan tangkap semua `responses/`).
 
 ### 4.5 `open-sse/services/`
 
@@ -535,11 +538,11 @@ Sorotan (senarai penuh di bawah `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 alat unik** yang didawaikan dalam `server.ts` (45 alat kanonik dalam `schemas/tools.ts` +
-  modul memori, kemahiran, GitHub-skills, kelompok, gamifikasi, pemalam, Notion, Obsidian,
-  korpus setempat dan pemampatan — kesatuan dikira oleh `countUniqueMcpTools`).
+- **110 alat unik** disambungkan dalam `server.ts` (45 alat kanonik dalam `schemas/tools.ts` +
+  modul memori, kemahiran, kemahiran GitHub, kumpulan, gamifikasi, pemalam, Notion, Obsidian,
+  korpus setempat dan pemampatan — gabungan dikira oleh `countUniqueMcpTools`).
 - **3 pengangkutan**: stdio, HTTP Streamable, SSE.
-- **33 skop** dikuatkuasakan pada masa jalan — senarai asas dalam `src/shared/constants/mcpScopes.ts`, set penuh ialah kesatuan skop yang diisytiharkan oleh setiap modul alat.
+- **33 skop** dikuatkuasakan semasa masa jalan — senarai asas dalam `src/shared/constants/mcpScopes.ts`, set penuh ialah gabungan skop yang diisytiharkan oleh setiap modul alat.
 - Jadual audit: `mcp_tool_audit` (diisi oleh `audit.ts`).
 - Fail: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
@@ -549,7 +552,7 @@ Sorotan (senarai penuh di bawah `open-sse/services/`):
 
 ### 4.7 `open-sse/config/`
 
-Daftar pembekal (`providerRegistry.ts`, `providerModels.ts`,
+Daftar penyedia (`providerRegistry.ts`, `providerModels.ts`,
 `providerHeaderProfiles.ts`), daftar model mengikut format (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
@@ -656,7 +659,7 @@ Perintah lazim:
 
 ## 8. `scripts/`
 
-Disusun kepada 6 subfolder mengikut tujuan.
+Disusun mengikut tujuan ke dalam 6 subfolder.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,

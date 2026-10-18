@@ -102,11 +102,16 @@ Postavite `"geminiSanitization": false` da biste to isključili.
 
 ## Rješavanje problema
 
-| Simptom                                           | Uzrok                                                                                                        |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Birač ne prikazuje OmniRoute model                | Nijedan ključ nije razriješen (provjerite upozorenje pri pokretanju), ili je gateway nedostupan              |
-| Sirovi ID-ovi modela, bez kombinacija, bez cijena | Upravljački endpointi su odbili token — postavite `managementReadToken`                                      |
-| Sesija prikačena na `opencode-<id>/…`             | v1 dodatak je objavio `opencode-<id>`; v2 objavljuje `<id>` ogoljeno, pa ponovo izaberite model pod `<id>/…` |
+| Simptom                                            | Uzrok                                                                                                                             |
+| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| Birač ne prikazuje nijedan OmniRoute model         | Ključ nije pronađen (provjerite upozorenje pri pokretanju) ili pristupnik nije dostupan                                           |
+| Neobrađeni ID-ovi modela, bez kombinacija i cijena | Upravljačke krajnje tačke odbile su token — postavite `managementReadToken`                                                       |
+| Kratak ili prazan `freeOnly` katalog               | Nema upravljačkog tokena ili je token odbijen — pročitajte red sa sažetkom osvježavanja (broj `unmatched-free`) u zapisniku hosta |
+| Sesija prikvačena za `opencode-<id>/…`             | Dodatak v1 objavio je `opencode-<id>`; v2 objavljuje samo `<id>`, pa ponovo odaberite model pod `<id>/…`                          |
+
+Varijable okruženja moraju biti dostupne procesu opencode servera: kada se host
+izvršava kao servis, ljuska koja pokreće `opencode models` i okruženje servera
+razlikuju se, zato izvezite ključ tamo gdje ga server učitava.
 
 ## Vidi također
 

@@ -125,11 +125,16 @@ Angi `"geminiSanitization": false` for å slå det av.
 
 ## Feilsøking
 
-| Symptom                                            | Årsak                                                                                                     |
-| -------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Velgeren viser ingen OmniRoute-modell              | Ingen nøkkel ble funnet (sjekk oppstartsadvarselen), eller gatewayen kan ikke nås                         |
-| Rå modell-ID-er, ingen kombinasjoner, ingen priser | Administrasjonsendepunktene avviste tokenet — angi `managementReadToken`                                  |
-| En økt er festet til `opencode-<id>/…`             | v1-pluginen publiserte `opencode-<id>`; v2 publiserer kun `<id>`, så velg modellen på nytt under `<id>/…` |
+| Symptom                                                     | Årsak                                                                                                                                      |
+| ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Velgeren viser ingen OmniRoute-modell                       | Ingen nøkkel ble funnet (kontroller oppstartsadvarselen), eller gatewayen er utilgjengelig                                                 |
+| Ubehandlede modell-ID-er, ingen kombinasjoner, ingen priser | Administrasjonsendepunktene avviste tokenet — angi `managementReadToken`                                                                   |
+| Kort eller tom `freeOnly`-katalog                           | Manglende administrasjonstoken eller et avvist token — les oppsummeringslinjen for oppdateringen (`unmatched-free`-antallet) i vertsloggen |
+| En økt festet til `opencode-<id>/…`                         | v1-programtillegget publiserte `opencode-<id>`; v2 publiserer kun `<id>`, så velg modellen på nytt under `<id>/…`                          |
+
+Miljøvariablene må være tilgjengelige for opencode-serverprosessen: Når verten
+kjører som en tjeneste, er skallet som kjører `opencode models`, og servermiljøet
+forskjellige. Eksporter derfor nøkkelen der serveren leser den.
 
 ## Se også
 

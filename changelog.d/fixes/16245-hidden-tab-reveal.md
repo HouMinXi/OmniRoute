@@ -1,0 +1,1 @@
+- fix(dashboard): reveal streamed pages while the tab is hidden instead of staying on "Loading OmniRoute..." (#16245)

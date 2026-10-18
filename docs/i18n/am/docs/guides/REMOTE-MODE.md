@@ -237,18 +237,21 @@ xAI ወይም Grok CLIን ሲያገናኙ `1455`ን በ`56121`/`56122`፣ `20128
 
 ---
 
-## Tokensን ማስተዳደር
+## ቶከኖችን ማስተዳደር
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ secretን አንድ ጊዜ ብቻ ያትማል — አሁን ይቅዱት
-omniroute tokens list                 # የተሸፈነ፦ id፣ name፣ scope፣ prefix፣ status፣ expiry
-omniroute tokens revoke <id|prefix>   # ወዲያውኑ ይሻሩ
-omniroute tokens scopes               # ሦስቱን scopes ያብራራል
+#   ↳ ምስጢሩን አንድ ጊዜ ብቻ ያትማል — አሁን ይቅዱት
+omniroute tokens list                 # የተሸፈኑ፦ id, name, scope, prefix, status, expiry
+omniroute tokens revoke <id|prefix>   # ወዲያውኑ ይሻር
+omniroute tokens scopes               # ሦስቱን የፈቃድ ወሰኖች ያብራራል
 ```
 
-የ`tokens` ትዕዛዞች **admin** credential ያስፈልጋቸዋል። Tokensን በዳሽቦርዱ ውስጥ
-በ**Settings → Access Tokens** ስርም ማስተዳደር ይችላሉ (መፍጠር፣ መሻር፣ አንድ-ጊዜ-መቅዳት)።
+የ`tokens` ትዕዛዞች የ**admin** ማረጋገጫ ይፈልጋሉ። በዳሽቦርዱ ውስጥ በ**Settings → Access Tokens** ስርም ቶከኖችን ማስተዳደር ይችላሉ (መፍጠር፣ መሻር፣ አንድ ጊዜ ብቻ መቅዳት)።
+
+አንድ ቶከን ከፈጣሪው የፈቃድ ደረጃ የበለጠ ልዩ መብት እንዲኖረው ፈጽሞ ሊመነጭ አይችልም። የ`admin` ቶከን ሊፈጠር የሚችለው በኦፕሬተሩ ብቻ ነው — በዳሽቦርድ ክፍለ ጊዜ፣ በራሱ ሰርቨር ላይ ባለው የአካባቢ CLI፣ በይለፍ ቃሉ `omniroute connect`ን በመጠቀም፣ ወይም መግባት በተሰናከለበት ኢንስታንስ ነው። የማሽን ማረጋገጫዎች (የ`admin` መዳረሻ ቶከን፣ ወይም የ`manage`/`admin` ፈቃድ ወሰን ያለው API ቁልፍ) የ`write` እና `read` ቶከኖችን ብቻ ማመንጨት ይችላሉ፤ `--scope admin` እንዲፈጥሩ መጠየቅ `403` ይመልሳል።
+
+ቶከን ከፈጣሪው የበለጠ ፈቃድ ኖሮት ፈጽሞ ሊፈጠር አይችልም። `admin` ቶከን ሊፈጥር የሚችለው ኦፕሬተሩ ብቻ ነው፦ በዳሽቦርድ ክፍለ ጊዜ፣ በአገልጋዩ ራሱ ላይ ባለው የአካባቢ CLI፣ በይለፍ ቃል ከ `omniroute connect` ጋር፣ ወይም መግባት በተሰናከለበት ኢንስታንስ። የማሽን ማረጋገጫዎች (`admin` የመዳረሻ ቶከን ወይም `manage`/`admin` ወሰን ያለው API ቁልፍ) `write` እና `read` ቶከኖችን ብቻ ሊፈጥሩ ይችላሉ፤ በእነሱ `--scope admin` መጠየቅ `403` ይመልሳል።
 
 ---
 

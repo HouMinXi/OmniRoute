@@ -1,0 +1,1 @@
+- fix(auto-combo): stop per-candidate registry scans and DB reads on the auto/* request path (#16814)

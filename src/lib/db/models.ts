@@ -398,14 +398,7 @@ export async function removeCustomModel(providerId: string, modelId: string) {
   return true;
 }
 
-// ──────────────── Synced Available Models ────────────────
-// Storage: namespace = 'syncedAvailableModels', key = '<providerId>:<connectionId>'
-// Each connection stores its own model list. Reads union across all connections
-// for a provider. Deleting a connection removes only its models.
-
-/**
- * Get synced available models for a specific provider connection.
- */
+// syncedAvailableModels keys are `<providerId>:<connectionId>`.
 export async function getSyncedAvailableModelsForConnection(
   providerId: string,
   connectionId: string
@@ -439,9 +432,6 @@ export async function getFreshAntigravityModelsForConnection(
   return getSyncedAvailableModelsForConnection(row.provider, connectionId);
 }
 
-/**
- * Get all synced available models for a provider, unioned across all connections.
- */
 export async function getSyncedAvailableModels(
   providerId: string
 ): Promise<SyncedAvailableModel[]> {
@@ -461,6 +451,28 @@ export async function getSyncedAvailableModels(
     }
   }
   return Array.from(map.values());
+}
+
+/** OpenCode and OpenCode Zen synced ids. Excludes opencode-go (`opencode%` would match it). */
+export function readSyncedOpencodeFamilyModelIds(): Set<string> {
+  const ids = new Set<string>();
+  const rows = getDbInstance()
+    .prepare(
+      "SELECT value FROM key_value WHERE namespace = 'syncedAvailableModels' AND (key LIKE ? OR key LIKE ?)"
+    )
+    .all("opencode:%", "opencode-zen:%");
+  for (const row of rows) {
+    const { value } = getKeyValue(row);
+    if (!value) continue;
+    try {
+      for (const model of normalizeSyncedAvailableModels(JSON.parse(value))) {
+        if (model.id) ids.add(model.id);
+      }
+    } catch {
+      // A malformed blob must not sink the rest of the catalog.
+    }
+  }
+  return ids;
 }
 
 export const SYNCED_AVAILABLE_MODELS_MALFORMED = Symbol("syncedAvailableModelsMalformed");
@@ -500,9 +512,6 @@ export async function getSyncedAvailableModelsByConnection(
   return result;
 }
 
-/**
- * Get all synced available models across all providers.
- */
 export async function getAllSyncedAvailableModels(): Promise<
   Record<string, SyncedAvailableModel[]>
 > {
@@ -653,10 +662,6 @@ export async function removeSyncedAvailableModel(
   return removedAny;
 }
 
-/**
- * Delete all synced models for a specific connection.
- * Returns the remaining unioned list for the provider.
- */
 export async function deleteSyncedAvailableModelsForConnection(
   providerId: string,
   connectionId: string
@@ -696,20 +701,13 @@ export async function cleanupProviderModelsAfterConnectionDelete(
   return { remainingConnections, removedImportedModelIds, remainingSyncedModels };
 }
 
-/**
- * Delete all synced models for every connection belonging to a provider.
- * Returns the number of connection-scoped synced model lists removed.
- */
 export async function deleteSyncedAvailableModelsForProvider(providerId: string): Promise<number> {
   const changes = await deleteSyncedAvailableModelsForProviderInternal(providerId);
   if (changes > 0) notifyQuotaCombosForProvider(providerId);
   return changes;
 }
 
-/**
- * Prune stale synced available models for a provider, keeping only the specified allowed connection IDs.
- * Returns the number of keys deleted.
- */
+/** Prune synced rows whose connection id is not in `allowedConnectionIds`. Returns keys deleted. */
 export async function pruneStaleSyncedAvailableModelsForProvider(
   providerId: string,
   allowedConnectionIds: string[]

@@ -246,15 +246,23 @@ vises som aktiv.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ viser hemmeligheden ÉN GANG — kopiér den nu
-omniroute tokens list                 # maskeret: id, navn, scope, præfiks, status, udløb
+#   ↳ udskriver hemmeligheden ÉN GANG — kopiér den nu
+omniroute tokens list                 # maskeret: id, navn, omfang, præfiks, status, udløb
 omniroute tokens revoke <id|prefix>   # tilbagekald med det samme
-omniroute tokens scopes               # forklar de tre scopes
+omniroute tokens scopes               # forklar de tre omfang
 ```
 
-`tokens`-kommandoer kræver en **admin**-legitimationsoplysning. Du kan også
-administrere tokens i dashboardet under **Indstillinger → Adgangstokens**
-(opret, tilbagekald, kopiér én gang).
+`tokens`-kommandoer kræver en **admin**-legitimationsoplysning. Du kan også administrere tokens i
+kontrolpanelet under **Indstillinger → Adgangstokens** (opret, tilbagekald, kopiér én gang).
+
+En token kan aldrig udstedes med flere rettigheder, end dens opretter har. En
+`admin`-token kan kun oprettes af operatøren — via kontrolpanelsessionen, den
+lokale CLI på selve serveren, `omniroute connect` med adgangskoden eller en
+instans, hvor login er deaktiveret. Maskinlegitimationsoplysninger (en `admin`-adgangstoken
+eller en API-nøgle med omfanget `manage`/`admin`) kan kun udstede `write`- og `read`-
+tokens; hvis de anmoder om `--scope admin`, returneres `403`.
+
+Et token kan aldrig oprettes med flere rettigheder end dets opretter har. Kun operatøren kan oprette et `admin`-token: via dashboardsessionen, den lokale CLI på selve serveren, `omniroute connect` med adgangskoden eller en instans med login deaktiveret. Maskinlegitimationsoplysninger (et `admin`-adgangstoken eller en API-nøgle med omfanget `manage`/`admin`) kan kun oprette `write`- og `read`-tokens; en anmodning om `--scope admin` med dem returnerer `403`.
 
 ---
 

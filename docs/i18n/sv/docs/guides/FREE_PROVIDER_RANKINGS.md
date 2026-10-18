@@ -13,22 +13,22 @@
 
 ## Vad det är
 
-OmniRoute registrerar 329 leverantörer, inklusive 155 katalogposter som är markerade som **kostnadsfria/utan autentisering**
+OmniRoute registrerar 372 leverantörer, inklusive 155 katalogposter markerade som **gratis/utan autentisering**
 (utan autentisering,
-kostnadsfri OAuth-nivå eller kostnadsfri API-nyckel — se
-[Guiden till kostnadsfria nivåer](../getting-started/FREE-TIERS-GUIDE.md) och den fullständiga
-[katalogen över kostnadsfria nivåer](../reference/FREE_TIERS.md)). Haken är att kostnadsfria leverantörer varierar
-kraftigt i modellkvalitet. En leverantör utan autentisering som erbjuder en spjutspetsmodell är betydligt mer användbar
-än en som erbjuder en liten äldre modell.
+OAuth med gratisnivå eller API-nyckel med gratisnivå – se
+[Guiden till gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) och den fullständiga
+[katalogen över gratisnivåer](../reference/FREE_TIERS.md)). Haken är att gratisleverantörernas
+modellkvalitet varierar kraftigt. En leverantör utan autentisering som erbjuder en
+frontlinjemodell är mycket mer användbar än en som erbjuder en liten äldre modell.
 
-**Rankning av kostnadsfria leverantörer** besvarar frågan ”**vilken kostnadsfri leverantör ger mig den bästa modellen?**” genom att
-sammanföra varje kostnadsfri leverantörs katalog med **kollektivt insamlade kvalitetspoäng** från
-**Arena AI:s topplista** (ELO baserad på mänskliga preferenser, samma idé som ligger bakom LMArena-
-chatbotarenan). Leverantörerna rankas sedan efter styrkan hos deras **bästa kostnadsfria modell**.
+**Rankning av gratisleverantörer** besvarar frågan ”**vilken gratisleverantör ger mig den bästa modellen?**” genom att
+sammanföra varje gratisleverantörs katalog med **kollektivt insamlade kvalitetspoäng** från
+**Arena AI:s topplista** (ELO baserad på mänskliga preferenser, samma idé som ligger bakom
+LMArenas chatbotarena). Leverantörerna rankas sedan efter kapaciteten hos deras **bästa gratis modell**.
 
 Rankningen beräknas från tre verkliga källor:
 
-1. Listorna över kostnadsfria leverantörer — `NOAUTH_PROVIDERS` samt poster i `OAUTH_PROVIDERS` /
+1. Listorna över gratisleverantörer – `NOAUTH_PROVIDERS` samt poster i `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` som är flaggade med `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Varje leverantörs modellkatalog från leverantörsregistret

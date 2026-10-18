@@ -250,15 +250,23 @@ sehingga sambungan dipaparkan sebagai aktif.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ mencetak rahsia SEKALI sahaja — salinnya sekarang
-omniroute tokens list                 # disamarkan: id, nama, skop, awalan, status, tamat tempoh
+#   ↳ memaparkan rahsia SEKALI SAHAJA — salinnya sekarang
+omniroute tokens list                 # disamarkan: id, name, scope, prefix, status, expiry
 omniroute tokens revoke <id|prefix>   # batalkan serta-merta
-omniroute tokens scopes               # terangkan ketiga-tiga skop
+omniroute tokens scopes               # terangkan tiga skop
 ```
 
-Perintah `tokens` memerlukan kelayakan **pentadbir**. Anda juga boleh mengurus
-token dalam papan pemuka di bawah **Tetapan → Token Akses** (cipta, batalkan,
-salin sekali).
+Perintah `tokens` memerlukan kelayakan **admin**. Anda juga boleh mengurus token dalam
+papan pemuka di bawah **Tetapan → Token Akses** (cipta, batalkan, salin sekali sahaja).
+
+Token tidak sekali-kali boleh dicipta dengan keistimewaan yang lebih tinggi daripada yang dimiliki oleh penciptanya. Token
+`admin` hanya boleh dicipta oleh pengendali — sesi papan pemuka,
+CLI setempat pada pelayan itu sendiri, `omniroute connect` dengan kata laluan, atau
+kejadian dengan log masuk dinyahdayakan. Kelayakan mesin (token akses `admin`,
+atau kunci API dengan skop `manage`/`admin`) hanya boleh mencipta token `write` dan `read`;
+permintaan untuk `--scope admin` akan mengembalikan `403`.
+
+Token tidak boleh dicipta dengan keistimewaan yang melebihi penciptanya. Hanya pengendali boleh mencipta token `admin`: melalui sesi papan pemuka, CLI setempat pada pelayan itu sendiri, `omniroute connect` dengan kata laluan atau instans yang log masuknya dinyahdayakan. Kelayakan mesin (token akses `admin` atau kunci API dengan skop `manage`/`admin`) hanya boleh mencipta token `write` dan `read`; permintaan `--scope admin` menggunakan kelayakan tersebut mengembalikan `403`.
 
 ---
 

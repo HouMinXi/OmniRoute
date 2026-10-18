@@ -13,6 +13,7 @@ import { invalidateDbCache, getCachedRawProviderConnections } from "./readCache"
 import { invalidateConnectionUpdate, type UpdateOpts } from "./readCache";
 import { reorderConnections } from "./providers/deletion";
 import { normalizeConnectionProviderSpecificData } from "./providers/providerSpecificData";
+import { ensureProviderSpecificDataSecretsEncrypted } from "./providers/migrations";
 import { bumpProxyConfigGeneration, getSettings } from "./settings";
 import {
   getStoredManagementPassword,
@@ -222,6 +223,7 @@ export async function getRawProviderConnections(
   columns?: string[]
 ) {
   const db = getDbInstance() as unknown as DbLike;
+  ensureProviderSpecificDataSecretsEncrypted(db);
   let selectCols = "*";
   if (columns?.length) {
     const invalidColumns = columns.filter((col) => !PROVIDER_CONNECTIONS_COLUMNS.has(col));
@@ -303,6 +305,7 @@ export function getProviderConnectionsCount(filter: JsonRecord = {}): number {
 
 export async function getProviderConnectionById(id: string) {
   const db = getDbInstance() as unknown as DbLike;
+  ensureProviderSpecificDataSecretsEncrypted(db);
   const row = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
   if (!row) return null;
 
@@ -410,6 +413,21 @@ function normalizeBaseUrlForDedup(value: unknown): string {
  * already overwritten. #3368's actual goal (same cookie under a different name
  * dedupes) is unaffected: that was always the credential loop's job.
  */
+/**
+ * Cookie-session identity checks must use plaintext for both sides.
+ * #16836 encrypts selected providerSpecificData cookies with randomized AES-GCM,
+ * so matching a new plaintext cookie against the raw JSON column would always
+ * miss the same session and create duplicate provider connections.
+ * Preserve the existing fallback behavior for legacy unencrypted metadata.
+ */
+function storedCookieCredentialKey(raw: unknown): string | null {
+  const parsed = parseProviderSpecificData(raw);
+  if (!parsed) return null;
+  return webSessionCredentialKey(
+    decryptConnectionFields({ providerSpecificData: parsed }).providerSpecificData
+  );
+}
+
 function findExistingCookieConnection(
   db: DbLike,
   provider: unknown,
@@ -423,8 +441,7 @@ function findExistingCookieConnection(
       .prepare("SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'cookie'")
       .all(provider) as JsonRecord[];
     for (const row of cookieRows) {
-      const psd = parseProviderSpecificData(row.provider_specific_data);
-      if (psd && webSessionCredentialKey(psd) === newCredKey) return row;
+      if (storedCookieCredentialKey(row.provider_specific_data) === newCredKey) return row;
     }
   }
 
@@ -439,10 +456,7 @@ function findExistingCookieConnection(
           "SELECT * FROM provider_connections WHERE provider = ? AND auth_type = 'cookie' AND name = ?"
         )
         .get(provider, name) as JsonRecord | undefined) || null;
-    if (
-      byName &&
-      !webSessionCredentialKey(parseProviderSpecificData(byName.provider_specific_data))
-    ) {
+    if (byName && !storedCookieCredentialKey(byName.provider_specific_data)) {
       return byName;
     }
   }
@@ -1022,12 +1036,17 @@ export async function updateProviderConnection(id: string, data: JsonRecord, opt
     return getProviderConnectionById(id);
   }
 
+  // The write path keeps existing ciphertext in merged.providerSpecificData
+  // to avoid re-encrypting unchanged values. Return a decrypted copy instead:
+  // callers of updateProviderConnection must never see enc:v1 metadata as the
+  // usable console credentials (#16836).
+  const returned = decryptConnectionFields({ ...merged });
   const returnedConnection = withNullableRateLimitOverrides(
     withNullableQuotaWindowThresholds(
-      withNullableMaxConcurrent(cleanNulls(merged), merged),
-      merged
+      withNullableMaxConcurrent(cleanNulls(returned), returned),
+      returned
     ),
-    merged
+    returned
   );
 
   if (

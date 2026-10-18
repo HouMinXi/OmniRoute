@@ -288,65 +288,72 @@ npm run test:combo:live:vps:failover     # เพิ่มสถานการ�
 
 ---
 
-## Project Structure
+## โครงสร้างโปรเจกต์
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # หน้าแดชบอร์ด (23 ส่วน)
+│   ├── api/                # เส้นทาง API (51 ไดเรกทอรี)
+│   └── login/              # หน้าการยืนยันตัวตน (.tsx)
+├── domain/                 # กลไกนโยบาย (policyEngine, comboResolver, costRules ฯลฯ)
+├── lib/                    # ตรรกะทางธุรกิจหลัก (.ts)
+│   ├── a2a/                # เซิร์ฟเวอร์โปรโตคอล Agent-to-Agent v0.3
+│   ├── acp/                # รีจิสทรี Agent Communication Protocol
+│   ├── compliance/         # กลไกนโยบายการปฏิบัติตามข้อกำหนด
+│   ├── db/                 # โมดูลโดเมน SQLite + การย้ายข้อมูล 130 รายการ
+│   ├── memory/             # หน่วยความจำการสนทนาแบบถาวร
+│   ├── oauth/              # ผู้ให้บริการ บริการ และยูทิลิตี OAuth
+│   ├── skills/             # เฟรมเวิร์กทักษะที่ขยายความสามารถได้
+│   ├── usage/              # การติดตามการใช้งานและการคำนวณต้นทุน
+│   └── localDb.ts          # เลเยอร์ส่งออกซ้ำเท่านั้น — ห้ามเพิ่มตรรกะที่นี่
+├── middleware/              # มิดเดิลแวร์สำหรับคำขอ (promptInjectionGuard)
+├── mitm/                   # พร็อกซี MITM (ใบรับรอง, DNS, การกำหนดเส้นทางเป้าหมาย)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # คอมโพเนนต์ React (.tsx)
+│   ├── constants/          # คำจำกัดความของผู้ให้บริการ (329), ขอบเขต MCP, กลยุทธ์การกำหนดเส้นทาง 19 แบบ
+│   ├── utils/              # เซอร์กิตเบรกเกอร์, ตัวกรองข้อมูล, ตัวช่วยการยืนยันตัวตน
+│   └── validation/         # สคีมา Zod v4
+└── sse/                    # ไปป์ไลน์พร็อกซี SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # เวิร์กสเปซ @omniroute/open-sse
+├── executors/              # โมดูลตัวดำเนินการ 150 โมดูล (คลาสตัวดำเนินการ + ตัวช่วยเฉพาะผู้ให้บริการ)
+├── handlers/               # ตัวจัดการคำขอ 11 ตัว (แชต, การตอบกลับ, embeddings, รูปภาพ ฯลฯ)
+├── mcp-server/             # เซิร์ฟเวอร์ MCP (เครื่องมือไม่ซ้ำกัน 110 รายการ, รูปแบบการส่งข้อมูล 3 แบบ, ขอบเขต 33 รายการ)
+├── services/               # บริการระดับบนสุด 178 รายการ (combo, autoCombo, rateLimitManager ฯลฯ)
+├── translator/             # ตัวแปลรูปแบบ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # ตัวแปลง Responses API
+└── utils/                  # โมดูลยูทิลิตี 22 โมดูล (สตรีม, TLS, พร็อกซี, การบันทึกเหตุการณ์)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # แอปเดสก์ท็อป Electron (ข้ามแพลตฟอร์ม)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # ตัวรันการทดสอบ Node.js (ไฟล์ทดสอบ 1,574 ไฟล์)
+├── integration/            # การทดสอบการทำงานร่วมกัน
+├── e2e/                    # การทดสอบ Playwright
+├── security/               # การทดสอบความปลอดภัย
+├── translator/             # การทดสอบเฉพาะตัวแปล
+└── load/                   # การทดสอบโหลด
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # บันทึกการตัดสินใจด้านสถาปัตยกรรม
+├── architecture/            # สถาปัตยกรรมระบบและความยืดหยุ่น
+├── comparison/              # OmniRoute เทียบกับทางเลือกอื่น
+├── compression/             # คู่มือและกฎการบีบอัด
+├── dev/                     # คู่มือการพัฒนา
+├── diagrams/                # แผนภาพสถาปัตยกรรม
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # คู่มือผู้ใช้, Docker, การตั้งค่า, การแก้ไขปัญหา
+├── i18n/                    # คำแปล README สำหรับภาษาต่าง ๆ
+├── marketing/               # สื่อการตลาด
+├── ops/                     # การปรับใช้, พร็อกซี, ความครอบคลุม, รุ่นเผยแพร่
+├── providers/               # เอกสารเฉพาะผู้ให้บริการ
+├── reference/               # เอกสารอ้างอิง API, ตัวแปรสภาพแวดล้อม, เครื่องมือ CLI, ระดับใช้งานฟรี
+├── releases/                # บันทึกประจำรุ่น
+├── routing/                 # กลไก auto-combo, การเล่นซ้ำกระบวนการให้เหตุผล
+├── screenshots/             # ภาพหน้าจอแดชบอร์ด
+├── security/                # มาตรการควบคุม, การปฏิบัติตามข้อกำหนด, การซ่อนตัว, โทเค็น
+└── specs/                   # ข้อกำหนดการออกแบบ
 ```
 
 ---

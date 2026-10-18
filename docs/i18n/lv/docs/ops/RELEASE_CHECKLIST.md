@@ -384,69 +384,70 @@ Pirms jebkura v3.8.x laidiena pārbaudiet arī tālāk norādīto:
 
 ---
 
-## 3.9.0 LTS atzarošana (izmēģināta versijā 3.8.58)
+## 3.9.0 LTS atzara izveide (izmēģināta versijā 3.8.58)
 
 Pēc v3.8.59 nākamā versija ir 3.9.0, un tās galotne kļūst par diviem ilglaicīgi uzturētiem zariem:
 `stable/v3` (v3 LTS līnija, npm `latest`) un `develop` (v4, versija paaugstināta uz 4.0.0, npm
-`nightly`). Zaru/kanālu modelis, pārnešana uz priekšu un etiķetes ir aprakstītas
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); plāns ir pieejams [ROADMAP](../../ROADMAP.md) (3. posms). Atzarošana tiek veikta vienreiz;
-versijā 3.8.58 tā tiek pilnībā izmēģināta atzarotā repozitorijā, bet 3.8.59 tiek noslēgta ar
+`nightly`). Zaru/kanālu modelis, izmaiņu pārnešana uz priekšu un etiķetes ir aprakstītas
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); plāns ir pieejams [ROADMAP](../../ROADMAP.md) (3. posms). Atzara izveide tiek veikta vienreiz;
+versijā 3.8.58 tā tiek pilnībā izmēģināta atzarotā repozitorijā, bet 3.8.59 noslēdzas ar
 [GO/NO-GO kontrolsarakstu](./LTS_GO_NO_GO.md).
 
-### Izmēģinājuma palaišana (tikai lasīšanai, droša jebkurā laikā)
+### Izmēģinājuma izpilde (tikai lasīšana, droša jebkurā laikā)
 
 ```bash
-npm run release:dry-run-lts-cut                       # īstā atzarošana: 3.9.0 no HEAD, iepriekšējā birka v3.8.59
+npm run release:dry-run-lts-cut                       # faktiskā atzara izveide: 3.9.0 no HEAD, iepriekšējais tags v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fiksēt avota komitu
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` neko neizpilda: tas nolasa git un `gh` datus un izdrukā
-visu secību — priekšnosacījumus (avots tiek atrasts, iepriekšējā birka pastāv, `package.json`
-satur mērķa versiju, ir atvērta `release-freeze` problēma, nevienā esošā laidiena zarā nav
-atvērtas problēmas `Release branch not green` — neesošam zaram tiek ziņots `?` jeb nezināms
-stāvoklis, nekad zaļš — Mergify `release` rinda ir konfigurēta (G11: `queue_rules`,
-`checks_timeout`, etiķete `queue`), `release/*` kārtulu kopa joprojām bloķē dzēšanu un
-piespiedu iesūtīšanu, un `stable/v3` un `develop` vēl nepastāv), abu zaru darbības, kuri neaktīvo
-darbplūsmu trigeri un `if:` nosacījumi kļūst patiesi (un kuri paliek bloķēti ar repozitorija
-mainīgo vai piesaistīti kanoniskajam repozitorijam), paredzamās dist-tags vērtības (`latest` → 3.9.0,
-`next` un `nightly` ir tukšas) un atriti. Izejas kods `0` = `RESULT: READY`, `1` = nav izpildīts
-bloķējošs priekšnosacījums (`✗`), `2` = lietošanas kļūda. `--advisory <id,...>` pazemina
-pārbaudes statusu līdz brīdinājumam (`!`), to neslēpjot.
+visu secību — priekšnosacījumus (avots tiek atrisināts, avota repozitorijā ir pilna vēsture —
+sekls klons nevar nosūtīt `stable/v3`, saņēmēja puse noraida pakotni pie pirmā
+piesaistītā vecāka, tādēļ atzars jāizveido no pilna klona vai vispirms jāizpilda `git fetch --unshallow origin` —
+iepriekšējais tags pastāv, `package.json` satur mērķa versiju, ir atvērta `release-freeze` problēma, nav atvērtas
+`Release branch not green` problēmas
+esošā laidiena zarā — neeksistējošs zars ziņo `?` jeb nezināmu stāvokli un nekad netiek uzskatīts
+par zaļu — Mergify `release` rinda ir konfigurēta (G11: `queue_rules`, `checks_timeout`,
+etiķete `queue`), `release/*` kārtulu kopa joprojām bloķē dzēšanu un piespiedu nosūtīšanu, un
+`stable/v3` un `develop` vēl nepastāv), abu zaru darbības, kuri neaktīvo darbplūsmu
+trigeri un `if:` nosacījumi kļūst patiesi (un kuri paliek bloķēti ar repozitorija mainīgo vai
+piesaistīti kanoniskajam repozitorijam), sagaidāmās dist-tags vērtības (`latest` → 3.9.0, `next` un
+`nightly` ir tukšas) un atsaukšanu. Izejas kods `0` = `RESULT: READY`, `1` = nav izpildīts bloķējošs priekšnosacījums
+(`✗`), `2` = lietojuma kļūda. `--advisory <id,...>` pazemina pārbaudi līdz brīdinājumam (`!`),
+to neslēpjot.
 
-Īstās atzarošanas izmēģinājuma palaišanu veiciet, kamēr 3.9.0 laidiena iesaldēšana vēl ir
-aktīva — zari tiek izveidoti pēc birkas un pirms iesaldēšanas atcelšanas 12c. posmā.
+Izpildiet faktiskās 3.9.0 atzara izveides izmēģinājuma izpildi, kamēr laidiena iesaldēšana vēl ir aktīva — zari tiek
+izveidoti pēc taga un pirms 12c. posmā iesaldēšana tiek atcelta.
 
 ### 3.8.58 izmēģinājums (tikai atzarotā repozitorijā)
 
 ```bash
-# 1. Izmēģinājuma palaišana pašreizējā galotnē ar izmēģinājuma parametriem
+# 1. Izmēģinājuma izpilde pašreizējā galotnē ar izmēģinājuma parametriem
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Izpildīt pret ATZAROTA REPOZITORIJA attālo repozitoriju (origin vai jebkurš attālais repozitorijs,
-#    kura URL ir kanoniskā repozitorija URL, tiek noraidīts; katrai darbībai terminālī tiek prasīts apstiprinājums)
+# 2. Izpildīt pret ATZAROTA REPOZITORIJA attālo repozitoriju (`origin` vai jebkurš attālais repozitorijs, kura URL ir kanoniskā
+#    repozitorija URL, tiek noraidīts; katrā darbībā terminālī tiek prasīts apstiprinājums)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Izmēģināt neaktīvās darbplūsmas atzarotajā repozitorijā (workflow_dispatch vietās, kur izmēģinājuma palaišana
-#    ziņo par piesaisti kanoniskajam repozitorijam), pēc tam veikt atriti
+# 3. Izmēģināt neaktīvās darbplūsmas atzarotajā repozitorijā (`workflow_dispatch` tur, kur izmēģinājuma izpilde
+#    ziņo par piesaisti kanoniskajam repozitorijam), pēc tam atsaukt izmaiņas
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-`develop` versijas paaugstināšanas komits tiek izveidots ar git zemā līmeņa mehānismiem
-(darba koks netiek aiztikts) un atjaunina tos pašus piecus failus, ko cikla atvēršanas komits:
-`package.json`, `open-sse/package.json`, `electron/package.json`, `package-lock.json` un
-`docs/openapi.yaml`. `[4.0.0]` CHANGELOG sadaļa un tās i18n spoguļversijas pēc tam tiek
-atvērtas zarā `develop` pirms tā pirmā PR. Skripts nekad nemaina npm dist-tags — izmēģiniet
-tās pagaidu pakotnē.
+`develop` versijas paaugstināšanas komits tiek izveidots ar git zema līmeņa rīkiem (darba koks netiek mainīts) un paaugstina
+versiju tajos pašos piecos failos kā cikla atvēršanas komits: `package.json`, `open-sse/package.json`,
+`electron/package.json`, `package-lock.json` un `docs/openapi.yaml`. `[4.0.0]`
+CHANGELOG sadaļa un tās i18n spoguļversijas pēc tam tiek atvērtas zarā `develop` pirms tā pirmā
+PR. Skripts nekad nemaina npm dist-tags — izmēģiniet tās testa pakotnē.
 
-### PR priekšskatījuma artefakts (būvējiet vienreiz, virziet tālāk tos pašus baitus)
+### PR priekšskatījuma artefakts (būvēt vienreiz, virzīt tālāk tos pašus baitus)
 
-`.github/workflows/preview-artifact.yml` izveido vienu produkcijas arhīvu no PR galotnes un
-validē tieši šo būvējumu (#8084 daļa (a)). Tikai viena repozitorija ietvaros izveidotiem PR;
-nekas netiek publicēts.
+`.github/workflows/preview-artifact.yml` izveido vienu produkcijas tarball arhīvu no PR galotnes un
+validē tieši šo būvējumu (#8084 daļa (a)). Tikai viena repozitorija PR; nekas netiek publicēts.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # vai pievienojiet etiķeti `preview-artifact`
@@ -456,40 +457,36 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # priekšskatījuma instalēšana
 ```
 
-Izpildes laikā tiek palaisti `npm ci`, `npm run build:release`, `npm run check:pack-artifact`,
-izveidots arhīvs, palaists `npm run check:pack-boot` (viltoti noslēpumi, īslaicīgs datu
-direktorijs), arhīvs izveidots atkārtoti, un process beidzas ar kļūdu, ja kontrolsumma nav
-identiska; pēc tam tiek ierakstīts `artifact-identity.json` (galotnes SHA, bāzes SHA,
-bloķēšanas faila jaucējvērtība, platforma, arhitektūra, node ABI, komplektētājs, būvēšanas
-politika — `scripts/release/artifact-identity.mjs`) un atsevišķā uzdevumā arhīvam tiek
-izveidots apliecinājums. Priekšskatījuma virzīšana tālāk nozīmē šī arhīva instalēšanu:
-nekad neveidojiet to atkārtoti no pirmkoda.
+Izpilde veic `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, iepako
+tarball arhīvu, izpilda `npm run check:pack-boot` (viltoti noslēpumi, īslaicīgs datu direktorijs), atkārtoti iepako un
+beidzas ar kļūdu, ja kontrolsumma nav identiska, pēc tam reģistrē `artifact-identity.json` (galotnes SHA, bāzes
+SHA, lockfile jaucējvērtība, platforma, arhitektūra, node ABI, komplektētājs, būvēšanas politika —
+`scripts/release/artifact-identity.mjs`) un atsevišķā uzdevumā apliecina tarball arhīvu. Priekšskatījuma
+virzīšana tālāk nozīmē šī tarball arhīva instalēšanu: nekad nepārbūvējiet to no pirmkoda.
 
-### Atzarošana (3.9.0, pēc GO)
+### Atzara izveide (3.9.0, pēc GO)
 
 1. GO ir reģistrēts failā [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` izdrukā `RESULT: READY`.
-3. Izveidojiet zarus `origin` manuāli, izmantojot izmēģinājuma palaišanas izdrukātās komandas —
-   skripts atsakās veikt push uz `origin`. Lai atkārtoti izmantotu pārskatītu `develop`
-   komitu, vispirms palaidiet `--execute` izmēģinājumu 3.9.0 galotnē pret savu atzaroto
-   repozitoriju; tas izdrukā abus SHA, un tos pašus komitus var iesūtīt:
+3. Izveidojiet zarus repozitorijā `origin` manuāli, izmantojot izmēģinājuma izpildes izdrukātās komandas —
+   skripts atsakās nosūtīt izmaiņas uz `origin`. Lai atkārtoti izmantotu pārskatītu `develop` komitu, vispirms izpildiet
+   `--execute` izmēģinājumu 3.9.0 galotnē pret savu atzaroto repozitoriju; tas izdrukā abas SHA vērtības, un
+   tos pašus komitus var nosūtīt:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Pirms pirmā PR sapludināšanas aizsargājiet `stable/v3` un `develop` (kārtulu kopas +
-   sapludināšanas rinda).
-5. Neaktīvās darbplūsmas ieslēdzas, tiklīdz pastāv attiecīgie zari: `forward-port.yml`
-   (push uz `stable/v3`), `validate-stable-pr.yml` (PR uz `stable/v3`) un
-   `nightly-v4-build.yml` (būvē `develop`). Pirms palaišanas darbībā iestatiet repozitorija
-   noslēpumu `secrets.FORWARD_PORT_TOKEN` (lai CI darbotos pārnešanas uz priekšu PR);
-   nakts būvējumu publicēšana paliek izslēgta, līdz īpašnieks iestata repozitorija mainīgo
-   `vars.NIGHTLY_PUBLISH` uz `true` un npm Trusted Publishing pieņem
-   `nightly-v4-build.yml`. Kanālu noteikšanu veic `scripts/release/dist-tag.mjs` — tas pats
+4. Aizsargājiet `stable/v3` un `develop` (noteikumu kopas + sapludināšanas rinda), pirms tiek sapludināts pirmais PR.
+5. Neaktīvās darbplūsmas tiek ieslēgtas līdz ar zara izveidi: `forward-port.yml` (izmaiņu
+   nosūtīšana uz `stable/v3`), `validate-stable-pr.yml` (PR uz `stable/v3`) un `nightly-v4-build.yml`
+   (`develop` būvējumi). Pirms palaišanas iestatiet repozitorija noslēpumu `secrets.FORWARD_PORT_TOKEN` (lai CI darbotos
+   pārcelšanas PR); nakts versiju publicēšana paliek izslēgta, līdz īpašnieks iestata repozitorija
+   mainīgo `vars.NIGHTLY_PUBLISH` uz `true` un npm Trusted Publishing pieņem
+   `nightly-v4-build.yml`. Kanāla noteikšanu veic `scripts/release/dist-tag.mjs` — tas pats
    noteicējs, ko izmanto `npm-publish.yml`.
-6. Pārbaudiet kanālus: `npm view omniroute dist-tags --json` rāda `latest` = 3.9.0 un nesatur
-   `next` / `nightly`, kamēr nav publicēta v4.
+6. Pārbaudiet kanālus: `npm view omniroute dist-tags --json` parāda `latest` = 3.9.0 un bez
+   `next` / `nightly`, līdz tiek publicēta v4.
 7. Ja nepieciešama atrite: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    un `npm dist-tag add omniroute@3.8.59 latest`.
 

@@ -386,14 +386,14 @@ Antes de disponibilizar qualquer versão v3.8.x, verifique estes itens adicionai
 
 ## Corte da versão 3.9.0 LTS (ensaiado na 3.8.58)
 
-Depois da v3.8.59, a versão seguinte é a 3.9.0, e a respetiva ponta dá origem a dois ramos de longa duração:
-`stable/v3` (a linha LTS da v3, npm `latest`) e `develop` (v4, incrementada para 4.0.0, npm
+Após a v3.8.59, a versão seguinte é a 3.9.0, e a respetiva ponta dá origem a dois ramos de longa duração:
+`stable/v3` (a linha LTS v3, npm `latest`) e `develop` (v4, atualizada para 4.0.0, npm
 `nightly`). O modelo de ramos/canais, o forward-port e as etiquetas encontram-se em
 [RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); o plano encontra-se no [ROADMAP](../../ROADMAP.md) (Fase 3). O corte é executado uma única vez;
 a versão 3.8.58 ensaia-o de ponta a ponta num fork, e a 3.8.59 termina com a
 [lista de verificação GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Simulação (apenas leitura, segura em qualquer altura)
+### Simulação (só de leitura, segura em qualquer altura)
 
 ```bash
 npm run release:dry-run-lts-cut                       # o corte real: 3.9.0 a partir de HEAD, etiqueta anterior v3.8.59
@@ -401,53 +401,53 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # fixa o commit de origem
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` não executa nada: lê o git e o `gh` e apresenta a
-sequência completa — pré-condições (a origem é resolvida, a etiqueta anterior existe, `package.json` tem a
-versão de destino, existe um issue `release-freeze` aberto, não existe nenhum issue
-`Release branch not green` aberto num ramo de lançamento existente — um ramo que não exista
-é indicado como `?` desconhecido, nunca como verde — a fila `release` do Mergify está configurada
-(G11: `queue_rules`, `checks_timeout`, etiqueta `queue`), o conjunto de regras `release/*`
-continua a bloquear a eliminação e o force-push, e `stable/v3` e `develop` ainda não existem),
-os dois passos relativos aos ramos, quais os acionadores e condições `if:` dos workflows
-inativos que passam a ser verdadeiros (e quais permanecem bloqueados por uma variável do
-repositório ou fixados ao repositório canónico), os dist-tags esperados (`latest` → 3.9.0,
-`next` e `nightly` vazios) e a reversão. Código de saída `0` = `RESULT: READY`, `1` = falha
-numa pré-condição bloqueadora (`✗`), `2` = erro de utilização. `--advisory <id,...>` rebaixa
-uma verificação para aviso (`!`) sem a ocultar.
+sequência completa — pré-condições (a origem é resolvida, o repositório de origem tem o histórico completo —
+um clone superficial não consegue enviar `stable/v3`, o lado recetor rejeita o pacote no primeiro
+progenitor enxertado, pelo que deve efetuar o corte a partir de um clone completo ou executar primeiro `git fetch --unshallow origin` —
+a etiqueta anterior existe, `package.json` tem a versão de destino, existe um problema `release-freeze` aberto, não existe
+nenhum problema `Release branch not green` aberto
+num ramo de lançamento existente — um ramo que não existe apresenta `?` desconhecido, nunca
+verde — a fila `release` do Mergify está configurada (G11: `queue_rules`, `checks_timeout`,
+etiqueta `queue`), o conjunto de regras `release/*` continua a bloquear a eliminação e o push forçado, e
+`stable/v3` e `develop` ainda não existem), os dois passos relativos aos ramos, os acionadores dos fluxos de trabalho
+inativos e as condições `if:` que se tornam verdadeiras (e quais permanecem bloqueadas por uma variável do repositório ou
+fixadas ao repositório canónico), as dist-tags esperadas (`latest` → 3.9.0, `next` e
+`nightly` vazias) e a reversão. Código de saída `0` = `RESULT: READY`, `1` = falha de uma pré-condição
+bloqueante (`✗`), `2` = erro de utilização. `--advisory <id,...>` rebaixa uma verificação para aviso (`!`)
+sem a ocultar.
 
-Execute a simulação do corte real enquanto o bloqueio de lançamento da 3.9.0 ainda estiver
-ativo — os ramos são criados após a etiqueta e antes de a Fase 12c levantar o bloqueio.
+Execute a simulação do corte real enquanto o congelamento do lançamento da versão 3.9.0 ainda estiver ativo — os ramos são
+criados após a etiqueta e antes de a Fase 12c levantar o congelamento.
 
-### Ensaio da 3.8.58 (apenas num fork)
+### Ensaio da versão 3.8.58 (apenas num fork)
 
 ```bash
 # 1. Simulação na ponta atual com parâmetros de ensaio
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Executar num remoto que seja um FORK (origin, ou qualquer remoto cujo URL seja o do
-#    repositório canónico, é recusado; cada passo pede confirmação no terminal)
+# 2. Executar num remoto de um FORK (origin, ou qualquer remoto cujo URL seja o do repositório
+#    canónico, é recusado; cada passo solicita confirmação no terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Exercitar os workflows inativos no fork (workflow_dispatch quando a simulação
+# 3. Exercitar os fluxos de trabalho inativos no fork (workflow_dispatch quando a simulação
 #    indicar uma fixação ao repositório canónico) e, em seguida, reverter
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-O commit de incremento de `develop` é criado através dos mecanismos internos do git (sem
-tocar na árvore de trabalho) e incrementa os mesmos cinco ficheiros que um commit de abertura
-de ciclo: `package.json`, `open-sse/package.json`, `electron/package.json`,
-`package-lock.json` e `docs/openapi.yaml`. A secção `[4.0.0]` do CHANGELOG e os respetivos
-espelhos i18n são abertos posteriormente em `develop`, antes do seu primeiro PR. O script
-nunca altera os dist-tags do npm — ensaie-os num pacote descartável.
+O commit de atualização de develop é criado com os mecanismos internos do git (sem tocar na árvore de trabalho) e atualiza
+os mesmos cinco ficheiros que um commit de abertura de ciclo: `package.json`, `open-sse/package.json`,
+`electron/package.json`, `package-lock.json` e `docs/openapi.yaml`. A secção `[4.0.0]` do
+CHANGELOG e os respetivos equivalentes i18n são abertos posteriormente em `develop`, antes do seu primeiro
+PR. O script nunca altera as dist-tags do npm — ensaie-as num pacote descartável.
 
-### Artefacto de pré-visualização do PR (compilar uma vez, promover os mesmos bytes)
+### Artefacto de pré-visualização do PR (compilar uma vez, promover exatamente os mesmos bytes)
 
-`.github/workflows/preview-artifact.yml` cria um único tarball de produção a partir da
-cabeça de um PR e valida exatamente essa compilação (parte (a) do #8084). Apenas PRs do
-mesmo repositório; nada é publicado.
+`.github/workflows/preview-artifact.yml` compila um único tarball de produção a partir da ponta de um PR e
+valida exatamente essa compilação (parte (a) do #8084). Apenas PRs do mesmo repositório; nada é publicado.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ou adicionar a etiqueta `preview-artifact`
@@ -457,39 +457,36 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # instalação de pré-visualização
 ```
 
-A execução realiza `npm ci`, `npm run build:release` e `npm run check:pack-artifact`, empacota
-o tarball, executa `npm run check:pack-boot` (segredos fictícios, diretório de dados efémero),
-volta a empacotar e falha se o resumo não for idêntico; em seguida, regista
-`artifact-identity.json` (SHA da cabeça, SHA da base, hash do ficheiro de bloqueio, plataforma,
-arquitetura, ABI do node, empacotador, política de compilação —
-`scripts/release/artifact-identity.mjs`) e atesta o tarball num job separado. Promover uma
-pré-visualização significa instalar esse tarball: nunca voltar a compilar a partir do código-fonte.
+A execução efetua `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, empacota o
+tarball, executa `npm run check:pack-boot` (segredos falsos, diretório de dados efémero), volta a empacotar e
+falha se o resumo não for idêntico; em seguida, regista `artifact-identity.json` (SHA da ponta, SHA da base,
+hash do lockfile, plataforma, arquitetura, ABI do node, bundler, política de compilação —
+`scripts/release/artifact-identity.mjs`) e atesta o tarball numa tarefa separada. Promover
+uma pré-visualização significa instalar esse tarball: nunca voltar a compilar a partir do código-fonte.
 
 ### O corte (3.9.0, após GO)
 
 1. GO registado em [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` apresenta `RESULT: READY`.
 3. Crie manualmente os ramos em `origin` com os comandos apresentados pela simulação — o
-   script recusa fazer push para `origin`. Para reutilizar um commit de `develop` revisto,
-   execute primeiro o ensaio com `--execute` na ponta da 3.9.0 no seu fork; este apresenta
-   ambos os SHAs, e os mesmos commits podem ser enviados:
+   script recusa-se a fazer push para `origin`. Para reutilizar um commit de develop revisto, execute primeiro o
+   ensaio com `--execute` na ponta da versão 3.9.0 no seu fork; este apresenta ambos os SHAs, e
+   os mesmos commits podem ser enviados:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Proteja `stable/v3` e `develop` (conjuntos de regras + fila de integração) antes de o
-   primeiro PR ser integrado.
-5. Os workflows inativos são ativados pela existência dos ramos: `forward-port.yml` (push
-   para `stable/v3`), `validate-stable-pr.yml` (PRs para `stable/v3`) e
-   `nightly-v4-build.yml` (compila `develop`). Antes da entrada em produção, defina o segredo
-   de repositório `secrets.FORWARD_PORT_TOKEN` (para que o CI seja executado nos PRs de
-   forward-port); a publicação nightly permanece desativada até o proprietário definir a
-   variável de repositório `vars.NIGHTLY_PUBLISH` como `true` e o npm Trusted Publishing
-   aceitar `nightly-v4-build.yml`. A resolução do canal é efetuada por
-   `scripts/release/dist-tag.mjs`, o mesmo resolvedor utilizado por `npm-publish.yml`.
-6. Verifique os canais: `npm view omniroute dist-tags --json` apresenta `latest` = 3.9.0 e
-   nenhum `next` / `nightly` até à publicação da v4.
+4. Proteja `stable/v3` e `develop` (conjuntos de regras + fila de integração) antes de o primeiro PR ser integrado.
+5. Os workflows inativos são ativados pela existência dos branches: `forward-port.yml` (push para
+   `stable/v3`), `validate-stable-pr.yml` (PRs para `stable/v3`) e `nightly-v4-build.yml`
+   (compila `develop`). Antes da entrada em produção, defina o segredo de repositório `secrets.FORWARD_PORT_TOKEN` (para que o CI seja executado nos
+   PRs de forward-port); a publicação nightly permanece desativada até o responsável definir a variável de repositório
+   `vars.NIGHTLY_PUBLISH` como `true` e o npm Trusted Publishing aceitar
+   `nightly-v4-build.yml`. A resolução do canal é efetuada por `scripts/release/dist-tag.mjs`, o mesmo
+   resolvedor utilizado por `npm-publish.yml`.
+6. Verifique os canais: `npm view omniroute dist-tags --json` mostra `latest` = 3.9.0 e nenhum
+   `next` / `nightly` até à publicação da v4.
 7. Reversão, se necessário: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    e `npm dist-tag add omniroute@3.8.59 latest`.
 

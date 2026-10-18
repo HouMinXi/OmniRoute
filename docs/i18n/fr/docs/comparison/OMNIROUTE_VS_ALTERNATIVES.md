@@ -39,11 +39,11 @@ Comparaison objective des fonctionnalités avec les routeurs d’IA open source 
 
 ## Quand choisir OmniRoute
 
-- Vous auto-hébergez et souhaitez une **couverture maximale des fournisseurs** (329 fournisseurs, 155 entrées de catalogue gratuites/sans authentification)
+- Vous auto-hébergez votre solution et souhaitez une **couverture maximale des fournisseurs** (372 fournisseurs, 155 entrées gratuites/sans authentification dans le catalogue)
 - Vous avez besoin d’un **serveur MCP intégré** (outils LLM, mémoire et compétences exposés sous forme d’outils)
 - Vous avez besoin du **protocole A2A** pour les workflows d’agent à agent
 - Vous souhaitez une **furtivité des empreintes** (JA3/JA4) pour éviter la détection par les CAPTCHA en amont
-- Vous avez besoin de **fonctionnalités d’entreprise** (garde-fous, évaluations, piste d’audit) sans facture SaaS
+- Vous avez besoin de **fonctionnalités pour les entreprises** (garde-fous, évaluations, piste d’audit) sans facture SaaS
 
 ## Quand choisir LiteLLM
 

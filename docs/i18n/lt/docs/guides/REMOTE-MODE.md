@@ -248,15 +248,23 @@ rodomas kaip aktyvus.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ paslaptis parodoma VIENĄ KARTĄ — nukopijuokite ją dabar
-omniroute tokens list                 # užmaskuota: ID, pavadinimas, aprėptis, prefiksas, būsena, galiojimo pabaiga
+#   ↳ paslaptis parodoma tik KARTĄ — nukopijuokite ją dabar
+omniroute tokens list                 # užmaskuota: ID, pavadinimas, apimtis, priešdėlis, būsena, galiojimo pabaiga
 omniroute tokens revoke <id|prefix>   # nedelsiant atšaukti
-omniroute tokens scopes               # paaiškinti tris aprėptis
+omniroute tokens scopes               # paaiškinti tris apimtis
 ```
 
-`tokens` komandoms reikia **administratoriaus** kredencialų. Prieigos raktus taip
-pat galite valdyti valdymo skydelio skiltyje **Nustatymai → Prieigos raktai**
-(sukurti, atšaukti, nukopijuoti vieną kartą).
+`tokens` komandoms reikia **admin** prisijungimo duomenų. Prieigos raktus taip pat galite valdyti
+valdymo skydelio skiltyje **Nustatymai → Prieigos raktai** (kurti, atšaukti, nukopijuoti vieną kartą).
+
+Prieigos raktui niekada negali būti suteikta daugiau teisių, nei turi jo kūrėjas.
+`admin` prieigos raktą gali sukurti tik operatorius — naudodamas valdymo skydelio sesiją,
+vietinę CLI pačiame serveryje, `omniroute connect` su slaptažodžiu arba
+egzempliorių, kuriame prisijungimas išjungtas. Mašininiai prisijungimo duomenys (`admin` prieigos raktas
+arba API raktas su `manage`/`admin` apimtimi) gali kurti tik `write` ir `read`
+prieigos raktus; pateikus jiems užklausą su `--scope admin`, grąžinamas `403`.
+
+Žetono niekada negalima sukurti su didesnėmis teisėmis, nei turi jo kūrėjas. Tik operatorius gali sukurti `admin` žetoną: per valdymo skydelio seansą, vietinę CLI pačiame serveryje, `omniroute connect` su slaptažodžiu arba egzemplioriuje, kuriame prisijungimas išjungtas. Mašininiai kredencialai (`admin` prieigos žetonas arba API raktas su `manage`/`admin` aprėptimi) gali kurti tik `write` ir `read` žetonus; jais pateikta užklausa `--scope admin` grąžina `403`.
 
 ---
 

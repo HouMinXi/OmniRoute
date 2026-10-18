@@ -247,15 +247,23 @@ ipakitang aktibo ang koneksyon.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ISANG BESES lang ipi-print ang secret — kopyahin ito ngayon
-omniroute tokens list                 # naka-mask: id, pangalan, scope, prefix, status, expiry
-omniroute tokens revoke <id|prefix>   # bawiin kaagad
-omniroute tokens scopes               # ipaliwanag ang tatlong scope
+#   ↳ isang beses LANG ipapakita ang lihim — kopyahin ito ngayon
+omniroute tokens list                 # nakatago: id, pangalan, saklaw, prefix, katayuan, pag-expire
+omniroute tokens revoke <id|prefix>   # bawiin agad
+omniroute tokens scopes               # ipaliwanag ang tatlong saklaw
 ```
 
-Nangangailangan ang mga command na `tokens` ng **admin** credential. Maaari mo ring
-pamahalaan ang mga token sa dashboard sa ilalim ng **Settings → Access Tokens**
-(gumawa, mag-revoke, kopyahin nang isang beses).
+Nangangailangan ang mga command na `tokens` ng kredensyal na **admin**. Maaari mo ring pamahalaan ang mga token sa
+dashboard sa ilalim ng **Settings → Access Tokens** (gumawa, bawiin, isang-beses-na-pagkopya).
+
+Hindi kailanman maaaring gumawa ng token na may higit na pribilehiyo kaysa sa taglay ng gumawa nito. Ang
+`admin` token ay maaari lamang gawin ng operator — ang session sa dashboard, ang
+lokal na CLI sa mismong server, `omniroute connect` gamit ang password, o isang
+instance na naka-disable ang pag-login. Ang mga kredensyal ng makina (isang `admin` access token,
+o isang API key na may saklaw na `manage`/`admin`) ay makagagawa lamang ng mga token na `write` at `read`;
+ang paghiling sa mga ito ng `--scope admin` ay magbabalik ng `403`.
+
+Hindi kailanman maaaring gumawa ng token na may mas malawak na pribilehiyo kaysa sa gumawa nito. Ang operator lamang ang maaaring gumawa ng `admin` token: sa sesyon ng dashboard, sa lokal na CLI sa mismong server, sa `omniroute connect` gamit ang password, o sa isang instance na naka-disable ang login. Ang mga kredensyal ng makina (isang `admin` access token o API key na may saklaw na `manage`/`admin`) ay maaari lamang gumawa ng `write` at `read` token; ang paghingi ng `--scope admin` gamit ang mga ito ay nagbabalik ng `403`.
 
 ---
 

@@ -113,11 +113,16 @@ Poista toiminto käytöstä asetuksella `"geminiSanitization": false`.
 
 ## Vianmääritys
 
-| Oire                                                       | Syy                                                                                                                                          |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| Valitsin ei näytä OmniRoute-malleja                        | Avainta ei voitu selvittää (tarkista käynnistysvaroitus) tai yhdyskäytävään ei saada yhteyttä                                                |
-| Raakoja mallitunnisteita, ei yhdistelmiä eikä hinnoittelua | Hallintapäätepisteet hylkäsivät tunnuksen — aseta `managementReadToken`                                                                      |
-| Istunto on kiinnitetty kohteeseen `opencode-<id>/…`        | v1-liitännäinen julkaisi tunnisteen `opencode-<id>`; v2 julkaisee paljaan `<id>`-tunnisteen, joten valitse malli uudelleen kohdasta `<id>/…` |
+| Oire                                                     | Syy                                                                                                                                    |
+| -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Valitsimessa ei näy OmniRoute-mallia                     | Avainta ei löytynyt (tarkista käynnistysvaroitus) tai yhdyskäytävään ei saada yhteyttä                                                 |
+| Raakoja mallitunnuksia, ei yhdistelmiä eikä hintatietoja | Hallintapäätepisteet hylkäsivät tunnuksen — aseta `managementReadToken`                                                                |
+| Lyhyt tai tyhjä `freeOnly`-luettelo                      | Hallintatunnus puuttuu tai se hylättiin — tarkista isäntälokista päivityksen yhteenvetorivi (`unmatched-free`-määrä)                   |
+| Istunto on kiinnitetty kohteeseen `opencode-<id>/…`      | v1-laajennus julkaisi tunnuksen `opencode-<id>`; v2 julkaisee pelkän `<id>`-tunnuksen, joten valitse malli uudelleen kohdasta `<id>/…` |
+
+Ympäristömuuttujien on välityttävä opencode-palvelinprosessille: kun isäntä
+toimii palveluna, komennon `opencode models` suorittava komentotulkki ja palvelimen
+ympäristö ovat eri ympäristöjä, joten vie avain siihen ympäristöön, josta palvelin lukee sen.
 
 ## Katso myös
 

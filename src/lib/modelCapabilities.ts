@@ -339,12 +339,14 @@ function stripKnownEffortSuffix(modelId: string): string | null {
 }
 
 function getStaticSpec(modelId: string | null, rawModel: string | null): ModelSpec | undefined {
+  // The routing provider is already resolved. Remaining path segments belong to
+  // the upstream model and must not import another provider's leaf capabilities.
   if (modelId) {
-    const byCanonical = getModelSpec(modelId);
+    const byCanonical = getModelSpec(modelId, { stripNamespace: false });
     if (byCanonical) return byCanonical;
   }
   if (rawModel && rawModel !== modelId) {
-    return getModelSpec(rawModel);
+    return getModelSpec(rawModel, { stripNamespace: false });
   }
   return undefined;
 }
@@ -398,7 +400,7 @@ function getStaticSpecCanonicalModelId(modelId: string | null, rawModel: string 
     (candidate): candidate is string => typeof candidate === "string" && candidate.length > 0
   );
   for (const candidate of candidates) {
-    const hit = findModelSpecIdByExactOrAlias(candidate);
+    const hit = findModelSpecIdByExactOrAlias(candidate, { stripNamespace: false });
     if (hit) return hit;
   }
   return null;

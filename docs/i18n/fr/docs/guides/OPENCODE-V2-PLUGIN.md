@@ -113,11 +113,16 @@ Définissez `"geminiSanitization": false` pour désactiver ce comportement.
 
 ## Dépannage
 
-| Symptôme                                                       | Cause                                                                                                                        |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Le sélecteur n’affiche aucun modèle OmniRoute                  | Aucune clé n’a été trouvée (vérifiez l’avertissement au démarrage), ou la passerelle est inaccessible                        |
-| Identifiants de modèles bruts, aucune combinaison, aucun tarif | Les points de terminaison de gestion ont refusé le jeton — définissez `managementReadToken`                                  |
-| Une session épinglée à `opencode-<id>/…`                       | Le plugin v1 publiait `opencode-<id>` ; la v2 publie directement `<id>`, sélectionnez donc à nouveau le modèle sous `<id>/…` |
+| Symptôme                                                  | Cause                                                                                                                                          |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Le sélecteur n’affiche aucun modèle OmniRoute             | Aucune clé n’a été trouvée (vérifiez l’avertissement au démarrage), ou la passerelle est inaccessible                                          |
+| Identifiants de modèle bruts, sans combinaisons ni tarifs | Les points de terminaison de gestion ont refusé le jeton — définissez `managementReadToken`                                                    |
+| Catalogue `freeOnly` court ou vide                        | Aucun jeton de gestion ou jeton refusé — consultez la ligne de résumé de l’actualisation (compteur `unmatched-free`) dans le journal de l’hôte |
+| Une session épinglée à `opencode-<id>/…`                  | Le plugin v1 publiait `opencode-<id>` ; la v2 publie directement `<id>`, alors sélectionnez de nouveau le modèle sous `<id>/…`                 |
+
+Les variables d’environnement doivent parvenir au processus serveur opencode : lorsque l’hôte
+s’exécute en tant que service, le shell qui exécute `opencode models` et l’environnement
+du serveur sont distincts ; exportez donc la clé à l’endroit où le serveur la lit.
 
 ## Voir aussi
 

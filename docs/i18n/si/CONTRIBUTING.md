@@ -298,66 +298,66 @@ CI හි වගකීමයි — ඒවා දේශීයව ධාවනය
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard පිටු (කොටස් 23ක්)
-│   ├── api/                # API routes (නාමාවලි 51ක්)
+│   ├── (dashboard)/        # උපකරණ පුවරු පිටු (කොටස් 23)
+│   ├── api/                # API මාර්ග (නාමාවලි 51)
 │   └── login/              # සත්යාපන පිටු (.tsx)
-├── domain/                 # ප්රතිපත්ති යන්ත්රය (policyEngine, comboResolver, costRules, ආදිය)
+├── domain/                 # ප්රතිපත්ති එන්ජිම (policyEngine, comboResolver, costRules, ආදිය)
 ├── lib/                    # මූලික ව්යාපාරික තර්කනය (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol ලේඛනාගාරය
-│   ├── compliance/         # අනුකූලතා ප්රතිපත්ති යන්ත්රය
-│   ├── db/                 # SQLite domain modules + migrations 130ක්
+│   ├── a2a/                # Agent-to-Agent v0.3 ප්රොටෝකෝල සේවාදායකය
+│   ├── acp/                # Agent Communication Protocol රෙජිස්ට්රිය
+│   ├── compliance/         # අනුකූලතා ප්රතිපත්ති එන්ජිම
+│   ├── db/                 # SQLite වසම් මොඩියුල + සංක්රමණ 130
 │   ├── memory/             # ස්ථිර සංවාද මතකය
-│   ├── oauth/              # OAuth providers, services සහ utilities
-│   ├── skills/             # පුළුල් කළ හැකි skill framework එක
-│   ├── usage/              # භාවිතය නිරීක්ෂණය සහ පිරිවැය ගණනය කිරීම
-│   └── localDb.ts          # නැවත export කරන ස්තරයක් පමණි — මෙහි කිසිවිටෙකත් තර්කනය එක් නොකරන්න
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (සහතික, DNS, ඉලක්ක routing)
+│   ├── oauth/              # OAuth සැපයුම්කරුවන්, සේවා සහ උපයෝගිතා
+│   ├── skills/             # විස්තීරණය කළ හැකි කුසලතා රාමුව
+│   ├── usage/              # භාවිතය හඹා යෑම සහ පිරිවැය ගණනය කිරීම
+│   └── localDb.ts          # නැවත නිර්යාත කිරීමේ ස්තරය පමණි — මෙහි කිසිවිටෙක තර්කනය එක් නොකරන්න
+├── middleware/              # ඉල්ලීම් මිඩ්ල්වෙයාර් (promptInjectionGuard)
+├── mitm/                   # MITM ප්රොක්සිය (සහතික, DNS, ඉලක්ක මාර්ගගත කිරීම)
 ├── shared/
 │   ├── components/         # React සංරචක (.tsx)
-│   ├── constants/          # Provider නිර්වචන (329), MCP scopes, routing උපායමාර්ග 19ක්
-│   ├── utils/              # Circuit breaker, sanitizer, සත්යාපන helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── constants/          # සැපයුම්කරු අර්ථදැක්වීම් (329), MCP විෂයපථ, මාර්ගගත කිරීමේ උපායමාර්ග 19
+│   ├── utils/              # පරිපථ බිඳුම, පවිත්රකාරකය, සත්යාපන සහායක
+│   └── validation/         # Zod v4 ස්කීමා
+└── sse/                    # SSE ප්රොක්සි නලමාර්ගය
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # executor ක්රියාත්මක කිරීමේ modules 89ක්
-├── handlers/               # request handlers 11ක් (chat, responses, embeddings, images, ආදිය)
-├── mcp-server/             # MCP server (අනන්ය tools 110ක්, transports 3ක්, scopes 33ක්)
-├── services/               # ඉහළ මට්ටමේ services 178ක් (combo, autoCombo, rateLimitManager, ආදිය)
+open-sse/                   # @omniroute/open-sse වැඩබිම
+├── executors/              # ක්රියාත්මකකාරක මොඩියුල 150 (ක්රියාත්මකකාරක පන්ති + එක් එක් සැපයුම්කරු සඳහා සහායක)
+├── handlers/               # ඉල්ලීම් හසුරුවන්නන් 11 (කතාබස්, ප්රතිචාර, එම්බෙඩින්, රූප, ආදිය)
+├── mcp-server/             # MCP සේවාදායකය (අනන්ය මෙවලම් 110, ප්රවාහන ක්රම 3, විෂයපථ 33)
+├── services/               # ඉහළ මට්ටමේ සේවා 178 (combo, autoCombo, rateLimitManager, ආදිය)
 ├── translator/             # ආකෘති පරිවර්තක (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # utility modules 22ක් (stream, TLS, proxy, logging)
+├── transformer/            # Responses API පරිණාමකය
+└── utils/                  # උපයෝගිතා මොඩියුල 22 (ප්රවාහය, TLS, ප්රොක්සි, ලොග්කරණය)
 
-electron/                   # Electron desktop app (බහු-වේදිකා)
+electron/                   # Electron ඩෙස්ක්ටොප් යෙදුම (හරස්-වේදිකා)
 
 tests/
-├── unit/                   # Node.js test runner (test ගොනු 1,574ක්)
-├── integration/            # ඒකාබද්ධතා tests
-├── e2e/                    # Playwright tests
-├── security/               # ආරක්ෂක tests
-├── translator/             # පරිවර්තකයට විශේෂිත tests
-└── load/                   # බර tests
+├── unit/                   # Node.js පරීක්ෂණ ධාවකය (පරීක්ෂණ ගොනු 1,574)
+├── integration/            # ඒකාබද්ධතා පරීක්ෂණ
+├── e2e/                    # Playwright පරීක්ෂණ
+├── security/               # ආරක්ෂක පරීක්ෂණ
+├── translator/             # පරිවර්තකයට විශේෂිත පරීක්ෂණ
+└── load/                   # භාර පරීක්ෂණ
 
 docs/
-├── adr/                     # වාස්තු විද්යාත්මක තීරණ වාර්තා
-├── architecture/            # පද්ධති වාස්තු විද්යාව සහ ප්රත්යස්ථතාව
+├── adr/                     # ගෘහනිර්මාණ තීරණ වාර්තා
+├── architecture/            # පද්ධති ගෘහනිර්මාණය සහ ප්රත්යස්ථතාව
 ├── comparison/              # OmniRoute සහ විකල්ප අතර සැසඳීම
 ├── compression/             # සම්පීඩන මාර්ගෝපදේශ සහ රීති
 ├── dev/                     # සංවර්ධන මාර්ගෝපදේශ
-├── diagrams/                # වාස්තු විද්යා රූප සටහන්
+├── diagrams/                # ගෘහනිර්මාණ රූපසටහන්
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # පරිශීලක මාර්ගෝපදේශය, Docker, පිහිටුවීම, දෝෂ නිරාකරණය
-├── i18n/                    # ජාත්යන්තරකරණය කළ README පරිවර්තන
+├── guides/                  # පරිශීලක මාර්ගෝපදේශය, Docker, සැකසුම, දෝෂ නිරාකරණය
+├── i18n/                    # ජාත්යන්තරීකරණය කළ README පරිවර්තන
 ├── marketing/               # අලෙවිකරණ ද්රව්ය
-├── ops/                     # යෙදවීම, proxy, coverage, releases
-├── providers/               # Provider-විශේෂිත ලේඛන
-├── reference/               # API යොමුව, env vars, CLI tools, නොමිලේ භාවිත මට්ටම්
+├── ops/                     # යෙදවීම, ප්රොක්සි, ආවරණය, නිකුතු
+├── providers/               # සැපයුම්කරුට විශේෂිත ලේඛන
+├── reference/               # API යොමුව, පරිසර විචල්ය, CLI මෙවලම්, නොමිලේ ස්තර
 ├── releases/                # නිකුතු සටහන්
-├── routing/                 # Auto-combo engine, reasoning replay
-├── screenshots/             # Dashboard තිර රූ
-├── security/                # Guardrails, අනුකූලතාව, stealth, tokens
+├── routing/                 # ස්වයංක්රීය සංයෝජන එන්ජිම, තර්කන නැවත ධාවනය
+├── screenshots/             # උපකරණ පුවරු තිර රූ
+├── security/                # ආරක්ෂණ සීමා, අනුකූලතාව, රහසිගතභාවය, ටෝකන
 └── specs/                   # සැලසුම් පිරිවිතර
 ```
 

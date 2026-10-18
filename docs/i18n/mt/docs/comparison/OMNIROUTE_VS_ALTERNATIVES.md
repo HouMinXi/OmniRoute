@@ -39,11 +39,11 @@ Tqabbil oġġettiv tal-karatteristiċi ma’ routers tal-IA popolari u open-sour
 
 ## Meta għandek tagħżel OmniRoute
 
-- Tospita lokalment u trid **kopertura massima tal-fornituri** (329 fornitur, 155 entrata tal-katalgu bla ħlas/bla awtentikazzjoni)
-- Għandek bżonn **server MCP integrat** (għodod LLM, memorja u ħiliet esposti bħala għodod)
+- Tospita s-servizz int stess u trid **kopertura massima tal-fornituri** (372 fornitur, 155 entrata fil-katalgu b’xejn/mingħajr awtentikazzjoni)
+- Għandek bżonn **server MCP integrat** (għodod LLM, memorja, ħiliet esposti bħala għodod)
 - Għandek bżonn il-**protokoll A2A** għal flussi tax-xogħol bejn aġent u ieħor
-- Trid **taħbi l-fingerprint** (JA3/JA4) biex tevita l-identifikazzjoni minn CAPTCHAs upstream
-- Għandek bżonn **karatteristiċi għall-intrapriżi** (miżuri protettivi, evalwazzjonijiet, rekord tal-awditjar) mingħajr kont ta’ SaaS
+- Trid **ħabi tal-marki tas-swaba’ diġitali** (JA3/JA4) biex tevita li tiġi identifikat minn CAPTCHAs upstream
+- Għandek bżonn **karatteristiċi għall-intrapriżi** (guardrails, evalwazzjonijiet, rekord tal-awditjar) mingħajr kont ta’ SaaS
 
 ## Meta għandek tagħżel LiteLLM
 

@@ -19,6 +19,6 @@ test("global compression off gates reactive and last-resort context compaction",
   );
   assert.match(
     source,
-    /reactiveContextCompactionEnabled\s*&&\s*!nativeCodexPassthrough\s*&&\s*finalEstimatedInputTokens\s*>=\s*finalContextLimit/
+    /reactiveContextCompactionEnabled\s*&&\s*!nativeCodexPassthrough\s*&&\s*finalEstimatedInputTokens\s*>=\s*effectiveCompactionCeiling/
   );
 });

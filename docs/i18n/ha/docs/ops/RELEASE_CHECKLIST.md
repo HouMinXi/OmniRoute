@@ -384,107 +384,110 @@ Kafin fitar da kowace siga ta v3.8.x, tabbatar da waɗannan ƙarin abubuwa:
 
 ---
 
-## Yanke 3.9.0 LTS (an yi atisaye a 3.8.58)
+## Yankewar 3.9.0 LTS (an yi atisaye a 3.8.58)
 
-Bayan v3.8.59 sigar da ke biye ita ce 3.9.0, kuma ƙarshenta zai zama rassa biyu masu dogon zango:
+Bayan v3.8.59, sigar da za ta biyo baya ita ce 3.9.0, kuma ƙarshenta zai zama rassa biyu masu ɗorewa:
 `stable/v3` (layin v3 LTS, npm `latest`) da `develop` (v4, an ɗaga zuwa 4.0.0, npm
 `nightly`). Tsarin reshe/tasha, forward-port da lakabobi suna cikin
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); shirin yana cikin [ROADMAP](../../ROADMAP.md) (Mataki na 3). Yankan yana gudana sau ɗaya;
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); shirin yana cikin [ROADMAP](../../ROADMAP.md) (Mataki na 3). Za a yi yankewar sau ɗaya;
 3.8.58 yana yin atisayensa daga farko har ƙarshe a kan fork, sannan 3.8.59 ya rufe da
 [jerin binciken GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Gwajin bushe (karantawa kawai, amintacce a kowane lokaci)
+### Gwajin bushewa (karantawa kawai, amintacce a kowane lokaci)
 
 ```bash
-npm run release:dry-run-lts-cut                       # yankan na ainihi: 3.9.0 daga HEAD, tag ɗin da ya gabata v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # tsayar da commit na tushe
+npm run release:dry-run-lts-cut                       # ainihin yankewar: 3.9.0 daga HEAD, alamar da ta gabata v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # ƙayyade commit ɗin tushe
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` ba ya aiwatar da komai: yana karanta git da `gh`, sannan ya buga
-dukkan jerin matakan — sharuɗɗan farko (tushen yana warwarewa, tag ɗin da ya gabata yana nan, `package.json` yana kan
-sigar da ake nufi, akwai buɗaɗɗen issue na `release-freeze`, babu buɗaɗɗen issue na `Release branch not green`
-a kan reshen fitarwa da yake akwai — reshen da babu shi yana bayar da rahoton `?` wanda ba a sani ba, ba zai taɓa zama
-kore ba — an saita jerin gwano na Mergify `release` (G11: `queue_rules`, `checks_timeout`,
-lakabin `queue`), har yanzu ruleset na `release/*` yana hana gogewa da force-push, kuma
-`stable/v3` da `develop` ba su wanzu ba tukuna), matakan rassan biyu, abubuwan da ke tayar da dormant-workflow
-da sharuɗɗan `if:` da suka zama gaskiya (da waɗanda suka ci gaba da kasancewa a kulle da repository variable ko
-aka tsayar da su ga canonical repository), dist-tags da ake tsammani (`latest` → 3.9.0, `next` da
-`nightly` babu komai) da kuma mayar da baya. Exit `0` = `RESULT: READY`, `1` = wani sharadin farko mai hanawa
-ya gaza (`✗`), `2` = kuskuren amfani. `--advisory <id,...>` yana saukar da bincike zuwa gargaɗi (`!`)
+`scripts/release/dry-run-lts-cut.mjs` ba ya aiwatar da komai: yana karanta git da `gh` sannan ya buga
+dukkan jerin matakan — sharuɗɗan farko (an warware tushe, ma'ajiyar tushe tana da cikakken tarihi —
+shallow clone ba zai iya tura `stable/v3` ba, ɓangaren karɓa yana ƙin pack a parent na farko
+da aka graft, saboda haka yi yankewar daga cikakken clone ko fara da `git fetch --unshallow origin` — alamar da ta gabata
+tana nan, `package.json` yana kan sigar da ake nufi, akwai buɗaɗɗen issue na `release-freeze`, babu buɗaɗɗen
+issue na `Release branch not green`
+a kan reshen saki da yake akwai — reshen da babu shi yana bayar da rahoton `?` wanda ba a sani ba, ba ya taɓa zama
+green — an saita layin jiran Mergify na `release` (G11: `queue_rules`, `checks_timeout`,
+lakabin `queue`), ruleset na `release/*` har yanzu yana hana gogewa da force-push, kuma
+`stable/v3` da `develop` ba su wanzu ba tukuna), matakan reshe guda biyu, abubuwan kunna dormant-workflow
+da sharuɗɗan `if:` da za su zama gaskiya (da waɗanda za su ci gaba da kasancewa a kulle ta hanyar repository variable ko
+aka ɗaure su ga canonical repository), dist-tags da ake tsammani (`latest` → 3.9.0, `next` da
+`nightly` babu komai) da rollback. Exit `0` = `RESULT: READY`, `1` = wani sharadin farko mai hana aiki
+ya gaza (`✗`), `2` = kuskuren amfani. `--advisory <id,...>` yana sauya bincike zuwa gargaɗi (`!`)
 ba tare da ɓoye shi ba.
 
-Gudanar da gwajin bushe na yankan na ainihi yayin da daskarar da fitarwar 3.9.0 take a buɗe — ana
-ƙirƙirar rassan bayan tag kuma kafin Mataki na 12c ya cire daskararwar.
+Gudanar da gwajin bushewa na ainihin yankewar yayin da release freeze na 3.9.0 yake a buɗe — ana
+ƙirƙirar rassan bayan alamar kuma kafin Mataki na 12c ya ɗage freeze ɗin.
 
 ### Atisayen 3.8.58 (a fork kawai)
 
 ```bash
-# 1. Yi gwajin bushe a kan ƙarshen yanzu tare da sigogin atisaye
+# 1. Yi gwajin bushewa a kan ƙarshen yanzu tare da sigogin atisaye
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
 # 2. Aiwatar a kan remote na FORK (ana ƙin origin, ko duk wani remote da URL ɗinsa yake na canonical
-#    repository; kowane mataki yana neman tabbatarwa a terminal)
+#    repository; kowane mataki yana neman tabbaci a terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Gwada dormant workflows a cikin fork (workflow_dispatch inda gwajin bushe
-#    ya bayar da rahoton tsayarwa ga canonical-repository), sannan a mayar da baya
+# 3. Gwada dormant workflows a cikin fork (workflow_dispatch inda gwajin bushewa
+#    ya bayar da rahoton canonical-repository pin), sannan yi rollback
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Ana gina commit na ɗaga `develop` da git plumbing (ba a taɓa working tree ba), kuma yana ɗaga
-fayiloli biyar iri ɗaya da commit na buɗe-zagaye: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` da `docs/openapi.yaml`. Ana buɗe sashen `[4.0.0]`
-na CHANGELOG da kwafinsa na i18n a kan `develop` daga baya, kafin PR na farko. Script ɗin ba ya
-taɓa canza npm dist-tags — yi atisayen waɗannan a kan scratch package.
+Ana gina develop bump commit da git plumbing (ba a taɓa working tree ba), kuma yana ɗaga
+fayiloli biyar iri ɗaya da cycle-open commit: `package.json`, `open-sse/package.json`,
+`electron/package.json`, `package-lock.json` da `docs/openapi.yaml`. Daga baya ana buɗe sashen
+CHANGELOG na `[4.0.0]` da kwafinsa na i18n a kan `develop`, kafin PR ɗinsa na farko.
+Script ɗin ba ya taɓa canza npm dist-tags — yi atisayen waɗannan a kan scratch package.
 
-### Artifact na samfotin PR (gina sau ɗaya, ɗaukaka bytes iri ɗaya)
+### Artifact na samfotin PR (gina sau ɗaya, tallata bytes iri ɗaya)
 
-`.github/workflows/preview-artifact.yml` yana gina production tarball guda ɗaya daga kan PR head sannan
-ya inganta ainihin wannan build ɗin (#8084 sashe (a)). PRs na repository iri ɗaya kawai; ba a wallafa komai.
+`.github/workflows/preview-artifact.yml` yana gina production tarball guda ɗaya daga head na PR kuma
+yana inganta ainihin build ɗin nan (#8084 sashe (a)). PR na repository iri ɗaya kawai; ba a wallafa komai.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ko ƙara lakabin `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # girka samfoti
+npm install -g ./omniroute-*.tgz                          # shigarwar samfoti
 ```
 
 Gudanarwar tana yin `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, tana shirya
-tarball, tana gudanar da `npm run check:pack-boot` (sirrika na bogi, ephemeral data dir), tana sake shiryawa kuma
-ta gaza sai dai idan digest ɗin daidai yake, sannan ta rubuta `artifact-identity.json` (head SHA, base
+tarball, tana gudanar da `npm run check:pack-boot` (fake secrets, ephemeral data dir), tana sake shiryawa kuma
+ta gaza sai idan digest ɗin ya kasance iri ɗaya, sannan ta rubuta `artifact-identity.json` (head SHA, base
 SHA, lockfile hash, platform, arch, node ABI, bundler, build policy —
-`scripts/release/artifact-identity.mjs`) kuma ta tabbatar da tarball a wani job na daban. Ɗaukaka
-samfoti na nufin girka wannan tarball ɗin: kada a sake ginawa daga tushe.
+`scripts/release/artifact-identity.mjs`) kuma ta tabbatar da tarball ɗin a wani job na daban. Tallata
+samfoti yana nufin shigar da wannan tarball ɗin: kada a sake ginawa daga tushe.
 
-### Yankan (3.9.0, bayan GO)
+### Yankewar (3.9.0, bayan GO)
 
 1. An rubuta GO a cikin [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` yana buga `RESULT: READY`.
-3. Ƙirƙiri rassan a kan `origin` da hannu ta amfani da commands da gwajin bushe ya buga —
-   script ɗin ya ƙi yin push zuwa `origin`. Don sake amfani da commit na develop da aka duba, gudanar da
-   atisayen `--execute` a kan ƙarshen 3.9.0 zuwa fork ɗinka da farko; yana buga SHA guda biyu, kuma
-   ana iya yin push na commits iri ɗaya:
+3. Ƙirƙiri rassan a kan `origin` da hannu ta amfani da umarnin da gwajin bushewa ya buga —
+   script ɗin ya ƙi turawa zuwa `origin`. Don sake amfani da develop commit da aka yi wa bita, gudanar da
+   atisayen `--execute` a kan ƙarshen 3.9.0 a kan fork ɗinka da farko; yana buga SHA guda biyu, kuma
+   ana iya tura commits iri ɗaya:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Kare `stable/v3` da `develop` (rulesets + merge queue) kafin PR na farko ya shiga.
-5. Dormant workflows suna kunna bisa wanzuwar reshe: `forward-port.yml` (push zuwa
+4. Kare `stable/v3` da `develop` (rulesets + merge queue) kafin a haɗa PR na farko.
+5. Workflows ɗin da ba sa aiki za su kunna ne idan branch ya wanzu: `forward-port.yml` (push zuwa
    `stable/v3`), `validate-stable-pr.yml` (PRs zuwa `stable/v3`) da `nightly-v4-build.yml`
-   (yana gina `develop`). Kafin fara aiki kai tsaye, saita repository secret na `secrets.FORWARD_PORT_TOKEN` (domin CI ya gudana a kan
-   PRs na forward-port); wallafar nightly za ta ci gaba da kasancewa a kashe har sai mai shi ya saita repository
-   variable na `vars.NIGHTLY_PUBLISH` zuwa `true` kuma npm Trusted Publishing ya amince da
-   `nightly-v4-build.yml`. Warware tasha yana cikin `scripts/release/dist-tag.mjs`, resolver iri ɗaya
-   da `npm-publish.yml` ke amfani da shi.
-6. Tabbatar da tashoshin: `npm view omniroute dist-tags --json` yana nuna `latest` = 3.9.0 kuma babu
-   `next` / `nightly` har sai v4 ya wallafa.
-7. Mayar da baya, idan ana buƙata: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   (yana gina `develop`). Kafin fara aiki, saita sirrin ma’ajiyar `secrets.FORWARD_PORT_TOKEN` (domin CI ya yi aiki a kan
+   PRs na forward-port); wallafawar nightly za ta ci gaba da kasancewa a kashe har sai mai ma’ajiyar ya saita
+   repository variable `vars.NIGHTLY_PUBLISH` zuwa `true` kuma npm Trusted Publishing ya amince da
+   `nightly-v4-build.yml`. Ana tantance channel ta `scripts/release/dist-tag.mjs`, wato resolver ɗin da
+   `npm-publish.yml` yake amfani da shi.
+6. Tabbatar da channels: `npm view omniroute dist-tags --json` ya nuna `latest` = 3.9.0 kuma babu
+   `next` / `nightly` har sai an wallafa v4.
+7. Komawa baya, idan ya zama dole: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    da `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

@@ -294,72 +294,72 @@ production build တို့သည် CI ၏ တာဝန်ဖြစ်သည�
 
 ---
 
-## ပရောဂျက်ဖွဲ့စည်းပုံ
+## ပရောဂျက် ဖွဲ့စည်းပုံ
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard စာမျက်နှာများ (ကဏ္ဍ 23 ခု)
-│   ├── api/                # API route များ (directory 51 ခု)
-│   └── login/              # အထောက်အထားစိစစ်ခြင်း စာမျက်နှာများ (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules စသည်)
-├── lib/                    # အဓိက business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite domain module များ + migration 130 ခု
-│   ├── memory/             # ရေရှည်သိမ်းဆည်းထားသော စကားဝိုင်းမှတ်ဉာဏ်
-│   ├── oauth/              # OAuth provider များ၊ service များနှင့် utility များ
-│   ├── skills/             # တိုးချဲ့နိုင်သော skill framework
-│   ├── usage/              # အသုံးပြုမှု ခြေရာခံခြင်းနှင့် ကုန်ကျစရိတ်တွက်ချက်ခြင်း
-│   └── localDb.ts          # ပြန်လည် export လုပ်သည့် layer သီးသန့် — ဤနေရာတွင် logic ကို မည်သည့်အခါမျှ မထည့်ပါနှင့်
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (certificate၊ DNS၊ ပစ်မှတ် routing)
+│   ├── (dashboard)/        # ဒက်ရှ်ဘုတ် စာမျက်နှာများ (ကဏ္ဍ 23 ခု)
+│   ├── api/                # API လမ်းကြောင်းများ (လမ်းညွှန် 51 ခု)
+│   └── login/              # စစ်မှန်ကြောင်းအတည်ပြုခြင်း စာမျက်နှာများ (.tsx)
+├── domain/                 # မူဝါဒ အင်ဂျင် (policyEngine, comboResolver, costRules စသည်)
+├── lib/                    # ပင်မ လုပ်ငန်းဆိုင်ရာ လော့ဂျစ် (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 ပရိုတိုကော ဆာဗာ
+│   ├── acp/                # Agent Communication Protocol မှတ်ပုံတင်စာရင်း
+│   ├── compliance/         # စည်းမျဉ်းလိုက်နာမှု မူဝါဒအင်ဂျင်
+│   ├── db/                 # SQLite ဒိုမိန်းမော်ဂျူးများ + ရွှေ့ပြောင်းမှု 130 ခု
+│   ├── memory/             # အမြဲတမ်းသိမ်းဆည်းထားသော စကားဝိုင်းမှတ်ဉာဏ်
+│   ├── oauth/              # OAuth ပံ့ပိုးသူများ၊ ဝန်ဆောင်မှုများနှင့် အသုံးဝင်ကိရိယာများ
+│   ├── skills/             # တိုးချဲ့နိုင်သော စွမ်းရည်ဘောင်
+│   ├── usage/              # အသုံးပြုမှု ခြေရာခံခြင်းနှင့် ကုန်ကျစရိတ် တွက်ချက်ခြင်း
+│   └── localDb.ts          # ပြန်လည်တင်ပို့သည့် အလွှာသာ — ဤနေရာတွင် လော့ဂျစ်ကို မည်သည့်အခါမျှ မထည့်ပါနှင့်
+├── middleware/              # တောင်းဆိုမှု ကြားခံဆော့ဖ်ဝဲ (promptInjectionGuard)
+├── mitm/                   # MITM ပရောက်စီ (လက်မှတ်၊ DNS၊ ပစ်မှတ်လမ်းကြောင်းသတ်မှတ်ခြင်း)
 ├── shared/
-│   ├── components/         # React component များ (.tsx)
-│   ├── constants/          # Provider သတ်မှတ်ချက်များ (329)၊ MCP scope များ၊ routing strategy 19 ခု
-│   ├── utils/              # Circuit breaker၊ sanitizer၊ auth helper များ
-│   └── validation/         # Zod v4 schema များ
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React ကွန်ပိုနင့်များ (.tsx)
+│   ├── constants/          # ပံ့ပိုးသူ သတ်မှတ်ချက်များ (329)၊ MCP နယ်ပယ်များ၊ လမ်းကြောင်းရွေးချယ်မှု မဟာဗျူဟာ 19 ခု
+│   ├── utils/              # ဆားကစ်ဖြတ်တောက်ကိရိယာ၊ သန့်စင်ကိရိယာ၊ စစ်မှန်ကြောင်းအတည်ပြုမှု အထောက်အကူပြုကိရိယာများ
+│   └── validation/         # Zod v4 စကီးမားများ
+└── sse/                    # SSE ပရောက်စီ လုပ်ငန်းစဉ်အစဉ်
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # Executor implementation module 89 ခု
-├── handlers/               # Request handler 11 ခု (chat၊ responses၊ embeddings၊ images စသည်)
-├── mcp-server/             # MCP server (သီးခြား tool 110 ခု၊ transport 3 ခု၊ scope 33 ခု)
-├── services/               # ထိပ်တန်းအဆင့် service 178 ခု (combo၊ autoCombo၊ rateLimitManager စသည်)
-├── translator/             # Format translator များ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # Utility module 22 ခု (stream၊ TLS၊ proxy၊ logging)
+open-sse/                   # @omniroute/open-sse အလုပ်နေရာ
+├── executors/              # အကောင်အထည်ဖော် မော်ဂျူး 150 ခု (အကောင်အထည်ဖော် ကလတ်စ်များ + ပံ့ပိုးသူတစ်ခုချင်းစီအတွက် အထောက်အကူပြုကိရိယာများ)
+├── handlers/               # တောင်းဆိုမှု ကိုင်တွယ်သူ 11 ခု (ချတ်၊ တုံ့ပြန်ချက်များ၊ မြှုပ်သွင်းချက်များ၊ ပုံများ စသည်)
+├── mcp-server/             # MCP ဆာဗာ (ထူးခြားသော ကိရိယာ 110 ခု၊ ပို့ဆောင်ရေးနည်းလမ်း 3 ခု၊ နယ်ပယ် 33 ခု)
+├── services/               # အပေါ်ဆုံးအဆင့် ဝန်ဆောင်မှု 178 ခု (combo, autoCombo, rateLimitManager စသည်)
+├── translator/             # ဖော်မတ် ဘာသာပြန်ကိရိယာများ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API အသွင်ပြောင်းကိရိယာ
+└── utils/                  # အသုံးဝင် မော်ဂျူး 22 ခု (စီးကြောင်း၊ TLS၊ ပရောက်စီ၊ မှတ်တမ်းတင်ခြင်း)
 
-electron/                   # Electron desktop app (platform အမျိုးမျိုးတွင် အသုံးပြုနိုင်သော)
+electron/                   # Electron ဒက်စ်တော့အက်ပ် (ပလက်ဖောင်းစုံ)
 
 tests/
-├── unit/                   # Node.js test runner (test ဖိုင် 1,574 ခု)
-├── integration/            # Integration test များ
-├── e2e/                    # Playwright test များ
-├── security/               # လုံခြုံရေး test များ
-├── translator/             # Translator သီးသန့် test များ
-└── load/                   # Load test များ
+├── unit/                   # Node.js စမ်းသပ်မှု လုပ်ဆောင်ကိရိယာ (စမ်းသပ်မှုဖိုင် 1,574 ခု)
+├── integration/            # ပေါင်းစည်းမှု စမ်းသပ်ချက်များ
+├── e2e/                    # Playwright စမ်းသပ်ချက်များ
+├── security/               # လုံခြုံရေး စမ်းသပ်ချက်များ
+├── translator/             # ဘာသာပြန်ကိရိယာအတွက် သီးသန့် စမ်းသပ်ချက်များ
+└── load/                   # ဝန်အား စမ်းသပ်ချက်များ
 
 docs/
-├── adr/                     # Architecture Decision Record များ
-├── architecture/            # စနစ် architecture နှင့် resilience
-├── comparison/              # OmniRoute နှင့် အခြားရွေးချယ်စရာများကို နှိုင်းယှဉ်ခြင်း
-├── compression/             # Compression လမ်းညွှန်များနှင့် စည်းမျဉ်းများ
+├── adr/                     # ဗိသုကာဆိုင်ရာ ဆုံးဖြတ်ချက် မှတ်တမ်းများ
+├── architecture/            # စနစ်ဗိသုကာနှင့် ခံနိုင်ရည်
+├── comparison/              # OmniRoute နှင့် အခြားရွေးချယ်စရာများ နှိုင်းယှဉ်ချက်
+├── compression/             # ချုံ့ခြင်း လမ်းညွှန်များနှင့် စည်းမျဉ်းများ
 ├── dev/                     # ဖွံ့ဖြိုးတိုးတက်ရေး လမ်းညွှန်များ
-├── diagrams/                # Architecture diagram များ
-├── frameworks/              # MCP၊ A2A၊ OpenCode၊ Memory၊ Skills
-├── guides/                  # အသုံးပြုသူလမ်းညွှန်၊ Docker၊ စနစ်တပ်ဆင်ခြင်း၊ ပြဿနာဖြေရှင်းခြင်း
-├── i18n/                    # ဘာသာစကားမျိုးစုံဖြင့် ပြန်ဆိုထားသော README များ
+├── diagrams/                # ဗိသုကာ ပုံကြမ်းများ
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # အသုံးပြုသူလမ်းညွှန်၊ Docker၊ ပြင်ဆင်တပ်ဆင်မှု၊ ပြဿနာဖြေရှင်းခြင်း
+├── i18n/                    # နိုင်ငံတကာဘာသာစကားသုံး README ဘာသာပြန်များ
 ├── marketing/               # စျေးကွက်မြှင့်တင်ရေး ပစ္စည်းများ
-├── ops/                     # Deployment၊ proxy၊ coverage၊ release များ
-├── providers/               # Provider သီးသန့် documentation
-├── reference/               # API reference၊ env var များ၊ CLI tool များ၊ အခမဲ့အဆင့်များ
-├── releases/                # Release note များ
-├── routing/                 # Auto-combo engine၊ reasoning replay
-├── screenshots/             # Dashboard screenshot များ
-├── security/                # Guardrail များ၊ compliance၊ stealth၊ token များ
-└── specs/                   # ဒီဇိုင်းသတ်မှတ်ချက်များ
+├── ops/                     # ဖြန့်ကျက်ခြင်း၊ ပရောက်စီ၊ လွှမ်းခြုံမှု၊ ထုတ်ဝေမှုများ
+├── providers/               # ပံ့ပိုးသူအလိုက် စာရွက်စာတမ်းများ
+├── reference/               # API ကိုးကားချက်၊ ပတ်ဝန်းကျင် ကိန်းရှင်များ၊ CLI ကိရိယာများ၊ အခမဲ့အဆင့်များ
+├── releases/                # ထုတ်ဝေမှု မှတ်စုများ
+├── routing/                 # အလိုအလျောက် ပေါင်းစပ်အင်ဂျင်၊ ကျိုးကြောင်းဆင်ခြင်မှု ပြန်လည်လုပ်ဆောင်ခြင်း
+├── screenshots/             # ဒက်ရှ်ဘုတ် မျက်နှာပြင်ပုံများ
+├── security/                # အကာအကွယ်စည်းမျဉ်းများ၊ စည်းမျဉ်းလိုက်နာမှု၊ ကိုယ်ပျောက်စနစ်၊ တိုကင်များ
+└── specs/                   # ဒီဇိုင်း သတ်မှတ်ချက်များ
 ```
 
 ---

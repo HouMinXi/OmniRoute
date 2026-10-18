@@ -302,63 +302,63 @@ src/                        # TypeScript (.ts / .tsx)
 │   ├── (dashboard)/        # Valdymo skydelio puslapiai (23 skyriai)
 │   ├── api/                # API maršrutai (51 katalogas)
 │   └── login/              # Autentifikavimo puslapiai (.tsx)
-├── domain/                 # Politikų variklis (policyEngine, comboResolver, costRules ir kt.)
+├── domain/                 # Taisyklių modulis (policyEngine, comboResolver, costRules ir kt.)
 ├── lib/                    # Pagrindinė verslo logika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokolo serveris
-│   ├── acp/                # Agent Communication Protocol registras
-│   ├── compliance/         # Atitikties politikų variklis
+│   ├── a2a/                # „Agent-to-Agent“ v0.3 protokolo serveris
+│   ├── acp/                # „Agent Communication Protocol“ registras
+│   ├── compliance/         # Atitikties taisyklių modulis
 │   ├── db/                 # SQLite domeno moduliai ir 130 migracijų
-│   ├── memory/             # Išliekamoji pokalbių atmintis
+│   ├── memory/             # Nuolatinė pokalbių atmintis
 │   ├── oauth/              # OAuth teikėjai, paslaugos ir pagalbinės priemonės
 │   ├── skills/             # Išplečiama įgūdžių sistema
-│   ├── usage/              # Naudojimo stebėjimas ir kainos skaičiavimas
-│   └── localDb.ts          # Tik reeksportavimo sluoksnis — niekada čia nepridėkite logikos
+│   ├── usage/              # Naudojimo stebėjimas ir sąnaudų skaičiavimas
+│   └── localDb.ts          # Tik pakartotinio eksportavimo sluoksnis — niekada čia nedėkite logikos
 ├── middleware/              # Užklausų tarpinė programinė įranga (promptInjectionGuard)
-├── mitm/                   # MITM tarpinis serveris (sertifikatai, DNS, paskirties maršruto parinkimas)
+├── mitm/                   # MITM tarpinis serveris (sertifikatai, DNS, paskirties maršrutizavimas)
 ├── shared/
 │   ├── components/         # React komponentai (.tsx)
-│   ├── constants/          # Teikėjų apibrėžtys (329), MCP aprėptys, 19 maršruto parinkimo strategijų
-│   ├── utils/              # Grandinės pertraukiklis, išvalymo priemonė, autentifikavimo pagalbinės priemonės
+│   ├── constants/          # Teikėjų aprašai (329), MCP aprėptys, 19 maršrutizavimo strategijų
+│   ├── utils/              # Grandinės pertraukiklis, duomenų valymo ir autentifikavimo pagalbinės priemonės
 │   └── validation/         # Zod v4 schemos
 └── sse/                    # SSE tarpinio serverio konvejeris
 
 open-sse/                   # @omniroute/open-sse darbo sritis
-├── executors/              # 89 vykdytojų realizavimo moduliai
+├── executors/              # 150 vykdytojų modulių (vykdytojų klasės ir kiekvienam teikėjui skirtos pagalbinės priemonės)
 ├── handlers/               # 11 užklausų apdorojimo programų (pokalbiai, atsakymai, įterpiniai, vaizdai ir kt.)
-├── mcp-server/             # MCP serveris (110 unikalių įrankių, 3 transportai, 33 aprėptys)
-├── services/               # 178 aukščiausio lygio paslaugos (combo, autoCombo, rateLimitManager ir kt.)
-├── translator/             # Formatų vertikliai (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── mcp-server/             # MCP serveris (110 unikalių įrankių, 3 perdavimo būdai, 33 aprėptys)
+├── services/               # 178 aukščiausiojo lygio paslaugos (combo, autoCombo, rateLimitManager ir kt.)
+├── translator/             # Formatų keitikliai (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Responses API transformavimo priemonė
-└── utils/                  # 22 pagalbiniai moduliai (srautai, TLS, tarpinis serveris, žurnalų registravimas)
+└── utils/                  # 22 pagalbinių priemonių moduliai (srautai, TLS, tarpinis serveris, žurnalų rašymas)
 
-electron/                   # Electron darbalaukio programa (kelioms platformoms)
+electron/                   # Electron darbalaukio programa (įvairioms platformoms)
 
 tests/
-├── unit/                   # Node.js testų vykdyklė (1 574 testų failai)
+├── unit/                   # Node.js testų vykdymo priemonė (1 574 testų failai)
 ├── integration/            # Integraciniai testai
 ├── e2e/                    # Playwright testai
 ├── security/               # Saugumo testai
-├── translator/             # Vertikliui skirti testai
+├── translator/             # Keitikliui skirti testai
 └── load/                   # Apkrovos testai
 
 docs/
-├── adr/                     # Architektūrinių sprendimų įrašai
+├── adr/                     # Architektūros sprendimų įrašai
 ├── architecture/            # Sistemos architektūra ir atsparumas
 ├── comparison/              # OmniRoute palyginimas su alternatyvomis
 ├── compression/             # Glaudinimo vadovai ir taisyklės
 ├── dev/                     # Kūrimo vadovai
 ├── diagrams/                # Architektūros diagramos
-├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── frameworks/              # MCP, A2A, OpenCode, atmintis, įgūdžiai
 ├── guides/                  # Naudotojo vadovas, Docker, sąranka, trikčių šalinimas
-├── i18n/                    # Internacionalizuoti README vertimai
+├── i18n/                    # Lokalizuoti README vertimai
 ├── marketing/               # Rinkodaros medžiaga
 ├── ops/                     # Diegimas, tarpinis serveris, aprėptis, leidimai
 ├── providers/               # Konkretiems teikėjams skirta dokumentacija
 ├── reference/               # API žinynas, aplinkos kintamieji, CLI įrankiai, nemokami planai
 ├── releases/                # Leidimų pastabos
-├── routing/                 # Automatinio derinių sudarymo variklis, samprotavimo atkūrimas
+├── routing/                 # Automatinio derinių parinkimo modulis, samprotavimo pakartojimas
 ├── screenshots/             # Valdymo skydelio ekrano kopijos
-├── security/                # Apsaugos priemonės, atitiktis, maskavimas, prieigos raktai
+├── security/                # Apsaugos priemonės, atitiktis, slaptumas, prieigos raktai
 └── specs/                   # Projektavimo specifikacijos
 ```
 

@@ -293,15 +293,15 @@ Uygulanmış örnekler için `open-sse/utils/stream.ts` ve `open-sse/utils/strea
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Pano sayfaları (23 bölüm)
+│   ├── (dashboard)/        # Dashboard sayfaları (23 bölüm)
 │   ├── api/                # API rotaları (51 dizin)
 │   └── login/              # Kimlik doğrulama sayfaları (.tsx)
-├── domain/                 # İlke motoru (policyEngine, comboResolver, costRules vb.)
+├── domain/                 # Politika motoru (policyEngine, comboResolver, costRules vb.)
 ├── lib/                    # Temel iş mantığı (.ts)
 │   ├── a2a/                # Agent-to-Agent v0.3 protokol sunucusu
-│   ├── acp/                # Agent Communication Protocol kayıt defteri
-│   ├── compliance/         # Uyumluluk ilke motoru
-│   ├── db/                 # SQLite alan modülleri + 130 migrasyon
+│   ├── acp/                # Agent Communication Protocol kayıt sistemi
+│   ├── compliance/         # Uyumluluk politikası motoru
+│   ├── db/                 # SQLite alan modülleri + 130 geçiş
 │   ├── memory/             # Kalıcı konuşma belleği
 │   ├── oauth/              # OAuth sağlayıcıları, hizmetleri ve yardımcı araçları
 │   ├── skills/             # Genişletilebilir beceri çerçevesi
@@ -317,7 +317,7 @@ src/                        # TypeScript (.ts / .tsx)
 └── sse/                    # SSE proxy işlem hattı
 
 open-sse/                   # @omniroute/open-sse çalışma alanı
-├── executors/              # 89 yürütücü uygulama modülü
+├── executors/              # 150 yürütücü modülü (yürütücü sınıfları + sağlayıcı başına yardımcılar)
 ├── handlers/               # 11 istek işleyicisi (sohbet, yanıtlar, gömmeler, görseller vb.)
 ├── mcp-server/             # MCP sunucusu (110 benzersiz araç, 3 taşıma yöntemi, 33 kapsam)
 ├── services/               # 178 üst düzey hizmet (combo, autoCombo, rateLimitManager vb.)
@@ -337,8 +337,8 @@ tests/
 
 docs/
 ├── adr/                     # Mimari Karar Kayıtları
-├── architecture/            # Sistem mimarisi ve dayanıklılık
-├── comparison/              # OmniRoute ve alternatiflerinin karşılaştırması
+├── architecture/            # Sistem mimarisi ve dayanıklılığı
+├── comparison/              # OmniRoute ve alternatiflerin karşılaştırması
 ├── compression/             # Sıkıştırma kılavuzları ve kuralları
 ├── dev/                     # Geliştirme kılavuzları
 ├── diagrams/                # Mimari diyagramları
@@ -350,10 +350,10 @@ docs/
 ├── providers/               # Sağlayıcıya özgü belgeler
 ├── reference/               # API referansı, ortam değişkenleri, CLI araçları, ücretsiz katmanlar
 ├── releases/                # Sürüm notları
-├── routing/                 # Otomatik kombinasyon motoru, akıl yürütme yeniden oynatma
-├── screenshots/             # Pano ekran görüntüleri
-├── security/                # Koruyucu önlemler, uyumluluk, gizlilik, tokenlar
-└── specs/                   # Tasarım özellikleri
+├── routing/                 # Otomatik kombinasyon motoru, akıl yürütme tekrarı
+├── screenshots/             # Dashboard ekran görüntüleri
+├── security/                # Koruma önlemleri, uyumluluk, gizlilik, token'lar
+└── specs/                   # Tasarım belirtimleri
 ```
 
 ---

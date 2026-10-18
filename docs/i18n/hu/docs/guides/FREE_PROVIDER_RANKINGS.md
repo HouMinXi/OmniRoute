@@ -14,32 +14,28 @@
 
 ## Mi ez?
 
-Az OmniRoute 329 szolgáltatót tart nyilván, köztük 155 olyan katalógusbejegyzést,
-amely **ingyenes/hitelesítés nélküli** jelölést kapott (hitelesítés nélküli,
-ingyenes szintű OAuth vagy ingyenes szintű API-kulcs — lásd az
-[Ingyenes szintek útmutatóját](../getting-started/FREE-TIERS-GUIDE.md) és a teljes
-[Ingyenes szintek jegyzékét](../reference/FREE_TIERS.md)). A bökkenő: az ingyenes
-szolgáltatók modelljeinek minősége rendkívül változó. Egy élvonalbeli modellt kínáló,
-hitelesítés nélküli szolgáltató sokkal hasznosabb annál, amely egy kisméretű, elavult
-modellt kínál.
+Az OmniRoute 372 szolgáltatót regisztrál, köztük 155 olyan katalógusbejegyzést, amely **ingyenes/nem igényel hitelesítést**
+(nincs hitelesítés,
+ingyenes csomagú OAuth vagy ingyenes csomagú API-kulcs — lásd az
+[Ingyenes csomagok útmutatóját](../getting-started/FREE-TIERS-GUIDE.md) és a teljes
+[Ingyenes csomagok jegyzékét](../reference/FREE_TIERS.md)). A bökkenő: az ingyenes szolgáltatók
+modellminősége rendkívül eltérő. Egy élvonalbeli modellt kínáló, hitelesítést nem igénylő szolgáltató sokkal hasznosabb,
+mint egy kisebb, régebbi modellt kínáló szolgáltató.
 
-Az **Ingyenes szolgáltatók rangsora** arra a kérdésre ad választ, hogy
-„**melyik ingyenes szolgáltató biztosítja számomra a legjobb modellt?**”. Ehhez
-összekapcsolja az egyes ingyenes szolgáltatók katalógusát az **Arena AI ranglistájának**
-**közösségi forrásból származó minőségi pontszámaival** (emberi preferenciákon alapuló
-ELO, ugyanaz az elv, mint a LMArena chatbotarénája mögött). A szolgáltatókat ezután a
-**legjobb ingyenes modelljük** erőssége alapján rangsorolja.
+Az **Ingyenes szolgáltatók rangsora** arra ad választ, hogy „**melyik ingyenes szolgáltató biztosítja számomra a legjobb modellt?**”: ehhez
+összekapcsolja az egyes ingyenes szolgáltatók katalógusát az
+**Arena AI ranglistájáról** származó, **közösségi forrásból gyűjtött minőségi pontszámokkal** (emberi preferenciákon alapuló ELO, ugyanaz az elv, amely az LMArena
+chatbotarénája mögött is áll). A szolgáltatók rangsorolása ezután a **legjobb ingyenes modelljük** teljesítménye alapján történik.
 
-A rangsor három valós forrás alapján készül:
+A rangsor három valós forrásból készül:
 
 1. Az ingyenes szolgáltatók listái — `NOAUTH_PROVIDERS`, valamint az `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` `hasFree` jelöléssel ellátott bejegyzései
+   `APIKEY_PROVIDERS` `hasFree` jelölésű bejegyzései
    (`src/shared/constants/providers.ts`).
 2. Az egyes szolgáltatók modellkatalógusa a szolgáltatói nyilvántartásból
    (`open-sse/config/providerRegistry.ts`).
-3. Az ELO-ból származtatott, feladathoz való illeszkedést mérő pontszámok, amelyeket
-   az Arena ELO szinkronizálási motor (`src/lib/arenaEloSync.ts`) tárol a
-   `model_intelligence` adatbázistáblában.
+3. Az ELO-ból származtatott, feladathoz való illeszkedést jelző pontszámok, amelyeket az Arena ELO szinkronizáló motor
+   (`src/lib/arenaEloSync.ts`) tárol a `model_intelligence` adatbázistáblában.
 
 Az összekapcsolási logika a `src/lib/freeProviderRankings.ts` fájlban található.
 

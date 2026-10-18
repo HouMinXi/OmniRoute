@@ -384,107 +384,110 @@ Tupu izipu mbipụta v3.8.x ọ bụla, nyochaa ihe ndị ọzọ ndị a:
 
 ---
 
-## Mbepụ 3.9.0 LTS (emegharịrị na 3.8.58)
+## Nkewa 3.9.0 LTS (a nwara ya na 3.8.58)
 
 Mgbe v3.8.59 gasịrị, ụdị na-esote bụ 3.9.0, ọnụ ya ga-aghọ alaka abụọ ga-adị ogologo oge:
-`stable/v3` (ahịrị v3 LTS, npm `latest`) na `develop` (v4, ebuliri gaa 4.0.0, npm
-`nightly`). Ụdị alaka/channel, forward-port na labels dị na
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); atụmatụ ahụ dị na [ROADMAP](../../ROADMAP.md) (Phase 3). A na-eme mbepụ ahụ naanị otu ugboro;
-3.8.58 na-emegharị ya site na mmalite ruo na njedebe n'elu fork, ebe 3.8.59 na-emechi site na
-[ndepụta nyocha GO/NO-GO](./LTS_GO_NO_GO.md).
+`stable/v3` (ahịrị v3 LTS, npm `latest`) na `develop` (v4, ebuliri ya gaa 4.0.0, npm
+`nightly`). Ụdị nhazi alaka/ọwa, forward-port na label dị na
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); atụmatụ ahụ dị na [ROADMAP](../../ROADMAP.md) (Phase 3). Nkewa a ga-eme naanị otu ugboro;
+3.8.58 na-anwale ya site na mbido ruo na njedebe na fork, ebe 3.8.59 ji
+[ndepụta nyocha GO/NO-GO](./LTS_GO_NO_GO.md) mechie.
 
-### Nnwale na-enweghị mmejuputa (naanị ọgụgụ, dị nchebe oge ọ bụla)
+### Nnwale akọrọ (naanị ọgụgụ, dị nchebe oge ọ bụla)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ezigbo mbepụ ahụ: 3.9.0 sitere na HEAD, tag gara aga bụ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # kpọchie commit isi mmalite ahụ
+npm run release:dry-run-lts-cut                       # ezigbo nkewa: 3.9.0 site na HEAD, tag gara aga v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # kpọgide commit isi mmalite
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` anaghị eme ihe ọ bụla: ọ na-agụ git na `gh` ma bipụta
-usoro ahụ niile — ihe ndị a chọrọ tupu amalite (isi mmalite ahụ na-ekpebi nke ọma, tag gara aga dị, `package.json` bụ
-ụdị ezubere, issue `release-freeze` mepere emepe, ọ dịghị issue `Release branch not green`
-mepere emepe n'alaka release dị adị — alaka na-adịghị adị na-akọ `?` amaghị, ọ dịghị mgbe ọ ga-abụ
+usoro niile — ihe ndị a ga-emerịrị tupu ya amalite (isi mmalite ga-ekpebi nke ọma, repository isi mmalite ahụ nwere akụkọ zuru ezu —
+shallow clone enweghị ike ịkwanye `stable/v3`, akụkụ nnata na-ajụ pack ahụ n’ebe parent mbụ
+e jikọtara malitere, ya mere mee nkewa site na full clone ma ọ bụ buru ụzọ mee `git fetch --unshallow origin` —
+tag gara aga dị, `package.json` bụ ụdị ebumnuche, issue `release-freeze` mepere emepe, ọ nweghị
+issue `Release branch not green` mepere emepe
+n’alaka mwepụta dị adị — alaka na-adịghị adị na-akọ `?` amaghị, ọ dịghị mgbe ọ ga-abụ
 green — ahaziri kwụ `release` nke Mergify (G11: `queue_rules`, `checks_timeout`,
-label `queue`), ruleset `release/*` ka na-egbochi nhichapụ na force-push, ma
-`stable/v3` na `develop` adịghị adị ugbu a), usoro alaka abụọ ahụ, ihe mkpali dormant-workflow
-na ọnọdụ `if:` ndị na-aghọ eziokwu (nakwa ndị repository variable ka na-egbochi ma ọ bụ
-ndị a kpọchiri na canonical repository), dist-tags ndị a tụrụ anya ha (`latest` → 3.9.0, `next` na
-`nightly` tọgbọ chakoo) na nlọghachi azụ. Exit `0` = `RESULT: READY`, `1` = otu ihe achọrọ
-tupu amalite nke na-egbochi usoro ahụ dara (`✗`), `2` = njehie ojiji. `--advisory <id,...>` na-ewedata nyocha ka ọ bụrụ ịdọ aka ná ntị (`!`)
-na-ezoghị ya.
+label `queue`), ruleset `release/*` ka na-egbochi nhichapụ na force-push, na
+`stable/v3` na `develop` adịghịkwa), nzọụkwụ alaka abụọ ahụ, trigger workflow ndị na-adịghị arụ ọrụ
+na ọnọdụ `if:` ndị ga-aghọ eziokwu (yana ndị variable repository ka na-egbochi ma ọ bụ
+ndị a kpọgidere na repository canonical), dist-tag ndị a tụrụ anya ha (`latest` → 3.9.0, `next` na
+`nightly` tọgbọ chakoo) na rollback. Ọpụpụ `0` = `RESULT: READY`, `1` = otu ihe dị mkpa
+a ga-emerịrị emezughị (`✗`), `2` = njehie ojiji. `--advisory <id,...>` na-eweda nyocha gaa n’ọkwa ịdọ aka ná ntị (`!`)
+n’ezoghị ya.
 
-Mee nnwale na-enweghị mmejuputa nke ezigbo mbepụ ahụ mgbe release freeze nke 3.9.0 ka mepere emepe — a na-emepụta alaka ndị ahụ
-mgbe tag gasịrị ma tupu Phase 12c ewepụ freeze ahụ.
+Gbaa nnwale akọrọ nke ezigbo nkewa ahụ mgbe release freeze 3.9.0 ka mepere emepe — a na-emepụta alaka ndị ahụ
+mgbe tag gasịrị nakwa tupu Phase 12c ewepụ freeze ahụ.
 
-### Mmegharị 3.8.58 (naanị na fork)
+### Nnwale 3.8.58 (naanị fork)
 
 ```bash
-# 1. Mee nnwale na-enweghị mmejuputa n'ọnụ dị ugbu a site na iji paramita mmegharị
+# 1. Mee nnwale akọrọ n’ọnụ dị ugbu a site na iji paramita nnwale
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Mee ya megide remote nke FORK (a na-ajụ origin, ma ọ bụ remote ọ bụla nke URL ya bụ
-#    canonical repository; usoro ọ bụla na-arịọ nkwenye na terminal)
+# 2. Mee ya megide remote FORK (a na-ajụ origin, ma ọ bụ remote ọ bụla URL ya bụ repository
+#    canonical; nzọụkwụ ọ bụla na-arịọ nkwenye na terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Nwalee dormant workflows n'ime fork ahụ (workflow_dispatch ebe nnwale na-enweghị mmejuputa
-#    na-akọ mkpọchi canonical-repository), wee laghachi azụ
+# 3. Nwalee workflow ndị na-adịghị arụ ọrụ n’ime fork (workflow_dispatch ebe nnwale akọrọ
+#    na-akọ njikọta na repository canonical), emesịa mee rollback
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-A na-eji git plumbing wuo commit mbuli `develop` (anaghị emetụ working tree aka), ọ na-ebulikwa
+A na-eji git plumbing wuo commit mbuli `develop` (a naghị emetụ working tree aka), ọ na-ebulikwa
 faịlụ ise ndị ahụ commit mmeghe cycle na-ebuli: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` na `docs/openapi.yaml`. A na-emeghe ngalaba `[4.0.0]`
-nke CHANGELOG na oyiri i18n ya na `develop` ma emechaa, tupu PR mbụ ya.
-Script ahụ anaghị agbanwe npm dist-tags mgbe ọ bụla — megharịa ndị ahụ n'elu scratch package.
+`electron/package.json`, `package-lock.json` na `docs/openapi.yaml`. A ga-emepe ngalaba `[4.0.0]`
+nke CHANGELOG na iṅomi i18n ya na `develop` ma emesịa, tupu PR mbụ ya.
+Script ahụ anaghị agbanwe npm dist-tag ma ọlị — jiri package nnwale nwalee ha.
 
 ### Artifact nlele PR (wuo otu ugboro, kwalite otu bytes ahụ)
 
-`.github/workflows/preview-artifact.yml` na-ewu otu tarball production site n'isi PR ma
-na-enyocha build ahụ kpọmkwem (#8084 slice (a)). Naanị PR sitere n'otu repository; anaghị ebipụta ihe ọ bụla.
+`.github/workflows/preview-artifact.yml` na-ewu otu tarball production site n’isi PR ma
+nyochaa build ahụ kpọmkwem (#8084 slice (a)). Naanị PR ndị sitere n’otu repository; ọ dịghị ihe a na-ebipụta.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ma ọ bụ tinye label `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # ntinye nlele
+npm install -g ./omniroute-*.tgz                          # nrụnye nlele
 ```
 
-Run ahụ na-eme `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, na-akwakọba
-tarball ahụ, na-eme `npm run check:pack-boot` (secrets adịgboroja, data dir nwa oge), na-akwakọba ya ọzọ ma
-daa ma ọ bụrụ na digest abụghị otu, emesịa ọ dekọọ `artifact-identity.json` (head SHA, base
+Nrụpụta ahụ na-eme `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, na-achịkọta
+tarball ahụ, na-agba `npm run check:pack-boot` (secret adịgboroja, data dir nwa oge), na-achịkọta ya ọzọ ma
+daa ma ọ bụrụ na digest ahụ abụghị otu, emesịa ọ dekọọ `artifact-identity.json` (head SHA, base
 SHA, hash lockfile, platform, arch, node ABI, bundler, iwu build —
-`scripts/release/artifact-identity.mjs`) ma nye tarball ahụ akaebe n'ime job dị iche. Ikwalite
-nlele pụtara ịwụnye tarball ahụ: ewughachila ya site na source.
+`scripts/release/artifact-identity.mjs`) ma kwado tarball ahụ n’ọrụ dị iche. Ịkwalite
+otu nlele pụtara ịwụnye tarball ahụ: ewughachila ya site na source ma ọlị.
 
-### Mbepụ ahụ (3.9.0, mgbe GO gasịrị)
+### Nkewa ahụ (3.9.0, mgbe GO gasịrị)
 
 1. Edekọrọ GO na [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` na-ebipụta `RESULT: READY`.
-3. Jiri aka mepụta alaka ndị ahụ na `origin` site na commands nnwale na-enweghị mmejuputa bipụtara —
-   script ahụ na-ajụ ịkwaga push na `origin`. Iji jiri commit `develop` enyocharala ọzọ, mee
-   mmegharị `--execute` n'ọnụ 3.9.0 megide fork gị na mbụ; ọ na-ebipụta SHA abụọ ahụ, a pụkwara
-   ịkwaga otu commits ndị ahụ site na push:
+3. Jiri aka mepụta alaka ndị ahụ na `origin` site na iwu ndị nnwale akọrọ bipụtara —
+   script ahụ na-ajụ ịkwanye na `origin`. Iji commit `develop` enyochalarị ọzọ, gbaa
+   nnwale `--execute` n’ọnụ 3.9.0 megide fork gị na mbụ; ọ ga-ebipụta SHA abụọ ahụ, a pụkwara
+   ịkwanye otu commit ndị ahụ:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Chebe `stable/v3` na `develop` (rulesets + merge queue) tupu PR mbụ abata.
-5. Dormant workflows na-amalite ịrụ ọrụ ozugbo alaka dị: `forward-port.yml` (push gaa
+4. Chekwaa `stable/v3` na `develop` (rulesets + merge queue) tupu ejikọta PR mbụ.
+5. Workflows ndị na-adịghị arụ ọrụ ga-amalite ịrụ ọrụ ozugbo branch dị: `forward-port.yml` (push gaa
    `stable/v3`), `validate-stable-pr.yml` (PR ndị na-aga `stable/v3`) na `nightly-v4-build.yml`
-   (na-ewu `develop`). Tupu go-live, tọọ repository secret `secrets.FORWARD_PORT_TOKEN` (ka CI nwee ike ịrụ ọrụ na
-   PR forward-port); mbipụta nightly ga-anọgide gbanyụọ ruo mgbe onye nwe ya tọọrọ repository
-   variable `vars.NIGHTLY_PUBLISH` ka ọ bụrụ `true`, npm Trusted Publishing anabatakwa
-   `nightly-v4-build.yml`. Mkpebi channel dị na `scripts/release/dist-tag.mjs`, otu
+   (na-ewu `develop`). Tupu e bido iji ya, tọọ repository secret `secrets.FORWARD_PORT_TOKEN` (ka CI wee na-arụ ọrụ na
+   PR ndị forward-port); mbipụta abalị ga-anọgide na-adịghị arụ ọrụ ruo mgbe onye nwe ya tọsịrị repository
+   variable `vars.NIGHTLY_PUBLISH` ka ọ bụrụ `true` ma npm Trusted Publishing nabata
+   `nightly-v4-build.yml`. Mkpebi ọwa dị na `scripts/release/dist-tag.mjs`, nke bụ otu
    resolver ahụ `npm-publish.yml` na-eji.
-6. Nyochaa channels ndị ahụ: `npm view omniroute dist-tags --json` na-egosi `latest` = 3.9.0, ọ dịghịkwa
+6. Nyochaa ọwa ndị ahụ: `npm view omniroute dist-tags --json` na-egosi `latest` = 3.9.0, na enweghị
    `next` / `nightly` ruo mgbe v4 bipụtara.
-7. Nlọghachi azụ, ma ọ bụrụ na ọ dị mkpa: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+7. Ọ bụrụ na ọ dị mkpa ịlaghachi azụ: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    na `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

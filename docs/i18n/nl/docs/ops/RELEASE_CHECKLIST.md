@@ -386,12 +386,12 @@ Controleer deze aanvullende punten voordat je een v3.8.x-release uitbrengt:
 
 ## 3.9.0 LTS-splitsing (geoefend in 3.8.58)
 
-Na v3.8.59 is de volgende versie 3.9.0, en de tip daarvan wordt opgesplitst in twee langlevende branches:
+Na v3.8.59 is de volgende versie 3.9.0 en wordt de topcommit ervan opgesplitst in twee langlevende branches:
 `stable/v3` (de v3 LTS-lijn, npm `latest`) en `develop` (v4, verhoogd naar 4.0.0, npm
 `nightly`). Het branch-/kanaalmodel, de forward-port en labels staan in
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); het plan staat in de [ROADMAP](../../ROADMAP.md) (fase 3). De splitsing wordt één keer uitgevoerd;
-3.8.58 oefent deze van begin tot eind op een fork, en 3.8.59 wordt afgesloten met de
-[GO/NO-GO-checklist](./LTS_GO_NO_GO.md).
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); het plan staat in de [ROADMAP](../../ROADMAP.md) (Fase 3). De splitsing wordt eenmaal uitgevoerd;
+3.8.58 oefent deze van begin tot eind op een fork en 3.8.59 wordt afgesloten met de
+[GO/NO-GO-controlelijst](./LTS_GO_NO_GO.md).
 
 ### Proefuitvoering (alleen-lezen, altijd veilig)
 
@@ -401,50 +401,53 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # zet de broncommit vast
 ```
 
 `scripts/release/dry-run-lts-cut.mjs` voert niets uit: het leest git en `gh` en drukt de
-volledige reeks af — randvoorwaarden (bron kan worden omgezet, vorige tag bestaat, `package.json` heeft de
-doelversie, er is een `release-freeze`-issue geopend, er is geen openstaand issue met `Release branch not green`
-op een bestaande releasebranch — een branch die niet bestaat, rapporteert `?` onbekend, nooit
-groen — de Mergify-`release`-wachtrij is geconfigureerd (G11: `queue_rules`, `checks_timeout`,
-label `queue`), de `release/*`-regelset blokkeert nog steeds verwijdering en geforceerd pushen, en
-`stable/v3` en `develop` bestaan nog niet), de twee branchstappen, welke triggers en `if:`-voorwaarden
-van slapende workflows waar worden (en welke geblokkeerd blijven door een repositoryvariabele of
-vastgepind zijn op de canonieke repository), de verwachte dist-tags (`latest` → 3.9.0, `next` en
-`nightly` leeg) en de rollback. Exitcode `0` = `RESULT: READY`, `1` = een blokkerende randvoorwaarde
+volledige reeks af — voorafgaande voorwaarden (de bron kan worden gevonden, de bronrepository heeft een volledige geschiedenis —
+een ondiepe kloon kan `stable/v3` niet pushen, de ontvangende zijde weigert het pakket bij de eerste
+geënte parent, dus voer de splitsing uit vanuit een volledige kloon of voer eerst `git fetch --unshallow origin` uit — de vorige
+tag bestaat, `package.json` heeft de doelversie, er staat een `release-freeze`-issue open, er staat geen
+`Release branch not green`-issue open
+voor een bestaande releasebranch — een branch die niet bestaat, rapporteert `?` onbekend, nooit
+groen — de Mergify-wachtrij `release` is geconfigureerd (G11: `queue_rules`, `checks_timeout`,
+label `queue`), de regelset `release/*` blokkeert nog steeds verwijdering en geforceerde pushes, en
+`stable/v3` en `develop` bestaan nog niet), de twee branchstappen, welke triggers van slapende workflows
+en `if:`-voorwaarden waar worden (en welke geblokkeerd blijven door een repositoryvariabele of
+vastgezet zijn op de canonieke repository), de verwachte dist-tags (`latest` → 3.9.0, `next` en
+`nightly` leeg) en het terugdraaien. Afsluitcode `0` = `RESULT: READY`, `1` = een blokkerende voorafgaande voorwaarde
 is mislukt (`✗`), `2` = gebruiksfout. `--advisory <id,...>` verlaagt een controle tot een waarschuwing (`!`)
 zonder deze te verbergen.
 
-Voer de proefuitvoering voor de echte splitsing uit terwijl de releasefreeze voor 3.9.0 nog actief is — de branches worden
-aangemaakt na de tag en voordat fase 12c de freeze opheft.
+Voer de proefuitvoering van de echte splitsing uit terwijl de releasefreeze voor 3.9.0 nog actief is — de branches worden
+na de tag en voordat Fase 12c de freeze opheft aangemaakt.
 
-### Oefening voor 3.8.58 (alleen op een fork)
+### 3.8.58-oefening (alleen fork)
 
 ```bash
-# 1. Proefuitvoering op de huidige tip met oefenparameters
+# 1. Proefuitvoering op de huidige topcommit met oefenparameters
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Uitvoeren tegen een FORK-remote (origin, of elke remote waarvan de URL de canonieke
-#    repository is, wordt geweigerd; elke stap vraagt om bevestiging in de terminal)
+# 2. Voer uit met een FORK-remote (origin, of elke remote waarvan de URL naar de canonieke
+#    repository verwijst, wordt geweigerd; elke stap vraagt om bevestiging in de terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Voer de slapende workflows uit in de fork (workflow_dispatch waar de proefuitvoering
-#    meldt dat er een pin naar de canonieke repository is) en draai daarna terug
+# 3. Test de slapende workflows in de fork (workflow_dispatch wanneer de proefuitvoering
+#    een vastzetting op de canonieke repository rapporteert) en draai daarna terug
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-De commit die `develop` verhoogt, wordt opgebouwd met git-plumbing (de werkboom wordt niet aangeraakt) en verhoogt
+De commit die de versie van develop verhoogt, wordt met git-plumbing opgebouwd (zonder de werkboom te wijzigen) en verhoogt
 dezelfde vijf bestanden als een commit die een cyclus opent: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` en `docs/openapi.yaml`. De sectie `[4.0.0]` in de
-CHANGELOG en de i18n-spiegelversies ervan worden daarna op `develop` geopend, vóór de eerste
-PR. Het script wijzigt nooit npm-dist-tags — oefen die op een tijdelijk testpakket.
+`electron/package.json`, `package-lock.json` en `docs/openapi.yaml`. De sectie `[4.0.0]` in het
+CHANGELOG en de i18n-equivalenten daarvan worden daarna op `develop` geopend, vóór de eerste
+PR ervan. Het script wijzigt nooit npm-dist-tags — oefen deze met een tijdelijk pakket.
 
-### PR-previewartifact (één keer bouwen, exact dezelfde bytes promoveren)
+### PR-previewartefact (eenmaal bouwen, exact dezelfde bytes promoveren)
 
 `.github/workflows/preview-artifact.yml` bouwt één productietarball vanaf de head van een PR en
-valideert exact die build (#8084, deel (a)). Alleen PR's uit dezelfde repository; er wordt niets gepubliceerd.
+valideert exact die build (deel (a) van #8084). Alleen PR's binnen dezelfde repository; er wordt niets gepubliceerd.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # of voeg het label `preview-artifact` toe
@@ -454,12 +457,12 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # preview-installatie
 ```
 
-De uitvoering doet `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, pakt de
-tarball in, voert `npm run check:pack-boot` uit (nepgeheimen, tijdelijke gegevensmap), pakt deze opnieuw in en
+De uitvoering voert `npm ci`, `npm run build:release` en `npm run check:pack-artifact` uit, pakt de
+tarball in, voert `npm run check:pack-boot` uit (nepgeheimen, tijdelijke datamap), pakt deze opnieuw in en
 mislukt tenzij de digest identiek is, legt vervolgens `artifact-identity.json` vast (head-SHA, base-
-SHA, lockfile-hash, platform, architectuur, node-ABI, bundler, buildbeleid —
-`scripts/release/artifact-identity.mjs`) en attesteert de tarball in een afzonderlijke job. Een
-preview promoveren betekent die tarball installeren: bouw nooit opnieuw vanuit de broncode.
+SHA, lockfile-hash, platform, architectuur, node ABI, bundler, buildbeleid —
+`scripts/release/artifact-identity.mjs`) en attesteert de tarball in een afzonderlijke job. Een preview
+promoveren betekent die tarball installeren: bouw nooit opnieuw vanuit de broncode.
 
 ### De splitsing (3.9.0, na GO)
 
@@ -467,24 +470,24 @@ preview promoveren betekent die tarball installeren: bouw nooit opnieuw vanuit d
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` drukt `RESULT: READY` af.
 3. Maak de branches handmatig aan op `origin` met de opdrachten die de proefuitvoering afdrukt — het
    script weigert naar `origin` te pushen. Om een beoordeelde develop-commit opnieuw te gebruiken, voert u
-   eerst de `--execute`-oefening uit op de 3.9.0-tip tegen uw fork; deze drukt beide SHA's af, waarna
+   eerst de `--execute`-oefening op de 3.9.0-topcommit uit tegen uw fork; deze drukt beide SHA's af en
    dezelfde commits kunnen worden gepusht:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. Beveilig `stable/v3` en `develop` (regelsets + merge queue) voordat de eerste PR wordt gemerged.
-5. De slapende workflows worden door het bestaan van de branch ingeschakeld: `forward-port.yml` (push naar
+4. Bescherm `stable/v3` en `develop` (regelsets + samenvoegwachtrij) voordat de eerste PR wordt geïntegreerd.
+5. De slapende workflows worden geactiveerd zodra de branches bestaan: `forward-port.yml` (push naar
    `stable/v3`), `validate-stable-pr.yml` (PR's naar `stable/v3`) en `nightly-v4-build.yml`
-   (bouwt `develop`). Stel vóór de ingebruikname het repositorysecret `secrets.FORWARD_PORT_TOKEN` in (zodat CI wordt uitgevoerd op
-   forward-port-PR's); nightly-publicatie blijft uitgeschakeld totdat de eigenaar de repositoryvariabele
+   (bouwt `develop`). Stel vóór de ingebruikname het repositorygeheim `secrets.FORWARD_PORT_TOKEN` in (zodat CI wordt uitgevoerd voor
+   forward-port-PR's); nachtelijke publicatie blijft uitgeschakeld totdat de eigenaar de repositoryvariabele
    `vars.NIGHTLY_PUBLISH` instelt op `true` en npm Trusted Publishing
-   `nightly-v4-build.yml` accepteert. Kanaalresolutie vindt plaats via `scripts/release/dist-tag.mjs`, dezelfde
-   resolver die `npm-publish.yml` gebruikt.
+   `nightly-v4-build.yml` accepteert. Kanaalresolutie wordt afgehandeld door `scripts/release/dist-tag.mjs`, dezelfde
+   resolver die door `npm-publish.yml` wordt gebruikt.
 6. Controleer de kanalen: `npm view omniroute dist-tags --json` toont `latest` = 3.9.0 en geen
    `next` / `nightly` totdat v4 wordt gepubliceerd.
-7. Rollback, indien nodig: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+7. Terugdraaien, indien nodig: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    en `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

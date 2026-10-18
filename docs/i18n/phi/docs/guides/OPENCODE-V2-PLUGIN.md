@@ -125,11 +125,14 @@ Itakda ang `"geminiSanitization": false` upang i-off ito.
 
 ## Pag-troubleshoot
 
-| Sintomas                                        | Sanhi                                                                                                                                      |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Walang ipinapakitang OmniRoute model ang picker | Walang na-resolve na key (tingnan ang babala sa startup), o hindi maabot ang gateway                                                       |
-| Mga raw model id, walang combo, walang presyo   | Tinanggihan ng mga management endpoint ang token — itakda ang `managementReadToken`                                                        |
-| Isang session na naka-pin sa `opencode-<id>/…`  | Inilathala ng v1 plugin ang `opencode-<id>`; inilalathala ito ng v2 bilang `<id>` lamang, kaya piliin muli ang model sa ilalim ng `<id>/…` |
+| Sintomas                                         | Sanhi                                                                                                                                           |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Walang ipinapakitang OmniRoute model ang picker  | Walang na-resolve na key (suriin ang babala sa startup), o hindi maabot ang gateway                                                             |
+| Mga raw na model id, walang combo, walang presyo | Tinanggihan ng mga management endpoint ang token — itakda ang `managementReadToken`                                                             |
+| Maikli o walang laman ang catalog na `freeOnly`  | Walang management token o tinanggihan ang token — basahin ang linya ng buod ng pag-refresh (`unmatched-free` count) sa host log                 |
+| Naka-pin ang isang session sa `opencode-<id>/…`  | Inilathala ng v1 plugin ang `opencode-<id>`; inilalathala ng v2 ang `<id>` nang walang prefix, kaya piliin muli ang model sa ilalim ng `<id>/…` |
+
+Kailangang makarating ang mga environment variable sa proseso ng opencode server: kapag tumatakbo bilang service ang host, magkaiba ang shell na nagpapatakbo ng `opencode models` at ang environment ng server, kaya i-export ang key kung saan ito binabasa ng server.
 
 ## Tingnan din
 

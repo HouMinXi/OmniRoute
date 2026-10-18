@@ -121,11 +121,16 @@ tham chiếu sẽ mở rộng schema thành "chấp nhận mọi thứ".
 
 ## Khắc phục sự cố
 
-| Triệu chứng                                | Nguyên nhân                                                                                                 |
-| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| Bộ chọn không hiển thị model OmniRoute     | Không phân giải được khóa (hãy kiểm tra cảnh báo khi khởi động), hoặc không thể kết nối đến gateway         |
-| ID model thô, không có combo, không có giá | Các endpoint quản lý đã từ chối token — hãy đặt `managementReadToken`                                       |
-| Một phiên bị ghim vào `opencode-<id>/…`    | Plugin v1 đã công bố `opencode-<id>`; v2 công bố trực tiếp `<id>`, vì vậy hãy chọn lại model trong `<id>/…` |
+| Triệu chứng                                   | Nguyên nhân                                                                                                                    |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Bộ chọn không hiển thị mô hình OmniRoute      | Không phân giải được khóa nào (hãy kiểm tra cảnh báo khi khởi động), hoặc không thể kết nối tới gateway                        |
+| ID mô hình thô, không có tổ hợp, không có giá | Các endpoint quản lý đã từ chối token — hãy đặt `managementReadToken`                                                          |
+| Danh mục `freeOnly` ngắn hoặc trống           | Không có token quản lý hoặc token bị từ chối — hãy đọc dòng tóm tắt làm mới (số lượng `unmatched-free`) trong nhật ký của host |
+| Một phiên được ghim vào `opencode-<id>/…`     | Plugin v1 đã công bố `opencode-<id>`; v2 công bố trực tiếp `<id>`, vì vậy hãy chọn lại mô hình trong `<id>/…`                  |
+
+Các biến môi trường phải được truyền đến tiến trình máy chủ opencode: khi host
+chạy dưới dạng dịch vụ, shell chạy `opencode models` và môi trường máy chủ
+là khác nhau, vì vậy hãy export khóa tại nơi máy chủ đọc khóa đó.
 
 ## Xem thêm
 

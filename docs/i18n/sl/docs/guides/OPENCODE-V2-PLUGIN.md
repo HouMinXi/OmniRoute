@@ -127,11 +127,16 @@ sklica razširila shemo tako, da bi »sprejela karkoli«.
 
 ## Odpravljanje težav
 
-| Simptom                                          | Vzrok                                                                                                |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Izbirnik ne prikazuje nobenega modela OmniRoute  | Noben ključ ni bil razrešen (preverite opozorilo ob zagonu) ali pa prehod ni dosegljiv               |
-| Neobdelani ID-ji modelov, brez kombinacij in cen | Končne točke za upravljanje so zavrnile žeton — nastavite `managementReadToken`                      |
-| Seja, pripeta na `opencode-<id>/…`               | Vtičnik v1 je objavil `opencode-<id>`; v2 objavi goli `<id>`, zato znova izberite model pod `<id>/…` |
+| Simptom                                          | Vzrok                                                                                                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Izbirnik ne prikazuje nobenega modela OmniRoute  | Ključ ni bil razrešen (preverite opozorilo ob zagonu) ali pa prehod ni dosegljiv                                                             |
+| Neobdelani ID-ji modelov, brez kombinacij in cen | Končne točke za upravljanje so zavrnile žeton — nastavite `managementReadToken`                                                              |
+| Kratek ali prazen katalog `freeOnly`             | Ni žetona za upravljanje ali pa je bil zavrnjen — v dnevniku gostitelja preberite vrstico s povzetkom osveževanja (število `unmatched-free`) |
+| Seja, pripeta na `opencode-<id>/…`               | Vtičnik v1 je objavil `opencode-<id>`; v2 objavlja zgolj `<id>`, zato znova izberite model pod `<id>/…`                                      |
+
+Okoljske spremenljivke morajo doseči strežniški proces opencode: ko gostitelj
+deluje kot storitev, se lupina, ki izvaja `opencode models`, razlikuje od
+strežniškega okolja, zato izvozite ključ tam, kjer ga strežnik prebere.
 
 ## Glejte tudi
 

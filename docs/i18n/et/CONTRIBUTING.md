@@ -296,68 +296,70 @@ Vaata `open-sse/utils/stream.ts` ja `open-sse/utils/streamHandler.ts` rakendatud
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard lehed (23 sektsiooni)
+│   ├── (dashboard)/        # Juhtpaneeli lehed (23 jaotist)
 │   ├── api/                # API marsruudid (51 kataloogi)
-│   └── login/              # Autentimise lehed (.tsx)
-├── domain/                 # Poliitika mootor (policyEngine, comboResolver, costRules, jne)
+│   └── login/              # Autentimislehed (.tsx)
+├── domain/                 # Reeglimootor (policyEngine, comboResolver, costRules jne)
 ├── lib/                    # Põhiline äriloogika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokolli server
-│   ├── acp/                # Agent Communication Protocol registri
-│   ├── compliance/         # Vastavuse poliitika mootor
-│   ├── db/                 # SQLite domeeni moodulid + 130 migreerimist
-│   ├── memory/             # Pidev konversatsioonimälu
-│   ├── oauth/              # OAuth pakkujad, teenused ja utiliidid
+│   ├── a2a/                # Agentidevahelise v0.3 protokolli server
+│   ├── acp/                # Agent Communication Protocoli register
+│   ├── compliance/         # Vastavusreeglite mootor
+│   ├── db/                 # SQLite'i domeenimoodulid + 130 migratsiooni
+│   ├── memory/             # Püsiv vestlusmälu
+│   ├── oauth/              # OAuthi pakkujad, teenused ja utiliidid
 │   ├── skills/             # Laiendatav oskuste raamistik
 │   ├── usage/              # Kasutuse jälgimine ja kulude arvutamine
-│   └── localDb.ts          # Ainult re-eksporti kihi — kunagi ei lisa loogikat siia
-├── middleware/              # Päringu middleware (promptInjectionGuard)
-├── mitm/                   # MITM proksi (sert, DNS, sihtmarsruutimine)
+│   └── localDb.ts          # Ainult reekspordi kiht — ära lisa siia kunagi loogikat
+├── middleware/              # Päringute vahevara (promptInjectionGuard)
+├── mitm/                   # MITM-puhverserver (sertifikaat, DNS, sihtkoha marsruutimine)
 ├── shared/
-│   ├── components/         # React komponendid (.tsx)
-│   ├── constants/          # Pakkuja definitsioonid (329), MCP skoobid, 19 marsruutimisstrategiat
-│   ├── utils/              # Ringi katkestaja, sanitaizer, autentimise abid
+│   ├── components/         # Reacti komponendid (.tsx)
+│   ├── constants/          # Pakkujate definitsioonid (329), MCP ulatused, 19 marsruutimisstrateegiat
+│   ├── utils/              # Kaitselüliti, puhastaja, autentimise abifunktsioonid
 │   └── validation/         # Zod v4 skeemid
-└── sse/                    # SSE proksi pipeline
+└── sse/                    # SSE-puhverserveri töötluskonveier
 
 open-sse/                   # @omniroute/open-sse tööruum
-├── executors/              # 89 eksikuteeri implementatsiooni moodulit
-├── handlers/               # 11 päringu käsitlejat (vestlus, vastused, embeddings, pildid, jne)
-├── mcp-server/             # MCP server (110 unikaalset tööriista, 3 transpordi, 33 skoobi)
-├── services/               # 178 ülemise taseme teenust (combo, autoCombo, rateLimitManager, jne)
-├── translator/             # Formaadi tõlkijad (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformeri
-└── utils/                  # 22 utiliidi moodulit (voog, TLS, proksi, logimine)
+├── executors/              # 150 täituri moodulit (täituriklassid + pakkujapõhised abifunktsioonid)
+├── handlers/               # 11 päringutöötlejat (vestlus, vastused, vektoresitused, pildid jne)
+├── mcp-server/             # MCP-server (110 unikaalset tööriista, 3 transporti, 33 ulatust)
+├── services/               # 178 tipptaseme teenust (combo, autoCombo, rateLimitManager jne)
+├── translator/             # Vorminguteisendajad (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API teisendaja
+└── utils/                  # 22 utiliidimoodulit (voog, TLS, puhverserver, logimine)
 
-electron/                   # Electroni töölauarakendus (cross-platform)
+electron/                   # Electroni töölauarakendus (platvormideülene)
 
 tests/
-├── unit/                   # Node.js test runner (1,574 testifaili)
+├── unit/                   # Node.js-i testikäitaja (1574 testifaili)
 ├── integration/            # Integratsioonitestid
-├── e2e/                    # Playwright testid
-├── security/               # Turvatestid
-├── translator/             # Tõlke-spetsiifilised testid
+├── e2e/                    # Playwrighti testid
+├── security/               # Turbetestid
+├── translator/             # Teisendajapõhised testid
 └── load/                   # Koormustestid
 
 docs/
-├── adr/                     # Arhitektuuripõhiste otsuste kirjed
+├── adr/                     # Arhitektuuriotsuste kirjed
 ├── architecture/            # Süsteemi arhitektuur ja vastupidavus
-├── comparison/              # OmniRoute vs alternatiivid
-├── compression/             # Pakkimise juhised ja reeglid
-├── dev/                     # Arendamise juhised
-├── diagrams/                # Arhitektuuridiagrammid
+├── comparison/              # OmniRoute võrreldes alternatiividega
+├── compression/             # Tihendamise juhendid ja reeglid
+├── dev/                     # Arendusjuhendid
+├── diagrams/                # Arhitektuuriskeemid
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Kasutajajuhend, Docker, seadistamine, tõrkeotsing
-├── i18n/                    # Rahvusvahelised README tõlked
+├── guides/                  # Kasutusjuhend, Docker, seadistamine, tõrkeotsing
+├── i18n/                    # README rahvusvahelised tõlked
 ├── marketing/               # Turundusmaterjalid
-├── ops/                     # Juurutamine, proksi, katvus, väljalasked
-├── providers/               # Pakkuja-spetsiifilised dokumendid
-├── reference/               # API viide, keskkonna muutujad, CLI tööriistad, tasuta kihid
+├── ops/                     # Juurutamine, puhverserver, testikate, väljalasked
+├── providers/               # Pakkujapõhine dokumentatsioon
+├── reference/               # API teatmik, keskkonnamuutujad, CLI-tööriistad, tasuta paketid
 ├── releases/                # Väljalaskemärkmed
-├── routing/                 # Auto-combo mootor, põhjenduse uuesti mängimine
-├── screenshots/             # Dashboardi ekraanipildid
-├── security/                # Kaitsekaitsed, vastavus, saladus, märgid
+├── routing/                 # Automaatkombinatsioonide mootor, arutluskäigu taasesitus
+├── screenshots/             # Juhtpaneeli kuvatõmmised
+├── security/                # Kaitsepiirded, vastavus, varjatud toimimine, pääsmikud
 └── specs/                   # Disainispetsifikatsioonid
 ```
+
+---
 
 ## Uue tarnija lisamine
 

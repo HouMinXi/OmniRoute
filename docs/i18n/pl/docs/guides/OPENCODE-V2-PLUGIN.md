@@ -125,11 +125,16 @@ Ustaw `"geminiSanitization": false`, aby to wyłączyć.
 
 ## Rozwiązywanie problemów
 
-| Objaw                                               | Przyczyna                                                                                                |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Selektor nie wyświetla żadnego modelu OmniRoute     | Nie znaleziono klucza (sprawdź ostrzeżenie podczas uruchamiania) albo brama jest nieosiągalna            |
-| Surowe identyfikatory modeli, brak kombinacji i cen | Punkty końcowe zarządzania odrzuciły token — ustaw `managementReadToken`                                 |
-| Sesja przypięta do `opencode-<id>/…`                | Wtyczka v1 publikowała `opencode-<id>`; v2 publikuje samo `<id>`, więc ponownie wybierz model w `<id>/…` |
+| Objaw                                               | Przyczyna                                                                                                                                  |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Selektor nie wyświetla żadnego modelu OmniRoute     | Nie znaleziono klucza (sprawdź ostrzeżenie podczas uruchamiania) albo brama jest nieosiągalna                                              |
+| Surowe identyfikatory modeli, brak kombinacji i cen | Punkty końcowe zarządzania odrzuciły token — ustaw `managementReadToken`                                                                   |
+| Krótki lub pusty katalog `freeOnly`                 | Brak tokenu zarządzania albo token został odrzucony — sprawdź w dzienniku hosta wiersz podsumowania odświeżania (licznik `unmatched-free`) |
+| Sesja przypięta do `opencode-<id>/…`                | Wtyczka v1 publikowała `opencode-<id>`; v2 publikuje samo `<id>`, więc ponownie wybierz model w sekcji `<id>/…`                            |
+
+Zmienne środowiskowe muszą docierać do procesu serwera opencode: gdy host
+działa jako usługa, powłoka uruchamiająca `opencode models` i środowisko
+serwera są różne, dlatego wyeksportuj klucz tam, skąd odczytuje go serwer.
 
 ## Zobacz także
 

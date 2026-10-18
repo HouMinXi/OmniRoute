@@ -388,14 +388,14 @@ v3.8.x 릴리스를 배포하기 전에 다음 추가 항목을 확인하세요.
 
 ## 3.9.0 LTS 분기 (3.8.58에서 리허설)
 
-v3.8.59 다음 버전은 3.9.0이며, 그 최종 커밋에서 수명이 긴 두 브랜치가 생성됩니다:
+v3.8.59 다음 버전은 3.9.0이며, 그 최종 커밋은 수명이 긴 두 브랜치가 됩니다:
 `stable/v3`(v3 LTS 라인, npm `latest`)와 `develop`(v4, 4.0.0으로 버전 상향, npm
-`nightly`). 브랜치/채널 모델, 순방향 포팅 및 레이블은
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)에 있으며, 계획은 [ROADMAP](../../ROADMAP.md)(3단계)에 있습니다. 분기는 한 번만 실행됩니다.
+`nightly`). 브랜치/채널 모델, 정방향 포팅 및 레이블은
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)에 있으며, 계획은 [ROADMAP](../../ROADMAP.md)(Phase 3)에 있습니다. 분기는 한 번만 실행됩니다.
 3.8.58에서는 포크에서 전체 과정을 처음부터 끝까지 리허설하고, 3.8.59는
-[GO/NO-GO 체크리스트](./LTS_GO_NO_GO.md)로 마무리합니다.
+[GO/NO-GO 체크리스트](./LTS_GO_NO_GO.md)로 마무리됩니다.
 
-### 드라이런(읽기 전용, 언제든 안전함)
+### 드라이런(읽기 전용, 언제든 안전)
 
 ```bash
 npm run release:dry-run-lts-cut                       # 실제 분기: HEAD에서 3.9.0, 이전 태그 v3.8.59
@@ -403,49 +403,53 @@ npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # 소스 커밋 고정
 ```
 
 `scripts/release/dry-run-lts-cut.mjs`는 아무 작업도 실행하지 않습니다. git과 `gh`를 읽고
-전체 절차를 출력합니다. 여기에는 사전 조건(소스가 확인됨, 이전 태그가 존재함, `package.json`이
-대상 버전임, `release-freeze` 이슈가 열려 있음, 기존 릴리스 브랜치에 열린 `Release branch not green`
-이슈가 없음 — 존재하지 않는 브랜치는 녹색이 아니라 `?` 알 수 없음으로 보고됨 — Mergify
-`release` 큐가 구성됨(G11: `queue_rules`, `checks_timeout`, 레이블 `queue`),
-`release/*` 규칙 세트가 여전히 삭제와 강제 푸시를 차단함, 그리고
-`stable/v3`와 `develop`이 아직 존재하지 않음), 두 브랜치 단계, 어떤 휴면 워크플로 트리거와
-`if:` 조건이 참이 되는지(그리고 어떤 것이 저장소 변수로 계속 제한되거나 정식 저장소에
-고정되는지), 예상 dist-tag(`latest` → 3.9.0, `next`와 `nightly`는 비어 있음) 및 롤백이 포함됩니다.
-종료 코드 `0` = `RESULT: READY`, `1` = 차단 사전 조건 실패(`✗`), `2` = 사용법 오류입니다.
-`--advisory <id,...>`는 검사를 숨기지 않고 경고(`!`)로 낮춥니다.
+전체 순서를 출력합니다. 여기에는 사전 조건(소스가 해석됨, 소스 저장소에 전체 이력이 있음 —
+얕은 클론에서는 `stable/v3`를 푸시할 수 없으며, 수신 측에서 첫 번째 접합된 부모 커밋의 팩을
+거부하므로 전체 클론에서 분기하거나 먼저 `git fetch --unshallow origin` 실행 — 이전
+태그가 존재함, `package.json`이 대상 버전임, `release-freeze` 이슈가 열려 있음, 기존
+릴리스 브랜치에 열린 `Release branch not green` 이슈가 없음 — 존재하지 않는 브랜치는
+green이 아니라 `?` unknown으로 보고됨 — Mergify `release` 큐가 구성되어 있음(G11:
+`queue_rules`, `checks_timeout`, 레이블 `queue`), `release/*` 규칙 세트가 여전히 삭제와
+강제 푸시를 차단함, `stable/v3`와 `develop`이 아직 존재하지 않음), 두 브랜치 단계,
+어떤 휴면 워크플로 트리거와 `if:` 조건이 참이 되는지(그리고 어떤 것이 저장소 변수에 의해
+계속 차단되거나 정식 저장소로 고정되는지), 예상 dist-tag(`latest` → 3.9.0, `next`와
+`nightly`는 비어 있음), 롤백이 포함됩니다. 종료 코드 `0` = `RESULT: READY`,
+`1` = 차단 사전 조건 실패(`✗`), `2` = 사용법 오류입니다. `--advisory <id,...>`는
+검사를 숨기지 않은 채 경고(`!`)로 낮춥니다.
 
-3.9.0 릴리스 동결이 아직 진행 중일 때 실제 분기의 드라이런을 실행하십시오. 브랜치는 태그 이후,
-그리고 12c 단계에서 동결을 해제하기 전에 생성됩니다.
+3.9.0 릴리스 동결이 아직 유지되는 동안 실제 분기의 드라이런을 실행하십시오. 브랜치는 태그
+생성 후, Phase 12c에서 동결을 해제하기 전에 생성됩니다.
 
 ### 3.8.58 리허설(포크 전용)
 
 ```bash
-# 1. 리허설 매개변수로 현재 최종 커밋에서 드라이런
+# 1. 리허설 매개변수를 사용하여 현재 최종 커밋에서 드라이런
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. 포크 원격 저장소를 대상으로 실행(origin 또는 URL이 정식 저장소인 원격 저장소는
-#    거부됨. 각 단계마다 터미널에서 확인을 요청함)
+# 2. 포크 원격 저장소를 대상으로 실행(origin 또는 URL이 정식
+#    저장소인 원격 저장소는 거부됨; 모든 단계에서 터미널 확인을 요청함)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. 포크에서 휴면 워크플로 실행(드라이런에서 정식 저장소 고정을 보고하는 경우
-#    workflow_dispatch 사용) 후 롤백
+# 3. 포크에서 휴면 워크플로 실행(드라이런에서 정식 저장소 고정이
+#    보고되는 경우 workflow_dispatch 사용) 후 롤백
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop 버전 상향 커밋은 git 저수준 명령으로 생성되며(작업 트리는 건드리지 않음),
-주기 시작 커밋과 동일한 다섯 파일의 버전을 상향합니다: `package.json`, `open-sse/package.json`,
+develop 버전 상향 커밋은 git plumbing으로 생성되며(작업 트리는 건드리지 않음), 주기 시작
+커밋과 동일한 다섯 파일의 버전을 올립니다: `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json`, `docs/openapi.yaml`. 이후 첫 번째
-PR 전에 `develop`에서 `[4.0.0]` CHANGELOG 섹션과 해당 i18n 미러를 엽니다.
-스크립트는 npm dist-tag를 변경하지 않습니다. 이러한 작업은 임시 패키지에서 리허설하십시오.
+PR 전에 `develop`에서 `[4.0.0]` CHANGELOG 섹션과 그 i18n 미러를 엽니다. 스크립트는
+npm dist-tag를 절대 변경하지 않습니다. 해당 작업은 임시 패키지에서 리허설하십시오.
 
 ### PR 미리 보기 아티팩트(한 번 빌드하고 동일한 바이트를 승격)
 
 `.github/workflows/preview-artifact.yml`은 PR 헤드에서 프로덕션 tarball 하나를 빌드하고
-정확히 그 빌드를 검증합니다(#8084 조각 (a)). 동일 저장소의 PR만 지원하며 아무것도 게시하지 않습니다.
+바로 그 빌드를 검증합니다(#8084 슬라이스 (a)). 동일 저장소 PR만 지원하며, 아무것도
+게시하지 않습니다.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # 또는 `preview-artifact` 레이블 추가
@@ -455,36 +459,36 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # 미리 보기 설치
 ```
 
-실행 과정에서는 `npm ci`, `npm run build:release`, `npm run check:pack-artifact`를 수행하고,
-tarball을 패킹한 다음 `npm run check:pack-boot`를 실행합니다(가짜 시크릿, 임시 데이터 디렉터리).
-이후 다시 패킹하여 다이제스트가 동일하지 않으면 실패하고, `artifact-identity.json`(헤드 SHA, 베이스
-SHA, lockfile 해시, 플랫폼, 아키텍처, node ABI, 번들러, 빌드 정책 —
-`scripts/release/artifact-identity.mjs`)을 기록한 뒤 별도 작업에서 tarball을 증명합니다. 미리 보기를
-승격한다는 것은 해당 tarball을 설치한다는 의미입니다. 소스에서 다시 빌드해서는 안 됩니다.
+실행 과정에서는 `npm ci`, `npm run build:release`, `npm run check:pack-artifact`를
+실행하고 tarball을 패킹한 다음, `npm run check:pack-boot`(가짜 시크릿, 임시 데이터
+디렉터리)를 실행하고 다시 패킹합니다. 다이제스트가 동일하지 않으면 실패합니다. 그런 다음
+`artifact-identity.json`(헤드 SHA, 베이스 SHA, lockfile 해시, 플랫폼, 아키텍처,
+node ABI, 번들러, 빌드 정책 — `scripts/release/artifact-identity.mjs`)을 기록하고,
+별도 작업에서 tarball을 증명합니다. 미리 보기를 승격한다는 것은 해당 tarball을 설치한다는
+뜻입니다. 소스에서 다시 빌드하지 마십시오.
 
 ### 분기(3.9.0, GO 이후)
 
 1. [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)에 GO가 기록되어 있습니다.
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0`이 `RESULT: READY`를 출력합니다.
-3. 드라이런이 출력하는 명령을 사용하여 `origin`에 브랜치를 수동으로 생성합니다. 스크립트는
-   `origin`으로의 푸시를 거부합니다. 검토된 develop 커밋을 재사용하려면 먼저 포크를 대상으로
-   3.9.0 최종 커밋에서 `--execute` 리허설을 실행하십시오. 그러면 두 SHA가 모두 출력되며
-   동일한 커밋을 푸시할 수 있습니다:
+3. 드라이런에서 출력한 명령을 사용하여 `origin`에 브랜치를 수동으로 생성합니다. 스크립트는
+   `origin`으로의 푸시를 거부합니다. 검토된 develop 커밋을 재사용하려면 먼저 포크를
+   대상으로 3.9.0 최종 커밋에서 `--execute` 리허설을 실행하십시오. 두 SHA가 모두
+   출력되며, 동일한 커밋을 푸시할 수 있습니다:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. 첫 번째 PR이 병합되기 전에 `stable/v3`와 `develop`을 보호합니다(규칙 세트 + 병합 큐).
-5. 브랜치가 존재하면 휴면 워크플로가 활성화됩니다: `forward-port.yml`(`stable/v3`로 푸시),
-   `validate-stable-pr.yml`(`stable/v3` 대상 PR), `nightly-v4-build.yml`
-   (`develop` 빌드). 실제 운영 전에 `secrets.FORWARD_PORT_TOKEN` 저장소 시크릿을 설정하십시오
-   (순방향 포팅 PR에서 CI가 실행되도록 하기 위함). 소유자가 저장소 변수
+4. 첫 번째 PR이 병합되기 전에 `stable/v3` 및 `develop`을 보호합니다(규칙 세트 + 병합 큐).
+5. 비활성 워크플로는 브랜치가 존재하면 활성화됩니다: `forward-port.yml`(`stable/v3`에 푸시),
+   `validate-stable-pr.yml`(`stable/v3` 대상 PR) 및 `nightly-v4-build.yml`
+   (`develop` 빌드). 실제 가동 전에 `secrets.FORWARD_PORT_TOKEN` 저장소 시크릿을 설정합니다(포워드 포트 PR에서 CI가 실행되도록 하기 위함). 야간 게시는 소유자가 저장소 변수
    `vars.NIGHTLY_PUBLISH`를 `true`로 설정하고 npm Trusted Publishing이
-   `nightly-v4-build.yml`을 허용할 때까지 nightly 게시는 비활성 상태로 유지됩니다. 채널 결정은
-   `scripts/release/dist-tag.mjs`가 담당하며, `npm-publish.yml`도 동일한 결정기를 사용합니다.
-6. 채널을 확인합니다: `npm view omniroute dist-tags --json`은 `latest` = 3.9.0을 표시하며,
-   v4가 게시되기 전까지 `next` / `nightly`는 표시하지 않습니다.
+   `nightly-v4-build.yml`을 허용할 때까지 비활성 상태로 유지됩니다. 채널 결정은 `scripts/release/dist-tag.mjs`에서 수행되며, 이는
+   `npm-publish.yml`이 사용하는 것과 동일한 리졸버입니다.
+6. 채널을 확인합니다: `npm view omniroute dist-tags --json`에서 `latest` = 3.9.0으로 표시되고, v4가 게시되기 전까지
+   `next` / `nightly`는 없어야 합니다.
 7. 필요한 경우 롤백합니다: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    및 `npm dist-tag add omniroute@3.8.59 latest`.
 

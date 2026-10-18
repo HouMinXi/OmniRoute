@@ -126,13 +126,18 @@ tidak berubah. Alat yang memuat `$ref` diteruskan tanpa perubahan alih-alih diha
 referensi tersebut akan memperluas skema menjadi "terima apa pun".
 Atur `"geminiSanitization": false` untuk menonaktifkannya.
 
-## Pemecahan masalah
+## Pemecahan Masalah
 
-| Gejala                                    | Penyebab                                                                                                                   |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Pemilih tidak menampilkan model OmniRoute | Tidak ada kunci yang ditemukan (periksa peringatan saat startup), atau gateway tidak dapat dijangkau                       |
-| ID model mentah, tanpa kombo, tanpa harga | Endpoint manajemen menolak token — atur `managementReadToken`                                                              |
-| Sesi disematkan ke `opencode-<id>/…`      | Plugin v1 memublikasikan `opencode-<id>`; v2 memublikasikan `<id>` tanpa prefiks, jadi pilih ulang model di bawah `<id>/…` |
+| Gejala                                        | Penyebab                                                                                                                     |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Pemilih tidak menampilkan model OmniRoute     | Tidak ada kunci yang berhasil ditemukan (periksa peringatan saat proses dimulai), atau gateway tidak dapat dijangkau         |
+| ID model mentah, tanpa kombinasi, tanpa harga | Endpoint pengelolaan menolak token — atur `managementReadToken`                                                              |
+| Katalog `freeOnly` pendek atau kosong         | Tidak ada token pengelolaan atau token ditolak — baca baris ringkasan penyegaran (jumlah `unmatched-free`) di log host       |
+| Sesi disematkan ke `opencode-<id>/…`          | Plugin v1 memublikasikan `opencode-<id>`; v2 memublikasikan `<id>` secara langsung, jadi pilih ulang model di bawah `<id>/…` |
+
+Variabel lingkungan harus diteruskan ke proses server opencode: ketika host
+berjalan sebagai layanan, shell yang menjalankan `opencode models` dan lingkungan
+server berbeda, jadi ekspor kunci tersebut di tempat server membacanya.
 
 ## Lihat juga
 

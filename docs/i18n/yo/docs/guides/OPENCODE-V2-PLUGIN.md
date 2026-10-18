@@ -119,13 +119,18 @@ A máa ń fi irinṣẹ́ tí ó ní `$ref` ránṣẹ́ láìfọwọ́ kàn á
 ìtọ́kasí náà kúrò yóò mú kí schema náà gbòòrò sí “gba ohunkóhun”.
 Ṣètò `"geminiSanitization": false` láti pa á.
 
-## Yíyanjú ìṣòro
+## Ìṣàtúnṣe Àwọn Ìṣòro
 
-| Àmì ìṣòro                                       | Ohun tó fà á                                                                                             |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| Olùyan kò fi àwòṣe OmniRoute kankan hàn         | Kò sí key tí a rí (ṣàyẹ̀wò ìkìlọ̀ ìbẹ̀rẹ̀), tàbí ẹnubodè náà kò ṣeé dé                                       |
-| Àwọn ID àwòṣe lásán, kò sí àkójọpọ̀, kò sí ìsọwọ́ | Àwọn endpoint ìṣàkóso kọ token náà — ṣètò `managementReadToken`                                          |
-| Session kan di mọ́ `opencode-<id>/…`             | Plugin v1 tẹ `opencode-<id>` jáde; v2 ń tẹ `<id>` lásán jáde, nítorí náà tún yan àwòṣe náà lábẹ́ `<id>/…` |
+| Àmì Ìṣòro                                         | Ohun tó fà á                                                                                                   |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| Olùyàn kò fi àwòṣe OmniRoute kankan hàn           | Kò sí kọ́kọ́rọ́ tí a rí (ṣàyẹ̀wò ìkìlọ̀ nígbà ìbẹ̀rẹ̀), tàbí a kò lè dé ẹnu-ọ̀nà                                       |
+| Àwọn id àwòṣe lásán, kò sí àkójọpọ̀, kò sí iye owó | Àwọn endpoint ìṣàkóso kọ token náà — ṣètò `managementReadToken`                                                |
+| Kátálọ́ọ̀gù `freeOnly` kúkúrú tàbí òfo              | Kò sí token ìṣàkóso tàbí a kọ token náà — ka ìlà àkótán ìsọdọtun (iye `unmatched-free`) nínú log olùgbàlejò    |
+| Àkókò ìṣiṣẹ́ kan tí a dì mọ́ `opencode-<id>/…`      | Plugin v1 ṣe àtẹ̀jáde `opencode-<id>`; v2 ń ṣe àtẹ̀jáde `<id>` lásán, nítorí náà tún yan àwòṣe náà lábẹ́ `<id>/…` |
+
+Àwọn variable àyíká gbọ́dọ̀ dé inú process server opencode: nígbà tí olùgbàlejò bá
+ń ṣiṣẹ́ gẹ́gẹ́ bí service, shell tí ń ṣiṣẹ́ `opencode models` àti àyíká server
+yàtọ̀ síra, nítorí náà export kọ́kọ́rọ́ náà sí ibi tí server ti ń kà á.
 
 ## Tún wo
 

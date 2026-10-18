@@ -125,11 +125,16 @@ Norėdami tai išjungti, nustatykite `"geminiSanitization": false`.
 
 ## Trikčių šalinimas
 
-| Požymis                                           | Priežastis                                                                                                         |
-| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| Parinkiklyje nerodomas joks OmniRoute modelis     | Nepavyko gauti rakto (patikrinkite paleidimo įspėjimą) arba šliuzas nepasiekiamas                                  |
-| Neapdoroti modelių ID, nėra derinių ir kainodaros | Valdymo galiniai taškai atmetė prieigos raktą — nustatykite `managementReadToken`                                  |
-| Seansas susietas su `opencode-<id>/…`             | v1 papildinys paskelbė `opencode-<id>`; v2 skelbia tik `<id>`, todėl iš naujo pasirinkite modelį skiltyje `<id>/…` |
+| Požymis                                               | Priežastis                                                                                                                                              |
+| ----------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Modelių parinkiklyje nerodomas joks OmniRoute modelis | Nepavyko aptikti rakto (patikrinkite paleidimo įspėjimą) arba tinklų sietuvas nepasiekiamas                                                             |
+| Neapdoroti modelių ID, nėra derinių ir kainodaros     | Valdymo galiniai taškai atmetė prieigos raktą — nustatykite `managementReadToken`                                                                       |
+| Trumpas arba tuščias `freeOnly` katalogas             | Nėra valdymo prieigos rakto arba jis buvo atmestas — pagrindinio proceso žurnale perskaitykite atnaujinimo suvestinės eilutę (`unmatched-free` skaičių) |
+| Sesija susieta su `opencode-<id>/…`                   | v1 papildinys paskelbė `opencode-<id>`; v2 skelbia tik `<id>`, todėl iš naujo pasirinkite modelį skiltyje `<id>/…`                                      |
+
+Aplinkos kintamieji turi pasiekti opencode serverio procesą: kai pagrindinis procesas
+veikia kaip tarnyba, apvalkalas, kuriame vykdoma `opencode models`, ir serverio
+aplinka skiriasi, todėl eksportuokite raktą ten, kur jį nuskaito serveris.
 
 ## Taip pat žr.
 

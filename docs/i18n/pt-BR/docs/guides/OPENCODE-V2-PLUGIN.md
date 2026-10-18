@@ -125,11 +125,16 @@ Defina `"geminiSanitization": false` para desativar esse comportamento.
 
 ## Solução de problemas
 
-| Sintoma                                      | Causa                                                                                                                |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| O seletor não mostra nenhum modelo OmniRoute | Nenhuma chave foi resolvida (verifique o aviso de inicialização), ou o gateway está inacessível                      |
-| IDs de modelo brutos, sem combos nem preços  | Os endpoints de gerenciamento recusaram o token — defina `managementReadToken`                                       |
-| Uma sessão fixada em `opencode-<id>/…`       | O plugin v1 publicava `opencode-<id>`; a v2 publica apenas `<id>`, portanto selecione novamente o modelo em `<id>/…` |
+| Sintoma                                          | Causa                                                                                                                                     |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| O seletor não mostra nenhum modelo do OmniRoute  | Nenhuma chave foi resolvida (verifique o aviso de inicialização) ou o gateway está inacessível                                            |
+| IDs de modelo brutos, sem combinações nem preços | Os endpoints de gerenciamento recusaram o token — defina `managementReadToken`                                                            |
+| Catálogo `freeOnly` curto ou vazio               | Nenhum token de gerenciamento ou token recusado — consulte a linha de resumo da atualização (contagem de `unmatched-free`) no log do host |
+| Uma sessão fixada em `opencode-<id>/…`           | O plugin v1 publicou `opencode-<id>`; a v2 publica apenas `<id>`, então selecione novamente o modelo em `<id>/…`                          |
+
+As variáveis de ambiente devem chegar ao processo do servidor opencode: quando o host
+é executado como um serviço, o shell que executa `opencode models` e o ambiente
+do servidor são diferentes; portanto, exporte a chave onde o servidor a lê.
 
 ## Veja também
 

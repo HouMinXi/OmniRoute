@@ -10,6 +10,7 @@
  */
 
 import { decryptQuiet } from "../encryption";
+import { mapProviderSpecificDataSecrets } from "./providerSpecificDataSecrets";
 import type { ConnectionRateLimitOverrides } from "./columns";
 
 type JsonRecord = Record<string, unknown>;
@@ -133,6 +134,7 @@ export function toProviderConnection(value: unknown): ProviderConnectionView {
 export function createLazyConnectionView(row: Record<string, unknown>): ProviderConnectionView {
   const base = toProviderConnection(row);
   let decrypted: Record<string, null | string> | undefined;
+  let providerData: Record<string, unknown> | undefined;
 
   const ensureDecrypted = () => {
     if (!decrypted) {
@@ -158,6 +160,12 @@ export function createLazyConnectionView(row: Record<string, unknown>): Provider
       if (prop === "apiKey" || prop === "accessToken" || prop === "refreshToken") {
         return ensureDecrypted()[prop];
       }
+      if (prop === "providerSpecificData") {
+        providerData ??= mapProviderSpecificDataSecrets(base.providerSpecificData, (value, field) =>
+          decryptQuiet(value, { connectionId: base.id, provider: base.provider, field })
+        ) as Record<string, unknown>;
+        return providerData;
+      }
       return Reflect.get(_target, prop);
     },
   });
@@ -176,6 +184,21 @@ const CREDENTIAL_FIELDS = new Set(["apiKey", "accessToken", "refreshToken", "idT
  */
 export function createLazyRowProxy(row: Record<string, unknown>): Record<string, unknown> {
   let decrypted: Record<string, string | null | undefined> | undefined;
+  let providerData: unknown;
+  let providerDataLoaded = false;
+  const readProviderData = () => {
+    if (!providerDataLoaded) {
+      providerDataLoaded = true;
+      providerData = mapProviderSpecificDataSecrets(row.providerSpecificData, (value, field) =>
+        decryptQuiet(value, {
+          connectionId: typeof row.id === "string" ? row.id : "",
+          provider: typeof row.provider === "string" ? row.provider : "unknown",
+          field,
+        })
+      );
+    }
+    return providerData;
+  };
 
   const ensureDecrypted = () => {
     if (!decrypted) {
@@ -200,11 +223,16 @@ export function createLazyRowProxy(row: Record<string, unknown>): Record<string,
       if (typeof prop === "string" && CREDENTIAL_FIELDS.has(prop)) {
         return ensureDecrypted()[prop];
       }
+      if (prop === "providerSpecificData") return readProviderData();
       if (prop === "toJSON") {
         return () => {
           const result: Record<string, unknown> = {};
           for (const key of Object.keys(target)) {
-            result[key] = CREDENTIAL_FIELDS.has(key) ? ensureDecrypted()[key] : target[key];
+            result[key] = CREDENTIAL_FIELDS.has(key)
+              ? ensureDecrypted()[key]
+              : key === "providerSpecificData"
+                ? readProviderData()
+                : target[key];
           }
           return result;
         };

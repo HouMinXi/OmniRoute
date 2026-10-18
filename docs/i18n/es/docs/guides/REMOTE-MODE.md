@@ -242,19 +242,27 @@ como activa.
 
 ---
 
-## Gestionar tokens
+## Gestión de tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
 #   ↳ muestra el secreto UNA SOLA VEZ; cópielo ahora
-omniroute tokens list                 # enmascarado: id, nombre, ámbito, prefijo, estado, caducidad
-omniroute tokens revoke <id|prefix>   # revocar inmediatamente
-omniroute tokens scopes               # explicar los tres ámbitos
+omniroute tokens list                 # ocultos: id, nombre, ámbito, prefijo, estado, vencimiento
+omniroute tokens revoke <id|prefix>   # revoca inmediatamente
+omniroute tokens scopes               # explica los tres ámbitos
 ```
 
-Los comandos `tokens` requieren una credencial de **administrador**. También puede
-gestionar los tokens en el panel, en **Configuración → Tokens de acceso** (crear,
-revocar, copiar una sola vez).
+Los comandos `tokens` requieren una credencial de **administrador**. También puede gestionar los tokens en
+el panel, en **Configuración → Tokens de acceso** (crear, revocar, copiar una sola vez).
+
+Nunca se puede emitir un token con más privilegios que los que posee su creador. Un
+token `admin` solo puede ser creado por el operador: la sesión del panel, la
+CLI local en el propio servidor, `omniroute connect` con la contraseña o una
+instancia con el inicio de sesión deshabilitado. Las credenciales de máquina (un token de acceso
+`admin` o una clave de API con el ámbito `manage`/`admin`) solo pueden emitir tokens
+`write` y `read`; solicitarles `--scope admin` devuelve `403`.
+
+Un token nunca puede crearse con más privilegios de los que tiene su creador. Solo el operador puede crear un token `admin`: desde la sesión del panel, la CLI local del propio servidor, `omniroute connect` con la contraseña o una instancia con el inicio de sesión desactivado. Las credenciales de máquina (un token de acceso `admin` o una clave de API con ámbito `manage`/`admin`) solo pueden crear tokens `write` y `read`; solicitar `--scope admin` con ellas devuelve `403`.
 
 ---
 

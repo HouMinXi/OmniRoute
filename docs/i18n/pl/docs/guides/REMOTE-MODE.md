@@ -255,14 +255,22 @@ wyświetlone jako aktywne.
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
 #   ↳ wyświetla sekret TYLKO RAZ — skopiuj go teraz
-omniroute tokens list                 # zamaskowane: identyfikator, nazwa, zakres, prefiks, stan, data wygaśnięcia
+omniroute tokens list                 # zamaskowane: identyfikator, nazwa, zakres, prefiks, status, data wygaśnięcia
 omniroute tokens revoke <id|prefix>   # natychmiast unieważnij
-omniroute tokens scopes               # objaśnij trzy zakresy
+omniroute tokens scopes               # wyjaśnia trzy zakresy
 ```
 
-Polecenia `tokens` wymagają poświadczenia **administratora**. Tokenami można
-również zarządzać w panelu w sekcji **Ustawienia → Tokeny dostępu** (tworzenie,
-unieważnianie, jednorazowe kopiowanie).
+Polecenia `tokens` wymagają poświadczeń **admin**. Tokenami można również zarządzać
+w panelu w sekcji **Ustawienia → Tokeny dostępu** (tworzenie, unieważnianie, jednorazowe kopiowanie).
+
+Token nigdy nie może zostać utworzony z większymi uprawnieniami niż te, które ma jego twórca. Token
+`admin` może zostać utworzony wyłącznie przez operatora — za pośrednictwem sesji w panelu,
+lokalnego CLI na samym serwerze, polecenia `omniroute connect` z hasłem lub
+instancji z wyłączonym logowaniem. Poświadczenia maszynowe (token dostępu `admin`
+lub klucz API z zakresem `manage`/`admin`) mogą tworzyć wyłącznie tokeny `write`
+i `read`; próba utworzenia za ich pomocą tokena z opcją `--scope admin` zwraca `403`.
+
+Token nigdy nie może zostać utworzony z większymi uprawnieniami niż uprawnienia jego twórcy. Token `admin` może utworzyć tylko operator: z sesji panelu, przez lokalne CLI na samym serwerze, przez `omniroute connect` z hasłem lub w instancji z wyłączonym logowaniem. Dane uwierzytelniające maszyny (token dostępu `admin` lub klucz API z zakresem `manage`/`admin`) mogą tworzyć wyłącznie tokeny `write` i `read`; żądanie `--scope admin` z ich użyciem zwraca `403`.
 
 ---
 

@@ -251,15 +251,17 @@ tunnelni ochiq saqlang.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ maxfiy qiymatni FAQAT BIR MARTA chiqaradi — uni hozir nusxalang
-omniroute tokens list                 # niqoblangan: id, nom, qamrov, prefiks, holat, amal qilish muddati
+#   ↳ maxfiy tokenni FAQAT BIR MARTA chiqaradi — uni hozir nusxalang
+omniroute tokens list                 # niqoblangan: ID, nom, qamrov, prefiks, holat, amal qilish muddati
 omniroute tokens revoke <id|prefix>   # darhol bekor qilish
 omniroute tokens scopes               # uchta qamrovni tushuntirish
 ```
 
-`tokens` buyruqlari **admin** hisob ma’lumotini talab qiladi. Tokenlarni boshqaruv
-panelidagi **Sozlamalar → Kirish tokenlari** bo‘limida ham boshqarishingiz mumkin
-(yaratish, bekor qilish, bir marta nusxalash).
+`tokens` buyruqlari **admin** hisob maʼlumotlarini talab qiladi. Tokenlarni boshqaruv panelidagi **Sozlamalar → Kirish tokenlari** bo‘limida ham boshqarishingiz mumkin (yaratish, bekor qilish, bir marta nusxalash).
+
+Token hech qachon uni yaratuvchida mavjud bo‘lganidan yuqori imtiyoz bilan yaratilmaydi. `admin` tokenini faqat operator yaratishi mumkin — boshqaruv paneli seansi, serverning o‘zidagi mahalliy CLI, parol bilan `omniroute connect` yoki kirish o‘chirib qo‘yilgan nusxa orqali. Mashina hisob maʼlumotlari (`admin` kirish tokeni yoki `manage`/`admin` qamroviga ega API kaliti) faqat `write` va `read` tokenlarini yaratishi mumkin; ulardan `--scope admin` so‘ralganda `403` qaytariladi.
+
+Token hech qachon uni yaratuvchining vakolatlaridan kengroq vakolatlar bilan yaratilmaydi. `admin` tokenini faqat operator yaratishi mumkin: boshqaruv paneli sessiyasi, serverning o‘zidagi mahalliy CLI, parol bilan `omniroute connect` yoki tizimga kirish o‘chirilgan instansiya orqali. Mashina autentifikatsiya ma’lumotlari (`admin` kirish tokeni yoki `manage`/`admin` doirasidagi API kaliti) faqat `write` va `read` tokenlarini yarata oladi; ular bilan `--scope admin` so‘rash `403` qaytaradi.
 
 ---
 

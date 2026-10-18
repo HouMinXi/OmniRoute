@@ -112,13 +112,18 @@ Nu există nicio comandă de reîmprospătare manuală: comenzile OpenCode v2 su
 Gemini respinge în întregime o solicitare ale cărei declarații de instrumente conțin `$schema` sau `additionalProperties`, răspunzând cu `400 INVALID_ARGUMENT`. Pluginul elimină acele cuvinte-cheie din schemele instrumentelor destinate unui model Gemini al acestui furnizor și lasă neschimbate toate celelalte solicitări. Un instrument care conține un `$ref` este transmis fără modificări, în loc să fie eliminat, deoarece eliminarea referinței ar extinde schema pentru a „accepta orice”.
 Setați `"geminiSanitization": false` pentru a dezactiva această funcționalitate.
 
-## Depanare
+## Depanarea problemelor
 
-| Simptom                                                 | Cauză                                                                                                           |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Selectorul nu afișează niciun model OmniRoute           | Nu a fost găsită nicio cheie (verificați avertismentul de la pornire) sau gateway-ul este inaccesibil           |
-| ID-uri brute de modele, fără combinații și fără prețuri | Endpoint-urile de administrare au refuzat tokenul — setați `managementReadToken`                                |
-| O sesiune fixată la `opencode-<id>/…`                   | Pluginul v1 a publicat `opencode-<id>`; v2 publică direct `<id>`, așadar selectați din nou modelul sub `<id>/…` |
+| Simptom                                                   | Cauză                                                                                                                                                            |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Selectorul nu afișează niciun model OmniRoute             | Nu a fost identificată nicio cheie (verificați avertismentul de la pornire) sau gateway-ul nu este accesibil                                                     |
+| ID-uri brute ale modelelor, fără combinații, fără prețuri | Endpoint-urile de administrare au refuzat tokenul — setați `managementReadToken`                                                                                 |
+| Catalog `freeOnly` scurt sau gol                          | Nu există niciun token de administrare sau tokenul a fost refuzat — consultați linia cu rezumatul reîmprospătării (numărul `unmatched-free`) din jurnalul gazdei |
+| O sesiune fixată la `opencode-<id>/…`                     | Pluginul v1 a publicat `opencode-<id>`; v2 publică doar `<id>`, așadar selectați din nou modelul din `<id>/…`                                                    |
+
+Variabilele de mediu trebuie să ajungă la procesul serverului opencode: atunci când gazda
+rulează ca serviciu, shell-ul care execută `opencode models` și mediul serverului
+sunt diferite, așadar exportați cheia în locul din care o citește serverul.
 
 ## Consultați și
 

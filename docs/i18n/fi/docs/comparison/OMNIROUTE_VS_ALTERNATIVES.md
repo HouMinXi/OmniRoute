@@ -39,11 +39,11 @@ Objektiivinen ominaisuusvertailu suosittuihin avoimen lähdekoodin tekoälyreiti
 
 ## Milloin OmniRoute kannattaa valita
 
-- Ylläpidät palvelua itse ja haluat **mahdollisimman kattavan palveluntarjoajatuen** (329 palveluntarjoajaa, 155 ilmaista tai ilman tunnistautumista toimivaa luettelokohdetta)
-- Tarvitset **sisäänrakennetun MCP-palvelimen** (LLM-työkalut, muisti ja taidot tarjolla työkaluina)
+- Ylläpidät palvelua itse ja haluat **mahdollisimman laajan palveluntarjoajatuen** (372 palveluntarjoajaa, 155 ilmaista tai ilman tunnistautumista toimivaa luettelomerkintää)
+- Tarvitset **sisäänrakennetun MCP-palvelimen** (LLM-työkalut, muisti ja taidot käytettävissä työkaluina)
 - Tarvitset **A2A-protokollan** agenttien välisiin työnkulkuihin
-- Haluat **sormenjäljen peittämisen** (JA3/JA4), jotta ylemmän tason CAPTCHA-järjestelmät eivät tunnista liikennettä
-- Tarvitset **yritystason ominaisuuksia** (suojaukset, arvioinnit ja kirjausketju) ilman SaaS-laskua
+- Haluat **sormenjälkien häivytyksen** (JA3/JA4), jotta ylätason CAPTCHA-järjestelmät eivät havaitse käyttöä
+- Tarvitset **yritystason ominaisuuksia** (suojakaiteet, arvioinnit ja kirjausketju) ilman SaaS-laskua
 
 ## Milloin LiteLLM kannattaa valita
 

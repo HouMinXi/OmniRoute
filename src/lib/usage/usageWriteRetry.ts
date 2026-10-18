@@ -29,6 +29,7 @@ import {
   getPromptCacheReadTokens,
   getReasoningTokens,
 } from "./tokenAccounting";
+import { backfillDuplicateUsageEntry } from "./usageHistory/duplicateEntry";
 import type { UsageEntry } from "./usageHistory";
 
 /** Delay before the single deferred attempt. Internal, not user-facing. */
@@ -64,16 +65,30 @@ function isLockMessage(message: string): boolean {
   return /database(?: table| schema)? is (?:locked|busy)|SQLITE_BUSY|SQLITE_LOCKED/i.test(message);
 }
 
+/** Legacy natural-key dedup stays on unless the caller owns a physical attempt. */
+type UsageWriteOptions = {
+  deduplicate?: boolean;
+};
+
 /**
  * Single write attempt. Throws on failure so the caller decides between a
  * deferred retry (lock) and an immediate log (anything else).
+ *
+ * `deduplicate: false` is the image-attempt opt-out: two real upstream calls
+ * can share every natural-key field, including the millisecond timestamp.
  */
-export function attemptWrite(entry: UsageEntry): void {
+export function attemptWrite(entry: UsageEntry, options: UsageWriteOptions = {}): void {
   const db = getDbInstance();
   const prepared = prepareEntry(db, entry);
   let inserted = false;
+  const deduplicate = options.deduplicate !== false;
 
   db.transaction(() => {
+    if (!deduplicate) {
+      insertEntry(db, prepared);
+      inserted = true;
+      return;
+    }
     inserted = insertUnlessDuplicate(db, prepared);
   })();
 
@@ -128,56 +143,12 @@ function insertUnlessDuplicate(
   prepared: PreparedEntry
 ): boolean {
   const { entry, timestamp, tokensInput, tokensOutput } = prepared;
-  const existing = db
-    .prepare(
-      `SELECT id, endpoint, cpa_auth_index FROM usage_history
-       WHERE timestamp = ?
-         AND COALESCE(provider, '')     = COALESCE(?, '')
-         AND COALESCE(model, '')        = COALESCE(?, '')
-         AND COALESCE(connection_id, '') = COALESCE(?, '')
-         AND COALESCE(api_key_id, '')   = COALESCE(?, '')
-         AND tokens_input  = ?
-         AND tokens_output = ?
-       ORDER BY id DESC LIMIT 1`
-    )
-    .get(
-      timestamp,
-      entry.provider ? resolveProviderId(entry.provider) : null,
-      entry.model || null,
-      entry.connectionId || null,
-      entry.apiKeyId || null,
-      tokensInput,
-      tokensOutput
-    ) as { id: number; endpoint: string | null; cpa_auth_index: string | null } | undefined;
-
-  if (existing) {
-    backfillDuplicate(db, existing, entry);
+  if (backfillDuplicateUsageEntry(db, entry, timestamp, tokensInput, tokensOutput)) {
     return false;
   }
 
   insertEntry(db, prepared);
   return true;
-}
-
-function backfillDuplicate(
-  db: ReturnType<typeof getDbInstance>,
-  existing: { id: number; endpoint: string | null; cpa_auth_index: string | null },
-  entry: UsageEntry
-): void {
-  // Back-fill endpoint if the original row missed it.
-  if (!existing.endpoint && entry.endpoint) {
-    db.prepare(`UPDATE usage_history SET endpoint = ? WHERE id = ?`).run(
-      entry.endpoint,
-      existing.id
-    );
-  }
-  // A later completed attempt can carry the trace the first write missed.
-  if (!existing.cpa_auth_index && entry.cpaAuthIndex) {
-    db.prepare(`UPDATE usage_history SET cpa_auth_index = ? WHERE id = ?`).run(
-      entry.cpaAuthIndex,
-      existing.id
-    );
-  }
 }
 
 function insertEntry(db: ReturnType<typeof getDbInstance>, prepared: PreparedEntry): void {
@@ -231,10 +202,10 @@ function toFirstToken(entry: UsageEntry): number {
  * the retry attempts the write once and, on failure, writes the existing log
  * line and stops.
  */
-export function scheduleWriteRetry(entry: UsageEntry): void {
+export function scheduleWriteRetry(entry: UsageEntry, options: UsageWriteOptions = {}): void {
   const timer = setTimeout(() => {
     try {
-      attemptWrite(entry);
+      attemptWrite(entry, options);
     } catch (retryError) {
       console.error("Failed to save usage stats:", retryError);
     }

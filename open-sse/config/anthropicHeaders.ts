@@ -268,6 +268,12 @@ export function syncSkillsBeta(
  * `R("server_side_fallback_category","server-side-fallback-2026-07-01")` in the shipped binary).
  * The `fallbacks` field travels through the passthrough; without its beta upstream rejects the
  * body with `400 fallbacks: Extra inputs are not permitted`.
+ *
+ * `fast-mode-2026-02-01` gates the top-level `speed` body parameter (Anthropic Fast Mode) that
+ * Claude Code sends on both `/fast on` and `/fast off`. The `speed` field travels through the
+ * passthrough; without its beta upstream rejects the body with a 400 whose message reads
+ * "To use the `speed` parameter with '<model>', send the `anthropic-beta: fast-mode-2026-02-01`
+ * header".
  */
 export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
   "tool-search-tool-2025-10-19",
@@ -299,6 +305,7 @@ export const FORWARDABLE_CLIENT_BETAS = Object.freeze([
   // without these betas upstream 400s "fallbacks: Extra inputs are not permitted".
   "server-side-fallback-2026-06-01",
   "server-side-fallback-2026-07-01",
+  "fast-mode-2026-02-01",
 ]);
 
 /**

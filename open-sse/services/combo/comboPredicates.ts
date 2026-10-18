@@ -29,7 +29,7 @@ import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
 import { getTrustedLocalRateLimitResponse } from "../rateLimitManager/errors.ts";
 import { TRANSLATION_FAILURE_CODE } from "../../handlers/chatCore/translationFailure.ts";
-import { isLocalModelPolicyResponse } from "../../../src/shared/utils/resolvedModelAccess.ts";
+import { isLocalModelPolicyResponse } from "../resolvedModelAccess.ts";
 import type { ResolvedComboTarget } from "./types.ts";
 import {
   classifyComboOutcome,

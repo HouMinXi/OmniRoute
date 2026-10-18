@@ -287,65 +287,72 @@ Katso käytännön esimerkkejä tiedostoista `open-sse/utils/stream.ts` ja `open
 
 ---
 
-## Project Structure
+## Projektin rakenne
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Hallintapaneelin sivut (23 osiota)
+│   ├── api/                # API-reitit (51 hakemistoa)
+│   └── login/              # Tunnistautumissivut (.tsx)
+├── domain/                 # Käytäntömoottori (policyEngine, comboResolver, costRules jne.)
+├── lib/                    # Keskeinen liiketoimintalogiikka (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 -protokollapalvelin
+│   ├── acp/                # Agent Communication Protocol -rekisteri
+│   ├── compliance/         # Vaatimustenmukaisuuskäytäntöjen moottori
+│   ├── db/                 # SQLite-toimialuemoduulit + 130 migraatiota
+│   ├── memory/             # Pysyvä keskustelumuisti
+│   ├── oauth/              # OAuth-palveluntarjoajat, -palvelut ja -apuohjelmat
+│   ├── skills/             # Laajennettava taitokehys
+│   ├── usage/              # Käytön seuranta ja kustannusten laskenta
+│   └── localDb.ts          # Vain jälleenvientikerros — älä koskaan lisää logiikkaa tänne
+├── middleware/              # Pyyntöjen väliohjelmisto (promptInjectionGuard)
+├── mitm/                   # MITM-välityspalvelin (varmenne, DNS, kohdereititys)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React-komponentit (.tsx)
+│   ├── constants/          # Palveluntarjoajien määritykset (329), MCP-käyttöalueet, 19 reititysstrategiaa
+│   ├── utils/              # Katkaisija, puhdistaja, tunnistautumisen apufunktiot
+│   └── validation/         # Zod v4 -skeemat
+└── sse/                    # SSE-välityspalvelinputki
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse-työtila
+├── executors/              # 150 suoritusmoduulia (suoritusluokat + palveluntarjoajakohtaiset apufunktiot)
+├── handlers/               # 11 pyyntökäsittelijää (keskustelu, vastaukset, upotukset, kuvat jne.)
+├── mcp-server/             # MCP-palvelin (110 yksilöllistä työkalua, 3 siirtotapaa, 33 käyttöaluetta)
+├── services/               # 178 ylimmän tason palvelua (combo, autoCombo, rateLimitManager jne.)
+├── translator/             # Muotomuuntimet (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API -muunnin
+└── utils/                  # 22 apuohjelmamoduulia (suoratoisto, TLS, välityspalvelin, lokitus)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron-työpöytäsovellus (monialustainen)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js-testisuorittaja (1 574 testitiedostoa)
+├── integration/            # Integraatiotestit
+├── e2e/                    # Playwright-testit
+├── security/               # Tietoturvatestit
+├── translator/             # Muuntajakohtaiset testit
+└── load/                   # Kuormitustestit
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Arkkitehtuuripäätösten dokumentit
+├── architecture/            # Järjestelmäarkkitehtuuri ja häiriönsietokyky
+├── comparison/              # OmniRoute verrattuna vaihtoehtoihin
+├── compression/             # Pakkausoppaat ja -säännöt
+├── dev/                     # Kehitysoppaat
+├── diagrams/                # Arkkitehtuurikaaviot
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Käyttöopas, Docker, käyttöönotto, vianmääritys
+├── i18n/                    # Kansainvälistetyt README-käännökset
+├── marketing/               # Markkinointimateriaalit
+├── ops/                     # Käyttöönotto, välityspalvelin, kattavuus, julkaisut
+├── providers/               # Palveluntarjoajakohtaiset dokumentit
+├── reference/               # API-viite, ympäristömuuttujat, CLI-työkalut, ilmaiset käyttökiintiöt
+├── releases/                # Julkaisutiedot
+├── routing/                 # Automaattinen yhdistelmämoottori, päättelyn uudelleentoisto
+├── screenshots/             # Hallintapaneelin näyttökuvat
+├── security/                # Suojakaiteet, vaatimustenmukaisuus, häivetila, tunnukset
+└── specs/                   # Suunnittelumääritykset
 ```
 
 ---

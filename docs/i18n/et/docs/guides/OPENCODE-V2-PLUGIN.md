@@ -112,11 +112,16 @@ Selle väljalülitamiseks määrake `"geminiSanitization": false`.
 
 ## Tõrkeotsing
 
-| Sümptom                                                | Põhjus                                                                                                            |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| Valikus ei kuvata ühtegi OmniRoute'i mudelit           | Võtit ei leitud (kontrollige käivitamisel kuvatud hoiatust) või lüüs pole ligipääsetav                            |
-| Toored mudeli-ID-d, kombinatsioonid ja hinnad puuduvad | Halduslõpp-punktid keeldusid luba aktsepteerimast — määrake `managementReadToken`                                 |
-| Seanss on kinnitatud valikule `opencode-<id>/…`        | v1 pistikprogramm avaldas `opencode-<id>`; v2 avaldab ainult `<id>`, seega valige mudel uuesti jaotisest `<id>/…` |
+| Sümptom                                                    | Põhjus                                                                                                             |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Valijas ei kuvata ühtegi OmniRoute'i mudelit               | Ühtegi võtit ei leitud (kontrollige käivitushoiatust) või lüüs pole kättesaadav                                    |
+| Mudelite toor-ID-d, kombinatsioonid ja hinnateave puuduvad | Haldusotspunktid keeldusid tõendist — määrake `managementReadToken`                                                |
+| Lühike või tühi `freeOnly` kataloog                        | Haldustõend puudub või sellest keelduti — vaadake hosti logist värskendamise kokkuvõtterida (`unmatched-free` arv) |
+| Seanss on kinnitatud valikule `opencode-<id>/…`            | v1 pistikprogramm avaldas `opencode-<id>`; v2 avaldab ainult `<id>`, seega valige mudel uuesti jaotisest `<id>/…`  |
+
+Keskkonnamuutujad peavad jõudma opencode'i serveriprotsessini: kui host
+töötab teenusena, on käsku `opencode models` käitava kesta ja serveri
+keskkonnad erinevad, seega eksportige võti sinna, kust server seda loeb.
 
 ## Vaadake ka
 

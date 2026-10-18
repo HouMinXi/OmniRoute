@@ -299,65 +299,65 @@ Za uporabljene primere glejte `open-sse/utils/stream.ts` in `open-sse/utils/stre
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
 │   ├── (dashboard)/        # Strani nadzorne plošče (23 razdelkov)
-│   ├── api/                # Poti API-ja (51 imenikov)
+│   ├── api/                # Poti API (51 imenikov)
 │   └── login/              # Strani za preverjanje pristnosti (.tsx)
 ├── domain/                 # Mehanizem pravilnikov (policyEngine, comboResolver, costRules itd.)
-├── lib/                    # Osrednja poslovna logika (.ts)
+├── lib/                    # Temeljna poslovna logika (.ts)
 │   ├── a2a/                # Strežnik protokola Agent-to-Agent v0.3
 │   ├── acp/                # Register protokola Agent Communication Protocol
 │   ├── compliance/         # Mehanizem pravilnikov skladnosti
 │   ├── db/                 # Domenski moduli SQLite + 130 migracij
-│   ├── memory/             # Trajni pomnilnik pogovorov
+│   ├── memory/             # Trajni pogovorni pomnilnik
 │   ├── oauth/              # Ponudniki, storitve in pripomočki OAuth
 │   ├── skills/             # Razširljivo ogrodje veščin
-│   ├── usage/              # Spremljanje uporabe in izračun stroškov
+│   ├── usage/              # Sledenje uporabi in izračun stroškov
 │   └── localDb.ts          # Samo plast za ponovni izvoz — sem nikoli ne dodajajte logike
-├── middleware/              # Vmesna programska oprema zahtev (promptInjectionGuard)
+├── middleware/              # Vmesna programska oprema za zahteve (promptInjectionGuard)
 ├── mitm/                   # Posredniški strežnik MITM (potrdilo, DNS, usmerjanje ciljev)
 ├── shared/
 │   ├── components/         # Komponente React (.tsx)
 │   ├── constants/          # Definicije ponudnikov (329), obsegi MCP, 19 strategij usmerjanja
-│   ├── utils/              # Odklopnik, čistilnik in pripomočki za preverjanje pristnosti
+│   ├── utils/              # Odklopnik, čistilnik in pomočniki za preverjanje pristnosti
 │   └── validation/         # Sheme Zod v4
 └── sse/                    # Posredniški cevovod SSE
 
 open-sse/                   # Delovni prostor @omniroute/open-sse
-├── executors/              # 89 modulov izvedbene implementacije
-├── handlers/               # 11 obdelovalnikov zahtev (klepet, odzivi, vdelave, slike itd.)
+├── executors/              # 150 izvajalnih modulov (izvajalni razredi + pomočniki za posamezne ponudnike)
+├── handlers/               # 11 obdelovalnikov zahtev (klepet, odgovori, vdelave, slike itd.)
 ├── mcp-server/             # Strežnik MCP (110 edinstvenih orodij, 3 transporti, 33 obsegov)
 ├── services/               # 178 storitev najvišje ravni (combo, autoCombo, rateLimitManager itd.)
-├── translator/             # Prevajalniki formatov (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── translator/             # Pretvorniki formatov (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
 ├── transformer/            # Pretvornik API-ja Responses
 └── utils/                  # 22 pomožnih modulov (tok, TLS, posredniški strežnik, beleženje)
 
 electron/                   # Namizna aplikacija Electron (za več platform)
 
 tests/
-├── unit/                   # Izvajalnik testov Node.js (1.574 testnih datotek)
+├── unit/                   # Izvajalnik testov Node.js (1,574 testnih datotek)
 ├── integration/            # Integracijski testi
 ├── e2e/                    # Testi Playwright
 ├── security/               # Varnostni testi
-├── translator/             # Testi, specifični za prevajalnik
+├── translator/             # Testi, specifični za pretvornik
 └── load/                   # Obremenitveni testi
 
 docs/
 ├── adr/                     # Zapisi arhitekturnih odločitev
-├── architecture/            # Arhitektura sistema in odpornost
+├── architecture/            # Sistemska arhitektura in odpornost
 ├── comparison/              # OmniRoute v primerjavi z alternativami
 ├── compression/             # Vodniki in pravila za stiskanje
 ├── dev/                     # Razvojni vodniki
 ├── diagrams/                # Arhitekturni diagrami
-├── frameworks/              # MCP, A2A, OpenCode, pomnilnik, veščine
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
 ├── guides/                  # Uporabniški vodnik, Docker, nastavitev, odpravljanje težav
 ├── i18n/                    # Internacionalizirani prevodi README
 ├── marketing/               # Trženjska gradiva
 ├── ops/                     # Uvajanje, posredniški strežnik, pokritost, izdaje
-├── providers/               # Dokumentacija, specifična za ponudnike
+├── providers/               # Dokumentacija za posamezne ponudnike
 ├── reference/               # Referenca API-ja, okoljske spremenljivke, orodja CLI, brezplačne ravni
-├── releases/                # Opombe ob izdajah
+├── releases/                # Opombe ob izdaji
 ├── routing/                 # Mehanizem samodejnih kombinacij, ponovno predvajanje sklepanja
 ├── screenshots/             # Posnetki zaslona nadzorne plošče
-├── security/                # Zaščitni mehanizmi, skladnost, prikritost, žetoni
+├── security/                # Zaščitni ukrepi, skladnost, prikritost, žetoni
 └── specs/                   # Specifikacije zasnove
 ```
 

@@ -208,9 +208,8 @@ test("header lookup: Headers objects and case-insensitive plain records both wor
   );
 });
 
-test("characterization: the two headers are currently an either/or, NOT a union", () => {
-  // registry.ts uses `get(x-omniroute-…) || get(x-disabled-…)`: when both are present the
-  // legacy header is silently dropped. Unlike the other channels this is not a union.
+test("disable headers are merged rather than dropping the legacy channel (#16412)", () => {
+  // Both header channels participate in the same normalized, deduplicated union.
   assert.deepEqual(
     resolveDisabledGuardrails({
       headers: new Headers({
@@ -218,9 +217,9 @@ test("characterization: the two headers are currently an either/or, NOT a union"
         "x-disabled-guardrails": "pii-masker",
       }),
     }),
-    ["vision-bridge"]
+    ["vision-bridge", "pii-masker"]
   );
-  // An empty x-omniroute value is falsy, so the legacy header is used instead.
+  // An empty modern header contributes nothing; the legacy header still applies.
   assert.deepEqual(
     resolveDisabledGuardrails({
       headers: { "x-omniroute-disabled-guardrails": "", "x-disabled-guardrails": "pii-masker" },

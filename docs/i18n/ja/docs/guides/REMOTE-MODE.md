@@ -194,13 +194,22 @@ xAI または Grok CLI に接続する場合は、`1455` を `56121`/`56122` に
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
 #   ↳ シークレットは一度だけ表示されます — 今すぐコピーしてください
-omniroute tokens list                 # マスク表示: ID、名前、スコープ、プレフィックス、ステータス、有効期限
-omniroute tokens revoke <id|prefix>   # 即座に取り消す
-omniroute tokens scopes               # 3 つのスコープを説明する
+omniroute tokens list                 # マスク表示: id、名前、スコープ、プレフィックス、ステータス、有効期限
+omniroute tokens revoke <id|prefix>   # 即時に失効
+omniroute tokens scopes               # 3つのスコープについて説明
 ```
 
 `tokens` コマンドには **admin** 認証情報が必要です。ダッシュボードの
-**Settings → Access Tokens** でもトークンを管理できます（作成、取り消し、一度だけのコピー）。
+**Settings → Access Tokens** からトークンを管理することもできます（作成、失効、一度だけコピー）。
+
+トークンには、その作成者が持つ権限を超える権限を付与できません。
+`admin` トークンを作成できるのはオペレーターだけです。具体的には、ダッシュボードセッション、
+サーバー自体のローカルCLI、パスワードを使用した `omniroute connect`、または
+ログインが無効化されたインスタンスから作成できます。マシン認証情報（`admin` アクセストークン、
+または `manage`/`admin` スコープを持つAPIキー）が作成できるのは、`write` および `read`
+トークンのみです。これらの認証情報で `--scope admin` を指定すると `403` が返されます。
+
+トークンは、作成者が持つ権限を超える権限で発行できません。`admin` トークンを作成できるのは運用者だけです。ダッシュボードのセッション、サーバー自体のローカル CLI、パスワードを使う `omniroute connect`、またはログインを無効にしたインスタンスから作成します。マシン認証情報（`admin` アクセストークン、または `manage`/`admin` スコープの API キー）で作成できるのは `write` と `read` トークンだけです。これらで `--scope admin` を要求すると `403` が返されます。
 
 ---
 

@@ -117,11 +117,16 @@ Bunu söndürmək üçün `"geminiSanitization": false` təyin edin.
 
 ## Problemlərin aradan qaldırılması
 
-| Əlamət                                                       | Səbəb                                                                                                                   |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Seçim aləti heç bir OmniRoute modeli göstərmir               | Heç bir açar müəyyən edilməyib (başlanğıc xəbərdarlığını yoxlayın) və ya şlüz əlçatmazdır                               |
-| Xam model identifikatorları, kombinasiya və qiymətlər yoxdur | İdarəetmə son nöqtələri tokeni rədd edib — `managementReadToken` təyin edin                                             |
-| Sessiya `opencode-<id>/…` ünvanına bərkidilib                | v1 plagini `opencode-<id>` dərc edirdi; v2 isə çılpaq `<id>` dərc edir, buna görə modeli `<id>/…` altında yenidən seçin |
+| Əlamət                                                              | Səbəb                                                                                                                        |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Seçicidə heç bir OmniRoute modeli görünmür                          | Heç bir açar müəyyən edilməyib (başlanğıc xəbərdarlığını yoxlayın) və ya şlüz əlçatan deyil                                  |
+| Xam model identifikatorları var, kombinasiyalar və qiymətlər yoxdur | İdarəetmə endpoint-ləri tokeni rədd edib — `managementReadToken` təyin edin                                                  |
+| `freeOnly` kataloqu qısa və ya boşdur                               | İdarəetmə tokeni yoxdur və ya token rədd edilib — host jurnalındakı yeniləmə xülasəsi sətrini (`unmatched-free` sayı) oxuyun |
+| Sessiya `opencode-<id>/…` üzərinə bərkidilib                        | v1 plagini `opencode-<id>` dərc edirdi; v2 isə yalnız `<id>` dərc edir, buna görə modeli `<id>/…` altında yenidən seçin      |
+
+Mühit dəyişənləri opencode server prosesinə çatmalıdır: host xidmət kimi
+işlədikdə, `opencode models` əmrini icra edən shell ilə serverin
+mühiti fərqli olur, buna görə açarı serverin onu oxuduğu yerdə export edin.
 
 ## Həmçinin baxın
 

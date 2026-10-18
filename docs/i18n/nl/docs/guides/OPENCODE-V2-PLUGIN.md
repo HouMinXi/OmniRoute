@@ -115,13 +115,19 @@ Er is geen handmatige vernieuwingsopdracht: OpenCode v2-opdrachten zijn promptsj
 Gemini weigert een volledige aanvraag wanneer de tooldeclaraties `$schema` of `additionalProperties` bevatten en antwoordt met `400 INVALID_ARGUMENT`. De plugin verwijdert die trefwoorden uit toolschema's die bestemd zijn voor een Gemini-model van deze provider en laat alle andere aanvragen ongewijzigd. Een tool met een `$ref` wordt ongewijzigd doorgestuurd in plaats van opgeschoond, omdat het verwijderen van de verwijzing het schema zou verruimen tot "alles accepteren".
 Stel `"geminiSanitization": false` in om dit uit te schakelen.
 
-## Probleemoplossing
+## Problemen oplossen
 
-| Symptoom                                    | Oorzaak                                                                                                               |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Modelkiezer toont geen OmniRoute-model      | Geen sleutel gevonden (controleer de waarschuwing bij het opstarten), of de gateway is onbereikbaar                   |
-| Ruwe model-id's, geen combo's, geen prijzen | De beheereindpunten hebben het token geweigerd — stel `managementReadToken` in                                        |
-| Een sessie vastgezet op `opencode-<id>/…`   | De v1-plugin publiceerde `opencode-<id>`; v2 publiceert alleen `<id>`, dus selecteer het model opnieuw onder `<id>/…` |
+| Symptoom                                         | Oorzaak                                                                                                                              |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| De modelkiezer toont geen OmniRoute-model        | Er is geen sleutel gevonden (controleer de waarschuwing bij het opstarten), of de gateway is onbereikbaar                            |
+| Ruwe model-ID's, geen combinaties, geen prijzen  | De beheerendpoints hebben het token geweigerd — stel `managementReadToken` in                                                        |
+| Korte of lege `freeOnly`-catalogus               | Geen beheertoken of een geweigerd token — lees de samenvattingsregel van de vernieuwing (aantal `unmatched-free`) in het hostlogboek |
+| Een sessie die is vastgezet op `opencode-<id>/…` | De v1-plug-in publiceerde `opencode-<id>`; v2 publiceert alleen `<id>`, dus selecteer het model opnieuw onder `<id>/…`               |
+
+Omgevingsvariabelen moeten het opencode-serverproces bereiken: wanneer de host
+als een service wordt uitgevoerd, verschillen de shell waarin `opencode models`
+wordt uitgevoerd en de serveromgeving van elkaar. Exporteer de sleutel daarom
+op de locatie waar de server deze leest.
 
 ## Zie ook
 

@@ -384,36 +384,39 @@ Trước khi phát hành bất kỳ bản phát hành v3.8.x nào, hãy xác min
 
 ---
 
-## Tách nhánh 3.9.0 LTS (đã diễn tập trong 3.8.58)
+## Cắt bản 3.9.0 LTS (đã diễn tập trong 3.8.58)
 
 Sau v3.8.59, phiên bản tiếp theo là 3.9.0 và đầu nhánh của phiên bản này trở thành hai nhánh tồn tại lâu dài:
 `stable/v3` (dòng v3 LTS, npm `latest`) và `develop` (v4, được tăng lên 4.0.0, npm
-`nightly`). Mô hình nhánh/kênh, quy trình chuyển tiếp thay đổi và các nhãn được mô tả trong
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); kế hoạch nằm trong [ROADMAP](../../ROADMAP.md) (Giai đoạn 3). Việc tách nhánh chỉ chạy một lần;
-3.8.58 diễn tập toàn bộ quy trình trên một fork và 3.8.59 kết thúc bằng
+`nightly`). Mô hình nhánh/kênh, quy trình forward-port và các nhãn được mô tả trong
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); kế hoạch nằm trong [ROADMAP](../../ROADMAP.md) (Giai đoạn 3). Việc cắt bản chỉ chạy một lần;
+3.8.58 diễn tập toàn bộ quy trình trên một fork, còn 3.8.59 kết thúc bằng
 [danh sách kiểm tra GO/NO-GO](./LTS_GO_NO_GO.md).
 
-### Chạy thử (chỉ đọc, an toàn vào bất kỳ lúc nào)
+### Chạy thử (chỉ đọc, luôn an toàn)
 
 ```bash
-npm run release:dry-run-lts-cut                       # lần tách nhánh thực tế: 3.9.0 từ HEAD, thẻ trước đó v3.8.59
+npm run release:dry-run-lts-cut                       # lần cắt bản thực tế: 3.9.0 từ HEAD, thẻ trước đó là v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # cố định commit nguồn
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` không thực thi gì: nó đọc git và `gh`, rồi in ra
-toàn bộ trình tự — các điều kiện tiên quyết (nguồn có thể được phân giải, thẻ trước đó tồn tại, `package.json` có
-phiên bản đích, một issue `release-freeze` đang mở, không có issue `Release branch not green` nào đang mở
-trên một nhánh phát hành hiện có — một nhánh không tồn tại sẽ báo `?` là không xác định, không bao giờ
-là đạt trạng thái xanh — hàng đợi `release` của Mergify đã được cấu hình (G11: `queue_rules`, `checks_timeout`,
-nhãn `queue`), ruleset `release/*` vẫn chặn thao tác xóa và force-push, đồng thời
-`stable/v3` và `develop` chưa tồn tại), hai bước tạo nhánh, những điều kiện kích hoạt workflow
-đang ở trạng thái không hoạt động và các điều kiện `if:` nào trở thành đúng (cũng như những điều kiện nào vẫn bị chặn bởi một biến kho lưu trữ hoặc
-được cố định vào kho lưu trữ chính thức), các dist-tag dự kiến (`latest` → 3.9.0, `next` và
-`nightly` trống) và thao tác hoàn tác. Mã thoát `0` = `RESULT: READY`, `1` = một điều kiện tiên quyết bắt buộc
-không đạt (`✗`), `2` = lỗi sử dụng. `--advisory <id,...>` hạ cấp một bước kiểm tra thành cảnh báo (`!`)
+`scripts/release/dry-run-lts-cut.mjs` không thực thi bất kỳ thao tác nào: nó đọc git và `gh`, rồi in ra
+toàn bộ trình tự — các điều kiện tiên quyết (nguồn có thể được phân giải, kho lưu trữ nguồn có đầy đủ lịch sử —
+một bản sao nông không thể đẩy `stable/v3`, phía nhận sẽ từ chối gói tại phần tử cha ghép đầu tiên,
+vì vậy trước hết hãy cắt bản từ một bản sao đầy đủ hoặc chạy `git fetch --unshallow origin` — thẻ trước đó
+tồn tại, `package.json` có phiên bản đích, một issue `release-freeze` đang mở, không có issue
+`Release branch not green` đang mở
+trên một nhánh phát hành hiện có — một nhánh không tồn tại sẽ báo `?` không xác định, không bao giờ
+là xanh — hàng đợi `release` của Mergify đã được cấu hình (G11: `queue_rules`, `checks_timeout`,
+nhãn `queue`), bộ quy tắc `release/*` vẫn chặn việc xóa và force-push, đồng thời
+`stable/v3` và `develop` chưa tồn tại), hai bước tạo nhánh, những trình kích hoạt workflow đang bất hoạt
+và điều kiện `if:` nào trở thành đúng (cũng như những điều kiện nào vẫn bị chặn bởi một biến kho lưu trữ hoặc
+được ghim vào kho lưu trữ chuẩn), các dist-tag dự kiến (`latest` → 3.9.0, `next` và
+`nightly` trống) và quy trình hoàn tác. Mã thoát `0` = `RESULT: READY`, `1` = một điều kiện tiên quyết
+có tính chặn đã thất bại (`✗`), `2` = lỗi sử dụng. `--advisory <id,...>` hạ cấp một lượt kiểm tra thành cảnh báo (`!`)
 mà không ẩn nó.
 
-Hãy chạy thử lần tách nhánh thực tế trong khi giai đoạn đóng băng phát hành 3.9.0 vẫn còn hiệu lực — các nhánh được
+Hãy chạy thử lần cắt bản thực tế trong khi thời gian đóng băng phát hành 3.9.0 vẫn còn hiệu lực — các nhánh được
 tạo sau thẻ và trước khi Giai đoạn 12c dỡ bỏ trạng thái đóng băng.
 
 ### Diễn tập 3.8.58 (chỉ trên fork)
@@ -423,25 +426,25 @@ tạo sau thẻ và trước khi Giai đoạn 12c dỡ bỏ trạng thái đóng
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. Thực thi với một remote là FORK (origin, hoặc bất kỳ remote nào có URL là kho lưu trữ
-#    chính thức, đều bị từ chối; mỗi bước đều yêu cầu xác nhận trong terminal)
+# 2. Thực thi với một remote FORK (origin hoặc bất kỳ remote nào có URL là kho lưu trữ
+#    chuẩn đều bị từ chối; mỗi bước đều yêu cầu xác nhận trong terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. Chạy thử các workflow đang không hoạt động trong fork (workflow_dispatch tại nơi kết quả chạy thử
-#    báo có cố định vào kho lưu trữ chính thức), sau đó hoàn tác
+# 3. Chạy thử các workflow đang bất hoạt trong fork (workflow_dispatch tại nơi kết quả chạy thử
+#    báo có ghim vào kho lưu trữ chuẩn), sau đó hoàn tác
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-Commit tăng phiên bản cho develop được tạo bằng git plumbing (không tác động đến cây làm việc) và tăng phiên bản
+Commit tăng phiên bản develop được tạo bằng hệ thống lệnh plumbing của git (không tác động đến cây làm việc) và tăng phiên bản
 cho cùng năm tệp như một commit mở chu kỳ: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json` và `docs/openapi.yaml`. Phần `[4.0.0]`
-trong CHANGELOG và các bản tương ứng i18n của nó sau đó được mở trên `develop`, trước PR đầu tiên
-của nhánh này. Script không bao giờ thay đổi các npm dist-tag — hãy diễn tập chúng trên một gói thử nghiệm.
+`electron/package.json`, `package-lock.json` và `docs/openapi.yaml`. Sau đó, mục `[4.0.0]`
+trong CHANGELOG và các bản sao i18n của mục này được mở trên `develop`, trước PR đầu tiên của nhánh.
+Script không bao giờ thay đổi các dist-tag của npm — hãy diễn tập chúng trên một gói thử nghiệm.
 
-### Artifact xem trước của PR (build một lần, phát hành đúng cùng dữ liệu byte)
+### Artifact xem trước của PR (build một lần, quảng bá đúng các byte đó)
 
 `.github/workflows/preview-artifact.yml` build một tarball production từ đầu nhánh PR và
 xác thực chính xác bản build đó (phần (a) của #8084). Chỉ dành cho các PR trong cùng kho lưu trữ; không có nội dung nào được phát hành.
@@ -454,37 +457,37 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # cài đặt bản xem trước
 ```
 
-Lần chạy thực hiện `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, đóng gói
+Lượt chạy thực hiện `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, đóng gói
 tarball, chạy `npm run check:pack-boot` (secret giả, thư mục dữ liệu tạm thời), đóng gói lại và
-thất bại nếu digest không giống hệt nhau, sau đó ghi lại `artifact-identity.json` (SHA đầu nhánh, SHA cơ sở,
-hash của lockfile, nền tảng, kiến trúc, node ABI, trình đóng gói, chính sách build —
-`scripts/release/artifact-identity.mjs`) và chứng thực tarball trong một job riêng biệt. Phát hành
+thất bại nếu digest không giống hệt, sau đó ghi lại `artifact-identity.json` (SHA đầu nhánh, SHA cơ sở,
+hash của lockfile, nền tảng, kiến trúc, ABI của node, bundler, chính sách build —
+`scripts/release/artifact-identity.mjs`) và chứng thực tarball trong một job riêng biệt. Việc quảng bá
 một bản xem trước có nghĩa là cài đặt tarball đó: tuyệt đối không build lại từ mã nguồn.
 
-### Tách nhánh (3.9.0, sau khi GO)
+### Cắt bản (3.9.0, sau GO)
 
 1. GO được ghi lại trong [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md).
 2. `npm run release:dry-run-lts-cut -- --from v3.9.0` in ra `RESULT: READY`.
-3. Tạo thủ công các nhánh trên `origin` bằng những lệnh mà lần chạy thử in ra — script
-   từ chối push lên `origin`. Để tái sử dụng một commit develop đã được review, trước tiên hãy chạy
-   lần diễn tập `--execute` trên đầu nhánh 3.9.0 với fork của bạn; lệnh này in ra cả hai SHA và
-   có thể push chính các commit đó:
+3. Tạo thủ công các nhánh trên `origin` bằng các lệnh do lượt chạy thử in ra — script
+   từ chối đẩy lên `origin`. Để tái sử dụng một commit develop đã được rà soát, trước tiên hãy chạy
+   diễn tập `--execute` trên đầu nhánh 3.9.0 với fork của bạn; thao tác này in ra cả hai SHA và
+   có thể đẩy chính các commit đó:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
 4. Bảo vệ `stable/v3` và `develop` (ruleset + hàng đợi hợp nhất) trước khi PR đầu tiên được hợp nhất.
-5. Các workflow đang không hoạt động sẽ được bật khi nhánh tồn tại: `forward-port.yml` (push lên
-   `stable/v3`), `validate-stable-pr.yml` (các PR vào `stable/v3`) và `nightly-v4-build.yml`
-   (build `develop`). Trước khi đưa vào hoạt động, hãy đặt secret kho lưu trữ `secrets.FORWARD_PORT_TOKEN` (để CI chạy trên
-   các PR chuyển tiếp thay đổi); việc phát hành nightly vẫn bị tắt cho đến khi chủ sở hữu đặt biến kho lưu trữ
-   `vars.NIGHTLY_PUBLISH` thành `true` và npm Trusted Publishing chấp nhận
-   `nightly-v4-build.yml`. Việc phân giải kênh nằm trong `scripts/release/dist-tag.mjs`, chính là
+5. Các workflow không hoạt động sẽ được bật khi nhánh tồn tại: `forward-port.yml` (push đến
+   `stable/v3`), `validate-stable-pr.yml` (các PR đến `stable/v3`) và `nightly-v4-build.yml`
+   (build `develop`). Trước khi chính thức vận hành, hãy thiết lập repository secret `secrets.FORWARD_PORT_TOKEN` (để CI chạy trên
+   các PR forward-port); việc phát hành hằng đêm vẫn bị tắt cho đến khi chủ sở hữu đặt repository
+   variable `vars.NIGHTLY_PUBLISH` thành `true` và npm Trusted Publishing chấp nhận
+   `nightly-v4-build.yml`. Việc phân giải kênh nằm trong `scripts/release/dist-tag.mjs`, cũng là
    trình phân giải mà `npm-publish.yml` sử dụng.
 6. Xác minh các kênh: `npm view omniroute dist-tags --json` hiển thị `latest` = 3.9.0 và không có
    `next` / `nightly` cho đến khi v4 được phát hành.
-7. Hoàn tác nếu cần: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+7. Khôi phục nếu cần: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    và `npm dist-tag add omniroute@3.8.59 latest`.
 
 ---

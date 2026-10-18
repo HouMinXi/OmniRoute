@@ -384,107 +384,111 @@ npm run build:release
 
 ---
 
-## ការកាត់ចេញ 3.9.0 LTS (បានហាត់សាកល្បងនៅក្នុង 3.8.58)
+## ការបំបែក 3.9.0 LTS (បានសាកល្បងក្នុង 3.8.58)
 
-បន្ទាប់ពី v3.8.59 កំណែបន្ទាប់គឺ 3.9.0 ហើយចំណុចចុងក្រោយរបស់វានឹងក្លាយជាសាខារយៈពេលវែងពីរ៖
+បន្ទាប់ពី v3.8.59 កំណែបន្ទាប់គឺ 3.9.0 ហើយចំណុចចុងរបស់វានឹងក្លាយជាសាខាដែលមានអាយុកាលវែងពីរ៖
 `stable/v3` (ខ្សែ v3 LTS, npm `latest`) និង `develop` (v4 ដែលបានដំឡើងទៅ 4.0.0, npm
 `nightly`)។ គំរូសាខា/ឆានែល ការផ្ទេរទៅមុខ និងស្លាក មាននៅក្នុង
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); ផែនការមាននៅក្នុង [ROADMAP](../../ROADMAP.md) (ដំណាក់កាលទី 3)។ ការកាត់ចេញនេះដំណើរការតែម្តងប៉ុណ្ណោះ;
-3.8.58 ហាត់សាកល្បងវាពីដើមដល់ចប់នៅលើ fork ហើយ 3.8.59 បិទបញ្ចប់ដោយ
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md); ផែនការមាននៅក្នុង [ROADMAP](../../ROADMAP.md) (ដំណាក់កាលទី 3)។ ការបំបែកនេះដំណើរការតែម្តងប៉ុណ្ណោះ;
+3.8.58 សាកល្បងវាពីដើមដល់ចប់លើ fork មួយ ហើយ 3.8.59 បិទបញ្ចប់ដោយ
 [បញ្ជីត្រួតពិនិត្យ GO/NO-GO](./LTS_GO_NO_GO.md)។
 
-### ការដំណើរការសាកល្បង (បានតែអាន មានសុវត្ថិភាពគ្រប់ពេល)
+### ការរត់សាកល្បង (បានតែអាន និងមានសុវត្ថិភាពគ្រប់ពេល)
 
 ```bash
-npm run release:dry-run-lts-cut                       # ការកាត់ចេញពិតប្រាកដ៖ 3.9.0 ពី HEAD, tag មុនគឺ v3.8.59
-npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # កំណត់ជាប់ source commit
+npm run release:dry-run-lts-cut                       # ការបំបែកពិតប្រាកដ៖ 3.9.0 ពី HEAD, ស្លាកមុន v3.8.59
+npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # កំណត់ commit ប្រភពជាក់លាក់
 ```
 
-`scripts/release/dry-run-lts-cut.mjs` មិនប្រតិបត្តិអ្វីទាំងអស់៖ វាអាន git និង `gh` ហើយបោះពុម្ព
-លំដាប់ទាំងមូល — លក្ខខណ្ឌជាមុន (source អាច resolve បាន, មាន tag មុន, `package.json` ជា
-កំណែគោលដៅ, issue `release-freeze` មួយកំពុងបើក, គ្មាន issue `Release branch not green`
-ដែលកំពុងបើកនៅលើសាខា release ដែលមានស្រាប់ — សាខាដែលមិនមាននឹងរាយការណ៍ `?` ថាមិនស្គាល់ មិនដែល
-ចាត់ទុកថា green — queue `release` របស់ Mergify ត្រូវបានកំណត់រចនាសម្ព័ន្ធ (G11: `queue_rules`, `checks_timeout`,
-ស្លាក `queue`), ruleset `release/*` នៅតែរារាំងការលុប និង force-push ហើយ
-`stable/v3` និង `develop` មិនទាន់មាននៅឡើយ), ជំហានសាខាទាំងពីរ, trigger របស់ workflow ដែលមិនទាន់សកម្មណាខ្លះ
-និងលក្ខខណ្ឌ `if:` ណាខ្លះក្លាយជាពិត (ព្រមទាំងអ្វីខ្លះនៅតែត្រូវបានរារាំងដោយអថេរ repository ឬ
-កំណត់ជាប់ទៅ repository ផ្លូវការ), dist-tag ដែលរំពឹងទុក (`latest` → 3.9.0, `next` និង
-`nightly` ទទេ) និងការត្រឡប់ថយក្រោយ។ Exit `0` = `RESULT: READY`, `1` = លក្ខខណ្ឌជាមុនដែលរារាំង
-បានបរាជ័យ (`✗`), `2` = កំហុសការប្រើប្រាស់។ `--advisory <id,...>` បន្ថយកម្រិតការត្រួតពិនិត្យទៅជាការព្រមាន (`!`)
-ដោយមិនលាក់វា។
+`scripts/release/dry-run-lts-cut.mjs` មិនប្រតិបត្តិអ្វីទាំងអស់៖ វាអាន git និង `gh` ហើយបង្ហាញ
+លំដាប់ទាំងមូល — លក្ខខណ្ឌជាមុន (ប្រភពអាច resolve បាន ឃ្លាំងប្រភពមានប្រវត្តិពេញលេញ —
+shallow clone មិនអាច push `stable/v3` បានទេ ដោយភាគីទទួលបដិសេធ pack ត្រង់ parent ដែលបាន
+graft ដំបូង ដូច្នេះត្រូវបំបែកពី full clone ឬរត់ `git fetch --unshallow origin` ជាមុន — មាន
+ស្លាកមុន `package.json` ស្ថិតនៅកំណែគោលដៅ មាន issue `release-freeze` មួយកំពុងបើក និងគ្មាន
+issue `Release branch not green` ដែលកំពុងបើក
+លើសាខាចេញផ្សាយដែលមានស្រាប់ — សាខាដែលមិនមាននឹងរាយការណ៍ជា `?` មិនស្គាល់ មិនដែល
+ជាពណ៌បៃតងឡើយ — ជួរ Mergify `release` ត្រូវបានកំណត់រចនាសម្ព័ន្ធ (G11: `queue_rules`, `checks_timeout`,
+ស្លាក `queue`) ruleset `release/*` នៅតែរារាំងការលុប និង force-push ហើយ
+`stable/v3` និង `develop` មិនទាន់មាននៅឡើយ) ជំហានសាខាទាំងពីរ trigger ណាខ្លះនៃ workflow
+ដែលកំពុងអសកម្ម និងលក្ខខណ្ឌ `if:` ណាខ្លះដែលក្លាយជាពិត (និងមួយណាខ្លះនៅតែត្រូវបានរារាំងដោយ
+អថេររបស់ឃ្លាំង ឬភ្ជាប់ជាក់លាក់ទៅឃ្លាំង canonical) dist-tags ដែលរំពឹងទុក (`latest` → 3.9.0,
+`next` និង `nightly` ទទេ) និងការត្រឡប់ថយក្រោយ។ Exit `0` = `RESULT: READY`, `1` = លក្ខខណ្ឌ
+ជាមុនដែលរារាំងបានបរាជ័យ (`✗`), `2` = កំហុសការប្រើប្រាស់។ `--advisory <id,...>` បន្ទាប
+ការត្រួតពិនិត្យទៅជាការព្រមាន (`!`) ដោយមិនលាក់វា។
 
-ដំណើរការសាកល្បងនៃការកាត់ចេញពិតប្រាកដ ខណៈពេល release freeze របស់ 3.9.0 នៅតែបើក — សាខាទាំងនេះត្រូវបាន
-បង្កើតបន្ទាប់ពី tag និងមុនពេលដំណាក់កាល 12c ដក freeze ចេញ។
+រត់ dry-run នៃការបំបែកពិតប្រាកដ ខណៈពេល release freeze របស់ 3.9.0 នៅតែបើក — សាខាត្រូវបាន
+បង្កើតបន្ទាប់ពីស្លាក និងមុនពេលដំណាក់កាល 12c ដក freeze ចេញ។
 
-### ការហាត់សាកល្បង 3.8.58 (សម្រាប់តែ fork)
+### ការសាកល្បង 3.8.58 (សម្រាប់តែ fork)
 
 ```bash
-# 1. ដំណើរការសាកល្បងនៅលើ tip បច្ចុប្បន្នដោយប្រើប៉ារ៉ាម៉ែត្រសម្រាប់ការហាត់សាកល្បង
+# 1. រត់សាកល្បងលើចំណុចចុងបច្ចុប្បន្នដោយប្រើប៉ារ៉ាម៉ែត្រសាកល្បង
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. ប្រតិបត្តិប្រឆាំងនឹង remote របស់ FORK (origin ឬ remote ណាមួយដែល URL របស់វាជា
-#    repository ផ្លូវការ នឹងត្រូវបានបដិសេធ; ជំហាននីមួយៗស្នើសុំការបញ្ជាក់នៅលើ terminal)
+# 2. ប្រតិបត្តិទល់នឹង remote របស់ FORK (origin ឬ remote ណាមួយដែល URL របស់វាជាឃ្លាំង
+#    canonical នឹងត្រូវបានបដិសេធ; រាល់ជំហានស្នើសុំការបញ្ជាក់នៅលើ terminal)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. សាកល្បង workflow ដែលមិនទាន់សកម្មនៅក្នុង fork (workflow_dispatch នៅកន្លែងដែលការដំណើរការសាកល្បង
-#    រាយការណ៍ពីការកំណត់ជាប់ទៅ repository ផ្លូវការ) បន្ទាប់មកត្រឡប់ថយក្រោយ
+# 3. សាកល្បង workflow ដែលកំពុងអសកម្មក្នុង fork (workflow_dispatch នៅកន្លែងដែល dry-run
+#    រាយការណ៍ការភ្ជាប់ជាក់លាក់ទៅឃ្លាំង canonical) បន្ទាប់មកត្រឡប់ថយក្រោយ
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop bump commit ត្រូវបានបង្កើតដោយប្រើ git plumbing (មិនប៉ះពាល់ working tree) ហើយដំឡើងកំណែ
-ឯកសារប្រាំដូចគ្នានឹង cycle-open commit៖ `package.json`, `open-sse/package.json`,
+commit ដំឡើងកំណែ develop ត្រូវបានបង្កើតដោយប្រើ git plumbing (មិនប៉ះពាល់ working tree ទេ) និង
+ដំឡើងកំណែឯកសារប្រាំដូចគ្នានឹង commit បើកវដ្ត៖ `package.json`, `open-sse/package.json`,
 `electron/package.json`, `package-lock.json` និង `docs/openapi.yaml`។ ផ្នែក `[4.0.0]`
-នៃ CHANGELOG និងកំណែឆ្លុះបញ្ចាំង i18n របស់វា ត្រូវបានបើកនៅលើ `develop` បន្ទាប់ពីនោះ មុន PR ដំបូងរបស់វា។
-ស្គ្រីបមិនដែលផ្លាស់ប្ដូរ npm dist-tag ទេ — សូមហាត់សាកល្បងទាំងនោះនៅលើ package សម្រាប់សាកល្បង។
+នៃ CHANGELOG និងកំណែឆ្លុះ i18n របស់វា ត្រូវបានបើកលើ `develop` បន្ទាប់ពីនោះ និងមុន PR
+ដំបូងរបស់វា។ ស្គ្រីបមិនដែលផ្លាស់ប្តូរ npm dist-tags ទេ — សាកល្បងវាទាំងនោះលើ package
+សាកល្បងមួយ។
 
-### Artifact សម្រាប់មើល PR ជាមុន (build ម្តង ហើយដំឡើងផ្សាយ byte ដដែល)
+### Artifact មើលជាមុនរបស់ PR (build ម្តង ហើយដំឡើងផ្សាយ bytes ដដែល)
 
-`.github/workflows/preview-artifact.yml` build production tarball មួយពី PR head ហើយ
-ផ្ទៀងផ្ទាត់ build ដដែលនោះ (#8084 ផ្នែក (a))។ សម្រាប់តែ PR ក្នុង repository ដូចគ្នា; គ្មានអ្វីត្រូវបាន publish ទេ។
+`.github/workflows/preview-artifact.yml` បង្កើត production tarball មួយពី PR head និង
+ផ្ទៀងផ្ទាត់ build ដដែលនោះ (#8084 ចំណែក (a))។ សម្រាប់តែ PR ក្នុងឃ្លាំងដូចគ្នា; គ្មានអ្វីត្រូវបានផ្សព្វផ្សាយទេ។
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # ឬបន្ថែមស្លាក `preview-artifact`
 gh run download <run-id> --name preview-artifact-pr<N>-<sha7> --dir preview
 cd preview && sha256sum -c SHA256SUMS
 gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
-npm install -g ./omniroute-*.tgz                          # ការដំឡើងសម្រាប់មើលជាមុន
+npm install -g ./omniroute-*.tgz                          # ការដំឡើងកំណែមើលជាមុន
 ```
 
-ការដំណើរការនេះអនុវត្ត `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, បង្កើត
-tarball, ដំណើរការ `npm run check:pack-boot` (secret ក្លែងក្លាយ, data dir បណ្តោះអាសន្ន), បង្កើត tarball ឡើងវិញ និង
-បរាជ័យ លុះត្រាតែ digest ដូចគ្នាបេះបិទ បន្ទាប់មកកត់ត្រា `artifact-identity.json` (head SHA, base
-SHA, lockfile hash, platform, arch, node ABI, bundler, build policy —
-`scripts/release/artifact-identity.mjs`) ហើយបញ្ជាក់ភាពត្រឹមត្រូវរបស់ tarball នៅក្នុង job ដាច់ដោយឡែក។ ការដំឡើងផ្សាយ
-preview មានន័យថាដំឡើង tarball នោះ៖ មិនត្រូវ build ឡើងវិញពី source ឡើយ។
+ការរត់នេះប្រតិបត្តិ `npm ci`, `npm run build:release`, `npm run check:pack-artifact`, ខ្ចប់
+tarball, រត់ `npm run check:pack-boot` (secret ក្លែងក្លាយ ថតទិន្នន័យបណ្តោះអាសន្ន), ខ្ចប់ឡើងវិញ និង
+បរាជ័យ លុះត្រាតែ digest ដូចគ្នា បន្ទាប់មកកត់ត្រា `artifact-identity.json` (head SHA, base
+SHA, lockfile hash, platform, arch, node ABI, bundler, គោលការណ៍ build —
+`scripts/release/artifact-identity.mjs`) និង attests tarball នៅក្នុង job ដាច់ដោយឡែក។ ការដំឡើងផ្សាយ
+កំណែមើលជាមុនមានន័យថាដំឡើង tarball នោះ៖ មិនត្រូវ build ឡើងវិញពីប្រភពឡើយ។
 
-### ការកាត់ចេញ (3.9.0, បន្ទាប់ពី GO)
+### ការបំបែក (3.9.0 បន្ទាប់ពី GO)
 
-1. GO ត្រូវបានកត់ត្រានៅក្នុង [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)។
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0` បោះពុម្ព `RESULT: READY`។
-3. បង្កើតសាខានៅលើ `origin` ដោយដៃ តាម command ដែលការដំណើរការសាកល្បងបោះពុម្ព — ស្គ្រីប
-   បដិសេធមិន push ទៅ `origin`។ ដើម្បីប្រើ develop commit ដែលបានពិនិត្យរួចឡើងវិញ សូមដំណើរការ
-   ការហាត់សាកល្បង `--execute` នៅលើ tip របស់ 3.9.0 ប្រឆាំងនឹង fork របស់អ្នកជាមុន; វាបោះពុម្ព SHA ទាំងពីរ ហើយ
+1. GO ត្រូវបានកត់ត្រាក្នុង [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)។
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0` បង្ហាញ `RESULT: READY`។
+3. បង្កើតសាខាលើ `origin` ដោយដៃ តាម command ដែល dry-run បង្ហាញ — ស្គ្រីបបដិសេធមិន
+   push ទៅ `origin`។ ដើម្បីប្រើ commit develop ដែលបានពិនិត្យរួចឡើងវិញ សូមរត់ការសាកល្បង
+   `--execute` លើចំណុចចុង 3.9.0 ទល់នឹង fork របស់អ្នកជាមុន; វាបង្ហាញ SHA ទាំងពីរ ហើយ
    commit ដដែលអាចត្រូវបាន push៖
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. ការពារ `stable/v3` និង `develop` (ruleset + merge queue) មុនពេល PR ដំបូងត្រូវបានបញ្ចូល។
-5. workflow ដែលមិនទាន់សកម្មនឹងបើកដោយផ្អែកលើការមានសាខា៖ `forward-port.yml` (push ទៅ
+4. ការពារ `stable/v3` និង `develop` (សំណុំច្បាប់ + ជួររង់ចាំបញ្ចូលកូដ) មុនពេល PR ដំបូងត្រូវបានបញ្ចូល។
+5. លំហូរការងារដែលមិនទាន់សកម្មនឹងចាប់ផ្តើមដំណើរការដោយផ្អែកលើអត្ថិភាពរបស់សាខា៖ `forward-port.yml` (ការ push ទៅ
    `stable/v3`), `validate-stable-pr.yml` (PR ទៅ `stable/v3`) និង `nightly-v4-build.yml`
-   (build `develop`)។ មុនពេលដាក់ឱ្យប្រើប្រាស់ពិត សូមកំណត់ repository secret `secrets.FORWARD_PORT_TOKEN` (ដើម្បីឱ្យ CI ដំណើរការ
-   លើ forward-port PR); ការ publish nightly នៅតែបិទ រហូតដល់ម្ចាស់កំណត់ repository
-   variable `vars.NIGHTLY_PUBLISH` ទៅជា `true` ហើយ npm Trusted Publishing ទទួលយក
-   `nightly-v4-build.yml`។ ការកំណត់ channel ប្រើ `scripts/release/dist-tag.mjs` ដែលជា
-   resolver ដូចគ្នានឹងអ្វីដែល `npm-publish.yml` ប្រើ។
-6. ផ្ទៀងផ្ទាត់ channel៖ `npm view omniroute dist-tags --json` បង្ហាញ `latest` = 3.9.0 ហើយគ្មាន
-   `next` / `nightly` រហូតដល់ v4 ត្រូវបាន publish។
-7. ត្រឡប់ថយក្រោយ ប្រសិនបើចាំបាច់៖ `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
+   (build `develop`)។ មុនពេលដាក់ឱ្យដំណើរការជាផ្លូវការ សូមកំណត់ secret របស់ឃ្លាំង `secrets.FORWARD_PORT_TOKEN` (ដើម្បីឱ្យ CI ដំណើរការលើ
+   PR ដែលធ្វើ forward-port); ការបោះពុម្ព nightly នឹងនៅតែបិទ រហូតដល់ម្ចាស់កំណត់អថេររបស់ឃ្លាំង
+   `vars.NIGHTLY_PUBLISH` ទៅជា `true` ហើយ npm Trusted Publishing ទទួលយក
+   `nightly-v4-build.yml`។ ការកំណត់ channel ត្រូវបានធ្វើដោយ `scripts/release/dist-tag.mjs` ដែលជា
+   resolver ដូចគ្នាដែល `npm-publish.yml` ប្រើ។
+6. ផ្ទៀងផ្ទាត់ channel៖ `npm view omniroute dist-tags --json` បង្ហាញថា `latest` = 3.9.0 ហើយមិនមាន
+   `next` / `nightly` ទេ រហូតដល់ v4 ត្រូវបានបោះពុម្ព។
+7. ប្រសិនបើចាំបាច់ ត្រឡប់ទៅកំណែមុន៖ `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    និង `npm dist-tag add omniroute@3.8.59 latest`។
 
 ---

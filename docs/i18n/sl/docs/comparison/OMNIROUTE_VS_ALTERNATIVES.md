@@ -39,11 +39,11 @@ Objektivna primerjava funkcij s priljubljenimi odprtokodnimi usmerjevalniki AI.
 
 ## Kdaj izbrati OmniRoute
 
-- Gostujete ga sami in želite **največjo pokritost ponudnikov** (329 ponudnikov, 155 brezplačnih vnosov v katalogu/brez avtentikacije)
-- Potrebujete **vgrajeni strežnik MCP** (orodja LLM, pomnilnik in sposobnosti, izpostavljene kot orodja)
-- Potrebujete **protokol A2A** za delovne tokove med agenti
-- Želite **prikrivanje prstnega odtisa** (JA3/JA4), da preprečite zaznavanje s sistemi CAPTCHA ponudnikov
-- Potrebujete **funkcije za podjetja** (zaščitne mehanizme, vrednotenja, revizijsko sled) brez računa za SaaS
+- Gostujete ga sami in želite **največjo pokritost ponudnikov** (372 ponudnikov, 155 brezplačnih vnosov v katalogu/brez preverjanja pristnosti)
+- Potrebujete **vgrajeni strežnik MCP** (orodja LLM, pomnilnik in veščine, izpostavljene kot orodja)
+- Potrebujete **protokol A2A** za poteke dela med agenti
+- Želite **prikrivanje prstnega odtisa** (JA3/JA4), da se izognete zaznavanju s sistemi CAPTCHA višje v verigi
+- Potrebujete **funkcije za podjetja** (zaščitne mehanizme, evalvacije, revizijsko sled) brez računa za SaaS
 
 ## Kdaj izbrati LiteLLM
 
