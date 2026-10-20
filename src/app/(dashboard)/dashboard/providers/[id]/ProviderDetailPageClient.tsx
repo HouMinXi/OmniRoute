@@ -55,6 +55,7 @@ import { useModelCompatState } from "./hooks/useModelCompatState";
 import { useConnectionGate } from "./hooks/useConnectionGate";
 import { useProviderNodeActions } from "./hooks/useProviderNodeActions";
 import ProviderExtraPanels from "./components/ProviderExtraPanels";
+import { hidesProviderModelSurfaces } from "./providerSurfaceVisibility";
 import ProviderModelsSection from "./components/ProviderModelsSection";
 import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
@@ -788,7 +789,7 @@ export default function ProviderDetailPageClient() {
       {isUpstreamProxyProvider && <UpstreamProxyCard t={t} />}
 
       {/* Models — hidden for search providers (they don't have models) */}
-      {!isSearchProvider && !isUpstreamProxyProvider && (
+      {!isSearchProvider && !isUpstreamProxyProvider && !hidesProviderModelSurfaces(providerId) && (
         <Card>
           <h2 className="text-lg font-semibold mb-4">{t("availableModels")}</h2>
           <ProviderModelsSection

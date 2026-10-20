@@ -1045,6 +1045,7 @@
     "searchTools": "Search Tools",
     "agents": "Agents",
     "cloudAgents": "Cloud Agents",
+    "grokBot": "Grok Bot",
     "memory": "Memory",
     "skills": "Skills",
     "omniSkills": "OmniSkills",
@@ -1238,6 +1239,7 @@
     "cliToolsSubtitle": "Configure CLI runtimes",
     "agentsSubtitle": "Manage local agents",
     "cloudAgentsSubtitle": "Manage cloud-based agents",
+    "grokBotSubtitle": "Read-only view of signed-in bots",
     "apiEndpointsSubtitle": "Expose custom endpoints",
     "proxySubtitle": "HTTP proxy settings",
     "mitmProxySubtitle": "MITM interception",
@@ -15073,5 +15075,20 @@
     "importButton": "Import",
     "importFailed": "Import failed.",
     "importSuccess": "Imported {connections} accounts and {nodes} provider nodes; {skipped} skipped."
+  },
+  "grokBotPage": {
+    "title": "Grok Bot",
+    "subtitle": "Signed-in accounts, their bots, skills, and local computers.",
+    "accountsTitle": "Accounts",
+    "accountsEmpty": "No signed-in accounts.",
+    "rosterTitle": "Bots",
+    "rosterEmpty": "Choose an account to see its bots.",
+    "conversationTitle": "Conversation",
+    "conversationEmpty": "Choose a bot to see the conversation.",
+    "skillsTitle": "Skills and routines",
+    "skillsEmpty": "No skills or routines.",
+    "computersTitle": "Local computers",
+    "computersEmpty": "No computers reported.",
+    "chiefOfStaff": "chief of staff"
   }
 }
