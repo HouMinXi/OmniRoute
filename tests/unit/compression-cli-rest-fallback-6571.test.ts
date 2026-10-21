@@ -63,11 +63,12 @@ test("restCompressionStatus (via runCompressionStatus REST fallback) should surf
   }) as typeof fetch;
 
   try {
-    const { runCompressionStatus } = await import(
-      "../../bin/cli/commands/compression.mjs"
-    );
+    const { runCompressionStatus } = await import("../../bin/cli/commands/compression.mjs");
     const out = await captureStdout(() =>
-      runCompressionStatus({}, makeCmd("json") as unknown as Parameters<typeof runCompressionStatus>[1])
+      runCompressionStatus(
+        {},
+        makeCmd("json") as unknown as Parameters<typeof runCompressionStatus>[1]
+      )
     );
     const parsed = JSON.parse(out);
 
@@ -101,9 +102,7 @@ test("restSetEngine (via runCompressionEngineSet REST fallback) should PUT `defa
   }) as typeof fetch;
 
   try {
-    const { runCompressionEngineSet } = await import(
-      "../../bin/cli/commands/compression.mjs"
-    );
+    const { runCompressionEngineSet } = await import("../../bin/cli/commands/compression.mjs");
     await runCompressionEngineSet(
       "caveman",
       {},
@@ -125,7 +124,11 @@ test("restSetEngine (via runCompressionEngineSet REST fallback) should PUT `defa
       "standard",
       `expected PUT body to contain defaultMode:"standard" (caveman translated), got: ${JSON.stringify(body)}`
     );
-    assert.equal(body.engine, undefined, `PUT body must not contain a nonexistent "engine" key, got: ${JSON.stringify(body)}`);
+    assert.equal(
+      body.engine,
+      undefined,
+      `PUT body must not contain a nonexistent "engine" key, got: ${JSON.stringify(body)}`
+    );
   } finally {
     globalThis.fetch = origFetch;
   }

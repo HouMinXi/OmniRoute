@@ -99,7 +99,10 @@ test("resilience profile set usa JSON-RPC tools/call", async () => {
   globalThis.fetch = makeMcpStreamFetch({ toolResult: {} });
   const inner = globalThis.fetch;
   globalThis.fetch = ((url: any, init: any) => {
-    if (String(url).includes("/api/mcp/stream") && String(init?.body || "").includes("tools/call")) {
+    if (
+      String(url).includes("/api/mcp/stream") &&
+      String(init?.body || "").includes("tools/call")
+    ) {
       capturedCall = JSON.parse(init.body);
     }
     return inner(url, init);
