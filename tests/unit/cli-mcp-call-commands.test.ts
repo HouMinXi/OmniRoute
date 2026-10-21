@@ -77,9 +77,16 @@ function jsonRpcSse(id: JsonRpcId, payload: Record<string, unknown>) {
 
 type JsonRpcId = number | string | null | undefined;
 
-const { runMcpCallCommand, resolveMcpCallTimeoutMs, resolveMcpToolCallTimeoutMs, MAX_TIMEOUT_MS } =
-  await import("../../bin/cli/commands/mcp.mjs");
-const { mcpCallTool, SESSION_DELETE_TIMEOUT_MS } = await import("../../bin/cli/mcpClient.mjs");
+const {
+  runMcpCallCommand,
+  resolveMcpCallTimeoutMs,
+  resolveMcpCallTimeouts,
+  DEFAULT_HANDSHAKE_TIMEOUT_MS,
+  MAX_TIMEOUT_MS,
+} = await import("../../bin/cli/commands/mcp.mjs");
+const { mcpCallTool, SESSION_DELETE_TIMEOUT_MS, CANCEL_NOTIFY_TIMEOUT_MS } =
+  await import("../../bin/cli/mcpClient.mjs");
+const { apiFetch } = await import("../../bin/cli/api.mjs");
 const { createProgram } = await import("../../bin/cli/program.mjs");
 
 const LOCAL = { baseUrl: "http://localhost:20128" };
@@ -434,7 +441,10 @@ test(
       const r = await runCli(["--timeout", " ", "mcp", "call", "slow"]);
       assert.equal(r.code, 1);
       assert.ok(r.ms < 3_000, `blank --timeout must not mean unlimited, took ${r.ms}ms`);
-      assert.match(r.stderr, /^Warning: invalid --timeout " ";/);
+      assert.equal(
+        r.stderr.split("\n")[0],
+        'Warning: invalid --timeout " "; ignoring it (tools/call: 60ms, initialize: 60ms per attempt).'
+      );
     })
 );
 
@@ -481,21 +491,62 @@ test("--timeout above setTimeout's limit is clamped, not turned into a 1ms abort
   );
 });
 
-test("resolveMcpToolCallTimeoutMs: explicit wins, else a positive env value, else no deadline", () => {
-  assert.equal(resolveMcpToolCallTimeoutMs(50, "60"), 50);
-  assert.equal(resolveMcpToolCallTimeoutMs(0, "60"), 0, "--timeout 0 stays unlimited");
-  assert.equal(resolveMcpToolCallTimeoutMs(undefined, "60"), 60);
-  for (const env of [undefined, "", "0", "abc", "-5"]) {
-    assert.equal(resolveMcpToolCallTimeoutMs(undefined, env), 0, `env ${JSON.stringify(env)}`);
+test("resolveMcpCallTimeouts: flag, else env, else 30s handshake and no tools/call deadline", () => {
+  const ok = (handshake: number, toolCall: number) => ({ handshake, toolCall, warnings: [] });
+  assert.equal(DEFAULT_HANDSHAKE_TIMEOUT_MS, 30_000);
+  assert.deepEqual(resolveMcpCallTimeouts("50", "60"), ok(50, 50));
+  assert.deepEqual(resolveMcpCallTimeouts("0", "60"), ok(0, 0), "--timeout 0 stays unlimited");
+  assert.deepEqual(resolveMcpCallTimeouts(undefined, "60"), ok(60, 60));
+  for (const env of [undefined, "", "0"]) {
+    assert.deepEqual(resolveMcpCallTimeouts(undefined, env), ok(30_000, 0), `env ${env}`);
   }
-  assert.equal(resolveMcpToolCallTimeoutMs(undefined, "99999999999"), MAX_TIMEOUT_MS);
+  assert.deepEqual(
+    resolveMcpCallTimeouts(undefined, "99999999999"),
+    ok(MAX_TIMEOUT_MS, MAX_TIMEOUT_MS)
+  );
+  // The env value is parsed like the flag: "300ms" is rejected, not read as 300.
+  for (const env of ["300ms", "abc", "-5", " 60 ", "1e3", "00"]) {
+    assert.deepEqual(resolveMcpCallTimeouts(undefined, env), {
+      handshake: 30_000,
+      toolCall: 0,
+      warnings: [`invalid OMNIROUTE_HTTP_TIMEOUT_MS ${JSON.stringify(env)}`],
+    });
+  }
+  assert.deepEqual(resolveMcpCallTimeouts("300ms", "60"), {
+    handshake: 60,
+    toolCall: 60,
+    warnings: ['invalid --timeout "300ms"'],
+  });
 });
+
+test(
+  "CLI: OMNIROUTE_HTTP_TIMEOUT_MS=300ms warns and is ignored, like --timeout 300ms",
+  { timeout: 10_000 },
+  () =>
+    withHttpTimeoutEnv("300ms", async () => {
+      // Both initialize and tools/call take 500ms: read as 300 they would time out.
+      const fetchImpl = makeMcpStreamFetch({
+        onRequest: async (c) => {
+          if (c.body?.method === "initialize" || c.body?.method === "tools/call") await delay(500);
+          return undefined;
+        },
+      });
+      const r = await runCli(["mcp", "call", "omniroute_get_health"], fetchImpl);
+      assert.equal(r.code, 0, r.stderr);
+      assert.equal(
+        r.stderr.split("\n")[0],
+        'Warning: invalid OMNIROUTE_HTTP_TIMEOUT_MS "300ms"; ignoring it ' +
+          "(tools/call: no limit, initialize: 30000ms per attempt)."
+      );
+    })
+);
 
 test("other mcpCallTool callers keep apiFetch's deadline on tools/call, as before", () =>
   withHttpTimeoutEnv(undefined, async () => {
     // combo / compression / oneproxy / resilience / skills pass no toolCallTimeout:
     // tools/call keeps OMNIROUTE_HTTP_TIMEOUT_MS-else-30s, or their explicit timeout.
-    for (const options of [{}, { timeout: 30000 }]) {
+    // toolCallTimeout: undefined counts as not set.
+    for (const options of [{}, { timeout: 30000 }, { toolCallTimeout: undefined }]) {
       const calls: McpFetchCall[] = [];
       await withFetch(makeMcpStreamFetch({ calls }), () =>
         mcpCallTool("omniroute_get_health", {}, { ...LOCAL, ...options })
@@ -507,69 +558,88 @@ test("other mcpCallTool callers keep apiFetch's deadline on tools/call, as befor
 
 // Let pending promise callbacks run between fake-timer ticks.
 const settle = () => new Promise<void>((resolve) => setImmediate(resolve));
+const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
-test("CLI: with no --timeout and no env, tools/call has no deadline but the handshake does", () =>
-  withHttpTimeoutEnv(undefined, async () => {
-    const calls: McpFetchCall[] = [];
-    const r = await runCli(["mcp", "call", "omniroute_get_health"], makeMcpStreamFetch({ calls }));
-    assert.equal(r.code, 0, r.stderr);
-    const byMethod = (m: string) => calls.find((c) => c.body?.method === m);
-    assert.equal(byMethod("tools/call")?.signal, null, "tools/call must not get a deadline");
-    assert.ok(byMethod("initialize")?.signal, "initialize keeps apiFetch's deadline");
-    assert.ok(byMethod("notifications/initialized")?.signal);
-    assert.ok(calls.find((c) => c.method === "DELETE")?.signal, "DELETE keeps its 3s deadline");
-  }));
-
-test("CLI: a tools/call slower than 30s still succeeds by default (fake timers)", () =>
-  withHttpTimeoutEnv(undefined, async () => {
-    mock.timers.enable({ apis: ["setTimeout"] });
-    try {
-      let answer: (() => void) | undefined;
+test(
+  "CLI: with no --timeout and no env, tools/call has no deadline but the handshake does",
+  { timeout: 10_000 },
+  () =>
+    withHttpTimeoutEnv(undefined, async () => {
       const calls: McpFetchCall[] = [];
-      const fetchImpl = makeMcpStreamFetch({
-        calls,
-        onRequest: (c) =>
-          c.body?.method !== "tools/call"
-            ? undefined
-            : new Promise<Response>((resolve, reject) => {
-                c.signal?.addEventListener("abort", () =>
-                  reject(new DOMException("This operation was aborted", "AbortError"))
-                );
-                answer = () => resolve(jsonRpcSse(c.body?.id, { result: { content: [] } }));
-              }),
-      });
-      const pending = runCli(["mcp", "call", "slow"], fetchImpl);
-      while (!answer) await settle();
-      mock.timers.tick(10 * 60_000);
-      await settle();
-      answer();
-      const r = await pending;
+      const r = await runCli(
+        ["mcp", "call", "omniroute_get_health"],
+        makeMcpStreamFetch({ calls })
+      );
       assert.equal(r.code, 0, r.stderr);
-      assert.equal(calls.filter((c) => c.body?.method === "tools/call").length, 1);
-    } finally {
-      mock.timers.reset();
-    }
-  }));
+      const byMethod = (m: string) => calls.find((c) => c.body?.method === m);
+      assert.equal(byMethod("tools/call")?.signal, null, "tools/call must not get a deadline");
+      assert.ok(byMethod("initialize")?.signal, "initialize keeps apiFetch's deadline");
+      assert.ok(byMethod("notifications/initialized")?.signal);
+      assert.ok(calls.find((c) => c.method === "DELETE")?.signal, "DELETE keeps its 3s deadline");
+    })
+);
 
-test("CLI: an explicit --timeout still aborts a slow tools/call (fake timers)", () =>
-  withHttpTimeoutEnv(undefined, async () => {
-    mock.timers.enable({ apis: ["setTimeout"] });
-    try {
-      const calls: McpFetchCall[] = [];
-      const pending = runCli(["--timeout", "30000", "mcp", "call", "slow"], hangingToolCall(calls));
-      while (!calls.some((c) => c.body?.method === "tools/call")) await settle();
-      const toolCall = calls.find((c) => c.body?.method === "tools/call");
-      mock.timers.tick(29_999);
-      await settle();
-      assert.equal(toolCall?.signal?.aborted, false);
-      mock.timers.tick(1);
-      const r = await pending;
-      assert.equal(r.code, 1);
-      assert.match(r.stderr, /^MCP tools\/call timed out after 30000ms/);
-    } finally {
-      mock.timers.reset();
-    }
-  }));
+test(
+  "CLI: a tools/call slower than 30s still succeeds by default (fake timers)",
+  { timeout: 10_000 },
+  () =>
+    withHttpTimeoutEnv(undefined, async () => {
+      mock.timers.enable({ apis: ["setTimeout"] });
+      try {
+        let answer: (() => void) | undefined;
+        const calls: McpFetchCall[] = [];
+        const fetchImpl = makeMcpStreamFetch({
+          calls,
+          onRequest: (c) =>
+            c.body?.method !== "tools/call"
+              ? undefined
+              : new Promise<Response>((resolve, reject) => {
+                  c.signal?.addEventListener("abort", () =>
+                    reject(new DOMException("This operation was aborted", "AbortError"))
+                  );
+                  answer = () => resolve(jsonRpcSse(c.body?.id, { result: { content: [] } }));
+                }),
+        });
+        const pending = runCli(["mcp", "call", "slow"], fetchImpl);
+        while (!answer) await settle();
+        mock.timers.tick(10 * 60_000);
+        await settle();
+        answer();
+        const r = await pending;
+        assert.equal(r.code, 0, r.stderr);
+        assert.equal(calls.filter((c) => c.body?.method === "tools/call").length, 1);
+      } finally {
+        mock.timers.reset();
+      }
+    })
+);
+
+test(
+  "CLI: an explicit --timeout still aborts a slow tools/call (fake timers)",
+  { timeout: 10_000 },
+  () =>
+    withHttpTimeoutEnv(undefined, async () => {
+      mock.timers.enable({ apis: ["setTimeout"] });
+      try {
+        const calls: McpFetchCall[] = [];
+        const pending = runCli(
+          ["--timeout", "30000", "mcp", "call", "slow"],
+          hangingToolCall(calls)
+        );
+        while (!calls.some((c) => c.body?.method === "tools/call")) await settle();
+        const toolCall = calls.find((c) => c.body?.method === "tools/call");
+        mock.timers.tick(29_999);
+        await settle();
+        assert.equal(toolCall?.signal?.aborted, false);
+        mock.timers.tick(1);
+        const r = await pending;
+        assert.equal(r.code, 1);
+        assert.match(r.stderr, /^MCP tools\/call timed out after 30000ms/);
+      } finally {
+        mock.timers.reset();
+      }
+    })
+);
 
 // tools/call answers with SSE headers at once, then stays silent until the
 // client gives up: a headers-only timer would never fire here.
@@ -633,7 +703,7 @@ test(
   }
 );
 
-test("CLI: initialize keeps the 30s default deadline (fake timers)", () =>
+test("CLI: initialize keeps the 30s default deadline (fake timers)", { timeout: 10_000 }, () =>
   withHttpTimeoutEnv(undefined, async () => {
     mock.timers.enable({ apis: ["setTimeout"] });
     try {
@@ -673,7 +743,174 @@ test("CLI: initialize keeps the 30s default deadline (fake timers)", () =>
     } finally {
       mock.timers.reset();
     }
-  }));
+  })
+);
+
+test(
+  "a finished tools/call clears its deadline, so the CLI can exit at once (fake timers)",
+  { timeout: 10_000 },
+  () =>
+    withHttpTimeoutEnv(undefined, async () => {
+      mock.timers.enable({ apis: ["setTimeout"] });
+      try {
+        const calls: McpFetchCall[] = [];
+        const r = await runCli(
+          ["--timeout", "600000", "mcp", "call", "omniroute_get_health"],
+          makeMcpStreamFetch({ calls })
+        );
+        assert.equal(r.code, 0, r.stderr);
+        const toolCall = calls.find((c) => c.body?.method === "tools/call");
+        assert.ok(toolCall?.signal, "the explicit --timeout attaches a deadline");
+        // A deadline timer left running would fire here, and in a real process it
+        // would keep the CLI alive for the full 600s after printing the result.
+        mock.timers.tick(600_000);
+        await settle();
+        assert.equal(toolCall.signal.aborted, false);
+      } finally {
+        mock.timers.reset();
+      }
+    })
+);
+
+test(
+  "notifications/cancelled is sent only when the deadline expires, not on other errors",
+  { timeout: 10_000 },
+  async () => {
+    const failures: Array<() => Promise<Response>> = [
+      async () => makeMcpResp({ error: "unavailable" }, 503),
+      async () => {
+        throw new TypeError("fetch failed");
+      },
+      async () => jsonRpcSse(2, { error: { code: -32000, message: "boom" } }),
+    ];
+    for (const fail of failures) {
+      const calls: McpFetchCall[] = [];
+      await withFetch(
+        makeMcpStreamFetch({
+          calls,
+          onRequest: (c) => (c.body?.method === "tools/call" ? fail() : undefined),
+        }),
+        () =>
+          captureStdio(async () => {
+            assert.equal(
+              await runMcpCallCommand("slow", {}, {}, { ...LOCAL, timeout: "60000" }),
+              1
+            );
+          })
+      );
+      assert.deepEqual(rpcSequence(calls).slice(-2), ["tools/call", "DELETE"]);
+    }
+  }
+);
+
+test(
+  "a hanging notifications/cancelled is dropped after CANCEL_NOTIFY_TIMEOUT_MS",
+  { timeout: 10_000 },
+  async () => {
+    assert.equal(CANCEL_NOTIFY_TIMEOUT_MS, 1000);
+    const calls: McpFetchCall[] = [];
+    let cancelSentAt = 0;
+    let cancelAbortedAfterMs: number | null = null;
+    const fetchImpl = makeMcpStreamFetch({
+      calls,
+      onRequest: (c) => {
+        if (c.body?.method === "tools/call") return hangUntilAborted(c);
+        if (c.body?.method !== "notifications/cancelled") return undefined;
+        cancelSentAt = Date.now();
+        c.signal?.addEventListener("abort", () => {
+          cancelAbortedAfterMs = Date.now() - cancelSentAt;
+        });
+        return hangUntilAborted(c);
+      },
+    });
+    await withFetch(fetchImpl, () =>
+      captureStdio(async () => {
+        assert.equal(await runMcpCallCommand("slow", {}, {}, { ...LOCAL, timeout: "100" }), 1);
+      })
+    );
+    assert.ok(cancelAbortedAfterMs != null, "the cancel must be cut off by its own timeout");
+    assert.ok(
+      cancelAbortedAfterMs >= CANCEL_NOTIFY_TIMEOUT_MS - 200 &&
+        cancelAbortedAfterMs < CANCEL_NOTIFY_TIMEOUT_MS + 1_000,
+      `cancel aborted after ${cancelAbortedAfterMs}ms; expected ~${CANCEL_NOTIFY_TIMEOUT_MS}ms`
+    );
+    assert.equal(rpcSequence(calls).at(-1), "DELETE");
+  }
+);
+
+test(
+  "the tools/call deadline starts after the handshake, not before",
+  { timeout: 10_000 },
+  async () => {
+    // initialize takes 700ms, tools/call 300ms; a 500ms deadline covers only tools/call.
+    const { stdout, stderr } = await withFetch(
+      makeMcpStreamFetch({
+        onRequest: async (c) => {
+          if (c.body?.method === "initialize") await delay(700);
+          if (c.body?.method === "tools/call") await delay(300);
+          return undefined;
+        },
+      }),
+      () =>
+        captureStdio(async () => {
+          assert.equal(
+            await runMcpCallCommand("omniroute_get_health", {}, {}, { ...LOCAL, timeout: "500" }),
+            0
+          );
+        })
+    );
+    assert.equal(stdout, "ok\n");
+    assert.equal(stderr, "");
+  }
+);
+
+function hangUntilAborted(c: McpFetchCall) {
+  return new Promise<Response>((_, reject) => {
+    c.signal?.addEventListener("abort", () =>
+      reject(new DOMException("This operation was aborted", "AbortError"))
+    );
+  });
+}
+
+test("apiFetch: the caller's signal aborts a request that also has a timeout", async () => {
+  const ac = new AbortController();
+  let seen: AbortSignal | null = null;
+  const fetchImpl = (async (_input: FetchInputLike, init?: RequestInit) => {
+    seen = init?.signal ?? null;
+    return new Promise<Response>((_, reject) => {
+      init?.signal?.addEventListener("abort", () => reject(init.signal?.reason));
+    });
+  }) as typeof globalThis.fetch;
+  await withFetch(fetchImpl, async () => {
+    const pending = apiFetch("/api/x", {
+      ...LOCAL,
+      timeout: 60_000,
+      retry: false,
+      signal: ac.signal,
+    });
+    while (!seen) await settle();
+    ac.abort(new Error("caller stopped"));
+    await assert.rejects(pending, /caller stopped/);
+  });
+});
+
+test("apiFetch: no retry once the caller's signal is aborted", async () => {
+  for (const timeout of [0, 60_000]) {
+    const ac = new AbortController();
+    ac.abort(); // default AbortError reason, which would otherwise be retried
+    let attempts = 0;
+    const fetchImpl = (async (_input: FetchInputLike, init?: RequestInit) => {
+      attempts++;
+      throw init?.signal?.reason;
+    }) as typeof globalThis.fetch;
+    await withFetch(fetchImpl, () =>
+      assert.rejects(apiFetch("/api/x", { ...LOCAL, timeout, signal: ac.signal }))
+    );
+    assert.equal(attempts, 1, `timeout ${timeout}`);
+  }
+});
+
+type FetchInputLike = string | URL | Request;
 
 test(
   "session DELETE uses SESSION_DELETE_TIMEOUT_MS even when --timeout is larger",

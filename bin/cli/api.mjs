@@ -204,6 +204,8 @@ async function readResponseBody(res) {
   }
 }
 
+// `signal` (opts.signal) lets a caller cancel the request; it combines with the
+// per-attempt timeout when both are set.
 function fetchOnce(url, init, timeoutMs, signal) {
   if (!timeoutMs) return fetch(url, signal ? { ...init, signal } : init);
   const ac = new AbortController();
@@ -244,7 +246,8 @@ export async function apiFetch(path, opts = {}) {
       return enrichResponse(res, opts);
     } catch (err) {
       lastErr = err;
-      if (attempt < maxAttempts && shouldRetryError(err, opts)) {
+      // A caller that aborted its own signal wants the request stopped, not retried.
+      if (attempt < maxAttempts && !opts.signal?.aborted && shouldRetryError(err, opts)) {
         const delay = computeBackoff(attempt, null);
         if (verbose) {
           process.stderr.write(

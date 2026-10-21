@@ -124,10 +124,10 @@ export function registerMcp(program) {
 export const MAX_TIMEOUT_MS = 2_147_483_647;
 
 /**
- * Parse an explicit --timeout value for mcp call.
+ * Parse a --timeout (or OMNIROUTE_HTTP_TIMEOUT_MS) value for mcp call.
  *
- * - missing → undefined (see resolveMcpToolCallTimeoutMs for what tools/call
- *   then uses; the handshake falls back to apiFetch's env-or-30s rule)
+ * - missing → undefined (resolveMcpCallTimeouts then falls back to
+ *   OMNIROUTE_HTTP_TIMEOUT_MS, else its defaults)
  * - exactly "0" → 0: no client-side deadline (intentional; unlike
  *   OMNIROUTE_HTTP_TIMEOUT_MS=0, which apiFetch treats as unset)
  * - a canonical positive integer (no sign, no leading zeros, no surrounding
@@ -145,23 +145,46 @@ export function resolveMcpCallTimeoutMs(raw) {
   return { timeout: Math.min(Number(s), MAX_TIMEOUT_MS), invalid: false };
 }
 
+// apiFetch's default when neither --timeout nor OMNIROUTE_HTTP_TIMEOUT_MS is set.
+export const DEFAULT_HANDSHAKE_TIMEOUT_MS = 30_000;
+
 /**
- * Deadline for the whole tools/call of `mcp call` (send until the result has
- * been read, --stream body included).
+ * Timeouts for one `mcp call`, from the raw --timeout flag and the raw
+ * OMNIROUTE_HTTP_TIMEOUT_MS value. Both go through resolveMcpCallTimeoutMs, so
+ * "300ms", " 50 " or "1e3" is rejected the same way in either place; a
+ * rejected value produces a warning and is ignored. An empty env value and
+ * OMNIROUTE_HTTP_TIMEOUT_MS=0 count as unset (apiFetch's rule); --timeout 0
+ * means no client-side deadline.
  *
- * Before the shared client, `mcp call` used bare fetch with no client-side
- * timeout, and a tool may legitimately run for minutes, so tools/call has no
- * default deadline. One applies only when the user asks for it:
- *   explicit (valid) --timeout → that value (0 = none)
- *   else OMNIROUTE_HTTP_TIMEOUT_MS, read like apiFetch reads it (a positive
- *   integer; anything else counts as unset), clamped to MAX_TIMEOUT_MS
- *   else 0 → no deadline
+ * - handshake (initialize, notifications/initialized; per attempt, until the
+ *   response headers arrive): flag, else env, else 30s
+ * - toolCall (the whole tools/call, until the result or the last --stream
+ *   frame has been read): flag, else env, else 0 = no deadline. Before the
+ *   shared client `mcp call` used bare fetch with no client-side timeout, and
+ *   a tool may legitimately run for minutes.
  */
-export function resolveMcpToolCallTimeoutMs(explicit, env = process.env.OMNIROUTE_HTTP_TIMEOUT_MS) {
-  if (explicit !== undefined) return explicit;
-  const fromEnv = Number.parseInt(env || "", 10);
-  return fromEnv > 0 ? Math.min(fromEnv, MAX_TIMEOUT_MS) : 0;
+export function resolveMcpCallTimeouts(rawFlag, rawEnv = process.env.OMNIROUTE_HTTP_TIMEOUT_MS) {
+  const warnings = [];
+  const flag = resolveMcpCallTimeoutMs(rawFlag);
+  if (flag.invalid) warnings.push(`invalid --timeout ${JSON.stringify(String(rawFlag))}`);
+  let env;
+  if (rawEnv != null && rawEnv !== "") {
+    const parsed = resolveMcpCallTimeoutMs(rawEnv);
+    if (parsed.invalid) {
+      warnings.push(`invalid OMNIROUTE_HTTP_TIMEOUT_MS ${JSON.stringify(String(rawEnv))}`);
+    } else if (parsed.timeout > 0) {
+      env = parsed.timeout;
+    }
+  }
+  const explicit = flag.timeout ?? env;
+  return {
+    handshake: explicit ?? DEFAULT_HANDSHAKE_TIMEOUT_MS,
+    toolCall: explicit ?? 0,
+    warnings,
+  };
 }
+
+const describeLimit = (ms) => (ms ? `${ms}ms` : "no limit");
 
 /**
  * `mcp call` entry point. Protocol + transport live in mcpClient.mjs
@@ -173,25 +196,20 @@ export async function runMcpCallCommand(tool, args, opts = {}, globalOpts = {}) 
     // Scopes come from the server-side credential, never from the client.
     process.stderr.write("Warning: --scope is ignored by mcp call and will be removed.\n");
   }
-  // --timeout is a global option (string from commander).
-  //   handshake (initialize, notifications/initialized): --timeout, else
-  //     OMNIROUTE_HTTP_TIMEOUT_MS, else 30s (apiFetch's rule), each request
-  //     until its response headers arrive
-  //   tools/call: --timeout, else OMNIROUTE_HTTP_TIMEOUT_MS, else none; it
-  //     limits the whole call, including reading the result or --stream body
-  const rawTimeout = globalOpts.timeout;
-  const { timeout, invalid } = resolveMcpCallTimeoutMs(rawTimeout);
-  if (invalid) {
+  // --timeout is a global option (string from commander); see
+  // resolveMcpCallTimeouts for how it combines with OMNIROUTE_HTTP_TIMEOUT_MS.
+  const { handshake, toolCall, warnings } = resolveMcpCallTimeouts(globalOpts.timeout);
+  for (const warning of warnings) {
     process.stderr.write(
-      `Warning: invalid --timeout ${JSON.stringify(String(rawTimeout))}; ignoring it ` +
-        "(OMNIROUTE_HTTP_TIMEOUT_MS still applies if set).\n"
+      `Warning: ${warning}; ignoring it (tools/call: ${describeLimit(toolCall)}, ` +
+        `initialize: ${describeLimit(handshake)} per attempt).\n`
     );
   }
   try {
     const result = await mcpCallTool(tool, args, {
       stream: Boolean(opts.stream),
-      timeout,
-      toolCallTimeout: resolveMcpToolCallTimeoutMs(timeout),
+      timeout: handshake,
+      toolCallTimeout: toolCall,
       baseUrl: globalOpts.baseUrl,
       apiKey: globalOpts.apiKey,
       context: globalOpts.context,

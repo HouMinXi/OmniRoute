@@ -104,15 +104,16 @@ export async function readJsonRpcResponse(res) {
  * request until its response headers arrive (undefined → OMNIROUTE_HTTP_TIMEOUT_MS,
  * else 30s); the session DELETE always uses SESSION_DELETE_TIMEOUT_MS.
  *
- * options.toolCallTimeout, when present, replaces options.timeout for tools/call
- * only and limits the WHOLE call, from send until the JSON-RPC result (or the
- * last --stream frame) has been read, like the MCP SDK's request timeout.
- * 0 = no client-side deadline. On expiry a sessionful server is sent a
- * best-effort notifications/cancelled. `mcp call` uses it; other callers do not.
+ * options.toolCallTimeout, when set to a number, replaces options.timeout for
+ * tools/call only and limits the WHOLE call, from send until the JSON-RPC
+ * result (or the last --stream frame) has been read, like the MCP SDK's
+ * request timeout. 0 = no client-side deadline. undefined (or absent) = not
+ * set: tools/call keeps options.timeout. On expiry a sessionful server is sent
+ * a best-effort notifications/cancelled. `mcp call` uses it; other callers do not.
  */
 export async function mcpCallTool(name, args = {}, options = {}) {
   const { timeout, baseUrl, apiKey, context } = options;
-  const hasToolCallTimeout = "toolCallTimeout" in options;
+  const hasToolCallTimeout = options.toolCallTimeout !== undefined;
   let sessionId = null;
 
   const send = (init) =>
@@ -181,9 +182,10 @@ export async function mcpCallTool(name, args = {}, options = {}) {
     );
 
     if (options.stream) {
-      // Must be awaited: the finally-block DELETE may close the server-side
-      // stream, so it can only run once every frame has been read.
-      return await consumeSse(callRes.body, options.onChunk, deadline?.signal);
+      // When a deadline expires, aborting the fetch also errors this body, so
+      // the read stops. The session DELETE (finally, below) runs only after
+      // the try block's await has seen every frame or the error.
+      return consumeSse(callRes.body, options.onChunk);
     }
 
     const data = await readJsonRpcResponse(callRes);
@@ -228,10 +230,9 @@ export async function mcpCallTool(name, args = {}, options = {}) {
   }
 }
 
-async function consumeSse(body, onChunk, signal) {
+async function consumeSse(body, onChunk) {
   if (!body) throw mcpError("MCP stream returned no body", { status: 500 });
   const reader = body.getReader();
-  signal?.addEventListener("abort", () => reader.cancel().catch(() => {}), { once: true });
   const decoder = new TextDecoder();
   const write = onChunk ?? writeStdout;
   let buf = "";
