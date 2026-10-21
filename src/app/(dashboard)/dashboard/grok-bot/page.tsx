@@ -4,7 +4,7 @@ import { Card } from "@/shared/components";
 import { useTranslations } from "next-intl";
 import { rosterEntries, type GrokBotRosterEntry } from "./roster";
 import { namedItems, type GrokBotRoutine, type GrokBotSkill } from "./details";
-import { nextTranscriptRequest, resumeTranscript, type TranscriptItem } from "./transcript";
+import { nextTranscriptRequest, resumeTranscript, snapshotAttempt, type TranscriptItem } from "./transcript";
 import { useEffect, useRef, useState } from "react";
 
 const REGION_IDS = ["accounts", "roster", "conversation", "skills", "computers"] as const;
@@ -46,6 +46,8 @@ export default function GrokBotPage() {
   const [skills, setSkills] = useState<GrokBotSkill[]>([]);
   const [routines, setRoutines] = useState<GrokBotRoutine[]>([]);
   const [messages, setMessages] = useState<TranscriptItem[]>([]);
+  const [blocked, setBlocked] = useState(false);
+  const drops = useRef<Record<string, number>>({});
   const seen = useRef<TranscriptItem[]>([]);
   const remembered = useRef<Record<string, { after: string; messages: TranscriptItem[] }>>({});
 
@@ -136,6 +138,7 @@ export default function GrokBotPage() {
           }
           if (next.stop) {
             request = { phase: next.phase, after: next.after };
+            delete drops.current[`${selectedAccount}:${selectedBot}`];
             controller.abort();
             return;
           }
@@ -146,7 +149,11 @@ export default function GrokBotPage() {
     read()
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        setMessages([]);
+        if (request.phase !== "snapshot") return;
+        const key = `${selectedAccount}:${selectedBot}`;
+        const verdict = snapshotAttempt(drops.current[key] ?? 0, "dropped");
+        drops.current[key] = (drops.current[key] ?? 0) + 1;
+        if (verdict === "blocked") setBlocked(true);
       })
       .then(() => {
         if (!controller.signal.aborted || request.phase !== "live") return;
@@ -218,6 +225,10 @@ export default function GrokBotPage() {
                       setSelectedBot("");
                       setSkills([]);
                       setRoutines([]);
+                      setBlocked(false);
+                      drops.current = {};
+                      seen.current = [];
+                      setMessages([]);
                       setSelectedAccount(account.id);
                     }}
                     type="button"
@@ -236,6 +247,8 @@ export default function GrokBotPage() {
                     onClick={() => {
                       setSkills([]);
                       setRoutines([]);
+                      setBlocked(false);
+                      delete drops.current[`${selectedAccount}:${bot.agentId}`];
                       const resumed = resumeTranscript(remembered.current, selectedAccount, bot.agentId);
                       seen.current = resumed.messages;
                       setMessages(resumed.messages);
@@ -248,6 +261,8 @@ export default function GrokBotPage() {
                 </li>
               ))}
             </ul>
+          ) : region.id === "conversation" && blocked ? (
+            <p className="text-sm text-muted-foreground">{t("conversationBlocked")}</p>
           ) : region.id === "conversation" && messages.length > 0 ? (
             <ul className="space-y-1">
               {messages.map((message) => (

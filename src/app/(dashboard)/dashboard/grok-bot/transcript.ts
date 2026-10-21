@@ -26,6 +26,11 @@ export type TranscriptRequest = {
   visible?: TranscriptItem[];
 };
 
+export function snapshotAttempt(drops: number, reason: "dropped" | "left"): "blocked" | "retry" | "left" {
+  if (reason === "left") return "left";
+  return drops + 1 >= 3 ? "blocked" : "retry";
+}
+
 export function resumeTranscript(
   saved: Record<string, { after: string; messages: TranscriptItem[] }>,
   account: string,

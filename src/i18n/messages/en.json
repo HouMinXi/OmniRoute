@@ -15085,6 +15085,7 @@
     "rosterEmpty": "Choose an account to see its bots.",
     "conversationTitle": "Conversation",
     "conversationEmpty": "Choose a bot to see the conversation.",
+    "conversationBlocked": "The conversation could not be started.",
     "skillsTitle": "Skills and routines",
     "skillsEmpty": "No skills or routines.",
     "computersTitle": "Local computers",
