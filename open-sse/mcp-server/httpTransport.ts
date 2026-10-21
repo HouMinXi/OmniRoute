@@ -26,16 +26,33 @@ type StreamableSession = {
   transport: WebStandardStreamableHTTPServerTransport;
   startedAt: number;
   lastActivityAt: number;
+  activeRequests: number;
 };
 
 const _streamableSessions = new Map<string, StreamableSession>();
 
 const MCP_SESSION_IDLE_MS = 5 * 60 * 1000;
 
+export function shouldReapSession(
+  session: { lastActivityAt: number; activeRequests?: number },
+  nowMs: number
+): boolean {
+  if ((session.activeRequests ?? 0) > 0) return false;
+  return nowMs - session.lastActivityAt > MCP_SESSION_IDLE_MS;
+}
+
+export function markStreamableSessionBusy(sessionId: string | undefined, busy: boolean): void {
+  if (!sessionId) return;
+  const session = _streamableSessions.get(sessionId);
+  if (!session) return;
+  session.activeRequests += busy ? 1 : -1;
+  if (session.activeRequests < 0) session.activeRequests = 0;
+}
+
 const _mcpSessionSweep = setInterval(() => {
   const now = Date.now();
   for (const [sessionId, session] of _streamableSessions) {
-    if (now - session.lastActivityAt > MCP_SESSION_IDLE_MS) {
+    if (shouldReapSession(session, now)) {
       try {
         closeStreamableSession(sessionId);
       } catch {}
@@ -115,6 +132,7 @@ function createStreamableSession(): StreamableSession {
     transport,
     startedAt: Date.now(),
     lastActivityAt: Date.now(),
+    activeRequests: 0,
   };
 
   void server.connect(transport);

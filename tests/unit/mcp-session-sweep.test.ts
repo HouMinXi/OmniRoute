@@ -55,10 +55,11 @@ test("sweep interval compares against lastActivityAt, not startedAt", () => {
   );
   assert.ok(sweepBlock, "sweep interval block must exist");
   assert.ok(
-    sweepBlock[1].includes("session.lastActivityAt"),
-    "sweep must check session.lastActivityAt"
+    sweepBlock[1].includes("shouldReapSession(session, now)"),
+    "sweep must ask shouldReapSession, which checks lastActivityAt"
   );
   assert.ok(!sweepBlock[1].includes("session.startedAt"), "sweep must NOT check session.startedAt");
+  assert.ok(src.includes("session.lastActivityAt"), "the reap decision must still read lastActivityAt");
 });
 
 // ── Source-level invariant: MCP_SESSION_IDLE_MS constant ─────────────────────
@@ -419,4 +420,13 @@ test("handleMcpStreamableHTTP auto-recovers when stale session id is sent with i
   );
 
   mod.shutdownMcpHttp();
+});
+
+test("a session with a request still running is not reaped after 6 idle minutes", () => {
+  const idle = { lastActivityAt: 0, activeRequests: 0 };
+  const busy = { lastActivityAt: 0, activeRequests: 1 };
+  assert.equal(mod.shouldReapSession(idle, 6 * 60_000), true);
+  assert.equal(mod.shouldReapSession(busy, 6 * 60_000), false);
+  busy.activeRequests = 0;
+  assert.equal(mod.shouldReapSession(busy, 6 * 60_000), true);
 });
