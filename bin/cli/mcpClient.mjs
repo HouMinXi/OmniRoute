@@ -39,6 +39,34 @@ const MCP_PATH = "/api/mcp/stream";
 // server's idle sweep reclaims abandoned sessions, so never wait long on it.
 export const SESSION_DELETE_TIMEOUT_MS = 3000;
 
+// notifications/cancelled after a tools/call deadline is best-effort too.
+export const CANCEL_NOTIFY_TIMEOUT_MS = 1000;
+
+const TOOL_CALL_ID = 2;
+
+/**
+ * A deadline for the whole tools/call. race() rejects with
+ * "MCP tools/call timed out after <ms>ms" when it expires, and the signal
+ * aborts the request and its body.
+ */
+function startDeadline(ms) {
+  const controller = new AbortController();
+  let expire;
+  const expired = new Promise((_, reject) => {
+    expire = reject;
+  });
+  const timer = setTimeout(() => {
+    const err = mcpError(`MCP tools/call timed out after ${ms}ms`, { status: 504 });
+    expire(err);
+    controller.abort(err);
+  }, ms);
+  return {
+    signal: controller.signal,
+    race: (promise) => Promise.race([promise, expired]),
+    clear: () => clearTimeout(timer),
+  };
+}
+
 function mcpError(message, { status, code } = {}) {
   const err = new Error(message);
   if (status) err.status = status;
@@ -72,10 +100,19 @@ export async function readJsonRpcResponse(res) {
  * returns null on success.
  *
  * options.timeout / baseUrl / apiKey / context are forwarded to apiFetch,
- * so callers can override the active CLI context.
+ * so callers can override the active CLI context. options.timeout bounds each
+ * request until its response headers arrive (undefined → OMNIROUTE_HTTP_TIMEOUT_MS,
+ * else 30s); the session DELETE always uses SESSION_DELETE_TIMEOUT_MS.
+ *
+ * options.toolCallTimeout, when present, replaces options.timeout for tools/call
+ * only and limits the WHOLE call, from send until the JSON-RPC result (or the
+ * last --stream frame) has been read, like the MCP SDK's request timeout.
+ * 0 = no client-side deadline. On expiry a sessionful server is sent a
+ * best-effort notifications/cancelled. `mcp call` uses it; other callers do not.
  */
 export async function mcpCallTool(name, args = {}, options = {}) {
   const { timeout, baseUrl, apiKey, context } = options;
+  const hasToolCallTimeout = "toolCallTimeout" in options;
   let sessionId = null;
 
   const send = (init) =>
@@ -128,16 +165,25 @@ export async function mcpCallTool(name, args = {}, options = {}) {
     // best-effort: only tools/call reachability matters
   }
 
-  try {
+  // Armed only now, so the handshake never eats into the tool's time.
+  const deadline = options.toolCallTimeout ? startDeadline(options.toolCallTimeout) : null;
+
+  const callTool = async () => {
     const callRes = await rpc(
-      { jsonrpc: "2.0", id: 2, method: "tools/call", params: { name, arguments: args } },
-      { retry: false }
+      { jsonrpc: "2.0", id: TOOL_CALL_ID, method: "tools/call", params: { name, arguments: args } },
+      {
+        retry: false,
+        // With toolCallTimeout the deadline above replaces apiFetch's
+        // headers-only timer, so it keeps running while the body is read.
+        ...(hasToolCallTimeout ? { timeout: 0 } : {}),
+        ...(deadline ? { signal: deadline.signal } : {}),
+      }
     );
 
     if (options.stream) {
       // Must be awaited: the finally-block DELETE may close the server-side
       // stream, so it can only run once every frame has been read.
-      return await consumeSse(callRes.body, options.onChunk);
+      return await consumeSse(callRes.body, options.onChunk, deadline?.signal);
     }
 
     const data = await readJsonRpcResponse(callRes);
@@ -151,7 +197,28 @@ export async function mcpCallTool(name, args = {}, options = {}) {
       throw mcpError(`MCP error: ${msg}`, { status: 500 });
     }
     return data.result;
+  };
+
+  try {
+    return await (deadline ? deadline.race(callTool()) : callTool());
+  } catch (err) {
+    if (deadline?.signal.aborted && sessionId) {
+      // Best-effort, like the MCP SDK: tell the server to stop the tool. Only a
+      // sessionful server can match the request id; a stateless one cannot.
+      await send({
+        method: "POST",
+        body: {
+          jsonrpc: "2.0",
+          method: "notifications/cancelled",
+          params: { requestId: TOOL_CALL_ID, reason: err.message },
+        },
+        retry: false,
+        timeout: CANCEL_NOTIFY_TIMEOUT_MS,
+      }).catch(() => {});
+    }
+    throw err;
   } finally {
+    deadline?.clear();
     if (sessionId) {
       // Tolerate 405 / network errors: the idle sweep reclaims the session anyway.
       await send({ method: "DELETE", retry: false, timeout: SESSION_DELETE_TIMEOUT_MS }).catch(
@@ -161,9 +228,10 @@ export async function mcpCallTool(name, args = {}, options = {}) {
   }
 }
 
-async function consumeSse(body, onChunk) {
+async function consumeSse(body, onChunk, signal) {
   if (!body) throw mcpError("MCP stream returned no body", { status: 500 });
   const reader = body.getReader();
+  signal?.addEventListener("abort", () => reader.cancel().catch(() => {}), { once: true });
   const decoder = new TextDecoder();
   const write = onChunk ?? writeStdout;
   let buf = "";
