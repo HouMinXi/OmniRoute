@@ -491,9 +491,17 @@ export class PerplexityWebExecutor extends BaseExecutor {
     } else if (MODEL_MAP[model]) {
       [pplxMode, modelPref] = MODEL_MAP[model];
     } else {
-      pplxMode = "copilot";
-      modelPref = model;
-      log?.info?.("PPLX-WEB", `Unmapped model ${model}, using as raw preference`);
+      const errResp = new Response(
+        JSON.stringify({
+          error: {
+            message: `Unknown model: ${model}`,
+            type: "invalid_request_error",
+            code: "model_not_found",
+          },
+        }),
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+      return { response: errResp, url: PPLX_SSE_ENDPOINT, headers: {}, transformedBody: body };
     }
 
     // Parse messages and check session continuity
