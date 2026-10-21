@@ -4,6 +4,7 @@ import { Card } from "@/shared/components";
 import { useTranslations } from "next-intl";
 import { rosterEntries, type GrokBotRosterEntry } from "./roster";
 import { namedItems, type GrokBotRoutine, type GrokBotSkill } from "./details";
+import { nextTranscriptRequest, type TranscriptItem } from "./transcript";
 import { useEffect, useState } from "react";
 
 const REGION_IDS = ["accounts", "roster", "conversation", "skills", "computers"] as const;
@@ -44,6 +45,7 @@ export default function GrokBotPage() {
   const [selectedBot, setSelectedBot] = useState("");
   const [skills, setSkills] = useState<GrokBotSkill[]>([]);
   const [routines, setRoutines] = useState<GrokBotRoutine[]>([]);
+  const [messages, setMessages] = useState<TranscriptItem[]>([]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -91,6 +93,99 @@ export default function GrokBotPage() {
     return () => controller.abort();
   }, [selectedAccount, selectedBot]);
 
+  useEffect(() => {
+    if (!selectedAccount || !selectedBot) return;
+    const controller = new AbortController();
+    const liveController = new AbortController();
+    let request = { phase: "snapshot" as "snapshot" | "live", after: "0" };
+    const read = async () => {
+      const query = new URLSearchParams({
+        agentId: selectedBot,
+        after: request.after,
+        phase: request.phase,
+      });
+      const response = await fetch(
+        `/api/providers/${selectedAccount}/grok-bot/transcript?${query}`,
+        { signal: controller.signal }
+      );
+      if (!response.ok || !response.body) return;
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let pending = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        pending += decoder.decode(value, { stream: true });
+        const lines = pending.split("\n");
+        pending = lines.pop() ?? "";
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          let frame: unknown;
+          try {
+            frame = JSON.parse(line.slice(6));
+          } catch {
+            continue;
+          }
+          const next = nextTranscriptRequest(request, frame);
+          if (next.visible) setMessages((current) => [...current, ...next.visible].slice(-200));
+          if (next.stop) {
+            request = { phase: next.phase, after: next.after };
+            controller.abort();
+            return;
+          }
+          request = { phase: next.phase, after: next.after };
+        }
+      }
+    };
+    read()
+      .catch((error: unknown) => {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+        setMessages([]);
+      })
+      .then(() => {
+        if (!controller.signal.aborted || request.phase !== "live") return;
+        const query = new URLSearchParams({
+          agentId: selectedBot,
+          after: request.after,
+          phase: "live",
+        });
+        fetch(`/api/providers/${selectedAccount}/grok-bot/transcript?${query}`, {
+          signal: liveController.signal,
+        })
+          .then(async (response) => {
+            if (!response.ok || !response.body) return;
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let pending = "";
+            let live = { phase: "live" as const, after: request.after };
+            for (;;) {
+              const { done, value } = await reader.read();
+              if (done) break;
+              pending += decoder.decode(value, { stream: true });
+              const lines = pending.split("\n");
+              pending = lines.pop() ?? "";
+              for (const line of lines) {
+                if (!line.startsWith("data: ")) continue;
+                let frame: unknown;
+                try {
+                  frame = JSON.parse(line.slice(6));
+                } catch {
+                  continue;
+                }
+                const next = nextTranscriptRequest(live, frame);
+                if (next.visible) setMessages((current) => [...current, ...next.visible].slice(-200));
+                live = { phase: "live", after: next.after };
+              }
+            }
+          })
+          .catch(() => undefined);
+      });
+    return () => {
+      controller.abort();
+      liveController.abort();
+    };
+  }, [selectedAccount, selectedBot]);
+
   return (
     <div className="space-y-6">
       <div className="min-w-0">
@@ -128,12 +223,21 @@ export default function GrokBotPage() {
                     onClick={() => {
                       setSkills([]);
                       setRoutines([]);
+                      setMessages([]);
                       setSelectedBot(bot.agentId);
                     }}
                     type="button"
                   >
                     {bot.chiefOfStaff ? `${bot.name} (${t("chiefOfStaff")})` : bot.name}
                   </button>
+                </li>
+              ))}
+            </ul>
+          ) : region.id === "conversation" && messages.length > 0 ? (
+            <ul className="space-y-1">
+              {messages.map((message) => (
+                <li className="break-words text-sm" key={message.seq}>
+                  {message.text}
                 </li>
               ))}
             </ul>
