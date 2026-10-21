@@ -4,8 +4,39 @@ import assert from "node:assert/strict";
 import {
   findVersionClaims,
   isTableRowAt,
+  nearReplace,
   rewriteVersionClaims,
 } from "../../scripts/release/bump-version-claims.mjs";
+
+test("nearReplace rewrites a count next to its literal anchor, in every locale's wording", () => {
+  // The executors count the Docs sync gate measures from code (156) was stale in two docs and
+  // their 66 mirrors; mirrors translate the prose but keep the digits next to "375".
+  const pt = "- Superfície de API compatível (375 provedores, 154 módulos executores)";
+  const r = nearReplace(pt, "375", "154", "156");
+  assert.equal(r.replaced, 1);
+  assert.equal(
+    r.content,
+    "- Superfície de API compatível (375 provedores, 156 módulos executores)"
+  );
+  assert.deepEqual(r.remaining, []);
+  const ja =
+    "CLI／ツール向けの OpenAI 互換 API サーフェス（375 プロバイダー、154 エグゼキューターモジュール）";
+  assert.match(nearReplace(ja, "375", "154", "156").content, /375 プロバイダー、156 /);
+});
+
+test("nearReplace only touches whole tokens inside the window after the anchor", () => {
+  const tree = "├── executors/              150 provider executor modules\n├── 150 other things";
+  const t = nearReplace(tree, "executors/", "150", "156");
+  assert.equal(t.replaced, 1);
+  assert.match(t.content, /executors\/\s+156 provider/);
+  assert.match(t.content, /150 other things/); // not anchored → untouched
+  assert.equal(nearReplace(t.content, "executors/", "150", "156").replaced, 0); // idempotent
+  // 1540 is not the token 154; a 154 beyond the window is not reached; no anchor → no change
+  assert.equal(nearReplace("375 x 1540 y", "375", "154", "156").replaced, 0);
+  assert.equal(nearReplace(`375 ${"-".repeat(90)} 154`, "375", "154", "156").replaced, 0);
+  assert.equal(nearReplace("nothing here 154", "375", "154", "156").replaced, 0);
+  assert.equal(nearReplace("375 a 154 … 375 b 154", "375", "154", "156").replaced, 2);
+});
 
 // The cycle bump (Phase 0a.0b) left release/v3.8.53's README asserting 3.8.52 in three places
 // (2026-10-19); these are the exact shapes the Docs sync strict gate flagged.
