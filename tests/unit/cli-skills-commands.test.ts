@@ -1,5 +1,5 @@
 import test from "node:test";
-import { makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
+import { makeMcpStreamFetch, type McpFetchCall } from "./helpers/mcpStreamMock.ts";
 import assert from "node:assert/strict";
 
 const SKILLS_DATA = [
@@ -228,4 +228,25 @@ test("runMarketplaceInstall --yes envia POST sem confirmação", async () => {
   assert.equal(capturedBody.version, "latest");
   assert.equal(capturedBody.enable, true);
   assert.ok(out.includes("sk_pdf_installed"));
+});
+
+test("runSkillsEnable works against a sessionless MCP stream", async () => {
+  const calls: McpFetchCall[] = [];
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { ok: true },
+    sessionMode: "stateless",
+    calls,
+  });
+
+  try {
+    const { runSkillsEnable } = await import("../../bin/cli/commands/skills.mjs");
+    const out = await captureStdout(() => runSkillsEnable("sk_pdf", {}, makeCmd()));
+    const toolCall = calls.find((c) => c.body?.method === "tools/call");
+    assert.equal(toolCall?.body?.params?.name, "omniroute_skills_enable");
+    assert.deepEqual(toolCall?.body?.params?.arguments, { skillId: "sk_pdf", enabled: true });
+    assert.match(out, /Enabled: sk_pdf/);
+  } finally {
+    globalThis.fetch = origFetch;
+  }
 });

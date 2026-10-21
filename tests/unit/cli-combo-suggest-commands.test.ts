@@ -118,3 +118,24 @@ test("combo.mjs exporta extendComboSuggest e registerCombo", async () => {
   assert.equal(typeof mod.registerCombo, "function");
   assert.equal(typeof mod.extendComboSuggest, "function");
 });
+
+test("combo suggest works against a sessionless MCP stream", async () => {
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: {
+      candidates: [{ name: "stateless-combo", score: 0.5 }],
+      rationale: "sessionless",
+    },
+    sessionMode: "stateless",
+  });
+  try {
+    const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
+    const result = await mcpCallTool("omniroute_best_combo_for_task", { task: "x", top: 1 });
+    assert.equal(
+      (result as { candidates: { name: string }[] }).candidates[0].name,
+      "stateless-combo"
+    );
+  } finally {
+    globalThis.fetch = origFetch;
+  }
+});

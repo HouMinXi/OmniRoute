@@ -1,5 +1,5 @@
 import test from "node:test";
-import { makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
+import { makeMcpStreamFetch, type McpFetchCall } from "./helpers/mcpStreamMock.ts";
 import assert from "node:assert/strict";
 
 function makeResp(data: unknown, status = 200) {
@@ -120,4 +120,20 @@ test("resilience profile set usa JSON-RPC tools/call", async () => {
 test("resilience.mjs pode ser importado sem erro", async () => {
   const mod = await import("../../bin/cli/commands/resilience.mjs");
   assert.equal(typeof mod.registerResilience, "function");
+});
+
+test("resilience profile set works against a sessionless MCP stream", async () => {
+  const calls: McpFetchCall[] = [];
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = makeMcpStreamFetch({ toolResult: {}, sessionMode: "stateless", calls });
+
+  try {
+    const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
+    await mcpCallTool("omniroute_set_resilience_profile", { profile: "balanced" });
+    const toolCall = calls.find((c) => c.body?.method === "tools/call");
+    assert.equal(toolCall?.body?.params?.name, "omniroute_set_resilience_profile");
+    assert.deepEqual(toolCall?.body?.params?.arguments, { profile: "balanced" });
+  } finally {
+    globalThis.fetch = origFetch;
+  }
 });

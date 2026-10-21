@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { apiFetch, isServerUp } from "../api.mjs";
-import { MCP_ACCEPT, readJsonRpcResponse } from "../mcpClient.mjs";
+import { mcpCallTool } from "../mcpClient.mjs";
 import { emit } from "../output.mjs";
 import { t } from "../i18n.mjs";
 
@@ -75,6 +75,13 @@ export function registerMcp(program) {
     .option("--scope <s>", t("mcp.call.scope"), (v, prev = []) => [...prev, v], [])
     .action(async (tool, argsPositional, opts, cmd) => {
       const globalOpts = cmd.optsWithGlobals();
+      // Commander always fills the global --timeout with its default ("30000").
+      // Drop that so apiFetch can still honour OMNIROUTE_HTTP_TIMEOUT_MS when
+      // the flag was not passed; an explicit --timeout (source "cli") wins.
+      const callGlobals =
+        cmd.getOptionValueSourceWithGlobals("timeout") === "default"
+          ? { ...globalOpts, timeout: undefined }
+          : globalOpts;
       const args = opts.args
         ? JSON.parse(opts.args)
         : opts.argsFile
@@ -90,7 +97,7 @@ export function registerMcp(program) {
           ...opts,
           stream: opts.stream,
         },
-        globalOpts
+        callGlobals
       );
 
       if (exitCode !== 0) process.exit(exitCode);
@@ -113,132 +120,87 @@ export function registerMcp(program) {
     });
 }
 
+// Node's setTimeout cannot represent longer delays: it truncates them to 1ms.
+export const MAX_TIMEOUT_MS = 2_147_483_647;
+
 /**
- * Shared JSON-RPC 2.0 MCP client used by both stream and non-stream `mcp call`.
+ * Parse an explicit --timeout value for mcp call.
  *
- * Protocol:
- *   1. POST /api/mcp/stream with initialize → get Mcp-Session-Id header
- *   2. POST /api/mcp/stream with tools/call + Mcp-Session-Id header
- *
- * When `stream` is true, writes SSE data chunks to stdout as they arrive.
- * When `stream` is false, returns the parsed JSON-RPC result.
- *
- * Returns the exit code (0 = success, non-zero = failure).
+ * - missing → undefined (apiFetch then uses OMNIROUTE_HTTP_TIMEOUT_MS, else 30s)
+ * - exactly "0" → 0: no client-side deadline (intentional; unlike
+ *   OMNIROUTE_HTTP_TIMEOUT_MS=0, which apiFetch treats as unset → 30s)
+ * - a canonical positive integer (no sign, no leading zeros, no surrounding
+ *   whitespace) → milliseconds, clamped to MAX_TIMEOUT_MS so a "very long"
+ *   timeout never turns into an immediate 1ms abort
+ * - anything else (blank, " 50 ", "00", "007", "abc", "-1", "300ms", "1e3", "0.5")
+ *   → { invalid: true }: the caller warns and falls back like a missing value;
+ *   it never disables the timeout
  */
-async function mcpJsonRpcCall(tool, args, { stream = false, globalOpts = {} } = {}) {
-  const baseUrl = globalOpts.baseUrl ?? "http://localhost:20128";
-  const apiKey = globalOpts.apiKey ?? "";
-  const streamUrl = `${baseUrl}/api/mcp/stream`;
+const CANONICAL_TIMEOUT_MS = /^(0|[1-9]\d*)$/;
 
-  const hdrs = {
-    "Content-Type": "application/json",
-    Accept: MCP_ACCEPT,
-    ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
-  };
-
-  // Step 1 — initialize
-  const initRes = await fetch(streamUrl, {
-    method: "POST",
-    headers: hdrs,
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 1,
-      method: "initialize",
-      params: {
-        protocolVersion: "2024-11-05",
-        capabilities: {},
-        clientInfo: { name: "omniroute-cli", version: "1.0" },
-      },
-    }),
-  });
-
-  if (!initRes.ok) {
-    const text = await initRes.text().catch(() => "");
-    process.stderr.write(
-      `MCP initialize failed: HTTP ${initRes.status}${text ? ` — ${text}` : ""}\n`
-    );
-    return 1;
-  }
-
-  const sessionId = initRes.headers.get("mcp-session-id");
-  if (!sessionId) {
-    process.stderr.write("MCP initialize failed: no Mcp-Session-Id in response\n");
-    return 1;
-  }
-
-  // Step 2 — tools/call
-  const callHeaders = {
-    ...hdrs,
-    "mcp-session-id": sessionId,
-  };
-
-  const callRes = await fetch(streamUrl, {
-    method: "POST",
-    headers: callHeaders,
-    body: JSON.stringify({
-      jsonrpc: "2.0",
-      id: 2,
-      method: "tools/call",
-      params: { name: tool, arguments: args },
-    }),
-  });
-
-  if (!callRes.ok) {
-    const text = await callRes.text().catch(() => "");
-    process.stderr.write(`MCP call failed: HTTP ${callRes.status}${text ? ` — ${text}` : ""}\n`);
-    return 1;
-  }
-
-  if (stream) {
-    return readMcpSseStream(callRes.body);
-  }
-
-  // Non-stream: parse JSON-RPC response
-  const data = await readJsonRpcResponse(callRes);
-  if (data.error) {
-    process.stderr.write(`MCP error: ${data.error.message || JSON.stringify(data.error)}\n`);
-    return 1;
-  }
-  // Print the result content
-  const content = data.result?.content;
-  if (content) {
-    for (const item of content) {
-      if (item.type === "text") {
-        process.stdout.write(item.text + "\n");
-      } else if (item.type === "resource") {
-        process.stdout.write(JSON.stringify(item.resource) + "\n");
-      } else {
-        process.stdout.write(JSON.stringify(item) + "\n");
-      }
-    }
-  } else {
-    process.stdout.write(JSON.stringify(data.result, null, 2) + "\n");
-  }
-  return 0;
+export function resolveMcpCallTimeoutMs(raw) {
+  if (raw == null) return { timeout: undefined, invalid: false };
+  const s = String(raw);
+  if (!CANONICAL_TIMEOUT_MS.test(s)) return { timeout: undefined, invalid: true };
+  return { timeout: Math.min(Number(s), MAX_TIMEOUT_MS), invalid: false };
 }
 
-async function readMcpSseStream(body) {
-  if (!body) return 1;
-  const reader = body.getReader();
-  const dec = new TextDecoder();
-  let buf = "";
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-  }
-  const lines = buf.split("\n");
-  for (const line of lines) {
-    if (line.startsWith("data: ")) {
-      const raw = line.slice(6).trim();
-      if (raw && raw !== "[DONE]") process.stdout.write(raw + "\n");
-    }
-  }
-  return 0;
-}
-
+/**
+ * `mcp call` entry point. Protocol + transport live in mcpClient.mjs
+ * (`mcpCallTool`); this wrapper only formats the result for the terminal
+ * and maps failures to exit codes.
+ */
 export async function runMcpCallCommand(tool, args, opts = {}, globalOpts = {}) {
-  return mcpJsonRpcCall(tool, args, { stream: opts.stream, globalOpts });
+  if (opts.scope?.length) {
+    // Scopes come from the server-side credential, never from the client.
+    process.stderr.write("Warning: --scope is ignored by mcp call and will be removed.\n");
+  }
+  // --timeout is a global option (string from commander). Precedence when it
+  // is unset or invalid: OMNIROUTE_HTTP_TIMEOUT_MS, then apiFetch's 30s default.
+  // The deadline covers each request until its response starts; a --stream
+  // body is not cut off by it.
+  const rawTimeout = globalOpts.timeout;
+  const { timeout, invalid } = resolveMcpCallTimeoutMs(rawTimeout);
+  if (invalid) {
+    process.stderr.write(
+      `Warning: invalid --timeout ${JSON.stringify(String(rawTimeout))}; ` +
+        "using OMNIROUTE_HTTP_TIMEOUT_MS or the 30000ms default.\n"
+    );
+  }
+  try {
+    const result = await mcpCallTool(tool, args, {
+      stream: Boolean(opts.stream),
+      timeout,
+      baseUrl: globalOpts.baseUrl,
+      apiKey: globalOpts.apiKey,
+      context: globalOpts.context,
+    });
+
+    if (opts.stream) {
+      // mcpCallTool already wrote SSE chunks to stdout.
+      return 0;
+    }
+
+    const content = result?.content;
+    if (content) {
+      for (const item of content) {
+        if (item.type === "text") {
+          process.stdout.write(item.text + "\n");
+        } else if (item.type === "resource") {
+          process.stdout.write(JSON.stringify(item.resource) + "\n");
+        } else {
+          process.stdout.write(JSON.stringify(item) + "\n");
+        }
+      }
+    } else if (result != null) {
+      process.stdout.write(JSON.stringify(result, null, 2) + "\n");
+    }
+    return 0;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    process.stderr.write(`${message}\n`);
+    return 1;
+  }
 }
 
 export async function runMcpStatusCommand(opts = {}) {

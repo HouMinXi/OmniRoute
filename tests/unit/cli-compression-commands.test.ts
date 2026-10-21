@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { makeMcpResp, makeMcpStreamFetch } from "./helpers/mcpStreamMock.ts";
+import { makeMcpResp, makeMcpStreamFetch, type McpFetchCall } from "./helpers/mcpStreamMock.ts";
 
 function makeResp(data: unknown, status = 200) {
   const obj = {
@@ -286,4 +286,25 @@ test("compression engine set falls back to PUT /api/settings/compression on MCP 
   assert.equal(restCall?.method, "PUT");
   // #6571: the REST fallback now PUTs the canonical `defaultMode` field
   assert.equal(restCall?.body?.defaultMode, "rtk");
+});
+
+test("compression status works against a sessionless MCP stream", async () => {
+  const calls: McpFetchCall[] = [];
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { engine: "caveman", enabled: true },
+    sessionMode: "stateless",
+    calls,
+  });
+
+  try {
+    const { runCompressionStatus } = await import("../../bin/cli/commands/compression.mjs");
+    await captureStdout(() => runCompressionStatus({}, makeCmd()));
+    const toolCall = calls.find((c) => c.body?.method === "tools/call");
+    assert.equal(toolCall?.body?.params?.name, "omniroute_compression_status");
+    assert.equal(toolCall?.headers.get("mcp-session-id"), null);
+    assert.ok(!calls.some((c) => c.method === "DELETE"), "no session → no DELETE");
+  } finally {
+    globalThis.fetch = origFetch;
+  }
 });
