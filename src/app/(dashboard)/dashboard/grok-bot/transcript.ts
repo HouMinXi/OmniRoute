@@ -26,6 +26,16 @@ export type TranscriptRequest = {
   visible?: TranscriptItem[];
 };
 
+export function resumeTranscript(
+  saved: Record<string, { after: string; messages: TranscriptItem[] }>,
+  account: string,
+  bot: string
+): { phase: "snapshot" | "live"; after: string; messages: TranscriptItem[] } {
+  const found = saved[`${account}:${bot}`];
+  if (!found) return { phase: "snapshot", after: "0", messages: [] };
+  return { phase: "live", after: found.after, messages: found.messages };
+}
+
 export function nextTranscriptRequest(
   request: { phase: "snapshot" | "live"; after: string },
   frame: unknown
