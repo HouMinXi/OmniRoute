@@ -243,7 +243,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------- |
 | `constants/providers.ts`         | **375 providers** with Zod validation (source of truth)                |
 | `constants/cliTools.ts`          | External CLI tool registry                                             |
-| `constants/routingStrategies.ts` | **20 routing strategies** with priorities                              |
+| `constants/routingStrategies.ts` | **21 routing strategies** with priorities                              |
 | `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                        |
 | `constants/upstreamHeaders.ts`   | Header denylist for upstream requests                                  |
 | `validation/schemas.ts`          | ~80 Zod schemas (single source of truth for API contracts)             |
