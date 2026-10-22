@@ -3400,13 +3400,13 @@
     "comboRefMember": "Комбинација → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Укључи у auto добављаче означене као ToS: avoid",
-    "autoTosDescription": "Подразумевано искључено. Важи за све auto комбинације, не само за један налог. Повезивање добављача не укључује ову опцију.",
-    "autoTosSaveError": "Није могуће сачувати ToS правила. И даље се приказује претходно подешавање. Покушајте поново.",
-    "autoTosLoadError": "Није могуће учитати ToS правила. Покушајте поново пре измене.",
     "title": "Комбинације",
     "description": "Креирајте комбинације модела са пондерисаним рутирањем и подршком за резервне опције",
     "autoCatalogTitle": "Каталог аутоматског рутирања",
+    "autoTosLoadError": "Није могуће учитати ToS правила. Покушајте поново пре измене.",
+    "autoTosSaveError": "Није могуће сачувати ToS правила. И даље се приказује претходно подешавање. Покушајте поново.",
+    "autoTosIncludeLabel": "Укључи у auto добављаче означене као ToS: avoid",
+    "autoTosDescription": "Подразумевано искључено. Важи за све auto комбинације, не само за један налог. Повезивање добављача не укључује ову опцију.",
     "autoCatalogTemplateCount": "{count} шаблона",
     "autoCatalogDescription": "Уграђене комбинације auto/* динамички се одређују на основу повезаних провајдера. Користите било који од ових ID-ова као поље модела — подешавање није потребно.",
     "autoCatalogExpand": "Прошири каталог аутоматског рутирања",
@@ -6080,6 +6080,13 @@
     "claudeLowPriorityModeDescription": "Када овај налог достигне ограничење коришћења од 5 сати и Anthropic понуди канал нижег приоритета, OmniRoute га прихвата и наставља да шаље захтеве са anthropic-usage-limit: slow док се временски период не ресетује, уместо да привремено обустави везу. Недељно ограничење и даље важи, а одговори могу да чекају на слободан капацитет.",
     "claudeAutoLimitResetLabel": "Аутоматски ресетуј ограничење сесије (једном недељно)",
     "claudeAutoLimitResetDescription": "Када овај налог достигне ограничење коришћења од 5 сати и ресетовање ограничења сесије је доступно, OmniRoute га аутоматски активира и покушава поново пуном брзином. Користи ресетовање налога доступно једном недељно и употреба се и даље рачуна у недељно ограничење.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Прескочите привремени период чекања како би ова веза остала доступна чак и након грешака од којих је могућ опоравак (терминална стања попут забране или истека и даље се примењују).",
     "disableCoolingLabel": "Онемогући период чекања за ову везу",
     "bulkPasteAdded": "{count, plural, one {Додат је 1 кључ} other {Додато је # кључева}}",
@@ -6533,6 +6540,7 @@
       "monsterapi": "Преузмите API кључ на monsterapi.ai",
       "moonshot": "Повежите Kimi помоћу API кључа.",
       "morph": "Бесплатан ниво: 250K кредита/месечно, 0$",
+      "apmix": "Повежите Apmix са API кључем са apmix.ai/dashboard — једна претплата, много модела.",
       "nanogpt": "Повежите NanoGPT помоћу API кључа.",
       "nebius": "~1$ пробних кредита приликом пријаве за тестирање API-ја",
       "nlpcloud": "NLP Cloud користи власнички chatbot API уместо OpenAI chat/completions. OmniRoute прилагођава OpenAI поруке у input/context/history и излаже локални каталог подржаних chatbot модела.",
@@ -6629,8 +6637,7 @@
       "kiro": "Бесплатни ниво: 50 кредита месечно (~25К–100К токена). ⚠️ Услови коришћења за Kiro забрањују употребу проксија или алата за оркестрацију трећих страна.",
       "codex": "Повежите OpenAI Codex помоћу постојећег OAuth тока.",
       "qwen": "Повежите Qwen Code помоћу постојећег OAuth тока.",
-      "github-models": "Направите GitHub PAT са обимом 'models: read' на github.com/settings/tokens",
-      "apmix": "Повежите Apmix са API кључем са apmix.ai/dashboard — једна претплата, много модела."
+      "github-models": "Направите GitHub PAT са обимом 'models: read' на github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} прихвата ID-ове модела нативне за добавача. Увезите из /models или додајте прилагођене ID-ове за рутирање.",
     "bedrockModelsDescription": "Amazon Bedrock модели су ограничени по AWS региону. Увезите из /models или додајте ID-ове Bedrock модела омогућене у изабраном региону.",
@@ -6802,14 +6809,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Подешавања",
@@ -9835,6 +9835,10 @@
     "streamTransformFailed": "Трансформација стрима није успела"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Коришћење",
     "grokExtraUsageCredits": "Кредити за додатно коришћење",
     "grokAutoTopUp": "Аутоматско допуњавање",
@@ -10287,11 +10291,7 @@
     "updatedShort": "Ажурирано",
     "lastRefreshed": "Последње ажурирање",
     "providerQuota": "Квота провајдера",
-    "providerQuotaHomeHint": "Статус повезаних налога у реалном времену",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "providerQuotaHomeHint": "Статус повезаних налога у реалном времену"
   },
   "modals": {
     "waitingAuth": "Чекање на овлашћење",
@@ -12952,7 +12952,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI алати за код",
     "pageSubtitle": "Алати за код усмерени на OmniRoute",
     "searchPlaceholder": "Претражи CLI…",
     "filterDetectionLabel": "Детекција",
@@ -12962,7 +12961,8 @@
     "detectionNotFound": "Није пронађено",
     "baseUrlAll": "Све",
     "baseUrlFull": "Пуна",
-    "baseUrlPartial": "Делимично"
+    "baseUrlPartial": "Делимично",
+    "pageTitle": "Kod CLI-a"
   },
   "cliAgents": {
     "pageTitle": "CLI агенти",
@@ -13758,6 +13758,270 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Инфраструктурна заустављања заштићеног приоритета као 502",
         "description": "Одговори статусом 502 уместо 503 када приоритетно одредиште које користи резервну опцију само због квоте заустави комбинацију из разлога за који се може доказати да није повезан са квотом: отвореног прекидача кола провајдера или предиктивног прескакања због кашњења."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "ID-je računa za beleženje",
+        "description": "Uključi prefiks računa u redove AUTH beležnika (npr. \"Koristi se račun '<provider>': abc12345...\"). Isključeno po osнови da se identifikatori računa prione iz zajedničkih/multitenantskih procesnih beležnika. Neovisno o Otključanom režimu; uključivanje Otključanog režima ovo ne otkriva."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Onemogući prijavu lozinkom uz OIDC",
+        "description": "Kada je OIDC omogućen, onemogući prijavu lozinkom da bi se korisnici autenticirali isključivo putem OIDC jedinstvene prijave. Kada je isključeno (podrazumevano), dostupni su i ulaz lozinkom i OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Čvorišta udaljenog audio provajdera",
+        "description": "Dozvoli da rute /v1/audio/* koriste čvorišta provajdera kompatibilna sa OpenAI-jem koja su smeštena van lokalne mašine. Isključeno po osnovi — usmeravanje zvuka na udaljenog domaćina menja identitet izlaza i mora biti eksplicitna operaterska odluka. Lupska čvorišta su uvek dozvoljena i nisu pogođena."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Čvorišta udaljenog rerank provajdera",
+        "description": "Dozvoli POST /v1/rerank (i rerank korak memorije, koji ga poziva preko lupske veze) da koristi čvorišta provajdera kompatibilna sa OpenAI-jem smeštena van lokalne mašine — lokalni uređaj ili Tailscale partner koji pokreće TEI, Infinity, vLLM itd. Isključeno po osnovi — usmeravanje na udaljenog domaćina menja identitet izlaza i mora biti eksplicitna operaterska odluka. Lupska čvorišta su uvek dozvoljena i nisu pogođena. Udaljena čvorišta takođe moraju da prođu pravila izlazne URL politike provajdera."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Zajednička izlazna zaštita mrežne rotacije",
+        "description": "Kada dođe do mrežnog izuzetka (isteklo je vreme, odbijena/resetovana konekcija) za izvršitelja rotacije više računa, ako nedostaje posvećeni proxy za račun koji nije uspeo, primenite kratko hlađenje i zaostatak zahteva preskočite ostale račune bez proxy-ja umesto da ponovo pokušavate za svakog. Uključeno po osnovi (bezbedno: nema promene IP-a izlaza, samo smanjuje rizik od latencije/hlađenja na zajedničkim izlaznim računima). Onemogućite da biste vratili odmahnju propagaciju na prvom bačenju bez proxy-ja."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Preskoči nedavno neuspešne proksi-ja",
+        "description": "Proksi-pulovi i per-nalog rotacija opencode-a prestaju da posluju proksi koji je tek neuspeo (odbijena TCP sonda ili 429 primljen kroz njega) za period po procesu koji se duplira na svako ponavljanje, do gornjeg limita. Nije se zapisuje status proksi-ja; kada se sve kandidate poreda, izbor ostaje nepromenjen. Podrazumevano uključeno: redosled izbora je tačno obična rotacija, osim kada je PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Redosled zajedničkog egress pulova",
+        "description": "Za provajdere čija je kvota bucket-ovana po egress adresi, poredi član pulva koji deli opaženu egress adresu nedavno odbijenog člana odmah ispod zdravih članova. Samo redosled, nikada ne isključuje. Potrebno je PROXY_SKIP_RECENTLY_FAILED, koji generiše signal odbijanja koji se čita. Podrazumevano isključeno: redosled izbora je tačno obična rotacija."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Evidencija atribucije rotacije",
+        "description": "Opencode rotacija beleži koji nalog je poslužio ili bio preskočen (samo maskirani ID-ovi, nikada puni ID-ovi naloga) i povezuje dnevnik proksi-zapisa sa zahtevom, kako bi operater mogao da razlikuje preskočene naloge od neiskorišćenih. Podrazumevano isključeno: nema dodatnih redova u dnevniku, nema dodatnih kolona koje se upisuju."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Opažanje egress-a proksi-pulova",
+        "description": "Prikazuje, ispod proksi-pulova u nadzornoj ploči, koliko opaženih egress IP-ova je poslužilo njegove članove u poslednjih 24 č, koliko konekcija ih je koristilo i koliko se najviše primetilo iza jednog IP-a. Samo za čitanje, izračunato iz proksi-dnevnika, nikada se ne koristi za rutiranje. Podrazumevano isključeno: uređivač pulova ostaje nepromenjen, a observation ruta vraća null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Operaterski egress za proksi-ja",
+        "description": "Prihvata datumirane opažene adrese koje operater šalje po članu pulova i spaja ih sa čitanjem iz dnevnika za prikaz i redosled pulova. Podrazumevano isključeno: push ruta vraća 404, a čitanja pulova se ponašaju tačno kao i pre."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Окрупљавање застоја одговора OpenCode",
+        "description": "За извршиоца OpenCode, прати први бајт тела стримованог одговора Responses (прозор: RESPONSES_FIRST_BYTE_TIMEOUT_MS, подразаумева се 15000). 2xx Responses стрим који остаје тиш након прозора сматра се засталим: акаунт се хлади и захтев се ротира на следећи акаунт једном; други застој прекида брзо. Искључено по подразаumeвању: застали стримови настављају да чекају по данима до истеклога времена за спреманост стрима."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "Окрупљавање user_blocked OpenCode",
+        "description": "За извршиоца OpenCode, када горњи ток одговори са 403 или 451 са одбијањем user_blocked (не блокуирање по географији, не одбијање отпечата Cloudflare), охлади одбијени акаунт и ротирај на следећи акаунт највише једном по захтеву; друго одбијање се враћа као што је без означавања успеха. Искључено по подразаumeвању: рутирање око горњег тока user блок а може личити на избегавање и ширити ознаку кроз флоту акауната, тако да се одбијање враћа неизмењено осим ако оператер не допринесе улашку."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "Поволатни одказ прелазна победничка измицање",
+        "description": "За OpenCode вишедесетску ротацију, паузирај пре сласлања на следећи акаунт када два узастопна покушаја неуспеле уз победничку грешку горњег тока (5xx или празно одбијање 400). Пауза почиње на 1,5с, удвостручује се за сваку даљу узастопну нејавност, ограничава се на 6с по паузи и 10с по захтеву, прескаче се када клијент одјекује, и тело нејавног одговора се ослобађа пре чекања. Искључено по подразаumeвању: прелазна победничка остаје одмах."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Ретурирање испуштање празног тура",
+        "description": "На преводимим стримовим туровим, када горњи тур нема корисан садржај (само завршетак размишљања или нула вредних комака), издај ограничена ретурирање кроз обичан створачки пут (до `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) пре него што се нешто изложи клијенту. Искључено по подразаumeвању: празни тутори задржавају тренутну понашање (празно 200 или празан садржај 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Повраћање празног стрима рођака",
+        "description": "Claude/Codex стримовиме: након првог животне догађај, краткотрајно истражи (до 1с / 64 КиБ) за корисан излаз; стрим који заврши без садржаја постаје empty_content нејавност што троши постојеће ограничено ретурирање на другој уложивој вези (без охлађивања, без закључавања модела), и round-robin комбинације заустављају ретурирање када клијент одјекује. Такође третира одбијање, паузу тура и model_context_window_exceeded као легитимне празне крајева унутар истраге. Искључено по подразаumeвању: спреманост, обрада празног садржаја и ретурирање комбинација остају тако као пре."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Proba kasnog izlaza toka",
+        "description": "Proba izlaznog toka: nakon prvih 64 prosleđenih komadičića, uzoruje se jedan komadić na 16 radi prvog vidljivog izlaza, tako da izlaz koji kasno počinje i dalje označava tok kao onaj koji je emitovao izlaz. Samostalni 5xx nakon te tačke ostaje vezan za zahtev, umesto da beleži zaključavanje samo modela, a firstOutputMs se popunjava nazad do prvog izlaznog komadičića u trenutnom intervalu uzorkovanja. Isključeno podrazumevano: analiziraju se samo prva 64 prosleđena komadičića, tačno kao ranije."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode ograničenje brzine 429 rani zaustav",
+        "description": "Za OpenCode rotaciju više nalogâ, zaustavi talas naloga na prvom 429 klasifikovanom kao pravi limit brzine (parsiran Retry-After zaglavlje ili telo koje naziva limit brzine/korišćenja) i vrati to neposredno gornje 429 nesmenjeno (status, telo, zaglavlja Retry-After i kvote), umesto da se probaju svi preostali nalozi. Neklasifikovani 429 nastavljaju rotaciju. Isključeno podrazumevano: besplatni nivo je ograničen po izlaznoj IP adresi (#9611), tako da svaki 429 rotira na sledeći nalog, a iscrpljen talas vraća poslednje neposredno gornje 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 parkiranje i nastavljanje",
+        "description": "Za OpenCode rotaciju više nalogâ, parkiraj zahtev nakon ponovljenih privremeni 429 (ili novog markera opterećenja basa) sa otkucajima, pa ponovo pokreni jednu ograničenu nogu od najviše 3 uzastopna naloga umesto širenja po celoj floti. Isključeno podrazumevano: svaki 429 rotira na sledeći nalog tačno kao ranije."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Ponovno pokušaj stana spremnosti toka",
+        "description": "Za striming zahteve za chat, kada prvi gornji telo zastoje pre nego što proizvede korisni događaj, izvrši jednu ograničenu drugu pokušaj kroz isti rutni put sa istim budžetom spremnosti i bez kazne za nalog. Isključeno podrazumevano: zastojeći prvi telo ne uspeva u zahtevu bez ponovnog pokušaja."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 ponovna selekcija basa",
+        "description": "Za OpenCode rotaciju više nalogâ, nakon 429 od provajdera sa izlaznim bazama na nalogu bez proksija u okruženom kontekstu basa, traži od veze ba novi član za sledeći pokušaj umesto ponovnog pokušaja na istoj izlaznoj adresi. Redosled, nikad isključivanje: iscrpljen bas zadržava trenutno ponašanje. Isključeno podrazumevano: svaki 429 rotira na sledeći nalog tačno kao ranije."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Отпочиње OpenCode v2 Клијент Отпечак",
+        "description": "Pošaljite otisak prsta CLI klijenta OpenCode v2 na zahtevima OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli i x-opencode-client cli, klijentski User-Agent zadržava se samo ako je 2.x OpenCode klijent, i na ograničenim zahtevima za besplatni paket bez x-opencode-request, sesija se ogleda u x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI šeme za read/shell na ubačenim alatima sa placeholderom i tool_choice od \"none\" se odbacuju. Isključeno podrazumevano: svaki OpenCode zahtev zadržava trenutni identitet, zaglavlja i telo bajt po bajt."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Isključenje Egress-IP-a",
+        "description": "Додај OpenCode Zen (opencode-zen) у породицу стандарног закључавања egress-IP, тако да 429 на једној Zen вези такође хлади сваку сестринску Zen везу која дели свој egress IP. Искључено по основи: Zen се кључира и свака веза се самостално хлади, баш као раније. Експлицитна OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS вредност увек превазилази ову заставицу."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Puna pravila o greškama za OpenCode",
+        "description": "Нека уграђена правила грешака OpenCode (opencode-zen, opencode-go, opencode-cli) да поклапају на целом тексту горестручне грешке, тако да ознаке у садржају попут organization_quota_exceeded или \"monthly usage limit reached\" класификују 429 као исцрпљен квота са закључавањем по вези. Искључено по подразumeвању: та правила виде само структурирани код грешке и такав 429 остаје краткорочна ограничење стопа, тачно као раније."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI Pravila za greške u punom tekstu",
+        "description": "Omogućite ugrađeno pravilo za greške Cloudflare Workers AI da podudara celo tekstualno telo greške uzviđenja, tako da telo 429 \"dnevna besplatna dodela\" bude klasifikovano kao iscrpljenje kvote, a ne kratko ograničenje brzine. Isključeno po podrazumevanom: pravilo vidi isključivo struktuirani kod greške, tačno kao ranije."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Филтер по способностима",
+        "description": "Одбаците захтеве пре слања ако циљни модел не поседује потребне capacidade (вижење, алате, структурирани излаз, прозор контекста). штити директне захтеве једног добављача који заобилазе филтер kompatibilности комбо-слоја."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Zanemari nicipovano korišćenje u USD kvotama",
+        "description": "Koristi se korišćenje modela bez cene kao $0 u po-ključnim USD kvotama za korišćenje, umesto da se kvota tretira kao precognuta. Isključeno po podrazumevanju: model ili rutno pseudonim bez cene može sakriti stvarne troškove, pa kvota radi u bezbednom režimu."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Omogući modul OmniRoute Radar (ekrani kataloga i sinhronizacija). Isključeno po podrazumevanju; omogućavanje otključava samo korisnički interfejs — sinhronizacija podataka ostaje zaseban izbor."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Kapija za sposobnosti tačke preusmeravanja modela",
+        "description": "Nametne se poverenim oznakama tački preusmeravanja modela (deklarisanim u katalogu provajdera, zaključivanim iz specijalizovanog ID modela ili podešavanim od strane operatera): odbijanje zahteva poslatog na tačku koju model ne podržava sa HTTP 400 pre slanja na /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations i /v1/audio/*; sakrivanje modela čije tačke sa oznakama nemaju OmniRoute adapter sa /v1/models; i odgovaranje testu modela u tabeli sa 422 za takve modele. Isključeno po podrazumevanju: oznake tačke ostaju informativne i zahtevi se šalju tačno kao ranije."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Univerzalno prenošenje konteksta",
+        "description": "Generiši i ubaci sažetke razgovora kada kombinovano rutiranje menja modele. Isključi za nezavisno tretiranje promena modela i sprečavanje pozadinskih zahteva za prenošenje za sve postojeće i buduće kombinacije."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Ponovno predstavljanje razumevanja",
+        "description": "Keširanje i ponovno predstavljanje razumevanja modela kroz razgovore sa više okreta. Isključi zaustavljanje čuvanja i ponovnog ubacivanja razumevanja."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex Transport posluživača aplikacija",
+        "description": "Omogućava Codex-u da koristi lokalni app-server transport putem WebSocket JSON-RPC protokola (codexTransport=app-server). Kada je isključeno, veze koje su izabrale app-server prepada se na druge Codex transportne mehanizme."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code otkriće pseudonima",
+        "description": "Oglasiti ID-eve zrcela oblika claude/'<provider>'/'<model>' na /v1/models kako bi otkrivanje modela Claude Code gateway-a navelo i modele koji nisu od Claude. Upozorenje: kada je uključeno globalno, duplira stavke kataloga za klijente."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Pseudonimi modela bez razmišljanja",
+        "description": "Glavni prekidač za gateway pseudonime no-think/'<provider>'/'<model>'. Uključeno (podrazumevano): /v1/models oglašava varijantu bez razmišljanja za svaki pogodan Claude model sa sposobnošću razmišljanja, a no-think/ ID poslat u zahtevu se rešava nazad na stvarni model sa potisnutim zaključivanjem. Isključeno: varijante se ne oglašavaju, a no-think/ ID se tretira kao bilo koji drugi nepoznat modelni ID. Per-model izborna opcija ModelSpec.noThinkingAlias i dalje važi dok je ovo uključeno."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Onemogući varijante nivoa razmišljanja",
+        "description": "Onemogućava generisanje varijanti nivoa razmišljanja (npr. -low, -medium, -high) u /v1/models katalogu."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptivni virtuelni ulazni hodnici",
+        "description": "Uključuje adaptivne virtuelne ulazne hodnike po iznajmiocu za distribuciju provajdera (#9654): napad jednog iznajmioca više ne uzrokuje 503 kod za drugog. OMNIROUTE_CHAT_VIRTUAL_LANES promenljiva okruženja ima prednost nad ovim previđanjem na nadzornoj ploči; izmene stупaju na snagu pri ponovnom pokretanju servera."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funkcionalni ogledači upravljačkog središta",
+        "description": "Prikazivati ID-ove ogledala u formatu '<gateway-alias>'/'<model>' na /v1/models za modele čiji kanonski vlasnik nema aktivno povjerenje, ali ih usmjerava prolazni upravljački centar s aktivnim povjerenjem. Upozorenje: dodaje stavke kataloga za sve klijente kada je uključeno globalno."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Stanje New-API agregatora",
+        "description": "Uključite otkrivanje stanja za čvorove kompatibilne s New-API / One-API / Sub2API agregatorima. Kada je uključeno, kompatibilni čvorovi s postavljene zastavice agregatora izvijestit će o svom stanju na nadzornoj ploči i usmjeravanju predkontrola kvota."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Sakrij obrisane pretraživačke veze",
+        "description": "Statistike pretraživanja i nedavna pretraživanja obuhvaćaju samo provajdere koji i dalje imaju aktivnu vezu (provajderi bez ključa poput duckduckgo-free uvijek se računaju). Isključeno zadržava svaku zadržanu vrstu pretraživanja s ID-jem provajdera."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Strogi besplatni značajka",
+        "description": "Stranice provajdera na nadzornoj ploči: prikaz značajke Besplatno samo na signalima koje provajder poštuje — odbacuje heuristiku naziva za prikaz, ne-bool besplatna polja i :free sufikse na registriranim provajderima bez dokumentirane besplatne razine. Isključeno zadržava povijesno pravilo značajke."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Automatska kombinacija: Prazan bazen odgovara s 503",
+        "description": "Kada je kandidatno skupina automatske kombinacije već prazna prije izvršenja pred-filtra za pozivanje alata (svaki cilj preskočen zbog odgode, zaključavanja ili iscrpljenosti), odgovorite s 503 no_eligible_targets umjesto naslijeđenog 400 \"Cilj ne podržava pozivanje alata\" capability_mismatch. Isključeno po zadanoj postavci: prazan skupina zadržava naslijeđeni 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral dvosmisleno 401 meko zaključavanje",
+        "description": "Goli Mistral 401 ('{\"detail\":\"Unauthorized\"}', bez eksplicitnog autentičacionog signala) je bajtno identičan za opozvani ključ i za iscrpplenu kvotu. Kada je omogućeno, takav 401 hladi vezu umesto da je parkira kao isteklu, do 3 puta u roku od jednog sata; sledeći će je i dalje parkirati kao isteklu, tako da se opozvani ključ konvergira. Isključeno po podrazumevanom: svaki goli Mistral 401 parkira vezu kao isteklu, kao i ranije."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Automatsko čišćenje batch i fajlova",
+        "description": "Dozvolite automatskom procesu čišćenja da obriše terminalne (završene/neuspele/otkazane/istekle) Batch API poslove starije od OMNIROUTE_BATCH_RETENTION_DAYS, zajedno sa njihovim checkpointovima po redovima, i da isprazni BLOB sadržaj otpremljenih fajlova koji su prošli svoju expires_at. Isključeno po podrazumevanom: svaka postojeća instalacija zadržava ove podatke tačno kao i ranije dok operator ne odluči drugačije. Rutu za brisanje koju pokreće operator, DELETE /api/v1/batches/delete-completed, to ne utiče ni na koji način – ona je odvojeni, bezuslovni javni API ugovor."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity iznajmljivanje naloga",
+        "description": "Rezervišite odabrani Antigravity nalog za životni ciklus strimovanja zahteva koji ga je izabrao, tako da paralelni ponovni pokušaj ili prenos verodajnih podataka ne mogu ponovo izabrati nalog koji je već zaključan za strim u toku. Rezervacija je obuhvaćena (veza, poziva gornji model), tako da jedan nalog može i dalje da služi dva različita modela odjednom. Kada je svaki sposoban nalog već iznajmljen za taj model, zahtev vraća strukturirano 503 POOL_BUSY sa ograničenim Retry-After umesto da se nagomilava na zauzetom nalogu. Isključeno po podrazumevanom: izbor naloga ostaje tačno kao i ranije, i ne uzima se nijedna rezervacija."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Automatsko čišćenje zastaralih Combo koraka",
+        "description": "Posle uspešnog sinhronizovanja modela sa autentičnim živim katalogom, uklonite combo korake vezane za modele koje katalog više ne navodi, sa jednom zapisom u izveštaju po uklonom koraku. Nikada ne čisti kod neuspele, degradirane ili samo besplatne sinhronizacije, i nikada ne prazni combo. Isključeno po podrazumevanom: zastarali koraci se samo označavaju."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth sažeti razmišljanje",
+        "description": "Dozvolite Claude OAuth zahtevu koji traži čitljivo razmišljanje (thinking.display \"summarized\") da odbaci Anthropic beta za crtanje razmišljanja redact-thinking-2026-02-12, koja inače čini da Anthropic vrati prazne blokove razmišljanja samo sa potpisom. Isključeno po podrazumevanom: ta beta je deo Claude Code OAuth bežništva, tako da OAuth zahtevi ostaju nepromenjeni. API-ključ Claude zahtevi već poštuju sažeto razmišljanje bez ovog flaga; OMNIROUTE_REDACT_THINKING=false takođe dopire do OAuth-a samo kada je ovaj flag uključen."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Popravka poziva alata Kiro",
+        "description": "Kada striming Kiro odgovor generiše neispravan tool_call omotač (nedostaje input.name ili input.arguments) pre bilo kakvog vidljivog izlaza, potisni ga i ponovo pošalji zahtev jednom sa korektivnom instrukcijom, umesto da okončaš turu sa invalid_kiro_tool_call. Ponovljeno slanje košta jedan dodatni Kiro zahtev; drugo neuspešno ponavljanje okončava turu sa kiro_tool_call_repair_retry_failed. Uključeno po podrazumevanom. Pоставite na false da biste okončili turu kod prvog neispravnog omotača."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev nivoi napora",
+        "description": "Koristite nivoje napora za razmišljanje koje models.dev objavljuje (suženi na poznati rečnik napora) kada niti operaterska preprava, niti registar pružaoca ne deklarišu nijedan, a praznu deklarisanu listu nivoa tretirajte kao „nema nivoa“ u /v1/models effort_tiers i kombinacijama preseka nivoa. Isključeno po podrazumevanom: effort_tiers i rešeni supportedThinkingEfforts ostaju tačno kao pre."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena sintetički cx telemetrija",
+        "description": "Pripovijezite sintetički programski blob klijentske interakcije cx (vrednost koju sama arena.ai šalje za stranicu bez zabeleženog međudelovanja) svakom Arena (lmarena) create-evaluation zahtevu koji nema cx podataka od strane operatera. Isključeno po podrazumevanom: cx polje je Arena signal protiv automatizacije, pa OmniRoute prosleđuje vrednost samo ako je operater uhvatio iz stvarne brauzerske sesije (providerSpecificData.cx), a u suprotnom ne šalje cx uopšte. Nedokazana korist sa gornje strane; uključite samo ako Arena počne da odbija zahteve bez cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Reaktivna kompaktifikacija za nativni Codex",
+        "description": "Dozvolite da reaktivni (pragovi) i poslednji koraci kontekstne kompaktifikacije takođe prepišu istorije nativnog Codex prosluđivanja (POST /v1/responses kod pružaoca codex) kada one premašuju budžet konteksta, koristeći adapter za Responses input[]. Isključeno po podrazumevanom: istorije nativnog Codexa pripadaju Codex klijentu i nikada ih kompaktifikacija ne prepisuje; preveliki zahtevi i dalje ne uspevaju na proveri budžeta konteksta tačno kao pre. Zahteva da je globalna kompresija uključena i da model nije isključen."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kvota: Poštovanje ograničenog parka",
+        "description": "Dozvolite politici kvote po prozoru (pragovi sesije/nedelje koje koristi izbor računa) da poštuje ograničeno parkovanje iscrpljivanja: čim je istekao rok parkovanja sa gornjim limitom ili je keširano posmatranje kvote starije od limita parka, prozor prestaje da isključuje račun dok se ne vrši novo preuzimanje kvote. Isključeno po podrazumevanom: keširani prozor nastavlja da blokira na poslednje prijavljenom procentu dok mu ne istekne vreme ponovne podešavanja."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Генерисање слика: Дуги послови",
+        "description": "За генерисање слика kompatibilno sa OpenAI-jem: koristite tajmаут конекције (providerSpecificData.timeoutMs), иначе централни тајмаут за преузимање са дужег извора (FETCH_TIMEOUT_MS, затим REQUEST_TIMEOUT_MS, подразумевано 600 s) уместо фиксних 120 s буџета за слике; завршите захтев кога је позивач отклонио кодом 499; и омогућите Playground-у да прима дуге послове генерисања слика као SSE стрим са keepalive хртовима. Подразумевано искључено: примењује се фиксни буџет, а отказивање позивача се не преноси. Рок који покрива читање тела одговора је увек укључен."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Унапређења огледала каталога",
+        "description": "Унапредите откривање claude/ и огледала функционалних gateway-ја на /v1/models. Подразумевано искључено: оба пролаза огледала рade тачно као пре. Укључено: огледала за откривање claude/ такође покривају наведене варијанте напора размишљања (-low/-medium/-high/-xhigh), прескачу уграђене auto/* ID-ове које путања захтева не може материјализовати и прескачу већ наведен алијас; огледала функционалних gateway-ја прескачу комбинације и ID-ове синтезоване од стране OmniRoute-а (claude/, no-think/), узимају власника из owned_by, никада не користе власника као свој gateway, прескачу gateway-је онемогућене у blockedProviders и моделе ван ауторитативног живог каталога gateway-ја."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Здравље проксија: Одбијање ресетује низ неуспеха",
+        "description": "У препусти здравља проксија, омогућите да сонда коју је циљ одбио (401/403/429: прокси је пренио, дестинација је одбила овај излазни IP) ресетује низ узастопних неуспеха проксија, као послужена сонда. Подразумевано искључено: одбијање остаје неутрално и чува низ (#10654). 5xx остаје нерешено у оба случаја, а одбијање никада не уклања, онемогућава или поново активише прокси."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok претплате за слике",
+        "description": "Региструјте xai-oauth (xao) и grok-cli путање за слике и мапирајте OpenAI квалитет high/hd на xAI medium. Подразумевано искључено: путања xAI слика са API-кључем остаје постојећи OpenAI-компатибилни захтев, а путање претплате се не региструју."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Откривање живог модела xAI OAuth",
+        "description": "Преузмите каталог живих xAI модела за xai-oauth конекције са https://api.x.ai/v1/models користећи OAuth bearer токен, уместо замрзнутог статичког сјама. Подразумевано укључено. Поставите заставицу на false да бисте наставили са служењем статичког сјама. ХТТП грешке се враћају на сјаам у путаљи откривања; сам гетер заставице не издаје HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-kompatibilni mid-konverzacije sistemski okreti",
+        "description": "Na običnim anthropic-compatible-* relay-ima (claude → claude passthrough), sačuvajte role:system okrete u sredini konverzacije unutar messages[] umesto da ih podižete na vršni sistemski parametar, kako bi se keširani prefiks prompta ostao stabilan kroz okrete. Važi samo kada klijent sam pošalje mid-conversation-system-2026-04-07 anthropic-beta (poslat nastručno onakav kakav jeste). Isključeno po podrazumevanom: svaki sistemski okret se diže tačno kao ranije, jer relay-i koji ne podržavaju beta odbacuju role:system poruke sa 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Provera zdravlja DB-a: Odloži početno skeniranje",
+        "description": "Pokreni početnu proveru integriteta/zdravlja DB-a nakon što server počne da prihvata zahteve (preko setImmediate) umesto da blokira pokretanje dok se ne završi. Isključeno po podrazumevanom: pokretanje se blokira proverom tačno kao pre #13717, pa se oštećena baza i dalje detektuje pre prve uslužene poruke. Uključeno: pokretanje se vraća odmah, a provera (sada ograničena/stranice, a za stvarnu file-backed bazu izolovana u otivnom podprocesu) se pokreće odmah nakon."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Rutiranje kataloga objavljeno za OpenCode",
+        "description": "Omogući OpenCode Zen i OpenCode Go modele bez eksplicitne registry tačke pristupa da svoju rekovirensku površinu (Responses za @ai-sdk/openai, Messages za @ai-sdk/anthropic) preuzmu iz objavljenog kataloga models.opencode.ai, čitani u pozadini svakih 6 h. Isključeno po podrazumevanom: tačka pristupa dolazi iz registry heuristike tačno kao ranije, a katalog se nikada ne preuzima."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automatski zahtevi: Rezolovane težine sposobnosti",
+        "description": "Omogući auto/* zahteve (resolveModelOrError i auto-rutiranje wrapper) da grade kandidate sa rezolovanim modelskim sposobnostima (vision, reasoning, thinking) i posmatranim ocenama kvaliteta, čitanih u jednom bulk prolazu kao /v1/models katalog. Isključeno po podrazumevanom: snapshot težine u trenutku zahteva ostaju tačno kao ranije (sposobnosti se rešavaju po zahtevu i ne hrane težine). Uključeno: ti signali hrane snapshot težine, pa težine kandidata, a samim tim i izbor, mogu da se promene."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Keyless transport gate",
+        "description": "Isključi keyless (bez-auth) providere čiji transport zahteva lokalni browser (browserBacked) ili lokalno instaliranu CLI (isLocalCli) iz auto/* kandidate, kako zaglavljani član ne bi zadržao auto zahtev do kraja per-target timaouta (#17036). Isključeno po podrazumevanom: svaki bez-auth provider sa emulovanim tool calling-om ostaje u poolu tačno kao ranije. Direktni '<alias>'/'<model>' pozivi rade u oba slučaja."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline ponovo reprodukcija razmišljanja",
+        "description": "Za CodeBuddy CN modele za razmišljanje (porodice DeepSeek-V4 / Kimi-K2 koje zahtevaju ponovnu reprodukciju razmišljanja), svako ponovo reprodukovano assistant reasoning_content ubaci kao vidljiv '<thought>' blok na početku sadržaja poruke, tako da preživi gateway koji isključi reasoning_content polje (#13632). Isključeno po defaultu: CodeBuddy CN zahtevi se šalju nepromenjeni; sam reasoning_content polje se uvek čuva."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Sigurnost pružalaca: Terminalni zaustav",
+        "description": "Očuvaj eksplicitan zaustav sigurnosti pružalaca (misalignment_policy_violation, content_policy_violation ili tačno nasleđena odbijenica 'blocked by our safety systems' označena kao provider_safety_rejection) kao terminalnu, zahtevu specifičnu odbijenicu: njen kod se čuva kroz HTTP, Responses, WebSocket i greške završenog toka, a combo staje na toj tački umesto da ponovo pokuša druge ciljeve, otkazujući usvojene braće (#17049). Isključeno po defaultu: ove greške zadržavaju postojeće obrađivanje, a combo ruting se ne menja."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Zdravlje kredencijala: Ponovni test automatski onemogućenih konekcija",
+        "description": "Omogući pranju zdravlja kredencijala da ponovo testira konekcije koje je gateway sam isključio (označene kao autoDisabledAt; najviše jednom na 6 h i 5 po pranju) i da ponovo uključi konekciju ako ponovni test prođe (#16190). Isključeno po defaultu: isključene konekcije ostaju isključene dok operater ne ponovo ne uključi ili ne testira, baš kao i pre. Konekcije koje je operater isključio i konekcije koje su isključene nakon trajne zabrane se nikada ne ponovno testiraju."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Vrata kredencijala: Samo dijagnoza autentifikacije",
+        "description": "Suzi combo ograničenje kredencijala tako da keširana neuspešna provjera kredencijala blokira konekciju samo kada njena dijagnoza dokaže loše kredencijale (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Nelošive neuspese (isteklo vreme, ograničenja stopa, smetnje, nepodržane provere i nerazvrstane skener greške) tada se tretiraju kao nepoznate, a konekcija nastavlja da prima promet. Isključeno po defaultu: bilo koja keširana greška provere blokira konekciju za vek trajanja keša (5 minuta)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Zaustavi na odbijanju politike sadržaja",
+        "description": "Kada combo cilj odgovori tačnim odbijanjem politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavi combo i vrati to odbijanje čak i kada su preostali ciljevi različiti modeli, umesto da napreduje ka sledećem cilju. Isključeno po defaultu: odbijanje nikada ne hladi nalog ni ne okida osigurač pružalaca, a combo napreduje ka svom sledećem cilju tačno kao i pre."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Ponovno pokretanje nakon pauze: Preskači odbijene zahteve 403/410",
+        "description": "Kada je svaka nalog na pauzi, a pauza koja ističe prvo izazvana je odbijanjem 403 (pristup odbijen) ili 410 (nema), odmah vrati to odbijanje umesto što čeka kraj pauze i ponovo šalje zahtev; obnavljajuća vezna kvota agentrouter-a za sesiju koja daje 403 onda se trajno čuva sa kodom greške 429 tako da ostaje moguć ponovni pokus. Isključeno podrazumevano: samo 401 preskače čekanje, a svako odbijanje se trajno čuva sa statusom kojim je stiglo."
       }
     }
   },
