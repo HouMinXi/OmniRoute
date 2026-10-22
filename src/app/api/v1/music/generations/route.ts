@@ -113,6 +113,7 @@ async function postHandler(request, context) {
       model: body.model,
       startTime,
       duration: body.duration,
+      apiKeyId: scope.policy.apiKeyInfo?.id,
     });
   }
 

@@ -221,6 +221,7 @@ async function postHandler(request, context) {
     model: body.model,
     startTime,
     duration: body.duration,
+    apiKeyId: policy.apiKeyInfo?.id,
   });
 }
 

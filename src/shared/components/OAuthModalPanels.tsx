@@ -270,7 +270,7 @@ function OAuthGoogleLoopbackNotice({ hint }: { hint: GoogleLoopbackHint }) {
         {t.rich("googleLoopbackHeadlessAlt", {
           a: (chunks) => (
             <a
-              href="https://github.com/diegosouzapw/OmniRoute#oauth-on-a-remote-server"
+              href="https://github.com/cheaper-inference/OmniRoute#oauth-on-a-remote-server"
               target="_blank"
               rel="noreferrer"
               className="underline"
@@ -372,8 +372,8 @@ export function OAuthManualInputPanel({
           {provider === "zed-hosted" && (
             <p className="text-xs text-amber-500 mb-2">
               After signing in, Zed redirects to a local address like{" "}
-              <code className="font-mono">http://127.0.0.1:&lt;port&gt;/?user_id=...</code> which the
-              browser may show as unreachable — that is expected. Copy the FULL URL from the
+              <code className="font-mono">http://127.0.0.1:&lt;port&gt;/?user_id=...</code> which
+              the browser may show as unreachable — that is expected. Copy the FULL URL from the
               browser address bar (the access token is inside it) and paste it above.
             </p>
           )}
