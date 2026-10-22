@@ -12962,7 +12962,7 @@
     "baseUrlAll": "전체",
     "baseUrlFull": "전체",
     "baseUrlPartial": "부분적",
-    "pageTitle": "CLI 코드"
+    "title": "CLI 코드"
   },
   "cliAgents": {
     "pageTitle": "CLI 에이전트",

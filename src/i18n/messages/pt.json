@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Todos",
     "baseUrlFull": "Completo",
     "baseUrlPartial": "Parcial",
-    "pageTitle": "Código CLI"
+    "title": "Código CLI"
   },
   "cliAgents": {
     "pageTitle": "Agentes CLI",

@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Kõik",
     "baseUrlFull": "Täielik",
     "baseUrlPartial": "Osaline",
-    "pageTitle": "KLI kood"
+    "title": "KLI kood"
   },
   "cliAgents": {
     "pageTitle": "CLI-agendid",

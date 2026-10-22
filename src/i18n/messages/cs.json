@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Vše",
     "baseUrlFull": "Plná",
     "baseUrlPartial": "Částečná",
-    "pageTitle": "Kód CLI"
+    "title": "Kód CLI"
   },
   "cliAgents": {
     "pageTitle": "CLI agenti",

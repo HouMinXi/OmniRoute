@@ -12962,7 +12962,7 @@
     "baseUrlAll": "ทั้งหมด",
     "baseUrlFull": "เต็มรูปแบบ",
     "baseUrlPartial": "บางส่วน",
-    "pageTitle": "โค้ด CLI"
+    "title": "โค้ด CLI"
   },
   "cliAgents": {
     "pageTitle": "เอเจนต์ CLI",

@@ -12962,7 +12962,7 @@
     "baseUrlAll": "सबै",
     "baseUrlFull": "पूर्ण",
     "baseUrlPartial": "आंशिक",
-    "pageTitle": "CLI कोड"
+    "title": "CLI कोड"
   },
   "cliAgents": {
     "pageTitle": "CLI एजेन्टहरू",

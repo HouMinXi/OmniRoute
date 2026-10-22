@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Vse",
     "baseUrlFull": "Celoten",
     "baseUrlPartial": "Delno",
-    "pageTitle": "CLI kode"
+    "title": "CLI kode"
   },
   "cliAgents": {
     "pageTitle": "Agenti CLI",

@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Lahat",
     "baseUrlFull": "Kumpleto",
     "baseUrlPartial": "Bahagya",
-    "pageTitle": "CLI Code"
+    "title": "CLI Code"
   },
   "cliAgents": {
     "pageTitle": "Mga CLI Agent",

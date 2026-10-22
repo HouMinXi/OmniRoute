@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Semua",
     "baseUrlFull": "Penuh",
     "baseUrlPartial": "Sebagian",
-    "pageTitle": "Kode CLI"
+    "title": "Kode CLI"
   },
   "cliAgents": {
     "pageTitle": "Agen CLI",

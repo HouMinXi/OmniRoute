@@ -12962,7 +12962,7 @@
     "baseUrlAll": "အားလုံး",
     "baseUrlFull": "အပြည့်အစုံ",
     "baseUrlPartial": "တစ်စိတ်တစ်ပိုင်း",
-    "pageTitle": "CLI ကုဒ်"
+    "title": "CLI ကုဒ်"
   },
   "cliAgents": {
     "pageTitle": "CLI Agent များ",

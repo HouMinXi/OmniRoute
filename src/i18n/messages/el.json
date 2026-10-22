@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Όλα",
     "baseUrlFull": "Πλήρης",
     "baseUrlPartial": "Μερική",
-    "pageTitle": "Κώδικας CLI"
+    "title": "Κώδικας CLI"
   },
   "cliAgents": {
     "pageTitle": "Πράκτορες CLI",

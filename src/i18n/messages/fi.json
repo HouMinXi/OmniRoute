@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Kaikki",
     "baseUrlFull": "Täysi",
     "baseUrlPartial": "Osittainen",
-    "pageTitle": "CLI-koodi"
+    "title": "CLI-koodi"
   },
   "cliAgents": {
     "pageTitle": "CLI-agentit",

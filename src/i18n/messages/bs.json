@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Sve",
     "baseUrlFull": "Potpuno",
     "baseUrlPartial": "Djelomično",
-    "pageTitle": "Kod CLI-ja"
+    "title": "Kod CLI-ja"
   },
   "cliAgents": {
     "pageTitle": "CLI agenti",

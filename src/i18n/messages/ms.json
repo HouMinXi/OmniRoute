@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Semua",
     "baseUrlFull": "Penuh",
     "baseUrlPartial": "Separa",
-    "pageTitle": "Kod CLI"
+    "title": "Kod CLI"
   },
   "cliAgents": {
     "pageTitle": "Ejen CLI",

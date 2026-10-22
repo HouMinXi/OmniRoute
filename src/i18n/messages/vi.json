@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Tất cả",
     "baseUrlFull": "Đầy đủ",
     "baseUrlPartial": "Một phần",
-    "pageTitle": "Mã CLI"
+    "title": "Mã CLI"
   },
   "cliAgents": {
     "pageTitle": "Tác nhân CLI",

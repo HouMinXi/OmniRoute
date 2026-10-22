@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Alle",
     "baseUrlFull": "Fullstendig",
     "baseUrlPartial": "Delvis",
-    "pageTitle": "CLI-kode"
+    "title": "CLI-kode"
   },
   "cliAgents": {
     "pageTitle": "CLI-agenter",

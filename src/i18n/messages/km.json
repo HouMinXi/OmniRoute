@@ -12962,7 +12962,7 @@
     "baseUrlAll": "ទាំងអស់",
     "baseUrlFull": "ពេញលេញ",
     "baseUrlPartial": "មួយផ្នែក",
-    "pageTitle": "កូដ CLI"
+    "title": "កូដ CLI"
   },
   "cliAgents": {
     "pageTitle": "ភ្នាក់ងារ CLI",

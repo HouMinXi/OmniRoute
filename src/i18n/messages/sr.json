@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Све",
     "baseUrlFull": "Пуна",
     "baseUrlPartial": "Делимично",
-    "pageTitle": "Kod CLI-a"
+    "title": "Kod CLI-a"
   },
   "cliAgents": {
     "pageTitle": "CLI агенти",

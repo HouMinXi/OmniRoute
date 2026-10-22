@@ -12962,7 +12962,7 @@
     "baseUrlAll": "அனைத்தும்",
     "baseUrlFull": "முழுமையானது",
     "baseUrlPartial": "பகுதியளவு",
-    "pageTitle": "CLI கோடு"
+    "title": "CLI கோடு"
   },
   "cliAgents": {
     "pageTitle": "CLI முகவர்கள்",

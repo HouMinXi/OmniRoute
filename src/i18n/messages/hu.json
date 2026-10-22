@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Összes",
     "baseUrlFull": "Teljes",
     "baseUrlPartial": "Részleges",
-    "pageTitle": "CLI kódkörnyezet"
+    "title": "CLI kódkörnyezet"
   },
   "cliAgents": {
     "pageTitle": "CLI-ágensek",

@@ -12962,7 +12962,7 @@
     "baseUrlAll": "הכל",
     "baseUrlFull": "מלא",
     "baseUrlPartial": "חלקי",
-    "pageTitle": "קוד CLI"
+    "title": "קוד CLI"
   },
   "cliAgents": {
     "pageTitle": "סוכני CLI",

@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Visi",
     "baseUrlFull": "Pilns",
     "baseUrlPartial": "Daļējs",
-    "pageTitle": "Komandrinda kods"
+    "title": "Komandrinda kods"
   },
   "cliAgents": {
     "pageTitle": "CLI aģenti",

@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Tümü",
     "baseUrlFull": "Tam",
     "baseUrlPartial": "Kısmi",
-    "pageTitle": "CLI Kodu"
+    "title": "CLI Kodu"
   },
   "cliAgents": {
     "pageTitle": "CLI Ajanları",

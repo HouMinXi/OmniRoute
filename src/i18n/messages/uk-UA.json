@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Всі",
     "baseUrlFull": "Повне",
     "baseUrlPartial": "Часткове",
-    "pageTitle": "Код CLI"
+    "title": "Код CLI"
   },
   "cliAgents": {
     "pageTitle": "Агенти CLI",

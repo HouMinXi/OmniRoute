@@ -12962,7 +12962,7 @@
     "baseUrlAll": "అన్నీ",
     "baseUrlFull": "పూర్తి",
     "baseUrlPartial": "పాక్షికం",
-    "pageTitle": "CLI కోడ్"
+    "title": "CLI కోడ్"
   },
   "cliAgents": {
     "pageTitle": "CLI ఏజెంట్లు",

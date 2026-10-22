@@ -12962,7 +12962,7 @@
     "baseUrlAll": "همه",
     "baseUrlFull": "کامل",
     "baseUrlPartial": "جزئی",
-    "pageTitle": "کد خط فرمان"
+    "title": "کد خط فرمان"
   },
   "cliAgents": {
     "pageTitle": "عامل‌های CLI",

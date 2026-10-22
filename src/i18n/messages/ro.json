@@ -12962,7 +12962,7 @@
     "baseUrlAll": "Toți",
     "baseUrlFull": "Complet",
     "baseUrlPartial": "Parțial",
-    "pageTitle": "Cod CLI"
+    "title": "Cod CLI"
   },
   "cliAgents": {
     "pageTitle": "Agenți CLI",

@@ -145,7 +145,7 @@ export default function CliCodePageClient({
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 flex-wrap">
         {/* Title + subtitle */}
         <div className="flex-1 min-w-0">
-          <h1 className="text-lg font-semibold text-text-main leading-tight">{t("pageTitle")}</h1>
+          <h1 className="text-lg font-semibold text-text-main leading-tight">{t("title")}</h1>
           <p className="text-sm text-text-muted mt-0.5">{t("pageSubtitle")}</p>
         </div>
 

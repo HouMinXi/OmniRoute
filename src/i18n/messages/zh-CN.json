@@ -12962,7 +12962,7 @@
     "baseUrlAll": "所有",
     "baseUrlFull": "完整",
     "baseUrlPartial": "部分",
-    "pageTitle": "CLI 编程工具接入"
+    "title": "CLI 编程工具接入"
   },
   "cliAgents": {
     "pageTitle": "CLI 代理",

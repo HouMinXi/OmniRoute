@@ -12962,7 +12962,7 @@
     "baseUrlAll": "الكل",
     "baseUrlFull": "كامل",
     "baseUrlPartial": "جزئي",
-    "pageTitle": "كود سطر الأوامر"
+    "title": "كود سطر الأوامر"
   },
   "cliAgents": {
     "pageTitle": "وكلاء CLI",
