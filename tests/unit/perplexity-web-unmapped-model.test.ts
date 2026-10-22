@@ -3,9 +3,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 const { PerplexityWebExecutor } = await import("../../open-sse/executors/perplexity-web.ts");
-const { __setTlsFetchOverrideForTesting } = await import(
-  "../../open-sse/services/perplexityTlsClient.ts"
-);
+const { __setTlsFetchOverrideForTesting } =
+  await import("../../open-sse/services/perplexityTlsClient.ts");
 
 __setTlsFetchOverrideForTesting(async (url, opts) => {
   const res = await globalThis.fetch(url, opts);
@@ -56,4 +55,15 @@ test("an unmapped model name is rejected locally and never reaches perplexity", 
 test("a mapped model still reaches perplexity, so a counter stuck at zero fails", async () => {
   const { fetches } = await run("pplx-sonar");
   assert.equal(fetches, 1);
+});
+
+test("the unmapped-model 404 goes through the shared error body and never echoes a credential", async () => {
+  const secret = "sk-ant-api03-abcdefghijklmnopqrstuvwxyz0123456789";
+  const { status, body, fetches } = await run(`pplx-${secret}`);
+  assert.equal(status, 404);
+  assert.equal(body.error.type, "invalid_request_error");
+  assert.equal(body.error.code, "model_not_found");
+  assert.match(body.error.message, /^Unknown model: /);
+  assert.ok(!body.error.message.includes(secret), "credential-shaped model name must be redacted");
+  assert.equal(fetches, 0);
 });

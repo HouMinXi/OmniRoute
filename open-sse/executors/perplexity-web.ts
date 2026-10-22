@@ -16,7 +16,11 @@ import {
 import { prepareToolMessages } from "../translator/webTools.ts";
 import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 import { buildToolModeResponse } from "./chatgptWebTools.ts";
-import { projectPublicErrorIdentifier, sanitizeErrorMessage } from "../utils/error.ts";
+import {
+  buildErrorBody,
+  projectPublicErrorIdentifier,
+  sanitizeErrorMessage,
+} from "../utils/error.ts";
 import { buildSessionCookieHeader, mergeRefreshedCookie } from "../utils/nextAuthCookie.ts";
 import { formatTranslatedStreamError } from "../utils/streamErrorFormat.ts";
 import {
@@ -492,13 +496,12 @@ export class PerplexityWebExecutor extends BaseExecutor {
       [pplxMode, modelPref] = MODEL_MAP[model];
     } else {
       const errResp = new Response(
-        JSON.stringify({
-          error: {
-            message: `Unknown model: ${model}`,
+        JSON.stringify(
+          buildErrorBody(404, `Unknown model: ${model}`, undefined, {
             type: "invalid_request_error",
             code: "model_not_found",
-          },
-        }),
+          })
+        ),
         { status: 404, headers: { "Content-Type": "application/json" } }
       );
       return { response: errResp, url: PPLX_SSE_ENDPOINT, headers: {}, transformedBody: body };
