@@ -20,10 +20,12 @@ export const PRE_SCREEN_CONCURRENCY = 5;
  * `targetTimeoutMs`. Combos exist to fail over fast, so inheriting the full upstream
  * request timeout (FETCH_TIMEOUT_MS, 600s by default) made a single hung target stall
  * the whole combo for up to 10 minutes before falling through to the next model
- * (escalated cmqlrhd7c). For STREAMING requests this only bounds the time-to-first-headers
- * — token generation streams after the response resolves, so it is NOT cut short. Operators
- * can still raise it per-combo via `targetTimeoutMs`, or set
- * a longer value for slow non-streaming reasoning combos.
+ * (escalated cmqlrhd7c). For STREAMING requests this bounds the time to the first output
+ * frame, not the time to response headers: a target that opens the stream and then produces
+ * nothing is abandoned at the same budget, while token generation that has started streams
+ * to completion and is NOT cut short. Operators can still raise it per-combo via
+ * `targetTimeoutMs` — worth doing for slow reasoning combos, streaming included, whose first
+ * token can legitimately take longer than the default.
  */
 export const DEFAULT_COMBO_TARGET_TIMEOUT_MS = 120_000;
 
