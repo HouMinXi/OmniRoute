@@ -448,12 +448,12 @@ export default function GrokBuildToolCard({
           </div>
           {selectedEndpoint === CUSTOM_ENDPOINT && (
             <div className={rowClass}>
-              <span className={labelClass}>Custom URL</span>
+              <span className={labelClass}>{t("customUrl")}</span>
               <span className="material-symbols-outlined text-[14px] text-text-muted">
                 arrow_forward
               </span>
               <input
-                aria-label="Custom endpoint"
+                aria-label={t("customEndpointAria")}
                 className={inputClass}
                 type="url"
                 value={customEndpoint}
@@ -476,7 +476,7 @@ export default function GrokBuildToolCard({
               value={effectiveKeyId}
               onChange={(event) => setSelectedKeyId(event.target.value)}
             >
-              <option value="">Use the OmniRoute default key</option>
+              <option value="">{t("useDefaultKey")}</option>
               {apiKeys.map((key) => (
                 <option key={key.id} value={key.id}>
                   {key.key || key.name || key.id}
@@ -499,7 +499,7 @@ export default function GrokBuildToolCard({
               {t("selectModel")}
             </Button>
             <input
-              aria-label="Main model"
+              aria-label={t("mainModelAria")}
               className={inputClass}
               value={model}
               onChange={(event) => setModel(event.target.value)}
@@ -664,7 +664,7 @@ export default function GrokBuildToolCard({
       <ManualConfigModal
         isOpen={showManual}
         onClose={() => setShowManual(false)}
-        title="Grok Build manual config"
+        title={t("manualConfigTitle")}
         configs={[{ filename: "~/.grok/config.toml", content: manualToml }]}
       />
     </Card>

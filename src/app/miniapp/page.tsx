@@ -9,6 +9,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 
 declare global {
   interface Window {
@@ -34,6 +35,7 @@ interface ChatMessage {
 const STREAM_URL = "/api/telegram/update";
 
 export default function TelegramMiniApp() {
+  const t = useTranslations("miniapp");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -52,12 +54,12 @@ export default function TelegramMiniApp() {
           ...prev,
           {
             role: "assistant",
-            content: `👋 Hi ${user.first_name || "there"}! Send a message to chat through your OmniRoute gateway.`,
+            content: t("greeting", { name: user.first_name || t("greetingFallbackName") }),
           },
         ]);
       }
     } else {
-      setError("This page must be opened inside the Telegram Mini App.");
+      setError(t("errTelegramOnly"));
     }
   }, []);
 
@@ -85,7 +87,7 @@ export default function TelegramMiniApp() {
         reply?: string;
         error?: string;
       } | null;
-      const reply = data?.reply || data?.error || "⚠️ No reply from gateway.";
+      const reply = data?.reply || data?.error || t("errNoReply");
       setMessages((prev) => [...prev, { role: "assistant", content: reply }]);
     } catch (err) {
       setMessages((prev) => [
@@ -109,7 +111,7 @@ export default function TelegramMiniApp() {
         fontFamily: "system-ui, -apple-system, sans-serif",
       }}
     >
-      <h1 style={{ fontSize: 18, margin: "0 0 12px" }}>OmniRoute Mini App</h1>
+      <h1 style={{ fontSize: 18, margin: "0 0 12px" }}>{t("title")}</h1>
       {error && <p style={{ color: "#e5484d", fontSize: 13, margin: "0 0 12px" }}>{error}</p>}
 
       <div style={{ flex: 1, overflowY: "auto", marginBottom: 12 }}>
@@ -138,7 +140,7 @@ export default function TelegramMiniApp() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder="Ask anything…"
+          placeholder={t("inputPlaceholder")}
           disabled={busy}
           style={{
             flex: 1,
@@ -161,7 +163,7 @@ export default function TelegramMiniApp() {
             cursor: busy ? "default" : "pointer",
           }}
         >
-          {busy ? "…" : "Send"}
+          {busy ? "…" : t("btnSend")}
         </button>
       </div>
     </main>

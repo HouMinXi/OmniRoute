@@ -542,42 +542,38 @@ export default function QdrantConfigCard() {
         <div
           role="dialog"
           aria-modal="true"
-          aria-label="Tutorial de configuração do Qdrant"
+          aria-label={t("qdrantTutorialAria")}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
         >
           <div className="max-h-[85vh] w-full max-w-2xl overflow-y-auto rounded-xl border border-border bg-background p-6 shadow-xl">
             <div className="flex items-start justify-between gap-4">
               <div>
-                <h4 className="text-lg font-semibold">Tutorial rápido: memória com Qdrant</h4>
+                <h4 className="text-lg font-semibold">{t("qdrantTutorialTitle")}</h4>
                 <p className="mt-2 text-sm text-text-muted">
-                  O Qdrant guarda vetores e metadados das memórias para recuperar contexto
-                  relevante. Ele não comprime tokens diretamente; a economia é indireta, ao evitar
-                  contexto sem relação com a solicitação.
+                  {t("qdrantTutorialIntro")}
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setTutorialOpen(false)}
-                aria-label="Fechar tutorial"
+                aria-label={t("qdrantTutorialCloseAria")}
               >
                 ×
               </button>
             </div>
             <ol className="mt-5 list-decimal space-y-3 pl-5 text-sm text-text-muted">
-              <li>Proteja o servidor com HTTPS e API key antes de uso produtivo.</li>
+              <li>{t("qdrantTutorialStep1")}</li>
               <li>
-                Informe host, porta, coleção e um modelo no formato provider/model com credencial
-                configurada.
+                {t("qdrantTutorialStep2")}
               </li>
               <li>
-                A dimensão da coleção precisa ser igual à dimensão produzida pelo modelo. Uma
-                coleção existente de 2048 dimensões não aceita embeddings de 1536 dimensões.
+                {t("qdrantTutorialStep3")}
               </li>
-              <li>Salve, teste a conexão e execute o teste de busca. Só então ative o Qdrant.</li>
+              <li>{t("qdrantTutorialStep4")}</li>
             </ol>
-            <pre className="mt-5 overflow-x-auto rounded-lg bg-surface p-3 text-xs">{`PUT /collections/minha_memoria\n{\n  "vectors": { "size": <dimensão-do-modelo>, "distance": "Cosine" }\n}`}</pre>
+            <pre className="mt-5 overflow-x-auto rounded-lg bg-surface p-3 text-xs">{t("qdrantTutorialCode")}</pre>
             <p className="mt-5 text-xs text-text-muted">
-              Créditos: Rafa Martins — rafacpti@gmail.com
+              {t("qdrantTutorialCredits")}
             </p>
           </div>
         </div>

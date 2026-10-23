@@ -526,12 +526,12 @@ export default function ConnectionRow({
                     )
                   }
                   className="text-xs font-medium rounded px-1.5 py-0.5 border-0 bg-black/[0.03] dark:bg-white/[0.03] text-text-muted/70 hover:text-text-muted cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/30"
-                  title="Upstream proxy routing for Claude Code traffic"
+                  title={t("claudeCodeRoutingTitle")}
                 >
-                  <option value="native">Native</option>
+                  <option value="native">{t("routingNative")}</option>
                   <option value="cliproxyapi">CLIProxyAPI</option>
                   <option value="dario">Dario</option>
-                  <option value="fallback">Fallback</option>
+                  <option value="fallback">{t("routingFallback")}</option>
                 </select>
                 {effectiveUpstreamProxyMode === "fallback" && (
                   <select
@@ -543,7 +543,7 @@ export default function ConnectionRow({
                       )
                     }
                     className="text-xs font-medium rounded px-1.5 py-0.5 border-0 bg-black/[0.03] dark:bg-white/[0.03] text-text-muted/70 hover:text-text-muted cursor-pointer focus:outline-none focus:ring-1 focus:ring-primary/30"
-                    title="Fallback retry backend"
+                    title={t("fallbackRetryBackendTitle")}
                   >
                     <option value="cliproxyapi">→ CLIProxyAPI</option>
                     <option value="dario">→ Dario</option>

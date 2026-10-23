@@ -626,15 +626,15 @@ export default function FreeBudgetCard() {
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search model, provider…"
-          aria-label="Search free models"
+          placeholder={t("searchPlaceholder")}
+          aria-label={t("searchAria")}
           data-testid="budget-search-input"
           className="rounded border border-border bg-surface px-2 py-1 text-[11px] text-text-main placeholder:text-text-muted min-w-[160px]"
         />
         <select
           value={providerFilter}
           onChange={(e) => setProviderFilter(e.target.value)}
-          aria-label="Filter by provider"
+          aria-label={t("filterProviderAria")}
           data-testid="budget-provider-select"
           className="rounded border border-border bg-surface px-1.5 py-1 text-[11px] text-text-main"
         >
@@ -653,7 +653,7 @@ export default function FreeBudgetCard() {
             className="accent-emerald-500"
             data-testid="budget-keyless-toggle"
           />
-          Keyless only
+          {t("keylessOnly")}
         </label>
         <label className="inline-flex items-center gap-1.5 cursor-pointer select-none">
           <input

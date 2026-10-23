@@ -327,7 +327,7 @@ function NamedCombosManager() {
                       <ComboCompressionModeSelect
                         combo={{ id, config: combo.config }}
                         disabled={!compressionEnabled}
-                        title="Compression override"
+                        title={t("compressionOverrideTitle")}
                         className="w-24 shrink-0 rounded-lg border border-border bg-bg px-2 py-1 text-xs text-text-main disabled:opacity-50"
                       />
                     </div>

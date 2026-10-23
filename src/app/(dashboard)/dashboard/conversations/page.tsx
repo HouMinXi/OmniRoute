@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import { useRouter, useSearchParams } from "next/navigation";
 import { PROVIDER_COLORS, getHttpStatusStyle } from "@/shared/constants/colors";
 import { formatTime } from "@/shared/utils/formatting";
@@ -43,10 +44,11 @@ interface ConversationRow {
 // (RequestLoggerV2) — reused here so "in progress" reads the same way in
 // both places.
 function ActiveSpinner() {
+  const t = useTranslations("conversations");
   return (
     <span
       className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-amber-500/15 border border-amber-500/25 shrink-0"
-      title="In progress"
+      title={t("statusInProgress")}
     >
       <span className="inline-block h-2.5 w-2.5 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
     </span>
@@ -106,14 +108,15 @@ function StatusBadge({ status }: { status: number | null }) {
 // from one the content-hash tracker merely counts as multi-turn while still
 // resending full history each request.
 function ContinuationBadge({ isGenuine }: { isGenuine: boolean }) {
+  const t = useTranslations("conversations");
   if (!isGenuine) return null;
   return (
     <span
-      title="Latest turn used previous_response_id and it resolved server-side"
+      title={t("continuationGenuineTitle")}
       className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/15 text-emerald-500 border border-emerald-500/25"
     >
       <span className="material-symbols-outlined text-[11px] leading-none">bolt</span>
-      continuation
+      {t("continuationBadge")}
     </span>
   );
 }
@@ -126,14 +129,15 @@ function ContinuationBadge({ isGenuine }: { isGenuine: boolean }) {
 // grace period has actually elapsed). Server-computed so this badge never
 // disagrees with the actual persisted artifact state.
 function StalledBadge({ isStalled }: { isStalled: boolean }) {
+  const t = useTranslations("conversations");
   if (!isStalled) return null;
   return (
     <span
-      title="Latest turn didn't end in stop and nothing has continued for 5+ minutes"
+      title={t("stalledTitle")}
       className="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-red-500/15 text-red-500 border border-red-500/25"
     >
       <span className="material-symbols-outlined text-[11px] leading-none">error</span>
-      stalled
+      {t("stalledBadge")}
     </span>
   );
 }
@@ -163,9 +167,10 @@ function ConversationLogView({
   // comment for why), rendered as a provisional bubble below the real turns.
   livePartialText: string;
 }) {
+  const t = useTranslations("conversations");
   if (nodes.length === 0 && !livePartialText) {
     return (
-      <div className="text-sm text-text-muted py-4">No turns recorded for this conversation.</div>
+      <div className="text-sm text-text-muted py-4">{t("noTurns")}</div>
     );
   }
   return (
@@ -202,6 +207,7 @@ function ConversationLogView({
 }
 
 function ConversationsPageContent() {
+  const t = useTranslations("conversations");
   const router = useRouter();
   const searchParams = useSearchParams();
   // Read once on mount, mirroring dashboard/logs/page.tsx (#6830/#8354): re-reading the
@@ -589,7 +595,7 @@ function ConversationsPageContent() {
   //
   // Depends on activeConversationId, NOT the whole activeConversation
   // object: activeConversation gets a fresh object reference every list-poll
-  // tick (see the resync effect above, needed so "Goto latest request"
+  // tick (see the resync effect above, needed so "{t("gotoLatestRequest")}"
   // doesn't go stale) — on the SAME poll cadence as this effect's own
   // interval. Depending on the object would tear down and recreate this
   // setInterval every single tick, resetting its countdown each time and
@@ -754,16 +760,16 @@ function ConversationsPageContent() {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <h2 className="text-lg font-semibold text-text-main">Conversations</h2>
+        <h2 className="text-lg font-semibold text-text-main">{t("title")}</h2>
         <div className="flex items-center gap-3">
           <span className="text-xs text-text-muted">
-            {total} conversation{total === 1 ? "" : "s"} with 2+ turns
+            {t("countSummary", { total })}
           </span>
           <label
             className="flex items-center gap-1 px-2 py-1 text-[11px] text-text-muted bg-bg-subtle rounded-md border border-border"
-            title="How often this list re-fetches from the server."
+            title={t("autoRefreshTitle")}
           >
-            <span>Auto-refresh</span>
+            <span>{t("autoRefresh")}</span>
             <input
               type="number"
               min={1}
@@ -785,7 +791,7 @@ function ConversationsPageContent() {
 
       {loading && conversations.length === 0 && (
         <div className="flex items-center justify-center py-12 text-text-muted text-sm">
-          Loading conversations...
+          {t("loading")}
         </div>
       )}
 
@@ -845,13 +851,13 @@ function ConversationsPageContent() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border bg-bg-subtle text-left text-[11px] uppercase tracking-wider text-text-muted">
-                  <th className="px-3 py-2">Conversation</th>
-                  <th className="px-3 py-2 text-right">Turns</th>
-                  <th className="px-3 py-2">Continuation</th>
-                  <th className="px-3 py-2">Last Model</th>
-                  <th className="px-3 py-2">Provider</th>
-                  <th className="px-3 py-2">Status</th>
-                  <th className="px-3 py-2 text-right">Last Seen</th>
+                  <th className="px-3 py-2">{t("colConversation")}</th>
+                  <th className="px-3 py-2 text-right">{t("colTurns")}</th>
+                  <th className="px-3 py-2">{t("colContinuation")}</th>
+                  <th className="px-3 py-2">{t("colLastModel")}</th>
+                  <th className="px-3 py-2">{t("colProvider")}</th>
+                  <th className="px-3 py-2">{t("colStatus")}</th>
+                  <th className="px-3 py-2 text-right">{t("colLastSeen")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -907,7 +913,7 @@ function ConversationsPageContent() {
           onClick={closeConversation}
           role="dialog"
           aria-modal="true"
-          aria-label="Conversation"
+          aria-label={t("drawerTitle")}
         >
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
           <div
@@ -917,7 +923,7 @@ function ConversationsPageContent() {
           >
             <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-bg-primary/95 backdrop-blur-sm rounded-t-xl sm:px-6 sm:py-4">
               <div className="min-w-0">
-                <h3 className="text-sm font-semibold text-text-main">Conversation</h3>
+                <h3 className="text-sm font-semibold text-text-main">{t("drawerTitle")}</h3>
                 <span
                   title={activeConversation.id}
                   className="block truncate font-mono text-[11px] text-text-muted"
@@ -930,8 +936,8 @@ function ConversationsPageContent() {
                   type="button"
                   onClick={goToPreviousConversation}
                   disabled={!hasPreviousConversation}
-                  title="Previous conversation"
-                  aria-label="Previous conversation"
+                  title={t("prevConversation")}
+                  aria-label={t("prevConversation")}
                   className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
                 >
                   <span className="material-symbols-outlined text-[18px]">chevron_left</span>
@@ -940,8 +946,8 @@ function ConversationsPageContent() {
                   type="button"
                   onClick={goToNextConversation}
                   disabled={!hasNextConversation}
-                  title="Next conversation"
-                  aria-label="Next conversation"
+                  title={t("nextConversation")}
+                  aria-label={t("nextConversation")}
                   className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors disabled:opacity-30 disabled:pointer-events-none"
                 >
                   <span className="material-symbols-outlined text-[18px]">chevron_right</span>
@@ -958,9 +964,9 @@ function ConversationsPageContent() {
                 <button
                   type="button"
                   onClick={scrollToBottom}
-                  title="Go to bottom"
+                  title={t("goToBottom")}
                   className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-                  aria-label="Go to bottom"
+                  aria-label={t("goToBottom")}
                 >
                   <span className="material-symbols-outlined text-[18px]">
                     vertical_align_bottom
@@ -970,7 +976,7 @@ function ConversationsPageContent() {
                   type="button"
                   onClick={closeConversation}
                   className="p-1 rounded hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
-                  aria-label="Close conversation"
+                  aria-label={t("closeConversation")}
                 >
                   <span className="material-symbols-outlined text-[20px]">close</span>
                 </button>
@@ -1013,6 +1019,7 @@ function ConversationsPageContent() {
 }
 
 export default function ConversationsPage() {
+  const t = useTranslations("conversations");
   return (
     <Suspense
       fallback={
