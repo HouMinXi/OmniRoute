@@ -9,6 +9,18 @@ type LockRecord = {
 
 const KEY = Symbol.for("omniroute.pplxResearchLocks");
 
+// A run that sent its request and then lost track of it may still be going on
+// Perplexity's side. Its lock holds the connection until the run's own deadline
+// (time budget plus one minute) and this grace after that, then the next
+// acquire takes the connection over. 60 s matches the research cooldown.
+export const UNCONFIRMED_GRACE_MS = 60_000;
+
+function busyUntil(record: LockRecord): number {
+  return record.state === "upstream_unconfirmed"
+    ? record.deadlineMs + UNCONFIRMED_GRACE_MS
+    : record.deadlineMs;
+}
+
 function locks(): Map<string, LockRecord> {
   const g = globalThis as unknown as Record<symbol, Map<string, LockRecord>>;
   return (g[KEY] ??= new Map());
@@ -21,8 +33,7 @@ export function acquireResearchLock(input: {
   maxTotalMinutes: number;
 }): "acquired" | "research_busy" {
   const existing = locks().get(input.connectionId);
-  if (existing && input.nowMs < existing.deadlineMs) return "research_busy";
-  if (existing && existing.state === "upstream_unconfirmed") return "research_busy";
+  if (existing && input.nowMs < busyUntil(existing)) return "research_busy";
   locks().set(input.connectionId, {
     invocationId: input.invocationId,
     acquiredAtMs: input.nowMs,
@@ -48,7 +59,6 @@ export function sweepResearchLock(
 ): LockState | "expired" | "absent" {
   const existing = locks().get(connectionId);
   if (!existing) return "absent";
-  if (nowMs < existing.deadlineMs) return existing.state;
-  if (existing.state === "upstream_unconfirmed") return "upstream_unconfirmed";
+  if (nowMs < busyUntil(existing)) return existing.state;
   return "expired";
 }

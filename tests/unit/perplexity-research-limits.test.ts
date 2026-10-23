@@ -2,9 +2,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { clampResearchResult, LIMITS } = await import(
-  "../../open-sse/mcp-server/tools/perplexityResearchLimits.ts"
-);
+const { clampResearchResult, LIMITS } =
+  await import("../../open-sse/mcp-server/tools/perplexityResearchLimits.ts");
 
 function parsed(report, citations) {
   return { outcome: "success", report, citations, warnings: [] };

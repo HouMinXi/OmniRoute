@@ -42,13 +42,14 @@ function streamedAnswer(frames: Record<string, unknown>[]): string {
   return parts.join("");
 }
 
-function finalReport(frames: Record<string, unknown>[]): { content: string; citations: Citation[] } | null {
+function finalReport(
+  frames: Record<string, unknown>[]
+): { content: string; citations: Citation[] } | null {
   for (const frame of frames) {
     for (const entry of (frame.artifact_entries as Array<Record<string, unknown>>) ?? []) {
       for (const asset of (entry.assets as Array<Record<string, unknown>>) ?? []) {
         const report = asset.research_report as
-          | { final?: boolean; source_content?: string; citations?: Citation[] }
-          | undefined;
+          { final?: boolean; source_content?: string; citations?: Citation[] } | undefined;
         if (asset.asset_type === "RESEARCH_REPORT" && report?.final === true) {
           return { content: report.source_content ?? "", citations: report.citations ?? [] };
         }
@@ -67,13 +68,20 @@ export function parseResearchFrames(input: string): ResearchParse {
     }
   }
 
-  const ended = frames.some((frame) => frame.final_sse_message === true || frame.status === "COMPLETED");
+  const ended = frames.some(
+    (frame) => frame.final_sse_message === true || frame.status === "COMPLETED"
+  );
   if (!ended) return { outcome: "incomplete_result", report: "", citations: [], warnings };
 
   const report = finalReport(frames);
   const streamed = streamedAnswer(frames);
   if (!report) {
-    return { outcome: "report_unconfirmed", report: streamed, citations: [], warnings: [...warnings, "report_unconfirmed"] };
+    return {
+      outcome: "report_unconfirmed",
+      report: streamed,
+      citations: [],
+      warnings: [...warnings, "report_unconfirmed"],
+    };
   }
   if (streamed && streamed !== report.content) {
     return {

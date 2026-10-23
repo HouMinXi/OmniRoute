@@ -13,6 +13,7 @@ import { randomUUID } from "node:crypto";
 import { createMcpServer } from "./server.ts";
 import { resolveMcpCallerAuthInfo, withMcpHttpAuthContext } from "./httpAuthContext.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { activeStreamableRequests } from "./sessionActivity.ts";
 import { WebStandardStreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
@@ -26,7 +27,6 @@ type StreamableSession = {
   transport: WebStandardStreamableHTTPServerTransport;
   startedAt: number;
   lastActivityAt: number;
-  activeRequests: number;
 };
 
 const _streamableSessions = new Map<string, StreamableSession>();
@@ -41,18 +41,11 @@ export function shouldReapSession(
   return nowMs - session.lastActivityAt > MCP_SESSION_IDLE_MS;
 }
 
-export function markStreamableSessionBusy(sessionId: string | undefined, busy: boolean): void {
-  if (!sessionId) return;
-  const session = _streamableSessions.get(sessionId);
-  if (!session) return;
-  session.activeRequests += busy ? 1 : -1;
-  if (session.activeRequests < 0) session.activeRequests = 0;
-}
-
 const _mcpSessionSweep = setInterval(() => {
   const now = Date.now();
   for (const [sessionId, session] of _streamableSessions) {
-    if (shouldReapSession(session, now)) {
+    const activeRequests = activeStreamableRequests(sessionId);
+    if (shouldReapSession({ lastActivityAt: session.lastActivityAt, activeRequests }, now)) {
       try {
         closeStreamableSession(sessionId);
       } catch {}
@@ -132,7 +125,6 @@ function createStreamableSession(): StreamableSession {
     transport,
     startedAt: Date.now(),
     lastActivityAt: Date.now(),
-    activeRequests: 0,
   };
 
   void server.connect(transport);

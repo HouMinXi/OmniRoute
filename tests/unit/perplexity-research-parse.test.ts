@@ -3,9 +3,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-const { parseResearchFrames } = await import(
-  "../../open-sse/mcp-server/tools/perplexityResearchParse.ts"
-);
+const { parseResearchFrames } =
+  await import("../../open-sse/mcp-server/tools/perplexityResearchParse.ts");
 
 const fixture = readFileSync(new URL("../fixtures/pplx-research-sse.txt", import.meta.url), "utf8");
 

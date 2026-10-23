@@ -13,17 +13,19 @@ const { __setTlsFetchOverrideForTesting } =
 
 let fetches = 0;
 let lastTimeoutMs = null;
+async function successFetch(url, opts) {
+  fetches += 1;
+  lastTimeoutMs = opts?.timeoutMs ?? null;
+  if (String(url).includes("rate-limit")) {
+    return { status: 200, headers: new Headers(), text: '{"remaining_research":5}', body: null };
+  }
+  const body =
+    'data: {"status":"COMPLETED","final_sse_message":true,"artifact_entries":[{"assets":[{"asset_type":"RESEARCH_REPORT","research_report":{"final":true,"source_content":"done"}}]}]}\n\n';
+  return { status: 200, headers: new Headers(), text: body, body: null };
+}
+
 function stubSuccess() {
-  __setTlsFetchOverrideForTesting(async (url, opts) => {
-    fetches += 1;
-    lastTimeoutMs = opts?.timeoutMs ?? null;
-    if (String(url).includes("rate-limit")) {
-      return { status: 200, headers: new Headers(), text: '{"remaining_research":5}', body: null };
-    }
-    const body =
-      'data: {"status":"COMPLETED","final_sse_message":true,"artifact_entries":[{"assets":[{"asset_type":"RESEARCH_REPORT","research_report":{"final":true,"source_content":"done"}}]}]}\n\n';
-    return { status: 200, headers: new Headers(), text: body, body: null };
-  });
+  __setTlsFetchOverrideForTesting(successFetch);
 }
 
 stubSuccess();
@@ -152,7 +154,7 @@ test("an upstream error does not start the cooldown", async () => {
   assert.equal(JSON.parse(first.content[0].text).error.code, "incomplete_result");
   stubSuccess();
   const second = await handler({ query: "q", connectionId: "c-err" }, successFrame);
-  assert.equal(JSON.parse(second.content[0].text).error.code, "research_busy");
+  assert.equal(bodyOf(second).ok, true, "no cooldown and no lock after an HTTP error");
   const other = await handler({ query: "q", connectionId: "c-err-other" }, successFrame);
   const body = JSON.parse(
     other.structuredContent ? JSON.stringify(other.structuredContent) : other.content[0].text
@@ -176,4 +178,235 @@ test("no research run starts when the account has no research runs left", async 
   const body = JSON.parse(result.content[0].text);
   assert.equal(body.error.code, "research_quota_exhausted");
   assert.equal(fetches, 1);
+});
+
+// ── How each outcome leaves the per-connection lock ──────────────────────────
+
+const { sweepResearchLock } =
+  await import("../../open-sse/mcp-server/tools/perplexityResearchLock.ts");
+const STORE_KEY = Symbol.for("omniroute.providerConnectionStore");
+
+function bodyOf(result) {
+  assert.ok(result, "the handler must return an envelope");
+  return result.structuredContent ?? JSON.parse(result.content[0].text);
+}
+
+function researchHandler() {
+  process.env.OMNIROUTE_PPLX_RESEARCH_ENABLED = "1";
+  return handlerOf(createMcpServer(), "omniroute_perplexity_research");
+}
+
+async function withStore(store, fn) {
+  const original = globalThis[STORE_KEY];
+  globalThis[STORE_KEY] = store;
+  try {
+    return await fn();
+  } finally {
+    globalThis[STORE_KEY] = original;
+  }
+}
+
+async function captureWarnings(fn) {
+  const original = console.warn;
+  const warnings = [];
+  console.warn = (...args) => warnings.push(args.join(" "));
+  try {
+    return { result: await fn(), warnings };
+  } finally {
+    console.warn = original;
+  }
+}
+
+test("a finished report survives a failed cooldown write and frees the lock", async () => {
+  stubSuccess();
+  const handler = researchHandler();
+  const store = {
+    getProviderConnectionById: async () => null,
+    mergeConnectionProviderSpecificData: async () => {
+      throw new Error("forced write failure");
+    },
+  };
+  const { result, warnings } = await captureWarnings(() =>
+    withStore(store, () => handler({ query: "q", connectionId: "c-dbfail" }, successFrame))
+  );
+  const body = bodyOf(result);
+  assert.equal(body.ok, true);
+  assert.equal(body.data.report, "done");
+  assert.ok(warnings.some((w) => w.includes("could not store the cooldown")));
+  assert.equal(sweepResearchLock("c-dbfail", Date.now()), "absent");
+  const retry = bodyOf(await handler({ query: "q", connectionId: "c-dbfail" }, successFrame));
+  assert.equal(retry.error.code, "research_cooldown", "the in-memory cooldown still applies");
+});
+
+test("an exhausted quota sends no research request and frees the lock", async () => {
+  __setTlsFetchOverrideForTesting(async (url) => {
+    fetches += 1;
+    const text = String(url).includes("rate-limit") ? '{"remaining_research":0}' : "sent";
+    return { status: 200, headers: new Headers(), text, body: null };
+  });
+  const handler = researchHandler();
+  const first = bodyOf(await handler({ query: "q", connectionId: "c-quota" }, successFrame));
+  assert.equal(first.error.code, "research_quota_exhausted");
+  assert.equal(sweepResearchLock("c-quota", Date.now()), "absent");
+  stubSuccess();
+  const retry = bodyOf(await handler({ query: "q", connectionId: "c-quota" }, successFrame));
+  assert.equal(retry.ok, true);
+});
+
+test("a quota lookup that throws does not block the run", async () => {
+  __setTlsFetchOverrideForTesting(async (url, opts) => {
+    if (String(url).includes("rate-limit")) throw new Error("tls handshake failed");
+    return successFetch(url, opts);
+  });
+  const handler = researchHandler();
+  const body = bodyOf(await handler({ query: "q", connectionId: "c-quota-throw" }, successFrame));
+  assert.equal(body.ok, true);
+  assert.equal(sweepResearchLock("c-quota-throw", Date.now()), "absent");
+});
+
+test("an aborted call returns research_aborted, sends nothing and frees the lock", async () => {
+  stubSuccess();
+  const handler = researchHandler();
+  const controller = new AbortController();
+  controller.abort();
+  fetches = 0;
+  const body = bodyOf(
+    await handler(
+      { query: "q", connectionId: "c-aborted" },
+      { ...successFrame, signal: controller.signal }
+    )
+  );
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, "research_aborted");
+  assert.equal(fetches, 0);
+  assert.equal(sweepResearchLock("c-aborted", Date.now()), "absent");
+  const retry = bodyOf(await handler({ query: "q", connectionId: "c-aborted" }, successFrame));
+  assert.equal(retry.ok, true);
+});
+
+function stubAsk(answer) {
+  __setTlsFetchOverrideForTesting(async (url, opts) => {
+    if (String(url).includes("rate-limit")) {
+      return { status: 200, headers: new Headers(), text: '{"remaining_research":5}', body: null };
+    }
+    return answer(opts);
+  });
+}
+
+for (const status of [401, 403, 500]) {
+  test(`an HTTP ${status} answer frees the lock, logs the status, and a retry works`, async () => {
+    const connectionId = `c-http-${status}`;
+    stubAsk(async () => ({ status, headers: new Headers(), text: "denied", body: null }));
+    const handler = researchHandler();
+    const { result, warnings } = await captureWarnings(() =>
+      handler({ query: "q", connectionId }, successFrame)
+    );
+    assert.equal(bodyOf(result).error.code, "incomplete_result");
+    assert.ok(warnings.some((w) => w.includes(`HTTP ${status}`)));
+    assert.equal(sweepResearchLock(connectionId, Date.now()), "absent");
+    stubSuccess();
+    assert.equal(bodyOf(await handler({ query: "q", connectionId }, successFrame)).ok, true);
+  });
+}
+
+test("a stream that ends with its end marker but no report frees the lock", async () => {
+  stubAsk(async () => ({
+    status: 200,
+    headers: new Headers(),
+    text: 'data: {"status":"COMPLETED","final_sse_message":true}\n\n',
+    body: null,
+  }));
+  const handler = researchHandler();
+  const body = bodyOf(await handler({ query: "q", connectionId: "c-marker" }, successFrame));
+  assert.equal(body.error.code, "report_unconfirmed");
+  assert.equal(sweepResearchLock("c-marker", Date.now()), "absent");
+});
+
+test("a stream that stops without its end marker stays busy until deadline and grace", async () => {
+  stubAsk(async () => ({
+    status: 200,
+    headers: new Headers(),
+    text: 'data: {"status":"PENDING"}\n\n',
+    body: null,
+  }));
+  const handler = researchHandler();
+  const started = Date.now();
+  const first = bodyOf(
+    await handler({ query: "q", connectionId: "c-cut", maxTotalMinutes: 5 }, successFrame)
+  );
+  assert.equal(first.error.code, "incomplete_result");
+  assert.equal(sweepResearchLock("c-cut", Date.now()), "upstream_unconfirmed");
+  // Deadline is the 5 minute budget plus one minute; the grace is one more minute.
+  assert.equal(sweepResearchLock("c-cut", started + 6 * 60_000), "upstream_unconfirmed");
+  assert.equal(sweepResearchLock("c-cut", Date.now() + 7 * 60_000), "expired");
+});
+
+test("an abort after the request went out returns research_aborted and stays unconfirmed", async () => {
+  const controller = new AbortController();
+  stubAsk(
+    (opts) =>
+      new Promise((_resolve, reject) => {
+        controller.abort();
+        opts.signal.addEventListener("abort", () => reject(new Error("aborted")), { once: true });
+        if (opts.signal.aborted) reject(new Error("aborted"));
+      })
+  );
+  const handler = researchHandler();
+  const { result } = await captureWarnings(() =>
+    handler(
+      { query: "q", connectionId: "c-late-abort" },
+      { ...successFrame, signal: controller.signal }
+    )
+  );
+  assert.equal(bodyOf(result).error.code, "research_aborted");
+  assert.equal(sweepResearchLock("c-late-abort", Date.now()), "upstream_unconfirmed");
+});
+
+test("an aborted request that still answers with an HTTP status stays unconfirmed", async () => {
+  const controller = new AbortController();
+  stubAsk(async () => {
+    controller.abort();
+    return { status: 500, headers: new Headers(), text: "", body: null };
+  });
+  const handler = researchHandler();
+  const body = bodyOf(
+    await handler(
+      { query: "q", connectionId: "c-late-abort-500" },
+      { ...successFrame, signal: controller.signal }
+    )
+  );
+  assert.equal(body.error.code, "research_aborted");
+  assert.equal(sweepResearchLock("c-late-abort-500", Date.now()), "upstream_unconfirmed");
+});
+
+test("a research request that throws comes back as a failure envelope", async () => {
+  __setTlsFetchOverrideForTesting(async (url) => {
+    if (String(url).includes("rate-limit")) {
+      return { status: 200, headers: new Headers(), text: '{"remaining_research":5}', body: null };
+    }
+    throw new Error("socket hang up");
+  });
+  const handler = researchHandler();
+  const { result, warnings } = await captureWarnings(() =>
+    handler({ query: "q", connectionId: "c-throw" }, successFrame)
+  );
+  const body = bodyOf(result);
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, "research_failed");
+  assert.ok(body.error.correlationId);
+  assert.ok(warnings.some((w) => w.includes("run failed")));
+  assert.equal(sweepResearchLock("c-throw", Date.now()), "upstream_unconfirmed");
+});
+
+test("with no connection store registered the call returns research_unavailable and warns", async () => {
+  stubSuccess();
+  const handler = researchHandler();
+  fetches = 0;
+  const { result, warnings } = await captureWarnings(() =>
+    withStore(undefined, () => handler({ query: "q", connectionId: "c-nostore" }, successFrame))
+  );
+  const body = bodyOf(result);
+  assert.equal(body.error.code, "research_unavailable");
+  assert.equal(fetches, 0);
+  assert.ok(warnings.some((w) => w.includes("has no connection store")));
 });

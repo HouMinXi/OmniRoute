@@ -21,9 +21,13 @@ export async function recordResearchCooldown(input: {
   await input.merge(input.connectionId, { pplxResearchNextAllowedAt: until });
 }
 
-export function cooldownRemainingMs(data: Record<string, unknown>, nowMs: number, connectionId?: string): number {
+export function cooldownRemainingMs(
+  data: Record<string, unknown>,
+  nowMs: number,
+  connectionId?: string
+): number {
   const stored = data.pplxResearchNextAllowedAt;
   const fromDb = typeof stored === "number" ? stored : 0;
-  const fromMemory = connectionId ? memory().get(connectionId) ?? 0 : 0;
+  const fromMemory = connectionId ? (memory().get(connectionId) ?? 0) : 0;
   return Math.max(0, Math.max(fromDb, fromMemory) - nowMs);
 }

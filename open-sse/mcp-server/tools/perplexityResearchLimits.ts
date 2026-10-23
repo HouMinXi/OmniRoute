@@ -34,7 +34,10 @@ export function clampResearchResult(input: ResearchParse): ClampedResearch {
   let truncated = report.cut || input.citations.length > LIMITS.citations;
   let result: ClampedResearch = { ...input, report: report.text, citations, truncated };
 
-  while (Buffer.byteLength(JSON.stringify(result), "utf8") > LIMITS.responseChars && citations.length > 0) {
+  while (
+    Buffer.byteLength(JSON.stringify(result), "utf8") > LIMITS.responseChars &&
+    citations.length > 0
+  ) {
     citations = citations.slice(0, -1);
     truncated = true;
     result = { ...result, citations, truncated };

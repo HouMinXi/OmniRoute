@@ -55,11 +55,15 @@ test("sweep interval compares against lastActivityAt, not startedAt", () => {
   );
   assert.ok(sweepBlock, "sweep interval block must exist");
   assert.ok(
-    sweepBlock[1].includes("shouldReapSession(session, now)"),
-    "sweep must ask shouldReapSession, which checks lastActivityAt"
+    sweepBlock[1].includes("session.lastActivityAt"),
+    "sweep must check session.lastActivityAt"
+  );
+  assert.match(
+    sweepBlock[1],
+    /shouldReapSession\(\s*\{\s*lastActivityAt:\s*session\.lastActivityAt,\s*activeRequests\s*\},\s*now\s*\)/,
+    "sweep must ask shouldReapSession with the session's lastActivityAt and its active request count"
   );
   assert.ok(!sweepBlock[1].includes("session.startedAt"), "sweep must NOT check session.startedAt");
-  assert.ok(src.includes("session.lastActivityAt"), "the reap decision must still read lastActivityAt");
 });
 
 // ── Source-level invariant: MCP_SESSION_IDLE_MS constant ─────────────────────
@@ -429,4 +433,19 @@ test("a session with a request still running is not reaped after 6 idle minutes"
   assert.equal(mod.shouldReapSession(busy, 6 * 60_000), false);
   busy.activeRequests = 0;
   assert.equal(mod.shouldReapSession(busy, 6 * 60_000), true);
+});
+
+test("the sweep asks the session activity count before reaping", async () => {
+  const sweepBlock = src.match(
+    /_mcpSessionSweep\s*=\s*setInterval\(\(\)\s*=>\s*\{([\s\S]*?)\},\s*60_000\)/
+  );
+  assert.ok(sweepBlock?.[1].includes("activeStreamableRequests(sessionId)"));
+  const activity = await import("../../open-sse/mcp-server/sessionActivity.ts");
+  activity.markStreamableSessionBusy("s-activity", true);
+  activity.markStreamableSessionBusy("s-activity", true);
+  activity.markStreamableSessionBusy("s-activity", false);
+  assert.equal(activity.activeStreamableRequests("s-activity"), 1);
+  activity.markStreamableSessionBusy("s-activity", false);
+  activity.markStreamableSessionBusy("s-activity", false);
+  assert.equal(activity.activeStreamableRequests("s-activity"), 0);
 });
