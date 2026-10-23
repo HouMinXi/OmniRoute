@@ -12,14 +12,14 @@ export interface CredentialGate {
   credentialDisabledGuardrails: string[];
 }
 
-const DEFAULT_WINDOW_SIZE = 512;
+export const DEFAULT_CREDENTIAL_WINDOW_SIZE = 512;
 const DEFAULT_MAX_BUFFERED_CHOICES = 32;
 const DEFAULT_MAX_BUFFERED_BYTES = 65536;
 const MAX_PARTIAL_PROBE = 256;
 
 function resolveWindowSize(options?: CredentialTransformOptions): number {
   if (options?.windowSize !== undefined) return Math.max(1, options.windowSize);
-  return DEFAULT_WINDOW_SIZE;
+  return DEFAULT_CREDENTIAL_WINDOW_SIZE;
 }
 
 function resolveMaxChoices(options?: CredentialTransformOptions): number {
@@ -350,12 +350,11 @@ function drainToolCalls(
   choiceBuf: Record<FieldCategory, string>,
   toolEntries: Array<[string, Record<FieldCategory, string>]>
 ): void {
-  if (!choiceBuf.toolArgs && toolEntries.length === 0) {
-    delete delta.tool_calls;
-    return;
-  }
-  if (!delta.tool_calls) delta.tool_calls = [];
-  const toolCalls = delta.tool_calls as Array<Record<string, unknown>>;
+  // The flush frame is a clone of the last frame that streamed, and that frame's
+  // tool_calls were already emitted with it. Only the residual buffers have not
+  // reached the client yet, so build the array from them alone: appending to the
+  // clone re-sent the arguments the client already had (#18012).
+  const toolCalls: Array<Record<string, unknown>> = [];
   if (choiceBuf.toolArgs) {
     toolCalls.push({ index: 0, function: { arguments: choiceBuf.toolArgs } });
     choiceBuf.toolArgs = "";
@@ -366,6 +365,8 @@ function drainToolCalls(
     toolCalls.push({ index: toolIdx, function: { arguments: buf.toolArgs } });
     buf.toolArgs = "";
   }
+  if (toolCalls.length > 0) delta.tool_calls = toolCalls;
+  else delete delta.tool_calls;
 }
 
 function drainOneChoice(store: ChoiceBufferStore, choice: OpenAiChoice): void {
