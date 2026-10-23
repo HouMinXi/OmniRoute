@@ -87,6 +87,11 @@ function getCodexModelItems(payload: unknown): unknown[] {
   if (Array.isArray(record.data)) return record.data;
   if (Array.isArray(payload)) return payload;
 
+  // An error envelope is not a model map. Without this, `{"error":{...}}`
+  // becomes a phantom model with id "error", the caller counts it as a
+  // successful live catalog, and the real failure never reaches the operator.
+  if (record.error) return [];
+
   const objectItems = Object.entries(record)
     .filter(([, value]) => value && typeof value === "object" && !Array.isArray(value))
     .map(([key, value]) => ({ id: key, ...asRecord(value) }));
@@ -545,8 +550,11 @@ export async function fetchCodexDiscoveryModels({
 
     if (!response.ok) return null;
 
-    const models = normalizeCodexModelsResponse(await response.json());
-    return models.length > 0 ? models : null;
+    // An empty catalog is a successful answer, not a failure: the account may
+    // simply have nothing discoverable right now (measured 2026-10-23 on both
+    // pro accounts, every client version). Callers use null for real failures
+    // so they can keep warning about those and stay quiet about this one.
+    return normalizeCodexModelsResponse(await response.json());
   } catch {
     return null;
   }

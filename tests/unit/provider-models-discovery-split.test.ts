@@ -759,7 +759,9 @@ test("codex.normalizeCodexModelsResponse drops entries without an id", () => {
   );
 });
 
-test("codex.fetchCodexDiscoveryModels returns null for missing token, auth failure, empty, or network error", async () => {
+// Contract change: an empty 200 catalog is a successful answer (callers use it to
+// fall through to the public catalog silently); null is reserved for real failures.
+test("codex.fetchCodexDiscoveryModels separates an empty catalog from a failed fetch", async () => {
   assert.equal(
     await fetchCodexDiscoveryModels({
       accessToken: null,
@@ -776,12 +778,12 @@ test("codex.fetchCodexDiscoveryModels returns null for missing token, auth failu
     null
   );
 
-  assert.equal(
+  assert.deepEqual(
     await fetchCodexDiscoveryModels({
       accessToken: "tok",
       fetchImpl: async () => Response.json({ data: [] }),
     }),
-    null
+    []
   );
 
   assert.equal(
