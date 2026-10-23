@@ -12,7 +12,7 @@ test("upstream timeout config derives hidden fetch timeouts from FETCH_TIMEOUT_M
   assert.deepEqual(config, {
     fetchTimeoutMs: 600000,
     streamIdleTimeoutMs: 600000,
-    streamActiveTimeoutMs: 1260000,
+    streamActiveTimeoutMs: 0,
     sseHeartbeatIntervalMs: 15000,
     streamReadinessTimeoutMs: 80000,
     streamReadinessMaxTimeoutMs: 180000,
@@ -106,11 +106,14 @@ test("API bridge timeouts align request timeout with long proxy timeout by defau
 });
 
 test("active stream timeout is independent from REQUEST_TIMEOUT_MS and validates its own setting", () => {
-  assert.equal(runtimeTimeouts.DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, 1_260_000);
-  assert.equal(runtimeTimeouts.getUpstreamTimeoutConfig({}).streamActiveTimeoutMs, 1_260_000);
+  // Default is off: the cap is resolved per target from the budget that target
+  // registers (see stream-active-timeout-per-target.test.ts). A global value is
+  // only ever the operator's explicit override.
+  assert.equal(runtimeTimeouts.DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, 0);
+  assert.equal(runtimeTimeouts.getUpstreamTimeoutConfig({}).streamActiveTimeoutMs, 0);
   assert.equal(
     runtimeTimeouts.getUpstreamTimeoutConfig({ REQUEST_TIMEOUT_MS: "25000" }).streamActiveTimeoutMs,
-    1_260_000
+    0
   );
   assert.equal(
     runtimeTimeouts.getUpstreamTimeoutConfig({ STREAM_ACTIVE_TIMEOUT_MS: "120000" })
@@ -127,7 +130,7 @@ test("active stream timeout is independent from REQUEST_TIMEOUT_MS and validates
     assert.equal(
       runtimeTimeouts.getUpstreamTimeoutConfig({ STREAM_ACTIVE_TIMEOUT_MS: value })
         .streamActiveTimeoutMs,
-      1_260_000
+      0
     );
   }
 });

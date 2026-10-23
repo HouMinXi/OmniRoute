@@ -9,16 +9,21 @@ type ReadTimeoutOptions = {
 export const DEFAULT_FETCH_TIMEOUT_MS = 600_000;
 export const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 600_000;
 // Hard cap on a connected stream's TOTAL lifetime (it never resets on bytes,
-// unlike STREAM_IDLE_TIMEOUT_MS). It must therefore stay ABOVE the largest
-// per-model `timeoutMs` any provider registers, or a model that is allowed to
-// run for its full budget would be killed mid-answer by this watchdog. The
-// current maximum registered budget is 1_200_000ms (20 min, the Codex models
-// in open-sse/config/providers/registry/codex), so the default is that value
-// plus a one-minute margin. tests/unit/stream-active-timeout-covers-model-budgets.test.ts
-// re-derives the maximum from the registry and fails if this constant ever
-// falls below it again (#12913).
+// unlike STREAM_IDLE_TIMEOUT_MS). A cap only makes sense against a budget the
+// target actually declared: a provider that registers `timeoutMs` promises to
+// answer inside that window, so the watchdog may allow that window plus
+// MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS before calling the stream dead.
+//
+// There is deliberately no blanket default. A single global constant had to be
+// derived from the largest budget any provider registers (the Codex models'
+// 20 min), and every other provider then inherited that wall for a budget it
+// never declared — a healthy long answer was cut mid-stream by a watchdog meant
+// to catch a stalled one. Callers resolve the cap per request with
+// resolveStreamActiveTimeoutMsForModel(); a target that declares no budget gets
+// no wall, and the stall/idle watchdogs still reap a stream that stops producing.
 export const MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS = 60_000;
-export const DEFAULT_STREAM_ACTIVE_TIMEOUT_MS = 1_260_000;
+// 0 = no global cap; STREAM_ACTIVE_TIMEOUT_MS is the operator override.
+export const DEFAULT_STREAM_ACTIVE_TIMEOUT_MS = 0;
 export const MAX_TIMER_TIMEOUT_MS = 2_147_483_647;
 export const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
 export const DEFAULT_STREAM_READINESS_TIMEOUT_MS = 80_000;
@@ -119,6 +124,33 @@ function readTimeoutMs(
   }
 
   return Math.floor(parsed);
+}
+
+/**
+ * Active-stream budget for one request, derived from the budget its target
+ * actually declared rather than from a global constant.
+ *
+ * A positive `configuredGlobalMs` is the operator's explicit cap and wins.
+ * Otherwise the target's own `timeoutMs` plus the margin, or 0 when it declares
+ * none: nothing was promised, so there is no budget for a wall to protect.
+ */
+export function resolveStreamActiveTimeoutMsForModel(
+  modelTimeoutMs: number | undefined,
+  configuredGlobalMs: number
+): number {
+  const globalCap =
+    Number.isFinite(configuredGlobalMs) && configuredGlobalMs > 0 ? Math.floor(configuredGlobalMs) : 0;
+  // setTimeout stores its delay in a 32-bit int; anything above MAX_TIMER_TIMEOUT_MS
+  // wraps and fires immediately, which would kill the stream it was meant to spare.
+  // Both branches clamp for the same reason.
+  if (globalCap > 0) return Math.min(globalCap, MAX_TIMER_TIMEOUT_MS);
+
+  const declared =
+    typeof modelTimeoutMs === "number" && Number.isFinite(modelTimeoutMs) && modelTimeoutMs > 0
+      ? Math.floor(modelTimeoutMs)
+      : 0;
+  if (declared <= 0) return 0;
+  return Math.min(declared + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS, MAX_TIMER_TIMEOUT_MS);
 }
 
 export function getUpstreamTimeoutConfig(

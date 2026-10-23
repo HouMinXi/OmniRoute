@@ -6,11 +6,14 @@ import {
   readCodexTurnStateHeader,
 } from "../../config/codexTurnState.ts";
 import {
+  STREAM_ACTIVE_TIMEOUT_MS,
   STREAM_DISCONNECT_GRACE_PERIOD_MS,
   STREAM_READINESS_MAX_TIMEOUT_MS,
   STREAM_READINESS_TIMEOUT_MS,
   STREAM_RECOVERY,
 } from "../../config/constants.ts";
+import { resolveStreamActiveTimeoutMsForModel } from "@/shared/utils/runtimeTimeouts";
+import { getModelTimeoutMs } from "../../config/providerModels.ts";
 import { incrementTokenUsage } from "../../services/geminiRateLimitTracker.ts";
 import { forgetClaudeThinkingForClientResponse } from "../../services/claudeThinkingStore.ts";
 import { requestTtftMs, streamEmittedOutput } from "../../utils/streamTiming.ts";
@@ -780,6 +783,16 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     // that same patience for their first REAL content, not just their first
     // lifecycle frame. See pipeWithDisconnect's own doc comment.
     contentStallTimeoutMs: streamReadinessPolicy.timeoutMs,
+    // Same target the readiness gate priced above, so both phases agree on how
+    // long this exchange may run before it is declared dead (0 = no wall). Only
+    // explicit declarations count: a connection override or the registry's own
+    // per-model budget. The provider/global fetch default is not a promise about
+    // how long an answer may take, so it must not become a wall here.
+    activeTimeoutMs: resolveStreamActiveTimeoutMsForModel(
+      resolveConnectionTimeoutMs(credentials?.vendorSpecificData) ??
+        getModelTimeoutMs(provider, model),
+      STREAM_ACTIVE_TIMEOUT_MS
+    ),
   });
   const clientFacingStream = wrapReadableStreamWithFinalize(finalStream, releaseTurnExecution);
 
