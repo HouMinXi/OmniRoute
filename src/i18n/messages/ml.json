@@ -15214,7 +15214,7 @@
     "scopes": "{count, plural, one {# scope} other {# scopes}}",
     "btnRemove": "നീക്കം ചെയ്യുക",
     "btnRefresh": "പുതുക്കുക",
-    "loginStep1": "1. നിങ്ങളുടെ ബ്രൈസറിൽ ഈ URL അല്ലെങ്കിൽ {alias} എന്ന അക്കൌണ്ടിന് വിലാസം അംഗീകരിക്കുക:",
+    "loginStep1": "1. നിങ്ങളുടെ ബ്രൈസറിൽ ഈ URL അല്ലെങ്കിൽ <mono>{alias}</mono> എന്ന അക്കൌണ്ടിന് വിലാസം അംഗീകരിക്കുക:",
     "pendingExpires": "പെൻഡിംഗ് ലോഗിൻ {time} എന്ന സമയം കഴിഞ്ഞു",
     "loginStep2": "2. Anthropic നൽകുന്ന കോഡ് ഘടകം ഇടുക:"
   },

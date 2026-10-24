@@ -15210,7 +15210,7 @@
     "noticeAdded": "Żid il-kont \"{alias}\".",
     "expiresInHours": "iskada f'~{hours} sigħat",
     "expiresInMinutes": "iskada f'~{minutes} minuti",
-    "expiresAt": "tiskad f'{date}'",
+    "expiresAt": "tiskad f''{date}",
     "scopes": "{count, plural, one {# skop} other {# skops}}",
     "btnRemove": "Neħħi",
     "btnRefresh": "Ġedded",
