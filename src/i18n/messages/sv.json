@@ -15196,7 +15196,7 @@
     "description": "Autentisera Dario med ditt Claude Pro/Max-abonnemang. Trafik debiteras din abonnemangspool. Minst ett konto krävs innan Dario kan dirigera förfrågningar (fram till dess rapporterar /health nedsatt prestanda).",
     "noAccounts": "Inga konton är konfigurerade ännu.",
     "importTitle": "Importera från OmniRoute",
-    "importDescription": "Återanvänd en befintlig OmniRoute Claude-anslutnings OAuth-token istället för att logga in igen – h跳ller över steg för webbläsarauktoriseringssteg helt.",
+    "importDescription": "Återanvänd OAuth-token från en befintlig OmniRoute Claude-anslutning i stället för att logga in igen – hoppar helt över godkännandesteget i webbläsaren.",
     "importPendingTooltip": "Vill vara aktiv när en Claude-anslutning finns i OmniRoute.",
     "btnImport": "Importera",
     "btnImporting": "Importerar…",

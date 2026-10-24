@@ -15161,7 +15161,7 @@
     "errExportRun": "Izvoženi tečaj ni uspel",
     "errUpdateDestination": "Posodobitev ciljne lokacije ni uspela",
     "errDeleteDestination": "Brisanje ciljne lokacije ni uspelo",
-    "deleteTitle": "Izbriši目的地",
+    "deleteTitle": "Izbriši cilj",
     "deleteConfirm": "Izbrišem \"{name}\"? Tudi njegov izvozni kazalec se odstrani, zato se ponovno dodajanje začne od najstarejšega ohranjenega dnevnika klicev.",
     "statusDisabled": "Onemogočeno",
     "statusFailing": "Neuspešno",

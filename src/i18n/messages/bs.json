@@ -4807,7 +4807,7 @@
     "qdrantTutorialStep3": "Dimenzija zborki mora odgovarati dimenziji koju generira model. Postojeća zbirka dimenzije 2048 ne prihvaća utrobljenja dimenzije 1536.",
     "qdrantTutorialStep4": "Spremite, testirajte konekciju i izvršite test pretrage. Tek tada omogućite Qdrant.",
     "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
-    "qdrantTutorialCredits": "Zaslugе: Rafa Martins — rafacpti@gmail.com"
+    "qdrantTutorialCredits": "Zasluge: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Vještine",
@@ -6826,7 +6826,7 @@
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
     "claudeCodeRoutingTitle": "Ruteiranje usmjerenog proxija za promet Claude Code-a",
-    "routingNative": "Natивно",
+    "routingNative": "Nativno",
     "routingFallback": "Rezervno",
     "rerank": "Rerank",
     "video": "Vide",

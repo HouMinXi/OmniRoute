@@ -15129,7 +15129,7 @@
     "drawerTitle": "संभाषण",
     "prevConversation": "मागील संभाषण",
     "nextConversation": "पुढील संभाषण",
-    "gotoLatestRequest": "सर्व最新 विनंतीक जा",
+    "gotoLatestRequest": "नवीनतम विनंतीवर जा",
     "goToBottom": "खाली जा",
     "closeConversation": "संभाषण बंद करा",
     "statusInProgress": "प्रगतीत आहे",
@@ -15141,7 +15141,7 @@
   },
   "logExport": {
     "pageTitle": "लॉ एक्सपोर्ट",
-    "pageSubtitle": "लॉग्स टॅबमधील कॉल लॉग्स एका 바ह्य एनालिटिक्स स्टोअरमध्ये непреस्थीन पाठवा.",
+    "pageSubtitle": "लॉग्स टॅबमधील कॉल लॉग्स सतत एका बाह्य अॅनालिटिक्स स्टोअरमध्ये पाठवा.",
     "addDestination": "घेवस्थळ जोडा",
     "scheduleTitle": "आधारित",
     "cronLabel": "Cron",

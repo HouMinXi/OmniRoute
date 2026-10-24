@@ -15185,7 +15185,7 @@
     "loading": "ගිනුම් තත්ත්වය ඉබ්බේද…",
     "stateReady": "ගින මූලද්‍රලාභය",
     "stateDisabled": "CLIProxyAPI ස්ථාපිතව නොමැත",
-    "stateMissingKey": "පාලන යතුර сконфигуරුරා නොමැත",
+    "stateMissingKey": "පාලන යතුර වින්‍යාස කර නොමැත",
     "stateUnreachable": "පාලන API ප්‍රවේශයක් නොමැත",
     "stateUnauthorized": "පාලන යතුර ප්‍රතික්ෂේපිත විය",
     "stateUnsupported": "මෙම CLIProxyAPI අනුවාර්තාව ගින මූලද්‍රලාභය නොප්‍රදර්ශනය කරයි",

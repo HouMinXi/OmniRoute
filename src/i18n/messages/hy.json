@@ -3283,7 +3283,7 @@
     "customEndpointAria": "Սեփական վերջնական կետ",
     "useDefaultKey": "Օգտագործեք OmniRoute-ի անկանխորոշ բանալին",
     "mainModelAria": "Հիմնական մոդել",
-    "manualConfigTitle": "Grok Build的手動 設定"
+    "manualConfigTitle": "Grok Build-ի ձեռքով կազմաձևում"
   },
   "modelCatalog": {
     "title": "Մոդելներ և կոմբոներ",
@@ -15215,16 +15215,16 @@
     "btnRemove": "Հեռացնել",
     "btnRefresh": "Թարմացնել",
     "loginStep1": "1. Բացեք այս հղումը ձեր բրաուզերում և մատակարարեք հասանելիություն «<mono>{alias}</mono>» հաշվին:",
-    "pendingExpires": "Նոչուստեմը փչիգրերըրըրըրըր {time}",
-    "loginStep2": "2. Սրիգաճիեցուցելը Anthropic-ի ցուցադրված չեմըրըրըրըրըրըր։"
+    "pendingExpires": "Սպասվող մուտքի ժամկետը լրանում է {time}",
+    "loginStep2": "2. Տեղադրեք Anthropic-ի ցուցադրած կոդը:"
   },
   "miniapp": {
     "title": "OmniRoute մինի շրջայթ",
     "errTelegramOnly": "Այս անուստեմը խուսք պետք է բացվի Telegram Mini App-ի ներսում։",
-    "greeting": "👋 Ողջույն, {name}! Յշիգրելըրըրըրըրըրըրըրըրըրըր, իմաստավորըրըրըրըրըրըրըրըրըրըրըրըրըր, OmniRoute շրջայթի միջոցով։",
+    "greeting": "👋 Ողջույն, {name}! Ուղարկեք հաղորդագրություն՝ ձեր OmniRoute շլյուզի միջոցով զրուցելու համար։",
     "greetingFallbackName": "ա՛հա",
     "errNoReply": "⚠️ Գրեյթվեյից պատասխան չկա։",
-    "inputPlaceholder": "Յկըրըրըրըրըրըրըրըրըրըրըրըրըրըրըր…",
-    "btnSend": "Յրըրըրըրըրըրըրըր"
+    "inputPlaceholder": "Հարցրեք ցանկացած բան…",
+    "btnSend": "Ուղարկել"
   }
 }

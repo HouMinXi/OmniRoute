@@ -15211,7 +15211,7 @@
     "expiresInHours": "utløper om omtrent {hours}t",
     "expiresInMinutes": "utløper om omtrent {minutes}m",
     "expiresAt": "utløper {date}",
-    "scopes": "{count, plural, one {#作用域} other {#作用域}}",
+    "scopes": "{count, plural, one {# omfang} other {# omfang}}",
     "btnRemove": "Fjern",
     "btnRefresh": "Oppdater",
     "loginStep1": "1. Åpne denne URL-en i nettleseren din og godkjenn tilgang for konto <mono>{alias}</mono>:",
