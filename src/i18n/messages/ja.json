@@ -15222,7 +15222,7 @@
     "title": "OmniRoute ミニアプリ",
     "errTelegramOnly": "このページは Telegram ミニアプリ内で開く必要があります。",
     "greeting": "👋 {name}さん、こんにちは！ OmniRoute ゲートウェイを通じてチャットでメッセージをお送りください。",
-    "greetingFallbackName": "そちら",
+    "greetingFallbackName": "ユーザー",
     "errNoReply": "⚠️ ゲートウェイからの応答がありません。",
     "inputPlaceholder": "何でも聞いてみてください…",
     "btnSend": "送信"

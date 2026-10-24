@@ -15222,7 +15222,7 @@
     "title": "OmniRoute Mini App",
     "errTelegramOnly": "මෙම පිටුව Telegram Mini App එක තුළ විවෘත විය යුතුය.",
     "greeting": "👋 හෙලෝ {name}! ඔබේ OmniRoute ගේට්වේ හරහා සංවාද කිරීමට පණිවිඩයක් යවන්න.",
-    "greetingFallbackName": "ඔහ",
+    "greetingFallbackName": "මිතුරා",
     "errNoReply": "⚠️ ගේට්වේව් එකෙන් පිළිතුරක් නැත.",
     "inputPlaceholder": "යමක් අහන්න…",
     "btnSend": "යවන්න"

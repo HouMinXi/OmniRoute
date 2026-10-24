@@ -15129,8 +15129,8 @@
     "drawerTitle": "Suhbat",
     "prevConversation": "Oldingi suhbat",
     "nextConversation": "Keyingi suhbat",
-    "gotoLatestRequest": "Eng soʻrovga oʻtish",
-    "goToBottom": "Turga oʻtish",
+    "gotoLatestRequest": "Eng soʻnggi soʻrovga oʻtish",
+    "goToBottom": "Pastga oʻtish",
     "closeConversation": "Muxrasani yopish",
     "statusInProgress": "Jarayonda",
     "continuationGenuineTitle": "Soʻnggi tura previous_response_id ni ishlatdi va u server tomonida hal qilindi",
@@ -15215,7 +15215,7 @@
     "btnRemove": "O‘chirish",
     "btnRefresh": "Yangilash",
     "loginStep1": "1. Shu URL'ni brauzeringizda oching va <mono>{alias}</mono> hisobi uchun ruxsatni tasdiqlang:",
-    "pendingExpires": "Kutiladagi tushun oʻsha muddati {time} vaqtda tugaydi",
+    "pendingExpires": "Kutilayotgan kirish muddati {time} da tugaydi",
     "loginStep2": "2. Anthropic koʻrsatgan kodni joylang:"
   },
   "miniapp": {

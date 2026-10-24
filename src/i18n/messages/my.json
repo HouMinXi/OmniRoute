@@ -15221,8 +15221,8 @@
   "miniapp": {
     "title": "OmniRoute Mini App",
     "errTelegramOnly": "ဤစာမျက်နှာကို Telegram Mini App ထဲတွင်သာ ဖွင့်ရပါမည်။",
-    "greeting": "👋 မင်္ဂလာပါ {name}! သင်၏ OmniRoute gateway မှတစ်ဆင့် စကားပြောမို့ ကြားသုံးပါ။",
-    "greetingFallbackName": "အကွာ",
+    "greeting": "👋 မင်္ဂလာပါ {name}! သင်၏ OmniRoute gateway မှတစ်ဆင့် စကားပြောရန် မက်ဆေ့ချ် ပို့ပါ။",
+    "greetingFallbackName": "မိတ်ဆွေ",
     "errNoReply": "⚠️ Gateway မှ အဖြေမရပါ။",
     "inputPlaceholder": "ကိစ္စမေးမေးပါ…",
     "btnSend": "စလောက်ပါ"

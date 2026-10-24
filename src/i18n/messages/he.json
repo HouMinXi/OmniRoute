@@ -6836,7 +6836,7 @@
     "tunnelIdLabel": "מזהה מנהרה",
     "tunnelRuntimeKeyLabel": "מפתח הזינוק למנהרה",
     "tunnelRuntimeKeyPlaceholder": "מפתח הזינוק",
-    "tunnelRuntimeKeyHint": "נשמר במצופף יחד עם ה־Cookie ולא נרשם לעולם ליומנים.",
+    "tunnelRuntimeKeyHint": "נשמר מוצפן יחד עם ה־Cookie ולעולם אינו נרשם ביומנים.",
     "tunnelRuntimeKeyNewLabel": "מפתח הזינוק חדש למנהרה",
     "tunnelRuntimeKeyNewHint": "הזינו יחד עם Cookie חדש בלבד. הערך נשמר במצופף.",
     "chatgptConnectorLabel": "מחבר מותאם אישית עבור ChatGPT",

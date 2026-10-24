@@ -15222,7 +15222,7 @@
     "title": "OmniRoute Mini App",
     "errTelegramOnly": "ეს გვერდი უნდა გაიხსნას Telegram Mini App-ის შიგნით.",
     "greeting": "👋 გამარჯობა {name}! გაგზავნეთ შეტყობინება ჩატისთვის თქვენი OmniRoute Gateway-ის გავლით.",
-    "greetingFallbackName": "აქ",
+    "greetingFallbackName": "მეგობარო",
     "errNoReply": "⚠️ Gateway-დან პასუხი არ მოვიდა.",
     "inputPlaceholder": "ეკითხეთ რაც გსურთ…",
     "btnSend": "გაგზავნა"
