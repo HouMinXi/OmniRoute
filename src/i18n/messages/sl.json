@@ -13941,7 +13941,7 @@
       },
       "KIRO_TOOL_CALL_REPAIR_ENABLED": {
         "label": "Popravek klicov orodij Kiro",
-        "description": "Ko odziv Kiro v stremljenju izda nepravilno ovoj tool_call (manjka input.name ali input.arguments) pred katerim koli vidnim izhodom, ga potiši in zahtevo ponovno pošlje enkrat s popravilnim navodilom namesto da konča vrsto z invalid_kiro_tool_call. Ponovni poskus stane eno dodatno zahtevo Kiro; druga neuspešna poskušanje konča vrsto s kiro_tool_call_repair_retry_failed. Vgrajeno je privzeto. Nastavite na false, da vrsto označite za neuspešno ob prvem nepravilnem ovoju."
+        "description": "Ko odziv Kiro v stremljenju izda nepravilno ovoj tool_call (manjka input.name ali input.arguments) pred katerim koli vidnim izhodom, ga potiši in zahtevo ponovno pošlje enkrat s popravilnim navodilom namesto da konča vrsto z invalid_kiro_tool_call. Ponovni poskus stane eno dodatno zahtevo Kiro; druga neuspešna poskušanje konča vrsto s kiro_tool_call_repair_retry_failed. Privzeto vklopljeno. Nastavite na false, da vrsto označite za neuspešno ob prvem nepravilnem ovoju."
       },
       "MODELS_DEV_EFFORT_TIERS_ENABLED": {
         "label": "Stati napora models.dev",
@@ -13949,15 +13949,15 @@
       },
       "LMARENA_SYNTHESIZED_CX_ENABLED": {
         "label": "Arena Sintetizirana cx Telemetrija",
-        "description": "Pripni sintetiziran programatski cx blok interakcije stranke (vrednost, ki jo sama stran arena.ai pošlje za stran z neprijetno zabeleženo interakcijo) v vsako zahtevo za ustvarjanje ocene v Areni (lmarena), ki nima cx podatkov, ki jih je oskrbel operater (providerSpecificData.cx). Privzeto izkljopljeno: polje cx je signal proti avtomatizaciji pri Areni, zato OmniRoute naprej pošle samo vrednost, ki jo je operater zajel iz resnične seje brskalnika (providerSpecificData.cx), drugače pa ne pošle nobenega cx. Prednost ni dokazana; vklopite le, če Arena začne zavrnovati zahteve brez cx."
+        "description": "Pripni sintetiziran programatski cx blok interakcije stranke (vrednost, ki jo sama stran arena.ai pošlje za stran z neprijetno zabeleženo interakcijo) v vsako zahtevo za ustvarjanje ocene v Areni (lmarena), ki nima cx podatkov, ki jih je oskrbel operater (providerSpecificData.cx). Privzeto izklopljeno: polje cx je signal proti avtomatizaciji pri Areni, zato OmniRoute naprej pošle samo vrednost, ki jo je operater zajel iz resnične seje brskalnika (providerSpecificData.cx), drugače pa ne pošle nobenega cx. Prednost ni dokazana; vklopite le, če Arena začne zavrnovati zahteve brez cx."
       },
       "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
         "label": "Samo Codex Reaktivno zgoščanje",
-        "description": "Dozvoli, da tudi poti za reaktivno (prago) in zadnje oziš zgoščanje prepisujo zgodovine za samostanski prehod Codex (POST /v1/responses k ponudniku codex), ko presegajo proračun za kontekst, s pomočjo prilagodnika za vhod[] Responses. Privzeto izkljopljeno: zgodovine samostansko Codexa lasti Codexov stranki in jih zgoščanje nikoli ne prepiše; presežene zahteve nadalje ostajajo ob proračunu za kontekst, kot prej. Potrebno je, da je globinsko stiskanje vklopljeno in da model ni izkljupljen."
+        "description": "Dozvoli, da tudi poti za reaktivno (prago) in zadnje oziš zgoščanje prepisujo zgodovine za samostanski prehod Codex (POST /v1/responses k ponudniku codex), ko presegajo proračun za kontekst, s pomočjo prilagodnika za vhod[] Responses. Privzeto izklopljeno: zgodovine samostansko Codexa lasti Codexov stranki in jih zgoščanje nikoli ne prepiše; presežene zahteve nadalje ostajajo ob proračunu za kontekst, kot prej. Potrebno je, da je globinsko stiskanje vklopljeno in da model ni izkljupljen."
       },
       "QUOTA_WINDOW_BOUNDED_PARK": {
         "label": "Okno meje: Spoštuje omejeno parkiranje",
-        "description": "Dozvoli, da politik mej po oknu (sejnijske/tedenski pragovi za izbiro računa) spoštuje omejeno parkiranje izčrpanosti: ko je rok za omejeno parkiranje potekel ali je opažanje zmejene meje starejše od praga parkiranja, okno preneha izkazati račun, dokler ni sveže opažanje meje. Privzeto izkljupljeno: zmečeno okno nadalje blokira s zadnjim poročanim odstotkom, dokler ne pride do njenega lastnega časa ponastavitve."
+        "description": "Dozvoli, da politik mej po oknu (sejnijske/tedenski pragovi za izbiro računa) spoštuje omejeno parkiranje izčrpanosti: ko je rok za omejeno parkiranje potekel ali je opažanje zmejene meje starejše od praga parkiranja, okno preneha izkazati račun, dokler ni sveže opažanje meje. Privzeto izklopljeno: zmečeno okno nadalje blokira s zadnjim poročanim odstotkom, dokler ne pride do njenega lastnega časa ponastavitve."
       },
       "IMAGE_GENERATION_LONG_JOBS": {
         "label": "Ustvarjanje slik: Dolga dela",

@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Ṣàkàn Ẹ̀kọ́ àwọn ID iṣẹ́",
-        "description": "Àfikún àwọn prefix iṣẹ́ nínpo àwọn ohun-ọrọ̀ log AUTH (ọ. d. \"Nílò iṣẹ́ '<provider>': abc12345...\"). A dí e ku ní ìbẹ̀rẹ̀ láti yọ àwọn idénà iṣẹ́ kúrò nínpo àwọn log ọ̀rẹ́/àwọn olùtẹ́jọ ẹ̀yà méjì. Ó dúró sí oríṣiṣe; lílo Debug Mode kò fi e dá wọ́le."
+        "description": "Àfikún àwọn prefix iṣẹ́ nínpo àwọn ohun-ọrọ̀ log AUTH (ọ. d. \"Nílò iṣẹ́ '<provider>': abc12345...\"). Ó wà ní pípa ní àkọ́kọ́ láti yọ àwọn idénà iṣẹ́ kúrò nínpo àwọn log ọ̀rẹ́/àwọn olùtẹ́jọ ẹ̀yà méjì. Ó dúró sí oríṣiṣe; lílo Debug Mode kò fi e dá wọ́le."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Dí Ẹ̀wọ̀n Tún Sí Wọlé Pẹ̀lú OIDC",
@@ -13769,15 +13769,15 @@
       },
       "AUDIO_REMOTE_PROVIDER_NODES": {
         "label": "Àwọn Nòòdù Ìṣẹ́ Ọ̀ràn Kù-àtọ́ka Ẹ̀yà Mésan",
-        "description": "Sọ àwọn /v1/audio/* láti lo àwọn nòòdù iṣẹ́ ìlò OpenAI-compatible tí wọ́n wà ní ìbámu pẹ̀lú àwọn ìpèjè kọ̀tẹ̀kọ̀tẹ̀. Kò nílò ní ìbẹ̀rẹ̀ — jíji ọ̀ràn kù-àtọ́ka sí olùkúlù kòtẹ̀kọ̀tẹ̀ mú ipò egress yípadà, ó sì gbọdọ̀ jẹ́ ìpinnu alabúsè tó ṣeéṣe. Àwọn nòòdù loopback máa nílò nígbàkọ̀gbe, kò ní ipa."
+        "description": "Sọ àwọn /v1/audio/* láti lo àwọn nòòdù iṣẹ́ ìlò OpenAI-compatible tí wọ́n wà ní ìbámu pẹ̀lú àwọn ìpèjè kọ̀tẹ̀kọ̀tẹ̀. Ó wà ní pípa ní àkọ́kọ́ — jíji ọ̀ràn kù-àtọ́ka sí olùkúlù kòtẹ̀kọ̀tẹ̀ mú ipò egress yípadà, ó sì gbọdọ̀ jẹ́ ìpinnu alabúsè tó ṣeéṣe. Àwọn nòòdù loopback máa nílò nígbàkọ̀gbe, kò ní ipa."
       },
       "RERANK_REMOTE_PROVIDER_NODES": {
         "label": "Àwọn Nòòdù Ìṣẹ́ Rerank Ẹ̀yà Mésan",
-        "description": "Sọ POST /v1/rerank (àti ìgbé-ìbámu rerank ọ̀rọ̀-ẹ̀yà, tí ọ pẹ́ loopback) láti lo àwọn nòòdù iṣẹ́ ìlò OpenAI-compatible tí wọ́n wà ní ìbámu pẹ̀lú àwọn ìpèjè kọ̀tẹ̀kọ̀tẹ̀ — ọkọ LAN tààṣe Tailscale peer tí TEI, Infinity, vLLM, b. tí wọn wà lórí e. Kò nílò ní ìbẹ̀rẹ̀ — jíji sí olùkúlù kòtẹ̀kọ̀tẹ̀ mú ipò egress yípadà, ó sì gbọdọ̀ jẹ́ ìpinnu alabúsè tó ṣeéṣe. Àwọn nòòdù loopback máa nílò nígbàkọ̀gbe, kò ní ipa. Àwọn nòòdù ẹ̀yà mésan gbọdọ̀ kọ́pa pọ̀nìpèjè URL iṣẹ́ oju-ọrọ̀ láti inú kó."
+        "description": "Sọ POST /v1/rerank (àti ìgbé-ìbámu rerank ọ̀rọ̀-ẹ̀yà, tí ọ pẹ́ loopback) láti lo àwọn nòòdù iṣẹ́ ìlò OpenAI-compatible tí wọ́n wà ní ìbámu pẹ̀lú àwọn ìpèjè kọ̀tẹ̀kọ̀tẹ̀ — ọkọ LAN tààṣe Tailscale peer tí TEI, Infinity, vLLM, b. tí wọn wà lórí e. Ó wà ní pípa ní àkọ́kọ́ — jíji sí olùkúlù kòtẹ̀kọ̀tẹ̀ mú ipò egress yípadà, ó sì gbọdọ̀ jẹ́ ìpinnu alabúsè tó ṣeéṣe. Àwọn nòòdù loopback máa nílò nígbàkọ̀gbe, kò ní ipa. Àwọn nòòdù ẹ̀yà mésan gbọdọ̀ kọ́pa pọ̀nìpèjè URL iṣẹ́ oju-ọrọ̀ láti inú kó."
       },
       "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
         "label": "Àdánidá Ìbámu Egress Ẹ̀wọ̀n Tún Sí",
-        "description": "Nígbà tí ìṣẹlẹ̀ nẹ́tìwọ̀nà (timeout, ìbámu kò ṣeéṣe/àdúrà) bọ sí olùkúlù àwọn iṣẹ́ méjèèjì, nígbà tí iṣẹ́ kan kò ní proxy kan patọ̀, ṣe àdúrà kúkù, kí o si yọ àwọn iṣẹ́ tí kò ní proxy yókò ojú àkókò tí ó kù fún ìbámu yẹn, dọ́gba ṣe ayẹ́ tí kò ní proxy. Ó nílò ní ìbẹ̀rẹ̀ (tótò: kò yí padà IP egress, ṣṣí ṣe irọrun latency/àdúrà lórí àwọn iṣẹ́ egress ẹ̀wọ̀n tún sí). Dí e láti tún ìbámu ìbẹ̀rẹ̀ padà lórí ìbá tí kò ní proxy àkọ́kọ́."
+        "description": "Nígbà tí ìṣẹlẹ̀ nẹ́tìwọ̀nà (timeout, ìbámu kò ṣeéṣe/àdúrà) bọ sí olùkúlù àwọn iṣẹ́ méjèèjì, nígbà tí iṣẹ́ kan kò ní proxy kan patọ̀, ṣe àdúrà kúkù, kí o si yọ àwọn iṣẹ́ tí kò ní proxy yókò ojú àkókò tí ó kù fún ìbámu yẹn, dọ́gba ṣe ayẹ́ tí kò ní proxy. Ó wà ní títàn ní àkọ́kọ́ (tótò: kò yí padà IP egress, ṣṣí ṣe irọrun latency/àdúrà lórí àwọn iṣẹ́ egress ẹ̀wọ̀n tún sí). Dí e láti tún ìbámu ìbẹ̀rẹ̀ padà lórí ìbá tí kò ní proxy àkọ́kọ́."
       },
       "PROXY_SKIP_RECENTLY_FAILED": {
         "label": "Da Ẹlẹ́ṣẹ́́ tí Ó Ìṣẹ́síì Ọjọ́ Ọwọ́n Rẹ́",
@@ -13809,15 +13809,15 @@
       },
       "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
         "label": "OpenCode Transient Failover Backoff",
-        "description": "Fun aṣiṣẹ OpenCode multi-account rotation, ṣe iduro nitori ẹsan iṣi ni ẹsan iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi, a o ni ẹsan iṣi iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi. A o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi, a o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi. A o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi, a o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi."
+        "description": "Fún yíyípo ọ̀pọ̀ àkọọ́lẹ̀ OpenCode, dúró díẹ̀ kí o tó fi ìbéèrè ránṣẹ́ sí àkọọ́lẹ̀ tó kàn nígbà tí ìgbìyànjú méjì tó tẹ̀léra bá kùnà pẹ̀lú àṣìṣe upstream onígbà díẹ̀ (5xx tàbí ìkọ̀sílẹ̀ 400 tó ṣófo). Ìdúró náà bẹ̀rẹ̀ ní 1.5s, ó máa ń di ìlọ́po méjì fún ìkùnà kọ̀ọ̀kan tó tún tẹ̀lé e, kò lè ju 6s lọ fún ìdúró kan àti 10s fún ìbéèrè kan, a máa fò ó nígbà tí client bá já ìsopọ̀, a sì máa tú body ìdáhùn tó kùnà sílẹ̀ kí a tó dúró. Ó wà ní pípa ní àkọ́kọ́: failover máa ń ṣẹlẹ̀ lẹ́sẹ̀kẹsẹ̀."
       },
       "FLUSH_EMPTY_RETRY_ENABLED": {
         "label": "Flush Empty Turn Retry",
-        "description": "Nígbà tí ẹsan iṣi aṣiṣẹ ẹsan iṣi ẹsan iṣi, nígbà tí iṣi aṣiṣẹ aṣiṣẹ kii ṣe ẹsan iṣi ẹsan iṣi, a o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi. A o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi."
+        "description": "Lórí àwọn ìyípo streaming tí a túmọ̀, nígbà tí ìyípo upstream kò ní àkóónú tó wúlò (completion tí ó jẹ́ reasoning nìkan tàbí chunk tó níye lórí kankan), ṣe àwọn ìgbìyànjú lẹ́ẹ̀kan sí i tó ní ààlà nípasẹ̀ ọ̀nà credential déédéé (títí dé `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) kí ohunkóhun tó hàn sí client. Ó wà ní pípa ní àkọ́kọ́: àwọn ìyípo tó ṣófo máa ń tẹ̀síwájú pẹ̀lú ìhùwàsí lọ́wọ́lọ́wọ́ (200 tó ṣófo tàbí 502 àkóónú tó ṣófo)."
       },
       "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
         "label": "Empty Stream Sibling Recovery",
-        "description": "Claude/Codex streaming: lẹhin iṣi aṣiṣẹ aṣiṣẹ, ṣe iṣi iṣi (títí di 1s / 64 KiB) ẹsan iṣi ẹsan iṣi; iṣi aṣiṣẹ aṣiṣẹ kii ṣe ẹsan iṣi ẹsan iṣi, a o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi ẹsan iṣi, a o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi. A o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi, a o ni ẹsan iṣi ẹsan iṣi ẹsan iṣi."
+        "description": "Claude/Codex streaming: lẹ́yìn ìṣẹ̀lẹ̀ lifecycle àkọ́kọ́, ṣàyẹ̀wò ní ṣókí (títí dé 1s / 64 KiB) fún ìjáde tó wúlò; stream tó parí láìsí àkóónú máa di ìkùnà empty_content tí ó lo ìgbìyànjú lẹ́ẹ̀kan sí i tó ní ààlà tó wà tẹ́lẹ̀ lórí ìsopọ̀ mìíràn tó yẹ (kò sí cooldown, kò sí títi àwòṣe pa), àwọn combo round-robin sì máa dúró láti gbìyànjú lẹ́ẹ̀kan sí i ní kété tí client bá já ìsopọ̀. Ó tún ka refusal, pause_turn àti model_context_window_exceeded sí ìparí òfo tó bófin mu nínú àyẹ̀wò náà. Ó wà ní pípa ní àkọ́kọ́: readiness, ìtọ́jú àkóónú tó ṣófo àti ìgbìyànjú lẹ́ẹ̀kan sí i ti combo máa wà gẹ́gẹ́ bí ti tẹ́lẹ̀ gan-an."
       },
       "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
         "label": "Ìtọ́sọ́nà Ìṣẹ̀ Ẹ̀mí Ìdíwọ́n Ìsàlẹ́",
@@ -13841,19 +13841,19 @@
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Fingerprint onimọrọ OpenCode v2",
-        "description": "Fi fingerprint onimọrọ CLI OpenCode v2 lọ si awọn oloselu OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli ati x-opencode-client cli, onimọrọ User-Agent kan naa ti a ti fi pamọ nikan ti o ba jẹ onimọrọ OpenCode 2.x, ati lori awọn oloselu ọfẹ ti a ti sọ mọlẹ, kii ṣe x-opencode-request, siseni ti a ti ṣe alaye ni x-opencode-session-id/x-session-affinity/x-session-id, awọn ẹda CLI v2 si/iṣẹ lori awọn ọna aṣa ti a ti kunu ati tool_choice ti \"none\" ti a ti ya. Kii ṣe ń ṣiṣẹ ní ìpìlẹ: gbogbo oloselu OpenCode maa n tẹsiwaju aṣoju, awọn oriṣi ati agbegbe nibi ti wọn ṣiṣẹ, byte fun byte."
+        "description": "Fi fingerprint onimọrọ CLI OpenCode v2 lọ si awọn oloselu OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli ati x-opencode-client cli, onimọrọ User-Agent kan naa ti a ti fi pamọ nikan ti o ba jẹ onimọrọ OpenCode 2.x, ati lori awọn oloselu ọfẹ ti a ti sọ mọlẹ, kii ṣe x-opencode-request, siseni ti a ti ṣe alaye ni x-opencode-session-id/x-session-affinity/x-session-id, awọn ẹda CLI v2 si/iṣẹ lori awọn ọna aṣa ti a ti kunu ati tool_choice ti \"none\" ti a ti ya. Ó wà ní pípa ní àkọ́kọ́: gbogbo oloselu OpenCode maa n tẹsiwaju aṣoju, awọn oriṣi ati agbegbe nibi ti wọn ṣiṣẹ, byte fun byte."
       },
       "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
         "label": "Ṣiṣẹ-ọna e-siyi OpenCode Zen Egress-IP",
-        "description": "Fi OpenCode Zen (opencode-zen) kun pẹlu aarin ọna e-siyi e-siyi ọna kọọkan, nitorinaa 429 lori ọna Zen kọọkan yoo ṣe aṣeyọri gbogbo awọn ọna Zen aṣiwaju ti o ba wa nipa aarin ọna e-siyi kan. Kii ṣe ń ṣiṣẹ ní ìpìlẹ: Zen ni o kọsi aarin ọna kọọkan maa n ṣe aṣeyọri funra rẹ, daadaa bi o ti jẹ tẹlẹ. Iye OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS kan pato yoo daadaa ju ami yìí lọ nitori aarin ọna kọọkan."
+        "description": "Fi OpenCode Zen (opencode-zen) kun pẹlu aarin ọna e-siyi e-siyi ọna kọọkan, nitorinaa 429 lori ọna Zen kọọkan yoo ṣe aṣeyọri gbogbo awọn ọna Zen aṣiwaju ti o ba wa nipa aarin ọna e-siyi kan. Ó wà ní pípa ní àkọ́kọ́: Zen ni o kọsi aarin ọna kọọkan maa n ṣe aṣeyọri funra rẹ, daadaa bi o ti jẹ tẹlẹ. Iye OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS kan pato yoo daadaa ju ami yìí lọ nitori aarin ọna kọọkan."
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Awọn Ìlànà Aṣiṣe OpenCode Taara",
-        "description": "Ṣe ki awọn ìlànà aṣiṣe OpenCode ti a fi pamọ (opencode-zen, opencode-go, opencode-cli) ba daradara mọlẹ lori agbegbe aṣiṣe ìdarakọ taara, nitorinaa awọn ami agbegbe bii organization_quota_exceeded tabi \"monthly usage limit reached\" maa n ṣe aṣeyọri 429 bi aṣiṣe ti a ti kọ si, pẹlu aṣeyọri ni ọna aarin kọọkan. Kii ṣe ń ṣiṣẹ ní ìpìlẹ: awọn ìlànà yẹn maa n ka aṣiṣe kọ si kan pato, nitorinaa 429 yìi maa n kete aṣeyọri, daadaa bi o ti jẹ tẹlẹ."
+        "description": "Ṣe ki awọn ìlànà aṣiṣe OpenCode ti a fi pamọ (opencode-zen, opencode-go, opencode-cli) ba daradara mọlẹ lori agbegbe aṣiṣe ìdarakọ taara, nitorinaa awọn ami agbegbe bii organization_quota_exceeded tabi \"monthly usage limit reached\" maa n ṣe aṣeyọri 429 bi aṣiṣe ti a ti kọ si, pẹlu aṣeyọri ni ọna aarin kọọkan. Ó wà ní pípa ní àkọ́kọ́: awọn ìlànà yẹn maa n ka aṣiṣe kọ si kan pato, nitorinaa 429 yìi maa n kete aṣeyọri, daadaa bi o ti jẹ tẹlẹ."
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Awọn Ìlànà Aṣiṣe Cloudflare Workers AI Taara",
-        "description": "Ṣe ki ìlànà aṣiṣe Cloudflare Workers AI ti a fi pamọ ba daradara mọlẹ lori agbegbe aṣiṣe ìdarakọ taara, nitorinaa 429 \"daily free allocation\" agbegbe maa n ṣe aṣeyọri aṣiṣe ti a ti kọ si dipo pe o kete aṣeyọri. Kii ṣe ń ṣiṣẹ ní ìpìlẹ: ìlànà naa maa n ka aṣiṣe kọ si kan pato, daadaa bi o ti jẹ tẹlẹ."
+        "description": "Ṣe ki ìlànà aṣiṣe Cloudflare Workers AI ti a fi pamọ ba daradara mọlẹ lori agbegbe aṣiṣe ìdarakọ taara, nitorinaa 429 \"daily free allocation\" agbegbe maa n ṣe aṣeyọri aṣiṣe ti a ti kọ si dipo pe o kete aṣeyọri. Ó wà ní pípa ní àkọ́kọ́: ìlànà naa maa n ka aṣiṣe kọ si kan pato, daadaa bi o ti jẹ tẹlẹ."
       },
       "CAPABILITY_FILTER_ENABLED": {
         "label": "Oloselu Ọna-ṣiṣe",
@@ -13861,7 +13861,7 @@
       },
       "USAGE_LIMIT_IGNORE_UNPRICED": {
         "label": "Ṣàkúdà Ẹ̀rọ̀ Alagbara tí kò ní Àwọn Àyẹ̀wò US",
-        "description": "Ṣe aṣẹ lilo awọn ọna ṣiṣe ti ko ni idiye gẹ́gẹ́ bí $0 nínú àwọn ààlà lilo USD fún ọkọ̀ọ́kọ́ (per-key) dípò yílo ààlà náà gẹ́gẹ́ bí ti kọsílẹ̀. Ó ṣiṣẹ́ dáadáa (off) ní àkọ́kọ́: ọna ṣiṣe tàbí àyíká àdúkọ tí ko ni idiye lè bo lilo ìní gidi, nítorí náà ààlà náà ṣiṣẹ́ pẹ̀lú àabo (fails closed)."
+        "description": "Ṣe aṣẹ lilo awọn ọna ṣiṣe ti ko ni idiye gẹ́gẹ́ bí $0 nínú àwọn ààlà lilo USD fún ọkọ̀ọ́kọ́ (per-key) dípò yílo ààlà náà gẹ́gẹ́ bí ti kọsílẹ̀. Ó wà ní pípa ní àkọ́kọ́: ọna ṣiṣe tàbí àyíká àdúkọ tí ko ni idiye lè bo lilo ìní gidi, nítorí náà ààlà náà ṣiṣẹ́ pẹ̀lú àabo (fails closed)."
       },
       "RADAR_ENABLED": {
         "label": "Radar",
@@ -13869,7 +13869,7 @@
       },
       "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
         "label": "Ẹrọ Iṣẹ Alaye Agbe",
-        "description": "Àgbẹ́kẹ́lé àmì àgbégbè ojú-ọ̀nà onímọ̀ ti a gbà wí pé ó dógba (tí olùpèlèpèpè fún, tí a ṣàṣẹ̀dá láti inú oní-àpẹẹrẹ model id, tàbí tí olùṣiṣẹ́ ṣètò): kọ ẹwọn àpẹẹrẹ tí a kọ sí ojú-ọ̀nà tí model kò ṣiṣẹ́ pẹ̀lú HTTP 400 kí ó tó ìpè lórí /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations àti /v1/audio/*; fẹ́ models tí àmì wọn àwọn ojú-ọ̀nà kò ní OmniRoute adapter láti /v1/models; àti dá àbérẹ̀ àwọn model tẹ́lẹ̀ sí 422 fún àwọn models bẹ́ẹ̀ni. Ó jẹ́ àlẹ́yọ́: àwọn àmì ojú-ọ̀nà máa ṣe àkíyèsí àti àwọn ìpè àwọn kó ń ṣe àyẹ kọ́ọ̀tú bẹ́ẹ̀ní."
+        "description": "Àgbẹ́kẹ́lé àmì àgbégbè ojú-ọ̀nà onímọ̀ ti a gbà wí pé ó dógba (tí olùpèlèpèpè fún, tí a ṣàṣẹ̀dá láti inú oní-àpẹẹrẹ model id, tàbí tí olùṣiṣẹ́ ṣètò): kọ ẹwọn àpẹẹrẹ tí a kọ sí ojú-ọ̀nà tí model kò ṣiṣẹ́ pẹ̀lú HTTP 400 kí ó tó ìpè lórí /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations àti /v1/audio/*; fẹ́ models tí àmì wọn àwọn ojú-ọ̀nà kò ní OmniRoute adapter láti /v1/models; àti dá àbérẹ̀ àwọn model tẹ́lẹ̀ sí 422 fún àwọn models bẹ́ẹ̀ni. Ó wà ní pípa ní àkọ́kọ́: àwọn àmì ojú-ọ̀nà máa ṣe àkíyèsí àti àwọn ìpè àwọn kó ń ṣe àyẹ kọ́ọ̀tú bẹ́ẹ̀ní."
       },
       "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
         "label": "Ìpamọ́ Àdúrà Fún Gbogbo",
@@ -13917,47 +13917,47 @@
       },
       "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
         "label": "Àlè àlè: Ìdáhùn Pool Tí Kò Sí 503",
-        "description": "Nígbà tí àlè àlè kò ní oníyà kankan nínú ọ́pọ̀ oníyà rẹ̀ kúrò ní ìṣàkóso íṣirò kí ó tó ṣe àṣẹ wíwíwádìí (gbogbo ibi tí a fagbálẹ̀ nípasẹ̀ ìdádùn, àṣẹ gbigbè tàbí ìparí), dáhùn 503 no_eligible_targets dípò 400 àtijọ́nì \"No target supports tool calling\" capability_mismatch. Off jẹ́ àṣẹ kọ̀ọ̀kọ́n: pool tí kò sí yóò kó 400 àtijọ́nì."
+        "description": "Nígbà tí àlè àlè kò ní oníyà kankan nínú ọ́pọ̀ oníyà rẹ̀ kúrò ní ìṣàkóso íṣirò kí ó tó ṣe àṣẹ wíwíwádìí (gbogbo ibi tí a fagbálẹ̀ nípasẹ̀ ìdádùn, àṣẹ gbigbè tàbí ìparí), dáhùn 503 no_eligible_targets dípò 400 àtijọ́nì \"No target supports tool calling\" capability_mismatch. Ó wà ní pípa ní àkọ́kọ́: pool tí kò sí yóò kó 400 àtijọ́nì."
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Mistral Amubigwus 401 Soft Lockout",
-        "description": "Mistral 401 gbọnii (‘'{\"detail\":\"Unauthorized\"}'’, ko si aami idanimọ ti o han gbangba) jọ iru kanna si awoṣe ti a fagile ati awọn olugba ti o ti parẹ. Nigba ti a gba, 401 bẹẹ o dídùn, kò sọ asiko di ti o ti fagile, títí dé ọjọ́-ọ̀fún ní inú ìwékan; eyi tí ó gbé yọ̀ ní sí fagile, nítorí náà awoṣe ti a fagile ní àṣàtún. Ṣàṣẹ́ ìparí ní ìṣòrogún: gbogbo Mistral 401 gbọ̀n sọ asiko di ti o ti fagile, bí ó ti wà l’iṣẹ̀yín."
+        "description": "Mistral 401 gbọnii (‘'{\"detail\":\"Unauthorized\"}'’, ko si aami idanimọ ti o han gbangba) jọ iru kanna si awoṣe ti a fagile ati awọn olugba ti o ti parẹ. Nigba ti a gba, 401 bẹẹ o dídùn, kò sọ asiko di ti o ti fagile, títí dé ọjọ́-ọ̀fún ní inú ìwékan; eyi tí ó gbé yọ̀ ní sí fagile, nítorí náà awoṣe ti a fagile ní àṣàtún. Ó wà ní pípa ní àkọ́kọ́: gbogbo Mistral 401 gbọ̀n sọ asiko di ti o ti fagile, bí ó ti wà l’iṣẹ̀yín."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "Ìṣakojọpọmọ ọna asoju ati Idinku Atilobooṣe",
-        "description": "Ìdinku asoju yóò gba ẹ́ káa ṣe ìṣíṣẹ́ Batch API tí ó gbíyẹ́ (parẹ́/didùn/ṣíṣi/fagile) tí ó tógbò níwọ̀n OOBIROUTE_BATCH_RETENTION_DAYS, pẹ̀lu checkpoint kọ́ọ̀kọ́ ìṣẹ̀ náà, àti mú BLOB content awọn faịlì tí a gbọ́ ìparẹ́ wọn. Ṣàṣẹ́ ìparí: gbogbo ìṣirò àtijọ́ ní àṣàtún títí oṣiṣẹ́ ṣe afihán. Ikilú tí oṣiṣẹ́ ṣe DELETE /api/v1/batches/delete-completed kò ni ipa, ìjọṣe kán ni ìṣẹ́ asoju tí ó ní àgbèkú."
+        "description": "Ìdinku asoju yóò gba ẹ́ káa ṣe ìṣíṣẹ́ Batch API tí ó gbíyẹ́ (parẹ́/didùn/ṣíṣi/fagile) tí ó tógbò níwọ̀n OOBIROUTE_BATCH_RETENTION_DAYS, pẹ̀lu checkpoint kọ́ọ̀kọ́ ìṣẹ̀ náà, àti mú BLOB content awọn faịlì tí a gbọ́ ìparẹ́ wọn. Ó wà ní pípa ní àkọ́kọ́: gbogbo ìṣirò àtijọ́ ní àṣàtún títí oṣiṣẹ́ ṣe afihán. Ikilú tí oṣiṣẹ́ ṣe DELETE /api/v1/batches/delete-completed kò ni ipa, ìjọṣe kán ni ìṣẹ́ asoju tí ó ní àgbèkú."
       },
       "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
         "label": "Ìrèéde Àkọṣu Antigravity",
-        "description": "Gba àkọṣu Antigravity tí a ṣe àyàn náà sí ìṣẹ́lẹ̀ streaming ẹ̀dùn, kí ojutu àyàdí àti ìbárú idanimọ kò tún àkọṣu tí a ti mú sọ asiko. Ìṣe ìgbẹ́ ní àgbèkú (connection, awoṣe upstream tí o lè kọ), nítorí náà àkọṣu káà lè gba awoṣe meji tí ó dúró ṣiṣẹ́. Nígbà tí gbogbo àkọṣu tí ó ní àṣàtún ti gba ìṣẹ́ awoṣe náà, àyè yóò padá 503 POOL_BUSY ìpilẹ̀ṣẹ́ tí a kọ, tó lè ṣe ìdúró, dípò kí ó mú àkọṣu tí ó ní iṣẹ́. Ṣàṣẹ́ ìparí: àyàn àkọṣu wà ní àṣàtún, kò sí àyè tí a mú."
+        "description": "Gba àkọṣu Antigravity tí a ṣe àyàn náà sí ìṣẹ́lẹ̀ streaming ẹ̀dùn, kí ojutu àyàdí àti ìbárú idanimọ kò tún àkọṣu tí a ti mú sọ asiko. Ìṣe ìgbẹ́ ní àgbèkú (connection, awoṣe upstream tí o lè kọ), nítorí náà àkọṣu káà lè gba awoṣe meji tí ó dúró ṣiṣẹ́. Nígbà tí gbogbo àkọṣu tí ó ní àṣàtún ti gba ìṣẹ́ awoṣe náà, àyè yóò padá 503 POOL_BUSY ìpilẹ̀ṣẹ́ tí a kọ, tó lè ṣe ìdúró, dípò kí ó mú àkọṣu tí ó ní iṣẹ́. Ó wà ní pípa ní àkọ́kọ́: àyàn àkọṣu wà ní àṣàtún, kò sí àyè tí a mú."
       },
       "COMBO_AUTO_PRUNE_STALE_STEPS": {
         "label": "Ìdinku Atilobooṣe Ọ̀nà Ìṣẹ́ Combo Tí Ko Dá",
-        "description": "Lẹ́yìn ìṣe àtúnṣe awoṣe tí ó dá lórí akọsílẹ̀ tí ó ní iṣẹ́, ṣe ẹ́ káa ṣe ọ̀nà combo tí a ti sọ asiko sí awọn awoṣe tí àkọsílẹ̀ kò ránsìn ní báyìí, pẹ̀lu àtọ́kasí kọ́ọ̀kọ́ fún ọ̀nà tí a kọ́. Kò ṣe ẹ́ káa ṣe lẹ́yìn ìṣe tí ó fà, tí ó ṣíṣe, tabì fún kọ́ ọ́nà. Kò ṣe ẹ́ káa ṣe ọ̀nà tí ó dúró. Ṣàṣẹ́ ìparí: ọ̀nà tí kò dá ní àṣàtún nìkan."
+        "description": "Lẹ́yìn ìṣe àtúnṣe awoṣe tí ó dá lórí akọsílẹ̀ tí ó ní iṣẹ́, ṣe ẹ́ káa ṣe ọ̀nà combo tí a ti sọ asiko sí awọn awoṣe tí àkọsílẹ̀ kò ránsìn ní báyìí, pẹ̀lu àtọ́kasí kọ́ọ̀kọ́ fún ọ̀nà tí a kọ́. Kò ṣe ẹ́ káa ṣe lẹ́yìn ìṣe tí ó fà, tí ó ṣíṣe, tabì fún kọ́ ọ́nà. Kò ṣe ẹ́ káa ṣe ọ̀nà tí ó dúró. Ó wà ní pípa ní àkọ́kọ́: ọ̀nà tí kò dá ní àṣàtún nìkan."
       },
       "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
         "label": "Claude OAuth Gbogbo Ìmọ̀",
-        "description": "Gbé Claude OAuth àyè tí ó ń gba ìmọ̀ tí a lè kà (thinking.display \"summarized\") padá Anthropic beta redact-thinking-2026-02-12, tí ní ìparí tí Anthropic yóò padá kòkù tí kò ránsìn, signature nìkan. Ṣàṣẹ́ ìparí: beta yìí jẹ́ ẹyẹkún àmì Claude Code OAuth, nítorí náà OAuth àyè máa ń gbé kó. Claude àyè tí ó lè kọ lẹ́yìn nìkan ní àṣàtún àyàdí kọ́ọ̀kọ́; OMNIROUTE_REDACT_THINKING=false tún sọ asiko OAuth ní ọ̀nà yìí."
+        "description": "Gbé Claude OAuth àyè tí ó ń gba ìmọ̀ tí a lè kà (thinking.display \"summarized\") padá Anthropic beta redact-thinking-2026-02-12, tí ní ìparí tí Anthropic yóò padá kòkù tí kò ránsìn, signature nìkan. Ó wà ní pípa ní àkọ́kọ́: beta yìí jẹ́ ẹyẹkún àmì Claude Code OAuth, nítorí náà OAuth àyè máa ń gbé kó. Claude àyè tí ó lè kọ lẹ́yìn nìkan ní àṣàtún àyàdí kọ́ọ̀kọ́; OMNIROUTE_REDACT_THINKING=false tún sọ asiko OAuth ní ọ̀nà yìí."
       },
       "KIRO_TOOL_CALL_REPAIR_ENABLED": {
         "label": "Ìtẹsíwájú Ìyẹwà Kiro",
-        "description": "Nígbà tí àdúdú Kiro tó ń ṣiṣẹ́ dá aṣẹ tool_call tí kò tọ́ (fẹ́lẹ́ tí ó ṣẹ́lẹ̀ input.name tàbí input.arguments) ṣaaju ìfúkùn tí a lè rí, dènù rẹ̀ kí o sì tún àyẹwo padà kọ́gan pẹ̀lú ìmúdandan ṣíṣe àyẹ̀sọ̀rọ̀ díẹ̀ sí i dọ́gba bí ó ti ṣe yẹ, dípò kí o parí ìyípo pẹ̀lú invalid_kiro_tool_call. Ìyípadà yìí láti kọ́gan nípa àyẹwo Kiro díẹ̀ sí i; ìfaìlì kejì yóò parí ìyípo pẹ̀lú kiro_tool_call_repair_retry_failed. Ó ṣiṣẹ́ ní àtúntún. Ṣe àtúnṣe sí false láti fa ìfaìlì ìyípo ní ìfaìlì àkọ́kọ́ fun wrapper tí kò tọ́."
+        "description": "Nígbà tí àdúdú Kiro tó ń ṣiṣẹ́ dá aṣẹ tool_call tí kò tọ́ (fẹ́lẹ́ tí ó ṣẹ́lẹ̀ input.name tàbí input.arguments) ṣaaju ìfúkùn tí a lè rí, dènù rẹ̀ kí o sì tún àyẹwo padà kọ́gan pẹ̀lú ìmúdandan ṣíṣe àyẹ̀sọ̀rọ̀ díẹ̀ sí i dọ́gba bí ó ti ṣe yẹ, dípò kí o parí ìyípo pẹ̀lú invalid_kiro_tool_call. Ìyípadà yìí láti kọ́gan nípa àyẹwo Kiro díẹ̀ sí i; ìfaìlì kejì yóò parí ìyípo pẹ̀lú kiro_tool_call_repair_retry_failed. Ó wà ní títàn ní àkọ́kọ́. Ṣe àtúnṣe sí false láti fa ìfaìlì ìyípo ní ìfaìlì àkọ́kọ́ fun wrapper tí kò tọ́."
       },
       "MODELS_DEV_EFFORT_TIERS_ENABLED": {
         "label": "Àwọn Ìpele Effort models.dev",
-        "description": "Lo àwọn ìpele effort tí models.dev ti gba ìpín (tí a tẹ́síwájú sí ọ̀rọ̀-ọnà tí a mọ̀) nígbà tí kò sí ìyípadà àṣẹ ìṣakóso tàbí registry olùpèsè tí kọ ọ́rọ-àṣẹ èyí, tí o sì gbà àkójọ ìpele tí ó dájú bíi pé “kò sí ìpele” nínu /v1/models effort_tiers àti àwọn ìdábúpọ̀ ìpele àjọṣepọ̀. Kò ṣiṣẹ́ ní àtúntún: effort_tiers àti resolved supportedThinkingEfforts yóò di ẹni tí wọ́n ti jẹ́."
+        "description": "Lo àwọn ìpele effort tí models.dev ti gba ìpín (tí a tẹ́síwájú sí ọ̀rọ̀-ọnà tí a mọ̀) nígbà tí kò sí ìyípadà àṣẹ ìṣakóso tàbí registry olùpèsè tí kọ ọ́rọ-àṣẹ èyí, tí o sì gbà àkójọ ìpele tí ó dájú bíi pé “kò sí ìpele” nínu /v1/models effort_tiers àti àwọn ìdábúpọ̀ ìpele àjọṣepọ̀. Ó wà ní pípa ní àkọ́kọ́: effort_tiers àti resolved supportedThinkingEfforts yóò di ẹni tí wọ́n ti jẹ́."
       },
       "LMARENA_SYNTHESIZED_CX_ENABLED": {
         "label": "Àwọn Ohun-èlò Télemetri ara ẹni Arena",
-        "description": "Lo ara ẹni cx tí a ṣẹdá nípasẹ̀ kọ̀dí (èyí tí arena.ai fún ní ọ̀fẹ́ fún ojú-ọ̀nà tí kò sí ìṣàkóso ìpinnu) sí gbogbo ìbéèrè create-evaluation Arena (lmarena) tí kò ní providerSpecificData.cx tí àṣẹ ìṣakóso fún ní ọ̀fẹ́. Kò ṣiṣẹ́ ní àtúntún: cx ni àmì àti-òfin tí a ṣe lórí automation, nítorí náà OmniRoute kan máa ń sọ àmì tí àṣẹ ìṣakóso gbà láti browser gidi (providerSpecificData.cx) tí ó máa ń sọ á yìí ní àyeyè tí kò jẹ́ èyí tí kò sọ. Ìlò tí kò ṣe ìpèníní; ṣe àtúnṣe ní àyeyè tí Arena bẹ̀rú láti yípadà ìbéèrè láti kọ cx."
+        "description": "Lo ara ẹni cx tí a ṣẹdá nípasẹ̀ kọ̀dí (èyí tí arena.ai fún ní ọ̀fẹ́ fún ojú-ọ̀nà tí kò sí ìṣàkóso ìpinnu) sí gbogbo ìbéèrè create-evaluation Arena (lmarena) tí kò ní providerSpecificData.cx tí àṣẹ ìṣakóso fún ní ọ̀fẹ́. Ó wà ní pípa ní àkọ́kọ́: cx ni àmì àti-òfin tí a ṣe lórí automation, nítorí náà OmniRoute kan máa ń sọ àmì tí àṣẹ ìṣakóso gbà láti browser gidi (providerSpecificData.cx) tí ó máa ń sọ á yìí ní àyeyè tí kò jẹ́ èyí tí kò sọ. Ìlò tí kò ṣe ìpèníní; ṣe àtúnṣe ní àyeyè tí Arena bẹ̀rú láti yípadà ìbéèrè láti kọ cx."
       },
       "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
         "label": "Àǹfàní Codex tí Ó ń Dádú",
-        "description": "Gbà ìpadà àṣẹ (threshold) àti ìpinnu ìpinnu fún ìṣàkóso ìdíwọ̀n tí a kọ ní ọ̀fẹ̀ láti tún ìṣẹ̀gùn ìdíwọ̀n Codex gidi (POST /v1/responses sí codex provider) tí ó dákì kún ìdákìdákì tí a sọ ìdíwọ̀n nínu ìdíwọ̀n rẹ̀, pẹ̀lú àdábọ̀ àṣẹ tí a lè ńṣe ìgbọ̀rísí. Kò ṣiṣẹ́ ní àtúntún: ìṣẹ̀gùn Codex gidi ní ọ̀dọ́ ìyìjì Codex, tí a kò tíì tún ṣe; ìbéèrè tó ń lọ pẹ́pẹ́ pẹ́ yóò máa parí pẹ̀lú ìdíwọ̀n tí ó bá àyà kò sí ní ìṣírí kún ìdákìdákì tí wọ́n ti jẹ́. Ó nílò ìsọ́dọ̀pọ̀ àṣẹ tí a ṣe kópa, tí a sì kọ àǹfàní náà fún àwọn èrè tí a kọ kọ̀ọ́."
+        "description": "Gbà ìpadà àṣẹ (threshold) àti ìpinnu ìpinnu fún ìṣàkóso ìdíwọ̀n tí a kọ ní ọ̀fẹ̀ láti tún ìṣẹ̀gùn ìdíwọ̀n Codex gidi (POST /v1/responses sí codex provider) tí ó dákì kún ìdákìdákì tí a sọ ìdíwọ̀n nínu ìdíwọ̀n rẹ̀, pẹ̀lú àdábọ̀ àṣẹ tí a lè ńṣe ìgbọ̀rísí. Ó wà ní pípa ní àkọ́kọ́: ìṣẹ̀gùn Codex gidi ní ọ̀dọ́ ìyìjì Codex, tí a kò tíì tún ṣe; ìbéèrè tó ń lọ pẹ́pẹ́ pẹ́ yóò máa parí pẹ̀lú ìdíwọ̀n tí ó bá àyà kò sí ní ìṣírí kún ìdákìdákì tí wọ́n ti jẹ́. Ó nílò ìsọ́dọ̀pọ̀ àṣẹ tí a ṣe kópa, tí a sì kọ àǹfàní náà fún àwọn èrè tí a kọ kọ̀ọ́."
       },
       "QUOTA_WINDOW_BOUNDED_PARK": {
         "label": "Àǹfàní Ọ̀pọ̀: Gbá Ìdíwọ̀n àmí tí a kọ ní ọ̀fẹ̀",
-        "description": "Gbiyanju ìdíwọ̀n ọ̀pọ̀ ní àyè àṣẹ àyíká (session/weekly thresholds tí a lo fún àṣẹ àǹfàní) kí ó gbà ìdíwọ̀n tí a kọ ní ọ̀fẹ̀: láti ìyẹn tí kò ní àǹfàní díẹ̀ sí i, àti àwọn ohun tí a gbé kó ọ̀pọ̀ tí ó wọ́pọ̀ ju ìdíwọ̀n àmí, àyè àṣẹ àyíká yìí á kọ àmí tí a kọ ní ọ̀fẹ̀ títí di àǹfàní ọ̀pọ̀ tuntun. Kò ṣiṣẹ́ ní àtúntún: àyè àṣẹ àyíká tí ó jẹ́ ìṣẹ̀gùn á parí pẹ̀lú ọ̀nà tí ó ṣe àlùmọ́ kò sí ní ìṣírí kún ìdákìdákì tí wọ́n ti jẹ́."
+        "description": "Gbiyanju ìdíwọ̀n ọ̀pọ̀ ní àyè àṣẹ àyíká (session/weekly thresholds tí a lo fún àṣẹ àǹfàní) kí ó gbà ìdíwọ̀n tí a kọ ní ọ̀fẹ̀: láti ìyẹn tí kò ní àǹfàní díẹ̀ sí i, àti àwọn ohun tí a gbé kó ọ̀pọ̀ tí ó wọ́pọ̀ ju ìdíwọ̀n àmí, àyè àṣẹ àyíká yìí á kọ àmí tí a kọ ní ọ̀fẹ̀ títí di àǹfàní ọ̀pọ̀ tuntun. Ó wà ní pípa ní àkọ́kọ́: àyè àṣẹ àyíká tí ó jẹ́ ìṣẹ̀gùn á parí pẹ̀lú ọ̀nà tí ó ṣe àlùmọ́ kò sí ní ìṣírí kún ìdákìdákì tí wọ́n ti jẹ́."
       },
       "IMAGE_GENERATION_LONG_JOBS": {
         "label": "Iṣẹ́ Ṣíṣẹ̀dá Àwòrán: Àwọn Iṣẹ́ Pẹ́",
@@ -13965,7 +13965,7 @@
       },
       "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
         "label": "Ìṣàkóso Àṣàtẹlẹ̀ Àyẹ̀túnṣe",
-        "description": "Ṣàyẹ̀wò àwọn ìṣirò àtúnṣe claude/ àti àwọn functional-gateway mirrors lori /v1/models. Kò ṣi ní ìbẹ̀rẹ̀: àwọn ìṣirò méjèèjì yóò ṣe àtẹ́lẹ̀ bí iṣẹ́ ọjọ́. Dúró: àwọn ìṣirò claude/ yóò tún bo àwọn ìṣirò ìròyìn-ìròyìn tí ó wà lórí àwọn àkọsílẹ̀ (-low/-medium/-high/-xhigh), kó ojú-ọ̀nà àwọn àkọsílẹ̀ auto/* tí àwọn ìbéèrè kò le ṣe àtẹ́lẹ̀, àti kó àwọn àkọsílẹ̀ tí ó ṣàtúnṣe tọ́kalẹ̀; àwọn functional-gateway mirrors yóò kó àwọn àpapọ̀ àti àwọn àkọsílẹ̀ tí OmniRoute ṣe àtẹ́lẹ̀ (claude/, no-think/), gba ọ̀nà owner láti owned_by, kò lo owner gẹ́gẹ́ bí àyíká rẹ̀, kó àwọn àyíká tí ó kọ àwọn àkọsílẹ̀ tí kò wà ní àwọn àkọsílẹ̀ tó ṣe àtẹ́lẹ̀."
+        "description": "Ṣàyẹ̀wò àwọn ìṣirò àtúnṣe claude/ àti àwọn functional-gateway mirrors lori /v1/models. Kò ṣi ní ìbẹ̀rẹ̀: àwọn ìṣirò méjèèjì yóò ṣe àtẹ́lẹ̀ bí iṣẹ́ ọjọ́. Nígbà tí ó bá wà ní títàn: àwọn ìṣirò claude/ yóò tún bo àwọn ìṣirò ìròyìn-ìròyìn tí ó wà lórí àwọn àkọsílẹ̀ (-low/-medium/-high/-xhigh), kó ojú-ọ̀nà àwọn àkọsílẹ̀ auto/* tí àwọn ìbéèrè kò le ṣe àtẹ́lẹ̀, àti kó àwọn àkọsílẹ̀ tí ó ṣàtúnṣe tọ́kalẹ̀; àwọn functional-gateway mirrors yóò kó àwọn àpapọ̀ àti àwọn àkọsílẹ̀ tí OmniRoute ṣe àtẹ́lẹ̀ (claude/, no-think/), gba ọ̀nà owner láti owned_by, kò lo owner gẹ́gẹ́ bí àyíká rẹ̀, kó àwọn àyíká tí ó kọ àwọn àkọsílẹ̀ tí kò wà ní àwọn àkọsílẹ̀ tó ṣe àtẹ́lẹ̀."
       },
       "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
         "label": "Àwárí Proxy: Àtúnṣe Fífalẹ̀ Fífalẹ̀",
@@ -13981,19 +13981,19 @@
       },
       "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
         "label": "Iṣeto Ẹda Mid-Conversation System-ṣiṣe ti o ba darapo pẹlu Anthropic",
-        "description": "Lori awọn relay anthropic-compatible-* ṣọto (claude → claude passthrough), da awọn turns role:system ni agbedemeji imọlẹ sinu messages[] ni, dipo ki a gbe wọn lọ si apẹrẹ system ti o wa ni giga, ki a ti le ṣe idaniloju pe eto agbegbe ti o wa ni agbedemeji yoo wa ni titẹ si lori awọn turns. O nlo kan nitosi ti eleyan (client) naa ṣe ifiranṣẹ mid-conversation-system-2026-04-07 anthropic-beta (tí a fífún si oke-ìlà bí o ti jẹ). A ti pa rẹ silẹ ninu: gbogbo system turn ti a gbe si oke ni deede bi ìparí kan náà, nítorí pé awọn relay tí kò tọ́ nípa beta yí jẹ́ ẹ́ ṣàníṣárole:system pẹ̀lú 400."
+        "description": "Lori awọn relay anthropic-compatible-* ṣọto (claude → claude passthrough), da awọn turns role:system ni agbedemeji imọlẹ sinu messages[] ni, dipo ki a gbe wọn lọ si apẹrẹ system ti o wa ni giga, ki a ti le ṣe idaniloju pe eto agbegbe ti o wa ni agbedemeji yoo wa ni titẹ si lori awọn turns. O nlo kan nitosi ti eleyan (client) naa ṣe ifiranṣẹ mid-conversation-system-2026-04-07 anthropic-beta (tí a fífún si oke-ìlà bí o ti jẹ). Ó wà ní pípa ní àkọ́kọ́: gbogbo system turn ti a gbe si oke ni deede bi ìparí kan náà, nítorí pé awọn relay tí kò tọ́ nípa beta yí jẹ́ ẹ́ ṣàníṣárole:system pẹ̀lú 400."
       },
       "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
         "label": "Ìṣàyẹ̀wò Ìlera DB: Dídìdẹ Ìṣàwákì Ìṣiṣẹ́ Ìṣiṣe",
-        "description": "Ṣiṣe ìṣàyẹ̀wò ìfọwọ́kan / ìlera DB ìṣiṣẹ́ ìṣiṣẹ́ lẹ́yìn tí sẹ́sẹ́ tẹ́ ń gba àwọn ìbéèrè (nípasẹ̀ setImmediate) dípò pé ó dídì ìṣiṣẹ́ ìṣiṣẹ́ títí ó tó. Ó pa rẹ̀ sílẹ̀ nínú: ìṣiṣẹ́ ìṣiṣẹ́ ń dídì lórí ìṣàyẹ̀wò náà gẹ́gẹ́ bí ìparí kan náà ní #13717, nítorí náà àdábó data tí ó fẹ́rù ṣùgbón ṣì ṣe ìṣàwárí kí àkọ́kọ́ tí a bàwọ́lẹ́. Ṣiṣi: ìṣiṣẹ́ ìṣiṣẹ́ ń pada ní ṣíṣe àti pé ìṣàyẹ̀wò (ọ̀pọ̀, àti, fún àdábó data aléèlèèlè, tí a ti fún ni àyíká ọmọ tó le jẹ kí a dúró) ń ṣiṣẹ́ lẹ́yìn náà."
+        "description": "Ṣiṣe ìṣàyẹ̀wò ìfọwọ́kan / ìlera DB ìṣiṣẹ́ ìṣiṣẹ́ lẹ́yìn tí sẹ́sẹ́ tẹ́ ń gba àwọn ìbéèrè (nípasẹ̀ setImmediate) dípò pé ó dídì ìṣiṣẹ́ ìṣiṣẹ́ títí ó tó. Ó wà ní pípa ní àkọ́kọ́: ìṣiṣẹ́ ìṣiṣẹ́ ń dídì lórí ìṣàyẹ̀wò náà gẹ́gẹ́ bí ìparí kan náà ní #13717, nítorí náà àdábó data tí ó fẹ́rù ṣùgbón ṣì ṣe ìṣàwárí kí àkọ́kọ́ tí a bàwọ́lẹ́. Ṣiṣi: ìṣiṣẹ́ ìṣiṣẹ́ ń pada ní ṣíṣe àti pé ìṣàyẹ̀wò (ọ̀pọ̀, àti, fún àdábó data aléèlèèlè, tí a ti fún ni àyíká ọmọ tó le jẹ kí a dúró) ń ṣiṣẹ́ lẹ́yìn náà."
       },
       "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
         "label": "Ìṣiṣẹ́ Àgbéjáde OpenCode Catalog",
-        "description": "Jẹ́ kí àwọn OpenCode Zen àti OpenCode Go tí kò ní ìṣeyan ẹrù ìranlọ́ láti gba àwọn ojú ìbéèrè wọn (Responses fún @ai-sdk/openai, Messages fún @ai-sdk/anthropic) láti inú àgbéjáde catalog models.opencode.ai tí a ka ní ìgbésẹ̀ àyà kọ̀ọ̀kan ní ọwọ́ 6. Ó pa rẹ̀ sílẹ̀ nínú: ìṣeyan ẹrù ń wá láti àwọn ìṣẹ̀wé ìwádìí àgbejáde gẹ́gẹ́ bí ìparí kan náà àti catalog kò ṣe ìwádìí."
+        "description": "Jẹ́ kí àwọn OpenCode Zen àti OpenCode Go tí kò ní ìṣeyan ẹrù ìranlọ́ láti gba àwọn ojú ìbéèrè wọn (Responses fún @ai-sdk/openai, Messages fún @ai-sdk/anthropic) láti inú àgbéjáde catalog models.opencode.ai tí a ka ní ìgbésẹ̀ àyà kọ̀ọ̀kan ní ọwọ́ 6. Ó wà ní pípa ní àkọ́kọ́: ìṣeyan ẹrù ń wá láti àwọn ìṣẹ̀wé ìwádìí àgbejáde gẹ́gẹ́ bí ìparí kan náà àti catalog kò ṣe ìwádìí."
       },
       "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
         "label": "Ìbéèrè Àtọ́ka: Aṣayan Ìṣe Ọ̀gọ̀ọ̀gọ̀nà",
-        "description": "Jẹ́ kí àwọn ìbéèrè auto/* (resolveModelOrError àti auto-routing wrapper) kọ àwọn aṣàyàn pẹ̀lú àwọn ìṣe àdánidá (vision, reasoning, thinking) àti àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà tí a ti rí, tí a ka ní ìgbésẹ̀ ọ̀kan gẹ́gẹ́ bí /v1/models catalog. Ó pa rẹ̀ sílẹ̀ nínú: àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà ń dúró gẹ́gẹ́ bí ìparí kan náà (àwọn ìṣe ń ṣe àtúnṣe lẹ́ẹ̀kan-kan àti pé kò gbé àwọn àmì yìí lọ). Ṣiṣi: àwọn àmì yìí ń gbé àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà, nítorí náà àwọn aṣayan àmì, àti nítorí náà àyànà, lè yí padà."
+        "description": "Jẹ́ kí àwọn ìbéèrè auto/* (resolveModelOrError àti auto-routing wrapper) kọ àwọn aṣàyàn pẹ̀lú àwọn ìṣe àdánidá (vision, reasoning, thinking) àti àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà tí a ti rí, tí a ka ní ìgbésẹ̀ ọ̀kan gẹ́gẹ́ bí /v1/models catalog. Ó wà ní pípa ní àkọ́kọ́: àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà ń dúró gẹ́gẹ́ bí ìparí kan náà (àwọn ìṣe ń ṣe àtúnṣe lẹ́ẹ̀kan-kan àti pé kò gbé àwọn àmì yìí lọ). Ṣiṣi: àwọn àmì yìí ń gbé àwọn àmì ìfáńfá àyẹ̀-ẹ̀yà, nítorí náà àwọn aṣayan àmì, àti nítorí náà àyànà, lè yí padà."
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Keyless Transport Gate",
@@ -14001,27 +14001,27 @@
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Tunnunṣe Atunṣe Tẹlẹ (Inline)",
-        "description": "Fun awọn imọ-ọgọ codebuddy-cn (awọn ẹgbẹ DeepSeek-V4 / Kimi-K2 ti a nilo tunṣe tunṣe), fi agbara ẹda aṣiri ti o tẹ lẹhin ti a tunṣe gbe kọdi-ẹgbẹ gẹgẹbi agbegbe '<thought>' ti o ṣe-ṣe ni apakan alaye itẹka naa, ki o ba ni irọrun si ọna-ọna ti o le foju ni apakan reasoning_content (#13632). Kii ṣe aṣayan nipasẹ ti ilana: awọn ibeere codebuddy-cn ni a fi silẹ kọ ni kọ; apakan reasoning_content ara rẹ n wa ni aaye ni gbogbo igba."
+        "description": "Fun awọn imọ-ọgọ codebuddy-cn (awọn ẹgbẹ DeepSeek-V4 / Kimi-K2 ti a nilo tunṣe tunṣe), fi agbara ẹda aṣiri ti o tẹ lẹhin ti a tunṣe gbe kọdi-ẹgbẹ gẹgẹbi agbegbe '<thought>' ti o ṣe-ṣe ni apakan alaye itẹka naa, ki o ba ni irọrun si ọna-ọna ti o le foju ni apakan reasoning_content (#13632). Ó wà ní pípa ní àkọ́kọ́: awọn ibeere codebuddy-cn ni a fi silẹ kọ ni kọ; apakan reasoning_content ara rẹ n wa ni aaye ni gbogbo igba."
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "Ipari Aabo Imẹlọ: Ebi-Ọpa",
-        "description": "Gbe awọn ipari aabo imẹlọ ti o ṣe-ṣe (misalignment_policy_violation, content_policy_violation, tabi idilọwọ ibi-ọna 'blocked by our safety systems' ti a fi ami provider_safety_rejection) bi ipari aabo ni ọna kan: koodu rẹ ma n wa ni iṣẹ ti o ni alaye, ṣiṣe ni HTTP, awọn iṣẹ, WebSocket, ati awọn iṣẹ ti o ti ṣe, ati pe combo kan yoo duro ni ibi naa dipo ki o ba ṣiṣẹ-ṣiṣẹ awọn aṣayan miiran, ati ki o ba di-ọpa awọn ẹgbẹ ti a gba (#17049). Kii ṣe aṣayan nipasẹ ti ilana: awọn iṣẹ wọnyi yoo jẹ ki wọn nṣiṣẹ ni ọna ti wọn n ṣiṣẹ, ati pe ọna-ọna combo ko ni iyipada."
+        "description": "Gbe awọn ipari aabo imẹlọ ti o ṣe-ṣe (misalignment_policy_violation, content_policy_violation, tabi idilọwọ ibi-ọna 'blocked by our safety systems' ti a fi ami provider_safety_rejection) bi ipari aabo ni ọna kan: koodu rẹ ma n wa ni iṣẹ ti o ni alaye, ṣiṣe ni HTTP, awọn iṣẹ, WebSocket, ati awọn iṣẹ ti o ti ṣe, ati pe combo kan yoo duro ni ibi naa dipo ki o ba ṣiṣẹ-ṣiṣẹ awọn aṣayan miiran, ati ki o ba di-ọpa awọn ẹgbẹ ti a gba (#17049). Ó wà ní pípa ní àkọ́kọ́: awọn iṣẹ wọnyi yoo jẹ ki wọn nṣiṣẹ ni ọna ti wọn n ṣiṣẹ, ati pe ọna-ọna combo ko ni iyipada."
       },
       "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
         "label": "Iṣẹ Imọ-ọgọ: Ti a ti Dì",
-        "description": "Gbiyanju awọn asopọ ti a ti di nipa gbigbe ọpọ-ọpọ-ọpọ (a ṣiṣẹ-ṣiṣẹ wọn; kootọ ju igba meji ni a ti di, a ṣiṣẹ-ṣiṣẹ wọn; 5 ni igba kọọkan). A yoo tun ṣiṣe awọn asopọ yẹn ni ṣiṣe ti a ba le ni iṣẹ ni igba keji (#16190). Kii ṣe aṣayan nipasẹ ti ilana: awọn asopọ ti a di ṣiṣe ni o ni a ni aṣa kan ṣiṣe-ṣiṣe, nkan ti o ṣẹlẹ tẹlẹ. Awọn asopọ ti a di nipa oluṣiṣe-ṣiṣẹ, ati awọn ti a di lẹhin ipinnu ti a di di ko ni iṣẹ ni igba keji."
+        "description": "Gbiyanju awọn asopọ ti a ti di nipa gbigbe ọpọ-ọpọ-ọpọ (a ṣiṣẹ-ṣiṣẹ wọn; kootọ ju igba meji ni a ti di, a ṣiṣẹ-ṣiṣẹ wọn; 5 ni igba kọọkan). A yoo tun ṣiṣe awọn asopọ yẹn ni ṣiṣe ti a ba le ni iṣẹ ni igba keji (#16190). Ó wà ní pípa ní àkọ́kọ́: awọn asopọ ti a di ṣiṣe ni o ni a ni aṣa kan ṣiṣe-ṣiṣe, nkan ti o ṣẹlẹ tẹlẹ. Awọn asopọ ti a di nipa oluṣiṣe-ṣiṣẹ, ati awọn ti a di lẹhin ipinnu ti a di di ko ni iṣẹ ni igba keji."
       },
       "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
         "label": "Aṣa Imọ-ọgọ: Ìdánimọ Iṣẹ Iṣẹlẹ Nìkan",
-        "description": "Dinku iṣẹ-ṣiṣe aṣa imọ-ọgọ combo ki ẹda imọ-ọgọ ti o di iṣẹ-ṣiṣe ti o ni aṣa ń ṣe-ṣe-ṣiṣe asopọ nìkan ni a ba ṣe-ṣe-ṣiṣe ni ẹda imọ-ọgọ ti ko le ni aṣa (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Iṣẹ ti ko ni aṣa ni iṣẹ-ṣiṣe (timeout, isopọ iṣẹlẹ, iṣẹ lẹ, awọn iṣẹ ti a ko ni aṣa, ati awọn iṣẹ ti a ko ni aṣa nipa aṣa iṣẹ) yoo jẹ aṣa ti a ṣe-ṣe-ṣiṣe, ati pe asopọ yoo jẹ ki o ni aṣa ni aṣa kan. Kii ṣe aṣayan nipasẹ ti ilana: gbogbo aṣa iṣẹ-ṣiṣe ni aṣa yoo jẹ ki asopọ naa n aṣa ni aṣa iṣẹ-ṣiṣe (iṣẹ-ṣiṣe 5 oṣu-ṣiṣẹ)."
+        "description": "Dinku iṣẹ-ṣiṣe aṣa imọ-ọgọ combo ki ẹda imọ-ọgọ ti o di iṣẹ-ṣiṣe ti o ni aṣa ń ṣe-ṣe-ṣiṣe asopọ nìkan ni a ba ṣe-ṣe-ṣiṣe ni ẹda imọ-ọgọ ti ko le ni aṣa (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Iṣẹ ti ko ni aṣa ni iṣẹ-ṣiṣe (timeout, isopọ iṣẹlẹ, iṣẹ lẹ, awọn iṣẹ ti a ko ni aṣa, ati awọn iṣẹ ti a ko ni aṣa nipa aṣa iṣẹ) yoo jẹ aṣa ti a ṣe-ṣe-ṣiṣe, ati pe asopọ yoo jẹ ki o ni aṣa ni aṣa kan. Ó wà ní pípa ní àkọ́kọ́: gbogbo aṣa iṣẹ-ṣiṣe ni aṣa yoo jẹ ki asopọ naa n aṣa ni aṣa iṣẹ-ṣiṣe (iṣẹ-ṣiṣe 5 oṣu-ṣiṣẹ)."
       },
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Duro ni Idilọwọ Aṣa Iṣẹ-ṣiṣe",
-        "description": "Ni aṣa ni aṣa-ṣiṣe-ṣiṣe combo ni aṣa idilọwọ aṣa iṣẹ-ṣiṣe (koodu tabi iru cyber_policy / content_policy_violation), duro combo naa, gbe idilọwọ naa pada ni aṣa-ṣiṣe-ṣiṣe kan, dipo ki o ba ṣe-ṣe-ṣiṣe ni aṣa-ṣiṣe-ṣiṣe miiran. Kii ṣe aṣayan nipasẹ ti ilana: idilọwọ naa ko ni aṣa ni aṣa-ṣiṣe-ṣiṣe, ko ni aṣa ni aṣa-ṣiṣe-ṣiṣe, ati pe combo yoo gbe ni aṣa-ṣiṣe-ṣiṣe kanna bi aṣa ni aṣa-ṣiṣe-ṣiṣe kan."
+        "description": "Ni aṣa ni aṣa-ṣiṣe-ṣiṣe combo ni aṣa idilọwọ aṣa iṣẹ-ṣiṣe (koodu tabi iru cyber_policy / content_policy_violation), duro combo naa, gbe idilọwọ naa pada ni aṣa-ṣiṣe-ṣiṣe kan, dipo ki o ba ṣe-ṣe-ṣiṣe ni aṣa-ṣiṣe-ṣiṣe miiran. Ó wà ní pípa ní àkọ́kọ́: idilọwọ naa ko ni aṣa ni aṣa-ṣiṣe-ṣiṣe, ko ni aṣa ni aṣa-ṣiṣe-ṣiṣe, ati pe combo yoo gbe ni aṣa-ṣiṣe-ṣiṣe kanna bi aṣa ni aṣa-ṣiṣe-ṣiṣe kan."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ìdíwàpadà Ìdíwàpadà: Yẹra 403/410 Ìṣàkóso",
-        "description": "Nígbà tí gbogbo akọkọ́ ń ṣe yípadà fún ìṣàkóso, àti pé ìdíwàpadà tí ó ń óde lẹ́yìn jẹ́ tí ó fa nípa 403 (ìṣàkóso) tàbi 410 (parí), padà sọ àwọn ìṣàkóso yẹn jù lọ dípò láti ṣì wà àti láti tẹ̀síwájú ìbéèrè náà; ìdíwàpadà tí ó ń ṣe àyípadà agentrouter ìdíwàpadà tí ó ń ṣe àyípadà 403 ń gbé síwájú nípa errorCode 429 kí ó ṣe àyípadà. Fún àkọ́kọ́: èyí kò ṣe àyípadà, èyí kò ṣe àyípadà, àti pé gbogbo ìṣàkóso ń gbé síwájú nípa status tí ó ń bọ̀ wáyé pẹ̀lú."
+        "description": "Nígbà tí gbogbo akọkọ́ ń ṣe yípadà fún ìṣàkóso, àti pé ìdíwàpadà tí ó ń óde lẹ́yìn jẹ́ tí ó fa nípa 403 (ìṣàkóso) tàbi 410 (parí), padà sọ àwọn ìṣàkóso yẹn jù lọ dípò láti ṣì wà àti láti tẹ̀síwájú ìbéèrè náà; ìdíwàpadà tí ó ń ṣe àyípadà agentrouter ìdíwàpadà tí ó ń ṣe àyípadà 403 ń gbé síwájú nípa errorCode 429 kí ó ṣe àyípadà. Ó wà ní pípa ní àkọ́kọ́: èyí kò ṣe àyípadà, èyí kò ṣe àyípadà, àti pé gbogbo ìṣàkóso ń gbé síwájú nípa status tí ó ń bọ̀ wáyé pẹ̀lú."
       }
     }
   },

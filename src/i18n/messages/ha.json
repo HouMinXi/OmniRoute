@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Ayyana ID na Asusun Kai",
-        "description": "Haɗa shafin asusun kai a layukan log na AUTH (misali \"Ana amfani da asusun kai na '<provider>': abc12345...\"). An cire shi a asali don fayyada ma'ana na asusun kai daga log na tsaro da tsarin masu amfani da tsaki. Ba ya dogara da Yakin Gwajima; shigar da Yakin Gwajima ba ya shawarwa wannan."
+        "description": "Haɗa shafin asusun kai a layukan log na AUTH (misali \"Ana amfani da asusun kai na '<provider>': abc12345...\"). A kashe yake ta tsohuwa don fayyada ma'ana na asusun kai daga log na tsaro da tsarin masu amfani da tsaki. Ba ya dogara da Yakin Gwajima; shigar da Yakin Gwajima ba ya shawarwa wannan."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Kashe Shiga da Kalmar Sirri Tare da OIDC",
@@ -13921,7 +13921,7 @@
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Mistral Baƙi 401 Ba Daidaituwan Loci",
-        "description": "Daidaituwa ta Mistral 401 ('{\"detail\":\"Unauthorized\"}', babu alamun isar daidaituwa) ta daidaituwa ta farfado don ƙarin kuskure da daidaituwan kwanciyar hankali. Idan aka buƗo, wanda 401 yake farfado da wuce daidaituwa maimakon a ƙi farfado kamar ya wuce, har komaraya guda uku a cikin sa'o'i; na gaba yake farfado farfado kamar ya wuce, don haka ƙarin kuskuren ya haɗa. A wuce asali: duk ƙananan Mistral 401 yana ƙi farfado kamar ya wuce, kamar da da wuce."
+        "description": "Daidaituwa ta Mistral 401 ('{\"detail\":\"Unauthorized\"}', babu alamun isar daidaituwa) ta daidaituwa ta farfado don ƙarin kuskure da daidaituwan kwanciyar hankali. Idan aka buƗo, wanda 401 yake farfado da wuce daidaituwa maimakon a ƙi farfado kamar ya wuce, har komaraya guda uku a cikin sa'o'i; na gaba yake farfado farfado kamar ya wuce, don haka ƙarin kuskuren ya haɗa. A kashe yake ta tsohuwa: duk ƙananan Mistral 401 yana ƙi farfado kamar ya wuce, kamar da da wuce."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "Tsaftace Batch & Fayil Ta Atomatik",
@@ -13997,11 +13997,11 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Babban Hanyar Kusa",
-        "description": "Ammatar mai ba da auna marasa siffa (babu gwada) na daidaikewa inda hanyarsu ke buƙatar browser a cikin gida (browserBacked) ko kuma na daidaikewa na CLI da aka sanya a cikin gida (isLocalCli) daga cibiyar zaɓi na auto/*, domin mai tsarar wani ɗaya ba zai iya tsayar da buƙatar auto har sauƙin lokaci ɗaya-ɗaya (#17036). A kowane lokaci ba a kunna ba: duk wanda ke ba da auna mara siffa mai amfani da kayan auna masu jera ya ci gaba da kasancewa a cibiyar daidai da yadda yake. Bashi '<alias>'/'<model>' a auna kai tsaye suna aiki a ko wane yanayi."
+        "description": "Ammatar mai ba da auna marasa siffa (babu gwada) na daidaikewa inda hanyarsu ke buƙatar browser a cikin gida (browserBacked) ko kuma na daidaikewa na CLI da aka sanya a cikin gida (isLocalCli) daga cibiyar zaɓi na auto/*, domin mai tsarar wani ɗaya ba zai iya tsayar da buƙatar auto har sauƙin lokaci ɗaya-ɗaya (#17036). A kashe yake ta tsohuwa: duk wanda ke ba da auna mara siffa mai amfani da kayan auna masu jera ya ci gaba da kasancewa a cibiyar daidai da yadda yake. Bashi '<alias>'/'<model>' a auna kai tsaye suna aiki a ko wane yanayi."
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Sai Mai Dubawa a Ciki",
-        "description": "Donin da manyan kwalliyen codebuddy-cn (jinsin DeepSeek-V4 / Kimi-K2 waɗanda suke buƙatar sake gina hankali), sa kowane maimaituwar hankalin mai aiki a cikin ma'anar ƙayyadaddun '<thought>' block a gefen farfaron bayanin, don ya ci gaba da gateway mai sakin fagefaren hankalin mai aiki (#13632). Ya ɗauki asali ba a yi ba: buƙatun codebuddy-cn ana ajiye su ba tare da canji ba; ana kiyaye fagefaren hankalin mai aiki da wuya."
+        "description": "Donin da manyan kwalliyen codebuddy-cn (jinsin DeepSeek-V4 / Kimi-K2 waɗanda suke buƙatar sake gina hankali), sa kowane maimaituwar hankalin mai aiki a cikin ma'anar ƙayyadaddun '<thought>' block a gefen farfaron bayanin, don ya ci gaba da gateway mai sakin fagefaren hankalin mai aiki (#13632). A kashe yake ta tsohuwa: buƙatun codebuddy-cn ana ajiye su ba tare da canji ba; ana kiyaye fagefaren hankalin mai aiki da wuya."
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "Tsayawar Tsaro ta Mai Ba da Sabis: Na Ƙarshe",

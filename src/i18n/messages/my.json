@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "အကောင့် ID များမှတ်တမ်းတင်ခြင်း",
-        "description": "AUTH log lines များတွင် အကောင့် prefix မှန်ကန်စွာဖော်ပြပါ (ဥပဒေသ \"Using '<provider>' account: abc12345...\"). Account identifiers များကို shared/multi-tenant process log များမှ ဖုံးကွယ်ထားသောကြောင့် ဆန်းစစ်မှု ပိတ်ထားသည်။ Debug Mode မှ တစ်ခြားနားကွဲပြားခြင်းရှိသည်; Debug Mode ကို ပြောင်းလဲခြင်းဖြင့် ဤချက်ကို မဖော်ပြနိုင်ပါ။"
+        "description": "AUTH log lines များတွင် အကောင့် prefix မှန်ကန်စွာဖော်ပြပါ (ဥပဒေသ \"Using '<provider>' account: abc12345...\"). Account identifiers များကို shared/multi-tenant process log များမှ ဖုံးကွယ်ထားနိုင်ရန် မူရင်းအတိုင်း ပိတ်ထားသည်။ Debug Mode မှ တစ်ခြားနားကွဲပြားခြင်းရှိသည်; Debug Mode ကို ပြောင်းလဲခြင်းဖြင့် ဤချက်ကို မဖော်ပြနိုင်ပါ။"
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "OIDC ဖြင့် စကားဝှက်ဖြင့် အကောင့်ဝင်ခြင်းကို ပိတ်ပါ",

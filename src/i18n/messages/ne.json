@@ -13997,11 +13997,11 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Keyless Transport Gate",
-        "description": "जसको transport लाई स्थानीय ब्राउजर (browserBacked) वा स्थानीय रूपमा स्थापित CLI (isLocalCli) आवश्यक हुन्छ, ती keyless (no-auth) provider हरूलाई auto/* candidate pool बाहिर राखिन्छ, ताकि hang भएकाले per-target timeout (#17036) सम्म auto request लाई ठप्प नगरून्। सडक रूपमा बन्द (Off by default): emulated tool calling भएका सबै no-auth provider हरू पहिलेजस्तै pool मा रहन्छन्। सिधा '<alias>'/'<model>' कॉल दुवै अवस्थामा काम गर्छ।"
+        "description": "जसको transport लाई स्थानीय ब्राउजर (browserBacked) वा स्थानीय रूपमा स्थापित CLI (isLocalCli) आवश्यक हुन्छ, ती keyless (no-auth) provider हरूलाई auto/* candidate pool बाहिर राखिन्छ, ताकि hang भएकाले per-target timeout (#17036) सम्म auto request लाई ठप्प नगरून्। पूर्वनिर्धारित रूपमा बन्द: emulated tool calling भएका सबै no-auth provider हरू पहिलेजस्तै pool मा रहन्छन्। सिधा '<alias>'/'<model>' कॉल दुवै अवस्थामा काम गर्छ।"
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Inline Reasoning Replay",
-        "description": "codebuddy-cn thinking model हरू (reasoning replay आवश्यक DeepSeek-V4 / Kimi-K2 परिवारहरू) को लागि, replay गरिएको assistant reasoning_content लाई message content को अगाडि दृश्यमान '<thought>' block सँगै inline गरिन्छ, ताकि reasoning_content field लाई हटाउने gateway ले उनीहरूलाई हटाउन सकिन (#13632)। सडक रूपमा बन्द (Off by default): codebuddy-cn request हरू बिना परिवर्तन पठाइन्छ; reasoning_content field आफैं सधै राखिन्छ।"
+        "description": "codebuddy-cn thinking model हरू (reasoning replay आवश्यक DeepSeek-V4 / Kimi-K2 परिवारहरू) को लागि, replay गरिएको assistant reasoning_content लाई message content को अगाडि दृश्यमान '<thought>' block सँगै inline गरिन्छ, ताकि reasoning_content field लाई हटाउने gateway ले उनीहरूलाई हटाउन सकिन (#13632)। पूर्वनिर्धारित रूपमा बन्द: codebuddy-cn request हरू बिना परिवर्तन पठाइन्छ; reasoning_content field आफैं सधै राखिन्छ।"
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "प्रदायक सुरक्षा स्टपहरू: टर्मिनल",

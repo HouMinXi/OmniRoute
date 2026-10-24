@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Protokolovat ID účtů",
-        "description": "Zahrnout předponu účtu do záznamů AUTH v protokolu (např. \"Používám účet '<provider>': abc12345...\"). V výchozím stavu je deaktivováno, aby byly identifikátory účtů utajeny z sdílených/protokolů více nájemníků. Nezávisí na režimu Lalování; přepnutí režimu Lalování toto nezobrazí."
+        "description": "Zahrnout předponu účtu do záznamů AUTH v protokolu (např. \"Používám účet '<provider>': abc12345...\"). Ve výchozím stavu je deaktivováno, aby byly identifikátory účtů utajeny z sdílených/protokolů více nájemníků. Nezávisí na režimu Lalování; přepnutí režimu Lalování toto nezobrazí."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Zakázat přihlášení heslem při použití OIDC",

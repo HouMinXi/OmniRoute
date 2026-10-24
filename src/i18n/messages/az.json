@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Hesab kimliklərini qeydə alın",
-        "description": "AUTH jurnal sətirlərində hesab prefixini daxil edin (məs. \"'<provider>' hesabından istifadə olunur: abc12345...\"). Ortaq/multi-tenant proses jurnallarından hesab identifikatorlarının redaktələnmiş halda saxlanması üçün açıqdan qapatılmışdır. Keşf Xüsusiyyətlərindən asılı deyil; Keşf Xüsusiyyəti aktiv olduqda belə bu xüsuliyyət açılmır."
+        "description": "AUTH jurnal sətirlərində hesab prefixini daxil edin (məs. \"'<provider>' hesabından istifadə olunur: abc12345...\"). Ortaq/multi-tenant proses jurnallarından hesab identifikatorlarının redaktələnmiş halda saxlanması üçün defolt olaraq söndürülüb. Keşf Xüsusiyyətlərindən asılı deyil; Keşf Xüsusiyyəti aktiv olduqda belə bu xüsuliyyət açılmır."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "OIDC ilə Şifrə Girişini Deaktiv Et",

@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Reġistra l-IDs tal-Kontijiet",
-        "description": "Inkludi l-prefix tal-kont fil-linji tal-log tal-AUTH (eż. \"Għaddi l-kont ta '<provider>': abc12345...\"). Imfuffaġ bmod preċiż biex l-identifikaturi tal-kontijiet jiġu rrifjutati mill-log ta' proċessi kondiviżi/multi-tenant. Indipendenti minn Debug Mode; il-bidla ta' Debug Mode ma tagħżilx dan."
+        "description": "Inkludi l-prefix tal-kont fil-linji tal-log tal-AUTH (eż. \"Għaddi l-kont ta '<provider>': abc12345...\"). Mitfi b'mod awtomatiku biex l-identifikaturi tal-kontijiet jiġu rrifjutati mill-log ta' proċessi kondiviżi/multi-tenant. Indipendenti minn Debug Mode; il-bidla ta' Debug Mode ma tagħżilx dan."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Iddiżattiva l-Login bil-Password b'OIDC",
@@ -13921,7 +13921,7 @@
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Soft Lockout Ambiguu ta' Mistral 401",
-        "description": "Mistral 401 li ma jfisser xejn ('{\"detail\":\"Unauthorized\"}', mingħajr sinjal tal-autentikazzjoni espiku) huwa identiku fil-bajta għal-key revokata u għal-koŋsuma ta' kwota. Meta mfakkar, tali 401 jeċċenta l-konnessioni minflok ma jseħħhux bħala eskord, sa tliet drabi f'ġieħu; l-ieħor għadha jseħħhuh bħala eskord, u ftak key revokata konvergġa. Miftuħ b'mod preċedentament: kull Mistral 401 li ma jfisser xejn jeċċenta l-konnessione bħala eskord, bħal qabel."
+        "description": "Mistral 401 li ma jfisser xejn ('{\"detail\":\"Unauthorized\"}', mingħajr sinjal tal-autentikazzjoni espiku) huwa identiku fil-bajta għal-key revokata u għal-koŋsuma ta' kwota. Meta mfakkar, tali 401 jeċċenta l-konnessioni minflok ma jseħħhux bħala eskord, sa tliet drabi f'ġieħu; l-ieħor għadha jseħħhuh bħala eskord, u ftak key revokata konvergġa. Mitfi b'mod awtomatiku: kull Mistral 401 li ma jfisser xejn jeċċenta l-konnessione bħala eskord, bħal qabel."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "Tindif Awtomatiku ta' Batch u Fajls",
@@ -13997,11 +13997,11 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Għodfa tal-Moviment bla Ċwievet",
-        "description": "Iżomm l-provvituri bla ċwievet (no-auth) li jridu browser lokali (browserBacked) jew CLI installat lokalment (isLocalCli) barra l-pużil tal-kandidati auto/*, biex membru mwaqqaf ma jista'x joqgħod ir-rikwest auto sakemm ma jmissx il-ħin tal-ġbir għall-ogħla (per-target timeout) (#17036). Imsewweq b'mod predefinit: kull provvitur bla awtentikazzjoni b'ċjamar ta' għodod emulati jibqa fil-pużil eżatt kif qabel. Cjamer diretta '<alias>'/'<model>' taħdem fkull każ."
+        "description": "Iżomm l-provvituri bla ċwievet (no-auth) li jridu browser lokali (browserBacked) jew CLI installat lokalment (isLocalCli) barra l-pużil tal-kandidati auto/*, biex membru mwaqqaf ma jista'x joqgħod ir-rikwest auto sakemm ma jmissx il-ħin tal-ġbir għall-ogħla (per-target timeout) (#17036). Mitfi b'mod awtomatiku: kull provvitur bla awtentikazzjoni b'ċjamar ta' għodod emulati jibqa fil-pużil eżatt kif qabel. Cjamer diretta '<alias>'/'<model>' taħdem fkull każ."
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Ri-Plaja ta' Raċġunament inline",
-        "description": "Għal mudelli ta' raċġunament ta codebuddy-cn (fammijiet DeepSeek-V4 / Kimi-K2 li jridu ri-plaja ta raċġunament), inżewgħi kull ri-plaja ta reasoning_content tal-assistent bħala blokk viżibbli '<thought>' fil-bidu tal-kontenut tal-messaġġ, biex jibqa għal gateway li jitlaq il-qasam reasoning_content (#13632). Imsewweq bmod predefinit: ir-rikwesti ta codebuddy-cn jintbagħtu bla bidla; il-qasam reasoning_content innifsu dejjem jinżamm."
+        "description": "Għal mudelli ta' raċġunament ta codebuddy-cn (fammijiet DeepSeek-V4 / Kimi-K2 li jridu ri-plaja ta raċġunament), inżewgħi kull ri-plaja ta reasoning_content tal-assistent bħala blokk viżibbli '<thought>' fil-bidu tal-kontenut tal-messaġġ, biex jibqa għal gateway li jitlaq il-qasam reasoning_content (#13632). Mitfi b'mod awtomatiku: ir-rikwesti ta codebuddy-cn jintbagħtu bla bidla; il-qasam reasoning_content innifsu dejjem jinżamm."
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "Waqfiet tas-Sigurtà tal-Fornitur: Terminali",

@@ -13921,7 +13921,7 @@
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Mistral Ambiguus 401 Kunci Kekal Lembut",
-        "description": "Mistral 401 telan ('{\"detail\":\"Unauthorized\"}', tanpa isyarat pengesahan eksplisit) adalah serupa secara bait untuk kunci yang telah ditarik balik dan untuk kuota yang telah habis. Apabila diaktifkan, 401 sedemikian akan memperlambat sambungan sebaliknya daripada meletakkan sebagai tamat tempoh, sehingga 3 kali dalam satu jam; yang seterusnya masih akan meletakkannya sebagai tamat tempoh, maka kunci yang ditarik balik akan menumpu. Naik secara lalai: setiap Mistral 401 telan akan meletakkan sambungan sebagai tamat tempoh, seperti sebelum ini."
+        "description": "Mistral 401 telan ('{\"detail\":\"Unauthorized\"}', tanpa isyarat pengesahan eksplisit) adalah serupa secara bait untuk kunci yang telah ditarik balik dan untuk kuota yang telah habis. Apabila diaktifkan, 401 sedemikian akan memperlambat sambungan sebaliknya daripada meletakkan sebagai tamat tempoh, sehingga 3 kali dalam satu jam; yang seterusnya masih akan meletakkannya sebagai tamat tempoh, maka kunci yang ditarik balik akan menumpu. Dimatikan secara lalai: setiap Mistral 401 telan akan meletakkan sambungan sebagai tamat tempoh, seperti sebelum ini."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "Pembersihan Automatik Kelompok & Fail",

@@ -13841,19 +13841,19 @@
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "Otvorené vloženie klientov OpenCode v2",
-        "description": "Odoslať odtlačok prstov klienta OpenCode v2 CLI pri žiadaniach OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli a hlavička x-opencode-client cli, klientova User-Agent sa udržiava len ak je to klient OpenCode 2.x, a pri gateovaných žiadaniach bezplatnej úrovne chýba hlavička x-opencode-request, relácia je zrkadlená do x-opencode-session-id/x-session-affinity/x-session-id, schémy pre čítanie/shell v2 CLI sú na injikovaných nástrojoch s placeholde a tool_choice \"none\" je odobrané. Výchozí stav: vypnuté; každé žiadanie OpenCode si zachováva súčasnú identitu, hlavičky a telo byte po byte."
+        "description": "Odoslať odtlačok prstov klienta OpenCode v2 CLI pri žiadaniach OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli a hlavička x-opencode-client cli, klientova User-Agent sa udržiava len ak je to klient OpenCode 2.x, a pri gateovaných žiadaniach bezplatnej úrovne chýba hlavička x-opencode-request, relácia je zrkadlená do x-opencode-session-id/x-session-affinity/x-session-id, schémy pre čítanie/shell v2 CLI sú na injikovaných nástrojoch s placeholde a tool_choice \"none\" je odobrané. Predvolene vypnuté; každé žiadanie OpenCode si zachováva súčasnú identitu, hlavičky a telo byte po byte."
       },
       "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
         "label": "Blokova OpenCode Zen Egress-IP",
-        "description": "Pridať OpenCode Zen (opencode-zen) do predvolenej rodiny blokov egress-IP, takže 429 na jednom pripojení Zen tiež ochladí všetky súrodne pripojenia Zen, ktoré zdieľajú ten istý egress IP. Výchozí stav: vypnuté; Zen je kľúčované a každé pripojenie sa ochladzuje samo, ako predtým. Jasná hodnota OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS vždy prevláda nad touto vlajkou."
+        "description": "Pridať OpenCode Zen (opencode-zen) do predvolenej rodiny blokov egress-IP, takže 429 na jednom pripojení Zen tiež ochladí všetky súrodne pripojenia Zen, ktoré zdieľajú ten istý egress IP. Predvolene vypnuté; Zen je kľúčované a každé pripojenie sa ochladzuje samo, ako predtým. Jasná hodnota OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS vždy prevláda nad touto vlajkou."
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Pravidlá pre chyby OpenCode s plným textom",
-        "description": "Povoliť vložené pravidlá pre chyby OpenCode (opencode-zen, opencode-go, opencode-cli), aby sa zhodovali na celom texte vyššej upstreamovej chyby, takže označenia tela ako organization_quota_exceeded alebo \"monthly usage limit reached\" zaradia 429 do kategórie vyčerpaná kvóta s uzamknutím v rozsahu pripojenia. Výchozí stav: vypnuté; tieto pravidlá vidia len štruktúrovaný kód chyby a takéto 429 zostáva krátkodobým obmedrením rýchlosti, ako predtým."
+        "description": "Povoliť vložené pravidlá pre chyby OpenCode (opencode-zen, opencode-go, opencode-cli), aby sa zhodovali na celom texte vyššej upstreamovej chyby, takže označenia tela ako organization_quota_exceeded alebo \"monthly usage limit reached\" zaradia 429 do kategórie vyčerpaná kvóta s uzamknutím v rozsahu pripojenia. Predvolene vypnuté; tieto pravidlá vidia len štruktúrovaný kód chyby a takéto 429 zostáva krátkodobým obmedrením rýchlosti, ako predtým."
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Pravidlá pre chyby Cloudflare Workers AI s plným textom",
-        "description": "Povoliť vložené pravidlo pre chyby Cloudflare Workers AI, aby sa zhodovalo na celom texte vyššej upstreamovej chyby, takže telo 429 \"daily free allocation\" sa zaradí do kategórie vyčerpaná kvóta namiesto krátkodobého obmedzenia rýchlosti. Výchozí stav: vypnuté; pravidlo vidí len štruktúrovaný kód chyby, ako predtým."
+        "description": "Povoliť vložené pravidlo pre chyby Cloudflare Workers AI, aby sa zhodovalo na celom texte vyššej upstreamovej chyby, takže telo 429 \"daily free allocation\" sa zaradí do kategórie vyčerpaná kvóta namiesto krátkodobého obmedzenia rýchlosti. Predvolene vypnuté; pravidlo vidí len štruktúrovaný kód chyby, ako predtým."
       },
       "CAPABILITY_FILTER_ENABLED": {
         "label": "Filter schopností",
@@ -13941,11 +13941,11 @@
       },
       "KIRO_TOOL_CALL_REPAIR_ENABLED": {
         "label": "Kiro Oprava volania nástroja",
-        "description": "Keď streamovaná odpoveď Kiro vygeneruje chybný obal tool_call (chýba input.name alebo input.arguments) pred akoukoľvek viditeľnou výstupnou hodnotou, potlačiť ho a požiadanie odoslať raz znova s nápravným pokynom namiesto ukončenia kôlu s chybou invalid_kiro_tool_call. Opätovné skúšenie stojí jeden ďalší Kiro požiadanie; druhé zlyhanie ukončí kolo s chybou kiro_tool_call_repair_retry_failed. Vo výchozom stave je zapnuté. Nastavením na false sa kolo ukončí pri prvom chybnom obale."
+        "description": "Keď streamovaná odpoveď Kiro vygeneruje chybný obal tool_call (chýba input.name alebo input.arguments) pred akoukoľvek viditeľnou výstupnou hodnotou, potlačiť ho a požiadanie odoslať raz znova s nápravným pokynom namiesto ukončenia kôlu s chybou invalid_kiro_tool_call. Opätovné skúšenie stojí jeden ďalší Kiro požiadanie; druhé zlyhanie ukončí kolo s chybou kiro_tool_call_repair_retry_failed. Predvolene je zapnuté. Nastavením na false sa kolo ukončí pri prvom chybnom obale."
       },
       "MODELS_DEV_EFFORT_TIERS_ENABLED": {
         "label": "Úrovne úsilia models.dev",
-        "description": "Použiť úrovne úsilia na uvažovanie, ktoré publikuje models.dev (obmedzené na známu terminológiu úsilia), keď operátorske prebratie ani registr poskytovateľa neposkytuje žiadne, a považovať deklarovaný prázdny zoznam úrovní za \"žiadne úrovne\" v effort_tiers a prienese kombinovaných úrovní v /v1/models. Vo výchozom stave je vypnuté: effort_tiers a vyriešené supportedThinkingEfforts zostávajú presne tak, ako boli predtým."
+        "description": "Použiť úrovne úsilia na uvažovanie, ktoré publikuje models.dev (obmedzené na známu terminológiu úsilia), keď operátorske prebratie ani registr poskytovateľa neposkytuje žiadne, a považovať deklarovaný prázdny zoznam úrovní za \"žiadne úrovne\" v effort_tiers a prienese kombinovaných úrovní v /v1/models. Predvolene je vypnuté: effort_tiers a vyriešené supportedThinkingEfforts zostávajú presne tak, ako boli predtým."
       },
       "LMARENA_SYNTHESIZED_CX_ENABLED": {
         "label": "Telemetria Arena pre syntetizované cx",
@@ -13953,11 +13953,11 @@
       },
       "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
         "label": "Natívna reaktívna kompresia Codex",
-        "description": "Povoliť reaktívne (prahové) aj poslednú inštanciou kompresiu kontextu prepisovať natívne histórie prechodu Codex (POST /v1/responses do poskytovateľa codex), keď prekročia rozpočet kontextu, s použitím adaptéra input[] Responses. Vo výchozom stave je vypnuté: natívne histórie Codex sú vlastníctom klienta Codex a nikdy sa neprepisujú kompresiou; príliš veľké požiadania zostávajú zlyhať kontrolu rozpočtu kontextu tak, ako predtým. Vyžaduje zapnutú globálnu kompresiu a aby model nebol vylúčený."
+        "description": "Povoliť reaktívne (prahové) aj poslednú inštanciou kompresiu kontextu prepisovať natívne histórie prechodu Codex (POST /v1/responses do poskytovateľa codex), keď prekročia rozpočet kontextu, s použitím adaptéra input[] Responses. Predvolene je vypnuté: natívne histórie Codex sú vlastníctom klienta Codex a nikdy sa neprepisujú kompresiou; príliš veľké požiadania zostávajú zlyhať kontrolu rozpočtu kontextu tak, ako predtým. Vyžaduje zapnutú globálnu kompresiu a aby model nebol vylúčený."
       },
       "QUOTA_WINDOW_BOUNDED_PARK": {
         "label": "Kvóta okna: Rešpektovať ohraničené parkovanie",
-        "description": "Povoliť politiku kvóty na okno (prahy relácie/týždňa použité pri výbere účtu) rešpektovať ohraničené parkovanie pri vyčerpaní: keď uplyne termín parkovania s hornou hranicou, alebo keň je uchovaná kvótna pozorovanie staršia ako horná hranica parkovania, okno prestane vylučovať účet dočasne, kým nie je získané nové kvótna údaj. Vo výchozom stave je vypnuté: uchované okno zostáva blokované naposledy nahláseným percentuálom do svojho času resetu."
+        "description": "Povoliť politiku kvóty na okno (prahy relácie/týždňa použité pri výbere účtu) rešpektovať ohraničené parkovanie pri vyčerpaní: keď uplyne termín parkovania s hornou hranicou, alebo keň je uchovaná kvótna pozorovanie staršia ako horná hranica parkovania, okno prestane vylučovať účet dočasne, kým nie je získané nové kvótna údaj. Predvolene je vypnuté: uchované okno zostáva blokované naposledy nahláseným percentuálom do svojho času resetu."
       },
       "IMAGE_GENERATION_LONG_JOBS": {
         "label": "Generovanie obrázkov: Dlhé úlohy",
@@ -14021,7 +14021,7 @@
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Odmietnutia",
-        "description": "Keď sú všetky účty v chladiacom režime a najskôr končiace cooldown bol spôsobený 403 (prístup odmietnutý) alebo 410 (prejdené), vráť to odmietnutie ihneď namiesto čakania na koniec cooldownu a opätovného odosielania požiadavky; obnovovaný agentrouter spojené kvóty 403 sa potom zachovávajú s errorCode 429, aby zostali znova vykonateľné. Východne vypnuté: iba 401 preskočí čakanie a každý odmietnutý požiadavka sa uchováva so statusom, s ktorým prišla."
+        "description": "Keď sú všetky účty v chladiacom režime a najskôr končiace cooldown bol spôsobený 403 (prístup odmietnutý) alebo 410 (prejdené), vráť to odmietnutie ihneď namiesto čakania na koniec cooldownu a opätovného odosielania požiadavky; obnovovaný agentrouter spojené kvóty 403 sa potom zachovávajú s errorCode 429, aby zostali znova vykonateľné. Predvolene vypnuté: iba 401 preskočí čakanie a každý odmietnutý požiadavka sa uchováva so statusom, s ktorým prišla."
       }
     }
   },

@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Reģistrēt konta ID",
-        "description": "Iekļaut konta prefiksu AUTH reģistra rindās (piem., \"Izmanto '<provider>' kontu: abc12345...\"). Izcilaits pēc noklusējuma, lai konta identifikatori netiktu izlaukti koplietojamos/vairāku īpašnieku procesu reģistros. Neatkarīgi no Atkodašanas režīma; Atkodašanas režīma pārslēgšana to neatklāj."
+        "description": "Iekļaut konta prefiksu AUTH reģistra rindās (piem., \"Izmanto '<provider>' kontu: abc12345...\"). Pēc noklusējuma atspējots, lai konta identifikatori netiktu izlaukti koplietojamos/vairāku īpašnieku procesu reģistros. Neatkarīgi no Atkodašanas režīma; Atkodašanas režīma pārslēgšana to neatklāj."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Atspējot paroles pieteikšanos ar OIDC",

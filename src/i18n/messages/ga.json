@@ -13941,7 +13941,7 @@
       },
       "KIRO_TOOL_CALL_REPAIR_ENABLED": {
         "label": "Deisiú Glao Uirlise Kiro",
-        "description": "Nuair a astaíonn freagra sruthaithe Kiro timfhilleadh tool_call míchumtha (input.name nó input.arguments ar iarraidh) roimh aon aschur infheicthe, cuir faoi chois é agus athsheol an t-iarratas uair amháin le treoir cheartaitheach in ionad deireadh a chur leis an seal le invalid_kiro_tool_call. Cosnaíonn an t-athiarracht iarratas Kiro breise amháin; cuireann dara teip deireadh leis an seal le kiro_tool_call_repair_retry_failed. Cumaiscthe de réir réamhshocraithe. Socraigh go false chun teip a chur ar an seal ar an gcéad timfhilleadh míchumtha."
+        "description": "Nuair a astaíonn freagra sruthaithe Kiro timfhilleadh tool_call míchumtha (input.name nó input.arguments ar iarraidh) roimh aon aschur infheicthe, cuir faoi chois é agus athsheol an t-iarratas uair amháin le treoir cheartaitheach in ionad deireadh a chur leis an seal le invalid_kiro_tool_call. Cosnaíonn an t-athiarracht iarratas Kiro breise amháin; cuireann dara teip deireadh leis an seal le kiro_tool_call_repair_retry_failed. Ar siúl de réir réamhshocraithe. Socraigh go false chun teip a chur ar an seal ar an gcéad timfhilleadh míchumtha."
       },
       "MODELS_DEV_EFFORT_TIERS_ENABLED": {
         "label": "Leibhéil Iarrachta models.dev",
@@ -13997,11 +13997,11 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Cinnseal Iompair Gan Eochraí",
-        "description": "Coinnigh soláthairí gan eochair (gan aitheolaíocht) a theastaíonn brabhsálaí áitiúil (browserBacked) nó CLI suiteáilte go háitiúil (isLocalCli) as an iascair candíadach auto/*, ionas nach féidir le ball cloingte an iarratas auto a choinneáil go dtí an am teorann in aghaidh sprioc (17036). As in aghaidh an chuingeachta: fanann gach soláthraí gan aitheolaíocht le gléas cur i bhfeidhm sa iascair díreach mar a bhí roimhe. Oibreann glaoigh dhíreacha '<alias>'/'<model>' beag beann."
+        "description": "Coinnigh soláthairí gan eochair (gan aitheolaíocht) a theastaíonn brabhsálaí áitiúil (browserBacked) nó CLI suiteáilte go háitiúil (isLocalCli) as an iascair candíadach auto/*, ionas nach féidir le ball cloingte an iarratas auto a choinneáil go dtí an am teorann in aghaidh sprioc (17036). Múchta de réir réamhshocraithe: fanann gach soláthraí gan aitheolaíocht le gléas cur i bhfeidhm sa iascair díreach mar a bhí roimhe. Oibreann glaoigh dhíreacha '<alias>'/'<model>' beag beann."
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Athsheinmínithe Cúisithe",
-        "description": "Do mhaideálacha smaointe codebuddy-cn (teaghlaigh DeepSeek-V4 / Kimi-K2 a theastaíonn athsheinmínithe cúisithe), líon isteach gach cuid de reasoning_content an aschurthaí atá á athsheinmíniú mar bhloc feictheach '<thought>' ag túsábairt an ábhair theachta, ionas go mairfidh sé trí gheata a bhaintear an réimse reasoning_content uaidh (13632). As in aghaidh an chuingeachta: seoltar iarratais codebuddy-cn gan athrú; coimeádtear an réimse reasoning_content féin i gcónaí."
+        "description": "Do mhaideálacha smaointe codebuddy-cn (teaghlaigh DeepSeek-V4 / Kimi-K2 a theastaíonn athsheinmínithe cúisithe), líon isteach gach cuid de reasoning_content an aschurthaí atá á athsheinmíniú mar bhloc feictheach '<thought>' ag túsábairt an ábhair theachta, ionas go mairfidh sé trí gheata a bhaintear an réimse reasoning_content uaidh (13632). Múchta de réir réamhshocraithe: seoltar iarratais codebuddy-cn gan athrú; coimeádtear an réimse reasoning_content féin i gcónaí."
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "Provider Safety Stops: Críochfortach",

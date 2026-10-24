@@ -13801,43 +13801,43 @@
       },
       "OPENCODE_RESPONSES_STALL_ROTATION": {
         "label": "OpenCode svarspausrotation",
-        "description": "För OpenCode-exekveraren: övervaka den första byte i en strömmeddelande från ett Responses-svar (fönster: RESPONSES_FIRST_BYTE_TIMEOUT_MS, standard 15000). Ett 2xx-Responsessvare som är tyst efter fönstret anser avställt: kontot kyls ner och begäringen roteras till nästa konto en gång; en andra avstängning misslyckas snabbt. Av för standard: avställda strömmar fortsätter att vänta tills strömmandeshanteringstidgräns."
+        "description": "För OpenCode-exekveraren: övervaka den första byte i en strömmeddelande från ett Responses-svar (fönster: RESPONSES_FIRST_BYTE_TIMEOUT_MS, standard 15000). Ett 2xx-Responsessvare som är tyst efter fönstret anser avställt: kontot kyls ner och begäringen roteras till nästa konto en gång; en andra avstängning misslyckas snabbt. Av som standard: avställda strömmar fortsätter att vänta tills strömmandeshanteringstidgräns."
       },
       "OPENCODE_USER_BLOCKED_ROTATION": {
         "label": "OpenCode user_blocked-rotation",
-        "description": "För OpenCode-exekveraren: när en uppvärdstjänst svarar 403 eller 451 med en user_blocked-avslag (inte en geo-blockering, inte ett Cloudflare-fingerpromtåvägningsavslag), kyler den nektade kontot ner och roteras till nästa konto högst en gång per begäran; ett andra avslaget returneras som det är utan en lyckomarkering. Av för standard: att kringgå en uppvärdstjänst användarblockering kan se ut som undanträngning och sprida flaggan över kontoflottan, så avslaget returneras oförändrat om inte operatören väljer in."
+        "description": "För OpenCode-exekveraren: när en uppvärdstjänst svarar 403 eller 451 med en user_blocked-avslag (inte en geo-blockering, inte ett Cloudflare-fingerpromtåvägningsavslag), kyler den nektade kontot ner och roteras till nästa konto högst en gång per begäran; ett andra avslaget returneras som det är utan en lyckomarkering. Av som standard: att kringgå en uppvärdstjänst användarblockering kan se ut som undanträngning och sprida flaggan över kontoflottan, så avslaget returneras oförändrat om inte operatören väljer in."
       },
       "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
         "label": "OpenCode tillfällig failover backoff",
-        "description": "För OpenCode-fler-kontorotation: pausar innan dispatch till nästa konto efter att två påföljande försök misslyckats med ett tillfälligt uppvärdstjänstfel (5xx eller ett tomt 400-avslag). Pausen börjar på 1,5 s, dubblas per ytterligare misslyckat påföljande försök, begränsas till 6 s per paus och 10 s per begäran, hoppas över om klienten kopplar upp sig, och misslyckats svarsinnehåll frigörs innan väntan. Av för standard: failover är omedelbar."
+        "description": "För OpenCode-fler-kontorotation: pausar innan dispatch till nästa konto efter att två påföljande försök misslyckats med ett tillfälligt uppvärdstjänstfel (5xx eller ett tomt 400-avslag). Pausen börjar på 1,5 s, dubblas per ytterligare misslyckat påföljande försök, begränsas till 6 s per paus och 10 s per begäran, hoppas över om klienten kopplar upp sig, och misslyckats svarsinnehåll frigörs innan väntan. Av som standard: failover är omedelbar."
       },
       "FLUSH_EMPTY_RETRY_ENABLED": {
         "label": "Rensa tom omgång omprovning",
-        "description": "Vid översatta strömmade omgångar, när en uppvärdstjänstomgång bär inte något användbart innehåll (bara anledningsskapt komplettering eller noll värdefulla block), utför begränsade omprovsförsök via den normala kreditvärdighetsvägen (upp till `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) innan något exponeras för klienten. Av för standard: tomma omgångar behåller nuvarande beteende (tomt 200 eller tomt innehåll 502)."
+        "description": "Vid översatta strömmade omgångar, när en uppvärdstjänstomgång bär inte något användbart innehåll (bara anledningsskapt komplettering eller noll värdefulla block), utför begränsade omprovsförsök via den normala kreditvärdighetsvägen (upp till `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) innan något exponeras för klienten. Av som standard: tomma omgångar behåller nuvarande beteende (tomt 200 eller tomt innehåll 502)."
       },
       "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
         "label": "Tom ström systeråterhämtning",
-        "description": "Claude/Codex strömning: efter det första livscykels händelsen, kort proberar (upp till 1 s / 64 KiB) för användbar utdata; en ström som slutar utan innehåll blir ett empty_content-misslyckande som spenderar den befintliga begränsade omprovning på en annan kvalificerad anslutning (ingen nedkylning, ingen modell låsning), och round-robin kombinationer slutar omprova när klienten kopplar upp sig. Behandlar också avslag, pause_turn och model_context_window_exceeded som legitim tomma terminaler i prober. Av för standard: förberedhet, tomt innehåll hantering och kombinations omprovning förblir exakt som tidigare."
+        "description": "Claude/Codex strömning: efter det första livscykels händelsen, kort proberar (upp till 1 s / 64 KiB) för användbar utdata; en ström som slutar utan innehåll blir ett empty_content-misslyckande som spenderar den befintliga begränsade omprovning på en annan kvalificerad anslutning (ingen nedkylning, ingen modell låsning), och round-robin kombinationer slutar omprova när klienten kopplar upp sig. Behandlar också avslag, pause_turn och model_context_window_exceeded som legitim tomma terminaler i prober. Av som standard: förberedhet, tomt innehåll hantering och kombinations omprovning förblir exakt som tidigare."
       },
       "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
         "label": "Stream Sen Output Prober",
-        "description": "Streamande utdataprober: efter de första 64 framsända chunkarna fortsätter att sticka prov i en chunk var 16:e för den första synliga utdatan, så att utdata som börjar sent ändå markerar strömmen som att den producerat utdata. En isolerad 5xx efter den punkten förblir då begärningsspecifik i stället för att registrera en modellbaserad lågning, och firstOutputMs efterfylls med den första utdatachunken i det aktuella provtagningsspetummet. Av per standard: endast de första 64 framsända chunkarna provas, exakt som tidigare."
+        "description": "Streamande utdataprober: efter de första 64 framsända chunkarna fortsätter att sticka prov i en chunk var 16:e för den första synliga utdatan, så att utdata som börjar sent ändå markerar strömmen som att den producerat utdata. En isolerad 5xx efter den punkten förblir då begärningsspecifik i stället för att registrera en modellbaserad lågning, och firstOutputMs efterfylls med den första utdatachunken i det aktuella provtagningsspetummet. Av som standard: endast de första 64 framsända chunkarna provas, exakt som tidigare."
       },
       "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
         "label": "OpenCode Rate-Begränsad 429 Tidig Stopp",
-        "description": "För OpenCode-flera-kontor rotation, stoppa kontovågen vid den första 429 som klassificeras som ett verkligt hastighetsbegränsande (en parsbar Retry-After-rubrik, eller en brödtext som nämner en hastighets/usage-begränsning) och returnera den uppvälsta 429 oförändrad (status, brödtext, Retry-After och kvotrubriker), i stället för att försöka med varje återstående konto. Oklassificerade 429:er fortsätter att rotera. Av per standard: den fria nischen är begränsad per utgående IP (#9611), så varje 429 roterar till nästa konto, och en uttömd våg returnerar den sista uppvälsta 429:en."
+        "description": "För OpenCode-flera-kontor rotation, stoppa kontovågen vid den första 429 som klassificeras som ett verkligt hastighetsbegränsande (en parsbar Retry-After-rubrik, eller en brödtext som nämner en hastighets/usage-begränsning) och returnera den uppvälsta 429 oförändrad (status, brödtext, Retry-After och kvotrubriker), i stället för att försöka med varje återstående konto. Oklassificerade 429:er fortsätter att rotera. Av som standard: den fria nischen är begränsad per utgående IP (#9611), så varje 429 roterar till nästa konto, och en uttömd våg returnerar den sista uppvälsta 429:en."
       },
       "OPENCODE_PARK_AND_RESUME": {
         "label": "OpenCode 429 Parkera och Återuppta",
-        "description": "För OpenCode-flera-kontor rotation, parkera begärningen efter upprepnade tillfälliga 429:er (eller en ny pool-spänningsmarkör) med ett hjärtslag, och återuppspelar sedan en begränsad ben med upp till 3 sekventiella konton i stället för att sprida ut hela flottan. Av per standard: varje 429 roterar till nästa konto exakt som tidigare."
+        "description": "För OpenCode-flera-kontor rotation, parkera begärningen efter upprepnade tillfälliga 429:er (eller en ny pool-spänningsmarkör) med ett hjärtslag, och återuppspelar sedan en begränsad ben med upp till 3 sekventiella konton i stället för att sprida ut hela flottan. Av som standard: varje 429 roterar till nästa konto exakt som tidigare."
       },
       "STREAM_READINESS_STALL_RETRY": {
         "label": "Stream Klarhetsstagnation Återförsök",
-        "description": "För streamade chattbegärningar, när den första uppvälsta brödtexten stagnerar innan den producerar ett användbart händelse, utför ett begränsat andra försök via samma routing-spel med samma klarhetsbudget och ingen kontoböta. Av per standard: en stagnerad första brödtext misslyckar begärningen utan återförsök."
+        "description": "För streamade chattbegärningar, när den första uppvälsta brödtexten stagnerar innan den producerar ett användbart händelse, utför ett begränsat andra försök via samma routing-spel med samma klarhetsbudget och ingen kontoböta. Av som standard: en stagnerad första brödtext misslyckar begärningen utan återförsök."
       },
       "OPENCODE_POOL_RESELECT": {
         "label": "OpenCode 429 Pool Återval",
-        "description": "För OpenCode-flera-kontor rotation, efter en 429 från en utgångs-bucketad leverantör på ett proxyfritt konto under ett omgivande poolkontext, bea ansökningspoolen om en annan medlem för nästa försök i stället för att återförsöka samma utgångsadress. Ordning, exkluderar aldrig: en uttömd pool bibehåller det nuvarande beteendet. Av per standard: varje 429 roterar till nästa konto exakt som tidigare."
+        "description": "För OpenCode-flera-kontor rotation, efter en 429 från en utgångs-bucketad leverantör på ett proxyfritt konto under ett omgivande poolkontext, bea ansökningspoolen om en annan medlem för nästa försök i stället för att återförsöka samma utgångsadress. Ordning, exkluderar aldrig: en uttömd pool bibehåller det nuvarande beteendet. Av som standard: varje 429 roterar till nästa konto exakt som tidigare."
       },
       "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
         "label": "OpenCode v2-klientfingerprint",
@@ -13848,7 +13848,7 @@
         "description": "Lägg till OpenCode Zen (opencode-zen) i familjen för standard egress-IP-spärr, så att en 429 på en Zen-anslutning även kyls alla syskon Zen-anslutningar som delar dess egress-IP. Avstängt som standard: Zen är nyckelförd och varje anslutning kyls ned för sig, precis som tidigare. Ett explicit värde för OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS alltid företräds detta flagga."
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
-        "label": "OpenCode helskärmsfelregler",
+        "label": "OpenCode-felregler för fulltext",
         "description": "Låt de inbyggda OpenCode-felreglerna (opencode-zen, opencode-go, opencode-cli) matcha hela det uppvälde feltexten, så att markörer i kroppen som organization_quota_exceeded eller \"monthly usage limit reached\" klassificerar en 429 som utsött kvot med en anslutningsomfattande sperr. Avstängt som standard: dessa regler ser bara den strukturerade felkoden och en sådan 429 förblir en kort tidsbegränsning, precis som tidigare."
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
