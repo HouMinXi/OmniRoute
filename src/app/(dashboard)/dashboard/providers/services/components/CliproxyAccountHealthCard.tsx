@@ -9,7 +9,7 @@ import type {
 } from "@/lib/services/cliproxyAccountHealth";
 
 function stateLabels(
-  t: ReturnType<typeof useTranslations>,
+  t: ReturnType<typeof useTranslations>
 ): Record<CliproxyAccountHealthResult["state"], string> {
   return {
     ready: t("stateReady"),
@@ -114,9 +114,7 @@ export function CliproxyAccountHealthCard() {
         )
       ) : (
         <p className="text-sm text-text-muted">
-          {loading && !result
-            ? t("loading")
-            : stateLabels(t)[result?.state ?? "unreachable"]}
+          {loading && !result ? t("loading") : stateLabels(t)[result?.state ?? "unreachable"]}
         </p>
       )}
     </Card>
