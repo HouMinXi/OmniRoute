@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ตัวอย่างแบบเคลื่อนไหวของกลยุทธ์การกำหนดเส้นทางคอมโบ 18 จาก 21 กลยุทธ์ — หนึ่งช่องต่อหนึ่งกลยุทธ์: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline ส่วน cache-optimized และ quota-weighted ไม่มีภาพเคลื่อนไหว ตารางด้านล่างอธิบายกลยุทธ์ทั้ง 21 รายการ"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ตัวอย่างแบบเคลื่อนไหวของกลยุทธ์การกำหนดเส้นทางคอมโบ 18 จาก 21 กลยุทธ์ — หนึ่งช่องต่อหนึ่งกลยุทธ์: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline ส่วน cache-optimized, quota-weighted และ expiry-first ไม่มีภาพเคลื่อนไหว ตารางด้านล่างอธิบายกลยุทธ์ทั้ง 21 รายการ"/>
 
 > **คอมโบ** คือสายโซ่ของโมเดลที่ OmniRoute กำหนดเส้นทางผ่านโดย **อัตโนมัติ** หากโควตาหมด ผู้ให้บริการขัดข้อง หรือค่าใช้จ่ายพุ่งสูง คอมโบจะย้ายไปยังโมเดลถัดไปที่มีสิทธิ์และพร้อมใช้งานได้ 🛡️
 

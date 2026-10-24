@@ -287,7 +287,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Mifano iliyohuishwa ya mikakati 18 kati ya 21 ya uelekezaji wa combo — kisanduku kimoja kwa kila mkakati: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized na quota-weighted hazijahuishwa; jedwali lililo hapa chini linafafanua mikakati yote 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Mifano iliyohuishwa ya mikakati 18 kati ya 21 ya uelekezaji wa combo — kisanduku kimoja kwa kila mkakati: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted na expiry-first hazijahuishwa; jedwali lililo hapa chini linafafanua mikakati yote 21."/>
 
 > **Combo** ni mnyororo wa modeli ambao OmniRoute huelekeza maombi kati yake **kiotomatiki**. Ikiwa kiwango kinachoruhusiwa kitaisha, mtoa huduma atashindwa, au gharama zitapanda ghafla, combo inaweza kuhamia kwenye modeli inayofuata inayostahiki na yenye afya nzuri. 🛡️
 

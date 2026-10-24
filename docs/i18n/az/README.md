@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 kombo marşrutlaşdırma strategiyasından 18-i üçün animasiyalı nümunələr — hər strategiya üçün bir xana: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized və quota-weighted animasiyalı deyil; aşağıdakı cədvəldə bütün 21 strategiya təsvir olunur."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 kombo marşrutlaşdırma strategiyasından 18-i üçün animasiyalı nümunələr — hər strategiya üçün bir xana: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted və expiry-first animasiyalı deyil; aşağıdakı cədvəldə bütün 21 strategiya təsvir olunur."/>
 
 > **Kombo** OmniRoute-un **avtomatik** marşrutlaşdırdığı modellər zənciridir. Kvota tükənərsə, provayderdə nasazlıq yaranarsa və ya xərclər kəskin artarsa, kombo növbəti uyğun və işlək modelə keçə bilər. 🛡️
 

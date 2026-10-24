@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Ví dụ động cho 18 trong số 21 chiến lược định tuyến combo — mỗi ô tương ứng với một chiến lược: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized và quota-weighted không có hiệu ứng động; bảng bên dưới mô tả đầy đủ cả 21 chiến lược."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Ví dụ động cho 18 trong số 21 chiến lược định tuyến combo — mỗi ô tương ứng với một chiến lược: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted và expiry-first không có hiệu ứng động; bảng bên dưới mô tả đầy đủ cả 21 chiến lược."/>
 
 > **Combo** là một chuỗi mô hình mà OmniRoute định tuyến qua **tự động**. Nếu hạn ngạch cạn, nhà cung cấp gặp sự cố hoặc chi phí tăng đột biến, combo có thể chuyển sang mô hình khả dụng và hoạt động ổn định tiếp theo. 🛡️
 

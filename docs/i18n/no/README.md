@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animerte eksempler på 18 av de 21 rutingstrategiene for comboer — én rute per strategi: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized og quota-weighted er ikke animert; tabellen nedenfor beskriver alle 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animerte eksempler på 18 av de 21 rutingstrategiene for comboer — én rute per strategi: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted og expiry-first er ikke animert; tabellen nedenfor beskriver alle 21."/>
 
 > En **combo** er en kjede av modeller som OmniRoute ruter mellom **automatisk**. Hvis kvoten tar slutt, en leverandør svikter eller kostnadene øker kraftig, kan comboen gå videre til den neste kvalifiserte, fungerende modellen. 🛡️
 

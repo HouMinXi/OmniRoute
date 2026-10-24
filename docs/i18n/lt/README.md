@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animuoti 18 iš 21 kombinacijų maršruto parinkimo strategijos pavyzdžiai — po vieną plytelę kiekvienai strategijai: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized ir quota-weighted nėra animuotos; toliau pateiktoje lentelėje aprašytos visos 21 strategija."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animuoti 18 iš 21 kombinacijų maršruto parinkimo strategijos pavyzdžiai — po vieną plytelę kiekvienai strategijai: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted ir expiry-first nėra animuotos; toliau pateiktoje lentelėje aprašytos visos 21 strategija."/>
 
 > **Kombinacija** – tai modelių grandinė, tarp kurių „OmniRoute“ užklausas nukreipia **automatiškai**. Jei išnaudojama kvota, sutrinka teikėjo veikimas arba smarkiai išauga išlaidos, kombinacija gali pereiti prie kito tinkamo ir tinkamai veikiančio modelio. 🛡️
 

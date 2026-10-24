@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="أمثلة متحركة على 18 من استراتيجيات توجيه المجموعات الـ21 — لوحة واحدة لكل استراتيجية: priority وfill-first وweighted وround-robin وp2c وleast-used وrandom وstrict-random وcost-optimized وheadroom وreset-window وreset-aware وcontext-relay وcontext-optimized وlkgp وauto وfusion وpipeline. لا تتوفر رسوم متحركة لاستراتيجيتي cache-optimized وquota-weighted؛ ويصف الجدول أدناه الاستراتيجيات الـ21 جميعها."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="أمثلة متحركة على 18 من استراتيجيات توجيه المجموعات الـ21 — لوحة واحدة لكل استراتيجية: priority وfill-first وweighted وround-robin وp2c وleast-used وrandom وstrict-random وcost-optimized وheadroom وreset-window وreset-aware وcontext-relay وcontext-optimized وlkgp وauto وfusion وpipeline. لا تتوفر رسوم متحركة لاستراتيجيات cache-optimized وquota-weighted وexpiry-first؛ ويصف الجدول أدناه الاستراتيجيات الـ21 جميعها."/>
 
 > **المجموعة** هي سلسلة من النماذج يوجّه OmniRoute الطلبات بينها **تلقائيًا**. إذا نفدت الحصة، أو تعطل أحد المزوّدين، أو ارتفعت التكاليف، فيمكن للمجموعة الانتقال إلى النموذج السليم والمؤهل التالي. 🛡️
 

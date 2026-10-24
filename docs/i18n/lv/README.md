@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animēti piemēri 18 no 21 kombināciju maršrutēšanas stratēģijas — pa vienam elementam katrai stratēģijai: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized un quota-weighted nav animētas; tālāk esošajā tabulā aprakstītas visa 21 stratēģija."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animēti piemēri 18 no 21 kombināciju maršrutēšanas stratēģijas — pa vienam elementam katrai stratēģijai: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted un expiry-first nav animētas; tālāk esošajā tabulā aprakstītas visa 21 stratēģija."/>
 
 > **Kombinācija** ir modeļu ķēde, starp kuriem OmniRoute maršrutē **automātiski**. Ja kvota ir izsmelta, pakalpojumu sniedzējs pārstāj darboties vai izmaksas strauji pieaug, kombinācija var pāriet uz nākamo piemēroto un darbspējīgo modeli. 🛡️
 

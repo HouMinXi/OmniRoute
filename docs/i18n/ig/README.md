@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Ọmụmaatụ mmegharị maka usoro ntụgharị combo 18 n'ime 21 — otu taịlị maka usoro ọ bụla: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. E meghị mmegharị maka cache-optimized na quota-weighted; tebụl dị n'okpuru na-akọwa ha niile 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Ọmụmaatụ mmegharị maka usoro ntụgharị combo 18 n'ime 21 — otu taịlị maka usoro ọ bụla: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. E meghị mmegharị maka cache-optimized, quota-weighted na expiry-first; tebụl dị n'okpuru na-akọwa ha niile 21."/>
 
 > **Combo** bụ usoro ụdịdị AI nke OmniRoute na-agafe n'etiti ha **na-akpaghị aka**. Ọ bụrụ na oke ojiji agwụ, onye na-eweta ọrụ daa, ma ọ bụ ọnụahịa rịa elu, combo nwere ike ịgafe na ụdị AI ọzọ tozuru oke ma dị mma. 🛡️
 

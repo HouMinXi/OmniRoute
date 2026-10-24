@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ከ21ዎቹ የጥምር ማዘዋወሪያ ስልቶች ውስጥ የ18ቱ እነማዊ ምሳሌዎች — ለእያንዳንዱ ስልት አንድ ሰቅ፦ priority፣ fill-first፣ weighted፣ round-robin፣ p2c፣ least-used፣ random፣ strict-random፣ cost-optimized፣ headroom፣ reset-window፣ reset-aware፣ context-relay፣ context-optimized፣ lkgp፣ auto፣ fusion፣ pipeline። cache-optimized እና quota-weighted እነማዊ አይደሉም፤ ከታች ያለው ሰንጠረዥ ሁሉንም 21 ይገልጻል።"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ከ21ዎቹ የጥምር ማዘዋወሪያ ስልቶች ውስጥ የ18ቱ እነማዊ ምሳሌዎች — ለእያንዳንዱ ስልት አንድ ሰቅ፦ priority፣ fill-first፣ weighted፣ round-robin፣ p2c፣ least-used፣ random፣ strict-random፣ cost-optimized፣ headroom፣ reset-window፣ reset-aware፣ context-relay፣ context-optimized፣ lkgp፣ auto፣ fusion፣ pipeline። cache-optimized፣ quota-weighted እና expiry-first እነማዊ አይደሉም፤ ከታች ያለው ሰንጠረዥ ሁሉንም 21 ይገልጻል።"/>
 
 > **ጥምር** ማለት OmniRoute **በራስ-ሰር** ጥያቄዎችን የሚያዘዋውርባቸው የሞዴሎች ሰንሰለት ነው። ኮታው ካለቀ፣ አቅራቢው ካልሰራ ወይም ወጪዎች በድንገት ከጨመሩ፣ ጥምሩ ወደሚቀጥለው ብቁና ጤናማ ሞዴል መሸጋገር ይችላል። 🛡️
 

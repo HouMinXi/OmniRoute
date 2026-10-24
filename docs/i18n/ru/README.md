@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анимированные примеры для 18 из 21 стратегии маршрутизации комбо — по одной плитке на стратегию: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Стратегии cache-optimized и quota-weighted не анимированы; в таблице ниже описаны все 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анимированные примеры для 18 из 21 стратегии маршрутизации комбо — по одной плитке на стратегию: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Стратегии cache-optimized, quota-weighted и expiry-first не анимированы; в таблице ниже описаны все 21."/>
 
 > **Комбо** — это цепочка моделей, между которыми OmniRoute переключается **автоматически**. Если квота исчерпана, провайдер недоступен или расходы резко возрастают, комбо может перейти к следующей подходящей и исправной модели. 🛡️
 

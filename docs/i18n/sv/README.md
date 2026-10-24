@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animerade exempel för 18 av de 21 routningsstrategierna för kombinationer — en ruta per strategi: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized och quota-weighted är inte animerade; tabellen nedan beskriver alla 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animerade exempel för 18 av de 21 routningsstrategierna för kombinationer — en ruta per strategi: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted och expiry-first är inte animerade; tabellen nedan beskriver alla 21."/>
 
 > En **kombination** är en kedja av modeller som OmniRoute routar mellan **automatiskt**. Om kvoten tar slut, en leverantör slutar fungera eller kostnaderna skjuter i höjden kan kombinationen gå vidare till nästa kvalificerade och fungerande modell. 🛡️
 

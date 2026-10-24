@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 میں سے 18 کومبو روٹنگ حکمتِ عملیوں کی متحرک مثالیں — ہر حکمتِ عملی کے لیے ایک ٹائل: priority، fill-first، weighted، round-robin، p2c، least-used، random، strict-random، cost-optimized، headroom، reset-window، reset-aware، context-relay، context-optimized، lkgp، auto، fusion، pipeline۔ cache-optimized اور quota-weighted متحرک نہیں ہیں؛ ذیل کا جدول تمام 21 کی وضاحت کرتا ہے۔"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 میں سے 18 کومبو روٹنگ حکمتِ عملیوں کی متحرک مثالیں — ہر حکمتِ عملی کے لیے ایک ٹائل: priority، fill-first، weighted، round-robin، p2c، least-used، random، strict-random، cost-optimized، headroom، reset-window، reset-aware، context-relay، context-optimized، lkgp، auto، fusion، pipeline۔ cache-optimized، quota-weighted اور expiry-first متحرک نہیں ہیں؛ ذیل کا جدول تمام 21 کی وضاحت کرتا ہے۔"/>
 
 > **کومبو** ماڈلز کی ایک زنجیر ہے جن کے درمیان OmniRoute **خودکار طور پر** روٹنگ کرتا ہے۔ اگر کوٹا ختم ہو جائے، کوئی فراہم کنندہ ناکام ہو جائے، یا اخراجات اچانک بڑھ جائیں، تو کومبو اگلے اہل اور صحت مند ماڈل پر منتقل ہو سکتا ہے۔ 🛡️
 

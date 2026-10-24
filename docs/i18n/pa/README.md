@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 ਵਿੱਚੋਂ 18 ਕੰਬੋ ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ ਲਈ ਐਨੀਮੇਟ ਕੀਤੀਆਂ ਉਦਾਹਰਨਾਂ — ਹਰ ਰਣਨੀਤੀ ਲਈ ਇੱਕ ਟਾਈਲ: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized ਅਤੇ quota-weighted ਐਨੀਮੇਟ ਨਹੀਂ ਕੀਤੀਆਂ ਗਈਆਂ; ਹੇਠਾਂ ਦਿੱਤੀ ਸਾਰਣੀ ਸਾਰੀਆਂ 21 ਦਾ ਵਰਣਨ ਕਰਦੀ ਹੈ।"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 ਵਿੱਚੋਂ 18 ਕੰਬੋ ਰੂਟਿੰਗ ਰਣਨੀਤੀਆਂ ਲਈ ਐਨੀਮੇਟ ਕੀਤੀਆਂ ਉਦਾਹਰਨਾਂ — ਹਰ ਰਣਨੀਤੀ ਲਈ ਇੱਕ ਟਾਈਲ: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized, quota-weighted ਅਤੇ expiry-first ਐਨੀਮੇਟ ਨਹੀਂ ਕੀਤੀਆਂ ਗਈਆਂ; ਹੇਠਾਂ ਦਿੱਤੀ ਸਾਰਣੀ ਸਾਰੀਆਂ 21 ਦਾ ਵਰਣਨ ਕਰਦੀ ਹੈ।"/>
 
 > ਇੱਕ **ਕੰਬੋ** ਮਾਡਲਾਂ ਦੀ ਇੱਕ ਲੜੀ ਹੈ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ OmniRoute **ਆਪਣੇ-ਆਪ** ਰੂਟ ਕਰਦਾ ਹੈ। ਜੇ ਕੋਟਾ ਖ਼ਤਮ ਹੋ ਜਾਵੇ, ਕੋਈ ਪ੍ਰਦਾਤਾ ਅਸਫਲ ਹੋ ਜਾਵੇ, ਜਾਂ ਲਾਗਤ ਵਧ ਜਾਵੇ, ਤਾਂ ਕੰਬੋ ਅਗਲੇ ਯੋਗ ਅਤੇ ਸਿਹਤਮੰਦ ਮਾਡਲ 'ਤੇ ਜਾ ਸਕਦਾ ਹੈ। 🛡️
 

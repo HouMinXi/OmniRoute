@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="דוגמאות מונפשות ל-18 מתוך 21 אסטרטגיות הניתוב של קומבואים — אריח אחד לכל אסטרטגיה: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. האסטרטגיות cache-optimized ו-quota-weighted אינן מונפשות; הטבלה שלהלן מתארת את כל ה-21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="דוגמאות מונפשות ל-18 מתוך 21 אסטרטגיות הניתוב של קומבואים — אריח אחד לכל אסטרטגיה: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. האסטרטגיות cache-optimized, quota-weighted ו-expiry-first אינן מונפשות; הטבלה שלהלן מתארת את כל ה-21."/>
 
 > **קומבו** הוא שרשרת של מודלים ש-OmniRoute מנתב ביניהם **באופן אוטומטי**. אם המכסה אוזלת, ספק נכשל או שהעלויות מזנקות, הקומבו יכול לעבור למודל התקין והכשיר הבא. 🛡️
 

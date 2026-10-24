@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="combo මාර්ගගත කිරීමේ උපායමාර්ග 21න් 18ක් සඳහා සජීවීකරණය කළ උදාහරණ — එක් උපායමාර්ගයකට එක් ටයිලයක් බැගින්: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized සහ quota-weighted සජීවීකරණය කර නැත; පහත වගුවේ උපායමාර්ග 21ම විස්තර කර ඇත."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="combo මාර්ගගත කිරීමේ උපායමාර්ග 21න් 18ක් සඳහා සජීවීකරණය කළ උදාහරණ — එක් උපායමාර්ගයකට එක් ටයිලයක් බැගින්: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted සහ expiry-first සජීවීකරණය කර නැත; පහත වගුවේ උපායමාර්ග 21ම විස්තර කර ඇත."/>
 
 > **combo** එකක් යනු OmniRoute විසින් **ස්වයංක්රීයව** මාර්ගගත කරන මාදිලි දාමයකි. කෝටාව අවසන් වුවහොත්, සැපයුම්කරුවෙකු අසාර්ථක වුවහොත්, හෝ පිරිවැය ඉහළ ගියහොත්, combo එකට ඊළඟ සුදුසු සහ ක්රියාකාරී මාදිලිය වෙත මාරු විය හැක. 🛡️
 

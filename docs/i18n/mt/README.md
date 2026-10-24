@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Eżempji animati għal 18 mill-21 strateġija ta’ routing tal-combos — maduma waħda għal kull strateġija: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized u quota-weighted mhumiex animati; it-tabella t’hawn taħt tiddeskrivi l-21 kollha."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Eżempji animati għal 18 mill-21 strateġija ta’ routing tal-combos — maduma waħda għal kull strateġija: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted u expiry-first mhumiex animati; it-tabella t’hawn taħt tiddeskrivi l-21 kollha."/>
 
 > **Combo** huwa katina ta’ mudelli li OmniRoute jgħaddi bejniethom **awtomatikament**. Jekk il-kwota tispiċċa, fornitur ifalli, jew l-ispejjeż jogħlew f’daqqa, il-combo jista’ jgħaddi għall-mudell eliġibbli u operattiv li jmiss. 🛡️
 

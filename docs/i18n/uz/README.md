@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 ta combo marshrutlash strategiyasidan 18 tasi uchun animatsiyali misollar — har bir strategiya uchun bittadan katak: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized va quota-weighted animatsiya qilinmagan; quyidagi jadvalda barcha 21 tasi tavsiflangan."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 ta combo marshrutlash strategiyasidan 18 tasi uchun animatsiyali misollar — har bir strategiya uchun bittadan katak: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted va expiry-first animatsiya qilinmagan; quyidagi jadvalda barcha 21 tasi tavsiflangan."/>
 
 > **Combo** — bu OmniRoute **avtomatik ravishda** marshrutlaydigan modellar zanjiri. Kvota tugasa, provayder ishlamay qolsa yoki xarajatlar keskin oshsa, combo keyingi mos va sogʻlom modelga oʻtishi mumkin. 🛡️
 

@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21가지 콤보 라우팅 전략 중 18가지의 애니메이션 예시 — 전략별 타일: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized와 quota-weighted는 애니메이션으로 제공되지 않으며, 아래 표에서 21가지 전략을 모두 설명합니다."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21가지 콤보 라우팅 전략 중 18가지의 애니메이션 예시 — 전략별 타일: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted, expiry-first는 애니메이션으로 제공되지 않으며, 아래 표에서 21가지 전략을 모두 설명합니다."/>
 
 > **콤보**는 OmniRoute가 **자동으로** 라우팅하는 모델 체인입니다. 할당량이 소진되거나, 공급자에 장애가 발생하거나, 비용이 급증하면 콤보는 조건을 충족하는 다음 정상 모델로 전환할 수 있습니다. 🛡️
 

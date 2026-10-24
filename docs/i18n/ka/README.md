@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 კომბო-მარშრუტიზაციის სტრატეგიიდან 18-ის ანიმაციური მაგალითები — თითო სტრატეგიაზე თითო ფილა: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized და quota-weighted ანიმირებული არ არის; ქვემოთ მოცემულ ცხრილში აღწერილია ოცდაერთივე."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 კომბო-მარშრუტიზაციის სტრატეგიიდან 18-ის ანიმაციური მაგალითები — თითო სტრატეგიაზე თითო ფილა: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted და expiry-first ანიმირებული არ არის; ქვემოთ მოცემულ ცხრილში აღწერილია ოცდაერთივე."/>
 
 > **კომბო** არის მოდელების ჯაჭვი, რომელთა შორისაც OmniRoute მოთხოვნებს **ავტომატურად** მარშრუტიზებს. თუ კვოტა ამოიწურება, პროვაიდერი შეფერხდება ან ხარჯები მკვეთრად გაიზრდება, კომბოს შეუძლია შემდეგ შესაბამის და გამართულ მოდელზე გადასვლა. 🛡️
 
@@ -491,7 +491,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">21</td>
     <td nowrap><code>expiry-first</code></td>
-    <td>პირველ რიგში ხარჯავს ანგარიშს, რომლის კვოტაც სხვა შემთხვევაში გამოუყენებლად ამოიწურებოდა: პირველია ყველაზე დიდი ნაშთისა და ყველაზე ახლო განულების მქონე ანგარიში ⏳</td>
+    <td>პირველ რიგში ხარჯავს ანგარიშს, რომლის კვოტასაც სხვა შემთხვევაში ვადა გამოუყენებლად გაუვიდოდა: პირველია ყველაზე დიდი ნაშთისა და ყველაზე ახლო განულების მქონე ანგარიში ⏳</td>
   </tr>
 </table>
 

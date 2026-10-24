@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Geanimeerde voorbeelden van 18 van de 21 routeringsstrategieën voor combo's — één tegel per strategie: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized en quota-weighted zijn niet geanimeerd; de onderstaande tabel beschrijft alle 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Geanimeerde voorbeelden van 18 van de 21 routeringsstrategieën voor combo's — één tegel per strategie: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted en expiry-first zijn niet geanimeerd; de onderstaande tabel beschrijft alle 21."/>
 
 > Een **combo** is een keten van modellen waarlangs OmniRoute **automatisch** routeert. Als het quotum opraakt, een provider uitvalt of de kosten plotseling stijgen, kan de combo doorgaan naar het volgende geschikte, correct werkende model. 🛡️
 

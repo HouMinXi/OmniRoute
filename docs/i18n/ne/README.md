@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="२१ मध्ये १८ कम्बो राउटिङ रणनीतिका एनिमेटेड उदाहरणहरू — प्रत्येक रणनीतिका लागि एउटा टाइल: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized र quota-weighted एनिमेट गरिएका छैनन्; तलको तालिकाले सबै २१ वटाको वर्णन गर्छ।"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="२१ मध्ये १८ कम्बो राउटिङ रणनीतिका एनिमेटेड उदाहरणहरू — प्रत्येक रणनीतिका लागि एउटा टाइल: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized, quota-weighted र expiry-first एनिमेट गरिएका छैनन्; तलको तालिकाले सबै २१ वटाको वर्णन गर्छ।"/>
 
 > **कम्बो** भनेको OmniRoute ले **स्वचालित रूपमा** राउट गर्ने मोडेलहरूको शृङ्खला हो। कोटा सकिएमा, प्रदायक असफल भएमा वा लागत आकस्मिक रूपमा बढेमा, कम्बो अर्को योग्य र स्वस्थ मोडेलमा जान सक्छ। 🛡️
 

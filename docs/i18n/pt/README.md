@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Exemplos animados de 18 das 21 estratégias de encaminhamento de combos — um mosaico por estratégia: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized e quota-weighted não são animadas; a tabela abaixo descreve as 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Exemplos animados de 18 das 21 estratégias de encaminhamento de combos — um mosaico por estratégia: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted e expiry-first não são animadas; a tabela abaixo descreve as 21."/>
 
 > Um **combo** é uma cadeia de modelos entre os quais o OmniRoute encaminha pedidos **automaticamente**. Se a quota se esgotar, um fornecedor falhar ou os custos dispararem, o combo pode avançar para o modelo elegível e operacional seguinte. 🛡️
 

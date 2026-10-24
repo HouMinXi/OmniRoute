@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Mga animated na halimbawa para sa 18 sa 21 diskarte sa pagruruta ng combo — isang tile bawat diskarte: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Hindi animated ang cache-optimized at quota-weighted; inilalarawan ng talahanayan sa ibaba ang lahat ng 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Mga animated na halimbawa para sa 18 sa 21 diskarte sa pagruruta ng combo — isang tile bawat diskarte: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Hindi animated ang cache-optimized, quota-weighted at expiry-first; inilalarawan ng talahanayan sa ibaba ang lahat ng 21."/>
 
 > Ang **combo** ay isang hanay ng mga model na **awtomatikong** pinagrurutahan ng OmniRoute. Kung maubos ang quota, pumalya ang isang provider, o biglang tumaas ang mga gastos, maaaring lumipat ang combo sa susunod na kwalipikado at maayos na model. 🛡️
 

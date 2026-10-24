@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Κινούμενα παραδείγματα για 18 από τις 21 στρατηγικές δρομολόγησης combo — ένα πλακίδιο ανά στρατηγική: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Οι cache-optimized και quota-weighted δεν είναι κινούμενες· ο παρακάτω πίνακας περιγράφει και τις 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Κινούμενα παραδείγματα για 18 από τις 21 στρατηγικές δρομολόγησης combo — ένα πλακίδιο ανά στρατηγική: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Οι cache-optimized, quota-weighted και expiry-first δεν είναι κινούμενες· ο παρακάτω πίνακας περιγράφει και τις 21."/>
 
 > Ένα **combo** είναι μια αλυσίδα μοντέλων μεταξύ των οποίων το OmniRoute δρομολογεί **αυτόματα**. Αν εξαντληθεί το όριο χρήσης, αποτύχει ένας πάροχος ή αυξηθεί απότομα το κόστος, το combo μπορεί να μεταβεί στο επόμενο κατάλληλο και λειτουργικό μοντέλο. 🛡️
 

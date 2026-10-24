@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21種類のコンボルーティング戦略のうち18種類のアニメーション例 — 戦略ごとに1タイル：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimizedとquota-weightedにはアニメーションがありません。以下の表では全21種類を説明しています。"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21種類のコンボルーティング戦略のうち18種類のアニメーション例 — 戦略ごとに1タイル：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimized、quota-weighted、expiry-firstにはアニメーションがありません。以下の表では全21種類を説明しています。"/>
 
 > **コンボ**とは、OmniRouteが**自動的に**切り替えながらルーティングするモデルのチェーンです。クォータを使い切った場合、プロバイダーに障害が発生した場合、またはコストが急増した場合、コンボは次に利用可能な正常なモデルへ移行できます。🛡️
 

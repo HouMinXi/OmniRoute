@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animované příklady 18 z 21 strategií směrování kombinací — jedna dlaždice pro každou strategii: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategie cache-optimized a quota-weighted nejsou animované; tabulka níže popisuje všech 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animované příklady 18 z 21 strategií směrování kombinací — jedna dlaždice pro každou strategii: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategie cache-optimized, quota-weighted a expiry-first nejsou animované; tabulka níže popisuje všech 21."/>
 
 > **Kombinace** je řetězec modelů, mezi kterými OmniRoute směruje požadavky **automaticky**. Pokud dojde kvóta, poskytovatel selže nebo prudce vzrostou náklady, kombinace může přejít na další vhodný a funkční model. 🛡️
 

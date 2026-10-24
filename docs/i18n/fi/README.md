@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animoidut esimerkit 18:sta kaikkiaan 21 yhdistelmän reititysstrategiasta — yksi ruutu strategiaa kohden: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategioita cache-optimized ja quota-weighted ei ole animoitu; alla oleva taulukko kuvaa kaikki 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animoidut esimerkit 18:sta kaikkiaan 21 yhdistelmän reititysstrategiasta — yksi ruutu strategiaa kohden: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategioita cache-optimized, quota-weighted ja expiry-first ei ole animoitu; alla oleva taulukko kuvaa kaikki 21."/>
 
 > **Yhdistelmä** on malliketju, jonka kautta OmniRoute reitittää **automaattisesti**. Jos kiintiö loppuu, palveluntarjoaja vikaantuu tai kustannukset nousevat äkillisesti, yhdistelmä voi siirtyä seuraavaan soveltuvaan ja toimintakuntoiseen malliin. 🛡️
 

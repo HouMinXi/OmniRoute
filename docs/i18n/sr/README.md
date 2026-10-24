@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анимирани примери за 18 од 21 стратегија комбинованог рутирања — по једна плочица за сваку стратегију: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized и quota-weighted нису анимиране; табела испод описује свих 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анимирани примери за 18 од 21 стратегија комбинованог рутирања — по једна плочица за сваку стратегију: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted и expiry-first нису анимиране; табела испод описује свих 21."/>
 
 > **Комбинација** је ланац модела између којих OmniRoute рутира **аутоматски**. Ако се квота потроши, добављач откаже или трошкови нагло порасту, комбинација може да пређе на следећи одговарајући исправан модел. 🛡️
 

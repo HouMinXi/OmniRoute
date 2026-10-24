@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Samplaí beoite de 18 gcinn den 21 straitéis ródaithe teaglamaí — tíl amháin in aghaidh na straitéise: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Níl cache-optimized ná quota-weighted beoite; déantar cur síos sa tábla thíos ar gach ceann den 21 ceann."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Samplaí beoite de 18 gcinn den 21 straitéis ródaithe teaglamaí — tíl amháin in aghaidh na straitéise: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Níl cache-optimized, quota-weighted ná expiry-first beoite; déantar cur síos sa tábla thíos ar gach ceann den 21 ceann."/>
 
 > Is éard is **teaglama** ann ná slabhra samhlacha a ndéanann OmniRoute ródú eatarthu **go huathoibríoch**. Má ídítear an cuóta, má theipeann ar sholáthraí, nó má ardaíonn costais go tobann, is féidir leis an teaglama bogadh ar aghaidh chuig an gcéad samhail incháilithe shláintiúil eile. 🛡️
 

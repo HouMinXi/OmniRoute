@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Àwọn àpẹẹrẹ aláyẹ̀-gbígbé fún 18 nínú àwọn ọgbọ́n ìdarí combo 21 náà — tile kan fún ọgbọ́n kọ̀ọ̀kan: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized àti quota-weighted kò ní àwòrán aláyẹ̀-gbígbé; tábìlì tó wà nísàlẹ̀ ṣàlàyé gbogbo 21 náà."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Àwọn àpẹẹrẹ aláyẹ̀-gbígbé fún 18 nínú àwọn ọgbọ́n ìdarí combo 21 náà — tile kan fún ọgbọ́n kọ̀ọ̀kan: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted àti expiry-first kò ní àwòrán aláyẹ̀-gbígbé; tábìlì tó wà nísàlẹ̀ ṣàlàyé gbogbo 21 náà."/>
 
 > **Combo** jẹ́ ẹ̀wọ̀n àwọn model tí OmniRoute ń darí kọjá lórí **láìfọwọ́ṣe**. Bí quota bá tán, provider kan bá kùnà, tàbí iye owó bá fò sókè, combo náà lè lọ sí model tó péye àti tó ń ṣiṣẹ́ dáadáa lẹ́yìn náà. 🛡️
 

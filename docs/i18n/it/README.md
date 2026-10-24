@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Esempi animati per 18 delle 21 strategie di instradamento delle combo — un riquadro per strategia: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized e quota-weighted non sono animate; la tabella seguente descrive tutte e 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Esempi animati per 18 delle 21 strategie di instradamento delle combo — un riquadro per strategia: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted e expiry-first non sono animate; la tabella seguente descrive tutte e 21."/>
 
 > Una **combo** è una catena di modelli tra i quali OmniRoute instrada le richieste **automaticamente**. Se la quota si esaurisce, un provider non risponde o i costi aumentano, la combo può passare al successivo modello idoneo e operativo. 🛡️
 

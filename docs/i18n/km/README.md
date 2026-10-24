@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ឧទាហរណ៍មានចលនាសម្រាប់យុទ្ធសាស្ត្រកំណត់ផ្លូវបន្សំចំនួន 18 ក្នុងចំណោម 21 — មួយក្រឡាសម្រាប់មួយយុទ្ធសាស្ត្រ៖ priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline។ cache-optimized និង quota-weighted មិនមានចលនាទេ; តារាងខាងក្រោមពិពណ៌នាយុទ្ធសាស្ត្រទាំង 21។"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ឧទាហរណ៍មានចលនាសម្រាប់យុទ្ធសាស្ត្រកំណត់ផ្លូវបន្សំចំនួន 18 ក្នុងចំណោម 21 — មួយក្រឡាសម្រាប់មួយយុទ្ធសាស្ត្រ៖ priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline។ cache-optimized, quota-weighted និង expiry-first មិនមានចលនាទេ; តារាងខាងក្រោមពិពណ៌នាយុទ្ធសាស្ត្រទាំង 21។"/>
 
 > **បន្សំ** គឺជាខ្សែសង្វាក់នៃម៉ូដែលដែល OmniRoute កំណត់ផ្លូវឆ្លងកាត់ដោយ **ស្វ័យប្រវត្តិ**។ ប្រសិនបើកូតាអស់ អ្នកផ្តល់សេវាបរាជ័យ ឬថ្លៃចំណាយកើនឡើងខ្លាំង បន្សំអាចប្តូរទៅម៉ូដែលដែលមានសុខភាពល្អ និងមានសិទ្ធិបន្ទាប់។ 🛡️
 

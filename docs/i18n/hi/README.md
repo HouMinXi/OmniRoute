@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 में से 18 कॉम्बो रूटिंग रणनीतियों के एनिमेटेड उदाहरण — प्रत्येक रणनीति के लिए एक टाइल: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized और quota-weighted एनिमेटेड नहीं हैं; नीचे दी गई तालिका सभी 21 का वर्णन करती है।"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 में से 18 कॉम्बो रूटिंग रणनीतियों के एनिमेटेड उदाहरण — प्रत्येक रणनीति के लिए एक टाइल: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized, quota-weighted और expiry-first एनिमेटेड नहीं हैं; नीचे दी गई तालिका सभी 21 का वर्णन करती है।"/>
 
 > एक **कॉम्बो** मॉडल की ऐसी शृंखला है, जिनके बीच OmniRoute **स्वचालित रूप से** रूट करता है। यदि कोटा समाप्त हो जाए, कोई प्रदाता विफल हो जाए या लागत अचानक बढ़ जाए, तो कॉम्बो अगले योग्य और स्वस्थ मॉडल पर जा सकता है। 🛡️
 

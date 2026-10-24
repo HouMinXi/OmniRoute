@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 combo வழித்தட உத்திகளில் 18-க்கான அசைவூட்டப்பட்ட எடுத்துக்காட்டுகள் — ஒவ்வொரு உத்திக்கும் ஒரு கட்டம்: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized மற்றும் quota-weighted ஆகியவை அசைவூட்டப்படவில்லை; கீழேயுள்ள அட்டவணை அனைத்து 21 உத்திகளையும் விவரிக்கிறது."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 combo வழித்தட உத்திகளில் 18-க்கான அசைவூட்டப்பட்ட எடுத்துக்காட்டுகள் — ஒவ்வொரு உத்திக்கும் ஒரு கட்டம்: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted மற்றும் expiry-first ஆகியவை அசைவூட்டப்படவில்லை; கீழேயுள்ள அட்டவணை அனைத்து 21 உத்திகளையும் விவரிக்கிறது."/>
 
 > **combo** என்பது OmniRoute **தானாகவே** வழித்தடப்படுத்தும் மாடல்களின் சங்கிலியாகும். ஒதுக்கீடு தீர்ந்துவிட்டாலோ, வழங்குநர் செயலிழந்தாலோ அல்லது செலவுகள் திடீரென அதிகரித்தாலோ, combo அடுத்த தகுதியான, சீராகச் செயல்படும் மாடலுக்கு மாறும். 🛡️
 

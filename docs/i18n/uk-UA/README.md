@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анімовані приклади 18 із 21 стратегії маршрутизації комбінацій — по одній плитці для кожної стратегії: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized і quota-weighted не анімовані; у таблиці нижче описано всі 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анімовані приклади 18 із 21 стратегії маршрутизації комбінацій — по одній плитці для кожної стратегії: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted і expiry-first не анімовані; у таблиці нижче описано всі 21."/>
 
 > **Комбінація** — це ланцюжок моделей, між якими OmniRoute маршрутизує запити **автоматично**. Якщо квоту вичерпано, постачальник дає збій або витрати різко зростають, комбінація може перейти до наступної доступної справної моделі. 🛡️
 

@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21ଟି କମ୍ବୋ ରାଉଟିଂ କୌଶଳ ମଧ୍ୟରୁ 18ଟିର ଆନିମେଟେଡ୍ ଉଦାହରଣ — ପ୍ରତ୍ୟେକ କୌଶଳ ପାଇଁ ଗୋଟିଏ ଟାଇଲ୍: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized ଏବଂ quota-weighted ଆନିମେଟେଡ୍ ନୁହେଁ; ନିମ୍ନସ୍ଥ ସାରଣୀରେ ସମସ୍ତ 21ଟି ବର୍ଣ୍ଣନା କରାଯାଇଛି।"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21ଟି କମ୍ବୋ ରାଉଟିଂ କୌଶଳ ମଧ୍ୟରୁ 18ଟିର ଆନିମେଟେଡ୍ ଉଦାହରଣ — ପ୍ରତ୍ୟେକ କୌଶଳ ପାଇଁ ଗୋଟିଏ ଟାଇଲ୍: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized, quota-weighted ଏବଂ expiry-first ଆନିମେଟେଡ୍ ନୁହେଁ; ନିମ୍ନସ୍ଥ ସାରଣୀରେ ସମସ୍ତ 21ଟି ବର୍ଣ୍ଣନା କରାଯାଇଛି।"/>
 
 > ଗୋଟିଏ **କମ୍ବୋ** ହେଉଛି ମଡେଲ୍ଗୁଡ଼ିକର ଏକ ଶୃଙ୍ଖଳା, ଯାହା ମଧ୍ୟରେ OmniRoute **ସ୍ୱୟଂଚାଳିତ ଭାବରେ** ରାଉଟ୍ କରେ। କୋଟା ଶେଷ ହୋଇଗଲେ, କୌଣସି ପ୍ରଦାନକାରୀ ବିଫଳ ହେଲେ କିମ୍ବା ଖର୍ଚ୍ଚ ହଠାତ୍ ବଢ଼ିଗଲେ, କମ୍ବୋ ପରବର୍ତ୍ତୀ ଯୋଗ୍ୟ ଓ ସୁସ୍ଥ ମଡେଲ୍କୁ ଯାଇପାରେ। 🛡️
 

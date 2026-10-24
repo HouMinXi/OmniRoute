@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 kombo yönlendirme stratejisinden 18'i için animasyonlu örnekler — her strateji için bir kutucuk: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized ve quota-weighted animasyonlu değildir; aşağıdaki tablo 21 stratejinin tamamını açıklar."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 kombo yönlendirme stratejisinden 18'i için animasyonlu örnekler — her strateji için bir kutucuk: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted ve expiry-first animasyonlu değildir; aşağıdaki tablo 21 stratejinin tamamını açıklar."/>
 
 > **Kombo**, OmniRoute'un **otomatik olarak** yönlendirme yaptığı bir model zinciridir. Kota biterse, bir sağlayıcı arızalanırsa veya maliyetler yükselirse kombo, uygun durumdaki bir sonraki sağlıklı modele geçebilir. 🛡️
 

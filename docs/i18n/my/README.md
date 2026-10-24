@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ကွန်ဘို routing strategy 21 ခုအနက် 18 ခုအတွက် လှုပ်ရှားသရုပ်ပြနမူနာများ — strategy တစ်ခုလျှင် tile တစ်ခုစီဖြင့် priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline တို့ကို ပြသထားသည်။ cache-optimized နှင့် quota-weighted ကို လှုပ်ရှားသရုပ်ပြမထားပါ။ အောက်ပါဇယားတွင် 21 ခုလုံးကို ဖော်ပြထားသည်။"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="ကွန်ဘို routing strategy 21 ခုအနက် 18 ခုအတွက် လှုပ်ရှားသရုပ်ပြနမူနာများ — strategy တစ်ခုလျှင် tile တစ်ခုစီဖြင့် priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline တို့ကို ပြသထားသည်။ cache-optimized၊ quota-weighted နှင့် expiry-first တို့ကို လှုပ်ရှားသရုပ်ပြမထားပါ။ အောက်ပါဇယားတွင် 21 ခုလုံးကို ဖော်ပြထားသည်။"/>
 
 > **ကွန်ဘို** ဆိုသည်မှာ OmniRoute က **အလိုအလျောက်** ဖြတ်သန်း route လုပ်ပေးသည့် model များ၏ အစဉ်တန်းတစ်ခုဖြစ်သည်။ quota ကုန်သွားလျှင်၊ provider တစ်ခု ပျက်ကွက်လျှင် သို့မဟုတ် ကုန်ကျစရိတ်များ ရုတ်တရက်မြင့်တက်လာလျှင် ကွန်ဘိုသည် သတ်မှတ်ချက်နှင့်ကိုက်ညီပြီး ကောင်းမွန်စွာအလုပ်လုပ်နေသည့် နောက် model တစ်ခုသို့ ပြောင်းနိုင်သည်။ 🛡️
 
@@ -491,7 +491,7 @@ strategy **21** ခုလုံးကို ကွန်ဘိုအဆင့်
   <tr>
     <td align="center">21</td>
     <td nowrap><code>expiry-first</code></td>
-    <td>မသုံးဘဲထားပါက သက်တမ်းကုန်သွားမည့် ကိုတာရှိသော အကောင့်ကို ဦးစွာသုံးသည်- အများဆုံးကျန်ရှိပြီး ပြန်လည်သတ်မှတ်ချိန် အနီးဆုံးဖြစ်သော အကောင့်ကို ဦးစားပေးသည် ⏳</td>
+    <td>မသုံးဘဲထားပါက သက်တမ်းကုန်သွားမည့် ခွဲတမ်းရှိသော အကောင့်ကို ဦးစွာသုံးသည်- အများဆုံးကျန်ရှိပြီး ပြန်လည်သတ်မှတ်ချိန် အနီးဆုံးဖြစ်သော အကောင့်ကို ဦးစားပေးသည် ⏳</td>
   </tr>
 </table>
 

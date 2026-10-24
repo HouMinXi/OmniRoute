@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animované príklady 18 z 21 stratégií smerovania komb — jedna dlaždica pre každú stratégiu: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Stratégie cache-optimized a quota-weighted nie sú animované; tabuľka nižšie opisuje všetkých 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animované príklady 18 z 21 stratégií smerovania komb — jedna dlaždica pre každú stratégiu: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Stratégie cache-optimized, quota-weighted a expiry-first nie sú animované; tabuľka nižšie opisuje všetkých 21."/>
 
 > **Kombo** je reťazec modelov, medzi ktorými OmniRoute smeruje požiadavky **automaticky**. Ak sa vyčerpá kvóta, poskytovateľ zlyhá alebo prudko stúpnu náklady, kombo môže prejsť na ďalší vhodný a funkčný model. 🛡️
 

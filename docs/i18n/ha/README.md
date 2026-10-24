@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Misalai masu motsi na dabarun sarrafa hanyoyin haɗe-haɗe guda 18 daga cikin 21 — tayal ɗaya ga kowace dabara: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized da quota-weighted ba su da motsi; teburin da ke ƙasa yana bayyana dukkan guda 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Misalai masu motsi na dabarun sarrafa hanyoyin haɗe-haɗe guda 18 daga cikin 21 — tayal ɗaya ga kowace dabara: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted da expiry-first ba su da motsi; teburin da ke ƙasa yana bayyana dukkan guda 21."/>
 
 > **Haɗin** jerin model ne da OmniRoute ke bi a tsakaninsu **ta atomatik**. Idan quota ya ƙare, provider ya gaza, ko farashi ya yi tashin gwauron zabi, haɗin zai iya matsawa zuwa model mai lafiya na gaba da ya cancanta. 🛡️
 

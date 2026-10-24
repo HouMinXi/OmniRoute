@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 種組合路由策略中 18 種的動畫範例——每種策略各一個圖塊：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimized 與 quota-weighted 未製作動畫；下表說明全部 21 種策略。"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 種組合路由策略中 18 種的動畫範例——每種策略各一個圖塊：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimized、quota-weighted 與 expiry-first 未製作動畫；下表說明全部 21 種策略。"/>
 
 > **組合**是一連串由 OmniRoute **自動**跨模型路由的模型鏈。如果配額耗盡、提供者發生故障或成本激增，組合便可移至下一個符合條件且運作正常的模型。🛡️
 

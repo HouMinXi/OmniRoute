@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 കോംബോ റൂട്ടിംഗ് തന്ത്രങ്ങളിൽ 18 എണ്ണത്തിന്റെ ആനിമേറ്റഡ് ഉദാഹരണങ്ങൾ — ഓരോ തന്ത്രത്തിനും ഓരോ ടൈൽ: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted എന്നിവ ആനിമേറ്റ് ചെയ്തിട്ടില്ല; താഴെയുള്ള പട്ടികയിൽ 21 എണ്ണവും വിവരിച്ചിരിക്കുന്നു."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 കോംബോ റൂട്ടിംഗ് തന്ത്രങ്ങളിൽ 18 എണ്ണത്തിന്റെ ആനിമേറ്റഡ് ഉദാഹരണങ്ങൾ — ഓരോ തന്ത്രത്തിനും ഓരോ ടൈൽ: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted, expiry-first എന്നിവ ആനിമേറ്റ് ചെയ്തിട്ടില്ല; താഴെയുള്ള പട്ടികയിൽ 21 എണ്ണവും വിവരിച്ചിരിക്കുന്നു."/>
 
 > **കോംബോ** എന്നാൽ OmniRoute **സ്വയമേവ** റൂട്ട് ചെയ്യുന്ന മോഡലുകളുടെ ഒരു ശൃംഖലയാണ്. ക്വാട്ട തീരുകയോ, ഒരു പ്രൊവൈഡർ പരാജയപ്പെടുകയോ, ചെലവ് കുത്തനെ ഉയരുകയോ ചെയ്താൽ, കോംബോയ്ക്ക് യോഗ്യവും പ്രവർത്തനക്ഷമവുമായ അടുത്ത മോഡലിലേക്ക് മാറാനാകും. 🛡️
 

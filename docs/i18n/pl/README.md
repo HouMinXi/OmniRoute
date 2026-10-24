@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animowane przykłady 18 z 21 strategii routingu kombinacji — po jednym kafelku na strategię: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategie cache-optimized i quota-weighted nie są animowane; poniższa tabela opisuje wszystkie 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animowane przykłady 18 z 21 strategii routingu kombinacji — po jednym kafelku na strategię: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategie cache-optimized, quota-weighted i expiry-first nie są animowane; poniższa tabela opisuje wszystkie 21."/>
 
 > **Kombinacja** to łańcuch modeli, między którymi OmniRoute routuje **automatycznie**. Jeśli limit zostanie wyczerpany, dostawca ulegnie awarii lub koszty gwałtownie wzrosną, kombinacja może przejść do następnego kwalifikującego się, sprawnego modelu. 🛡️
 

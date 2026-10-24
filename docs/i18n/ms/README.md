@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Contoh animasi bagi 18 daripada 21 strategi penghalaan kombo — satu petak bagi setiap strategi: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized dan quota-weighted tidak dianimasikan; jadual di bawah menerangkan kesemua 21 strategi."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Contoh animasi bagi 18 daripada 21 strategi penghalaan kombo — satu petak bagi setiap strategi: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted dan expiry-first tidak dianimasikan; jadual di bawah menerangkan kesemua 21 strategi."/>
 
 > **Kombo** ialah rantaian model yang OmniRoute halakan secara **automatik**. Jika kuota habis, penyedia gagal, atau kos melonjak, kombo boleh beralih kepada model sihat seterusnya yang layak. 🛡️
 

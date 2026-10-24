@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 కాంబో రూటింగ్ వ్యూహాల్లో 18కి యానిమేటెడ్ ఉదాహరణలు — ప్రతి వ్యూహానికి ఒక టైల్: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized మరియు quota-weighted యానిమేట్ చేయబడలేదు; దిగువ పట్టిక మొత్తం 21ని వివరిస్తుంది."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 కాంబో రూటింగ్ వ్యూహాల్లో 18కి యానిమేటెడ్ ఉదాహరణలు — ప్రతి వ్యూహానికి ఒక టైల్: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted మరియు expiry-first యానిమేట్ చేయబడలేదు; దిగువ పట్టిక మొత్తం 21ని వివరిస్తుంది."/>
 
 > **కాంబో** అనేది OmniRoute **స్వయంచాలకంగా** రూట్ చేసే మోడళ్ల గొలుసు. కోటా అయిపోయినా, ప్రొవైడర్ విఫలమైనా లేదా ఖర్చులు పెరిగినా, కాంబో తదుపరి అర్హత కలిగిన, సక్రమంగా పనిచేస్తున్న మోడల్కు మారగలదు. 🛡️
 

@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animeeritud näited 18-st kombo marsruutimise strateegiast 21-st — üks paan strateegia kohta: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strateegiad cache-optimized ja quota-weighted pole animeeritud; allolev tabel kirjeldab kõiki 21 strateegiat."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animeeritud näited 18-st kombo marsruutimise strateegiast 21-st — üks paan strateegia kohta: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strateegiad cache-optimized, quota-weighted ja expiry-first pole animeeritud; allolev tabel kirjeldab kõiki 21 strateegiat."/>
 
 > **Kombo** on mudelite ahel, mille vahel OmniRoute marsruudib **automaatselt**. Kui kvoot saab otsa, teenusepakkujal tekib tõrge või kulud kasvavad järsult, saab kombo liikuda järgmise sobiva ja töökorras mudeli juurde. 🛡️
 

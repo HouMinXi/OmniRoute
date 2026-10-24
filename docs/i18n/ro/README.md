@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Exemple animate pentru 18 dintre cele 21 de strategii de rutare pentru combo-uri — câte o dală pentru fiecare strategie: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized și quota-weighted nu sunt animate; tabelul de mai jos descrie toate cele 21 de strategii."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Exemple animate pentru 18 dintre cele 21 de strategii de rutare pentru combo-uri — câte o dală pentru fiecare strategie: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted și expiry-first nu sunt animate; tabelul de mai jos descrie toate cele 21 de strategii."/>
 
 > Un **combo** este un lanț de modele între care OmniRoute rutează **automat**. Dacă se epuizează cota, un furnizor eșuează sau costurile cresc brusc, combo-ul poate trece la următorul model eligibil și funcțional. 🛡️
 

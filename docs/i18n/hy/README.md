@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 կոմբինացիոն երթուղավորման ռազմավարություններից 18-ի անիմացված օրինակներ՝ յուրաքանչյուր ռազմավարության համար մեկ սալիկ՝ priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline։ cache-optimized-ը և quota-weighted-ը անիմացված չեն․ ստորև բերված աղյուսակը նկարագրում է բոլոր 21-ը։"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 կոմբինացիոն երթուղավորման ռազմավարություններից 18-ի անիմացված օրինակներ՝ յուրաքանչյուր ռազմավարության համար մեկ սալիկ՝ priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline։ cache-optimized-ը, quota-weighted-ը և expiry-first-ը անիմացված չեն․ ստորև բերված աղյուսակը նկարագրում է բոլոր 21-ը։"/>
 
 > **Կոմբինացիան** մոդելների շղթա է, որոնց միջև OmniRoute-ն երթուղավորում է **ինքնաբերաբար**։ Եթե քվոտան սպառվում է, մատակարարը խափանվում է կամ ծախսերը կտրուկ աճում են, կոմբինացիան կարող է անցնել հաջորդ համապատասխան ու անխափան աշխատող մոդելին։ 🛡️
 
@@ -491,7 +491,7 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">21</td>
     <td nowrap><code>expiry-first</code></td>
-    <td>Նախ ծախսում է այն հաշիվը, որի քվոտան հակառակ դեպքում կսպառվեր չօգտագործված․ առաջինն է ամենամեծ մնացորդով և ամենամոտ վերակայմամբ հաշիվը ⏳</td>
+    <td>Նախ ծախսում է այն հաշիվը, որի քվոտայի ժամկետը հակառակ դեպքում կլրանար առանց օգտագործվելու․ առաջինն է ամենամեծ մնացորդով և ամենամոտ վերակայմամբ հաշիվը ⏳</td>
   </tr>
 </table>
 

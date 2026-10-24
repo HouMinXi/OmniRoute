@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animált példák a 21 kombinált útválasztási stratégia közül 18-ra — stratégiánként egy csempe: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. A cache-optimized és a quota-weighted nincs animálva; az alábbi táblázat mind a 21-at ismerteti."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animált példák a 21 kombinált útválasztási stratégia közül 18-ra — stratégiánként egy csempe: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. A cache-optimized, a quota-weighted és az expiry-first nincs animálva; az alábbi táblázat mind a 21-at ismerteti."/>
 
 > A **kombó** olyan modelllánc, amelyen az OmniRoute **automatikusan** végzi az útválasztást. Ha elfogy a kvóta, meghibásodik egy szolgáltató, vagy megugranak a költségek, a kombó továbbléphet a következő megfelelő és működőképes modellre. 🛡️
 

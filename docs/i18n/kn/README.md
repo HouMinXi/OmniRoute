@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 ಕಾಂಬೋ ರೂಟಿಂಗ್ ತಂತ್ರಗಳಲ್ಲಿ 18ರ ಅನಿಮೇಟೆಡ್ ಉದಾಹರಣೆಗಳು — ಪ್ರತಿ ತಂತ್ರಕ್ಕೆ ಒಂದು ಟೈಲ್: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized ಮತ್ತು quota-weighted ಅನ್ನು ಅನಿಮೇಟ್ ಮಾಡಿಲ್ಲ; ಕೆಳಗಿನ ಕೋಷ್ಟಕವು ಎಲ್ಲಾ 21ನ್ನೂ ವಿವರಿಸುತ್ತದೆ."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 ಕಾಂಬೋ ರೂಟಿಂಗ್ ತಂತ್ರಗಳಲ್ಲಿ 18ರ ಅನಿಮೇಟೆಡ್ ಉದಾಹರಣೆಗಳು — ಪ್ರತಿ ತಂತ್ರಕ್ಕೆ ಒಂದು ಟೈಲ್: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted ಮತ್ತು expiry-first ಅನ್ನು ಅನಿಮೇಟ್ ಮಾಡಿಲ್ಲ; ಕೆಳಗಿನ ಕೋಷ್ಟಕವು ಎಲ್ಲಾ 21ನ್ನೂ ವಿವರಿಸುತ್ತದೆ."/>
 
 > **ಕಾಂಬೋ** ಎಂದರೆ OmniRoute **ಸ್ವಯಂಚಾಲಿತವಾಗಿ** ರೂಟ್ ಮಾಡುವ ಮಾದರಿಗಳ ಸರಣಿ. ಕೋಟಾ ಮುಗಿದರೆ, ಪೂರೈಕೆದಾರ ವಿಫಲವಾದರೆ ಅಥವಾ ವೆಚ್ಚಗಳು ಏರಿದರೆ, ಕಾಂಬೋ ಮುಂದಿನ ಅರ್ಹ ಮತ್ತು ಸುಸ್ಥಿತಿಯಲ್ಲಿರುವ ಮಾದರಿಗೆ ಸಾಗಬಹುದು. 🛡️
 

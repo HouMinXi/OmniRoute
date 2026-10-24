@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animirani primjeri za 18 od 21 strategija usmjeravanja kombinacija — jedna pločica po strategiji: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategije cache-optimized i quota-weighted nisu animirane; tablica u nastavku opisuje svih 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animirani primjeri za 18 od 21 strategija usmjeravanja kombinacija — jedna pločica po strategiji: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. Strategije cache-optimized, quota-weighted i expiry-first nisu animirane; tablica u nastavku opisuje svih 21."/>
 
 > **Kombinacija** je lanac modela između kojih OmniRoute usmjerava **automatski**. Ako se kvota potroši, pružatelj zakaže ili troškovi naglo porastu, kombinacija može prijeći na sljedeći prihvatljiv i ispravan model. 🛡️
 

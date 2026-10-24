@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анимирани примери за 18 от 21-те стратегии за маршрутизиране на комбинации — по една плочка за всяка стратегия: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized и quota-weighted не са анимирани; таблицата по-долу описва всичките 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Анимирани примери за 18 от 21-те стратегии за маршрутизиране на комбинации — по една плочка за всяка стратегия: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted и expiry-first не са анимирани; таблицата по-долу описва всичките 21."/>
 
 > **Комбинацията** е верига от модели, между които OmniRoute маршрутизира **автоматично**. Ако квотата се изчерпи, доставчикът откаже или разходите рязко се повишат, комбинацията може да премине към следващия допустим и работещ модел. 🛡️
 

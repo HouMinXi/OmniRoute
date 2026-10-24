@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="২১টি কম্বো রাউটিং কৌশলের মধ্যে ১৮টির অ্যানিমেটেড উদাহরণ — প্রতি কৌশলের জন্য একটি টাইল: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized এবং quota-weighted অ্যানিমেটেড নয়; নিচের টেবিলে সব ২১টির বর্ণনা রয়েছে।"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="২১টি কম্বো রাউটিং কৌশলের মধ্যে ১৮টির অ্যানিমেটেড উদাহরণ — প্রতি কৌশলের জন্য একটি টাইল: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline। cache-optimized, quota-weighted এবং expiry-first অ্যানিমেটেড নয়; নিচের টেবিলে সব ২১টির বর্ণনা রয়েছে।"/>
 
 > একটি **কম্বো** হলো মডেলের এমন একটি শৃঙ্খল, যার মধ্যে OmniRoute **স্বয়ংক্রিয়ভাবে** রাউট করে। কোটা ফুরিয়ে গেলে, কোনো প্রদানকারী ব্যর্থ হলে বা খরচ বেড়ে গেলে, কম্বোটি পরবর্তী উপযুক্ত ও সচল মডেলে যেতে পারে। 🛡️
 

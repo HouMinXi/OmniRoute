@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animierte Beispiele für 18 der 21 Combo-Routing-Strategien — eine Kachel pro Strategie: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized und quota-weighted sind nicht animiert; die Tabelle unten beschreibt alle 21."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="Animierte Beispiele für 18 der 21 Combo-Routing-Strategien — eine Kachel pro Strategie: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted und expiry-first sind nicht animiert; die Tabelle unten beschreibt alle 21."/>
 
 > Eine **Combo** ist eine Kette von Modellen, zwischen denen OmniRoute **automatisch** routet. Wenn das Kontingent aufgebraucht ist, ein Anbieter ausfällt oder die Kosten stark steigen, kann die Combo zum nächsten geeigneten, funktionsfähigen Modell wechseln. 🛡️
 

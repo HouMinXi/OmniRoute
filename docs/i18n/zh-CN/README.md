@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 种组合路由策略中 18 种的动态示例——每种策略对应一个图块：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimized 和 quota-weighted 没有动画；下表介绍了全部 21 种策略。"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 种组合路由策略中 18 种的动态示例——每种策略对应一个图块：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimized、quota-weighted 和 expiry-first 没有动画；下表介绍了全部 21 种策略。"/>
 
 > **组合**是一条由 OmniRoute **自动**跨模型路由的链。如果配额耗尽、提供者出现故障或成本激增，组合可以切换到下一个符合条件且运行正常的模型。🛡️
 

@@ -354,7 +354,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 કોમ્બો રાઉટિંગ વ્યૂહરચનાઓમાંથી 18નાં એનિમેટેડ ઉદાહરણો — દરેક વ્યૂહરચના માટે એક ટાઇલ: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized અને quota-weighted એનિમેટેડ નથી; નીચેનું કોષ્ટક તમામ 21નું વર્ણન કરે છે."/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="21 કોમ્બો રાઉટિંગ વ્યૂહરચનાઓમાંથી 18નાં એનિમેટેડ ઉદાહરણો — દરેક વ્યૂહરચના માટે એક ટાઇલ: priority, fill-first, weighted, round-robin, p2c, least-used, random, strict-random, cost-optimized, headroom, reset-window, reset-aware, context-relay, context-optimized, lkgp, auto, fusion, pipeline. cache-optimized, quota-weighted અને expiry-first એનિમેટેડ નથી; નીચેનું કોષ્ટક તમામ 21નું વર્ણન કરે છે."/>
 
 > **કોમ્બો** એ મોડેલોની એક શૃંખલા છે, જેની વચ્ચે OmniRoute **આપમેળે** રાઉટ કરે છે. જો ક્વોટા ખૂટી જાય, કોઈ પ્રદાતા નિષ્ફળ જાય અથવા ખર્ચ વધી જાય, તો કોમ્બો આગલા પાત્ર અને કાર્યરત મોડેલ પર જઈ શકે છે. 🛡️
 
