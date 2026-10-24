@@ -479,32 +479,35 @@ test("provider models route returns curated GPT-5.6 variants when auto-fetch is 
   );
 });
 
-test("vendor models route treats an empty live Codex catalog as a labelled GitHub fallthrough", async () => {
+const CACHED_CODEX_ROW = {
+  id: "gpt-5.6-sol",
+  name: "Cached GPT 5.6 Sol",
+  source: "imported",
+  apiFormat: "responses",
+  supportedEndpoints: ["responses"],
+};
+
+const GITHUB_NOVA_MANIFEST = {
+  models: [
+    {
+      slug: "gpt-5.7-nova",
+      display_name: "GPT-5.7 Nova",
+      visibility: "list",
+      supported_in_api: true,
+      context_window: 400000,
+    },
+  ],
+};
+
+test("vendor models route keeps the cached catalog when live Codex answers an empty list", async () => {
   const connection = await seedCodexConnection({ accessToken: "codex-access-token" });
   await modelsDb.replaceSyncedAvailableModelsForConnection("codex", connection.id, [
-    {
-      id: "gpt-5.6-sol",
-      name: "Cached GPT 5.6 Sol",
-      source: "imported",
-      apiFormat: "responses",
-      supportedEndpoints: ["responses"],
-    },
+    CACHED_CODEX_ROW,
   ]);
 
   globalThis.fetch = async (url) => {
-    const requestUrl = String(url);
-    if (requestUrl.includes("raw.githubusercontent.com/openai/codex")) {
-      return Response.json({
-        models: [
-          {
-            slug: "gpt-5.7-nova",
-            display_name: "GPT-5.7 Nova",
-            visibility: "list",
-            supported_in_api: true,
-            context_window: 400000,
-          },
-        ],
-      });
+    if (String(url).includes("raw.githubusercontent.com/openai/codex")) {
+      return Response.json(GITHUB_NOVA_MANIFEST);
     }
     // Live answers 200 with an empty catalog (measured 2026-10-23: both pro
     // accounts, client versions 0.61-0.64, with and without the account id).
@@ -516,35 +519,47 @@ test("vendor models route treats an empty live Codex catalog as a labelled GitHu
   const modelIds = new Set((body.models || []).map((model) => model.id));
 
   assert.equal(response.status, 200);
-  assert.equal(body.source, "github_catalog");
-  // A silent fallback would let model-sync persist the public manifest as the
-  // account's synced catalog (isDegraded* keys off source + a non-empty warning),
-  // so an empty catalog still reports the fallback — with wording that separates
-  // it from an upstream outage.
-  assert.equal(body.warning, "Codex returned no models — using the public catalog");
-  assert.ok(modelIds.has("gpt-5.7-nova"));
-  assert.equal(
-    modelIds.has("gpt-5.6-sol"),
-    false,
-    "the cleared cached row must not leak into the GitHub fallback"
+  // An empty answer can be transient, so the account's own catalog wins and the
+  // response is labelled degraded (model-sync's isDegraded* gates key off source
+  // plus a non-empty warning), with wording distinct from an upstream outage.
+  assert.equal(body.source, "cache");
+  assert.equal(body.warning, "Codex returned no models — using the cached catalog");
+  assert.ok(modelIds.has("gpt-5.6-sol"));
+  const synced = await modelsDb.getSyncedAvailableModelsForConnection("codex", connection.id);
+  assert.deepEqual(
+    synced.map((model) => model.id),
+    ["gpt-5.6-sol"],
+    "an empty answer must not delete the cached catalog"
   );
 });
 
-test("vendor models route clears the stale catalog when live is empty and GitHub is down", async () => {
+test("vendor models route falls through to the public catalog on an empty list with no cache", async () => {
+  const connection = await seedCodexConnection({ accessToken: "codex-access-token" });
+
+  globalThis.fetch = async (url) => {
+    if (String(url).includes("raw.githubusercontent.com/openai/codex")) {
+      return Response.json(GITHUB_NOVA_MANIFEST);
+    }
+    return Response.json({ models: [] });
+  };
+
+  const response = await callRoute(connection.id, "?refresh=true");
+  const body = (await response.json()) as RouteBody;
+
+  assert.equal(response.status, 200);
+  assert.equal(body.source, "github_catalog");
+  assert.equal(body.warning, "Codex returned no models — using the public catalog");
+  assert.ok((body.models || []).some((model) => model.id === "gpt-5.7-nova"));
+});
+
+test("vendor models route keeps the cache on an empty list even when GitHub is down", async () => {
   const connection = await seedCodexConnection({ accessToken: "codex-access-token" });
   await modelsDb.replaceSyncedAvailableModelsForConnection("codex", connection.id, [
-    {
-      id: "gpt-5.6-sol",
-      name: "Cached GPT 5.6 Sol",
-      source: "imported",
-      apiFormat: "responses",
-      supportedEndpoints: ["responses"],
-    },
+    CACHED_CODEX_ROW,
   ]);
 
   globalThis.fetch = async (url) => {
-    const requestUrl = String(url);
-    if (requestUrl.includes("raw.githubusercontent.com/openai/codex")) {
+    if (String(url).includes("raw.githubusercontent.com/openai/codex")) {
       return new Response("github unavailable", { status: 503 });
     }
     return Response.json({ models: [] });
@@ -554,34 +569,20 @@ test("vendor models route clears the stale catalog when live is empty and GitHub
   const body = (await response.json()) as RouteBody;
 
   assert.equal(response.status, 200);
-  // No cache replay: the account advertises nothing, so its stale synced rows
-  // are cleared and the answer comes from the local catalog.
-  assert.equal(body.source, "local_catalog");
-  assert.equal(body.warning, "Codex returned no models — using the local catalog");
+  assert.equal(body.source, "cache");
+  assert.equal(body.warning, "Codex returned no models — using the cached catalog");
   const synced = await modelsDb.getSyncedAvailableModelsForConnection("codex", connection.id);
-  assert.equal(synced.length, 0, "an empty catalog must clear the stale synced rows");
-
-  // The unrefreshed GET must reach the same answer instead of replaying rows.
-  const second = await callRoute(connection.id);
-  const secondBody = (await second.json()) as RouteBody;
-  assert.equal(secondBody.source, body.source);
+  assert.equal(synced.length, 1, "the cached catalog must survive an empty answer");
 });
 
-test("vendor models route does not treat an error envelope as a live catalog", async () => {
+test("vendor models route reports an error envelope as a failure, not a live or empty catalog", async () => {
   const connection = await seedCodexConnection({ accessToken: "codex-access-token" });
   await modelsDb.replaceSyncedAvailableModelsForConnection("codex", connection.id, [
-    {
-      id: "gpt-5.6-sol",
-      name: "Cached GPT 5.6 Sol",
-      source: "imported",
-      apiFormat: "responses",
-      supportedEndpoints: ["responses"],
-    },
+    CACHED_CODEX_ROW,
   ]);
 
   globalThis.fetch = async (url) => {
-    const requestUrl = String(url);
-    if (requestUrl.includes("raw.githubusercontent.com/openai/codex")) {
+    if (String(url).includes("raw.githubusercontent.com/openai/codex")) {
       return new Response("github unavailable", { status: 503 });
     }
     // 200 with an error body: without the guard this normalizes into a phantom
@@ -594,11 +595,10 @@ test("vendor models route does not treat an error envelope as a live catalog", a
   const modelIds = (body.models || []).map((model) => model.id);
 
   assert.equal(response.status, 200);
-  // An error envelope normalizes to an empty catalog, so the account's stale rows
-  // are cleared and the answer comes from the local catalog, not the dead cache.
-  assert.equal(body.source, "local_catalog");
-  assert.equal(body.intentional, true, "the local catalog is the deliberate last resort");
-  assert.equal(body.warning, "Codex returned no models — using the local catalog");
+  assert.equal(body.source, "cache");
+  assert.equal(body.warning, "Codex live catalog unavailable — using cached catalog");
   assert.equal(modelIds.includes("error"), false, "an error envelope is not a model");
-  assert.ok(modelIds.length > 0, "the local fallback must still return a catalog");
+  assert.ok(modelIds.includes("gpt-5.6-sol"));
+  const synced = await modelsDb.getSyncedAvailableModelsForConnection("codex", connection.id);
+  assert.equal(synced.length, 1, "a failed lookup must not touch the cached catalog");
 });

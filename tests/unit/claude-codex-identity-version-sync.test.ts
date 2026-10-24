@@ -130,13 +130,26 @@ function assertGithubFallbackDoesNotPersist() {
   const githubIdx = githubMatch ? githubMatch.index : -1;
   const localMatch = /source:\s*"local_catalog"/.exec(src.slice(githubIdx));
   const localIdx = localMatch ? githubIdx + localMatch.index : -1;
+  const fallbackIdx = src.indexOf("const liveFailed = liveModels === null", liveIdx);
+  const cacheMatch = /if\s*\(\s*fallbackSource\s*===\s*"cache"/.exec(src.slice(fallbackIdx));
+  const cacheIdx = cacheMatch ? fallbackIdx + cacheMatch.index : -1;
   assert.ok(liveIdx > 0, "the live branch must exist");
-  assert.ok(githubIdx > liveIdx, "the fallback chain must follow the live branch");
+  assert.ok(fallbackIdx > liveIdx, "the fallback chain must follow the live branch");
+  assert.ok(cacheIdx > fallbackIdx, "the cached account view must be tried first");
+  assert.ok(githubIdx > cacheIdx, "the GitHub branch must follow the cache branch");
   assert.ok(localIdx > githubIdx, "the local fallback must follow the GitHub branch");
 
-  // Only the live branch may persist the account inventory.
-  const liveWindow = src.slice(liveIdx, githubIdx);
+  // Only the live branch may persist the account inventory. No fallback, an
+  // empty live answer included, may rewrite it.
+  const liveWindow = src.slice(liveIdx, fallbackIdx);
   assert.match(liveWindow, /persistDiscoveredModels\s*\(/);
+  assert.doesNotMatch(src.slice(fallbackIdx, localIdx), /persistDiscoveredModels\s*\(/);
+
+  // The cached account view is a degraded answer too: it must carry the
+  // fallback warning and must not be reported as a live discovery.
+  const cacheWindow = src.slice(cacheIdx, githubIdx);
+  assert.match(cacheWindow, /fallbackWarning/);
+  assert.doesNotMatch(cacheWindow, /buildApiDiscoveryResponse\s*\(/);
 
   // A fallback that hid itself from model-sync would let the public manifest
   // persist as the account's synced catalog (isDegraded* keys off the warning).

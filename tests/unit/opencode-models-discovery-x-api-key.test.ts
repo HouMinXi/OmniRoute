@@ -24,9 +24,7 @@ for (const vendor of ["opencode-zen", "opencode-go"] as const) {
     assert.equal(headers["x-api-key"], "zen-api-key-value");
     // Case-insensitive on purpose: an injected lowercase `authorization` header
     // must fail here, because the bearer branch wins even when both are present.
-    const bearerKeys = Object.keys(headers).filter(
-      (key) => key.toLowerCase() === "authorization"
-    );
+    const bearerKeys = Object.keys(headers).filter((key) => key.toLowerCase() === "authorization");
     assert.deepEqual(
       bearerKeys,
       [],

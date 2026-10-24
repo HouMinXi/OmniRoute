@@ -2120,32 +2120,19 @@ export async function GET(
         });
       }
 
-      // One fallback chain covers both an empty catalog and a failed call. An
-      // empty catalog prefers the fresh public manifest; a failed call keeps the
-      // cached account view first. Both report which fallback answered.
+      // One fallback chain covers both an empty catalog and a failed call:
+      // cached account view, then the public manifest, then the local catalog.
+      // An empty answer may be transient, so it never clears the cached catalog;
+      // the warning says which situation it was and which fallback answered.
       const liveFailed = liveModels === null;
       const liveEmpty = liveModels !== null && liveModels.length === 0;
       const hasGithubCatalog = Boolean(githubCatalogModels && githubCatalogModels.length > 0);
-      const hasCachedCatalog = cachedDiscoveryModels.length > 0;
-
-      // An empty catalog means the account advertises nothing right now. Drop the
-      // stale synced rows, the same way the generic branch clears them on empty
-      // discovery, so an unrefreshed GET reaches the same answer instead of
-      // replaying a catalog the account no longer serves.
-      if (liveEmpty && hasCachedCatalog) {
-        await persistDiscoveredModels(provider, connectionId, []);
-      }
-
       const fallbackSource: "github_catalog" | "cache" | "local_catalog" =
-        liveFailed && hasCachedCatalog
+        cachedDiscoveryModels.length > 0
           ? "cache"
           : hasGithubCatalog
             ? "github_catalog"
-            : liveEmpty
-              ? "local_catalog"
-              : hasCachedCatalog
-                ? "cache"
-                : "local_catalog";
+            : "local_catalog";
       const liveFailureWarning: Record<typeof fallbackSource, string> = {
         cache: "Codex live catalog unavailable — using cached catalog",
         github_catalog: "Codex live catalog unavailable — using GitHub model catalog",

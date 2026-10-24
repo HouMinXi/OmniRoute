@@ -759,8 +759,9 @@ test("codex.normalizeCodexModelsResponse drops entries without an id", () => {
   );
 });
 
-// Contract change: an empty 200 catalog is a successful answer (callers use it to
-// fall through to the public catalog silently); null is reserved for real failures.
+// Contract change: a recognised empty list (`{data: []}`, `{models: []}`, `[]`) is
+// a successful answer, returned as []. Every other body that yields no models is
+// a failure, returned as null, so callers keep warning about it.
 test("codex.fetchCodexDiscoveryModels separates an empty catalog from a failed fetch", async () => {
   assert.equal(
     await fetchCodexDiscoveryModels({
@@ -778,12 +779,42 @@ test("codex.fetchCodexDiscoveryModels separates an empty catalog from a failed f
     null
   );
 
-  assert.deepEqual(
+  for (const emptyList of [{ data: [] }, { models: [] }, []]) {
+    assert.deepEqual(
+      await fetchCodexDiscoveryModels({
+        accessToken: "tok",
+        fetchImpl: async () => Response.json(emptyList),
+      }),
+      [],
+      `${JSON.stringify(emptyList)} is an empty catalog`
+    );
+  }
+
+  for (const notAList of [
+    { error: { message: "quota exhausted", type: "insufficient_quota" } },
+    { error: "bad", models: [] },
+    { detail: "Unauthorized" },
+    { status: "ok" },
+    {},
+    null,
+  ]) {
+    assert.equal(
+      await fetchCodexDiscoveryModels({
+        accessToken: "tok",
+        fetchImpl: async () => Response.json(notAList),
+      }),
+      null,
+      `${JSON.stringify(notAList)} is a failure, not an empty catalog`
+    );
+  }
+
+  assert.equal(
     await fetchCodexDiscoveryModels({
       accessToken: "tok",
-      fetchImpl: async () => Response.json({ data: [] }),
+      fetchImpl: async () => new Response("<html>bad gateway</html>", { status: 200 }),
     }),
-    []
+    null,
+    "an unparseable 200 body is a failure"
   );
 
   assert.equal(
