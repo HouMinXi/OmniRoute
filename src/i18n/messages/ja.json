@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log Account IDs",
-        "description": "Include account prefix in AUTH log lines (e.g. \"Using '<provider>' account: abc12345...\"). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this."
+        "description": "AUTH ログ行にアカウントのプレフィックスを含めます (例: \"Using '<provider>' account: abc12345...\")。共有/マルチテナントのプロセスログからアカウント識別子を伏せるため、デフォルトでは無効です。デバッグモードとは独立しており、デバッグモードを切り替えてもこれは表示されません。"
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "OIDC有効時のパスワードログインを無効化",

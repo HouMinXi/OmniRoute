@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log Account IDs",
-        "description": "Include account prefix in AUTH log lines (e.g. \"Using '<provider>' account: abc12345...\"). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this."
+        "description": "AUTH ਲੌਗ ਲਾਈਨਾਂ ਵਿੱਚ ਖਾਤੇ ਦਾ ਪ੍ਰੀਫਿਕਸ ਸ਼ਾਮਲ ਕਰੋ (ਜਿਵੇਂ \"Using '<provider>' account: abc12345...\")। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ, ਤਾਂ ਜੋ ਸਾਂਝੇ/ਮਲਟੀ-ਟੈਨੈਂਟ ਪ੍ਰੋਸੈਸ ਲੌਗਾਂ ਵਿੱਚੋਂ ਖਾਤਾ ਪਛਾਣਕਰਤਾ ਲੁਕੇ ਰਹਿਣ। Debug Mode ਤੋਂ ਸੁਤੰਤਰ; Debug Mode ਬਦਲਣ ਨਾਲ ਇਹ ਪ੍ਰਗਟ ਨਹੀਂ ਹੁੰਦਾ।"
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "OIDC ਨਾਲ ਪਾਸਵਰਡ ਲੌਗਇਨ ਅਯੋਗ ਕਰੋ",

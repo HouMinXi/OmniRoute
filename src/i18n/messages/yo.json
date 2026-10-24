@@ -13801,11 +13801,11 @@
       },
       "OPENCODE_RESPONSES_STALL_ROTATION": {
         "label": "OpenCode Responses Stall Rotation",
-        "description": "Fun unimọra OpenCode, ṣe aṣoju afikun data akọkọ ti awọn esi awọn Ẹya ti a n tu silẹ (iye iṣi: RESPONSES_FIRST_BYTE_TIMEOUT_MS, ẹya de: 15000). Ti a ba ṣe iṣẹ 2xx Ẹya ti ẹyiti ko sọrọ si iṣi, a o si ṣe idaniloju iṣẹ: a n ṣe akawọ akọṣẹ gẹgẹbi iṣi, a si tọpinpin iṣẹ naa si akọṣẹ ti o tẹle lẹẹkan; iṣi kẹta yoo kuna ni iyara. A o ṣiṣẹ fun ẹya naa: awọn iṣi Ẹya ti o ni akọṣẹ a o ni iduro akọṣẹ Ẹya ti a n tu silẹ títí di ẹya aṣiṣẹ aṣiṣẹ aṣiṣẹ."
+        "description": "Fún OpenCode executor, ṣàkíyèsí byte àkọ́kọ́ ti body ìdáhùn Responses tí a ń ṣàn (fèrèsé: RESPONSES_FIRST_BYTE_TIMEOUT_MS, àìyípadà 15000). Ìṣàn Responses 2xx tí ó bá dákẹ́ kọjá fèrèsé náà ni a ó kà sí èyí tí ó dúró: a ó fi àkọọ́lẹ̀ náà sí àkókò ìsinmi, ìbéèrè náà yóò sì yí lọ sí àkọọ́lẹ̀ tókàn lẹ́ẹ̀kan; ìdúró kejì yóò kùnà lẹ́sẹ̀kẹsẹ̀. Pípa ní àìyípadà: àwọn ìṣàn tí ó dúró yóò máa dúró bí ti òní títí àkókò ìmúrasílẹ̀ ìṣàn (stream readiness timeout) yóò fi tán."
       },
       "OPENCODE_USER_BLOCKED_ROTATION": {
         "label": "OpenCode user_blocked Rotation",
-        "description": "Fun unimọra OpenCode, nígbà tí ọwọ ọna iṣẹ ṣe àṣiṣe 403 tabi 451 pẹlu iṣẹ user_blocked (kii ṣe iṣẹ aṣiṣẹ iṣẹ, kii ṣe aṣiṣẹ Cloudflare), a o n tọpinpin iṣi si akọṣẹ ti o tẹle títí di lẹẹkan ninu iṣe; a o fọwọṣe iṣi kẹta ni ẹsan aṣiṣẹ ẹsan ẹsan aṣiṣẹ. A o ṣiṣẹ fun ẹya naa: ṣiṣe iṣi aṣiṣẹ iṣẹ iṣi iṣẹ iṣi aṣiṣẹ iṣẹ iṣi aṣiṣẹ, ti a o si ṣe afihan ni ẹsan aṣiṣẹ ẹsan aṣiṣẹ ẹsan aṣiṣẹ aṣiṣẹ aṣiṣẹ, nitori a o ba ṣe iṣi aṣiṣẹ aṣiṣẹ ẹsan aṣiṣẹ iṣi iṣi aṣiṣẹ aṣiṣẹ."
+        "description": "Fún OpenCode executor, nígbà tí upstream bá dáhùn pẹ̀lú 403 tàbí 451 tí ó gbé ìkọ̀sílẹ̀ user_blocked (kì í ṣe ìdènà agbègbè, kì í ṣe ìkọ̀sílẹ̀ fingerprint Cloudflare), fi àkọọ́lẹ̀ tí a kọ̀ náà sí àkókò ìsinmi kí o sì yí lọ sí àkọọ́lẹ̀ tókàn ní ẹ̀ẹ̀kan péré fún ìbéèrè kọ̀ọ̀kan; ìkọ̀sílẹ̀ kejì ni a ó dá padà bí ó ti rí láìsí àmì àṣeyọrí. Pípa ní àìyípadà: yíyí ọ̀nà ká ìdènà olùmúlò upstream lè dàbí ìyẹ̀sílẹ̀, ó sì lè tan àmì náà ká gbogbo àwọn àkọọ́lẹ̀, nítorí náà a ó dá ìkọ̀sílẹ̀ náà padà láìyípadà àyàfi tí olùṣiṣẹ́ bá yàn án."
       },
       "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
         "label": "OpenCode Transient Failover Backoff",
@@ -13997,7 +13997,7 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Keyless Transport Gate",
-        "description": "Hold keyless (no-auth) providers whose transport needs a local browser (browserBacked) or a locally installed CLI (isLocalCli) out of the auto/* candidate pool, so a hung member cannot stall an auto request until the per-target timeout (#17036). Off by default: every no-auth provider with emulated tool calling stays in the pool exactly as before. Direct '<alias>'/'<model>' calls work either way."
+        "description": "Fi àwọn olùpèsè keyless (no-auth) tí transport wọn nílò browser agbègbè (browserBacked) tàbí CLI tí a fi sórí ẹ̀rọ (isLocalCli) sílẹ̀ kúrò nínú àkójọ olùdíje auto/*, kí ọmọ ẹgbẹ́ tí ó dúró má baà dí ìbéèrè auto lọ́wọ́ títí di timeout ti ibi-àfojúsùn kọ̀ọ̀kan (#17036). Pípa ní àìyípadà: gbogbo olùpèsè no-auth tí ó ní ìpè irinṣẹ́ àfarawé yóò wà nínú àkójọ náà gẹ́gẹ́ bí ti tẹ́lẹ̀. Àwọn ìpè tààrà '<alias>'/'<model>' ń ṣiṣẹ́ ní ọ̀nà méjèèjì."
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Tunnunṣe Atunṣe Tẹlẹ (Inline)",

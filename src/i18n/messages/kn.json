@@ -13885,7 +13885,7 @@
       },
       "EXPOSE_CC_DISCOVERY_ALIASES": {
         "label": "Claude Code Discovery Aliases",
-        "description": "Advertise claude/'<provider>'/'<model>' mirror ids on /v1/models so Claude Code gateway model discovery lists non-Claude models. Warning: doubles catalog entries for all clients when enabled globally."
+        "description": "Claude Code gateway ಮಾದರಿ ಅನ್ವೇಷಣೆಯಲ್ಲಿ Claude ಅಲ್ಲದ ಮಾದರಿಗಳೂ ಪಟ್ಟಿಯಾಗುವಂತೆ /v1/models ನಲ್ಲಿ claude/'<provider>'/'<model>' ಮಿರರ್ id ಗಳನ್ನು ಪ್ರಕಟಿಸಿ. ಎಚ್ಚರಿಕೆ: ಜಾಗತಿಕವಾಗಿ ಸಕ್ರಿಯಗೊಳಿಸಿದಾಗ ಎಲ್ಲ ಕ್ಲೈಂಟ್‌ಗಳಿಗೆ ಕ್ಯಾಟಲಾಗ್ ನಮೂದುಗಳು ದ್ವಿಗುಣಗೊಳ್ಳುತ್ತವೆ."
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "ನೋ-ಥಿಂಕ್ ಮಾದರಿ ಏಲಿಯಾಸ್‌ಗಳು",

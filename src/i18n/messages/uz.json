@@ -13948,7 +13948,7 @@
         "description": "Hech qaysi operator moslashmasi yoki provayder reyestri hech qanday tier'ni e'lon qilmagan holda, models.dev nashr qiladigan reasoning effort tierlarini (ma'lum effort lug'atiga cheklangan) ishlating va /v1/models effort_tiers hamda combo tier kesishmalarida e'lon qilingan bo'sh tier ro'yxatini \"tierlar yo'q\" deb qarash kerak. Standart holatida o'chiq: effort_tiers va hal qilingan supportedThinkingEfforts oldingi holatda qoladi."
       },
       "LMARENA_SYNTHESIZED_CX_ENABLED": {
-        "label": "Arena Synthesized cx Telemetry",
+        "label": "Arena sintetik cx telemetriyasi",
         "description": "Har qanday operator-taklif etilmagan providerSpecificData.cx ga ega bo'lmagan Arena (lmarena) create-evaluation so'rovlariga sintezlangan dasturiy cx mijoz o'zaro ta'sirlarini (arena.ai o'zi hech qanday yozib olinmagan o'zaro ta'sirga ega sahifa uchun yuboradigan qiymatni) biriktiring. Standart holatida o'chiq: cx maydoni Arena anti-avtomatlashtirish signali bo'lgani uchun, OmniRoute faqat operator tomonidan haqiqiy brauzer sessiyasidan olingan qiymatni (providerSpecificData.cx) olib yuboradi va aks holda cx umuman yubormaydi. Yuqori oqimdan isbotlanmagan foyda; faqat Arena cx'siz so'rovlarni rad etishni boshlaganda yoqish kerak."
       },
       "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {

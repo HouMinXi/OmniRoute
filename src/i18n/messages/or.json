@@ -13997,11 +13997,11 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Keyless Transport Gate",
-        "description": "Hold keyless (no-auth) providers whose transport needs a local browser (browserBacked) or a locally installed CLI (isLocalCli) out of the auto/* candidate pool, so a hung member cannot stall an auto request until the per-target timeout (#17036). Off by default: every no-auth provider with emulated tool calling stays in the pool exactly as before. Direct '<alias>'/'<model>' calls work either way."
+        "description": "ଯେଉଁ keyless (no-auth) ପ୍ରୋଭାଇଡର୍‌ଙ୍କ transport ପାଇଁ ସ୍ଥାନୀୟ browser (browserBacked) କିମ୍ବା ସ୍ଥାନୀୟ ଭାବେ ସଂସ୍ଥାପିତ CLI (isLocalCli) ଆବଶ୍ୟକ, ସେମାନଙ୍କୁ auto/* ପ୍ରାର୍ଥୀ ପୁଲ୍‌ରୁ ବାହାରେ ରଖନ୍ତୁ, ଯାହାଦ୍ୱାରା ଅଟକି ଯାଇଥିବା ସଦସ୍ୟ ଜଣେ auto ଅନୁରୋଧକୁ ପ୍ରତି-ଲକ୍ଷ୍ୟ timeout ପର୍ଯ୍ୟନ୍ତ ଅଟକାଇ ରଖିପାରିବ ନାହିଁ (#17036)। ପୂର୍ବନିର୍ଦ୍ଧାରିତ ଭାବେ ବନ୍ଦ: ଅନୁକରଣ କରାଯାଇଥିବା tool calling ଥିବା ପ୍ରତ୍ୟେକ no-auth ପ୍ରୋଭାଇଡର୍ ଠିକ୍ ପୂର୍ବ ପରି ପୁଲ୍‌ରେ ରହେ। ସିଧାସଳଖ '<alias>'/'<model>' କଲ୍ ଉଭୟ କ୍ଷେତ୍ରରେ କାମ କରେ।"
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Inline Reasoning Replay",
-        "description": "For codebuddy-cn thinking models (the DeepSeek-V4 / Kimi-K2 families that need reasoning replay), inline each replayed assistant reasoning_content as a visible '<thought>' block at the front of the message content, so it survives a gateway that drops the reasoning_content field (#13632). Off by default: codebuddy-cn requests are sent unchanged; the reasoning_content field itself is always kept."
+        "description": "codebuddy-cn thinking ମଡେଲଗୁଡ଼ିକ ପାଇଁ (reasoning replay ଆବଶ୍ୟକ କରୁଥିବା DeepSeek-V4 / Kimi-K2 ପରିବାର), ପ୍ରତ୍ୟେକ ପୁନଃପ୍ରେରିତ assistant reasoning_content କୁ message content ର ଆରମ୍ଭରେ ଏକ ଦୃଶ୍ୟମାନ '<thought>' ବ୍ଲକ୍ ଭାବେ ଯୋଡ଼ନ୍ତୁ, ଯାହାଦ୍ୱାରା reasoning_content ଫିଲ୍ଡ ହଟାଉଥିବା gateway ଦେଇ ମଧ୍ୟ ଏହା ବଞ୍ଚି ରହେ (#13632)। ପୂର୍ବନିର୍ଦ୍ଧାରିତ ଭାବେ ବନ୍ଦ: codebuddy-cn ଅନୁରୋଧଗୁଡ଼ିକ ଅପରିବର୍ତ୍ତିତ ଭାବେ ପଠାଯାଏ; reasoning_content ଫିଲ୍ଡ ନିଜେ ସର୍ବଦା ରଖାଯାଏ।"
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "ପ୍ରୋଭାଇଡର୍ ସୁରକ୍ଷା ଷ୍ଟପ୍: ଟର୍ମିନାଲ୍",

@@ -13997,11 +13997,11 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Keyless Transport Gate",
-        "description": "Keyless (no-auth) providers whose transport requires a local browser (browserBacked) or a locally installed CLI (isLocalCli) are held out of the auto/* candidate pool, so a hung member cannot stall an auto request until the per-target timeout (#17036). Off by default: every no-auth provider with emulated tool calling stays in the pool exactly as before. Direct '<alias>'/'<model>' calls work either way."
+        "description": "transport အတွက် local browser (browserBacked) သို့မဟုတ် စက်တွင်း ထည့်သွင်းထားသော CLI (isLocalCli) လိုအပ်သည့် keyless (no-auth) provider များကို auto/* ကိုယ်စားလှယ်စု (candidate pool) ထဲမှ ဖယ်ထားပါ၊ သို့မှသာ တုံ့ပြန်မှုမရှိတော့သော အဖွဲ့ဝင်တစ်ခုက auto request ကို target တစ်ခုချင်းစီ၏ timeout အထိ ရပ်တန့်မနေစေနိုင်ပါ (#17036)။ မူရင်းအားဖြင့် ပိတ်ထားသည်- tool ခေါ်ဆိုမှုကို အတုပြုလုပ်ပေးသော (emulated tool calling) no-auth provider တိုင်းသည် ယခင်အတိုင်း pool ထဲတွင် ရှိနေမည်။ တိုက်ရိုက် '<alias>'/'<model>' ခေါ်ဆိုမှုများသည် မည်သည့်အခြေအနေတွင်မဆို အလုပ်လုပ်သည်။"
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Inline Reasoning Replay",
-        "description": "For codebuddy-cn thinking models (the DeepSeek-V4 / Kimi-K2 families that need reasoning replay), each replayed assistant reasoning_content is inlined as a visible '<thought>' block at the front of the message content, so it survives a gateway that drops the reasoning_content field (#13632). Off by default: codebuddy-cn requests are sent unchanged; the reasoning_content field itself is always kept."
+        "description": "codebuddy-cn စဉ်းစားသော မော်ဒယ်များ (reasoning replay လိုအပ်သော DeepSeek-V4 / Kimi-K2 မိသားစုများ) အတွက်၊ ပြန်လည်ပို့သော assistant reasoning_content တစ်ခုစီကို message content ၏ ရှေ့ဆုံးတွင် မြင်သာသော '<thought>' block အဖြစ် ထည့်သွင်းပါ၊ သို့မှသာ reasoning_content field ကို ဖယ်ရှားသည့် gateway ကို ဖြတ်သွားသော်လည်း ကျန်ရှိနေမည် (#13632)။ မူရင်းအားဖြင့် ပိတ်ထားသည်- codebuddy-cn request များကို မပြောင်းလဲဘဲ ပို့သည်၊ reasoning_content field ကိုယ်တိုင်ကို အမြဲ ထိန်းသိမ်းထားသည်။"
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "Provider ဘေးကင်းလုံခြုံရေး ရပ်တန့်မှုများ- အပြီးသတ်",

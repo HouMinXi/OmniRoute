@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log Account IDs",
-        "description": "Include account prefix in AUTH log lines (e.g. \"Using '<provider>' account: abc12345...\"). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this."
+        "description": "AUTH লগ লাইনে অ্যাকাউন্টের প্রিফিক্স অন্তর্ভুক্ত করুন (যেমন \"Using '<provider>' account: abc12345...\")। ডিফল্টভাবে বন্ধ, যাতে শেয়ার্ড/মাল্টি-টেন্যান্ট প্রসেস লগ থেকে অ্যাকাউন্ট শনাক্তকারী গোপন থাকে। Debug Mode থেকে স্বাধীন; Debug Mode চালু-বন্ধ করলেও এটি প্রকাশ পায় না।"
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "OIDC-এর সাথে পাসওয়ার্ড লগইন নিষ্ক্রিয় করুন",
@@ -13885,11 +13885,11 @@
       },
       "EXPOSE_CC_DISCOVERY_ALIASES": {
         "label": "Claude Code Discovery Aliases",
-        "description": "Advertise claude/'<provider>'/'<model>' mirror ids on /v1/models so Claude Code gateway model discovery lists non-Claude models. Warning: doubles catalog entries for all clients when enabled globally."
+        "description": "/v1/models-এ claude/'<provider>'/'<model>' মিরর id প্রকাশ করুন, যাতে Claude Code gateway-এর মডেল অনুসন্ধানে Claude নয় এমন মডেলও তালিকাভুক্ত হয়। সতর্কতা: বিশ্বব্যাপী চালু করলে সব ক্লায়েন্টের জন্য ক্যাটালগ এন্ট্রি দ্বিগুণ হয়।"
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "No-Thinking Model Aliases",
-        "description": "Master switch for the no-think/'<provider>'/'<model>' gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on."
+        "description": "no-think/'<provider>'/'<model>' gateway alias-এর মূল সুইচ। চালু (ডিফল্ট): /v1/models প্রতিটি যোগ্য, thinking-সক্ষম Claude মডেলের জন্য একটি no-thinking ভ্যারিয়েন্ট প্রকাশ করে, এবং অনুরোধে পাঠানো no-think/ id reasoning বন্ধ রেখে আসল মডেলে রিজলভ হয়। বন্ধ: কোনো ভ্যারিয়েন্ট প্রকাশ করা হয় না এবং no-think/ id অন্য যেকোনো অজানা মডেল id-এর মতো বিবেচিত হয়। এটি চালু থাকাকালীন প্রতি-মডেল ModelSpec.noThinkingAlias opt-in/opt-out প্রযোজ্য থাকে।"
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "থিংকিং লেভেল ভ্যারিয়েন্ট নিষ্ক্রিয় করুন",
@@ -13901,7 +13901,7 @@
       },
       "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
         "label": "Functional Gateway Mirrors",
-        "description": "Advertise '<gateway-alias>'/'<model>' mirror ids on /v1/models for models whose canonical owner has no active credential but a passthrough gateway with an active credential routes them. Warning: adds catalog entries for all clients when enabled globally."
+        "description": "যেসব মডেলের মূল (canonical) মালিকের কোনো সক্রিয় ক্রেডেনশিয়াল নেই কিন্তু সক্রিয় ক্রেডেনশিয়ালসহ একটি passthrough gateway সেগুলো রাউট করে, সেগুলোর জন্য /v1/models-এ '<gateway-alias>'/'<model>' মিরর id প্রকাশ করুন। সতর্কতা: বিশ্বব্যাপী চালু করলে সব ক্লায়েন্টের জন্য ক্যাটালগ এন্ট্রি যোগ হয়।"
       },
       "NEWAPI_AGGREGATOR_BALANCE": {
         "label": "New-API অ্যাগ্রিগেটর ব্যালেন্স",

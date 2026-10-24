@@ -13921,7 +13921,7 @@
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Briclann Mistral Dóchánach 401",
-        "description": "Bhríonn bhríceadh Mistral aicse (\"'{\"detail\":\"Unauthorized\"}'\", gan comhartha aicse aicse) aicse go hiomlánn do cheav a cheadaítear, agus do creidmheas a mhéidíocht. Nuair atá sé gníomhach, briceadh aicse a chomhcheangal aicse aicse aicse aicse, suas le 3 uair ón aghaidh aicse; ansin, briceadh aicse a chomhcheangal aicse aicse aicse, chun creidmheas a chéav aicse a mhéidíocht. Díchumaithe go réamhshocraithe: briceadh Mistral aicse a chomhcheangal aicse aicse aicse, mar aicse aicse aicse."
+        "description": "Tá Mistral 401 lom ('{\"detail\":\"Unauthorized\"}', gan comhartha údaraithe follasach) comhionann beart ar bheart d'eochair aisghairthe agus do chuóta ídithe. Nuair atá sé cumasaithe, cuireann 401 den sórt sin an nasc i dtréimhse fuaraithe in ionad é a pháirceáil mar imithe in éag, suas le 3 huaire laistigh d'uair an chloig; páirceálann an chéad cheann eile fós é mar imithe in éag, ionas go socraítear eochair aisghairthe ar deireadh. As de réir réamhshocraithe: páirceálann gach Mistral 401 lom an nasc mar imithe in éag, mar a bhí roimhe."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "Uathghlanadh Baisceanna & Comhad",

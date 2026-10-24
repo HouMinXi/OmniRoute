@@ -13901,7 +13901,7 @@
       },
       "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
         "label": "Functional Gateway Mirrors",
-        "description": "Advertise '<gateway-alias>'/'<model>' mirror ids on /v1/models for models whose canonical owner has no active credential but a passthrough gateway with an active credential routes them. Warning: adds catalog entries for all clients when enabled globally."
+        "description": "ቀኖናዊ ባለቤታቸው ንቁ የመግቢያ ማስረጃ የሌለው ነገር ግን ንቁ የመግቢያ ማስረጃ ያለው passthrough gateway የሚያስተላልፋቸው ሞዴሎች '<gateway-alias>'/'<model>' የመስታወት id-ዎችን በ/v1/models ላይ ያስተዋውቁ። ማስጠንቀቂያ፦ በአጠቃላይ ሲነቃ ለሁሉም ደንበኞች የካታሎግ ግቤቶችን ይጨምራል።"
       },
       "NEWAPI_AGGREGATOR_BALANCE": {
         "label": "የNew-API አግሪጌተር ቀሪ ሂሳብ",
