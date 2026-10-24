@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Aliases ta' Mudelli Bla-Fekir",
-        "description": "Intiċ ġenerali għal aliases ta gateway ta no-think/'<provider>'/'<model>'. Fuq (preċedentament: /v1/models xjajr jiddikjaraw varjant bla-fekir għal kull mudell Claude li jista jiġi żviluppat bħala raċoċkjan, u ID ta no-think/ mibgħut f'reċiż jirrilu lura għall-mudell veru b'reċoċjoni suppressed. Miftuħ: varjanti mhumiex muddi, u ID ta' no-think/ jittrattat bħala kwalunkwe ID ta' mudell mhux magħruf ieħor. L-intiċ ta' ModelSpec.noThinkingAlias għal kull mudell japplika għall-intiċ/intiċ minn dan filwaqt li dan fuq."
+        "description": "Intiċ ġenerali għal aliases ta gateway ta no-think/'<provider>'/'<model>'. Mixgħul (awtomatiku): /v1/models xjajr jiddikjaraw varjant bla-fekir għal kull mudell Claude li jista jiġi żviluppat bħala raċoċkjan, u ID ta no-think/ mibgħut f'reċiż jirrilu lura għall-mudell veru b'reċoċjoni suppressed. Mitfi: varjanti mhumiex muddi, u ID ta' no-think/ jittrattat bħala kwalunkwe ID ta' mudell mhux magħruf ieħor. L-intiċ ta' ModelSpec.noThinkingAlias għal kull mudell japplika għall-intiċ/intiċ minn dan filwaqt li dan mixgħul."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Iddiżattiva l-Varjanti tal-Livell tal-Ħsieb",

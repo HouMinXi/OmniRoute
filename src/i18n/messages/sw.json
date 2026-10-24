@@ -13765,7 +13765,7 @@
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Zuia Utumiaji wa Gesingeniya ya Kisimbuzi kwa OIDC",
-        "description": "Ukipiga OIDC kazi, zuia tumiaji wa gesingeniya ya kisimbuzi ili watumiaji waweze kuthibitisha kwa njia ya OIDC Single Sign-On tu. Wakiwa wimelengwa (mwandamo), tumiaji wa kisimbuzi na OIDC vinapatikana."
+        "description": "OIDC ikiwa imewashwa, zima kuingia kwa nenosiri ili watumiaji waweze kuthibitisha kupitia OIDC Single Sign-On pekee. Ikiwa imezimwa (chaguo-msingi), kuingia kwa nenosiri na OIDC vyote vinapatikana."
       },
       "AUDIO_REMOTE_PROVIDER_NODES": {
         "label": "Nodi za Msimulizi wa Sikia wa Mbali",
@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Aliasi za Modeli Bila Kufikiri",
-        "description": "Chaguzi kuu kwa aliasi za gwani za no-think/'<provider>'/'<model>'. Wako (chaguo-msingi): /v1/models inatangaza tofauti isiyo ya kufikiri kwa kila modeli ya Claude inayoweza kufikiri, na id ya no-think/ inayotumwa kwenye ombi inaelekezwa tena kwenye modeli halisi ikiwa uthibitishaji umekatwa. Zimezimwa: hakuna tofauti zinatangazwa na id ya no-think/ inachukuliwa kama id yoyote isiyojulikana ya modeli. Kumbukulia/Kutorudi kwa ModelSpec.noThinkingAlias kwa kila modeli bado inatumika wakati hii iko kwenye mwanga."
+        "description": "Chaguzi kuu kwa aliasi za gwani za no-think/'<provider>'/'<model>'. Imewashwa (chaguo-msingi): /v1/models inatangaza tofauti isiyo ya kufikiri kwa kila modeli ya Claude inayoweza kufikiri, na id ya no-think/ inayotumwa kwenye ombi inaelekezwa tena kwenye modeli halisi ikiwa uthibitishaji umekatwa. Zimezimwa: hakuna tofauti zinatangazwa na id ya no-think/ inachukuliwa kama id yoyote isiyojulikana ya modeli. Kumbukulia/Kutorudi kwa ModelSpec.noThinkingAlias kwa kila modeli bado inatumika wakati hii imewashwa."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Zima Tofauti za Kiwango cha Kufikiri",
@@ -13965,7 +13965,7 @@
       },
       "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
         "label": "Usongo wa Miradia ya Kihifadhi",
-        "description": "Hasisha ukaguzi wa claude/ na nyufa za functional-gateway kwenye /v1/models. Imezimwa kwa chaguo-msingi: kila mzunguko wa nyufa hufanya kazi taratibu kama ilivyo zamani. Iliwezeshe: ukaguzi wa claude/ unasambayisha pia vigezo vilivyoorodheshwa vya mchakato wa mawezani (-low/-medium/-high/-xhigh), inaruka idhi za auto/* ndani ambazo njia ya ombi haitawezi kuzitengeneza na inaruka alia iliyoorodheshwa taya; nyufa za functional-gateway ziruka mchanganyiko na idhi za OmniRoute-zilizotengenezwa (claude/, no-think/), zinachukua mwenyeji kutoka owned_by, kamwe hazitumi mwenyeji kama nyufa yake mwenyewe, zinaruka nyufa zimezimwa kwenye blockedProviders na modeli nje ya kumbukumbu hai ya ndani ya nyufa."
+        "description": "Hasisha ukaguzi wa claude/ na nyufa za functional-gateway kwenye /v1/models. Imezimwa kwa chaguo-msingi: kila mzunguko wa nyufa hufanya kazi taratibu kama ilivyo zamani. Imewashwa: ukaguzi wa claude/ unasambayisha pia vigezo vilivyoorodheshwa vya mchakato wa mawezani (-low/-medium/-high/-xhigh), inaruka idhi za auto/* ndani ambazo njia ya ombi haitawezi kuzitengeneza na inaruka alia iliyoorodheshwa taya; nyufa za functional-gateway ziruka mchanganyiko na idhi za OmniRoute-zilizotengenezwa (claude/, no-think/), zinachukua mwenyeji kutoka owned_by, kamwe hazitumi mwenyeji kama nyufa yake mwenyewe, zinaruka nyufa zimezimwa kwenye blockedProviders na modeli nje ya kumbukumbu hai ya ndani ya nyufa."
       },
       "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
         "label": "Afya ya Mwakilishi: Kurudisha Aisi inapunguza Mnyakato wa Mvutano",
@@ -13977,7 +13977,7 @@
       },
       "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
         "label": "Utafitaji wa Models Hai kwa Kupitisha Oauth ya xAI",
-        "description": "Pata kumbukumbu hai za programu ya xAI kwa mawasiliano ya xai-oauth kutoka https://api.x.ai/v1/models kwa kutumia token ya OAuth ya mwenyeji, badala ya kupanda chujiko cha asili cha kimuundo. Imewashwa kwa chaguo-msingi. Weka alama kuwa false ili kuendelea kutoa kupanda chujiko cha asili. Mautia ya HTTP hutoa upanga chujiko cha asili njini ya ugunduzi; chuja cha alama bado haina kutoa HTTP."
+        "description": "Fetch the live xAI model catalog for xai-oauth connections from https://api.x.ai/v1/models using the OAuth bearer token, instead of the frozen static seed. On by default. Set the flag to false to keep serving the static seed. HTTP failures fall back to the seed in the discovery route; the flag getter itself does not issue HTTP."
       },
       "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
         "label": "Mabadiliko ya System katikati ya Mawasiliano Iliyofanana na Anthropic",
@@ -13985,7 +13985,7 @@
       },
       "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
         "label": "Kichunguza wa Afya ya DB: Kushikiza Ukaguzi wa Anza",
-        "description": "Tuma ukaguzi wa usahihi/afya wa DB wa anza baada ya seva kutangaza kuwa inapokea ombi (kupitia setImmediate) badala ya kuzuia mchakato wa mwanzo hadi ukaguzi ukamilike. Imezimwa kwa chaguo-msingi: mwanzo unashikwa kwenye ukaguzi kama ilivyo kabla ya #13717, hivyo DB iliovunjika bado inachunguzwa kabla ya ombi la kwanza kusambazwa. Wazi: mwanzo unarudi mara moja na ukaguzi (sasa umezingishwa na kupagwa na, kwa DB ya faili ya kweli, umepelekwa katika mchakato wa mtoto unaorekajika) unafanyika mara tu baada yake."
+        "description": "Tuma ukaguzi wa usahihi/afya wa DB wa anza baada ya seva kutangaza kuwa inapokea ombi (kupitia setImmediate) badala ya kuzuia mchakato wa mwanzo hadi ukaguzi ukamilike. Imezimwa kwa chaguo-msingi: mwanzo unashikwa kwenye ukaguzi kama ilivyo kabla ya #13717, hivyo DB iliovunjika bado inachunguzwa kabla ya ombi la kwanza kusambazwa. Imewashwa: mwanzo unarudi mara moja na ukaguzi (sasa umezingishwa na kupagwa na, kwa DB ya faili ya kweli, umepelekwa katika mchakato wa mtoto unaorekajika) unafanyika mara tu baada yake."
       },
       "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
         "label": "Mzunguko wa Katalogi Iliyopachikwa ya OpenCode",
@@ -13993,7 +13993,7 @@
       },
       "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
         "label": "Ombi Otomatiki: Uzito wa Uwezo Imara",
-        "description": "Ruhusu ombi la auto/* (resolveModelOrError na wrapper ya mzunguko wa auto) kujenga mkusanyiko wa wachaguzi na uwezo wa modeli imara (vision, reasoning, thinking) na alama ya ubora zilizotajwa, zikiwa somwa kwa hatua moja kwa kupitia katalogi ya /v1/models. Imezimwa kwa chaguo-msingi: uzito wa snapshot ya wakati wa ombi unabaki kama awali (uwezo hutafutwa kwa onyeshao na haiachani uzito). Wazi: ishara hizo huchangia uzito wa snapshot, hivyo uzito wa wachaguzi, na hivyo uchaguzi, unaweza kubadilika."
+        "description": "Ruhusu ombi la auto/* (resolveModelOrError na wrapper ya mzunguko wa auto) kujenga mkusanyiko wa wachaguzi na uwezo wa modeli imara (vision, reasoning, thinking) na alama ya ubora zilizotajwa, zikiwa somwa kwa hatua moja kwa kupitia katalogi ya /v1/models. Imezimwa kwa chaguo-msingi: uzito wa snapshot ya wakati wa ombi unabaki kama awali (uwezo hutafutwa kwa onyeshao na haiachani uzito). Imewashwa: ishara hizo huchangia uzito wa snapshot, hivyo uzito wa wachaguzi, na hivyo uchaguzi, unaweza kubadilika."
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Milango ya Usafirishaji Isiyo na Ufunguo",

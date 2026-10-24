@@ -13765,7 +13765,7 @@
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Dí Ẹ̀wọ̀n Tún Sí Wọlé Pẹ̀lú OIDC",
-        "description": "Nígbà tí OIDC tí nílò, dí ẹ̀wọ̀n tún sí wọlé kí àwọn olùtẹ́jọ wọle nìkan nípasí OIDC Single Sign-On. Nígbà tí kò nílò (ìbẹ̀rẹ̀), ẹ̀wọ̀n tún sí wọlé àti OIDC jẹ́ àṣàyàn méjèèjì."
+        "description": "Nígbà tí OIDC bá wà ní títàn, dí ẹ̀wọ̀n tún sí wọlé kí àwọn olùtẹ́jọ wọle nìkan nípasí OIDC Single Sign-On. Nígbà tí ó wà ní pípa (àkọ́kọ́), ẹ̀wọ̀n tún sí wọlé àti OIDC jẹ́ àṣàyàn méjèèjì."
       },
       "AUDIO_REMOTE_PROVIDER_NODES": {
         "label": "Àwọn Nòòdù Ìṣẹ́ Ọ̀ràn Kù-àtọ́ka Ẹ̀yà Mésan",
@@ -13813,7 +13813,7 @@
       },
       "FLUSH_EMPTY_RETRY_ENABLED": {
         "label": "Flush Empty Turn Retry",
-        "description": "Lórí àwọn ìyípo streaming tí a túmọ̀, nígbà tí ìyípo upstream kò ní àkóónú tó wúlò (completion tí ó jẹ́ reasoning nìkan tàbí chunk tó níye lórí kankan), ṣe àwọn ìgbìyànjú lẹ́ẹ̀kan sí i tó ní ààlà nípasẹ̀ ọ̀nà credential déédéé (títí dé `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) kí ohunkóhun tó hàn sí client. Ó wà ní pípa ní àkọ́kọ́: àwọn ìyípo tó ṣófo máa ń tẹ̀síwájú pẹ̀lú ìhùwàsí lọ́wọ́lọ́wọ́ (200 tó ṣófo tàbí 502 àkóónú tó ṣófo)."
+        "description": "Lórí àwọn ìyípo streaming tí a túmọ̀, nígbà tí ìyípo upstream kò ní àkóónú tó wúlò (completion tí ó jẹ́ reasoning nìkan tàbí láìsí chunk tó níye lórí kankan), ṣe àwọn ìgbìyànjú lẹ́ẹ̀kan sí i tó ní ààlà nípasẹ̀ ọ̀nà credential déédéé (títí dé `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) kí ohunkóhun tó hàn sí client. Ó wà ní pípa ní àkọ́kọ́: àwọn ìyípo tó ṣófo máa ń tẹ̀síwájú pẹ̀lú ìhùwàsí lọ́wọ́lọ́wọ́ (200 tó ṣófo tàbí 502 àkóónú tó ṣófo)."
       },
       "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
         "label": "Empty Stream Sibling Recovery",
@@ -13873,7 +13873,7 @@
       },
       "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
         "label": "Ìpamọ́ Àdúrà Fún Gbogbo",
-        "description": "Ṣe ẹrọ itumọ awọn ikanni ikanni nigba ti awọn ẹrọ iru onigun onigun yipada awọn ẹrọ iru onigun. Jẹ ki o da oṣuwọn iru onigun onigun ti o wa ni aaye lẹẹkansi, ki o si gbe iwajiri ẹrọ iru onigun onigun fun gbogbo awọn ẹrọ iru onigun onigun ti a ti wa ati ti ọjọ iwaju da oṣuwọn o."
+        "description": "Generate and inject conversation summaries when combo routing switches models. Disable to treat model switches independently and prevent background handoff requests for all existing and future combos."
       },
       "REASONING_REPLAY_ENABLED": {
         "label": "Ṣe ìṣirò pada",
@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Àwọn Orúkọ Àkójìpúpọ̀ Alajìṣẹ́-Ìròyìn",
-        "description": "Látà olókùnkún fún àwọn orúkọ gateway no-think/'<provider>'/'<model>'. Nígbà tí ó ṣi (ṣọdátì): /v1/models sún àwọn oní àkójìpúpọ̀ alajìṣẹ́-ìròyìn fún gbogbo àkójìpúpọ̀ Claude tó ní agbára ìròyìn, àti pe àkójìpúpọ̀ no-think/ tí a fi lọsí ìbéèrè padà sọ́rí àkójìpúpọ̀ títín ní ìròyìn tí a ti da. Nígbà tí ó tií: kò sí oní àkójìpúpọ̀ tí a sún, àti pe àkójìpúpọ̀ no-think/ fi bẹ́ẹ̀ ní bi àwọn àkójìpúpọ̀ míì tí a mọ̀ rá. Àfèéwò ModelSpec.noThinkingAlias fun ẹ́yà kọ̀ọ̀kan ṣe lójúṣe yígbà tí ó ṣi."
+        "description": "Látà olókùnkún fún àwọn orúkọ gateway no-think/'<provider>'/'<model>'. Nígbà tí ó wà ní títàn (àkọ́kọ́): /v1/models sún àwọn oní àkójìpúpọ̀ alajìṣẹ́-ìròyìn fún gbogbo àkójìpúpọ̀ Claude tó ní agbára ìròyìn, àti pe àkójìpúpọ̀ no-think/ tí a fi lọsí ìbéèrè padà sọ́rí àkójìpúpọ̀ títín ní ìròyìn tí a ti da. Nígbà tí ó wà ní pípa: kò sí oní àkójìpúpọ̀ tí a sún, àti pe àkójìpúpọ̀ no-think/ fi bẹ́ẹ̀ ní bi àwọn àkójìpúpọ̀ míì tí a mọ̀ rá. Àfèéwò ModelSpec.noThinkingAlias fun ẹ́yà kọ̀ọ̀kan ṣe lójúṣe yígbà tí ó ṣi."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Yí àwọn Oríṣi Ìpe Ìròyìn",
@@ -13921,11 +13921,11 @@
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Mistral Amubigwus 401 Soft Lockout",
-        "description": "Mistral 401 gbọnii (‘'{\"detail\":\"Unauthorized\"}'’, ko si aami idanimọ ti o han gbangba) jọ iru kanna si awoṣe ti a fagile ati awọn olugba ti o ti parẹ. Nigba ti a gba, 401 bẹẹ o dídùn, kò sọ asiko di ti o ti fagile, títí dé ọjọ́-ọ̀fún ní inú ìwékan; eyi tí ó gbé yọ̀ ní sí fagile, nítorí náà awoṣe ti a fagile ní àṣàtún. Ó wà ní pípa ní àkọ́kọ́: gbogbo Mistral 401 gbọ̀n sọ asiko di ti o ti fagile, bí ó ti wà l’iṣẹ̀yín."
+        "description": "Mistral 401 gbọnii (‘'{\"detail\":\"Unauthorized\"}'’, ko si aami idanimọ ti o han gbangba) jọ iru kanna si awoṣe ti a fagile ati awọn olugba ti o ti parẹ. Nigba ti a gba, 401 bẹẹ o dídùn, kò sọ asiko di ti o ti fagile, títí dé ìgbà 3 láàrin wákàtí kan; eyi tí ó gbé yọ̀ ní sí fagile, nítorí náà awoṣe ti a fagile ní àṣàtún. Ó wà ní pípa ní àkọ́kọ́: gbogbo Mistral 401 gbọ̀n sọ asiko di ti o ti fagile, bí ó ti wà l’iṣẹ̀yín."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "Ìṣakojọpọmọ ọna asoju ati Idinku Atilobooṣe",
-        "description": "Ìdinku asoju yóò gba ẹ́ káa ṣe ìṣíṣẹ́ Batch API tí ó gbíyẹ́ (parẹ́/didùn/ṣíṣi/fagile) tí ó tógbò níwọ̀n OOBIROUTE_BATCH_RETENTION_DAYS, pẹ̀lu checkpoint kọ́ọ̀kọ́ ìṣẹ̀ náà, àti mú BLOB content awọn faịlì tí a gbọ́ ìparẹ́ wọn. Ó wà ní pípa ní àkọ́kọ́: gbogbo ìṣirò àtijọ́ ní àṣàtún títí oṣiṣẹ́ ṣe afihán. Ikilú tí oṣiṣẹ́ ṣe DELETE /api/v1/batches/delete-completed kò ni ipa, ìjọṣe kán ni ìṣẹ́ asoju tí ó ní àgbèkú."
+        "description": "Ìdinku asoju yóò gba ẹ́ káa ṣe ìṣíṣẹ́ Batch API tí ó gbíyẹ́ (parẹ́/didùn/ṣíṣi/fagile) tí ó tógbò níwọ̀n OMNIROUTE_BATCH_RETENTION_DAYS, pẹ̀lu checkpoint kọ́ọ̀kọ́ ìṣẹ̀ náà, àti mú BLOB content awọn faịlì tí a gbọ́ ìparẹ́ wọn. Ó wà ní pípa ní àkọ́kọ́: gbogbo ìṣirò àtijọ́ ní àṣàtún títí oṣiṣẹ́ ṣe afihán. Ikilú tí oṣiṣẹ́ ṣe DELETE /api/v1/batches/delete-completed kò ni ipa, ìjọṣe kán ni ìṣẹ́ asoju tí ó ní àgbèkú."
       },
       "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
         "label": "Ìrèéde Àkọṣu Antigravity",
@@ -14009,7 +14009,7 @@
       },
       "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
         "label": "Iṣẹ Imọ-ọgọ: Ti a ti Dì",
-        "description": "Gbiyanju awọn asopọ ti a ti di nipa gbigbe ọpọ-ọpọ-ọpọ (a ṣiṣẹ-ṣiṣẹ wọn; kootọ ju igba meji ni a ti di, a ṣiṣẹ-ṣiṣẹ wọn; 5 ni igba kọọkan). A yoo tun ṣiṣe awọn asopọ yẹn ni ṣiṣe ti a ba le ni iṣẹ ni igba keji (#16190). Ó wà ní pípa ní àkọ́kọ́: awọn asopọ ti a di ṣiṣe ni o ni a ni aṣa kan ṣiṣe-ṣiṣe, nkan ti o ṣẹlẹ tẹlẹ. Awọn asopọ ti a di nipa oluṣiṣe-ṣiṣẹ, ati awọn ti a di lẹhin ipinnu ti a di di ko ni iṣẹ ni igba keji."
+        "description": "Gbiyanju awọn asopọ ti a ti di nipa gbigbe ọpọ-ọpọ-ọpọ (tí a sàmì sí autoDisabledAt; ẹ̀ẹ̀kan péré láàrin wákàtí 6 fún ọ̀kọ̀ọ̀kan, àti 5 péré fún sweep kọ̀ọ̀kan). A yoo tun ṣiṣe awọn asopọ yẹn ni ṣiṣe ti a ba le ni iṣẹ ni igba keji (#16190). Ó wà ní pípa ní àkọ́kọ́: awọn asopọ ti a di ṣiṣe ni o ni a ni aṣa kan ṣiṣe-ṣiṣe, nkan ti o ṣẹlẹ tẹlẹ. Awọn asopọ ti a di nipa oluṣiṣe-ṣiṣẹ, ati awọn ti a di lẹhin ipinnu ti a di di ko ni iṣẹ ni igba keji."
       },
       "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
         "label": "Aṣa Imọ-ọgọ: Ìdánimọ Iṣẹ Iṣẹlẹ Nìkan",
@@ -14017,11 +14017,11 @@
       },
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Duro ni Idilọwọ Aṣa Iṣẹ-ṣiṣe",
-        "description": "Ni aṣa ni aṣa-ṣiṣe-ṣiṣe combo ni aṣa idilọwọ aṣa iṣẹ-ṣiṣe (koodu tabi iru cyber_policy / content_policy_violation), duro combo naa, gbe idilọwọ naa pada ni aṣa-ṣiṣe-ṣiṣe kan, dipo ki o ba ṣe-ṣe-ṣiṣe ni aṣa-ṣiṣe-ṣiṣe miiran. Ó wà ní pípa ní àkọ́kọ́: idilọwọ naa ko ni aṣa ni aṣa-ṣiṣe-ṣiṣe, ko ni aṣa ni aṣa-ṣiṣe-ṣiṣe, ati pe combo yoo gbe ni aṣa-ṣiṣe-ṣiṣe kanna bi aṣa ni aṣa-ṣiṣe-ṣiṣe kan."
+        "description": "When a combo target answers with an exact content-policy refusal (code or type cyber_policy / content_policy_violation), stop the combo and return that refusal even when the remaining targets are different models, instead of advancing to the next target. Off by default: the refusal never cools the account or trips the provider breaker, and the combo advances to its next target exactly as before."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ìdíwàpadà Ìdíwàpadà: Yẹra 403/410 Ìṣàkóso",
-        "description": "Nígbà tí gbogbo akọkọ́ ń ṣe yípadà fún ìṣàkóso, àti pé ìdíwàpadà tí ó ń óde lẹ́yìn jẹ́ tí ó fa nípa 403 (ìṣàkóso) tàbi 410 (parí), padà sọ àwọn ìṣàkóso yẹn jù lọ dípò láti ṣì wà àti láti tẹ̀síwájú ìbéèrè náà; ìdíwàpadà tí ó ń ṣe àyípadà agentrouter ìdíwàpadà tí ó ń ṣe àyípadà 403 ń gbé síwájú nípa errorCode 429 kí ó ṣe àyípadà. Ó wà ní pípa ní àkọ́kọ́: èyí kò ṣe àyípadà, èyí kò ṣe àyípadà, àti pé gbogbo ìṣàkóso ń gbé síwájú nípa status tí ó ń bọ̀ wáyé pẹ̀lú."
+        "description": "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with."
       }
     }
   },

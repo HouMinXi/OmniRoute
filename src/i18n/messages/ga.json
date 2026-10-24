@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Ailiyacha Modailíochtaí Díchumaithe",
-        "description": "Máistir scéalaithe chun ailiyacha \"no-think/'<provider>'/'<model>'\" ar an gcloch a rialú. Ar an taobh uachtair (go réamhshocraithe): foilsíonn /v1/models éabhróidh díchumaithe don gach modailíocht Claude inbuanach; agus ailiyach \"no-think/\" ar iarráiteachtaí áirítear ar an modailíocht a fhíorchódú le cothromóireacht chomhsuimigh. Ar an taobh íochtarach: níl éabhróidh a foilsíonn, agus ailiyach \"no-think/\" áirítear ar gach modailíocht anaithnid eile. Tá ailiyacha aicse aicse ar an modailíocht a fhíorchódú áirítéil chomh maith nuair atá an máistir scéalaithe gníomhach."
+        "description": "Master switch for the no-think/'<provider>'/'<model>' gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Díchumasaigh Leaganacha Leibhéal Machnaimh",
@@ -13997,11 +13997,11 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Auto-Combo: Cinnseal Iompair Gan Eochraí",
-        "description": "Coinnigh soláthairí gan eochair (gan aitheolaíocht) a theastaíonn brabhsálaí áitiúil (browserBacked) nó CLI suiteáilte go háitiúil (isLocalCli) as an iascair candíadach auto/*, ionas nach féidir le ball cloingte an iarratas auto a choinneáil go dtí an am teorann in aghaidh sprioc (17036). Múchta de réir réamhshocraithe: fanann gach soláthraí gan aitheolaíocht le gléas cur i bhfeidhm sa iascair díreach mar a bhí roimhe. Oibreann glaoigh dhíreacha '<alias>'/'<model>' beag beann."
+        "description": "Coinnigh soláthairí gan eochair (gan aitheolaíocht) a theastaíonn brabhsálaí áitiúil (browserBacked) nó CLI suiteáilte go háitiúil (isLocalCli) as an iascair candíadach auto/*, ionas nach féidir le ball cloingte an iarratas auto a choinneáil go dtí an am teorann in aghaidh sprioc (#17036). Múchta de réir réamhshocraithe: fanann gach soláthraí gan aitheolaíocht le gléas cur i bhfeidhm sa iascair díreach mar a bhí roimhe. Oibreann glaoigh dhíreacha '<alias>'/'<model>' beag beann."
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: Athsheinmínithe Cúisithe",
-        "description": "Do mhaideálacha smaointe codebuddy-cn (teaghlaigh DeepSeek-V4 / Kimi-K2 a theastaíonn athsheinmínithe cúisithe), líon isteach gach cuid de reasoning_content an aschurthaí atá á athsheinmíniú mar bhloc feictheach '<thought>' ag túsábairt an ábhair theachta, ionas go mairfidh sé trí gheata a bhaintear an réimse reasoning_content uaidh (13632). Múchta de réir réamhshocraithe: seoltar iarratais codebuddy-cn gan athrú; coimeádtear an réimse reasoning_content féin i gcónaí."
+        "description": "Do mhaideálacha smaointe codebuddy-cn (teaghlaigh DeepSeek-V4 / Kimi-K2 a theastaíonn athsheinmínithe cúisithe), líon isteach gach cuid de reasoning_content an aschurthaí atá á athsheinmíniú mar bhloc feictheach '<thought>' ag túsábairt an ábhair theachta, ionas go mairfidh sé trí gheata a bhaintear an réimse reasoning_content uaidh (#13632). Múchta de réir réamhshocraithe: seoltar iarratais codebuddy-cn gan athrú; coimeádtear an réimse reasoning_content féin i gcónaí."
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
         "label": "Provider Safety Stops: Críochfortach",

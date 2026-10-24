@@ -13900,7 +13900,7 @@
         "description": "Gbanye okporo ụzọ nnabata virtual na-agbanwe agbanwe maka tenant ọ bụla maka mbugharị onye na-eweta (#9654): mmụba mberede nke otu tenant agaghịzi akpatara onye ọzọ 503. Env var OMNIROUTE_CHAT_VIRTUAL_LANES na-ebute ụzọ karịa ngbanwe dashboard a; mgbanwe ga-amalite ọrụ mgbe amalitụrụ sava ọzọ."
       },
       "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
-        "label": "Nkà Ihe Dị Mkpa Ihe Ndị Ọzọ Ọ bụrụ na anyị chọrọ ịhụ nhọrọ, anyị kwesịrị ịga n'ihu. Nke a bụ akụkọ.",
+        "label": "Functional Gateway Mirrors",
         "description": "Kwupụta '<gateway-alias>'/'<model>' Ọ bụrụ na anyị chọrọ ịhụ nhọrọ, anyị kwesịrị ịga n'ihu. Nke a bụ akụkọ."
       },
       "NEWAPI_AGGREGATOR_BALANCE": {

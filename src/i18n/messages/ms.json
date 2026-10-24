@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log ID Akaun",
-        "description": "Sertakan awalan akaun dalam baris log AUTH (cth. \"Menggunakan akaun '<provider>': abc12345...\"). Dinonaktifkan secara lalai supaya pengenal akaun disamarkan daripada log proses berkongsi/bertanah serang-multiple. Bebas dari Mod Imbangan; penukaran Mod Imbangan tidak mendedahkan ini."
+        "description": "Sertakan awalan akaun dalam baris log AUTH (cth. \"Menggunakan akaun '<provider>': abc12345...\"). Dinonaktifkan secara lalai supaya pengenal akaun disamarkan daripada log proses berkongsi/berbilang penyewa. Bebas dari Mod Imbangan; penukaran Mod Imbangan tidak mendedahkan ini."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Nyahdayakan Log Masuk Kata Laluan Dengan OIDC",

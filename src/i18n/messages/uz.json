@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Muhammasiz Model Aliaslari",
-        "description": "no-think/'<provider>'/'<model>' shaxbon aliaslari uchun asosiy kalit. Kutilib o‘lganda (standart): /v1/models qabul qilingan barcha fikr-muomalali Claude modellari uchun muhimmasiz variantni kuzatadi va so‘rovda yuborilgan no-think/ ID real modelga qayta chalinadi, fikr-muomalalar bostirilgan holatda. O‘chiq bo‘lganda: hech qanday variant kuzatilmaydi va no-think/ ID boshqa noma'lum model ID kabi ko‘riladi. Bu yoqilganda model bo‘yicha ModelSpec.noThinkingAlias tanlash/yechib chiqish hali ham amal qiladi."
+        "description": "no-think/'<provider>'/'<model>' shaxbon aliaslari uchun asosiy kalit. Yoqilganda (standart): /v1/models qabul qilingan barcha fikr-muomalali Claude modellari uchun muhimmasiz variantni kuzatadi va so‘rovda yuborilgan no-think/ ID real modelga qayta chalinadi, fikr-muomalalar bostirilgan holatda. O‘chiq bo‘lganda: hech qanday variant kuzatilmaydi va no-think/ ID boshqa noma'lum model ID kabi ko‘riladi. Bu yoqilganda model bo‘yicha ModelSpec.noThinkingAlias tanlash/yechib chiqish hali ham amal qiladi."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Muhamma Darajasi Variantlarini O‘chirish",

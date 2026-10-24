@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "No-Thinking Model Aliases",
-        "description": "no-think/'<provider>'/'<model>' gateway aliases සඳහා ප්‍රධාන මාර්ගය. ඔව් (පෙරනිමි): /v1/models හි සෑම දුර්වල thinking-capable Claude model සඳහාම no-thinking variant එකක් දැන් වාගින් කරනු ලබන අතර, request එකක no-think/ id එකක් යවන විට එය reasoning අවලංගු කර real model වෙකට ව්‍යාප්ත වේ. නොව: variants එකකුත් දැන් වාගින් නොකරන අතර no-think/ id එක අනුන්‍ය අනුන්‍ය model id එකක් ලෙස සැලකේ. මෙය ඔව් වන විටද model විශේෂිත ModelSpec.noThinkingAlias opt-in/opt-out තවමත් අදාළ වේ."
+        "description": "no-think/'<provider>'/'<model>' gateway aliases සඳහා ප්‍රධාන මාර්ගය. සක්‍රිය (පෙරනිමි): /v1/models හි සෑම දුර්වල thinking-capable Claude model සඳහාම no-thinking variant එකක් දැන් වාගින් කරනු ලබන අතර, request එකක no-think/ id එකක් යවන විට එය reasoning අවලංගු කර real model වෙකට ව්‍යාප්ත වේ. අක්‍රිය: variants එකකුත් දැන් වාගින් නොකරන අතර no-think/ id එක අනුන්‍ය අනුන්‍ය model id එකක් ලෙස සැලකේ. මෙය සක්‍රිය වන විටද model විශේෂිත ModelSpec.noThinkingAlias opt-in/opt-out තවමත් අදාළ වේ."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Thinking Level Variants අවලංගු කිරීම",
@@ -13937,7 +13937,7 @@
       },
       "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
         "label": "Claude OAuth සාරාංශ කළ සිතුවම් කිරීම",
-        "description": "ආරූච්චික සිතුවම් කිරීම (thinking.display \"summarized\") ඉල්ලා ඇති Claude OAuth ඉල්ලීමකට, redact-thinking-2026-02-12 Anthropic බෙටාව ඉවත් කිරීමට ඉඩ දෙන්න, එයින් තොරව Anthropic හි හිස්, අත්සන-පමණක් සිතුවම් කිරීමේ කාඩුව ආරූච්චික සිතුවම් කිරීම පමණක් ආරූච්චික සිතුවම් කිරීම ආරූච්චික සිතුවම් කිරීම ලෙස ආරූච්චික සිතුවම් කිරීම ආරූච්චික සිතුවම් කිරීම ආරූච්චික සිතුවම් කිරීම වේ. පෙරනිමියෙන් අක්‍රියයි: එම බෙටාව Claude Code OAuth වයයර් අඟුරු ආංකිකයේ අංශයක් බැවින්, OAuth ඉල්ලීම් එය වෙනස් නොවන ලෙස තබා ගනී. API-කී Claude ඉල්ලීම් දැනටමත් මෙම කළමනාකරණයකින් තොරව සාරාංශ කළ සිතුවම් කිරීම ආරූච්චික සිතුවම් කිරීම ආරූච්චික සිතුවම් කිරීම ආරූච්චික සිතුවම් කිරීම ගත කරයි; OMNIROUTE_REDACT_THINKING=false ද මෙම කළමනාකරණයක් සක්‍රීය වූ විට පමණක් OAuth වෙත ආරූච්චික සිතුවම් කිරීම ආරූච්චික සිතුවම් කිරීම ගනී."
+        "description": "Let a Claude OAuth request that asks for readable thinking (thinking.display \"summarized\") drop the redact-thinking-2026-02-12 Anthropic beta, which otherwise makes Anthropic return empty, signature-only thinking blocks. Off by default: that beta is part of the Claude Code OAuth wire fingerprint, so OAuth requests keep it unchanged. API-key Claude requests already honor summarized thinking without this flag; OMNIROUTE_REDACT_THINKING=false also reaches OAuth only when this flag is on."
       },
       "KIRO_TOOL_CALL_REPAIR_ENABLED": {
         "label": "Kiro Tool Call අදාළ නිරව්හන සංස්කරණය",
@@ -13953,11 +13953,11 @@
       },
       "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
         "label": "Native Codex Reactive Compaction",
-        "description": "ප්‍රතිකාර්මික (පරමාණු) සහ අවසාන පරිච්ඡේදය සහයෝජිත පරිච්ඡේද සහයෝජිත ග්‍රාහක සහයෝජිත ප්‍රතිකාර්මික පාරිච්ඡේද ප්‍රතික්‍රියා ජනකයන්, ඒවා සහයෝජිත අභ්‍යාන්තරය ඉක්මවුණු විට, Responses input[] අදාළ ව්‍යාපෘතිය භාවිතා කර, native Codex passthrough ඉතිහාසයන් (codex provider එකට POST /v1/responses) සහයෝජිත ප්‍රතිකාර්මික ප්‍රතිකාරයන් සහයෝජිත ප්‍රතිකාරයන්, පෙරනිමියෙන් අක්‍රියයි: native Codex ඉතිහාසයන් Codex client මගින් පාලනය වන අතර සහයෝජිත ප්‍රතිකාරයන් කිසි විටෙක සහයෝජිත ප්‍රතිකාරයන් නොවේ; අභ්‍යාන්තරය ඉක්මවුණු ඉල්තීම් පෙර පරිදිම සහයෝජිත අභ්‍යාන්තර පරීක්ෂාව අපරාජනය වේ. ප්‍රතිකාර්මික සහයෝජිත ප්‍රතිකාරයන් සක්‍රීය විය යුතු අතර ආයතනවල ප්‍රතික්‍රියා ජනකයන් ප්‍රතිකාර්මික නොවිය යුතුය."
+        "description": "Let the reactive (threshold) and last-resort context compaction passes also rewrite native Codex passthrough histories (POST /v1/responses to the codex provider) when they exceed the context budget, using the Responses input[] adapter. Off by default: native Codex histories are owned by the Codex client and are never rewritten by compaction; oversized requests keep failing the context budget check exactly as before. Requires global compression to be on and the model not to be excluded."
       },
       "QUOTA_WINDOW_BOUNDED_PARK": {
         "label": "Quota Window: Honour Bounded Park",
-        "description": "පරිච්ඡේදය සහයෝජිත quota න්‍යාය (ගිණිගාලු/සති පරමාණු ඖපරේටර් සඳහා භාවිතා වේ) පරිච්ඡේදය සහයෝජිත quota න්‍යාය ආරක්ෂිත කිරීමට ඉඩ දෙන්න: පරිච්ඡේදය සහයෝජිත quota න්‍යාය ආරක්ෂිත කිරීමේ පරමාණු අවසන් වන විට, හෝ මූලික quota නිරීක්ෂණය පරමාණු මාලාවකට වඩා පරණ වූ විට, නව quota ලබා ගැනීමක් තුළ ඖපරේටර් පරිච්ඡේදය ඉතා දුර්විමුහුර්ගත කරයි. පෙරනිමියෙන් අක්‍රියයි: මූලික පරිච්ඡේදය සහයෝජිත පරමාණු පරිච්ඡේදයේ අවසාන ප්‍රතිදානයේ ප්‍රතිශතය තුළ ඖපරේටර් අගුළුගැසීම ආරක්ෂිත කරයි, ඉහළ පරමාණු අවසන් වන තුරුම."
+        "description": "Let the per-window quota policy (session/weekly thresholds used by account selection) honour the bounded exhaustion park: once the capped park deadline has passed, or the cached quota observation is older than the park cap, the window stops excluding the account until a fresh quota fetch. Off by default: a cached window keeps blocking on its last reported percentage until its own reset time."
       },
       "IMAGE_GENERATION_LONG_JOBS": {
         "label": "බිම් නිර්මාණය: දිගු වේලාවන්",

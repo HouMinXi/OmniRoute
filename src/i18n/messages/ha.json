@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Adal na Maƙani Marasa Farkawa",
-        "description": "Ayyakakin babban tsarin no-think/'<provider>'/'<model>' gwajima adal. Yana buƙatar (asali): /v1/models yana ayyana kungiyar mara shirin farkowa ga duk yanayin Claude da akwai kungiyar shirin, kuma id na no-think/ da aka aika a bukatar yana kuskure kan ainihin yanayi da aka ɓoye hira. A wuce: babu kungiyar da aka ayyana, kuma id na no-think/ ana daukarsa kamar wani insha yanayi id. Yawan yanayin ModelSpec.noThinkingAlias ya zubar/kashe harin ya wuce yayin da wannan ke buɗe."
+        "description": "Ayyakakin babban tsarin no-think/'<provider>'/'<model>' gwajima adal. A kunne (asali): /v1/models yana ayyana kungiyar mara shirin farkowa ga duk yanayin Claude da akwai kungiyar shirin, kuma id na no-think/ da aka aika a bukatar yana kuskure kan ainihin yanayi da aka ɓoye hira. A kashe: babu kungiyar da aka ayyana, kuma id na no-think/ ana daukarsa kamar wani insha yanayi id. Yawan yanayin ModelSpec.noThinkingAlias ya zubar/kashe harin ya wuce yayin da wannan ke buɗe."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Kashe Nau'o'in Matakin Tunani",

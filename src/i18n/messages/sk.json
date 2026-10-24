@@ -13760,7 +13760,7 @@
         "description": "Odpovedať kódom 502 namiesto 503, keď prioritný cieľ so záložnou možnosťou iba pri vyčerpaní kvóty zastaví kombináciu z dôvodu, ktorý preukázateľne nesúvisí s kvótou: otvorený istič poskytovateľa alebo prediktívne preskočenie z dôvodu latencie."
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
-        "label": "ID účtovných účtov",
+        "label": "Logovať ID účtov",
         "description": "Zahrnúť predponu účtu v riadkoch AUTH logu (napr. \"Používam účet '<provider>': abc12345...\"). Predvolene vypnuté, aby sa identifikátory účtov maskovali v zdieľaných / multi-tenant procesových logoch. Nezávislé od režimu ladenia; prepnutie režimu ladenia to nezodpoveda."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {

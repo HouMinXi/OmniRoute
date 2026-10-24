@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Mga ID ng Account sa Log",
-        "description": "Kasama ang prefix ng account sa mga linya ng AUTH log (hal. \"Ginagamit ang account ni '<provider>': abc12345...\"). Disabled sa default upang ang mga identifier ng account ay nakalutuhin sa mga log ng process na nakahati o multi-tenant. Hiwalay sa Debug Mode; ang pagpapalit sa Debug Mode ay hindi ipapakita ito."
+        "description": "Kasama ang prefix ng account sa mga linya ng AUTH log (hal. \"Ginagamit ang account ni '<provider>': abc12345...\"). Disabled sa default upang ang mga identifier ng account ay nakatago sa mga log ng process na nakahati o multi-tenant. Hiwalay sa Debug Mode; ang pagpapalit sa Debug Mode ay hindi ipapakita ito."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "I-disable ang Password Login Kapag May OIDC",
@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Mga Alias ng No-Thinking Model",
-        "description": "Master switch para sa mga no-think/'<provider>'/'<model>' gateway aliases. On (default): ang /v1/models ay inaadVERTISE ng isang no-thinking variant para sa bawat naaccredited na kapable ng pag-iisip na Claude model, at ang naipadala na no-think/ id sa isang request ay babalik sa tunay na model na may naka-suppress na pagmumuno. Off: walang na-advertise variant at ang no-think/ id ay itinuturing na parang anumang ibang hindi kilalang model id. Ang opt-in/opt-out ng ModelSpec.noThinkingAlias para sa bawat model ay patuloy na nakailanman na ginagamit habang ito ay on."
+        "description": "Master switch para sa mga no-think/'<provider>'/'<model>' gateway aliases. On (default): ang /v1/models ay nag-a-advertise ng isang no-thinking variant para sa bawat naaccredited na kapable ng pag-iisip na Claude model, at ang naipadala na no-think/ id sa isang request ay babalik sa tunay na model na may naka-suppress na pagmumuno. Off: walang na-advertise variant at ang no-think/ id ay itinuturing na parang anumang ibang hindi kilalang model id. Ang opt-in/opt-out ng ModelSpec.noThinkingAlias para sa bawat model ay patuloy na nakailanman na ginagamit habang ito ay on."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "I-disable ang mga Thinking Level Variant",

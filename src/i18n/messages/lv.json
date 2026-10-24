@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Modeļu ališi bez domāšanas",
-        "description": "Galais pārslēgs no-think/'<provider>'/'<model>' vārta alīšu izmantošanai. Ielists (noklusējums): /v1/models pakļauj variantu bez domāšanas visiem atbilstošiem Claude modeļiem, kas spēj domāt, un no-think/ ID, nosūtīta pieprasījumā, atgriežas pie reālā modeļa, slāpjot spriešanu. Izslēgts: varianti netiek pakļauti, un no-think/ ID tiek apstrādāts tāpat kā jebkurš cits nezināms modeļa ID. Katra modeļa ModelSpec.noThinkingAlias iesaiste/izslēgšana joprojām piemērojas, kamēr tas ir ielists."
+        "description": "Galais pārslēgs no-think/'<provider>'/'<model>' vārta alīšu izmantošanai. Ieslēgts (noklusējums): /v1/models pakļauj variantu bez domāšanas visiem atbilstošiem Claude modeļiem, kas spēj domāt, un no-think/ ID, nosūtīta pieprasījumā, atgriežas pie reālā modeļa, slāpjot spriešanu. Izslēgts: varianti netiek pakļauti, un no-think/ ID tiek apstrādāts tāpat kā jebkurš cits nezināms modeļa ID. Katra modeļa ModelSpec.noThinkingAlias iesaiste/izslēgšana joprojām piemērojas, kamēr tas ir ieslēgts."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Atspējot domāšanas līmeņu variantus",

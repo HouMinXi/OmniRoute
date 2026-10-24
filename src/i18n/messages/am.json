@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "የመላካያ ሞዴል ቅጽል መለያዎች",
-        "description": "ለno-think/'<provider>'/'<model>' የገጸጥ ቅጽል መለያዎች ዋና ስታንድ። በጊዜ በግብ ጊዜ (ውስጥ በጊዜ በግብ ጊዜ): /v1/models ለሁሉም የገጸጥ ሞዴሎች ቅጽል መለያዎችን እንዲህ ያስገጥፍ። ነገር ግን የ'no-think/' ቅጽል መለያ በግጠ ጊዜ ሰው ሞዴል ምድር እንዲህ ያስገጥፍ። ምንም ያስገጥፍ አይገጥፍም። ቅጽል መለያዎች ገጸጥ ውስጥ የቀረፉ ማህል በተቀናበረ በጊዜ ላይ በጊዜ በጊዜ ቀራይ ግጥ ሁሉ ይዘረጋል።"
+        "description": "Master switch for the no-think/'<provider>'/'<model>' gateway aliases. On (default): /v1/models advertises a no-thinking variant for every eligible thinking-capable Claude model, and a no-think/ id sent on a request resolves back to the real model with reasoning suppressed. Off: no variants are advertised and a no-think/ id is treated like any other unknown model id. The per-model ModelSpec.noThinkingAlias opt-in/opt-out still applies while this is on."
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "የማሰብ ደረጃ ተለዋጮችን አሰናክል",
@@ -13921,7 +13921,7 @@
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Mistral በማይገለጽ 401 ላይ ቀላል መጠፊያ",
-        "description": "ሁሉም በማይገለጽ Mistral 401 ('{\"detail\":\"Unauthorized\"}', ምንም የገጸጥ መጠቃቀሚያ በሌለበት ጊዜ) ለሁሉም በአክሬንፊያዊ ግልበኛ ሲሆን ለበጣት ክፍያ ማዕቀፍ እኩል በአዝማገት ይመስላል። ሲቀረፍ፣ ይህ አዝማገት በአክሬንፊያዊ ግልበኛ ክፍይ ለመቀራረብ እጅ በአክሬንፊያዊ ግልበኛ ሲሆን ለበጣት ክፍያ ማዕቀፍ እኩል በአዝማገት ይመሳሳል። ሲቀረፍ፣ ይህ አዝማገት ለበጣት ክፍያ ማዕቀፍ እጅ በአክሬንፊያዊ ግልበኛ ክፍይ ለመቀራረብ እጅ በአክሬንፊያዊ ግልበኛ ሲሆን ለበጣት ክፍያ ማዕቀፍ እኩል በአዝማገት ይመሳሳል።"
+        "description": "A bare Mistral 401 ('{\"detail\":\"Unauthorized\"}', no explicit auth signal) is byte-identical for a revoked key and for exhausted quota. When enabled, such a 401 cools the connection down instead of parking it as expired, up to 3 times within an hour; the next one still parks it as expired, so a revoked key converges. Off by default: every bare Mistral 401 parks the connection as expired, as before."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "የBatch እና ፋይል ራስ-ሰር ጽዳት",
