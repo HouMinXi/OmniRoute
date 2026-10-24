@@ -13849,7 +13849,7 @@
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Sheria za Hitilafu ya Neno-likizo ya OpenCode",
-        "description": "Ruhusu kanuni za kosa za ndani za OpenCode (opencode-zen, opencode-go, opencode-cli) kufanana na maandishi ya kosa ya juu ya mtiririko kwa mkusanyiko, ili alama za kiini kama organization_quota_exceeded au \"mapungufu ya matumizi ya miezi yamekamilika\" yakiweka kiasi cha 429 kama kutumika kwa upau na kufunga kwa kiasi cha muunganisho. Zimezimwa kwa sifa: kanuni hizo haziona msimbo wa kosa wa mpangilio na kiasi cha 429 huwa ukomo mfupi wa kiwango, kama ilivyo awali."
+        "description": "Ruhusu kanuni za kosa za ndani za OpenCode (opencode-zen, opencode-go, opencode-cli) kufanana na maandishi ya kosa ya juu ya mtiririko kwa mkusanyiko, ili alama za kiini kama organization_quota_exceeded au \"monthly usage limit reached\" yakiweka kiasi cha 429 kama kutumika kwa upau na kufunga kwa kiasi cha muunganisho. Zimezimwa kwa sifa: kanuni hizo haziona msimbo wa kosa wa mpangilio na kiasi cha 429 huwa ukomo mfupi wa kiwango, kama ilivyo awali."
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Maelezo ya Kamili ya Kosa kwa Cloudflare Workers AI",

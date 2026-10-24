@@ -13849,7 +13849,7 @@
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "OpenCode helskärmsfelregler",
-        "description": "Låt de inbyggda OpenCode-felreglerna (opencode-zen, opencode-go, opencode-cli) matcha hela det uppvälde feltexten, så att markörer i kroppen som organization_quota_exceeded eller \"månatlig användningsgräns uppnådd\" klassificerar en 429 som utsött kvot med en anslutningsomfattande sperr. Avstängt som standard: dessa regler ser bara den strukturerade felkoden och en sådan 429 förblir en kort tidsbegränsning, precis som tidigare."
+        "description": "Låt de inbyggda OpenCode-felreglerna (opencode-zen, opencode-go, opencode-cli) matcha hela det uppvälde feltexten, så att markörer i kroppen som organization_quota_exceeded eller \"monthly usage limit reached\" klassificerar en 429 som utsött kvot med en anslutningsomfattande sperr. Avstängt som standard: dessa regler ser bara den strukturerade felkoden och en sådan 429 förblir en kort tidsbegränsning, precis som tidigare."
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Cloudflare Workers AI helskärmsfelregler",

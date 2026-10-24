@@ -13849,7 +13849,7 @@
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "OpenCode مکمل ٹیکسٹ ایرر قواعد",
-        "description": "موجودہ OpenCode ایرر قواعد (opencode-zen, opencode-go, opencode-cli) کو مکمل اپسٹریم ایرر ٹیکسٹ پر میل کھانے کی اجازت دیں، تاکہ باڈی مارکرز جیسے organization_quota_exceeded یا \"ماہانہ استعمال کی حد طے\" سے 429 کو کوٹا ختم ہونے کی درجہ بندی کی جائے اور کنکشن اسکوپڈ لاک ہو۔ براہِ دیفت آف ہے: ان قواعد کو صرف منظم ایرر کوڈ دیکھتا ہے اور ایسا 429 مختصر ریٹ لیمٹ کے طور پر برقرار رہتا ہے، بالکل پہلے کی طرح۔"
+        "description": "موجودہ OpenCode ایرر قواعد (opencode-zen, opencode-go, opencode-cli) کو مکمل اپسٹریم ایرر ٹیکسٹ پر میل کھانے کی اجازت دیں، تاکہ باڈی مارکرز جیسے organization_quota_exceeded یا \"monthly usage limit reached\" سے 429 کو کوٹا ختم ہونے کی درجہ بندی کی جائے اور کنکشن اسکوپڈ لاک ہو۔ براہِ دیفت آف ہے: ان قواعد کو صرف منظم ایرر کوڈ دیکھتا ہے اور ایسا 429 مختصر ریٹ لیمٹ کے طور پر برقرار رہتا ہے، بالکل پہلے کی طرح۔"
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Cloudflare Workers AI مکمل ٹیکسٹ ایرر قواعد",

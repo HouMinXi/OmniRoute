@@ -13849,7 +13849,7 @@
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Pravila za napake OpenCode v celotnem besedilu",
-        "description": "Omogoči vgrajenim pravilom OpenCode za napake (opencode-zen, opencode-go, opencode-cli), da ustrežejo celotnemu zgoraj omenjenemu besedilu napake, da oznake telesa, kot so organization_quota_exceeded ali \"dosežena mesečna meja uporabe\", razvrstijo 429 kot izčrpano kontingentiranje z omejitvijo povezave. Privzeto izklopljeno: ta pravila vidijo le strukturirano kodo napake in tak 429 ostane kratkotrajna omejitev hitrosti, natanko kot prej."
+        "description": "Omogoči vgrajenim pravilom OpenCode za napake (opencode-zen, opencode-go, opencode-cli), da ustrežejo celotnemu zgoraj omenjenemu besedilu napake, da oznake telesa, kot so organization_quota_exceeded ali \"monthly usage limit reached\", razvrstijo 429 kot izčrpano kontingentiranje z omejitvijo povezave. Privzeto izklopljeno: ta pravila vidijo le strukturirano kodo napake in tak 429 ostane kratkotrajna omejitev hitrosti, natanko kot prej."
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Pravila za napake Cloudflare Workers AI v celotnem besedilu",

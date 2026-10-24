@@ -13849,7 +13849,7 @@
       },
       "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "OpenCode To'liq Matn Xato Qoidalari",
-        "description": "Ichki OpenCode xato qoidalari (opencode-zen, opencode-go, opencode-cli) to'liq yuqori oqim xato matni bo'yicha moslashga imkon beradi, shunda organization_quota_exceeded yoki \"oylik ishlatish chegarasiga yetib kelindi\" kabi tana belgileri 429 ni kvota tugashi sifatida tasniflaydi va ulanishga asoslangan bloklanishni qo'llaydi. Standart sozlamada o'chiq emas: ushbu qoidalari faqat strukturalashtirilgan xato kodini ko'radi va bunday 429 qisqa tezlik chegarasi sifatida saqlanadi, aynan oldingi holatdagidek."
+        "description": "Ichki OpenCode xato qoidalari (opencode-zen, opencode-go, opencode-cli) to'liq yuqori oqim xato matni bo'yicha moslashga imkon beradi, shunda organization_quota_exceeded yoki \"monthly usage limit reached\" kabi tana belgileri 429 ni kvota tugashi sifatida tasniflaydi va ulanishga asoslangan bloklanishni qo'llaydi. Standart sozlamada o'chiq emas: ushbu qoidalari faqat strukturalashtirilgan xato kodini ko'radi va bunday 429 qisqa tezlik chegarasi sifatida saqlanadi, aynan oldingi holatdagidek."
       },
       "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
         "label": "Cloudflare Workers AI To'liq Matn Xato Qoidalari",
