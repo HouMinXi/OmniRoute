@@ -3827,7 +3827,7 @@
         "title": "Cuota por vencer primero",
         "description": "Ordena las cuentas según la presión de aprovechamiento: la cuota restante alta cercana a su plazo de reinicio va primero.",
         "tip1": "Requiere telemetría de cuotas del proveedor; las cuentas sin ella mantienen su orden de prioridad indicado.",
-        "tip2": "Las puntuaciones casi empatadas rotan dentro de la banda de empate para que las cuentas hermanas sigan compartiendo la carga.",
+        "tip2": "Las puntuaciones casi empatadas rotan dentro de la banda de empate para que las cuentas similares sigan compartiendo la carga.",
         "tip3": "Limite la clasificación al grupo de cuota con el que realmente factura cada modelo."
       },
       "strict-random": {
