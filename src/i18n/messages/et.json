@@ -9291,7 +9291,7 @@
     "dragToReorder": "Lohista etapi järjekorra muutmiseks",
     "engine": "Mootor",
     "intensity": "Intensiivsus",
-    "compressionOverrideTitle": "Kokkuvõtme üle kirjutamine"
+    "compressionOverride": "Kokkuvõtme üle kirjutamine"
   },
   "compressionStudio": {
     "noRun": "Tihenduskäitust pole saadaval.",

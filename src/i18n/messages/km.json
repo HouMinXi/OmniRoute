@@ -9291,7 +9291,7 @@
     "dragToReorder": "អូសដើម្បីរៀបលំដាប់ជំហានឡើងវិញ",
     "engine": "ម៉ាស៊ីន",
     "intensity": "កម្រិត",
-    "compressionOverrideTitle": "ការច្រឡំការបង្រួម"
+    "compressionOverride": "ការច្រឡំការបង្រួម"
   },
   "compressionStudio": {
     "noRun": "មិនមានការដំណើរការបង្ហាប់ទេ។",

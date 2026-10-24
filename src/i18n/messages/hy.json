@@ -9291,7 +9291,7 @@
     "dragToReorder": "Քաշեք՝ քայլի հերթականությունը փոխելու համար",
     "engine": "Շարժիչ",
     "intensity": "Ինտենսիվություն",
-    "compressionOverrideTitle": "Գոտեղանալիքի փոխարինում"
+    "compressionOverride": "Գոտեղանալիքի փոխարինում"
   },
   "compressionStudio": {
     "noRun": "Սեղմման ոչ մի գործարկում հասանելի չէ։",

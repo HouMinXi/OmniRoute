@@ -9291,7 +9291,7 @@
     "dragToReorder": "चरणको क्रम बदल्न तान्नुहोस्",
     "engine": "इन्जिन",
     "intensity": "तीव्रता",
-    "compressionOverrideTitle": "सम্পीडन आभास"
+    "compressionOverride": "सम্পीडन आभास"
   },
   "compressionStudio": {
     "noRun": "कुनै सङ्कुचन रन उपलब्ध छैन।",

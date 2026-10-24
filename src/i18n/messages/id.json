@@ -9291,7 +9291,7 @@
     "dragToReorder": "Seret untuk menyusun ulang langkah",
     "engine": "Mesin",
     "intensity": "Intensitas",
-    "compressionOverrideTitle": "Override kompresi"
+    "compressionOverride": "Override kompresi"
   },
   "compressionStudio": {
     "noRun": "Tidak ada proses kompresi yang tersedia.",

@@ -9291,7 +9291,7 @@
     "dragToReorder": "Addımın sırasını dəyişmək üçün sürükləyin",
     "engine": "Mühərrik",
     "intensity": "İntensivlik",
-    "compressionOverrideTitle": "Sıxışdırma yeniləməsi"
+    "compressionOverride": "Sıxışdırma yeniləməsi"
   },
   "compressionStudio": {
     "noRun": "Heç bir sıxılma icrası mövcud deyil.",

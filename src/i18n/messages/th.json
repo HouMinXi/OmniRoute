@@ -9291,7 +9291,7 @@
     "dragToReorder": "ลากเพื่อจัดลำดับขั้นตอนใหม่",
     "engine": "เอนจิน",
     "intensity": "ความเข้ม",
-    "compressionOverrideTitle": "การเขียนแผนการบีบอัด"
+    "compressionOverride": "การเขียนแผนการบีบอัด"
   },
   "compressionStudio": {
     "noRun": "ไม่มีการรันการบีบอัดที่พร้อมใช้งาน",

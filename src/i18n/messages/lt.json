@@ -9291,7 +9291,7 @@
     "dragToReorder": "Vilkite, kad pakeistumėte veiksmo vietą",
     "engine": "Variklis",
     "intensity": "Intensyvumas",
-    "compressionOverrideTitle": "Spaudimo perrašymas"
+    "compressionOverride": "Spaudimo perrašymas"
   },
   "compressionStudio": {
     "noRun": "Nėra pasiekiamo glaudinimo vykdymo.",

@@ -9291,7 +9291,7 @@
     "dragToReorder": "Σύρετε για να αναδιατάξετε το βήμα",
     "engine": "Μηχανισμός",
     "intensity": "Ένταση",
-    "compressionOverrideTitle": "Επικάλυψη συμπίεσης"
+    "compressionOverride": "Επικάλυψη συμπίεσης"
   },
   "compressionStudio": {
     "noRun": "Δεν υπάρχει διαθέσιμη εκτέλεση συμπίεσης.",

@@ -9291,7 +9291,7 @@
     "dragToReorder": "拖曳以重新排序步驟",
     "engine": "引擎",
     "intensity": "強度",
-    "compressionOverrideTitle": "壓縮覆寫"
+    "compressionOverride": "壓縮覆寫"
   },
   "compressionStudio": {
     "noRun": "無可用的壓縮執行記錄。",

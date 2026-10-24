@@ -9291,7 +9291,7 @@
     "dragToReorder": "Плъзнете, за да пренаредите стъпката",
     "engine": "Двигател",
     "intensity": "Интензивност",
-    "compressionOverrideTitle": "Приоритет на компресията"
+    "compressionOverride": "Приоритет на компресията"
   },
   "compressionStudio": {
     "noRun": "Няма налично изпълнение на компресиране.",

@@ -9291,7 +9291,7 @@
     "dragToReorder": "படியை மறுவரிசைப்படுத்த இழுக்கவும்",
     "engine": "எஞ்சின்",
     "intensity": "தீவிரம்",
-    "compressionOverrideTitle": "முக்குப்பதை மிகைச்செயல்"
+    "compressionOverride": "முக்குப்பதை மிகைச்செயல்"
   },
   "compressionStudio": {
     "noRun": "சுருக்க இயக்கம் எதுவும் கிடைக்கவில்லை.",

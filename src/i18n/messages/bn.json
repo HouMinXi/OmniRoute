@@ -9291,7 +9291,7 @@
     "dragToReorder": "ধাপের ক্রম পরিবর্তন করতে টেনে আনুন",
     "engine": "ইঞ্জিন",
     "intensity": "তীব্রতা",
-    "compressionOverrideTitle": "কম্প্রেশন ওভাররাইড"
+    "compressionOverride": "কম্প্রেশন ওভাররাইড"
   },
   "compressionStudio": {
     "noRun": "কোনো কম্প্রেশন রান উপলব্ধ নেই।",

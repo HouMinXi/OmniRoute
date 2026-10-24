@@ -9291,7 +9291,7 @@
     "dragToReorder": "पायरीचा क्रम बदलण्यासाठी ड्रॅग करा",
     "engine": "इंजिन",
     "intensity": "तीव्रता",
-    "compressionOverrideTitle": "संपीडन override"
+    "compressionOverride": "संपीडन override"
   },
   "compressionStudio": {
     "noRun": "कोणताही कॉम्प्रेशन रन उपलब्ध नाही.",

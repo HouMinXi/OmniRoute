@@ -9291,7 +9291,7 @@
     "dragToReorder": "Povlecite korak, da spremenite njegov vrstni red",
     "engine": "Mehanizem",
     "intensity": "Intenzivnost",
-    "compressionOverrideTitle": "Prekora stiska"
+    "compressionOverride": "Prekora stiska"
   },
   "compressionStudio": {
     "noRun": "Na voljo ni nobenega zagona stiskanja.",

@@ -9291,7 +9291,7 @@
     "dragToReorder": "පියවරේ අනුපිළිවෙළ වෙනස් කිරීමට ඇදගෙන යන්න",
     "engine": "එන්ජිම",
     "intensity": "තීව්රතාව",
-    "compressionOverrideTitle": "සම්පීඩනය නිවසුම් කරන්න"
+    "compressionOverride": "සම්පීඩනය නිවසුම් කරන්න"
   },
   "compressionStudio": {
     "noRun": "ලබාගත හැකි සම්පීඩන ධාවනයක් නොමැත.",

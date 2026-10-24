@@ -9291,7 +9291,7 @@
     "dragToReorder": "I-drag upang muling isaayos ang hakbang",
     "engine": "Makina",
     "intensity": "Tindi",
-    "compressionOverrideTitle": "Pag-override ng kompresyon"
+    "compressionOverride": "Pag-override ng kompresyon"
   },
   "compressionStudio": {
     "noRun": "Walang available na compression run.",

@@ -26,7 +26,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button } from "@/shared/components";
+import { Button, Card, Input } from "@/shared/components";
 import Tooltip from "@/shared/components/Tooltip";
 
 interface DarioAccount {
@@ -275,9 +275,7 @@ export function DarioAccountPanel() {
       <div className="space-y-4">
         <div>
           <p className="text-sm font-medium">{t("title")}</p>
-          <p className="text-xs text-text-muted mt-0.5">
-            {t("description")}
-          </p>
+          <p className="text-xs text-text-muted mt-0.5">{t("description")}</p>
         </div>
 
         {/* Account list */}
@@ -317,9 +315,7 @@ export function DarioAccountPanel() {
         {/* Import from OmniRoute */}
         <div className="space-y-2 border-t border-border pt-3">
           <p className="text-xs font-medium">{t("importTitle")}</p>
-          <p className="text-xs text-text-muted">
-            {t("importDescription")}
-          </p>
+          <p className="text-xs text-text-muted">{t("importDescription")}</p>
           {omniLoading && omniConnections.length === 0 ? (
             <div className="h-8 animate-pulse bg-bg-subtle rounded" />
           ) : omniConnections.length === 0 ? (
@@ -360,12 +356,12 @@ export function DarioAccountPanel() {
         {/* Login flow */}
         {!pending ? (
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
-            <input
-              type="text"
+            <Input
               placeholder={t("aliasPlaceholder")}
+              aria-label={t("aliasPlaceholder")}
               value={aliasInput}
               onChange={(e) => setAliasInput(e.target.value)}
-              className="flex-1 min-w-[140px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted"
+              className="min-w-[140px] flex-1"
             />
             <Button size="sm" disabled={busy !== null} onClick={startLogin}>
               {busy === "start" ? t("btnStarting") : t("btnStartLogin")}
@@ -404,12 +400,13 @@ export function DarioAccountPanel() {
             )}
             <p className="text-xs text-text-muted">{t("loginStep2")}</p>
             <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="text"
+              <Input
                 placeholder={t("codePlaceholder")}
+                aria-label={t("codePlaceholder")}
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
-                className="flex-1 min-w-[180px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted font-mono"
+                className="min-w-[180px] flex-1"
+                inputClassName="font-mono"
               />
               <Button
                 size="sm"
@@ -433,8 +430,8 @@ export function DarioAccountPanel() {
           </div>
         )}
 
-        {notice && <p className="text-xs text-green-600 dark:text-green-400">{notice}</p>}
-        {error && <p className="text-xs text-red-600 dark:text-red-400 break-words">{error}</p>}
+        {notice && <p className="text-xs text-success">{notice}</p>}
+        {error && <p className="text-xs text-error break-words">{error}</p>}
       </div>
     </Card>
   );

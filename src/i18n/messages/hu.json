@@ -9291,7 +9291,7 @@
     "dragToReorder": "Húzza a lépés átrendezéséhez",
     "engine": "Motor",
     "intensity": "Intenzitás",
-    "compressionOverrideTitle": "Tömörítés felülírása"
+    "compressionOverride": "Tömörítés felülírása"
   },
   "compressionStudio": {
     "noRun": "Nem áll rendelkezésre tömörítési futtatás.",

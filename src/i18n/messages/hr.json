@@ -9291,7 +9291,7 @@
     "dragToReorder": "Povucite za promjenu redoslijeda koraka",
     "engine": "Mehanizam",
     "intensity": "Intenzitet",
-    "compressionOverrideTitle": "Pritisnuti kompresiju"
+    "compressionOverride": "Pritisnuti kompresiju"
   },
   "compressionStudio": {
     "noRun": "Nije dostupno nijedno izvođenje kompresije.",

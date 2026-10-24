@@ -9291,7 +9291,7 @@
     "dragToReorder": "برای تغییر ترتیب مرحله بکشید",
     "engine": "موتور",
     "intensity": "شدت",
-    "compressionOverrideTitle": "برداشت از فشرده‌سازی"
+    "compressionOverride": "برداشت از فشرده‌سازی"
   },
   "compressionStudio": {
     "noRun": "هیچ اجرای فشرده‌سازی موجود نیست.",

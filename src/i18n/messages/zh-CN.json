@@ -9291,7 +9291,7 @@
     "dragToReorder": "拖动以重新排序步骤",
     "engine": "引擎",
     "intensity": "强度",
-    "compressionOverrideTitle": "压缩覆盖"
+    "compressionOverride": "压缩覆盖"
   },
   "compressionStudio": {
     "noRun": "没有可用的压缩运行记录。",

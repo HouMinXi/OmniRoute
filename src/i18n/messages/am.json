@@ -9291,7 +9291,7 @@
     "dragToReorder": "የደረጃዎቹን ቅደም ተከተል ለመቀየር ይጎትቱ",
     "engine": "ኤንጂን",
     "intensity": "ጥንካሬ",
-    "compressionOverrideTitle": "የማጭው ውጤት መቀየሪያ"
+    "compressionOverride": "የማጭው ውጤት መቀየሪያ"
   },
   "compressionStudio": {
     "noRun": "ምንም የማጨመቂያ ሂደት አይገኝም።",

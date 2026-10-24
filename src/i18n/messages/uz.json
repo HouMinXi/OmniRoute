@@ -9291,7 +9291,7 @@
     "dragToReorder": "Bosqich tartibini oʻzgartirish uchun sudrang",
     "engine": "Mexanizm",
     "intensity": "Daraja",
-    "compressionOverrideTitle": "Kamaytirish ustunligi"
+    "compressionOverride": "Kamaytirish ustunligi"
   },
   "compressionStudio": {
     "noRun": "Siqish jarayoni mavjud emas.",

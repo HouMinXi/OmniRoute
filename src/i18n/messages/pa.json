@@ -9291,7 +9291,7 @@
     "dragToReorder": "ਪੜਾਅ ਦਾ ਕ੍ਰਮ ਬਦਲਣ ਲਈ ਖਿੱਚੋ",
     "engine": "ਇੰਜਣ",
     "intensity": "ਤੀਬਰਤਾ",
-    "compressionOverrideTitle": "ਕੰਪ੍ਰੈਸ਼ਨ overide"
+    "compressionOverride": "ਕੰਪ੍ਰੈਸ਼ਨ overide"
   },
   "compressionStudio": {
     "noRun": "ਕੋਈ ਕੰਪ੍ਰੈਸ਼ਨ ਰਨ ਉਪਲਬਧ ਨਹੀਂ ਹੈ।",

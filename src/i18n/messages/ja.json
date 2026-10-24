@@ -9291,7 +9291,7 @@
     "dragToReorder": "ドラッグしてステップを並べ替え",
     "engine": "エンジン",
     "intensity": "強度",
-    "compressionOverrideTitle": "圧縮オーバーライド"
+    "compressionOverride": "圧縮オーバーライド"
   },
   "compressionStudio": {
     "noRun": "利用可能な圧縮実行はありません。",

@@ -9291,7 +9291,7 @@
     "dragToReorder": "ഘട്ടത്തിന്റെ ക്രമം മാറ്റാൻ വലിച്ചിടുക",
     "engine": "എഞ്ചിൻ",
     "intensity": "തീവ്രത",
-    "compressionOverrideTitle": "കംപ്രഷൻ ഓവർറൈഡ്"
+    "compressionOverride": "കംപ്രഷൻ ഓവർറൈഡ്"
   },
   "compressionStudio": {
     "noRun": "കംപ്രഷൻ റൺ ലഭ്യമല്ല.",

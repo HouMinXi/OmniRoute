@@ -9291,7 +9291,7 @@
     "dragToReorder": "Ja don sake tsara matakin",
     "engine": "Injin",
     "intensity": "Ƙarfi",
-    "compressionOverrideTitle": "Sauwakin haɗewa"
+    "compressionOverride": "Sauwakin haɗewa"
   },
   "compressionStudio": {
     "noRun": "Babu wani aikin compression da ake samu.",

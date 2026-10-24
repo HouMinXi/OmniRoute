@@ -9291,7 +9291,7 @@
     "dragToReorder": "اسحب لإعادة ترتيب الخطوة",
     "engine": "المحرك",
     "intensity": "الشدة",
-    "compressionOverrideTitle": "تجاوز الضغط"
+    "compressionOverride": "تجاوز الضغط"
   },
   "compressionStudio": {
     "noRun": "لا يوجد تشغيل ضغط متاح.",

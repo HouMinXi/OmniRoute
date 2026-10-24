@@ -9291,7 +9291,7 @@
     "dragToReorder": "Potiahnutím zmeníte poradie kroku",
     "engine": "Nástroj",
     "intensity": "Intenzita",
-    "compressionOverrideTitle": "Prepínanie kompresie"
+    "compressionOverride": "Prepínanie kompresie"
   },
   "compressionStudio": {
     "noRun": "Nie je k dispozícii žiadny beh kompresie.",

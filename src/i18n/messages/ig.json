@@ -9291,7 +9291,7 @@
     "dragToReorder": "Dọrọ iji hazigharịa nzọụkwụ",
     "engine": "Injin",
     "intensity": "Ogo ike",
-    "compressionOverrideTitle": "Ndakịrị mgbakwunye"
+    "compressionOverride": "Ndakịrị mgbakwunye"
   },
   "compressionStudio": {
     "noRun": "Enweghị usoro mkpakọ emere dị.",

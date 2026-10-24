@@ -9291,7 +9291,7 @@
     "dragToReorder": "ପଦକ୍ଷେପର କ୍ରମ ପରିବର୍ତ୍ତନ କରିବାକୁ ଟାଣନ୍ତୁ",
     "engine": "ଇଞ୍ଜିନ୍",
     "intensity": "ତୀବ୍ରତା",
-    "compressionOverrideTitle": "ସଙ୍କୋଚନ override"
+    "compressionOverride": "ସଙ୍କୋଚନ override"
   },
   "compressionStudio": {
     "noRun": "କୌଣସି ସଂକୋଚନ ରନ୍ ଉପଲବ୍ଧ ନାହିଁ।",

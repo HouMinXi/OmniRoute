@@ -9291,7 +9291,7 @@
     "dragToReorder": "အဆင့်အစီအစဉ် ပြောင်းရန် ဆွဲရွှေ့ပါ",
     "engine": "အင်ဂျင်",
     "intensity": "ပြင်းအား",
-    "compressionOverrideTitle": "ဖိစီးမှု ကျော်သွား"
+    "compressionOverride": "ဖိစီးမှု ကျော်သွား"
   },
   "compressionStudio": {
     "noRun": "ချုံ့မှုလုပ်ဆောင်ချက် မရှိသေးပါ။",

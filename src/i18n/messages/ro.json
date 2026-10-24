@@ -9291,7 +9291,7 @@
     "dragToReorder": "Trageți pentru a reordona pasul",
     "engine": "Motor",
     "intensity": "Intensitate",
-    "compressionOverrideTitle": "Suprascriere comprimare"
+    "compressionOverride": "Suprascriere comprimare"
   },
   "compressionStudio": {
     "noRun": "Nicio rulare de compresie disponibilă.",

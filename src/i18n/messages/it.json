@@ -9291,7 +9291,7 @@
     "dragToReorder": "Trascina per riordinare il passaggio",
     "engine": "Motore",
     "intensity": "Intensità",
-    "compressionOverrideTitle": "Override della compressione"
+    "compressionOverride": "Override della compressione"
   },
   "compressionStudio": {
     "noRun": "Nessuna esecuzione di compressione disponibile.",

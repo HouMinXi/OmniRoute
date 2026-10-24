@@ -9291,7 +9291,7 @@
     "dragToReorder": "Adımı yeniden sıralamak için sürükleyin",
     "engine": "Motor",
     "intensity": "Yoğunluk",
-    "compressionOverrideTitle": "Sıkıştırma geçersiz kılma"
+    "compressionOverride": "Sıkıştırma geçersiz kılma"
   },
   "compressionStudio": {
     "noRun": "Kullanılabilir sıkıştırma çalışması yok.",

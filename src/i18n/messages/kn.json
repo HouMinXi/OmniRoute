@@ -9291,7 +9291,7 @@
     "dragToReorder": "ಹಂತದ ಕ್ರಮವನ್ನು ಬದಲಾಯಿಸಲು ಎಳೆಯಿರಿ",
     "engine": "ಎಂಜಿನ್",
     "intensity": "ತೀವ್ರತೆ",
-    "compressionOverrideTitle": "ಸಂಕೋಚನ ಮೀರಿಹೋಗುವಿಕೆ"
+    "compressionOverride": "ಸಂಕೋಚನ ಮೀರಿಹೋಗುವಿಕೆ"
   },
   "compressionStudio": {
     "noRun": "ಯಾವುದೇ ಸಂಕುಚನ ರನ್ ಲಭ್ಯವಿಲ್ಲ.",

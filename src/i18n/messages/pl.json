@@ -9291,7 +9291,7 @@
     "dragToReorder": "Przeciągnij, aby zmienić kolejność kroku",
     "engine": "Silnik",
     "intensity": "Intensywność",
-    "compressionOverrideTitle": "Nadpisanie kompresji"
+    "compressionOverride": "Nadpisanie kompresji"
   },
   "compressionStudio": {
     "noRun": "Brak dostępnego przebiegu kompresji.",

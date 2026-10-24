@@ -9291,7 +9291,7 @@
     "dragToReorder": "Iddreggja biex tibdel l-ordni tal-pass",
     "engine": "Magna",
     "intensity": "Intensità",
-    "compressionOverrideTitle": "Override tal-kompressjoni"
+    "compressionOverride": "Override tal-kompressjoni"
   },
   "compressionStudio": {
     "noRun": "Ebda eżekuzzjoni tal-kompressjoni mhi disponibbli.",

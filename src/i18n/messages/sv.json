@@ -9291,7 +9291,7 @@
     "dragToReorder": "Dra för att ändra ordning på steg",
     "engine": "Motor",
     "intensity": "Intensitet",
-    "compressionOverrideTitle": "Kompressionsöverstyrning"
+    "compressionOverride": "Kompressionsöverstyrning"
   },
   "compressionStudio": {
     "noRun": "Ingen komprimeringskörning tillgänglig.",

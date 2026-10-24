@@ -1,6 +1,8 @@
 "use client";
 
-import { Badge, Button, Card } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import { useTranslations } from "next-intl";
 import type { LogExportDestination } from "../types";
 
@@ -22,8 +24,10 @@ function formatTimestamp(value: string | null, neverLabel: string): string {
 
 function statusBadge(destination: LogExportDestination, t: ReturnType<typeof useTranslations>) {
   if (!destination.enabled) return <Badge variant="default">{t("statusDisabled")}</Badge>;
-  if (destination.lastStatus === "failure") return <Badge variant="error">{t("statusFailing")}</Badge>;
-  if (destination.lastStatus === "success") return <Badge variant="success">{t("statusHealthy")}</Badge>;
+  if (destination.lastStatus === "failure")
+    return <Badge variant="error">{t("statusFailing")}</Badge>;
+  if (destination.lastStatus === "success")
+    return <Badge variant="success">{t("statusHealthy")}</Badge>;
   return <Badge variant="info">{t("statusNotRunYet")}</Badge>;
 }
 
@@ -62,7 +66,7 @@ export function DestinationCard({
             })}
           </p>
           {destination.lastError ? (
-            <p className="mt-2 rounded-control bg-red-500/10 p-2 text-xs text-red-600 dark:text-red-400">
+            <p className="mt-2 rounded-control bg-error-bg p-2 text-xs text-error">
               {destination.lastError}
             </p>
           ) : null}

@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, ConfirmModal, EmptyState, Loading } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
+import Loading from "@/shared/components/Loading";
+import { ConfirmModal } from "@/shared/components/Modal";
 import { DestinationCard } from "./components/DestinationCard";
 import { DestinationFormModal } from "./components/DestinationFormModal";
 import type { LogExportDestination, LogExportStatus, LogExportTypeDescriptor } from "./types";
@@ -41,6 +47,7 @@ export function LogExportPageClient() {
   const [status, setStatus] = useState<LogExportStatus | null>(null);
   const [types, setTypes] = useState<LogExportTypeDescriptor[]>([]);
   const [loading, setLoading] = useState(true);
+  const tc = useTranslations("common");
   const [feedback, setFeedback] = useState<Feedback>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<LogExportDestination | null>(null);
@@ -69,7 +76,7 @@ export function LogExportPageClient() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     void (async () => {
@@ -203,35 +210,31 @@ export function LogExportPageClient() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-lg font-semibold text-text-main">{t("pageTitle")}</h1>
-          <p className="text-xs text-text-muted">
-            {t("pageSubtitle")}
-          </p>
-        </div>
-        <Button
-          icon="add"
-          onClick={() => {
-            setEditing(null);
-            setFormError(null);
-            setFormOpen(true);
-          }}
-        >
-          {t("addDestination")}
-        </Button>
-      </div>
+      <PageHeader
+        compact
+        title={t("pageTitle")}
+        description={t("pageSubtitle")}
+        actions={
+          <Button
+            icon="add"
+            onClick={() => {
+              setEditing(null);
+              setFormError(null);
+              setFormOpen(true);
+            }}
+          >
+            {t("addDestination")}
+          </Button>
+        }
+      />
 
       {feedback ? (
-        <p
-          className={
-            feedback.type === "success"
-              ? "rounded-control bg-green-500/10 p-2 text-xs text-green-600 dark:text-green-400"
-              : "rounded-control bg-red-500/10 p-2 text-xs text-red-600 dark:text-red-400"
-          }
-        >
-          {feedback.message}
-        </p>
+        <Alert
+          variant={feedback.type === "success" ? "success" : "critical"}
+          description={feedback.message}
+          dismissLabel={tc("dismissNotification")}
+          onDismiss={() => setFeedback(null)}
+        />
       ) : null}
 
       <Card padding="sm" title={t("scheduleTitle")}>

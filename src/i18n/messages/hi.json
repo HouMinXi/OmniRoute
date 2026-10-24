@@ -9291,7 +9291,7 @@
     "dragToReorder": "चरण का क्रम बदलने के लिए खींचें",
     "engine": "इंजन",
     "intensity": "तीव्रता",
-    "compressionOverrideTitle": "संपीड़न अतिरिक्त"
+    "compressionOverride": "संपीड़न अतिरिक्त"
   },
   "compressionStudio": {
     "noRun": "कोई कंप्रेशन रन उपलब्ध नहीं है।",

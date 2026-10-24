@@ -9291,7 +9291,7 @@
     "dragToReorder": "Перетягніть, щоб змінити порядок кроків",
     "engine": "Рушій",
     "intensity": "Інтенсивність",
-    "compressionOverrideTitle": "Перевизначення стиснення"
+    "compressionOverride": "Перевизначення стиснення"
   },
   "compressionStudio": {
     "noRun": "Немає доступних запусків стиснення.",

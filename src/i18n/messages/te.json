@@ -9291,7 +9291,7 @@
     "dragToReorder": "దశను క్రమబద్ధీకరించడానికి డ్రాగ్ చేయండి",
     "engine": "ఇంజిన్",
     "intensity": "తీవ్రత",
-    "compressionOverrideTitle": "కంప్రెషన్ ఓవర్రైడ్"
+    "compressionOverride": "కంప్రెషన్ ఓవర్రైడ్"
   },
   "compressionStudio": {
     "noRun": "ఎటువంటి కంప్రెషన్ రన్ అందుబాటులో లేదు.",

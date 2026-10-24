@@ -9291,7 +9291,7 @@
     "dragToReorder": "Přetažením změňte pořadí kroku",
     "engine": "Modul",
     "intensity": "Intenzita",
-    "compressionOverrideTitle": "Přepsání komprese"
+    "compressionOverride": "Přepsání komprese"
   },
   "compressionStudio": {
     "noRun": "Není k dispozici žádný běh komprese.",

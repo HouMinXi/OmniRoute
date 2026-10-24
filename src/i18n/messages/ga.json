@@ -9291,7 +9291,7 @@
     "dragToReorder": "Tarraing chun an chéim a atheagrú",
     "engine": "Inneall",
     "intensity": "Déine",
-    "compressionOverrideTitle": "Cáiliúna na gáire"
+    "compressionOverride": "Cáiliúna na gáire"
   },
   "compressionStudio": {
     "noRun": "Níl aon rith comhbhrúcháin ar fáil.",

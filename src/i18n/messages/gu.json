@@ -9291,7 +9291,7 @@
     "dragToReorder": "પગલાંનો ક્રમ બદલવા માટે ખેંચો",
     "engine": "એન્જિન",
     "intensity": "તીવ્રતા",
-    "compressionOverrideTitle": "પ્રતિબંધન ઓવરરાઇડ"
+    "compressionOverride": "પ્રતિબંધન ઓવરરાઇડ"
   },
   "compressionStudio": {
     "noRun": "કોઈ કમ્પ્રેશન રન ઉપલબ્ધ નથી.",

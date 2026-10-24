@@ -9291,7 +9291,7 @@
     "dragToReorder": "Seret untuk menyusun semula langkah",
     "engine": "Enjin",
     "intensity": "Keamatan",
-    "compressionOverrideTitle": "Sampakan penimpa"
+    "compressionOverride": "Sampakan penimpa"
   },
   "compressionStudio": {
     "noRun": "Tiada larian pemampatan tersedia.",

@@ -9291,7 +9291,7 @@
     "dragToReorder": "Sleep om stap opnieuw te ordenen",
     "engine": "Engine",
     "intensity": "Intensiteit",
-    "compressionOverrideTitle": "Compressie-overrule"
+    "compressionOverride": "Compressie-overrule"
   },
   "compressionStudio": {
     "noRun": "Geen compressierun beschikbaar.",

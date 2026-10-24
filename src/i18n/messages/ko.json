@@ -9291,7 +9291,7 @@
     "dragToReorder": "드래그하여 단계 순서 변경",
     "engine": "엔진",
     "intensity": "강도",
-    "compressionOverrideTitle": "압축 오버라이드"
+    "compressionOverride": "압축 오버라이드"
   },
   "compressionStudio": {
     "noRun": "사용 가능한 압축 실행이 없습니다.",

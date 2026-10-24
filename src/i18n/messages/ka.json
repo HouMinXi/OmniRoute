@@ -9291,7 +9291,7 @@
     "dragToReorder": "გადაათრიეთ ნაბიჯი რიგის შესაცვლელად",
     "engine": "ძრავა",
     "intensity": "ინტენსივობა",
-    "compressionOverrideTitle": "იმედობა კომპრესიის გადაწერის"
+    "compressionOverride": "იმედობა კომპრესიის გადაწერის"
   },
   "compressionStudio": {
     "noRun": "შეკუმშვის არცერთი გაშვება არ არის ხელმისაწვდომი.",

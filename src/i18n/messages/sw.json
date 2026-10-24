@@ -9291,7 +9291,7 @@
     "dragToReorder": "Buruta ili kupanga upya hatua",
     "engine": "Injini",
     "intensity": "Ukali",
-    "compressionOverrideTitle": "Kubadilisha utulizaji"
+    "compressionOverride": "Kubadilisha utulizaji"
   },
   "compressionStudio": {
     "noRun": "Hakuna uendeshaji wa mbano unaopatikana.",

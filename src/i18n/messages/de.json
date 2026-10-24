@@ -9291,7 +9291,7 @@
     "dragToReorder": "Ziehen, um Schritt neu anzuordnen",
     "engine": "Engine",
     "intensity": "Intensität",
-    "compressionOverrideTitle": "Komprimierungs-Override"
+    "compressionOverride": "Komprimierungs-Override"
   },
   "compressionStudio": {
     "noRun": "Kein Komprimierungsdurchlauf verfügbar.",

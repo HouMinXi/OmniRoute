@@ -9291,7 +9291,7 @@
     "dragToReorder": "Vedä järjestääksesi vaiheen uudelleen",
     "engine": "Moottori",
     "intensity": "Voimakkuus",
-    "compressionOverrideTitle": "Pakkausylikirjoitus"
+    "compressionOverride": "Pakkausylikirjoitus"
   },
   "compressionStudio": {
     "noRun": "Pakkausajoa ei ole saatavilla.",

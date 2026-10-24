@@ -9291,7 +9291,7 @@
     "dragToReorder": "גרור כדי לשנות את סדר השלבים",
     "engine": "מנוע",
     "intensity": "עוצמה",
-    "compressionOverrideTitle": "החלפת דחיסה"
+    "compressionOverride": "החלפת דחיסה"
   },
   "compressionStudio": {
     "noRun": "אין הרצת דחיסה זמינה.",

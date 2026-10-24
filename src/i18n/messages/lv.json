@@ -9291,7 +9291,7 @@
     "dragToReorder": "Velciet, lai mainītu soļa secību",
     "engine": "Dzinējs",
     "intensity": "Intensitāte",
-    "compressionOverrideTitle": "Saspiedes pārrakstīšana"
+    "compressionOverride": "Saspiedes pārrakstīšana"
   },
   "compressionStudio": {
     "noRun": "Nav pieejama neviena saspiešanas izpilde.",

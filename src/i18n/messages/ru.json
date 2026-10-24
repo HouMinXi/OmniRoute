@@ -9291,7 +9291,7 @@
     "dragToReorder": "Перетащите для изменения порядка шагов",
     "engine": "Движок",
     "intensity": "Интенсивность",
-    "compressionOverrideTitle": "Переопределение сжатия"
+    "compressionOverride": "Переопределение сжатия"
   },
   "compressionStudio": {
     "noRun": "Нет доступных запусков сжатия.",
