@@ -1,6 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildTargetTimeoutRunner } from "../../open-sse/services/combo/targetTimeoutRunner.ts";
+import {
+  buildTargetTimeoutRunner,
+  resolveFirstOutputWaitMs,
+} from "../../open-sse/services/combo/targetTimeoutRunner.ts";
+import {
+  DECLARED_FIRST_OUTPUT_WAIT_CAP_MS,
+  resolveComboSetupConfig,
+} from "../../open-sse/services/comboConfig.ts";
 import {
   awaitFirstOutput,
   SseOutputScanner,
@@ -521,5 +528,55 @@ test("declared target budgets resolve model, then provider, and defer to an expl
     await resolveDeclaredTargetBudgetMs({ targetTimeoutMs: 30_000 }, target("glm", "glm-4.6")),
     undefined,
     "an explicit per-combo targetTimeoutMs stays authoritative"
+  );
+});
+
+test("a declared budget stretches the first-output wait by at most 180 seconds", () => {
+  assert.equal(DECLARED_FIRST_OUTPUT_WAIT_CAP_MS, 180_000);
+  assert.equal(resolveFirstOutputWaitMs(120_000, GLM_TIMEOUT_MS), 180_000, "GLM's 50 minutes");
+  assert.equal(resolveFirstOutputWaitMs(120_000, 1_200_000), 180_000, "Codex xhigh's 20 minutes");
+  assert.equal(
+    resolveFirstOutputWaitMs(120_000, 150_000),
+    150_000,
+    "under the cap it applies as is"
+  );
+  assert.equal(resolveFirstOutputWaitMs(120_000, 60_000), 120_000, "never shorter than the floor");
+  assert.equal(resolveFirstOutputWaitMs(120_000, undefined), 120_000);
+  assert.equal(resolveFirstOutputWaitMs(120_000, Number.NaN), 120_000);
+  assert.equal(
+    resolveFirstOutputWaitMs(300_000, GLM_TIMEOUT_MS),
+    300_000,
+    "the cap never lowers a floor that is already longer"
+  );
+});
+
+test("a global comboDefaults targetTimeoutMs counts as explicit; a provider override does not reach the combo setup", async () => {
+  const glmTarget = {
+    kind: "model" as const,
+    stepId: "s",
+    executionKey: "k",
+    modelStr: "glm/glm-4.6",
+    provider: "glm",
+    providerId: null,
+    connectionId: null,
+    weight: 1,
+    label: null,
+  };
+  const combo = { config: {} };
+  assert.equal(
+    await resolveDeclaredTargetBudgetMs(
+      resolveComboSetupConfig(combo, { comboDefaults: { targetTimeoutMs: 30_000 } }),
+      glmTarget
+    ),
+    undefined,
+    "an operator's global default is as authoritative as the combo's own value"
+  );
+  assert.equal(
+    await resolveDeclaredTargetBudgetMs(
+      resolveComboSetupConfig(combo, { providerOverrides: { glm: { targetTimeoutMs: 30_000 } } }),
+      glmTarget
+    ),
+    GLM_TIMEOUT_MS,
+    "the combo setup resolves the cascade without a provider, so providerOverrides are not merged"
   );
 });

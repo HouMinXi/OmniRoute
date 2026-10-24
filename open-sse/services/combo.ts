@@ -668,9 +668,11 @@ export async function resolveTargetTimeoutMsForTarget(
 /**
  * The target's declared budget for the first-output gate, in the order the upstream timeout uses
  * (getExecutorTimeoutMs): connection `providerSpecificData.timeoutMs` → registry per-model
- * `timeoutMs` → registry provider-level `timeoutMs`. The runner only lets it lengthen the wait.
- * Returns undefined when the combo sets `targetTimeoutMs` itself (that budget stays authoritative)
- * or when nothing is declared.
+ * `timeoutMs` → registry provider-level `timeoutMs`. The runner only lets it lengthen the wait,
+ * and by at most DECLARED_FIRST_OUTPUT_WAIT_CAP_MS. Returns undefined when `targetTimeoutMs` is
+ * set explicitly in the resolved combo config (the combo's own config or the global
+ * comboDefaults; see hasExplicitComboTargetTimeout), since that budget stays authoritative, or
+ * when nothing is declared.
  */
 export async function resolveDeclaredTargetBudgetMs(
   config: Record<string, unknown> | null | undefined,

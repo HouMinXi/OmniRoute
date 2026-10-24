@@ -10,6 +10,7 @@
  * See _tasks/superpowers/plans/2026-07-03-blocoJ-combo-hotpath-decomposition.md (Task 1).
  */
 import { buildErrorBody, errorResponse, sanitizeErrorMessage } from "../../utils/error.ts";
+import { DECLARED_FIRST_OUTPUT_WAIT_CAP_MS } from "../comboConfig.ts";
 import {
   COMBO_HEDGE_CANCELLED_REASON,
   COMBO_PER_MODEL_TIMEOUT_REASON,
@@ -110,11 +111,13 @@ function targetTimeoutResponse(modelStr: string): Response {
   );
 }
 
-/** A declared budget may lengthen the first-output wait; anything else leaves the floor as-is. */
-function loosenOnly(floorMs: number, declaredMs: number | undefined): number {
-  return typeof declaredMs === "number" && Number.isFinite(declaredMs) && declaredMs > floorMs
-    ? declaredMs
-    : floorMs;
+/**
+ * A declared budget may lengthen the first-output wait, up to DECLARED_FIRST_OUTPUT_WAIT_CAP_MS;
+ * it never shortens it, and the cap never lowers a floor that is already longer.
+ */
+export function resolveFirstOutputWaitMs(floorMs: number, declaredMs: number | undefined): number {
+  if (typeof declaredMs !== "number" || !Number.isFinite(declaredMs)) return floorMs;
+  return Math.max(floorMs, Math.min(declaredMs, DECLARED_FIRST_OUTPUT_WAIT_CAP_MS));
 }
 
 export function buildTargetTimeoutRunner(deps: {
@@ -126,7 +129,8 @@ export function buildTargetTimeoutRunner(deps: {
   ) => Promise<number | undefined> | number | undefined;
   /**
    * The target's own declared budget, consulted only for the first-output wait. It can only
-   * lengthen that wait past the dispatch budget, never shorten it.
+   * lengthen that wait past the dispatch budget (up to DECLARED_FIRST_OUTPUT_WAIT_CAP_MS),
+   * never shorten it.
    */
   resolveDeclaredTargetBudgetMs?: (
     target?: SingleModelTarget
@@ -241,7 +245,7 @@ export function buildTargetTimeoutRunner(deps: {
       // waiting until the client gives up.
       if (!dispatched.ok || !isEventStreamResponse(dispatched)) return dispatched;
 
-      const firstOutputBudgetMs = loosenOnly(
+      const firstOutputBudgetMs = resolveFirstOutputWaitMs(
         effectiveTimeoutMs,
         await resolveDeclaredTargetBudgetMs?.(target)
       );
