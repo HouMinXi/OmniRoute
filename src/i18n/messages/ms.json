@@ -13885,7 +13885,7 @@
       },
       "EXPOSE_CC_DISCOVERY_ALIASES": {
         "label": "Alias Penemuan Claude Code",
-        "description": "Iklan id cermin claude/'<provider>'/'<model>' pada /v1/models supaya penemuan model gateウェイ Claude Code senaraikan model bukan-Claude. Amaran: menggandaikan item katalog untuk semua klien apabila diaktifkan secara global."
+        "description": "Iklankan id cermin claude/'<provider>'/'<model>' pada /v1/models supaya penemuan model gateway Claude Code menyenaraikan model bukan Claude. Amaran: menggandakan entri katalog untuk semua klien apabila didayakan secara global."
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "Alias Model Tanpa Pemikiran",

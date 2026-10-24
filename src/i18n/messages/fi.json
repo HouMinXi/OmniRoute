@@ -13761,7 +13761,7 @@
       },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Kirjaa tilitunnukset",
-        "description": "Sisällytä tiliprefiksi AUTH-lokipiireihin (esim. \"Käytetään '<provider>'-tiliä: abc12345...\"). Oletusasetuksena poistettu käytöstä, jotta tilitunnisteet suljetaan pois jaetusta/monen租户n prosessin lokeista. Itsenäinen Virhetilasta; Virhetilan muuttaminen ei paljasta tätä."
+        "description": "Sisällytä tilin etuliite AUTH-lokiriveihin (esim. \"Using '<provider>' account: abc12345...\"). Oletuksena pois käytöstä, jotta tilitunnisteet peitetään jaetuista/monivuokraajaympäristön prosessilokeista. Riippumaton virheenkorjaustilasta; virheenkorjaustilan vaihtaminen ei paljasta tätä."
       },
       "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
         "label": "Poista salasanakirjautuminen käytöstä OIDC:n kanssa",

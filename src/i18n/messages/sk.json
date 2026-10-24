@@ -13781,7 +13781,7 @@
       },
       "PROXY_SKIP_RECENTLY_FAILED": {
         "label": "Preskočiť nedávno zlyhalé proxy",
-        "description": "Proxy池 a per-account rotácia opencode prestanú opätovne poskytovať proxy, ktorá práve zlyhala (odmietnutý TCP probe alebo prijatý 429 cez ňu) na periodické obdobie pre proces, ktoré sa pri každom opätovnom zlyhaní zdvojňuje, až do určitého limitu. Stav proxy sa nezapísava; ak sa vynechajú všetci kandidáti, výber zostáva nezmenený. V predvolenom nastavení zapnuté: poradie výberu je presne rotácia v čistom tvare iba s PROXY_SKIP_RECENTLY_FAILED=false."
+        "description": "Proxy pooly a rotácia opencode pre jednotlivé účty prestanú opätovne používať proxy, ktorá práve zlyhala (odmietnutý TCP test alebo cez ňu prijatá odpoveď 429), na obdobie v rámci procesu, ktoré sa pri každom opakovaní zdvojnásobí až po strop. Nezapisuje sa žiadny stav proxy; ak sú odložení všetci kandidáti, výber sa nemení. Predvolene zapnuté: poradie výberu je presne obyčajná rotácia iba pri PROXY_SKIP_RECENTLY_FAILED=false."
       },
       "PROXY_POOL_SHARED_EGRESS_ORDER": {
         "label": "Poradie zdieľaného odchozího poolu",
@@ -13793,7 +13793,7 @@
       },
       "PROXY_POOL_EGRESS_OBSERVATION": {
         "label": "Pozorovanie odchozích adries proxy poolu",
-        "description": "Zobraziť pod proxy poolom v dashboarde, koľko pozorovaných odchozích IP slúžilo jeho členom v priebehu posledných 24 hodín, koľko konekcií ich používalo a čo sa najviac pozorovalo za jednou IP. Len čítanie, vypočítané z proxy denníka, nikdy sa nepoužíva na smerovanie. V predvolenom nastavení vypnuté: editor poolu zostáva nezmenený a pozorovacia路由 vráta null."
+        "description": "Pod proxy poolom v dashboarde zobrazí, koľko pozorovaných odchádzajúcich IP adries obsluhovalo jeho členov za posledných 24 h, koľko pripojení ich použilo a najvyšší počet pozorovaný za jednou IP. Len na čítanie, vypočítané z proxy logu, nikdy sa nepoužíva na smerovanie. Predvolene vypnuté: editor poolu sa nemení a pozorovacia trasa vracia null."
       },
       "PROXY_OPERATOR_EGRESS_ENABLED": {
         "label": "Proxy operátora odchod",
@@ -13913,7 +13913,7 @@
       },
       "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
         "label": "Prísna odznaka Free",
-        "description": "Stránky poskytovateľov na仪表盘e: odznak Free sa zobrazuje len pri signáloch, ktoré poskytovateľ akceptuje – odstraňuje sa heuristika na základe zobrazovaného názvu, nebooleanové bezplatné polia a prípony :free pri registrovaných poskytovateľoch bez zdokumentovaného bezplatného tarifu. Voľba Off zachováva historické pravidlo pre odznaky."
+        "description": "Stránky poskytovateľov v dashboarde: odznak Free sa zobrazuje len pri signáloch, ktoré poskytovateľ dodržiava – odstraňuje heuristiku podľa zobrazovaného názvu, nebooleovské polia free a prípony :free pri registrovaných poskytovateľoch bez zdokumentovaného bezplatného tarifu. Vypnuté zachováva historické pravidlo pre odznak."
       },
       "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
         "label": "Auto Combo: Prázdny pool odpovedí 503",
@@ -13949,7 +13949,7 @@
       },
       "LMARENA_SYNTHESIZED_CX_ENABLED": {
         "label": "Telemetria Arena pre syntetizované cx",
-        "description": "Pripojiť syntetizovaný programatický cx blob klienta-vzťahov (hodnotu, ktorú arena.ai sama odosielá pre stránku bez zaznamenaných interakcií) ku každému požiadaniu na vytvorenie hodnotenia v Aрене (lmarena), ktoré nemá cx v providerSpecificData dodaným operátorom. Vo výchozom stave je vypnuté: pole cx je signál proti automatizácii Arena, takže OmniRoute forwarduje iba hodnotu zachytenú operátorom z reálnej relácie prehliadača (providerSpecificData.cx) a inak neposielajú cx vôbec. Nepreukázaný prínos od zdroja; zapnúť iba v prípade, že Arena začne odmietať požiadania bez cx."
+        "description": "Ku každej požiadavke Arena (lmarena) na vytvorenie hodnotenia, ktorá nemá providerSpecificData.cx dodané operátorom, pripojí syntetizovaný programový blob cx s interakciou klienta (hodnotu, ktorú samotná arena.ai posiela pre stránku bez zaznamenanej interakcie). Predvolene vypnuté: pole cx je signál Arena proti automatizácii, preto OmniRoute preposiela iba hodnotu, ktorú operátor zachytil zo skutočnej relácie prehliadača (providerSpecificData.cx), a inak cx neposiela vôbec. Prínos na strane upstreamu nie je preukázaný; zapnite iba vtedy, ak Arena začne odmietať požiadavky bez cx."
       },
       "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
         "label": "Natívna reaktívna kompresia Codex",

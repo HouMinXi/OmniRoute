@@ -13901,7 +13901,7 @@
       },
       "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
         "label": "Funktionelle Gateway-Spiegelungen",
-        "description": "Bietet auf /v1/models '<gateway-alias>'/'<model>'-Spiegel-IDs für Modelle an, deren kanonischer Inhaber keine aktive凭据 (Credential) hat, aber ein Durchreichungs-Gateway mit aktiver Qualifikation sie leitet. Warnung: Fügt bei globaler Aktivierung Katalogeinträge für alle Clients hinzu."
+        "description": "Bietet auf /v1/models '<gateway-alias>'/'<model>'-Spiegel-IDs für Modelle an, deren kanonischer Inhaber keine aktiven Anmeldedaten hat, die aber ein Passthrough-Gateway mit aktiven Anmeldedaten routet. Warnung: Fügt bei globaler Aktivierung Katalogeinträge für alle Clients hinzu."
       },
       "NEWAPI_AGGREGATOR_BALANCE": {
         "label": "New-API-Aggregator-Guthaben",

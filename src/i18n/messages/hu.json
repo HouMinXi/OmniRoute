@@ -13921,7 +13921,7 @@
       },
       "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
         "label": "Mistral egyértelmű 401 lágy zárolás",
-        "description": "A meztelen Mistral 401 ('{\"detail\":\"Unauthorized\"}', nincsen显明es hitelesítési jelzés) byte-azonos egy lemondott kulcs és egy kimerült kvóta esetén is. Amikor be van kapcsolva, egy ilyen 401-es hiba a kapcsolatot hűti le, ahelyett, hogy lejártként parkolná, összesen 3 alkalommal egy óra alatt; a következő ilyen hiba már lejártként parkolja a kapcsolatot, így egy lemondott kulcs konvergens lesz. Alaphelyzetben kikapcsolva: minden meztelen Mistral 401-es hiba lejártként parkolja a kapcsolatot, ahogyan eddig."
+        "description": "Egy csupasz Mistral 401 ('{\"detail\":\"Unauthorized\"}', explicit hitelesítési jelzés nélkül) bájtra azonos visszavont kulcs és kimerült kvóta esetén. Bekapcsolva egy ilyen 401 lehűti a kapcsolatot ahelyett, hogy lejártként félreállítaná, egy órán belül legfeljebb 3 alkalommal; a következő már lejártként állítja félre, így a visszavont kulcs végül oda kerül. Alapértelmezés szerint kikapcsolva: minden csupasz Mistral 401 lejártként állítja félre a kapcsolatot, mint eddig."
       },
       "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
         "label": "Batch és fájl automatikus tisztítás",
@@ -13997,7 +13997,7 @@
       },
       "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
         "label": "Automatikus kombináció: kulcstalan transportszabályozás",
-        "description": "Kizárja a kulcstalan (hitelesítés nélküli) szolgáltatókat, amelyek transzportja helyi böngészőt (browserBacked) vagy helyileg telepített CLI-őt (isLocalCli) igényel, az auto/* jelöltkандидájtakaról, hogy egy elakadt tag ne tudjon megakadályozni egy automatikus kérést a célonkénti időtúllépésig (#17036). Alapértelmezetten kikapcsolva: minden olyan hitelesítés nélküli szolgáltató, amely emulált eszközhívást használ, pontosan úgy marad a tartalékban, mint eddig. A közvetlen '<alias>'/'<model>' hívások mindkét módban működnek."
+        "description": "Kizárja az auto/* jelöltkészletből azokat a kulcs nélküli (hitelesítés nélküli) szolgáltatókat, amelyek átvitele helyi böngészőt (browserBacked) vagy helyileg telepített CLI-t (isLocalCli) igényel, hogy egy lefagyott tag ne akaszthasson meg egy auto kérést a célonkénti időtúllépésig (#17036). Alapértelmezés szerint kikapcsolva: minden emulált eszközhívást használó, hitelesítés nélküli szolgáltató pontosan úgy marad a készletben, mint eddig. A közvetlen '<alias>'/'<model>' hívások mindkét esetben működnek."
       },
       "CODEBUDDY_CN_INLINE_REASONING": {
         "label": "CodeBuddy CN: belső következtetési újrafuttatás",
