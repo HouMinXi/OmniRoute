@@ -622,7 +622,7 @@ function ConversationsPageContent() {
   //
   // Depends on activeConversationId, NOT the whole activeConversation
   // object: activeConversation gets a fresh object reference every list-poll
-  // tick (see the resync effect above, needed so "{t("gotoLatestRequest")}"
+  // tick (see the resync effect above, needed so the "Go to latest request" button
   // doesn't go stale) — on the SAME poll cadence as this effect's own
   // interval. Depending on the object would tear down and recreate this
   // setInterval every single tick, resetting its countdown each time and
@@ -977,7 +977,7 @@ function ConversationsPageContent() {
               />
               {activeConversation.lastCallLogId && (
                 <Button variant="outline" size="sm" onClick={gotoLatestRequest}>
-                  Goto latest request
+                  {t("gotoLatestRequest")}
                 </Button>
               )}
               <Button
