@@ -15211,7 +15211,7 @@
     "expiresInHours": "upphör om ~{hours}t",
     "expiresInMinutes": "upphör om ~{minutes}m",
     "expiresAt": "upphör {date}",
-    "scopes": "{count, plural, one {# scope} other {# scopes}}",
+    "scopes": "{count, plural, one {# omfång} other {# omfång}}",
     "btnRemove": "Ta bort",
     "btnRefresh": "Uppdatera",
     "loginStep1": "1. Öppna denna URL i webbläsaren och godkänn åtkomst för kontot <mono>{alias}</mono>:",

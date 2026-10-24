@@ -15205,7 +15205,7 @@
     "btnStarting": "Pokreće se…",
     "btnCompleteLogin": "Završi prijavu",
     "btnCompleting": "Završava se…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state ili samo code",
     "noticeImported": "Uvešeno kao račun \"{alias}\" — Dario je ponovno pokrenut da bi ga preuzeo.",
     "noticeAdded": "Račun \"{alias}\" dodan.",
     "expiresInHours": "istječe za ~{hours}h",

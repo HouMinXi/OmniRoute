@@ -15205,7 +15205,7 @@
     "btnStarting": "Boshlanmoqda…",
     "btnCompleteLogin": "Kirishni yakunlash",
     "btnCompleting": "Yakunlanmoqda…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state yoki faqat code",
     "noticeImported": "\"{alias}\" hisobi sifatida import qilindi — Dario uni aniqlash uchun qayta ishga tushirildi.",
     "noticeAdded": "\"{alias}\" hisobi qo‘shildi.",
     "expiresInHours": "muddati ~{hours} soatdan so‘r oxiriy bo‘ladi",

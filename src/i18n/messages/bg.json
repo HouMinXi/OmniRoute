@@ -15211,7 +15211,7 @@
     "expiresInHours": "изтича след ~{hours}ч",
     "expiresInMinutes": "изтича след ~{minutes}м",
     "expiresAt": "изтича на {date}",
-    "scopes": "{count, plural, one {# обхват} other {# обхвata}}",
+    "scopes": "{count, plural, one {# обхват} other {# обхвата}}",
     "btnRemove": "Премахни",
     "btnRefresh": "Обнови",
     "loginStep1": "1. Отворете този URL в браузъра си и одобете достъпа за акаунта <mono>{alias}</mono>:",

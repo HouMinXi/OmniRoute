@@ -15205,7 +15205,7 @@
     "btnStarting": "Aloitetaan…",
     "btnCompleteLogin": "Täytä kirjautuminen",
     "btnCompleting": "Täytetään…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state tai pelkkä code",
     "noticeImported": "Tuohtu tunniksella \"{alias}\" — Dario uudelleenkäynnistetty sen poimimiseksi.",
     "noticeAdded": "Tili \"{alias}\" lisätty.",
     "expiresInHours": "vanhentuu ~{hours} h kuluttua",

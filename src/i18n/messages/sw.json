@@ -15149,7 +15149,7 @@
     "lastScheduledRun": "Usara mmoja wa mwisho",
     "lastRunSummary": "{startedAt} — {status}, mstari wa {rows}",
     "never": "hawezi",
-    "highWaterMark": "Call logs high-water mark",
+    "highWaterMark": "Alama ya kiwango cha juu cha kumbukumbu za maombi (call logs)",
     "rowPrefix": "mstari {id}",
     "noDestinations": "Hakuna malipo ya maisha ya uwekaji",
     "noDestinationsHint": "Ongeza uwekaji ili uanze kutuma rekodi za simu kulingana na mpangilio wa kila saa.",

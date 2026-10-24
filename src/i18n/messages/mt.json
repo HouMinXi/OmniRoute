@@ -15205,7 +15205,7 @@
     "btnStarting": "Għaddej fil-bidu…",
     "btnCompleteLogin": "KUMPLI L-LOGIN",
     "btnCompleting": "Għaddej fil-kompletament…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state jew code biss",
     "noticeImported": "Injumbat bħala kont \"{alias}\" — Dario erġa' ibda biex jagħżlu.",
     "noticeAdded": "Żid il-kont \"{alias}\".",
     "expiresInHours": "iskada f'~{hours} sigħat",

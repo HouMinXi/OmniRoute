@@ -15211,7 +15211,7 @@
     "expiresInHours": "~{hours}h में समाप्त हो रहा है",
     "expiresInMinutes": "~{minutes}m में समाप्त हो रहा है",
     "expiresAt": "{date} को समाप्त",
-    "scopes": "{count, plural, one {# scope} other {# scopes}}",
+    "scopes": "{count, plural, one {# स्कोप} other {# स्कोप}}",
     "btnRemove": "हटाएँ",
     "btnRefresh": "रिफ़्रेश करें",
     "loginStep1": "1. अपने ब्राउज़र में यह URL खोलें और खाते <mono>{alias}</mono> के लिए एक्सेस की अनुमति दें:",

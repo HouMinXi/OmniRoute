@@ -6842,7 +6842,7 @@
     "chatgptConnectorLabel": "ChatGPT-ის თვითონ შესქმნელი კონექტორი",
     "doctorChecking": "სტატუსის შემოწმება…",
     "doctorCheck": "დოქტორის სტატუსის შემოწმება",
-    "fallbackRetryBackendTitle": "Fallback retry backend"
+    "fallbackRetryBackendTitle": "სარეზერვო ხელახალი ცდის backend"
   },
   "settings": {
     "title": "პარამეტრები",
@@ -15205,7 +15205,7 @@
     "btnStarting": "იწყება…",
     "btnCompleteLogin": "შესვლის დასრულება",
     "btnCompleting": "დასრულება…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state ან მხოლოდ code",
     "noticeImported": "შემოტანილია ანგარიშად „{alias}“ — Dario-მ სასაზღვრო უფლებები ამოირჩია.",
     "noticeAdded": "ანგარიში „{alias}“ დაემატა.",
     "expiresInHours": "ვადას ვადა ~{hours} საათში",

@@ -15205,7 +15205,7 @@
     "btnStarting": "Wird gestartet…",
     "btnCompleteLogin": "Anmeldung abschließen",
     "btnCompleting": "Wird abgeschlossen…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state oder nur code",
     "noticeImported": "Als Konto „{alias}“ importiert — Dario hat neu gestartet, um es zu übernehmen.",
     "noticeAdded": "Konto „{alias}“ hinzugefügt.",
     "expiresInHours": "läuft in ca. {hours} Std. ab",

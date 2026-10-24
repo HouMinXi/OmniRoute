@@ -15205,7 +15205,7 @@
     "btnStarting": "Pokretanje…",
     "btnCompleteLogin": "Završi prijavu",
     "btnCompleting": "Završavanje…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state ili samo code",
     "noticeImported": "Uvezeno kao nalog \"{alias}\" — Dario je pokrenut ponovo da ga preuzme.",
     "noticeAdded": "Nalog \"{alias}\" dodan.",
     "expiresInHours": "istječe za ~{hours}h",

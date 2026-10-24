@@ -15317,7 +15317,7 @@
     "btnStarting": "Đang bắt đầu…",
     "btnCompleteLogin": "Hoàn tất đăng nhập",
     "btnCompleting": "Đang hoàn tất…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state hoặc chỉ code",
     "noticeImported": "Đã nhập như tài khoản \"{alias}\" — Dario đã khởi động lại để lấy thông tin.",
     "noticeAdded": "Tài khoản \"{alias}\" đã được thêm.",
     "expiresInHours": "hết hạn trong ~{hours}h",

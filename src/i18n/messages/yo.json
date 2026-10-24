@@ -15205,7 +15205,7 @@
     "btnStarting": "Nínú bẹrẹ…",
     "btnCompleteLogin": "Parí Wọlé",
     "btnCompleting": "Nínú parí…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state tàbí code nìkan",
     "noticeImported": "Ti a gbé wọle bi aṣẹda \"{alias}\" — Dario kọju mọ́ fun rẹ.",
     "noticeAdded": "A ti kun aṣẹda \"{alias}\" sii.",
     "expiresInHours": "fa ìparí ní ~{hours}h",

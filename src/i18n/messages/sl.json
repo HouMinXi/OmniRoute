@@ -15205,7 +15205,7 @@
     "btnStarting": "Zaganjanje …",
     "btnCompleteLogin": "Zaključi prijavo",
     "btnCompleting": "Zaključevanje …",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state ali samo code",
     "noticeImported": "Uvoženo kot račun \"{alias}\" — Dario je bil pripet, da bi ga prevzel.",
     "noticeAdded": "Račun \"{alias}\" je bil dodan.",
     "expiresInHours": "poteče čez ~{hours} ur",

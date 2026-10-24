@@ -4804,7 +4804,7 @@
     "qdrantTutorialCloseAria": "பாடத்தை மூடுக",
     "qdrantTutorialStep1": "பயன்பாட்டுக்கு முன் சேவகத்தை HTTPS மற்றும் API முத்திரையுடன் பாதுகாக்கவும்.",
     "qdrantTutorialStep2": "ஹோஸ்ட், துறைமுகம், சேகரிப்பு (collection), மற்றும் provider/model வடிவத்தில் ஒரு மாடலை உள்ளிடுங்கள், ஒரு அமைப்பு விருப்பம் (credential) உடையது.",
-    "qdrantTutorialStep3": "சேகரிப்பின் ஆயामம் (dimension) மாடல் உருவாக்கும் ஆயாமத்துடன் பொருந்த வேண்டும். ஏற்கனவே உள்ள 2048-ஆயாம சேகரிப்பு 1536-ஆயாம எஞ்பெடிங்க்களை (embeddings) ஏற்காது.",
+    "qdrantTutorialStep3": "சேகரிப்பின் பரிமாணம் (dimension), மாடல் உருவாக்கும் பரிமாணத்துடன் பொருந்த வேண்டும். ஏற்கனவே உள்ள 2048-பரிமாண சேகரிப்பு 1536-பரிமாண எம்பெடிங்குகளை (embeddings) ஏற்காது.",
     "qdrantTutorialStep4": "சேமிக்கவும், இணைப்பை முயற்சித்தல், மற்றும் தேடல் சோதனை நிறைவு செய்தல். பின்னர் Qdrant-ஐ செயலாக்கவும்.",
     "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
     "qdrantTutorialCredits": "கிரெடிட்ஸ்: Rafa Martins — rafacpti@gmail.com"
@@ -15115,7 +15115,7 @@
   },
   "conversations": {
     "title": "அரட்டைகள்",
-    "countSummary": "{total, plural, one {# அரட்டை} other {# அரட்டைகள்}} with 2+ turns",
+    "countSummary": "2+ சுற்றுகள் கொண்ட {total, plural, one {# அரட்டை} other {# அரட்டைகள்}}",
     "autoRefreshTitle": "இந்தப் பட்டியல் சேவகரிடமிடம் மீண்டும் பெறப்படுவதற்கான காலம்.",
     "autoRefresh": "தானியங்கி மீட்டல்",
     "loading": "அரட்டைகள் ஏற்று….",
@@ -15211,7 +15211,7 @@
     "expiresInHours": "~{hours} மணி நேரத்தில் காலாவதியாகும்",
     "expiresInMinutes": "~{minutes} நிமிடங்களில் காலாவதியாகும்",
     "expiresAt": "{date} அன்று காலாவதியாகும்",
-    "scopes": "{count, plural, one {# scope} other {# scopes}}",
+    "scopes": "{count, plural, one {# வரம்பு} other {# வரம்புகள்}}",
     "btnRemove": "அகற்று",
     "btnRefresh": "புதுப்பி",
     "loginStep1": "1. உங்கள் உலாவியில் இந்த URL-ஐத் திறந்து <mono>{alias}</mono> கணக்கிற்கான அணுகலை அங்கீகரிக்கவும்:",

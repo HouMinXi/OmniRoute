@@ -6835,11 +6835,11 @@
     "codexTunnelDescription": "Tunnel tana kasancewa strict outbound kawai. Kayayyakin gida har yanzu Codex ne kawai ke gudanar da su, a tsakanin sandbox da tsarin yardonsa.",
     "tunnelIdLabel": "Tunnel ID",
     "tunnelRuntimeKeyLabel": "Runtime key na tunnel",
-    "tunnelRuntimeKeyPlaceholder": "Runtime key",
+    "tunnelRuntimeKeyPlaceholder": "Maɓallin runtime",
     "tunnelRuntimeKeyHint": "An adana shi a sarrafa tare da cookie kuma ba a rubuta shi cikin logs ba.",
     "tunnelRuntimeKeyNewLabel": "Sabon runtime key na tunnel",
     "tunnelRuntimeKeyNewHint": "Shigar da shi tare da sabon cookie kawai. An adana darajar a sarrafa.",
-    "chatgptConnectorLabel": "ChatGPT custom connector",
+    "chatgptConnectorLabel": "Mahaɗin ChatGPT na musamman",
     "doctorChecking": "Ana duban yanke…",
     "doctorCheck": "Duba yanke doctor",
     "fallbackRetryBackendTitle": "Baya mara da maganin maimaitawa"

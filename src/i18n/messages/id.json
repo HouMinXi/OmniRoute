@@ -15205,7 +15205,7 @@
     "btnStarting": "Memulai…",
     "btnCompleteLogin": "Selesaikan Masuk",
     "btnCompleting": "Menyelesaikan…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state atau code saja",
     "noticeImported": "Diimpor sebagai akun \"{alias}\" — Dario di-restart untuk mengambilnya.",
     "noticeAdded": "Akun \"{alias}\" ditambahkan.",
     "expiresInHours": "berlaku hingga ±{hours}j",

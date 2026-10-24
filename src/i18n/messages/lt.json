@@ -6839,7 +6839,7 @@
     "tunnelRuntimeKeyHint": "Išsaugomas šifruotu kartu su slaptažyme ir niekada nesražuojamas į žurnalus.",
     "tunnelRuntimeKeyNewLabel": "Naujas tunelio vykdytojo raktas",
     "tunnelRuntimeKeyNewHint": "Įveskite tik kartu su nauja slaptažyme. Reikšmė išsaugoma šifruota.",
-    "chatgptConnectorLabel": "ChatGPT custom connector",
+    "chatgptConnectorLabel": "ChatGPT pasirinktinė jungtis",
     "doctorChecking": "Tikrinamas būsena…",
     "doctorCheck": "Patikrinti doctor būseną",
     "fallbackRetryBackendTitle": "Atsarginis pakartojimo backendas"

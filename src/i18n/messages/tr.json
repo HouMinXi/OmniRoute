@@ -15205,7 +15205,7 @@
     "btnStarting": "Başlatılıyor…",
     "btnCompleteLogin": "Girişi Tamamla",
     "btnCompleting": "Tamamlanıyor…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state veya yalnızca code",
     "noticeImported": "\"{alias}\" hesabı olarak içe aktarıldı — Dario tarafından algılanması için yeniden başlatıldı.",
     "noticeAdded": "\"{alias}\" hesabı eklendi.",
     "expiresInHours": "~{hours} saat içinde sona eriyor",

@@ -15205,7 +15205,7 @@
     "btnStarting": "Memulakan…",
     "btnCompleteLogin": "Lengkapkan Log Masuk",
     "btnCompleting": "Melengkapkan…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state atau code sahaja",
     "noticeImported": "Diam il sebagai akaun \"{alias}\" — Dario dipulihkan untuk memakainya.",
     "noticeAdded": "Akaun \"{alias}\" ditambah.",
     "expiresInHours": "tamat dalam ~{hours}j",

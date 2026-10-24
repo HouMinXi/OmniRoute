@@ -3281,7 +3281,7 @@
     "cliproxyapiVersion": "ସଂସ୍କରଣ",
     "customUrl": "କଷ୍ଟମ URL",
     "customEndpointAria": "କଷ୍ଟମ୍ ଏଣ୍ଡପଏଣ୍ଟ",
-    "useDefaultKey": "ଓମ୍ନି ରୁଟ୍ ର डिଫଲ୍ଟ କୀ ବ୍ୟବହାର କରନ୍ତୁ",
+    "useDefaultKey": "OmniRoute ର ପୂର୍ବନିର୍ଦ୍ଧାରିତ କୀ ବ୍ୟବହାର କରନ୍ତୁ",
     "mainModelAria": "ମୂଳ ମଡେଲ୍",
     "manualConfigTitle": "Grok Build ମାନୁଆଲ୍ ଡିଃ"
   },
@@ -6842,7 +6842,7 @@
     "chatgptConnectorLabel": "ଚାଟ୍ ଜି ପି ଟି କଷ୍ଟମ୍ କୋନେକ୍ଟର",
     "doctorChecking": "ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରାଯାଉଛି…",
     "doctorCheck": "ଡକ୍ଟର ଷ୍ଟାଟସ୍ ଯାଞ୍ଚ କରନ୍ତୁ",
-    "fallbackRetryBackendTitle": "Fallback retry backend"
+    "fallbackRetryBackendTitle": "ଫଲବ୍ୟାକ୍ ପୁନଃଚେଷ୍ଟା backend"
   },
   "settings": {
     "title": "ସେଟିଂସ୍",
@@ -15162,7 +15162,7 @@
     "errUpdateDestination": "ଉଦ୍ଦେଶ୍ୟ ହାରାହାରି କରିବାରେ ବିଫଳ",
     "errDeleteDestination": "ଉଦ୍ଦେଶ୍ୟ ମସୁକଂ କରିବାରେ ବିଫଳ",
     "deleteTitle": "ଗନ୍ତବ୍ଯ ଖଡ଼ାନ୍ତୁ",
-    "deleteConfirm": "\"{name}\" କୁ ଖଡ଼ାଇବେ କି? ଏହାର export cursor ମଧ୍ୟ ଅଦୃଶ୍ତ ହେବ, ତେଣୁ ଏହାକୁ ପୁଣି ଯୋଡ଼ିଲେ ପୁରୁଣା retained call log ରୁ ଆରମ୍ଭ ହେବ।",
+    "deleteConfirm": "\"{name}\" ବିଲୋପ କରିବେ କି? ଏହାର ରପ୍ତାନି କର୍ସର୍ ମଧ୍ୟ ହଟାଯିବ, ତେଣୁ ଏହାକୁ ପୁଣି ଯୋଡ଼ିଲେ ସବୁଠାରୁ ପୁରୁଣା ସଂରକ୍ଷିତ କଲ୍ ଲଗ୍‌ରୁ ଆରମ୍ଭ ହେବ।",
     "statusDisabled": "ବିକଳାଙ୍ଗ",
     "statusFailing": "ବିଫଳ",
     "statusHealthy": "ସୁସ୍ଥ",
@@ -15174,7 +15174,7 @@
     "btnDisable": "ଚାଳୁ ରଖିବା",
     "btnEnable": "ଚାଳୁ କରିବା",
     "btnEdit": "ସମ୍ପାଦନା",
-    "btnDelete": "ମୁছে"
+    "btnDelete": "ବିଲୋପ କରନ୍ତୁ"
   },
   "cliproxyHealth": {
     "cardTitle": "CLIProxyAPI ଆକାଉଣ୍ଟଗୁଡ଼ିକ",
@@ -15215,7 +15215,7 @@
     "btnRemove": "ମାଟ୍ତିଦିଅନ୍ତୁ",
     "btnRefresh": "ଅପଡେଟ୍ କରନ୍ତୁ",
     "loginStep1": "1. ଆପଣଙ୍କ ବ୍ରାଉଜରରେ ଏହି URL ଖୋଲନ୍ତୁ ଏବଂ ଗ୍ରାହକ <mono>{alias}</mono> ପାଇଁ ଅନୁମତି ଦିଅନ୍ତୁ:",
-    "pendingExpires": "Pending login expires {time}",
+    "pendingExpires": "ବିଚାରାଧୀନ ଲଗଇନ୍ {time} ରେ ସମାପ୍ତ ହେବ",
     "loginStep2": "2. Anthropic ଦୃଶ୍ୟମାନ କୋଡ୍ ଯୋଡ଼ାନ୍:"
   },
   "miniapp": {

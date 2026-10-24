@@ -15206,7 +15206,7 @@
     "btnCompleteLogin": "লগইন সম্পন্ন করুন",
     "btnCompleting": "সম্পন্ন হচ্ছে…",
     "codePlaceholder": "কোড#স্টেট অথবা শুধু কোড",
-    "noticeImported": "অ্যাকাউন্ট \"{alias}\" হিসেবে আমports করা হয়েছে — Dario এটি পিকআপ করতে পুনরায় চালু করেছেন।",
+    "noticeImported": "অ্যাকাউন্ট \"{alias}\" হিসেবে ইমপোর্ট করা হয়েছে — এটি গ্রহণ করতে Dario পুনরায় চালু হয়েছে।",
     "noticeAdded": "অ্যাকাউন্ট \"{alias}\" যুক্ত হয়েছে।",
     "expiresInHours": "~{hours} ঘণ্টা পরে মেয়াদ শেষ",
     "expiresInMinutes": "~{minutes} মিনিট পরে মেয়াদ শেষ",

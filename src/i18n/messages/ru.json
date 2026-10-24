@@ -15205,7 +15205,7 @@
     "btnStarting": "Начало…",
     "btnCompleteLogin": "Завершить вход",
     "btnCompleting": "Завершение…",
-    "codePlaceholder": "code#state or bare code",
+    "codePlaceholder": "code#state или только code",
     "noticeImported": "Импортировано как аккаунт \"{alias}\" — Dario был перезапущен, чтобы учесть изменения.",
     "noticeAdded": "Аккаунт \"{alias}\" добавлен.",
     "expiresInHours": "истекает примерно через {hours} ч.",
