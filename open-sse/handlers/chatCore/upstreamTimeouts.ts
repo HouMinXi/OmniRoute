@@ -1,4 +1,5 @@
 import {
+  DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
   FETCH_TIMEOUT_MS,
   HTTP_STATUS,
@@ -155,24 +156,50 @@ export function resolveDeclaredTargetTimeoutMs(
 }
 
 /**
- * Total-lifetime cap for one stream (#12913). `globalMs` is STREAM_ACTIVE_TIMEOUT_MS:
- * 0 disables the watchdog for every target. Otherwise a declared budget may only
- * raise the cap, to that budget plus MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS; it never
- * lowers it. Clamped to the timer range, since a larger setTimeout delay wraps and
- * fires at once.
+ * Total-lifetime cap for one stream (#12913). `operatorMs` is the operator's own
+ * STREAM_ACTIVE_TIMEOUT_MS (undefined when unset):
+ * - unset: the default cap, raised for a target that declares a longer budget to
+ *   that budget plus MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS (never lowered);
+ * - positive: a hard cap for every target; a declared budget cannot raise it;
+ * - 0: the watchdog is off.
+ * Clamped to the timer range, since a larger setTimeout delay wraps and fires at once.
  */
 export function resolveStreamActiveTimeoutMs(
-  globalMs: number,
+  operatorMs: number | undefined,
   declaredTimeoutMs: number | undefined
 ): number {
-  if (!Number.isFinite(globalMs) || globalMs <= 0) return 0;
+  if (operatorMs !== undefined) {
+    if (!Number.isFinite(operatorMs) || operatorMs <= 0) return 0;
+    return Math.min(Math.floor(operatorMs), MAX_TIMER_TIMEOUT_MS);
+  }
   const declaredCapMs =
     typeof declaredTimeoutMs === "number" &&
     Number.isFinite(declaredTimeoutMs) &&
     declaredTimeoutMs > 0
       ? Math.floor(declaredTimeoutMs) + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS
       : 0;
-  return Math.min(Math.max(Math.floor(globalMs), declaredCapMs), MAX_TIMER_TIMEOUT_MS);
+  return Math.min(Math.max(DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, declaredCapMs), MAX_TIMER_TIMEOUT_MS);
+}
+
+/**
+ * The active cap for the stream a connection is about to serve: the declared
+ * budget comes from the connection's `providerSpecificData.timeoutMs`, then the
+ * model, then the provider (resolveDeclaredTargetTimeoutMs).
+ */
+export function resolveTargetStreamActiveTimeoutMs(
+  operatorMs: number | undefined,
+  provider: string | null | undefined,
+  model: string | null | undefined,
+  credentials: { providerSpecificData?: unknown } | null | undefined
+): number {
+  return resolveStreamActiveTimeoutMs(
+    operatorMs,
+    resolveDeclaredTargetTimeoutMs(
+      provider,
+      model,
+      resolveConnectionTimeoutMs(credentials?.providerSpecificData)
+    )
+  );
 }
 
 /**

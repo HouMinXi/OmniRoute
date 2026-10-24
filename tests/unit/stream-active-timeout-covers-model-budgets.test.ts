@@ -89,7 +89,8 @@ test("every registered budget, model-level or provider-level, resolves to a cap 
         declared,
         `${providerId}/${model.id} did not resolve its declared budget`
       );
-      const cap = resolveStreamActiveTimeoutMs(DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, resolved);
+      // STREAM_ACTIVE_TIMEOUT_MS unset: the default cap, raised by the declared budget.
+      const cap = resolveStreamActiveTimeoutMs(undefined, resolved);
       assert.ok(
         cap >= declared + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
         `${providerId}/${model.id} declares ${declared}ms but the active watchdog would fire at ${cap}ms`

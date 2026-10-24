@@ -9,10 +9,12 @@ type ReadTimeoutOptions = {
 export const DEFAULT_FETCH_TIMEOUT_MS = 600_000;
 export const DEFAULT_STREAM_IDLE_TIMEOUT_MS = 600_000;
 // Hard cap on a connected stream's TOTAL lifetime (it never resets on bytes,
-// unlike STREAM_IDLE_TIMEOUT_MS). This is the cap every stream gets. A target
-// that declares a longer budget of its own (connection, per-model or
-// provider-level `timeoutMs`) raises its cap to that budget plus the margin, so
-// a model allowed to run for its full budget is not killed mid-answer; see
+// unlike STREAM_IDLE_TIMEOUT_MS). When STREAM_ACTIVE_TIMEOUT_MS is unset, each
+// stream gets this default, raised for a target that declares a longer budget
+// of its own (connection, per-model or provider-level `timeoutMs`) to that
+// budget plus the margin, so a model allowed to run for its full budget is not
+// killed mid-answer. A positive STREAM_ACTIVE_TIMEOUT_MS is a hard cap that no
+// declared budget can raise; 0 disables the cap. See
 // resolveStreamActiveTimeoutMs in open-sse/handlers/chatCore/upstreamTimeouts.ts.
 // The default is the largest per-model budget (1_200_000ms, the Codex models in
 // open-sse/config/providers/registry/codex) plus a one-minute margin.
@@ -119,6 +121,21 @@ function readTimeoutMs(
     return defaultValue;
   }
 
+  return Math.floor(parsed);
+}
+
+/**
+ * The operator's own STREAM_ACTIVE_TIMEOUT_MS, or undefined when it is unset or
+ * invalid (an invalid value falls back to the default, so it counts as unset).
+ * 0 means disabled. Lets the stream resolver tell "operator chose a cap" apart
+ * from "default cap", which getUpstreamTimeoutConfig folds together.
+ */
+export function readStreamActiveTimeoutOverrideMs(
+  env: EnvSource = process.env
+): number | undefined {
+  if (!hasEnvValue(env, "STREAM_ACTIVE_TIMEOUT_MS")) return undefined;
+  const parsed = Number(env.STREAM_ACTIVE_TIMEOUT_MS);
+  if (!Number.isFinite(parsed) || parsed < 0) return undefined;
   return Math.floor(parsed);
 }
 
