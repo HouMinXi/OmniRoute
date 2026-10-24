@@ -13884,7 +13884,7 @@
         "description": "Να επιτρέπεται στο Codex να χρησιμοποιεί το τοπικό μέσο μεταφοράς app-server WebSocket JSON-RPC (codexTransport=app-server). Όταν είναι ανενεργό, οι συνδέσεις που έχουν επιλέξει το app-server μεταπίπτουν στα άλλα μέσα μεταφοράς του Codex."
       },
       "EXPOSE_CC_DISCOVERY_ALIASES": {
-        "label": "Ψευδώνυμες Συναφείες Anίχνευσης Claude Code",
+        "label": "Ψευδώνυμα ανακάλυψης Claude Code",
         "description": "Δημοσιεύει αναγνωριστικά καθρέφτη claude/'<provider>'/'<model>' στο /v1/models, ώστε η ανακάλυψη μοντέλων της πύλης Claude Code να εμφανίζει και μοντέλα εκτός Claude. Προσοχή: διπλασιάζει τις εγγραφές καταλόγου για όλους τους πελάτες όταν ενεργοποιείται καθολικά."
       },
       "NO_THINKING_ALIAS_ENABLED": {

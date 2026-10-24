@@ -13889,7 +13889,7 @@
       },
       "NO_THINKING_ALIAS_ENABLED": {
         "label": "No-Thinking मोडेल एलियासहरू",
-        "description": "no-think/'<provider>'/'<model>' गेटवे एलियासहरूको मास्टर स्विच। चालू (डिफल्ट): /v1/models ले हरेक योग्य सोच्ने क्षमता भएको Claude मोडेलको लागि no-thinking भेरिएन्ट विज्ञापन गर्दछ, र अनुरोधमा पठाइएको no-think/ आईडीले reasoninguनिक्रियनसँगै वास्तविक मोडेलमा फिर्ता ट्याकुन गर्छ। बन्द: कुनै पनि भेरिएन्ट विज्ञापन गरिँदैन र no-think/ आईडीलाई अन्य अज्ञात मोडेल आईडी जस्तै व्यवहार गरिन्छ। यो चालू हुँदा पनि per-model ModelSpec.noThinkingAlias opt-in/opt-out लागू हुन्छ।"
+        "description": "no-think/'<provider>'/'<model>' गेटवे एलियासहरूको मास्टर स्विच। चालू (डिफल्ट): /v1/models ले हरेक योग्य सोच्ने क्षमता भएको Claude मोडेलको लागि no-thinking भेरिएन्ट विज्ञापन गर्दछ, र अनुरोधमा पठाइएको no-think/ आईडी reasoning निष्क्रिय गरिएको वास्तविक मोडेलमा फर्काइन्छ। बन्द: कुनै पनि भेरिएन्ट विज्ञापन गरिँदैन र no-think/ आईडीलाई अन्य अज्ञात मोडेल आईडी जस्तै व्यवहार गरिन्छ। यो चालू हुँदा पनि per-model ModelSpec.noThinkingAlias opt-in/opt-out लागू हुन्छ।"
       },
       "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
         "label": "Thinking Level भेरियन्टहरू असक्षम गर्नुहोस्",
