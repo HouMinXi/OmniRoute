@@ -1,89 +1,133 @@
 /**
- * #12913: the active-stream watchdog never resets on upstream bytes, so the cap it
- * enforces has to come from the budget the target itself declared. These tests pin
- * the resolver, the registry lookup that feeds it, and the hand-off to the stream.
+ * #12913: the active-stream watchdog never resets on upstream bytes. Its global
+ * cap (STREAM_ACTIVE_TIMEOUT_MS, 21 min by default) stays for every stream; a
+ * target that declares a longer budget may only raise its own cap above it, and
+ * an explicit 0 still turns the watchdog off. These tests pin the resolver, the
+ * declared-budget lookup that feeds it, and the hand-off to the stream.
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
   MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
   MAX_TIMER_TIMEOUT_MS,
-  resolveStreamActiveTimeoutMsForModel,
+  getUpstreamTimeoutConfig,
 } from "../../src/shared/utils/runtimeTimeouts.ts";
-import { PROVIDER_MODELS, getModelTimeoutMs } from "../../open-sse/config/providerModels.ts";
-import { resolveConnectionTimeoutMs } from "../../open-sse/handlers/chatCore/upstreamTimeouts.ts";
+import { GLM_TIMEOUT_MS } from "../../open-sse/config/glmProvider.ts";
+import { codexProvider } from "../../open-sse/config/providers/registry/codex/index.ts";
+import {
+  resolveConnectionTimeoutMs,
+  resolveDeclaredTargetTimeoutMs,
+  resolveStreamActiveTimeoutMs,
+} from "../../open-sse/handlers/chatCore/upstreamTimeouts.ts";
 
-const { assembleStreamingPipeline } = await import(
-  "../../open-sse/handlers/chatCore/streamingPipeline.ts"
+const { assembleStreamingPipeline } =
+  await import("../../open-sse/handlers/chatCore/streamingPipeline.ts");
+
+const codexLongModel = codexProvider.models.find(
+  (model) => typeof model.timeoutMs === "number" && model.timeoutMs >= 1_200_000
 );
 
 // ── 1. resolver semantics ────────────────────────────────────────────────────
 
-test("a target that declares no budget gets no wall", () => {
-  assert.equal(resolveStreamActiveTimeoutMsForModel(undefined, 0), 0);
-  assert.equal(resolveStreamActiveTimeoutMsForModel(0, 0), 0);
-  assert.equal(resolveStreamActiveTimeoutMsForModel(-1, 0), 0);
-  assert.equal(resolveStreamActiveTimeoutMsForModel(Number.NaN, 0), 0);
+test("a target that declares no budget keeps the global cap", () => {
+  for (const declared of [undefined, 0, -1, Number.NaN]) {
+    assert.equal(
+      resolveStreamActiveTimeoutMs(DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, declared),
+      DEFAULT_STREAM_ACTIVE_TIMEOUT_MS
+    );
+  }
 });
 
-test("a declared budget resolves to itself plus the margin", () => {
+test("a declared budget above the cap raises it to the budget plus the margin", () => {
   assert.equal(
-    resolveStreamActiveTimeoutMsForModel(1_200_000, 0),
+    resolveStreamActiveTimeoutMs(DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, GLM_TIMEOUT_MS),
+    GLM_TIMEOUT_MS + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS
+  );
+  assert.equal(
+    resolveStreamActiveTimeoutMs(600_000, 1_200_000),
     1_200_000 + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS
   );
+});
+
+test("a declared budget below the cap never lowers it", () => {
   assert.equal(
-    resolveStreamActiveTimeoutMsForModel(600_000, 0),
-    600_000 + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS
+    resolveStreamActiveTimeoutMs(DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, 120_000),
+    DEFAULT_STREAM_ACTIVE_TIMEOUT_MS
+  );
+  assert.equal(resolveStreamActiveTimeoutMs(900_000, 600_000), 900_000);
+});
+
+test("an explicit STREAM_ACTIVE_TIMEOUT_MS=0 disables the watchdog even for long budgets", () => {
+  const disabled = getUpstreamTimeoutConfig({
+    STREAM_ACTIVE_TIMEOUT_MS: "0",
+  }).streamActiveTimeoutMs;
+  assert.equal(disabled, 0);
+  assert.ok(codexLongModel, "precondition: a Codex model declares a 20-minute budget");
+  assert.equal(
+    resolveStreamActiveTimeoutMs(
+      disabled,
+      resolveDeclaredTargetTimeoutMs("codex", codexLongModel.id)
+    ),
+    0
+  );
+  assert.equal(resolveStreamActiveTimeoutMs(disabled, GLM_TIMEOUT_MS), 0);
+  assert.equal(
+    getUpstreamTimeoutConfig({}).streamActiveTimeoutMs,
+    DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
+    "unset is not the same as 0"
   );
 });
 
-test("an operator-configured global cap wins over the per-target budget", () => {
-  assert.equal(resolveStreamActiveTimeoutMsForModel(1_200_000, 900_000), 900_000);
-  assert.equal(resolveStreamActiveTimeoutMsForModel(undefined, 900_000), 900_000);
+test("a value beyond the timer range is clamped, not wrapped to fire instantly", () => {
+  assert.equal(
+    resolveStreamActiveTimeoutMs(DEFAULT_STREAM_ACTIVE_TIMEOUT_MS, Number.MAX_SAFE_INTEGER),
+    MAX_TIMER_TIMEOUT_MS
+  );
+  assert.equal(resolveStreamActiveTimeoutMs(3_000_000_000, undefined), MAX_TIMER_TIMEOUT_MS);
 });
 
-test("a value beyond the timer range is clamped on either branch, not wrapped to fire instantly", () => {
-  // setTimeout stores its delay in 32 bits; an unclamped value fires immediately.
-  assert.equal(resolveStreamActiveTimeoutMsForModel(Number.MAX_SAFE_INTEGER, 0), MAX_TIMER_TIMEOUT_MS);
-  assert.equal(resolveStreamActiveTimeoutMsForModel(0, 3_000_000_000), MAX_TIMER_TIMEOUT_MS);
+// ── 2. declared budget lookup: connection → model → provider ────────────────
+
+test("the declared budget comes from the connection, then the model, then the provider", () => {
+  assert.ok(codexLongModel);
+  const connectionTimeoutMs = resolveConnectionTimeoutMs({ timeoutMs: 1_800_000 });
+  assert.equal(connectionTimeoutMs, 1_800_000);
+  assert.equal(
+    resolveDeclaredTargetTimeoutMs("codex", codexLongModel.id, connectionTimeoutMs),
+    1_800_000,
+    "a connection override outranks the registry"
+  );
+  assert.equal(
+    resolveDeclaredTargetTimeoutMs("codex", codexLongModel.id),
+    codexLongModel.timeoutMs,
+    "a per-model budget comes next"
+  );
+  assert.equal(
+    resolveDeclaredTargetTimeoutMs("glm", "glm-4.6"),
+    GLM_TIMEOUT_MS,
+    "a provider-level budget applies when the model declares none"
+  );
+  assert.equal(resolveDeclaredTargetTimeoutMs("openai", "gpt-4o"), undefined);
+  assert.equal(resolveDeclaredTargetTimeoutMs(undefined, undefined), undefined);
 });
 
-// ── 2. the same properties through the real registry lookup ─────────────────
-
-test("every model that declares a budget is looked up and capped above it", () => {
-  let declaring = 0;
-  for (const [alias, models] of Object.entries(PROVIDER_MODELS)) {
-    for (const model of models ?? []) {
-      if (typeof model?.timeoutMs !== "number" || model.timeoutMs <= 0) continue;
-      declaring += 1;
-      // Read the budget back through the lookup production uses, so a broken
-      // alias/id mapping fails here instead of silently resolving to "no wall".
-      const lookedUp = getModelTimeoutMs(alias, model.id);
-      assert.equal(lookedUp, model.timeoutMs, `${alias}/${model.id} did not round-trip through the lookup`);
-      const cap = resolveStreamActiveTimeoutMsForModel(lookedUp, 0);
-      assert.ok(
-        cap > model.timeoutMs,
-        `${alias}/${model.id} declares ${model.timeoutMs} but resolves to a cap of ${cap}`
-      );
-    }
+test("a target with no declaration keeps the 21-minute wall that bounds endless streams", () => {
+  for (const [provider, model] of [
+    ["openai", "gpt-4o"],
+    ["claude", "claude-sonnet-4-5-20250929"],
+    ["gemini", "gemini-2.5-pro"],
+  ]) {
+    assert.equal(
+      resolveStreamActiveTimeoutMs(
+        DEFAULT_STREAM_ACTIVE_TIMEOUT_MS,
+        resolveDeclaredTargetTimeoutMs(provider, model)
+      ),
+      1_260_000,
+      `${provider}/${model} must not lose its active wall`
+    );
   }
-  assert.ok(declaring > 0, "expected at least one registry model to declare timeoutMs");
-});
-
-test("a model with no declared budget resolves to no wall", () => {
-  const declared = getModelTimeoutMs("grok-cli", "grok-4.7");
-  assert.equal(declared, undefined);
-  assert.equal(resolveStreamActiveTimeoutMsForModel(declared, 0), 0);
-});
-
-test("a connection override outranks the registry budget", () => {
-  const override = resolveConnectionTimeoutMs({ timeoutMs: 1_800_000 });
-  assert.equal(override, 1_800_000);
-  assert.equal(
-    resolveStreamActiveTimeoutMsForModel(override ?? getModelTimeoutMs("grok-cli", "grok-4.7"), 0),
-    1_800_000 + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS
-  );
 });
 
 // ── 3. wiring ───────────────────────────────────────────────────────────────
@@ -117,11 +161,11 @@ test("the resolved active budget reaches pipeWithDisconnect", () => {
       echoModel: null,
       responseHeaders: {},
       contentStallTimeoutMs: 80_000,
-      activeTimeoutMs: 1_260_000,
+      activeTimeoutMs: 3_060_000,
     } as Parameters<typeof assembleStreamingPipeline>[0],
     deps
   );
 
-  assert.equal(seen?.activeTimeoutMs, 1_260_000, "activeTimeoutMs must be forwarded, not dropped");
+  assert.equal(seen?.activeTimeoutMs, 3_060_000, "activeTimeoutMs must be forwarded, not dropped");
   assert.equal(seen?.contentStallTimeoutMs, 80_000, "the existing stall budget must keep flowing");
 });

@@ -29,9 +29,15 @@ export const STREAM_IDLE_TIMEOUT_MS = upstreamTimeouts.streamIdleTimeoutMs;
 export const STREAM_DISCONNECT_GRACE_PERIOD_MS = upstreamTimeouts.streamDisconnectGracePeriodMs;
 
 // Hard cap for a connected upstream stream. This timer never resets on
-// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. Set
-// STREAM_ACTIVE_TIMEOUT_MS=0 to disable it.
+// upstream byte activity and is independent of REQUEST_TIMEOUT_MS. A target that
+// declares a longer budget raises its own cap (resolveStreamActiveTimeoutMs). Set
+// STREAM_ACTIVE_TIMEOUT_MS=0 to disable it for every target.
 export const STREAM_ACTIVE_TIMEOUT_MS = upstreamTimeouts.streamActiveTimeoutMs;
+// Re-exported so the engine reads them through this module instead of importing src.
+export {
+  MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
+  MAX_TIMER_TIMEOUT_MS,
+} from "@/shared/utils/runtimeTimeouts";
 
 // Timeout for the first non-ping SSE event. Inherits REQUEST_TIMEOUT_MS when
 // set, unless STREAM_READINESS_TIMEOUT_MS is specified directly. This must stay

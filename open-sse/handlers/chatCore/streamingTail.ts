@@ -12,8 +12,6 @@ import {
   STREAM_READINESS_TIMEOUT_MS,
   STREAM_RECOVERY,
 } from "../../config/constants.ts";
-import { resolveStreamActiveTimeoutMsForModel } from "@/shared/utils/runtimeTimeouts";
-import { getModelTimeoutMs } from "../../config/providerModels.ts";
 import { incrementTokenUsage } from "../../services/geminiRateLimitTracker.ts";
 import { forgetClaudeThinkingForClientResponse } from "../../services/claudeThinkingStore.ts";
 import { requestTtftMs, streamEmittedOutput } from "../../utils/streamTiming.ts";
@@ -58,7 +56,12 @@ import { storeStreamingSemanticCacheResponse } from "./streamingSemanticCacheSto
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
-import { getExecutorTimeoutMs, resolveConnectionTimeoutMs } from "./upstreamTimeouts.ts";
+import {
+  getExecutorTimeoutMs,
+  resolveConnectionTimeoutMs,
+  resolveDeclaredTargetTimeoutMs,
+  resolveStreamActiveTimeoutMs,
+} from "./upstreamTimeouts.ts";
 import { recordCost, recordUnpricedBudgetUsage } from "@/domain/costRules";
 import { extractFacts } from "@/lib/memory/extraction";
 import { calculateCost, calculateCostDetailed } from "@/lib/usage/costCalculator";
@@ -783,15 +786,16 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     // that same patience for their first REAL content, not just their first
     // lifecycle frame. See pipeWithDisconnect's own doc comment.
     contentStallTimeoutMs: streamReadinessPolicy.timeoutMs,
-    // Same target the readiness gate priced above, so both phases agree on how
-    // long this exchange may run before it is declared dead (0 = no wall). Only
-    // explicit declarations count: a connection override or the registry's own
-    // per-model budget. The provider/global fetch default is not a promise about
-    // how long an answer may take, so it must not become a wall here.
-    activeTimeoutMs: resolveStreamActiveTimeoutMsForModel(
-      resolveConnectionTimeoutMs(credentials?.vendorSpecificData) ??
-        getModelTimeoutMs(provider, model),
-      STREAM_ACTIVE_TIMEOUT_MS
+    // The same target the readiness gate priced above. A budget it declared
+    // (connection, then model, then provider) can only raise the global cap, so a
+    // model allowed to run that long is not cut mid-answer; 0 still disables it.
+    activeTimeoutMs: resolveStreamActiveTimeoutMs(
+      STREAM_ACTIVE_TIMEOUT_MS,
+      resolveDeclaredTargetTimeoutMs(
+        provider,
+        model,
+        resolveConnectionTimeoutMs(credentials?.providerSpecificData)
+      )
     ),
   });
   const clientFacingStream = wrapReadableStreamWithFinalize(finalStream, releaseTurnExecution);

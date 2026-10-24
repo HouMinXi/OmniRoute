@@ -83,9 +83,8 @@ export function assembleStreamingPipeline(
      * request's pre-handoff readiness gate, so slow-first-content reasoning
      * models keep the same generous budget in both phases. */
     contentStallTimeoutMs?: number;
-    /** Total lifetime budget for this stream, resolved from the target's own
-     * declared `timeoutMs` (see resolveStreamActiveTimeoutMsForModel). Omitted or
-     * 0 leaves the active watchdog off. */
+    /** Total lifetime budget for this stream (see resolveStreamActiveTimeoutMs).
+     * Omitted falls back to STREAM_ACTIVE_TIMEOUT_MS; 0 leaves the watchdog off. */
     activeTimeoutMs?: number;
   },
   deps: StreamingPipelineDeps = DEFAULT_DEPS

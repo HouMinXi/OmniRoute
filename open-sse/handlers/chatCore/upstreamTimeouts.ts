@@ -2,8 +2,11 @@ import {
   EXECUTOR_CONTRACT_VIOLATION_CODE,
   FETCH_TIMEOUT_MS,
   HTTP_STATUS,
+  MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS,
+  MAX_TIMER_TIMEOUT_MS,
 } from "../../config/constants.ts";
 import { getModelTimeoutMs } from "../../config/providerModels.ts";
+import { getRegistryEntry } from "../../config/providerRegistry.ts";
 import {
   getLoggedInputTokens,
   getLoggedOutputTokens,
@@ -128,6 +131,48 @@ export function getExecutorTimeoutMs(
   const modelOverride = resolveModelTimeoutOverride(provider, model);
   if (modelOverride !== undefined) return modelOverride;
   return resolveProviderTimeoutMs(executor);
+}
+
+/**
+ * The budget a target itself declared, in getExecutorTimeoutMs's order: connection
+ * `providerSpecificData.timeoutMs` → registry per-model `timeoutMs` → registry
+ * provider-level `timeoutMs` (e.g. GLM's 50 min). Unlike getExecutorTimeoutMs it
+ * never falls back to FETCH_TIMEOUT_MS: a global default is not a promise about
+ * how long an answer may take. Undefined when nothing is declared.
+ */
+export function resolveDeclaredTargetTimeoutMs(
+  provider: string | null | undefined,
+  model: string | null | undefined,
+  connectionTimeoutMs?: number
+): number | undefined {
+  if (connectionTimeoutMs !== undefined && connectionTimeoutMs > 0) return connectionTimeoutMs;
+  const modelOverride = resolveModelTimeoutOverride(provider ?? undefined, model ?? undefined);
+  if (modelOverride !== undefined && modelOverride > 0) return modelOverride;
+  const providerTimeoutMs = provider ? getRegistryEntry(provider)?.timeoutMs : undefined;
+  if (typeof providerTimeoutMs !== "number" || !Number.isFinite(providerTimeoutMs))
+    return undefined;
+  return providerTimeoutMs > 0 ? Math.floor(providerTimeoutMs) : undefined;
+}
+
+/**
+ * Total-lifetime cap for one stream (#12913). `globalMs` is STREAM_ACTIVE_TIMEOUT_MS:
+ * 0 disables the watchdog for every target. Otherwise a declared budget may only
+ * raise the cap, to that budget plus MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS; it never
+ * lowers it. Clamped to the timer range, since a larger setTimeout delay wraps and
+ * fires at once.
+ */
+export function resolveStreamActiveTimeoutMs(
+  globalMs: number,
+  declaredTimeoutMs: number | undefined
+): number {
+  if (!Number.isFinite(globalMs) || globalMs <= 0) return 0;
+  const declaredCapMs =
+    typeof declaredTimeoutMs === "number" &&
+    Number.isFinite(declaredTimeoutMs) &&
+    declaredTimeoutMs > 0
+      ? Math.floor(declaredTimeoutMs) + MAX_REGISTERED_MODEL_TIMEOUT_MARGIN_MS
+      : 0;
+  return Math.min(Math.max(Math.floor(globalMs), declaredCapMs), MAX_TIMER_TIMEOUT_MS);
 }
 
 /**
