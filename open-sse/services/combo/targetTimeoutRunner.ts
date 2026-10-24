@@ -110,6 +110,13 @@ function targetTimeoutResponse(modelStr: string): Response {
   );
 }
 
+/** A declared budget may lengthen the first-output wait; anything else leaves the floor as-is. */
+function loosenOnly(floorMs: number, declaredMs: number | undefined): number {
+  return typeof declaredMs === "number" && Number.isFinite(declaredMs) && declaredMs > floorMs
+    ? declaredMs
+    : floorMs;
+}
+
 export function buildTargetTimeoutRunner(deps: {
   handleSingleModel: HandleSingleModel;
   comboTargetTimeoutMs: number;
@@ -117,12 +124,25 @@ export function buildTargetTimeoutRunner(deps: {
   resolveTargetTimeoutMs?: (
     target?: SingleModelTarget
   ) => Promise<number | undefined> | number | undefined;
+  /**
+   * The target's own declared budget, consulted only for the first-output wait. It can only
+   * lengthen that wait past the dispatch budget, never shorten it.
+   */
+  resolveDeclaredTargetBudgetMs?: (
+    target?: SingleModelTarget
+  ) => Promise<number | undefined> | number | undefined;
 }): (
   b: Record<string, unknown>,
   modelStr: string,
   target?: SingleModelTarget
 ) => Promise<Response> {
-  const { handleSingleModel, comboTargetTimeoutMs, log, resolveTargetTimeoutMs } = deps;
+  const {
+    handleSingleModel,
+    comboTargetTimeoutMs,
+    log,
+    resolveTargetTimeoutMs,
+    resolveDeclaredTargetBudgetMs,
+  } = deps;
   ensureDiagnosticListener();
   return async (
     b: Record<string, unknown>,
@@ -221,17 +241,21 @@ export function buildTargetTimeoutRunner(deps: {
       // waiting until the client gives up.
       if (!dispatched.ok || !isEventStreamResponse(dispatched)) return dispatched;
 
+      const firstOutputBudgetMs = loosenOnly(
+        effectiveTimeoutMs,
+        await resolveDeclaredTargetBudgetMs?.(target)
+      );
       const gate = await awaitFirstOutput(
         dispatched,
-        effectiveTimeoutMs - (Date.now() - startedAt),
+        firstOutputBudgetMs - (Date.now() - startedAt),
         timeoutController.signal
       );
       if (gate.kind === "output") return gate.response;
 
       if (gate.reason !== "budget") {
         // Cancelled from outside (hedge winner, client disconnect) or the body closed empty.
-        // Neither is the target's fault, so the response goes back as-is and the existing
-        // empty/取消 handling classifies it — never as combo_target_timeout.
+        // Neither is the target's fault, so the response goes back with its body unread and the
+        // existing empty/cancel handling classifies it — never as combo_target_timeout.
         log.debug?.(
           "COMBO",
           `Model ${modelStr} stream ended before output (${gate.reason}) after ${Date.now() - startedAt}ms — not counted as a timeout`
@@ -242,14 +266,14 @@ export function buildTargetTimeoutRunner(deps: {
       const stallErr = new Error(COMBO_PER_MODEL_TIMEOUT_REASON);
       recordTimeoutContext({
         modelStr,
-        timeoutMs: effectiveTimeoutMs,
+        timeoutMs: firstOutputBudgetMs,
         abortError: stallErr,
         timestamp: Date.now(),
       });
       timeoutController.abort(stallErr);
       log.warn(
         "COMBO",
-        `Model ${modelStr} opened a stream but produced no output within ${Date.now() - startedAt}ms of dispatch (per-target budget ${effectiveTimeoutMs}ms) — falling back`
+        `Model ${modelStr} opened a stream but produced no output within ${Date.now() - startedAt}ms of dispatch (first-output budget ${firstOutputBudgetMs}ms) — falling back`
       );
       return targetTimeoutResponse(modelStr);
     } finally {

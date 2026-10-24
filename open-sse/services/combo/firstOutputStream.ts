@@ -141,7 +141,12 @@ export class SseOutputScanner {
  * Hold `response` until its body carries output, or stop waiting for one of the reasons above.
  *
  * The peek reads a clone, so the caller keeps the original Response (same object, same headers,
- * unlocked body). Both branches are cancelled before returning, releasing the upstream socket.
+ * unlocked body). The gate owns only the peek branch: it always cancels that one, and it cancels
+ * the original body only on `budget`, when the caller is about to throw the target away.
+ * - `empty`: the original body still holds every byte the target sent, so the empty-response
+ *   checks (quality validation, trusted empty turns) read exactly what they read without the gate.
+ * - `cancelled`: whoever aborted `signal` owns the teardown; the runner passes the target's
+ *   abort signal, which already releases the upstream request.
  */
 export async function awaitFirstOutput(
   response: Response,
@@ -205,6 +210,8 @@ export async function awaitFirstOutput(
   void reader.cancel(COMBO_PER_MODEL_TIMEOUT_REASON).catch(() => undefined);
   if (outcome === "output") return { kind: "output", response };
 
-  void response.body?.cancel(COMBO_PER_MODEL_TIMEOUT_REASON).catch(() => undefined);
+  if (outcome === "budget") {
+    void response.body?.cancel(COMBO_PER_MODEL_TIMEOUT_REASON).catch(() => undefined);
+  }
   return { kind: "stalled", reason: outcome };
 }

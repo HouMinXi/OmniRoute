@@ -23,9 +23,10 @@ export const PRE_SCREEN_CONCURRENCY = 5;
  * (escalated cmqlrhd7c). For STREAMING requests this bounds the time to the first output
  * frame, not the time to response headers: a target that opens the stream and then produces
  * nothing is abandoned at the same budget, while token generation that has started streams
- * to completion and is NOT cut short. Operators can still raise it per-combo via
- * `targetTimeoutMs` — worth doing for slow reasoning combos, streaming included, whose first
- * token can legitimately take longer than the default.
+ * to completion and is NOT cut short. A target that declares a longer budget of its own
+ * (connection, per-model or provider-level `timeoutMs`) gets that much time for its first
+ * output (see resolveDeclaredTargetBudgetMs in combo.ts). Operators can still set it
+ * per-combo via `targetTimeoutMs`, which overrides the declared budgets.
  */
 export const DEFAULT_COMBO_TARGET_TIMEOUT_MS = 120_000;
 
@@ -243,6 +244,13 @@ function normalizePositiveTimeoutMs(value: unknown): number {
   const numericValue = Number(value);
   if (!Number.isFinite(numericValue) || numericValue <= 0) return 0;
   return Math.min(Math.floor(numericValue), MAX_TIMER_TIMEOUT_MS);
+}
+
+/** True when the combo itself sets `targetTimeoutMs`, which then outranks every other budget. */
+export function hasExplicitComboTargetTimeout(
+  config: Record<string, unknown> | null | undefined
+): boolean {
+  return isRecord(config) && normalizePositiveTimeoutMs(config.targetTimeoutMs) > 0;
 }
 
 export function resolveComboTargetTimeoutMs(
