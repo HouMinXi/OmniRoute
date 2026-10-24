@@ -14004,7 +14004,7 @@
         "description": "codebuddy-cn థింకింగ్ మోడల్‌ల కోసం (reasoning replay అవసరమయ్యే DeepSeek-V4 / Kimi-K2 కుటుంబాలు), మళ్లీ పంపిన ప్రతి assistant reasoning_content‌ను సందేశ కంటెంట్ ప్రారంభంలో కనిపించే '<thought>' బ్లాక్‌గా ఇన్‌లైన్ చేయండి, తద్వారా reasoning_content ఫీల్డ్‌ను తొలగించే గేట్‌వే దాటినా అది నిలిచి ఉంటుంది (#13632). డిఫాల్ట్‌గా ఆఫ్: codebuddy-cn అభ్యర్థనలు మారకుండా పంపబడతాయి; reasoning_content ఫీల్డ్ ఎల్లప్పుడూ ఉంచబడుతుంది."
       },
       "PROVIDER_SAFETY_STOPS_TERMINAL": {
-        "label": "ప్రొవైడర్ సేఫ్టీ స్టాప్‌లు: తుది నిర్ణయం",
+        "label": "ప్రొవైడర్ సేఫ్టీ స్టాప్‌లు: తుది ఆపివేత",
         "description": "స్పష్టమైన ప్రొవైడర్ సేఫ్టీ స్టాప్‌ను (misalignment_policy_violation, content_policy_violation, లేదా provider_safety_rejection‌గా లేబుల్ చేసిన ఖచ్చితమైన పాత 'blocked by our safety systems' తిరస్కరణ) తుది, అభ్యర్థన-పరిధి తిరస్కరణగా ఉంచండి: దాని కోడ్ HTTP, Responses, WebSocket మరియు completed-stream లోపాలలో భద్రపరచబడుతుంది, మరియు కాంబో ఇతర లక్ష్యాలను మళ్లీ ప్రయత్నించే బదులు అక్కడే ఆగి, అనుమతించిన సోదర అభ్యర్థనలను రద్దు చేస్తుంది (#17049). డిఫాల్ట్‌గా ఆఫ్: ఈ లోపాలు ఇప్పటికే ఉన్న నిర్వహణనే కొనసాగిస్తాయి, కాంబో రూటింగ్ మారదు."
       },
       "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
