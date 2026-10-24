@@ -4807,7 +4807,7 @@
     "qdrantTutorialStep3": "Η διάσταση της συλλογής πρέπει να ταιριάζει με τη διάσταση που παράγει το μοντέλο. Μια υπάρχουσα συλλογή διαστάσεων 2048 δεν αποδεχόταν embeddings διαστάσεων 1536.",
     "qdrantTutorialStep4": "Αποθηκεύστε, δοκιμάστε τη σύνδεση και εκτελέστε το τεστ αναζήτησης. Μόνο τότε ενεργοποιήστε το Qdrant.",
     "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
-    "qdrantTutorialCredits": "Credits: Rafa Martins — rafacpti@gmail.com"
+    "qdrantTutorialCredits": "Συντελεστές: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Δεξιότητες",

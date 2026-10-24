@@ -4807,7 +4807,7 @@
     "qdrantTutorialStep3": "컬렉션 차원은 모델이 생성하는 차원과 일치해야 합니다. 기존 2048차원 컬렉션은 1536차원 임베딩을 받을 수 없습니다.",
     "qdrantTutorialStep4": "저장하고 연결을 테스트한 다음 검색 테스트를 실행하십시오. 그런 후에만 Qdrant를 활성화하세요.",
     "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
-    "qdrantTutorialCredits": "Credits: Rafa Martins — rafacpti@gmail.com"
+    "qdrantTutorialCredits": "제작: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "스킬",

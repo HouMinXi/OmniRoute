@@ -3279,7 +3279,7 @@
     "cliproxyapiUpdate": "განახლება",
     "cliproxyapiUpdateAvailable": "ხელმისაწვდომია განახლება: v{current} → v{latest}",
     "cliproxyapiVersion": "ვერსია",
-    "customUrl": "მორწუფული URL",
+    "customUrl": "მორგებული URL",
     "customEndpointAria": "მორწუფული დაბოლო წერტილი",
     "useDefaultKey": "გადაამხსიარეთ OmniRoute-ის ნაგულისხმობი კლავში",
     "mainModelAria": "მთავარი მოდელი",

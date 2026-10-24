@@ -3279,7 +3279,7 @@
     "cliproxyapiUpdate": "အပ်ဒိတ်လုပ်ရန်",
     "cliproxyapiUpdateAvailable": "အပ်ဒိတ်ရရှိနိုင်သည်- v{current} → v{latest}",
     "cliproxyapiVersion": "ဗားရှင်း",
-    "customUrl": "ကွဲပြားသော URL",
+    "customUrl": "စိတ်ကြိုက် URL",
     "customEndpointAria": "ကွဲပြားသော endpoint",
     "useDefaultKey": "OmniRoute ကိုယ်ပိုင် default key ကို အသုံးပြုပါ",
     "mainModelAria": "လက်မောင်းမုခ်ခံစက်",
@@ -4807,7 +4807,7 @@
     "qdrantTutorialStep3": "collection ၏ အတိုင်းအတာ (dimension) သည် မော်ဒယ်က ထုတ်ပေးသော အတိုင်းအတာနှင့် ကိုက်ညီရမည်။ ရှိပြီးသား 2048 အတိုင်းအတာ collection သည် 1536 အတိုင်းအတာ embedding များကို လက်မခံပါ။",
     "qdrantTutorialStep4": "သိမ်းဆည်းပါ၊ ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ရှာဖွေမှု စစ်ဆေးမှုကို လည်ပတ်ပါ။ ထို့နောက်မှသာ Qdrant ကို ဖွင့်တင်ပါ။",
     "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
-    "qdrantTutorialCredits": "Credits: Rafa Martins — rafacpti@gmail.com"
+    "qdrantTutorialCredits": "ဖန်တီးသူ: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "ကျွမ်းကျင်မှုများ",

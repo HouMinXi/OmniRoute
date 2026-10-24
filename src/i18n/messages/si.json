@@ -3279,7 +3279,7 @@
     "cliproxyapiUpdate": "යාවත්කාලීන කරන්න",
     "cliproxyapiUpdateAvailable": "යාවත්කාලීනයක් ඇත: v{current} → v{latest}",
     "cliproxyapiVersion": "අනුවාදය",
-    "customUrl": "Custom URL",
+    "customUrl": "අභිරුචි URL",
     "customEndpointAria": "අභිමත endpoint",
     "useDefaultKey": "OmniRoute ඉලක්කයේ මූලික key භාවිතා කරන්න",
     "mainModelAria": "ප්‍රධාන ආකෘතිය",
@@ -4807,7 +4807,7 @@
     "qdrantTutorialStep3": "එකතුවේ මානය ආකෘතියෙන් භාවිතා කරන මානයට සමාන විය යුතුය. 2048-මාන එකතුවක් ඇති විට, 1536-මාන දත්ත ඉලක්කය පිළිගත නොහැක.",
     "qdrantTutorialStep4": "සැකසුම් සුරකින්න, සම්බන්ධතාවය පරීක්ෂා කර, සොයායාම පරීක්ෂාව සිදු කරන්න. එවිට පමණක් Qdrant සක්‍රීය කරන්න.",
     "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
-    "qdrantTutorialCredits": "අගය: Rafa Martins — rafacpti@gmail.com"
+    "qdrantTutorialCredits": "කර්තෘ: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "කුසලතා",
