@@ -22,7 +22,6 @@ import { DEFAULT_RESPONSES_PREVIOUS_RESPONSE_ID_MODE } from "@/shared/constants/
 import { decodeUserinfo } from "@/shared/utils/decodeUserinfo";
 import { type JsonRecord, toRecord } from "./settings/shared";
 import { resolveNoAuthSharedProviderProxy } from "./settings/noAuthProxyFallback";
-import { readSavedCallLogPipelineEnabled } from "./databaseSettings";
 import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
 
 type ProxyValue = JsonRecord | string | null;
@@ -149,19 +148,6 @@ function applySessionAffinityLegacyFallback(settings: Record<string, unknown>): 
         ? settings.codexSessionAffinityTtlMs
         : 0;
   }
-}
-
-/**
- * The dashboard persists the logs section under the `databaseSettings` namespace
- * (camelCase keys), while the request hot path reads
- * `settings.call_log_pipeline_enabled` (snake_case) from the `settings`
- * namespace. Without a bridge the panel toggle writes one row and the hot path
- * reads another, so enabling the call-log pipeline changes nothing (#16310
- * follow-up). Only an explicit saved value wins; otherwise the flat key stands.
- */
-function applyCallLogPipelineBridge(settings: Record<string, unknown>): void {
-  const saved = readSavedCallLogPipelineEnabled();
-  if (saved !== null) settings.call_log_pipeline_enabled = saved;
 }
 
 export async function getSettings() {
@@ -318,7 +304,6 @@ export async function getSettings() {
     settings.oidcClientSecret = decrypt(settings.oidcClientSecret) ?? "";
   }
   applySessionAffinityLegacyFallback(settings);
-  applyCallLogPipelineBridge(settings);
 
   // Auto-complete onboarding for pre-configured deployments (Docker/VM)
   // If INITIAL_PASSWORD is set via env, this is a headless deploy — skip the wizard
