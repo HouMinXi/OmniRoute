@@ -373,8 +373,8 @@ ma jiddependi fuq definizzjoni statika ta' combo. Dan iħaddem il-familja ta' pr
 
 Kapaċitajiet ewlenin:
 
-- **20 strateġija tar-routing** (prijorità, ponderata, imla-l-ewwel, round-robin, P2C, każwali,
-  l-inqas użata, ottimizzata għall-ispejjeż, konxja mir-reset, tieqa tar-reset, marġni disponibbli, ponderata skont il-kwota,
+- **21 strateġija tar-routing** (prijorità, ponderata, imla-l-ewwel, round-robin, P2C, każwali,
+  l-inqas użata, ottimizzata għall-ispejjeż, konxja mir-reset, tieqa tar-reset, l-ewwel dak li jiskadi, marġni disponibbli, ponderata skont il-kwota,
   strettament każwali, **awtomatika**, lkgp, ottimizzata għall-kuntest, ottimizzata għall-cache, relay tal-kuntest, **fużjoni**,
   pipeline) —
   l-istrateġija awtomatika hija ż-żieda ewlenija f'v3.8.0; `fusion` (fan-out tal-panel + sinteżi mill-ġudikatur,

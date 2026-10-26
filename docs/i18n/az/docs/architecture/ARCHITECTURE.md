@@ -370,8 +370,8 @@ Auto Combo statik kombinasiya tərifinə əsaslanmaq əvəzinə, sorğu zamanı 
 
 Əsas imkanlar:
 
-- **20 marşrutlaşdırma strategiyası** (prioritet, çəkili, əvvəlcə doldurma, dövri növbələmə, P2C, təsadüfi,
-  ən az istifadə edilən, xərc baxımından optimallaşdırılmış, sıfırlanmanı nəzərə alan, sıfırlama pəncərəsi, ehtiyat tutum, kvota üzrə çəkili,
+- **21 marşrutlaşdırma strategiyası** (prioritet, çəkili, əvvəlcə doldurma, dövri növbələmə, P2C, təsadüfi,
+  ən az istifadə edilən, xərc baxımından optimallaşdırılmış, sıfırlanmanı nəzərə alan, sıfırlama pəncərəsi, müddəti bitənə üstünlük, ehtiyat tutum, kvota üzrə çəkili,
   sərt təsadüfi, **avtomatik**, lkgp, kontekst baxımından optimallaşdırılmış, keş baxımından optimallaşdırılmış, kontekst ötürülməsi, **birləşdirmə**,
   konveyer) —
   avtomatik strategiya v3.8.0 versiyasındakı əsas yenilikdir; `fusion` (panelə paralel paylama + hakim sintezi,

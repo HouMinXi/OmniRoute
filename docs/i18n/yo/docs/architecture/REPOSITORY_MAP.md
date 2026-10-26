@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: àwọn orúkọ ààmì tí àwọn ojú-ìfihàn ń lò → àwọn àkójọpọ̀ Lucide (`<Icon>`)               |
 | `constants/providers.ts`         | **Àwọn provider 375** pẹ̀lú ìfọwọ́sí Zod (orisun òtítọ́)                                              |
 | `constants/cliTools.ts`          | Àkọsílẹ̀ àwọn irinṣẹ́ CLI ti ita                                                                     |
-| `constants/routingStrategies.ts` | **Àwọn ọgbọ́n routing 20** pẹ̀lú àwọn ààyò                                                           |
+| `constants/routingStrategies.ts` | **Àwọn ọgbọ́n routing 21** pẹ̀lú àwọn ààyò                                                           |
 | `constants/publicApiRoutes.ts`   | Àwọn route tó nílò ìfàṣẹsí Bearer (dípò management)                                                |
 | `constants/upstreamHeaders.ts`   | Àtòjọ àwọn header tí a kò gbà láàyè fún àwọn ìbéèrè upstream                                       |
 | `validation/schemas.ts`          | Àwọn schema Zod tó tó ~80 (orisun òtítọ́ kan ṣoṣo fún àwọn àdéhùn API)                              |

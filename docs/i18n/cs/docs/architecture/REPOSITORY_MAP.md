@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                              |
 | `constants/providers.ts`         | **375 poskytovatelů** s validací Zod (jediný zdroj pravdy)                                               |
 | `constants/cliTools.ts`          | Registr externích nástrojů CLI                                                                           |
-| `constants/routingStrategies.ts` | **20 strategií směrování** s prioritami                                                                  |
+| `constants/routingStrategies.ts` | **21 strategií směrování** s prioritami                                                                  |
 | `constants/publicApiRoutes.ts`   | Trasy, které vyžadují ověření Bearer (oproti ověření pro správu)                                         |
 | `constants/upstreamHeaders.ts`   | Seznam zakázaných hlaviček pro požadavky na upstream                                                     |
 | `validation/schemas.ts`          | ~80 schémat Zod (jediný zdroj pravdy pro kontrakty API)                                                  |

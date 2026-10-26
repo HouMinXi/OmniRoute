@@ -379,8 +379,8 @@ polegać na statycznej definicji combo. Obsługuje rodzinę prefiksów modeli `a
 
 Najważniejsze możliwości:
 
-- **20 strategii routingu** (priorytetowa, ważona, najpierw wypełnianie, round-robin, P2C, losowa,
-  najmniej używana, optymalizowana kosztowo, uwzględniająca reset, okno resetu, rezerwa, ważona kwotą,
+- **21 strategii routingu** (priorytetowa, ważona, najpierw wypełnianie, round-robin, P2C, losowa,
+  najmniej używana, optymalizowana kosztowo, uwzględniająca reset, okno resetu, najpierw wygasające, rezerwa, ważona kwotą,
   ściśle losowa, **auto**, lkgp, optymalizowana pod kątem kontekstu, optymalizowana pod kątem pamięci podręcznej, przekazywanie kontekstu, **fusion**,
   potokowa) —
   auto jest główną nowością w v3.8.0; `fusion` (równoległe kierowanie do panelu + synteza przez oceniającego,

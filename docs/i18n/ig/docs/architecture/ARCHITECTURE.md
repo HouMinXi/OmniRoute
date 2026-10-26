@@ -371,8 +371,8 @@ Auto Combo na-enye ebumnuche ntụgharị akara ma họrọ ha n'ụzọ na-agba
 
 Ike ndị bụ isi:
 
-- **Ụzọ ntụgharị 20** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **Ụzọ ntụgharị 21** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
   auto bụ mgbakwunye kachasị pụta ìhè na v3.8.0; `fusion` (ịgbasa gaa na panel + njikọ mkpebi onye ọkaikpe,

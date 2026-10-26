@@ -372,8 +372,8 @@ mengandalkan definisi combo statis. Fitur ini mendukung keluarga prefiks model `
 
 Kemampuan utama:
 
-- **20 strategi perutean** (prioritas, berbobot, isi-dahulu, round-robin, P2C, acak,
-  paling jarang digunakan, dioptimalkan untuk biaya, sadar reset, jendela reset, ruang tersisa, berbobot kuota,
+- **21 strategi perutean** (prioritas, berbobot, isi-dahulu, round-robin, P2C, acak,
+  paling jarang digunakan, dioptimalkan untuk biaya, sadar reset, jendela reset, kedaluwarsa dulu, ruang tersisa, berbobot kuota,
   acak ketat, **auto**, lkgp, dioptimalkan untuk konteks, dioptimalkan untuk cache, relai konteks, **fusion**,
   pipeline) —
   auto merupakan penambahan utama dalam v3.8.0; `fusion` (fan-out panel + sintesis oleh juri,

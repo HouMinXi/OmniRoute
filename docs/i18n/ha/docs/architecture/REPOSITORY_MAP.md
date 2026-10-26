@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: sunayen gumaka da allunan ke amfani da su → sassan Lucide (`<Icon>`)                             |
 | `constants/providers.ts`         | **masu samarwa 375** tare da tabbatarwar Zod (tushen gaskiya)                                                |
 | `constants/cliTools.ts`          | Kundin rajistar kayan aikin CLI na waje                                                                      |
-| `constants/routingStrategies.ts` | **dabarun zaɓin hanya 20** tare da matakan fifiko                                                            |
+| `constants/routingStrategies.ts` | **dabarun zaɓin hanya 21** tare da matakan fifiko                                                            |
 | `constants/publicApiRoutes.ts`   | Hanyoyin da ke buƙatar tantancewar Bearer (maimakon ta gudanarwa)                                            |
 | `constants/upstreamHeaders.ts`   | Jerin kanun da aka hana don buƙatun upstream                                                                 |
 | `validation/schemas.ts`          | Tsarukan Zod kusan 80 (tushen gaskiya guda ɗaya don kwangilolin API)                                         |

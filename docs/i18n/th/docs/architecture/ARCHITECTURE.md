@@ -371,8 +371,8 @@ Auto Combo จะให้คะแนนและเลือกเป้าห
 
 ความสามารถหลัก:
 
-- **กลยุทธ์การกำหนดเส้นทาง 20 แบบ** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **กลยุทธ์การกำหนดเส้นทาง 21 แบบ** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
   auto เป็นฟีเจอร์เด่นที่เพิ่มเข้ามาใน v3.8.0 ส่วน `fusion` (กระจายคำขอไปยังพาเนล + สังเคราะห์ผลโดยผู้ตัดสิน,

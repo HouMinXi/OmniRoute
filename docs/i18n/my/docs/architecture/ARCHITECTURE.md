@@ -361,8 +361,8 @@ Auto Combo သည် ပုံသေ combo သတ်မှတ်ချက်အ�
 
 အဓိက လုပ်ဆောင်နိုင်စွမ်းများ:
 
-- **routing strategy 20 မျိုး** (ဦးစားပေး၊ အလေးချိန်အလိုက်၊ ဦးစွာဖြည့်၊ အလှည့်ကျ၊ P2C၊ ကျပန်း၊
-  အသုံးပြုမှုအနည်းဆုံး၊ ကုန်ကျစရိတ်အကောင်းဆုံးဖြစ်အောင်ပြုလုပ်ထားသော၊ reset ကိုထည့်သွင်းစဉ်းစားသော၊ reset-window၊ headroom၊ quota-weighted၊
+- **routing strategy 21 မျိုး** (ဦးစားပေး၊ အလေးချိန်အလိုက်၊ ဦးစွာဖြည့်၊ အလှည့်ကျ၊ P2C၊ ကျပန်း၊
+  အသုံးပြုမှုအနည်းဆုံး၊ ကုန်ကျစရိတ်အကောင်းဆုံးဖြစ်အောင်ပြုလုပ်ထားသော၊ reset ကိုထည့်သွင်းစဉ်းစားသော၊ reset-window၊ expiry-first၊ headroom၊ quota-weighted၊
   strict-random၊ **auto**၊ lkgp၊ context-optimized၊ cache-optimized၊ context-relay၊ **fusion**၊
   pipeline) —
   auto သည် v3.8.0 တွင် အဓိကထည့်သွင်းမှုဖြစ်သည်။ `fusion` (panel fan-out + judge synthesis၊

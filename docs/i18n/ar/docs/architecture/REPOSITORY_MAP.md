@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: أسماء الأيقونات التي تستخدمها الشاشات ← مكوّنات Lucide (`<Icon>`)                                |
 | `constants/providers.ts`         | **375 مزوّدًا** مع التحقق باستخدام Zod (مصدر الحقيقة)                                                        |
 | `constants/cliTools.ts`          | سجل أدوات CLI الخارجية                                                                                       |
-| `constants/routingStrategies.ts` | **20 استراتيجية توجيه** مع الأولويات                                                                         |
+| `constants/routingStrategies.ts` | **21 استراتيجية توجيه** مع الأولويات                                                                         |
 | `constants/publicApiRoutes.ts`   | المسارات التي تتطلب مصادقة Bearer (بدلًا من مصادقة الإدارة)                                                  |
 | `constants/upstreamHeaders.ts`   | قائمة حظر الترويسات لطلبات المنبع                                                                            |
 | `validation/schemas.ts`          | نحو 80 مخطط Zod (مصدر الحقيقة الوحيد لعقود API)                                                              |

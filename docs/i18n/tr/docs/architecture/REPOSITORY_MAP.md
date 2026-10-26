@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tarafından kullanılan simge adları → Lucide bileşenleri (`<Icon>`)                      |
 | `constants/providers.ts`         | Zod doğrulamalı **375 sağlayıcı** (tek doğruluk kaynağı)                                                     |
 | `constants/cliTools.ts`          | Harici CLI aracı kayıt defteri                                                                               |
-| `constants/routingStrategies.ts` | Önceliklere sahip **20 yönlendirme stratejisi**                                                              |
+| `constants/routingStrategies.ts` | Önceliklere sahip **21 yönlendirme stratejisi**                                                              |
 | `constants/publicApiRoutes.ts`   | Bearer kimlik doğrulaması (yönetim kimlik doğrulaması yerine) gerektiren rotalar                             |
 | `constants/upstreamHeaders.ts`   | Yukarı akış istekleri için üst bilgi engelleme listesi                                                       |
 | `validation/schemas.ts`          | ~80 Zod şeması (API sözleşmeleri için tek doğruluk kaynağı)                                                  |

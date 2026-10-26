@@ -372,8 +372,8 @@ Otomatik Kombinasyon, statik bir kombinasyon tanımına bağlı kalmak yerine is
 
 Temel yetenekler:
 
-- **20 yönlendirme stratejisi** (öncelik, ağırlıklı, önce doldurma, sıralı döngü, P2C, rastgele,
-  en az kullanılan, maliyet optimizasyonlu, sıfırlama duyarlı, sıfırlama penceresi, kapasite payı, kota ağırlıklı,
+- **21 yönlendirme stratejisi** (öncelik, ağırlıklı, önce doldurma, sıralı döngü, P2C, rastgele,
+  en az kullanılan, maliyet optimizasyonlu, sıfırlama duyarlı, sıfırlama penceresi, önce süresi dolan, kapasite payı, kota ağırlıklı,
   katı rastgele, **otomatik**, lkgp, bağlam optimizasyonlu, önbellek optimizasyonlu, bağlam aktarma, **füzyon**,
   işlem hattı) —
   otomatik, v3.8.0 sürümünün öne çıkan yeniliğidir; `fusion` (panel dağıtımı + değerlendirici sentezi,

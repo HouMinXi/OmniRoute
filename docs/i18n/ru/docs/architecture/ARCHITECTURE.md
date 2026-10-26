@@ -362,8 +362,8 @@ Auto Combo динамически оценивает и выбирает цел�
 
 Основные возможности:
 
-- **20 стратегий маршрутизации** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **21 стратегия маршрутизации** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
   auto — главное нововведение в v3.8.0; `fusion` (параллельная отправка панели + синтез арбитром,

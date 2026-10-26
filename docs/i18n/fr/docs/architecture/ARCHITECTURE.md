@@ -372,8 +372,8 @@ s’appuyer sur une définition statique de combo. Il alimente la famille de pr�
 
 Fonctionnalités principales :
 
-- **20 stratégies de routage** (priorité, pondéré, remplissage prioritaire, tourniquet, P2C, aléatoire,
-  moins utilisé, optimisé pour le coût, tenant compte de la réinitialisation, fenêtre de réinitialisation, marge disponible, pondéré par quota,
+- **21 stratégies de routage** (priorité, pondéré, remplissage prioritaire, tourniquet, P2C, aléatoire,
+  moins utilisé, optimisé pour le coût, tenant compte de la réinitialisation, fenêtre de réinitialisation, expiration d'abord, marge disponible, pondéré par quota,
   aléatoire strict, **auto**, lkgp, optimisé pour le contexte, optimisé pour le cache, relais de contexte, **fusion**,
   pipeline) —
   auto est l’ajout phare de la v3.8.0 ; `fusion` (diffusion en éventail vers un panel + synthèse par un juge,

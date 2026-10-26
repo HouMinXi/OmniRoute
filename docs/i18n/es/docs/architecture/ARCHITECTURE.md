@@ -372,8 +372,8 @@ depender de una definición estática de combo. Es la base de la familia de pref
 
 Capacidades principales:
 
-- **20 estrategias de enrutamiento** (prioridad, ponderado, completar primero, round-robin, P2C, aleatorio,
-  menos usado, optimizado por coste, consciente del restablecimiento, ventana de restablecimiento, margen disponible, ponderado por cuota,
+- **21 estrategias de enrutamiento** (prioridad, ponderado, completar primero, round-robin, P2C, aleatorio,
+  menos usado, optimizado por coste, consciente del restablecimiento, ventana de restablecimiento, vencimiento primero, margen disponible, ponderado por cuota,
   aleatorio estricto, **auto**, lkgp, optimizado por contexto, optimizado por caché, retransmisión de contexto, **fusión**,
   canalización) —
   auto es la incorporación principal de v3.8.0; `fusion` (distribución en abanico al panel + síntesis por un juez,

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavn som brukes av skjermbildene → Lucide-komponenter (`<Icon>`)                            |
 | `constants/providers.ts`         | **375 leverandører** med Zod-validering (autoritativ kilde)                                                 |
 | `constants/cliTools.ts`          | Register over eksterne CLI-verktøy                                                                          |
-| `constants/routingStrategies.ts` | **20 rutingsstrategier** med prioriteter                                                                    |
+| `constants/routingStrategies.ts` | **21 rutingsstrategier** med prioriteter                                                                    |
 | `constants/publicApiRoutes.ts`   | Ruter som krever Bearer-autentisering (i motsetning til administrasjonsautentisering)                       |
 | `constants/upstreamHeaders.ts`   | Blokkeringsliste for headere i oppstrømsforespørsler                                                        |
 | `validation/schemas.ts`          | ~80 Zod-skjemaer (én autoritativ kilde for API-kontrakter)                                                  |

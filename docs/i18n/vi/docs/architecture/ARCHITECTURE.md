@@ -372,8 +372,8 @@ dựa vào một định nghĩa combo tĩnh. Đây là thành phần vận hành
 
 Các khả năng chính:
 
-- **20 chiến lược định tuyến** (ưu tiên, có trọng số, lấp đầy trước, luân phiên, P2C, ngẫu nhiên,
-  ít được sử dụng nhất, tối ưu hóa chi phí, có xét đặt lại, cửa sổ đặt lại, dung lượng dự phòng, có trọng số theo hạn ngạch,
+- **21 chiến lược định tuyến** (ưu tiên, có trọng số, lấp đầy trước, luân phiên, P2C, ngẫu nhiên,
+  ít được sử dụng nhất, tối ưu hóa chi phí, có xét đặt lại, cửa sổ đặt lại, hết hạn trước, dung lượng dự phòng, có trọng số theo hạn ngạch,
   ngẫu nhiên nghiêm ngặt, **auto**, lkgp, tối ưu hóa ngữ cảnh, tối ưu hóa bộ nhớ đệm, chuyển tiếp ngữ cảnh, **fusion**,
   pipeline) —
   auto là bổ sung nổi bật trong v3.8.0; `fusion` (phân tán song song theo bảng + tổng hợp qua bộ phán xét,

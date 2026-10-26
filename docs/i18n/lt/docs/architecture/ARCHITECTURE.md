@@ -372,8 +372,8 @@ naudojusi statinę derinio apibrėžtį. Ji naudojama `auto/*` modelių prefiks�
 
 Pagrindinės galimybės:
 
-- **20 maršruto parinkimo strategijų** (prioritetinė, svertinė, pirmiausia užpildoma, ciklinė, P2C, atsitiktinė,
-  mažiausiai naudota, pagal sąnaudas optimizuota, atstatymą įvertinanti, atstatymo lango, laisvos talpos, pagal kvotą svertinė,
+- **21 maršruto parinkimo strategija** (prioritetinė, svertinė, pirmiausia užpildoma, ciklinė, P2C, atsitiktinė,
+  mažiausiai naudota, pagal sąnaudas optimizuota, atstatymą įvertinanti, atstatymo lango, pirmiausia baigiančios galioti, laisvos talpos, pagal kvotą svertinė,
   griežtai atsitiktinė, **automatinė**, lkgp, pagal kontekstą optimizuota, pagal podėlį optimizuota, konteksto perdavimo, **sintezės**,
   konvejerinė) —
   automatinė strategija yra pagrindinis v3.8.0 papildymas; `fusion` (išsiuntimas ekspertų grupei + vertintojo sintezė,

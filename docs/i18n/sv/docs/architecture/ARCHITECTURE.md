@@ -372,8 +372,8 @@ förlita sig på en statisk kombinationsdefinition. Den driver modellprefixfamil
 
 Viktiga funktioner:
 
-- **20 routningsstrategier** (prioritet, viktad, fyll först, round-robin, P2C, slumpmässig,
-  minst använd, kostnadsoptimerad, återställningsmedveten, återställningsfönster, marginal, kvotviktad,
+- **21 routningsstrategier** (prioritet, viktad, fyll först, round-robin, P2C, slumpmässig,
+  minst använd, kostnadsoptimerad, återställningsmedveten, återställningsfönster, utgång först, marginal, kvotviktad,
   strikt slumpmässig, **auto**, lkgp, kontextoptimerad, cacheoptimerad, kontextvidarebefordran, **fusion**,
   pipeline) —
   auto är det främsta tillägget i v3.8.0; `fusion` (panelutspridning + domarsyntes,

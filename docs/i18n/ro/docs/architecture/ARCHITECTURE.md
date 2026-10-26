@@ -372,8 +372,8 @@ se bazeze pe o definiție statică a unei combinații. Acesta stă la baza famil
 
 Capabilități principale:
 
-- **20 de strategii de rutare** (prioritate, ponderată, completare prioritară, round-robin, P2C, aleatorie,
-  cea mai puțin utilizată, optimizată pentru cost, conștientă de resetare, fereastră de resetare, marjă disponibilă, ponderată după cotă,
+- **21 de strategii de rutare** (prioritate, ponderată, completare prioritară, round-robin, P2C, aleatorie,
+  cea mai puțin utilizată, optimizată pentru cost, conștientă de resetare, fereastră de resetare, expirare întâi, marjă disponibilă, ponderată după cotă,
   strict aleatorie, **auto**, lkgp, optimizată pentru context, optimizată pentru cache, retransmitere de context, **fusion**,
   pipeline) —
   auto este principala noutate din v3.8.0; `fusion` (distribuire către un panou + sinteză efectuată de un evaluator,

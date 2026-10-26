@@ -372,8 +372,8 @@ toho, aby sa spoliehal na statickú definíciu kombinácie. Zabezpečuje fungova
 
 Kľúčové funkcie:
 
-- **20 stratégií smerovania** (priorita, vážené, najprv naplniť, cyklické, P2C, náhodné,
-  najmenej používané, optimalizované podľa nákladov, zohľadňujúce reset, okno resetu, rezerva, vážené podľa kvóty,
+- **21 stratégií smerovania** (priorita, vážené, najprv naplniť, cyklické, P2C, náhodné,
+  najmenej používané, optimalizované podľa nákladov, zohľadňujúce reset, okno resetu, najskôr expirujúce, rezerva, vážené podľa kvóty,
   striktne náhodné, **auto**, lkgp, optimalizované podľa kontextu, optimalizované podľa vyrovnávacej pamäte, prenos kontextu, **fusion**,
   pipeline) —
   auto je hlavnou novinkou vo v3.8.0; `fusion` (rozdelenie do panela + syntéza hodnotiteľom,

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: aha akara ngosi nke ihuenyo na-eji → kọmponẹntụ Lucide (`<Icon>`)                           |
 | `constants/providers.ts`         | **Ndị na-enye ọrụ 375** nwere nkwado Zod (isi iyi eziokwu)                                              |
 | `constants/cliTools.ts`          | Ndekọ ngwá ọrụ CLI mpụga                                                                                |
-| `constants/routingStrategies.ts` | **Atụmatụ ntụgharị ụzọ 20** nwere ọkwa mkpa                                                             |
+| `constants/routingStrategies.ts` | **Atụmatụ ntụgharị ụzọ 21** nwere ọkwa mkpa                                                             |
 | `constants/publicApiRoutes.ts`   | Ụzọ ndị chọrọ nkwenye Bearer (kama nkwenye njikwa)                                                      |
 | `constants/upstreamHeaders.ts`   | Ndepụta nkụnye isi ndị a machibidoro maka arịrịọ upstream                                               |
 | `validation/schemas.ts`          | Ihe dị ka schema Zod 80 (otu isi iyi eziokwu maka nkwekọrịta API)                                       |

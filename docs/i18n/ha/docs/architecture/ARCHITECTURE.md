@@ -372,8 +372,8 @@ dogaro da tsayayyen ma’anar combo. Shi ne ke tafiyar da dangin prefix na samfu
 
 Muhimman ƙwarewa:
 
-- **Dabarun tura buƙata guda 20** (fifiko, mai nauyi, cika-na-farko, zagaye-bi-da-bi, P2C, bazuwar,
-  mafi ƙarancin amfani, inganta-farashi, mai la’akari-da-sake-saiti, tagar-sake-saiti, sararin-ajiya, mai nauyin-keɓaɓɓen-rabo,
+- **Dabarun tura buƙata guda 21** (fifiko, mai nauyi, cika-na-farko, zagaye-bi-da-bi, P2C, bazuwar,
+  mafi ƙarancin amfani, inganta-farashi, mai la’akari-da-sake-saiti, tagar-sake-saiti, mai ƙarewa da farko, sararin-ajiya, mai nauyin-keɓaɓɓen-rabo,
   tsantsar-bazuwar, **auto**, lkgp, inganta-mahallin-bayani, inganta-cache, isar-da-mahallin-bayani, **fusion**,
   pipeline) —
   auto shi ne babban ƙarin da aka yi a v3.8.0; `fusion` (watsa zuwa panel + haɗawar hukunci,

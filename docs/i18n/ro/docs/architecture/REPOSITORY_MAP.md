@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: numele pictogramelor utilizate de ecrane → componente Lucide (`<Icon>`)                                            |
 | `constants/providers.ts`         | **375 de furnizori** cu validare Zod (sursa unică de adevăr)                                                                   |
 | `constants/cliTools.ts`          | Registrul instrumentelor CLI externe                                                                                           |
-| `constants/routingStrategies.ts` | **20 de strategii de rutare** cu priorități                                                                                    |
+| `constants/routingStrategies.ts` | **21 de strategii de rutare** cu priorități                                                                                    |
 | `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (în locul autentificării de administrare)                                              |
 | `constants/upstreamHeaders.ts`   | Lista de blocare a antetelor pentru cererile upstream                                                                          |
 | `validation/schemas.ts`          | ~80 de scheme Zod (sursa unică de adevăr pentru contractele API)                                                               |

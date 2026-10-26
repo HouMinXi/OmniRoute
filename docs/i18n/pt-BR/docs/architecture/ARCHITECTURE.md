@@ -372,8 +372,8 @@ depender de uma definição estática de combinação. Ele é responsável pela 
 
 Principais recursos:
 
-- **20 estratégias de roteamento** (prioridade, ponderada, preencher primeiro, round-robin, P2C, aleatória,
-  menos usada, otimizada por custo, sensível a redefinições, janela de redefinição, margem disponível, ponderada por cota,
+- **21 estratégias de roteamento** (prioridade, ponderada, preencher primeiro, round-robin, P2C, aleatória,
+  menos usada, otimizada por custo, sensível a redefinições, janela de redefinição, expiração primeiro, margem disponível, ponderada por cota,
   aleatória estrita, **automática**, lkgp, otimizada por contexto, otimizada por cache, retransmissão de contexto, **fusão**,
   pipeline) —
   a estratégia automática é a principal novidade da v3.8.0; `fusion` (distribuição em painel + síntese por avaliador,

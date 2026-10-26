@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`：页面使用的图标名称 → Lucide 组件（`<Icon>`）                                 |
 | `constants/providers.ts`         | 通过 Zod 验证的 **375 个提供者**（事实来源）                                             |
 | `constants/cliTools.ts`          | 外部 CLI 工具注册表                                                                      |
-| `constants/routingStrategies.ts` | **20 种路由策略**，带有优先级                                                            |
+| `constants/routingStrategies.ts` | **21 种路由策略**，带有优先级                                                            |
 | `constants/publicApiRoutes.ts`   | 需要 Bearer 身份验证（而非管理身份验证）的路由                                           |
 | `constants/upstreamHeaders.ts`   | 上游请求的请求头拒绝列表                                                                 |
 | `validation/schemas.ts`          | 约 80 个 Zod 模式（API 契约的单一事实来源）                                              |

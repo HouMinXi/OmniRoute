@@ -362,8 +362,8 @@ Auto Combo は、静的なコンボ定義に依存するのではなく、リク
 
 主な機能:
 
-- **20 種類のルーティング戦略** (priority、weighted、fill-first、round-robin、P2C、random、
-  least-used、cost-optimized、reset-aware、reset-window、headroom、quota-weighted、
+- **21 種類のルーティング戦略** (priority、weighted、fill-first、round-robin、P2C、random、
+  least-used、cost-optimized、reset-aware、reset-window、expiry-first、headroom、quota-weighted、
   strict-random、**auto**、lkgp、context-optimized、cache-optimized、context-relay、**fusion**、
   pipeline) —
   auto は v3.8.0 の目玉となる追加機能です。`fusion` (パネルへのファンアウト + ジャッジによる統合、

@@ -371,8 +371,8 @@ depender de uma definição de combo estática. É responsável pela família de
 
 Principais capacidades:
 
-- **20 estratégias de encaminhamento** (prioridade, ponderada, preenchimento inicial, round-robin, P2C, aleatória,
-  menos utilizada, otimizada por custo, sensível à reposição, janela de reposição, margem disponível, ponderada por quota,
+- **21 estratégias de encaminhamento** (prioridade, ponderada, preenchimento inicial, round-robin, P2C, aleatória,
+  menos utilizada, otimizada por custo, sensível à reposição, janela de reposição, expiração primeiro, margem disponível, ponderada por quota,
   aleatória estrita, **auto**, lkgp, otimizada por contexto, otimizada por cache, retransmissão de contexto, **fusão**,
   pipeline) —
   auto é a principal novidade na v3.8.0; `fusion` (distribuição em leque para um painel + síntese por um juiz,

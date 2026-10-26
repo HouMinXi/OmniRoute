@@ -372,8 +372,8 @@ Auto Combo poengsetter og velger rutingsmål dynamisk på forespørselstidspunkt
 
 Viktige funksjoner:
 
-- **20 rutingsstrategier** (prioritet, vektet, fyll-først, round-robin, P2C, tilfeldig,
-  minst brukt, kostnadsoptimalisert, tilbakestillingsbevisst, tilbakestillingsvindu, kapasitet,
+- **21 rutingsstrategier** (prioritet, vektet, fyll-først, round-robin, P2C, tilfeldig,
+  minst brukt, kostnadsoptimalisert, tilbakestillingsbevisst, tilbakestillingsvindu, utløp først, kapasitet,
   kvotevektet, strengt tilfeldig, **auto**, lkgp, kontekstoptimalisert, hurtigbufferoptimalisert,
   kontekstvideresending, **fusion**, pipeline) —
   auto er hovedtillegget i v3.8.0; `fusion` (utsending til panel + dommersyntese,

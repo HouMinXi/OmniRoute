@@ -362,8 +362,8 @@ sich auf eine statische Combo-Definition zu stützen. Es bildet die Grundlage f�
 
 Zentrale Funktionen:
 
-- **20 Routing-Strategien** (Priorität, gewichtet, zuerst auffüllen, Round-Robin, P2C, zufällig,
-  am wenigsten verwendet, kostenoptimiert, zurücksetzungsbewusst, Zurücksetzungsfenster, Reservekapazität, quotengewichtet,
+- **21 Routing-Strategien** (Priorität, gewichtet, zuerst auffüllen, Round-Robin, P2C, zufällig,
+  am wenigsten verwendet, kostenoptimiert, zurücksetzungsbewusst, Zurücksetzungsfenster, Ablauf zuerst, Reservekapazität, quotengewichtet,
   strikt zufällig, **auto**, lkgp, kontextoptimiert, cacheoptimiert, Kontextweiterleitung, **fusion**,
   Pipeline) —
   auto ist die wichtigste Neuerung in v3.8.0; `fusion` (Panel-Fan-out + Judge-Synthese,

@@ -371,8 +371,8 @@ tugineda staatilisele combo definitsioonile. See käitab mudeliprefiksite pereko
 
 Põhivõimalused:
 
-- **20 marsruutimisstrateegiat** (prioriteet, kaalutud, esmalt täitmine, ringsuunamine, P2C, juhuslik,
-  vähim kasutatud, kuludele optimeeritud, lähtestamisteadlik, lähtestusaken, varuruum, kvoodiga kaalutud,
+- **21 marsruutimisstrateegiat** (prioriteet, kaalutud, esmalt täitmine, ringsuunamine, P2C, juhuslik,
+  vähim kasutatud, kuludele optimeeritud, lähtestamisteadlik, lähtestusaken, aeguv esimesena, varuruum, kvoodiga kaalutud,
   rangelt juhuslik, **auto**, lkgp, kontekstile optimeeritud, vahemälule optimeeritud, kontekstiedastus, **fusion**,
   konveier) —
   auto on versiooni v3.8.0 olulisim täiendus; `fusion` (paneelile hajutamine + kohtunikupoolne süntees,

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: نام آیکونهای استفادهشده در صفحهها → مؤلفههای Lucide (`<Icon>`)                                    |
 | `constants/providers.ts`         | **۳۷۵ ارائهدهنده** با اعتبارسنجی Zod (منبع حقیقت)                                                             |
 | `constants/cliTools.ts`          | رجیستری ابزارهای CLI خارجی                                                                                    |
-| `constants/routingStrategies.ts` | **۲۰ راهبرد مسیریابی** با اولویتها                                                                            |
+| `constants/routingStrategies.ts` | **۲۱ راهبرد مسیریابی** با اولویتها                                                                            |
 | `constants/publicApiRoutes.ts`   | مسیرهایی که به احراز هویت Bearer (در مقابل مدیریتی) نیاز دارند                                                |
 | `constants/upstreamHeaders.ts`   | فهرست مسدودسازی هدرها برای درخواستهای بالادستی                                                                |
 | `validation/schemas.ts`          | حدود ۸۰ اسکیمای Zod (منبع حقیقت واحد برای قراردادهای API)                                                     |

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: screen များတွင် အသုံးပြုသည့် icon အမည်များ → Lucide component များ (`<Icon>`)                           |
 | `constants/providers.ts`         | Zod validation ပါဝင်သည့် **provider 375 ခု** (တစ်ခုတည်းသော မှန်ကန်မှုရင်းမြစ်)                                      |
 | `constants/cliTools.ts`          | ပြင်ပ CLI tool registry                                                                                             |
-| `constants/routingStrategies.ts` | ဦးစားပေးအဆင့်များပါဝင်သည့် **routing strategy 20 ခု**                                                               |
+| `constants/routingStrategies.ts` | ဦးစားပေးအဆင့်များပါဝင်သည့် **routing strategy 21 ခု**                                                               |
 | `constants/publicApiRoutes.ts`   | Bearer authentication (management authentication မဟုတ်သော) လိုအပ်သည့် route များ                                    |
 | `constants/upstreamHeaders.ts`   | Upstream request များအတွက် header denylist                                                                          |
 | `validation/schemas.ts`          | Zod schema ~80 ခု (API contract များအတွက် တစ်ခုတည်းသော မှန်ကန်မှုရင်းမြစ်)                                          |

@@ -374,9 +374,9 @@ da se oslanja na statičku definiciju kombinacije. Pokreće obitelj prefiksa mod
 
 Ključne mogućnosti:
 
-- **20 strategija usmjeravanja** (prioritetno, ponderirano, prvo popunjavanje, kružno,
+- **21 strategija usmjeravanja** (prioritetno, ponderirano, prvo popunjavanje, kružno,
   P2C, nasumično, najmanje korišteno, troškovno optimizirano, uzimajući u obzir poništavanje,
-  prozor poništavanja, raspoloživi kapacitet, ponderirano kvotom, strogo nasumično, **auto**,
+  prozor poništavanja, prvo istječuće, raspoloživi kapacitet, ponderirano kvotom, strogo nasumično, **auto**,
   lkgp, kontekstno optimizirano, predmemorijski optimizirano, prosljeđivanje konteksta, **fusion**,
   cjevovod) —
   auto je glavni dodatak u v3.8.0; `fusion` (slanje upita panelu + sinteza procjenitelja,

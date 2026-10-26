@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: imena ikon, ki jih uporabljajo zasloni → komponente Lucide (`<Icon>`)                                        |
 | `constants/providers.ts`         | **375 ponudnikov** s preverjanjem veljavnosti Zod (vir resnice)                                                          |
 | `constants/cliTools.ts`          | Register zunanjih orodij CLI                                                                                             |
-| `constants/routingStrategies.ts` | **20 strategij usmerjanja** s prioritetami                                                                               |
+| `constants/routingStrategies.ts` | **21 strategij usmerjanja** s prioritetami                                                                               |
 | `constants/publicApiRoutes.ts`   | Poti, ki zahtevajo avtentikacijo Bearer (namesto upravljavske)                                                           |
 | `constants/upstreamHeaders.ts`   | Seznam prepovedanih glav za zahteve do nadrejenih strežnikov                                                             |
 | `validation/schemas.ts`          | ~80 shem Zod (enotni vir resnice za pogodbe API)                                                                         |

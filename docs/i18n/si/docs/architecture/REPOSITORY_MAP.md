@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: තිර මඟින් භාවිත කරන අයිකන නම් → Lucide සංරචක (`<Icon>`)                               |
 | `constants/providers.ts`         | Zod වලංගුකරණය සහිත **සැපයුම්කරුවන් 375ක්** (සත්යයේ මූලාශ්රය)                                      |
 | `constants/cliTools.ts`          | බාහිර CLI මෙවලම් රෙජිස්ට්රිය                                                                      |
-| `constants/routingStrategies.ts` | ප්රමුඛතා සහිත **මාර්ගගත කිරීමේ උපායමාර්ග 20ක්**                                                   |
+| `constants/routingStrategies.ts` | ප්රමුඛතා සහිත **මාර්ගගත කිරීමේ උපායමාර්ග 21ක්**                                                   |
 | `constants/publicApiRoutes.ts`   | Bearer (කළමනාකරණයට සාපේක්ෂව) සත්යාපනය අවශ්ය මාර්ග                                                 |
 | `constants/upstreamHeaders.ts`   | උඩුගං ඉල්ලීම් සඳහා ශීර්ෂක ප්රතික්ෂේප ලැයිස්තුව                                                    |
 | `validation/schemas.ts`          | Zod ස්කීමා ~80ක් (API ගිවිසුම් සඳහා එකම සත්ය මූලාශ්රය)                                            |

@@ -371,8 +371,8 @@ a bheith ag brath ar shainmhíniú statach teaglama. Cumhachtaíonn sé teaghlac
 
 Príomhchumais:
 
-- **20 straitéis ródaithe** (tosaíocht, ualaithe, líonadh ar dtús, spól-robin, P2C, randamach,
-  is lú úsáidte, optamaithe ó thaobh costais, feasach ar athshocrú, fuinneog athshocraithe, spás breise, ualaithe de réir cuóta,
+- **21 straitéis ródaithe** (tosaíocht, ualaithe, líonadh ar dtús, spól-robin, P2C, randamach,
+  is lú úsáidte, optamaithe ó thaobh costais, feasach ar athshocrú, fuinneog athshocraithe, éag ar dtús, spás breise, ualaithe de réir cuóta,
   dianrandamach, **auto**, lkgp, optamaithe de réir comhthéacs, optamaithe de réir taisce, athsheachadadh comhthéacs, **fusion**,
   píblíne) —
   is é auto an phríomhghné nua in v3.8.0; tá `fusion` (leathnú amach painéil + sintéis breithimh,

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: שמות סמלים המשמשים במסכים → רכיבי Lucide (`<Icon>`)                                    |
 | `constants/providers.ts`         | **375 ספקים** עם אימות Zod (מקור האמת)                                                             |
 | `constants/cliTools.ts`          | מרשם כלי CLI חיצוניים                                                                              |
-| `constants/routingStrategies.ts` | **20 אסטרטגיות ניתוב** עם עדיפויות                                                                 |
+| `constants/routingStrategies.ts` | **21 אסטרטגיות ניתוב** עם עדיפויות                                                                 |
 | `constants/publicApiRoutes.ts`   | נתיבים הדורשים אימות Bearer (לעומת אימות ניהולי)                                                   |
 | `constants/upstreamHeaders.ts`   | רשימת כותרות חסומות עבור בקשות upstream                                                            |
 | `validation/schemas.ts`          | כ־80 סכמות Zod (מקור אמת יחיד לחוזי API)                                                           |

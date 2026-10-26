@@ -372,8 +372,8 @@ spoléhání se na statickou definici komba. Zajišťuje fungování rodiny pref
 
 Klíčové funkce:
 
-- **20 strategií směrování** (prioritní, vážená, nejprve naplnit, round-robin, P2C, náhodná,
-  nejméně používaná, nákladově optimalizovaná, zohledňující reset, okno resetu, volná kapacita, vážená podle kvóty,
+- **21 strategií směrování** (prioritní, vážená, nejprve naplnit, round-robin, P2C, náhodná,
+  nejméně používaná, nákladově optimalizovaná, zohledňující reset, okno resetu, nejdřív expirující, volná kapacita, vážená podle kvóty,
   striktně náhodná, **auto**, lkgp, optimalizovaná podle kontextu, optimalizovaná pro mezipaměť, předávání kontextu, **fusion**,
   pipeline) —
   auto je hlavní novinkou ve v3.8.0; `fusion` (rozeslání panelu + syntéza posuzovatelem,
