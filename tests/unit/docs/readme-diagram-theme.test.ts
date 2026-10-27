@@ -116,6 +116,11 @@ test("every new KIT value equals what its kit token resolves to in ci-tokens.css
   }
 });
 
+test("border is pinned to the kit's --ci-color-border in both blocks", () => {
+  assert.equal(KIT.light.border, resolve("--ci-color-border", lightBlock));
+  assert.equal(KIT.dark.border, resolve("--ci-color-border", darkBlock));
+});
+
 test("themeCss declares the light palette and a dark override behind prefers-color-scheme", () => {
   const css = themeCss();
   assert.match(css, /:root\{[^}]*--bg:#fbfbf8[^}]*--accent:#d8ff00/);
@@ -178,7 +183,7 @@ test("text roles use the kit stacks and end in a generic family", () => {
   assert.match(css, /\.num\{[^}]*"CI Mono"[^}]*monospace/);
 });
 
-test("the original nine text classes and the fill line stay first, in their original order", () => {
+test("ordering pin: textRoleCss() lines keep their positions — the original nine classes and the fill line first, then the type scale", () => {
   const lines = textRoleCss().split("\n");
   const heads = [
     ".kicker{",

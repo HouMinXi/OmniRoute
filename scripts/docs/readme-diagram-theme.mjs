@@ -30,6 +30,14 @@
 // inverseBg is --ci-neutral-950 in BOTH blocks (the kit keeps technical inverse panels dark, so
 // in dark mode an inverse surface equals the canvas — give it a border); accentSoft is the kit's
 // --ci-color-accent-surface-range, which the dark block lowers to 0.12 alpha.
+//
+// `border` is the kit's --ci-color-border in both blocks (light rgb(4 13 16 / 0.24), dark
+// rgb(241 247 247 / 0.24), pinned by the test); `grid` is the one value that is not a kit token —
+// a lighter tint of the border for the canvas pattern.
+//
+// extraCss naming: diagram-local classes and custom properties passed through svgOpen's
+// `extraCss` carry the diagram's abbreviation as a prefix (`rl-…`, `cmp-…`, `--inv-*`…), never a
+// bare theme-like name (`.card`, `--muted-2`): the shared roles above own the plain names.
 import { fontStack } from "./readme-fonts.mjs";
 
 export const KIT = {
@@ -64,7 +72,7 @@ export const KIT = {
     ink: "#ffffff",
     body: "#f1f7f7",
     muted: "#c7cbc5",
-    border: "rgba(241,247,247,0.18)",
+    border: "rgba(241,247,247,0.24)",
     grid: "rgba(241,247,247,0.05)",
     accent: "#d8ff00",
     accentInk: "#040d10",
