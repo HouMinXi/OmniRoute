@@ -64,6 +64,7 @@ interface ComboMetricsView extends ComboMetricsEntry {
   avgLatencyMs: number;
   successRate: number;
   fallbackRate: number;
+  skipsPerRequest: number;
   persistedSkipBypassed: number;
   byModel: Record<string, ModelMetricsView>;
   byTarget: Record<string, ComboTargetMetricsView>;
@@ -451,6 +452,10 @@ export function getComboMetrics(comboName: string): ComboMetricsView | null {
     fallbackRate:
       combo.totalRequests > 0
         ? Math.round((combo.requestsWithFallback / combo.totalRequests) * 100)
+        : 0,
+    skipsPerRequest:
+      combo.totalRequests > 0
+        ? Math.round((combo.totalFallbacks / combo.totalRequests) * 10) / 10
         : 0,
     intentCounts: { ...combo.intentCounts },
     byModel: Object.fromEntries(
