@@ -333,8 +333,8 @@ test("Codex custom model listed by no synced inventory keeps every account eligi
 test("Codex custom model keeps an account with an empty synced inventory eligible (#18311)", async () => {
   await resetStorage();
   const { proId, plusId } = await seedTwoAccounts();
-  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, plusId, []);
   // A persisted but empty inventory row must not count as advertising every model.
+  // Written raw because replacing with [] deletes the row instead of storing it.
   core
     .getDbInstance()
     .prepare(

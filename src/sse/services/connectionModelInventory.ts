@@ -85,6 +85,8 @@ export async function loadAdvertisedModelsForConnections(
         const advertisedByAnyAccount = Object.values(byConnection).some(
           (models) =>
             Array.isArray(models) &&
+            // An empty set means "advertises everything" to the matcher, so an
+            // empty row must not count as evidence for the requested model.
             models.length > 0 &&
             isRequestedModelAdvertised(providerId, requestedModel, new Set(models.map((m) => m.id)))
         );
