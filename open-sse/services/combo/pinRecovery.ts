@@ -46,7 +46,7 @@ export function buildRecoveryHint(
       return {
         action: "switch-combo",
         next_step:
-          "Every target in this combo was rejected for authentication (invalid, expired or revoked credentials). Reconnect or re-authenticate the affected accounts in /dashboard/providers, or switch to a combo with working credentials. Retrying the same combo will not fix this.",
+          "Every combo target was rejected for authentication or permission. Reconnect accounts in /dashboard/providers or switch combos.",
       };
     case "all_models_failed":
       return {

@@ -11,6 +11,7 @@ const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-auth-rejected-1
 const previousDataDir = process.env.DATA_DIR;
 process.env.DATA_DIR = dataDir;
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+const { buildRecoveryHint } = await import("../../open-sse/services/combo/pinRecovery.ts");
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
@@ -51,15 +52,16 @@ async function runCombo(name: string, failures: Record<string, Failure>) {
   const body = (await response.json()) as {
     error?: { diagnostics?: { terminalReason?: string; recovery?: { action?: string } } };
     diagnostics?: { terminalReason?: string; recovery?: { action?: string } };
+    recovery_hint?: { action?: string; next_step?: string };
   };
   const diagnostics = body.error?.diagnostics ?? body.diagnostics;
-  return { response, diagnostics };
+  return { response, diagnostics, recoveryHint: body.recovery_hint };
 }
 
 const AUTH = "Upstream rejected token: Authorization Failed (invalid token)";
 
 test("all-auth combo failure reports authentication_rejected and does not recommend retry", async () => {
-  const { response, diagnostics } = await runCombo("auth-18360-all", {
+  const { response, diagnostics, recoveryHint } = await runCombo("auth-18360-all", {
     "openai/a": { status: 502, message: AUTH },
     "claude/b": { status: 401, message: "Invalid API key" },
   });
@@ -70,6 +72,15 @@ test("all-auth combo failure reports authentication_rejected and does not recomm
   );
   assert.equal(diagnostics?.terminalReason, "authentication_rejected");
   assert.equal(diagnostics?.recovery?.action, "switch-combo");
+
+  // The sanitized response keeps 200 chars in the body and 128 in the header. The
+  // hint must survive both whole, including the /dashboard/providers pointer.
+  const fullHint = buildRecoveryHint("authentication_rejected").next_step;
+  const headerHint = response.headers.get("x-omniroute-recovery-next-step") ?? "";
+  assert.match(headerHint, /\/dashboard\/providers/);
+  assert.equal(headerHint, fullHint, "header hint must not be truncated");
+  assert.equal(recoveryHint?.action, "switch-combo");
+  assert.equal(recoveryHint?.next_step, fullHint, "body hint must not be cut mid-word");
 });
 
 test("mixed auth and provider failures keep the transient retry hint", async () => {

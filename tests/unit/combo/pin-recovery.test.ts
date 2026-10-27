@@ -193,6 +193,8 @@ test("buildRecoveryHint: authentication_rejected maps to switch-combo with a rec
   assert.match(hint.next_step, /authentication/i);
   assert.match(hint.next_step, /dashboard\/providers/);
   assert.doesNotMatch(hint.next_step, /failed transiently/i);
+  // The response header keeps 128 chars; a longer hint loses its action.
+  assert.ok(hint.next_step.length <= 128, `hint is ${hint.next_step.length} chars`);
   assert.equal("retry_after_seconds" in hint, false);
 });
 
