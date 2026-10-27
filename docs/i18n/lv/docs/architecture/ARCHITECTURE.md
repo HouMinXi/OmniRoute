@@ -372,8 +372,8 @@ paļaujas uz statisku kombinācijas definīciju. Tā nodrošina `auto/*` modeļu
 
 Galvenās iespējas:
 
-- **20 maršrutēšanas stratēģijas** (prioritāte, svērtā izvēle, vispirms aizpildīt, cikliskā izvēle, P2C, nejaušā izvēle,
-  vismazāk izmantotais, izmaksu optimizācija, atiestatīšanas ievērošana, atiestatīšanas logs, brīvā kapacitāte, kvotu svērtā izvēle,
+- **21 maršrutēšanas stratēģija** (prioritāte, svērtā izvēle, vispirms aizpildīt, cikliskā izvēle, P2C, nejaušā izvēle,
+  vismazāk izmantotais, izmaksu optimizācija, atiestatīšanas ievērošana, atiestatīšanas logs, vispirms beidzošās, brīvā kapacitāte, kvotu svērtā izvēle,
   stingri nejaušā izvēle, **auto**, lkgp, konteksta optimizācija, kešatmiņas optimizācija, konteksta pārsūtīšana, **fusion**,
   konveijers) —
   auto ir galvenais v3.8.0 papildinājums; `fusion` (izvēršana uz paneli + vērtētāja sintēze,

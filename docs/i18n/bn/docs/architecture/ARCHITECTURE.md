@@ -369,8 +369,8 @@ Auto Combo একটি স্থির combo সংজ্ঞার ওপর �
 
 প্রধান সক্ষমতাসমূহ:
 
-- **২০টি রাউটিং কৌশল** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **২১টি রাউটিং কৌশল** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
   auto হলো v3.8.0-এর প্রধান সংযোজন; `fusion` (panel fan-out + judge synthesis,

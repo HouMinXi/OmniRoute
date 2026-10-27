@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavne, der bruges af skærmbillederne → Lucide-komponenter (`<Icon>`)                    |
 | `constants/providers.ts`         | **375 udbydere** med Zod-validering (autoritativ kilde)                                                 |
 | `constants/cliTools.ts`          | Register over eksterne CLI-værktøjer                                                                    |
-| `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteter                                                                |
+| `constants/routingStrategies.ts` | **21 routingstrategier** med prioriteter                                                                |
 | `constants/publicApiRoutes.ts`   | Ruter, der kræver Bearer-godkendelse (i modsætning til administrationsgodkendelse)                      |
 | `constants/upstreamHeaders.ts`   | Afvisningsliste over headers til upstream-anmodninger                                                   |
 | `validation/schemas.ts`          | ~80 Zod-skemaer (autoritativ kilde til API-kontrakter)                                                  |

@@ -372,8 +372,8 @@ at være afhængig af en statisk combo-definition. Den driver modelpræfiksfamil
 
 Vigtigste funktioner:
 
-- **20 routingstrategier** (prioritet, vægtet, udfyld-først, round-robin, P2C, tilfældig,
-  mindst anvendt, omkostningsoptimeret, nulstillingsbevidst, nulstillingsvindue, råderum, kvotevægtet,
+- **21 routingstrategier** (prioritet, vægtet, udfyld-først, round-robin, P2C, tilfældig,
+  mindst anvendt, omkostningsoptimeret, nulstillingsbevidst, nulstillingsvindue, udløb først, råderum, kvotevægtet,
   strengt tilfældig, **auto**, lkgp, kontekstoptimeret, cacheoptimeret, kontekstrelæ, **fusion**,
   pipeline) —
   auto er den vigtigste tilføjelse i v3.8.0; `fusion` (panel-fan-out + dommersyntese,

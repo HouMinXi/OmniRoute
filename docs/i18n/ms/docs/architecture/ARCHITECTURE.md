@@ -372,8 +372,8 @@ bergantung pada takrif kombo statik. Ia menjadi asas kepada keluarga awalan mode
 
 Keupayaan utama:
 
-- **20 strategi penghalaan** (keutamaan, berwajaran, isi dahulu, giliran bergilir, P2C, rawak,
-  paling kurang digunakan, dioptimumkan kos, peka tetapan semula, tetingkap tetapan semula, ruang lebihan, berwajaran kuota,
+- **21 strategi penghalaan** (keutamaan, berwajaran, isi dahulu, giliran bergilir, P2C, rawak,
+  paling kurang digunakan, dioptimumkan kos, peka tetapan semula, tetingkap tetapan semula, luput dahulu, ruang lebihan, berwajaran kuota,
   rawak ketat, **auto**, lkgp, dioptimumkan konteks, dioptimumkan cache, geganti konteks, **fusion**,
   saluran paip) —
   auto ialah penambahan utama dalam v3.8.0; `fusion` (pengagihan keluar panel + sintesis penilai,

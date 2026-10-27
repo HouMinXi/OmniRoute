@@ -362,8 +362,8 @@ te vertrouwen op een statische combodefinitie. Het vormt de basis voor de famili
 
 Belangrijkste mogelijkheden:
 
-- **20 routeringsstrategieën** (prioriteit, gewogen, eerst-vullen, round-robin, P2C, willekeurig,
-  minst-gebruikt, kostengeoptimaliseerd, resetbewust, resetvenster, vrije capaciteit, quotumgewogen,
+- **21 routeringsstrategieën** (prioriteit, gewogen, eerst-vullen, round-robin, P2C, willekeurig,
+  minst-gebruikt, kostengeoptimaliseerd, resetbewust, resetvenster, vervaldatum eerst, vrije capaciteit, quotumgewogen,
   strikt-willekeurig, **auto**, lkgp, contextgeoptimaliseerd, cachegeoptimaliseerd, contextdoorgifte, **fusion**,
   pipeline) —
   auto is de belangrijkste toevoeging in v3.8.0; `fusion` (panel-fan-out + synthese door beoordelaar,

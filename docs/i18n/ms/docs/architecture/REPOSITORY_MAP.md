@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh skrin → komponen Lucide (`<Icon>`)                             |
 | `constants/providers.ts`         | **375 penyedia** dengan pengesahan Zod (sumber tunggal kebenaran)                                        |
 | `constants/cliTools.ts`          | Daftar alat CLI luaran                                                                                   |
-| `constants/routingStrategies.ts` | **20 strategi penghalaan** dengan keutamaan                                                              |
+| `constants/routingStrategies.ts` | **21 strategi penghalaan** dengan keutamaan                                                              |
 | `constants/publicApiRoutes.ts`   | Laluan yang memerlukan pengesahan Bearer (berbanding pengesahan pengurusan)                              |
 | `constants/upstreamHeaders.ts`   | Senarai sekatan pengepala untuk permintaan huluan                                                        |
 | `validation/schemas.ts`          | ~80 skema Zod (sumber tunggal kebenaran untuk kontrak API)                                               |

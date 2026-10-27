@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ეკრანებზე გამოყენებული ხატულების სახელები → Lucide-ის კომპონენტები (`<Icon>`)                     |
 | `constants/providers.ts`         | **375 პროვაიდერი** Zod ვალიდაციით (ჭეშმარიტების პირველწყარო)                                                  |
 | `constants/cliTools.ts`          | გარე CLI ხელსაწყოების რეესტრი                                                                                 |
-| `constants/routingStrategies.ts` | **მარშრუტიზაციის 20 სტრატეგია** პრიორიტეტებით                                                                 |
+| `constants/routingStrategies.ts` | **მარშრუტიზაციის 21 სტრატეგია** პრიორიტეტებით                                                                 |
 | `constants/publicApiRoutes.ts`   | მარშრუტები, რომლებიც მართვის ავტორიზაციის ნაცვლად Bearer ავტორიზაციას მოითხოვს                                |
 | `constants/upstreamHeaders.ts`   | ზედა დონის მოთხოვნებისთვის აკრძალული სათაურების სია                                                           |
 | `validation/schemas.ts`          | ~80 Zod სქემა (API კონტრაქტებისთვის ჭეშმარიტების ერთადერთი წყარო)                                             |

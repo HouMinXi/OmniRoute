@@ -371,8 +371,8 @@ statikus combo-definícióra támaszkodna. Ez biztosítja az `auto/*` modelelül
 
 Fő képességek:
 
-- **20 útválasztási stratégia** (prioritásos, súlyozott, elsőként feltöltő, ciklikus, P2C, véletlenszerű,
-  legkevésbé használt, költségoptimalizált, visszaállítás-tudatos, visszaállítási ablakos, tartalékkapacitás-alapú, kvótával súlyozott,
+- **21 útválasztási stratégia** (prioritásos, súlyozott, elsőként feltöltő, ciklikus, P2C, véletlenszerű,
+  legkevésbé használt, költségoptimalizált, visszaállítás-tudatos, visszaállítási ablakos, lejárat elsőként, tartalékkapacitás-alapú, kvótával súlyozott,
   szigorúan véletlenszerű, **automatikus**, lkgp, kontextusoptimalizált, gyorsítótár-optimalizált, kontextusátadó, **fúziós**,
   folyamatlánc) —
   az automatikus stratégia a v3.8.0 legfontosabb újdonsága; a `fusion` (párhuzamos panellekérdezés + bírálói szintézis,

@@ -372,8 +372,8 @@ basarsi su una definizione statica delle combo. È alla base della famiglia di p
 
 Funzionalità principali:
 
-- **20 strategie di routing** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **21 strategie di routing** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
   auto è la principale novità della v3.8.0; `fusion` (distribuzione a ventaglio verso un panel + sintesi tramite giudice,

@@ -372,8 +372,8 @@ staattiseen yhdistelmämäärittelyyn tukeutumisen sijaan. Se toimii `auto/*`-ma
 
 Keskeiset ominaisuudet:
 
-- **20 reititysstrategiaa** (prioriteetti, painotettu, täytä ensin, vuorottelu, P2C, satunnainen,
-  vähiten käytetty, kustannusoptimoitu, nollauksen huomioiva, nollausikkuna, liikkumavara, kiintiöpainotettu,
+- **21 reititysstrategiaa** (prioriteetti, painotettu, täytä ensin, vuorottelu, P2C, satunnainen,
+  vähiten käytetty, kustannusoptimoitu, nollauksen huomioiva, nollausikkuna, vanheneva ensin, liikkumavara, kiintiöpainotettu,
   tiukasti satunnainen, **auto**, lkgp, kontekstioptimoitu, välimuistioptimoitu, kontekstin välitys, **fusion**,
   liukuhihna) —
   auto on v3.8.0:n merkittävin lisäys; `fusion` (paneelin rinnakkaishajautus + arvioijan koostaminen,

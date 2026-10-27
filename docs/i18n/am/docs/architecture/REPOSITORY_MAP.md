@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`፦ በስክሪኖቹ ጥቅም ላይ የሚውሉ የአዶ ስሞች → የLucide ክፍለ አካላት (`<Icon>`)                              |
 | `constants/providers.ts`         | የZod ማረጋገጫ ያላቸው **375 አቅራቢዎች** (ዋና የእውነት ምንጭ)                                                     |
 | `constants/cliTools.ts`          | የውጫዊ CLI መሣሪያዎች መዝገብ                                                                              |
-| `constants/routingStrategies.ts` | ቅድሚያዎች ያላቸው **20 የማስተላለፊያ ስልቶች**                                                                  |
+| `constants/routingStrategies.ts` | ቅድሚያዎች ያላቸው **21 የማስተላለፊያ ስልቶች**                                                                  |
 | `constants/publicApiRoutes.ts`   | የBearer (ከአስተዳደር ማረጋገጫ በተቃራኒ) ማረጋገጫ የሚፈልጉ መስመሮች                                                   |
 | `constants/upstreamHeaders.ts`   | ለወደላይ ጥያቄዎች የራስጌ ክልክል ዝርዝር                                                                        |
 | `validation/schemas.ts`          | ~80 የZod መርሐግብሮች (ለAPI ውሎች ብቸኛው የእውነት ምንጭ)                                                        |

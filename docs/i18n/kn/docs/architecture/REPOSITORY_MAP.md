@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ಸ್ಕ್ರೀನ್ಗಳು ಬಳಸುವ ಐಕಾನ್ ಹೆಸರುಗಳು → Lucide ಕಾಂಪೊನೆಂಟ್ಗಳು (`<Icon>`)                               |
 | `constants/providers.ts`         | Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ **375 ಪ್ರೊವೈಡರ್ಗಳು** (ಅಧಿಕೃತ ಮೂಲ)                                                       |
 | `constants/cliTools.ts`          | ಬಾಹ್ಯ CLI ಟೂಲ್ ರಿಜಿಸ್ಟ್ರಿ                                                                                    |
-| `constants/routingStrategies.ts` | ಆದ್ಯತೆಗಳೊಂದಿಗೆ **20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು**                                                                       |
+| `constants/routingStrategies.ts` | ಆದ್ಯತೆಗಳೊಂದಿಗೆ **21 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು**                                                                       |
 | `constants/publicApiRoutes.ts`   | Bearer (ಮ್ಯಾನೇಜ್ಮೆಂಟ್ಗೆ ವಿರುದ್ಧವಾಗಿ) ದೃಢೀಕರಣ ಅಗತ್ಯವಿರುವ ರೂಟ್ಗಳು                                              |
 | `constants/upstreamHeaders.ts`   | ಅಪ್ಸ್ಟ್ರೀಮ್ ವಿನಂತಿಗಳಿಗಾಗಿ ಹೆಡರ್ ನಿರಾಕರಣೆಪಟ್ಟಿ                                                                |
 | `validation/schemas.ts`          | ~80 Zod ಸ್ಕೀಮಾಗಳು (API ಒಪ್ಪಂದಗಳಿಗೆ ಏಕೈಕ ಅಧಿಕೃತ ಮೂಲ)                                                          |

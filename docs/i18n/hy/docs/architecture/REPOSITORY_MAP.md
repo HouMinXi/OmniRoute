@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`. էկրաններում օգտագործվող պատկերակների անուններ → Lucide բաղադրիչներ (`<Icon>`)             |
 | `constants/providers.ts`         | **375 մատակարար**՝ Zod վավերացմամբ (ճշմարտության սկզբնաղբյուր)                                        |
 | `constants/cliTools.ts`          | Արտաքին CLI գործիքների գրանցամատյան                                                                   |
-| `constants/routingStrategies.ts` | **20 երթուղավորման ռազմավարություն**՝ առաջնահերթություններով                                          |
+| `constants/routingStrategies.ts` | **21 երթուղավորման ռազմավարություն**՝ առաջնահերթություններով                                          |
 | `constants/publicApiRoutes.ts`   | Երթուղիներ, որոնք պահանջում են Bearer նույնականացում՝ կառավարման նույնականացման փոխարեն               |
 | `constants/upstreamHeaders.ts`   | Վերին հոսքի հարցումների վերնագրերի արգելացանկ                                                         |
 | `validation/schemas.ts`          | ~80 Zod սխեմա (API պայմանագրերի ճշմարտության միասնական սկզբնաղբյուր)                                  |

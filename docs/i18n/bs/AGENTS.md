@@ -67,7 +67,7 @@ Klijent → /v1/chat/completions (Next.js ruta)
 
 API rute slijede dosljedan obrazac: `Route → CORS preflight → Zod body validation → Optional auth (extractApiKey/isValidApiKey) → API key policy enforcement → Handler delegation (open-sse)`. Nema globalnog Next.js posredničkog softvera — presretanje je specifično za rutu.
 
-**Kombinirano usmjeravanje** (`open-sse/services/combo.ts`): 20 javnih strategija (prioritetna, ponderirana, prvo popunjavanje, kružna raspodjela, p2c, nasumična, najmanje korištena, optimizirana prema trošku, svjesna resetiranja, prozor resetiranja, raspoloživi kapacitet, ponderirana prema kvoti, strogo nasumična, automatska, lkgp, optimizirana prema kontekstu, optimizirana prema kešu, prosljeđivanje konteksta, fuzija, cjevovod). Svaki cilj poziva `handleSingleModel()` (obavija `handleChatCore()` rukovanjem greškama za svaki cilj + provjerama prekidača strujnog kola); strategija `fusion` umjesto toga paralelno šalje zahtjeve panelu modela, a model-sudija sintetizira jedan konačni odgovor (`open-sse/services/fusion.ts`). Bodovanje automatske kombinacije prema 16 faktora + puna tabela strategija: `docs/routing/AUTO-COMBO.md`; 3 sloja otpornosti: `docs/architecture/RESILIENCE_GUIDE.md`.
+**Kombinovano usmjeravanje** (`open-sse/services/combo.ts`): 21 javna strategija (priority, weighted, fill-first, round-robin, p2c, random, least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, context-relay, fusion, pipeline). Svako odredište poziva `handleSingleModel()`, koji obavija `handleChatCore()` obradom grešaka po odredištu i provjerama prekidača strujnog kruga. Strategija `fusion` je izuzetak: paralelno šalje zahtjeve panelu modela, a zatim model-sudija sintetizira jedan konačni odgovor (`open-sse/services/fusion.ts`). Pogledajte `docs/routing/AUTO-COMBO.md` za Auto-Combo bodovanje sa 16 faktora i potpunu tabelu strategija, a `docs/architecture/RESILIENCE_GUIDE.md` za 3 sloja otpornosti.
 
 ---
 
@@ -203,20 +203,38 @@ Potpuni detaljni postupci: [`docs/architecture/MODIFICATION_SCENARIOS.md`](docs/
 
 Za svaku netrivijalnu izmjenu prvo pročitajte odgovarajući detaljni vodič:
 
-- Navigacija repozitorijem — `docs/architecture/REPOSITORY_MAP.md` · Arhitektura — `docs/architecture/ARCHITECTURE.md` · Inženjerska referenca — `docs/architecture/CODEBASE_DOCUMENTATION.md`
-- Auto-Combo (bodovanje prema 16 faktora, 20 strategija) — `docs/routing/AUTO-COMBO.md` · Ponovno izvođenje zaključivanja — `docs/routing/REASONING_REPLAY.md`
-- Otpornost (3 mehanizma + otklanjanje grešaka) — `docs/architecture/RESILIENCE_GUIDE.md`
-- Postupci izmjena — `docs/architecture/MODIFICATION_SCENARIOS.md`
-- Okvir vještina — `docs/frameworks/SKILLS.md` · Radar (sloj kataloga besplatnih modela) — `docs/frameworks/RADAR.md` · Sistem memorije (FTS5 + Qdrant) — `docs/frameworks/MEMORY.md`
-- Agenti u oblaku — `docs/frameworks/CLOUD_AGENT.md` · Protokoli agenata (A2A / ACP / Cloud) — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`
-- Zaštitne mjere (PII / ubacivanje naredbi / vizija) — `docs/security/GUARDRAILS.md` · Javne vjerodajnice uzvodnih usluga (Gemini/itd.) — `docs/security/PUBLIC_CREDS.md` · Sanitizacija poruka o greškama — `docs/security/ERROR_SANITIZATION.md` · Usklađenost / revizija — `docs/security/COMPLIANCE.md` · Prikrivenost (TLS / otisak) — `docs/security/STEALTH_GUIDE.md`
-- Evaluacije — `docs/frameworks/EVALS.md` · Webhookovi — `docs/frameworks/WEBHOOKS.md` · Izvoz dnevnika (dnevnici poziva → BigQuery/…) — `docs/frameworks/LOG-EXPORT.md`
-- Tok autorizacije — `docs/architecture/AUTHZ_GUIDE.md`
-- MCP server — `docs/frameworks/MCP-SERVER.md` · A2A server — `docs/frameworks/A2A-SERVER.md`
-- API referenca + OpenAPI — `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` · Katalog pružalaca usluga (automatski generiran) — `docs/reference/PROVIDER_REFERENCE.md`
-- Tuneli — `docs/ops/TUNNELS_GUIDE.md` · Tok izdavanja — `docs/ops/RELEASE_CHECKLIST.md` · Protokol radnog stabla — `docs/ops/WORKTREE_ISOLATION.md` · Detalji strogih pravila — `docs/ops/HARD_RULES_DETAIL.md` · Upozorenja pri izgradnji + otklanjanje poteškoća s Bunom — `docs/ops/BUILD_WARNINGS.md`
-- Electron desktop aplikacija — `docs/guides/ELECTRON_GUIDE.md` · VS Code Copilot Chat (OmniCopilot ekstenzija) — `docs/guides/VSCODE-COPILOT.md`
-- Ugrađene usluge — `docs/frameworks/EMBEDDED-SERVICES.md` · Kontrole kvaliteta (~90 skripti, pravila liste dozvoljenih stavki) — `docs/architecture/QUALITY_GATES.md`
+| Oblast                                                              | Dokument                                                |
+| ------------------------------------------------------------------- | ------------------------------------------------------- |
+| Navigacija repozitorija                                             | `docs/architecture/REPOSITORY_MAP.md`                   |
+| Arhitektura                                                         | `docs/architecture/ARCHITECTURE.md`                     |
+| Inženjerska referenca                                               | `docs/architecture/CODEBASE_DOCUMENTATION.md`           |
+| Auto-Combo (bodovanje pomoću 16 faktora, 21 strategija)             | `docs/routing/AUTO-COMBO.md`                            |
+| Otpornost (3 mehanizma)                                             | `docs/architecture/RESILIENCE_GUIDE.md`                 |
+| Ponovna reprodukcija zaključivanja                                  | `docs/routing/REASONING_REPLAY.md`                      |
+| Okvir za vještine                                                   | `docs/frameworks/SKILLS.md`                             |
+| Radar (sloj kataloga besplatnih modela)                             | `docs/frameworks/RADAR.md`                              |
+| Memorijski sistem (FTS5 + Qdrant)                                   | `docs/frameworks/MEMORY.md`                             |
+| Agenti u oblaku                                                     | `docs/frameworks/CLOUD_AGENT.md`                        |
+| Zaštitne mjere (PII / ubacivanje instrukcija / vizija)              | `docs/security/GUARDRAILS.md`                           |
+| Javni pristupni podaci uzvodnih servisa (Gemini itd.)               | `docs/security/PUBLIC_CREDS.md`                         |
+| Sanitizacija poruka o greškama                                      | `docs/security/ERROR_SANITIZATION.md`                   |
+| Evaluacije                                                          | `docs/frameworks/EVALS.md`                              |
+| Usklađenost / revizija                                              | `docs/security/COMPLIANCE.md`                           |
+| Webhookovi                                                          | `docs/frameworks/WEBHOOKS.md`                           |
+| Izvoz zapisnika (zapisi poziva → BigQuery/…)                        | `docs/frameworks/LOG-EXPORT.md`                         |
+| Proces autorizacije                                                 | `docs/architecture/AUTHZ_GUIDE.md`                      |
+| Prikrivenost (TLS / otisak)                                         | `docs/security/STEALTH_GUIDE.md`                        |
+| Protokoli agenata (A2A / ACP / Cloud)                               | `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`              |
+| MCP server                                                          | `docs/frameworks/MCP-SERVER.md`                         |
+| A2A server                                                          | `docs/frameworks/A2A-SERVER.md`                         |
+| API referenca + OpenAPI                                             | `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` |
+| Katalog pružalaca usluga (automatski generiran)                     | `docs/reference/PROVIDER_REFERENCE.md`                  |
+| Tuneli                                                              | `docs/ops/TUNNELS_GUIDE.md`                             |
+| Electron desktop aplikacija                                         | `docs/guides/ELECTRON_GUIDE.md`                         |
+| VS Code Copilot Chat (OmniCopilot ekstenzija)                       | `docs/guides/VSCODE-COPILOT.md`                         |
+| Proces izdavanja                                                    | `docs/ops/RELEASE_CHECKLIST.md`                         |
+| Ugrađene usluge                                                     | `docs/frameworks/EMBEDDED-SERVICES.md`                  |
+| Kontrole kvaliteta (~90 skripti, politika liste dozvoljenih stavki) | `docs/architecture/QUALITY_GATES.md`                    |
 
 ---
 

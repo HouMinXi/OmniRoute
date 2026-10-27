@@ -372,8 +372,8 @@ se zanašal na statično definicijo kombinacije. Poganja družino predpon modelo
 
 Ključne zmogljivosti:
 
-- **20 strategij usmerjanja** (prednostno, uteženo, najprej zapolni, krožno, P2C, naključno,
-  najmanj uporabljeno, stroškovno optimizirano, z upoštevanjem ponastavitve, okno ponastavitve, rezerva, uteženo po kvoti,
+- **21 strategij usmerjanja** (prednostno, uteženo, najprej zapolni, krožno, P2C, naključno,
+  najmanj uporabljeno, stroškovno optimizirano, z upoštevanjem ponastavitve, okno ponastavitve, najprej potekajoče, rezerva, uteženo po kvoti,
   strogo naključno, **auto**, lkgp, optimizirano za kontekst, optimizirano za predpomnilnik, posredovanje konteksta, **fusion**,
   cevovod) —
   auto je glavna novost v v3.8.0; `fusion` (razpršitev na panel + sinteza presoje,

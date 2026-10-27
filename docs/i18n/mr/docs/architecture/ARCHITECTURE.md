@@ -360,8 +360,8 @@ Auto Combo स्थिर combo व्याख्येवर अवलंब�
 
 प्रमुख क्षमता:
 
-- **20 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **21 routing strategies** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
   auto ही v3.8.0 मधील प्रमुख भर आहे; `fusion` (panel fan-out + judge synthesis,

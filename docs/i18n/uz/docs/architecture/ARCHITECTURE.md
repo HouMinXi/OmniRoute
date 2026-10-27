@@ -371,8 +371,8 @@ Auto Combo statik combo taʼrifiga tayanish o‘rniga, so‘rov vaqtida marshrut
 
 Asosiy imkoniyatlar:
 
-- **20 ta marshrutlash strategiyasi** (ustuvorlik, vaznli, avval to‘ldirish, navbatma-navbat, P2C, tasodifiy,
-  eng kam ishlatilgan, xarajat bo‘yicha optimallashtirilgan, qayta tiklanishni hisobga oluvchi, qayta tiklanish oynasi, zaxira sig‘imi, kvota bo‘yicha vaznlangan,
+- **21 ta marshrutlash strategiyasi** (ustuvorlik, vaznli, avval to‘ldirish, navbatma-navbat, P2C, tasodifiy,
+  eng kam ishlatilgan, xarajat bo‘yicha optimallashtirilgan, qayta tiklanishni hisobga oluvchi, qayta tiklanish oynasi, muddati tugayotgani birinchi, zaxira sig‘imi, kvota bo‘yicha vaznlangan,
   qatʼiy tasodifiy, **auto**, lkgp, kontekst bo‘yicha optimallashtirilgan, kesh bo‘yicha optimallashtirilgan, kontekstni uzatish, **fusion**,
   konveyer) —
   auto — v3.8.0 dagi asosiy yangilik; `fusion` (panelga parallel tarqatish + hakam sintezi,

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: திரைகள் பயன்படுத்தும் ஐகான் பெயர்கள் → Lucide கூறுகள் (`<Icon>`)                                       |
 | `constants/providers.ts`         | Zod சரிபார்ப்புடன் **375 வழங்குநர்கள்** (அதிகாரப்பூர்வ ஒற்றை ஆதாரம்)                                               |
 | `constants/cliTools.ts`          | வெளிப்புற CLI கருவிப் பதிவகம்                                                                                      |
-| `constants/routingStrategies.ts` | முன்னுரிமைகளுடன் **20 வழித்தட உத்திகள்**                                                                           |
+| `constants/routingStrategies.ts` | முன்னுரிமைகளுடன் **21 வழித்தட உத்திகள்**                                                                           |
 | `constants/publicApiRoutes.ts`   | Bearer அங்கீகாரம் தேவைப்படும் வழித்தடங்கள் (மேலாண்மை அங்கீகாரத்திற்கு மாறாக)                                       |
 | `constants/upstreamHeaders.ts`   | அப்ஸ்ட்ரீம் கோரிக்கைகளுக்கான தலைப்பு மறுப்புப் பட்டியல்                                                            |
 | `validation/schemas.ts`          | ~80 Zod ஸ்கீமாக்கள் (API ஒப்பந்தங்களுக்கான அதிகாரப்பூர்வ ஒற்றை ஆதாரம்)                                             |

@@ -372,8 +372,8 @@ Auto Combo स्थिर कॉम्बो परिभाषा पर न�
 
 प्रमुख क्षमताएँ:
 
-- **20 रूटिंग रणनीतियाँ** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
+- **21 रूटिंग रणनीतियाँ** (priority, weighted, fill-first, round-robin, P2C, random,
+  least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted,
   strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
   pipeline) —
   auto, v3.8.0 में प्रमुख नया संयोजन है; `fusion` (पैनल फ़ैन-आउट + निर्णायक संश्लेषण,

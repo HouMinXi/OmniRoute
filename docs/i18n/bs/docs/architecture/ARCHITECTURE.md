@@ -372,8 +372,8 @@ da se oslanja na statičku definiciju kombinacije. Pokreće porodicu prefiksa mo
 
 Ključne mogućnosti:
 
-- **20 strategija usmjeravanja** (prioritet, ponderisano, prvo-popunjavanje, kružno, P2C, nasumično,
-  najmanje-korišteno, optimizovano-prema-trošku, svjesno-resetovanja, prozor-resetovanja, rezerva, ponderisano-kvotom,
+- **21 strategija usmjeravanja** (prioritet, ponderisano, prvo-popunjavanje, kružno, P2C, nasumično,
+  najmanje-korišteno, optimizovano-prema-trošku, svjesno-resetovanja, prozor-resetovanja, prvo ističuće, rezerva, ponderisano-kvotom,
   strogo-nasumično, **automatski**, lkgp, optimizovano-prema-kontekstu, optimizovano-prema-kešu, prijenos-konteksta, **fuzija**,
   protočna obrada) —
   automatski način je glavni dodatak u v3.8.0; `fusion` (raspoređivanje na panel + sinteza procjenitelja,

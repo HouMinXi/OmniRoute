@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: kuvadel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                   |
 | `constants/providers.ts`         | **375 teenusepakkujat** koos Zodi valideerimisega (ainus tõeallikas)                            |
 | `constants/cliTools.ts`          | Väliste CLI-tööriistade register                                                                |
-| `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** koos prioriteetidega                                             |
+| `constants/routingStrategies.ts` | **21 marsruutimisstrateegiat** koos prioriteetidega                                             |
 | `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad Bearer-autentimist (haldusautentimise asemel)                           |
 | `constants/upstreamHeaders.ts`   | Päiste keeluloend ülesvoolupäringute jaoks                                                      |
 | `validation/schemas.ts`          | ~80 Zodi skeemi (API-lepingute ainus tõeallikas)                                                |

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ονόματα εικονιδίων που χρησιμοποιούνται από τις οθόνες → στοιχεία Lucide (`<Icon>`)                           |
 | `constants/providers.ts`         | **375 πάροχοι** με επικύρωση Zod (πηγή αλήθειας)                                                                          |
 | `constants/cliTools.ts`          | Μητρώο εξωτερικών εργαλείων CLI                                                                                           |
-| `constants/routingStrategies.ts` | **20 στρατηγικές δρομολόγησης** με προτεραιότητες                                                                         |
+| `constants/routingStrategies.ts` | **21 στρατηγικές δρομολόγησης** με προτεραιότητες                                                                         |
 | `constants/publicApiRoutes.ts`   | Διαδρομές που απαιτούν έλεγχο ταυτότητας Bearer (αντί διαχείρισης)                                                        |
 | `constants/upstreamHeaders.ts`   | Λίστα απαγόρευσης κεφαλίδων για αιτήματα προς ανάντη υπηρεσίες                                                            |
 | `validation/schemas.ts`          | ~80 σχήματα Zod (μοναδική πηγή αλήθειας για συμβάσεις API)                                                                |

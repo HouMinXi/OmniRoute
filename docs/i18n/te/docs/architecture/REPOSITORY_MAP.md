@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: స్క్రీన్లు ఉపయోగించే ఐకాన్ పేర్లు → Lucide కాంపోనెంట్లు (`<Icon>`)                             |
 | `constants/providers.ts`         | Zod ధృవీకరణతో **375 ప్రొవైడర్లు** (ప్రామాణిక మూలం)                                                         |
 | `constants/cliTools.ts`          | బాహ్య CLI సాధనాల రిజిస్ట్రీ                                                                                |
-| `constants/routingStrategies.ts` | ప్రాధాన్యతలతో **20 రూటింగ్ వ్యూహాలు**                                                                      |
+| `constants/routingStrategies.ts` | ప్రాధాన్యతలతో **21 రూటింగ్ వ్యూహాలు**                                                                      |
 | `constants/publicApiRoutes.ts`   | Bearer (మేనేజ్మెంట్కు భిన్నంగా) ప్రమాణీకరణ అవసరమయ్యే రూట్లు                                                |
 | `constants/upstreamHeaders.ts`   | అప్స్ట్రీమ్ అభ్యర్థనల కోసం హెడర్ నిరాకరణ జాబితా                                                            |
 | `validation/schemas.ts`          | ~80 Zod స్కీమాలు (API కాంట్రాక్ట్లకు ఏకైక ప్రామాణిక మూలం)                                                  |

@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ainmneacha deilbhíní a úsáideann na scáileáin → comhpháirteanna Lucide (`<Icon>`)                |
 | `constants/providers.ts`         | **375 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                      |
 | `constants/cliTools.ts`          | Clárlann uirlisí seachtracha CLI                                                                             |
-| `constants/routingStrategies.ts` | **20 straitéis ródúcháin** le tosaíochtaí                                                                    |
+| `constants/routingStrategies.ts` | **21 straitéis ródúcháin** le tosaíochtaí                                                                    |
 | `constants/publicApiRoutes.ts`   | Bealaí a éilíonn fíordheimhniú Bearer (seachas fíordheimhniú bainistíochta)                                  |
 | `constants/upstreamHeaders.ts`   | Liosta coiscthe ceanntásca le haghaidh iarrataí réamhtheachtacha                                             |
 | `validation/schemas.ts`          | ~80 scéimre Zod (foinse aonair na fírinne le haghaidh conarthaí API)                                         |

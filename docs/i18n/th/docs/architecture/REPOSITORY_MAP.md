@@ -244,7 +244,7 @@ src/
 | `constants/iconMap.ts`           | `ICON_MAP`: ชื่อไอคอนที่หน้าจอต่าง ๆ ใช้ → คอมโพเนนต์ Lucide (`<Icon>`)                               |
 | `constants/providers.ts`         | **ผู้ให้บริการ 375 ราย** พร้อมการตรวจสอบความถูกต้องด้วย Zod (แหล่งข้อมูลจริงหลัก)                     |
 | `constants/cliTools.ts`          | รีจิสทรีเครื่องมือ CLI ภายนอก                                                                         |
-| `constants/routingStrategies.ts` | **กลยุทธ์การกำหนดเส้นทาง 20 แบบ** พร้อมลำดับความสำคัญ                                                 |
+| `constants/routingStrategies.ts` | **กลยุทธ์การกำหนดเส้นทาง 21 แบบ** พร้อมลำดับความสำคัญ                                                 |
 | `constants/publicApiRoutes.ts`   | เส้นทางที่ต้องใช้การยืนยันตัวตนแบบ Bearer (แทนการยืนยันตัวตนเพื่อการจัดการ)                           |
 | `constants/upstreamHeaders.ts`   | รายการปฏิเสธส่วนหัวสำหรับคำขอไปยังต้นทาง                                                              |
 | `validation/schemas.ts`          | สคีมา Zod ประมาณ 80 รายการ (แหล่งข้อมูลจริงหลักเพียงแห่งเดียวสำหรับสัญญา API)                         |
