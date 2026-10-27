@@ -489,7 +489,7 @@ Wannan yana sarrafa:
 
 | Fayil                              | Manufa                                                  |
 | ---------------------------------- | ------------------------------------------------------- |
-| `providerRegistry.ts`              | Rajistar samfuran chat bisa katalog na masu samarwa 375 |
+| `providerRegistry.ts`              | Rajistar samfuran chat bisa katalog na masu samarwa 376 |
 | `providerModels.ts`                | Laƙabin samfurai, taswirar tsari                        |
 | `constants.ts`                     | Lokutan ƙarewa, iyakoki, lambobin matsayi               |
 | `defaultThinkingSignature.ts`      | Sa hannun tunani na Claude na tsoho                     |
