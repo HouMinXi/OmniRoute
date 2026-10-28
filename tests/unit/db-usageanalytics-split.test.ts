@@ -26,7 +26,7 @@ import {
 // ── 1. buildUnifiedSource — pure branching ───────────────────────────────────
 
 describe("usageAnalytics/sources — buildUnifiedSource", () => {
-  it("includes the daily_usage_summary leg for a wide window with no api-key filter", () => {
+  it("includes the usage_daily_summary leg for a wide window with no api-key filter", () => {
     const { unifiedSource, unifiedParams } = buildUnifiedSource({
       sinceIso: "2024-06-01T00:00:00.000Z",
       untilIso: null,
@@ -35,9 +35,9 @@ describe("usageAnalytics/sources — buildUnifiedSource", () => {
       apiKeyParams: {},
     });
     assert.ok(typeof unifiedSource === "string" && unifiedSource.length > 0);
-    // needsAggregated = (sinceDate < rawCutoffDate) && !apiKeyWhere => true
+    // needsAggregated = (sinceDate <= rawCutoffDate) && !apiKeyWhere => true
     assert.ok(
-      unifiedSource.includes("daily_usage_summary"),
+      unifiedSource.includes("usage_daily_summary"),
       "aggregated leg must be present when the window predates the raw cutoff"
     );
     assert.equal(unifiedParams.rawCutoff, "2024-06-15");
@@ -58,7 +58,7 @@ describe("usageAnalytics/sources — buildUnifiedSource", () => {
     });
     // needsAggregated = ... && !apiKeyWhere => false
     assert.ok(
-      !unifiedSource.includes("daily_usage_summary"),
+      !unifiedSource.includes("usage_daily_summary"),
       "aggregated leg must be absent once an api-key filter scopes the query to raw rows"
     );
     // Regression: raw-only fallback must also surface the requests column.
