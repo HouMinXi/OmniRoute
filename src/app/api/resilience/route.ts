@@ -43,6 +43,11 @@ function normalizeLegacyPatch(body: JsonRecord): ResilienceSettingsPatch {
       ...(typeof defaults.concurrentRequests === "number"
         ? { concurrentRequests: defaults.concurrentRequests }
         : {}),
+      // #18390: the legacy schema has accepted this key since the global gate landed,
+      // but it was never mapped, so the value was silently dropped.
+      ...(typeof defaults.globalConcurrentRequests === "number"
+        ? { globalConcurrentRequests: defaults.globalConcurrentRequests }
+        : {}),
     };
   }
 
