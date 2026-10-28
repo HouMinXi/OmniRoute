@@ -81,7 +81,11 @@ describe("#18390 PATCH /api/resilience round trip", () => {
   it("saves the Request Queue card payload built from GET", async () => {
     const current = await (await GET()).json();
     const payload = {
-      requestQueue: { ...current.requestQueue, requestsPerMinute: 77, globalConcurrentRequests: 12 },
+      requestQueue: {
+        ...current.requestQueue,
+        requestsPerMinute: 77,
+        globalConcurrentRequests: 12,
+      },
     };
     const response = await PATCH(patchRequest(payload));
     const body = await response.json();
