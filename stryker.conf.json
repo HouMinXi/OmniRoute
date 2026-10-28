@@ -667,7 +667,8 @@
       "tests/unit/management-writers-always-protected.test.ts",
       "tests/unit/opencode-410-model-scope.test.ts",
       "tests/unit/p2c-latency-weight.test.ts",
-      "tests/unit/services/service-status-route-guard.test.ts"
+      "tests/unit/services/service-status-route-guard.test.ts",
+      "tests/unit/expiry-first-combo-ordering.test.ts"
     ],
     "nodeArgs": [
       "--import",
