@@ -12,7 +12,11 @@
 import { getDbInstance } from "./core";
 import type { AnalyticsParams } from "./usageAnalytics/sources";
 
-export { buildUnifiedSource, buildPresetUnifiedSource, readPublishedCutoffDate } from "./usageAnalytics/sources";
+export {
+  buildUnifiedSource,
+  buildPresetUnifiedSource,
+  readPublishedCutoffDate,
+} from "./usageAnalytics/sources";
 export type {
   AnalyticsParams,
   BuildUnifiedSourceOptions,

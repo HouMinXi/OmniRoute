@@ -13,12 +13,10 @@ const aggregateHistory = await import("../../src/lib/usage/aggregateHistory.ts")
 const cleanup = await import("../../src/lib/db/cleanup.ts");
 const databaseSettings = await import("../../src/lib/db/databaseSettings.ts");
 const { saveRequestUsage } = await import("../../src/lib/usage/usageHistory.ts");
-const { buildUnifiedSource, buildPresetUnifiedSource } = await import(
-  "../../src/lib/db/usageAnalytics/sources.ts"
-);
-const { getProviderDailyUsageRows, readPublishedCutoffDate } = await import(
-  "../../src/lib/db/usageAnalytics.ts"
-);
+const { buildUnifiedSource, buildPresetUnifiedSource } =
+  await import("../../src/lib/db/usageAnalytics/sources.ts");
+const { getProviderDailyUsageRows, readPublishedCutoffDate } =
+  await import("../../src/lib/db/usageAnalytics.ts");
 const { sumUsageTokensThisMonth } = await import("../../src/lib/db/usageSummary.ts");
 const { getUsageStats } = await import("../../src/lib/usage/usageStats.ts");
 const { calculateCost } = await import("../../src/lib/usage/costCalculator.ts");
@@ -285,6 +283,7 @@ test("two runs cannot price the same day", async () => {
     },
   });
   await first;
+  await secondDone;
   assert.equal(summaryWrites, 1);
 });
 
@@ -412,7 +411,6 @@ parentPort.postMessage("done");
       assert.equal(outcome[0], 2, `second connection committed after ${outcome[1]}ms`);
     },
   });
-
 });
 
 test("a published day is read from usage_daily_summary and carries its cache tokens", () => {
@@ -486,10 +484,14 @@ test("a raw row at noon on the published day is counted once", () => {
   });
   const db = core.getDbInstance();
   const counted = db
-    .prepare(`SELECT COUNT(*) AS n, COALESCE(SUM(tokens_input), 0) AS input FROM ${unifiedSource} AS _u`)
+    .prepare(
+      `SELECT COUNT(*) AS n, COALESCE(SUM(tokens_input), 0) AS input FROM ${unifiedSource} AS _u`
+    )
     .get(unifiedParams) as { n: number; input: number };
   const presetCounted = db
-    .prepare(`SELECT COUNT(*) AS n, COALESCE(SUM(tokens_input), 0) AS input FROM ${preset.unifiedSource} AS _u`)
+    .prepare(
+      `SELECT COUNT(*) AS n, COALESCE(SUM(tokens_input), 0) AS input FROM ${preset.unifiedSource} AS _u`
+    )
     .get(preset.unifiedParams) as { n: number; input: number };
 
   assert.equal(counted.n, 1);

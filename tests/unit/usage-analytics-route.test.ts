@@ -245,9 +245,9 @@ test("GET /api/usage/analytics preserves archived flat-rate estimates without ch
       (provider, model, service_tier, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
   ).run("claude", "claude-opus-5", "standard", "2024-01-01", 2, 1_000_000, 1_000_000, 42.5);
-  db.prepare(
-    `INSERT INTO rollup_state (tier, last_completed_date) VALUES ('daily', ?)`
-  ).run("2024-01-01");
+  db.prepare(`INSERT INTO rollup_state (tier, last_completed_date) VALUES ('daily', ?)`).run(
+    "2024-01-01"
+  );
 
   const billedResponse = await analyticsRoute.GET(
     makeRequest("http://localhost/api/usage/analytics?range=all")

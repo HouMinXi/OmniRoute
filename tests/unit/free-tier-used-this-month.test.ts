@@ -18,7 +18,9 @@ test("sumUsageTokensThisMonth sums only the current calendar month's rolled-up t
     total_input_tokens INTEGER NOT NULL DEFAULT 0, total_output_tokens INTEGER NOT NULL DEFAULT 0,
     total_cost REAL NOT NULL DEFAULT 0.0, UNIQUE (provider, model, service_tier, date));`);
   const thisMonth = new Date().toISOString().slice(0, 7); // YYYY-MM
-  const insert = db.prepare("INSERT INTO usage_daily_summary (provider, model, service_tier, date, total_input_tokens, total_output_tokens) VALUES (?,?,?,?,?,?)");
+  const insert = db.prepare(
+    "INSERT INTO usage_daily_summary (provider, model, service_tier, date, total_input_tokens, total_output_tokens) VALUES (?,?,?,?,?,?)"
+  );
   insert.run("groq", "llama", "standard", `${thisMonth}-05`, 100, 200);
   insert.run("cerebras", "qwen", "standard", `${thisMonth}-12`, 50, 50);
   insert.run("groq", "llama", "standard", "2000-01-01", 9999, 9999); // long ago, excluded
@@ -37,7 +39,9 @@ test("sumUsageTokensThisMonth includes the current month's raw usage_history row
     tokens_cache_read INTEGER DEFAULT 0, tokens_cache_creation INTEGER DEFAULT 0, tokens_reasoning INTEGER DEFAULT 0,
     service_tier TEXT DEFAULT 'standard', status TEXT, success INTEGER DEFAULT 1, latency_ms INTEGER DEFAULT 0,
     ttft_ms INTEGER DEFAULT 0, error_code TEXT, timestamp TEXT NOT NULL);`);
-  db.exec(`CREATE TABLE IF NOT EXISTS daily_usage_summary (id INTEGER PRIMARY KEY AUTOINCREMENT, provider TEXT NOT NULL, model TEXT NOT NULL, date TEXT NOT NULL, total_requests INTEGER NOT NULL DEFAULT 0, total_input_tokens INTEGER NOT NULL DEFAULT 0, total_output_tokens INTEGER NOT NULL DEFAULT 0, total_cost REAL NOT NULL DEFAULT 0.0, created_at TEXT NOT NULL DEFAULT (datetime('now')));`);
+  db.exec(
+    `CREATE TABLE IF NOT EXISTS daily_usage_summary (id INTEGER PRIMARY KEY AUTOINCREMENT, provider TEXT NOT NULL, model TEXT NOT NULL, date TEXT NOT NULL, total_requests INTEGER NOT NULL DEFAULT 0, total_input_tokens INTEGER NOT NULL DEFAULT 0, total_output_tokens INTEGER NOT NULL DEFAULT 0, total_cost REAL NOT NULL DEFAULT 0.0, created_at TEXT NOT NULL DEFAULT (datetime('now')));`
+  );
 
   // Isolate from the shared DB (getDbInstance is a singleton across test cases): start empty.
   db.exec("DELETE FROM usage_history");
@@ -79,19 +83,19 @@ test("sumUsageTokensThisMonth uses an inclusive-start/exclusive-end UTC month ra
     tokens_cache_read INTEGER DEFAULT 0, tokens_cache_creation INTEGER DEFAULT 0, tokens_reasoning INTEGER DEFAULT 0,
     service_tier TEXT DEFAULT 'standard', status TEXT, success INTEGER DEFAULT 1, latency_ms INTEGER DEFAULT 0,
     ttft_ms INTEGER DEFAULT 0, error_code TEXT, timestamp TEXT NOT NULL);`);
-  db.exec(`CREATE TABLE IF NOT EXISTS daily_usage_summary (id INTEGER PRIMARY KEY AUTOINCREMENT, provider TEXT NOT NULL, model TEXT NOT NULL, date TEXT NOT NULL, total_requests INTEGER NOT NULL DEFAULT 0, total_input_tokens INTEGER NOT NULL DEFAULT 0, total_output_tokens INTEGER NOT NULL DEFAULT 0, total_cost REAL NOT NULL DEFAULT 0.0, created_at TEXT NOT NULL DEFAULT (datetime('now')));`);
+  db.exec(
+    `CREATE TABLE IF NOT EXISTS daily_usage_summary (id INTEGER PRIMARY KEY AUTOINCREMENT, provider TEXT NOT NULL, model TEXT NOT NULL, date TEXT NOT NULL, total_requests INTEGER NOT NULL DEFAULT 0, total_input_tokens INTEGER NOT NULL DEFAULT 0, total_output_tokens INTEGER NOT NULL DEFAULT 0, total_cost REAL NOT NULL DEFAULT 0.0, created_at TEXT NOT NULL DEFAULT (datetime('now')));`
+  );
   db.exec("DELETE FROM usage_history");
   db.exec("DELETE FROM usage_daily_summary");
 
-  const monthStart = db
-    .prepare("SELECT strftime('%Y-%m-01T00:00:00.000Z','now') AS s")
-    .get() as { s: string };
+  const monthStart = db.prepare("SELECT strftime('%Y-%m-01T00:00:00.000Z','now') AS s").get() as {
+    s: string;
+  };
   const nextMonthStart = db
     .prepare("SELECT strftime('%Y-%m-01T00:00:00.000Z','now','+1 month') AS s")
     .get() as { s: string };
-  const lastInstantOfPrevMonth = new Date(
-    new Date(monthStart.s).getTime() - 1
-  ).toISOString();
+  const lastInstantOfPrevMonth = new Date(new Date(monthStart.s).getTime() - 1).toISOString();
 
   const insHistory = db.prepare(
     "INSERT INTO usage_history (provider, model, tokens_input, tokens_output, timestamp) VALUES (?,?,?,?,?)"
@@ -110,19 +114,18 @@ test("sumUsageTokensThisMonth counts a day published by the rollup once", async 
   db.exec("DELETE FROM usage_history");
   db.exec("DELETE FROM usage_daily_summary");
   db.exec("DELETE FROM rollup_state");
-  const monthStart = (
-    db.prepare("SELECT strftime('%Y-%m-01', 'now') AS d").get() as { d: string }
-  ).d;
-  const yesterday = new Date(
-    Date.parse(`${monthStart}T00:00:00.000Z`) - 24 * 60 * 60 * 1000
-  ).toISOString().slice(0, 10);
-  db.prepare(
-    `INSERT INTO rollup_state (tier, last_completed_date) VALUES ('daily', ?)`
-  ).run(yesterday);
+  const monthStart = (db.prepare("SELECT strftime('%Y-%m-01', 'now') AS d").get() as { d: string })
+    .d;
+  const yesterday = new Date(Date.parse(`${monthStart}T00:00:00.000Z`) - 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
+  db.prepare(`INSERT INTO rollup_state (tier, last_completed_date) VALUES ('daily', ?)`).run(
+    yesterday
+  );
 
-  const published = new Date(
-    Date.parse(`${monthStart}T00:00:00.000Z`) + 24 * 60 * 60 * 1000
-  ).toISOString().slice(0, 10);
+  const published = new Date(Date.parse(`${monthStart}T00:00:00.000Z`) + 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
   db.prepare(
     `INSERT INTO usage_history
       (provider, model, tokens_input, tokens_output, timestamp)
