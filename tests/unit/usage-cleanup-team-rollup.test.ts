@@ -98,4 +98,24 @@ test("cleanup keeps a Team row with a non-UTC offset until it is folded", async 
     .get(timestamp) as { n: number };
   // Every Team row is either folded into the summary or still on disk.
   assert.equal(folded.n + left.n, 1);
+
+  // A later Team day moves the fold cutoff past the offset row: it is folded
+  // once, and the next run can delete it without counting it again.
+  await usage.saveRequestUsage({
+    provider: "openai",
+    model: "m",
+    apiKeyId: key.id,
+    success: true,
+    tokens: { input: 1, output: 1 },
+    timestamp: "2020-02-05T12:00:00.000Z",
+  });
+  const offsetDay = db.prepare(
+    "SELECT COALESCE(SUM(total_requests), 0) n FROM daily_team_usage_summary WHERE team_id = ? AND date = ?"
+  );
+  const offsetRows = db.prepare("SELECT COUNT(*) n FROM usage_history WHERE timestamp = ?");
+  assert.equal((await cleanup.cleanupUsageHistory()).errors, 0);
+  assert.equal((offsetDay.get(team.id, "2020-02-02") as { n: number }).n, 1);
+  assert.equal((await cleanup.cleanupUsageHistory()).errors, 0);
+  assert.equal((offsetRows.get(timestamp) as { n: number }).n, 0);
+  assert.equal((offsetDay.get(team.id, "2020-02-02") as { n: number }).n, 1);
 });

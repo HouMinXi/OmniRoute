@@ -376,12 +376,10 @@ test("a published day with a stored cost is not billed again for its tokens", as
 test("the rollup hold takes the write lock before its callback runs", async () => {
   insertUsageRow({ day: "2026-01-01" });
   const { Worker } = await import("node:worker_threads");
-  const workerPath = path.join(process.cwd(), ".scratch", "second-writer.mjs");
-  fs.mkdirSync(path.dirname(workerPath), { recursive: true });
-  fs.writeFileSync(
-    workerPath,
-    `import { parentPort, workerData } from "node:worker_threads";
-import Database from "better-sqlite3";
+  // An eval worker needs no file in the repo; its require() resolves from the cwd.
+  const writerSource = `
+const { parentPort, workerData } = require("node:worker_threads");
+const Database = require("better-sqlite3");
 const db = new Database(workerData.file);
 db.pragma("busy_timeout = 300");
 const started = Date.now();
@@ -396,13 +394,15 @@ Atomics.store(status, 1, Date.now() - started);
 Atomics.store(status, 2, 1);
 Atomics.notify(status, 2);
 parentPort.postMessage("done");
-`
-  );
+`;
   const status = new SharedArrayBuffer(12);
 
   await aggregateHistory.runDailyRollup(new Date("2026-01-02T00:00:00Z"), {
     pause: () => {
-      const writer = new Worker(workerPath, { workerData: { file: SQLITE_FILE, status } });
+      const writer = new Worker(writerSource, {
+        eval: true,
+        workerData: { file: SQLITE_FILE, status },
+      });
       const view = new Int32Array(status);
       const saw = Atomics.wait(view, 2, 0, 1_000);
       const outcome = [Atomics.load(view, 0), Atomics.load(view, 1)] as const;
