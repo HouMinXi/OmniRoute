@@ -4,7 +4,7 @@
  * @module lib/db/cleanup
  */
 
-import { publishDay } from "@/lib/usage/aggregateHistory";
+import { publishDay, rollupTeamUsageBefore } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { getDbInstance } from "./core";
@@ -185,6 +185,11 @@ function readRetiringDay(db: ReturnType<typeof getDbInstance>, day: string): Ret
     .prepare("SELECT COUNT(*) AS n FROM usage_daily_summary WHERE date = ?")
     .get(day) as { n: number };
   return { revision: dirty?.revision ?? null, rawCount: raw.n, summaryCount: summary.n };
+}
+
+function nextUtcDay(day: string): string {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date + 1)).toISOString().slice(0, 10);
 }
 
 function notePublishedDay(db: ReturnType<typeof getDbInstance>, day: string): void {
