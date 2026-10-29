@@ -30,4 +30,11 @@ test("NVIDIA NIM registry preserves known model capabilities", () => {
 
   const omni = byId.get("nvidia/nemotron-3-nano-omni-30b-a3b-reasoning");
   assert.equal(omni?.supportsVision, true, "Nemotron 3 Nano Omni must support vision");
+
+  // The emergency fallback default since #18418 (it replaced openai/gpt-oss-120b).
+  assert.equal(
+    byId.get("nvidia/nemotron-3.5-super-vl-120b-a12b")?.supportsVision,
+    true,
+    "Nemotron 3.5 Super VL must support vision"
+  );
 });
