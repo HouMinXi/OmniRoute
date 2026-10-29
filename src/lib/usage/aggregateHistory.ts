@@ -356,7 +356,13 @@ export type PublishOptions = {
  * Price usage_history inside [fromIso, toIso). A null start means no lower bound,
  * which is the range the retention rollup already used.
  */
-export async function priceRange(
+export const PRICE_RANGE_FROM = `FROM usage_history INDEXED BY idx_uh_provider_model_timestamp
+      WHERE timestamp < ?
+        AND (? IS NULL OR timestamp >= ?)
+        AND provider IS NOT NULL AND provider != ''
+        AND model IS NOT NULL AND model != ''`;
+
+async function priceRange(
   db: UsageDb,
   fromIso: string | null,
   toIso: string
@@ -381,11 +387,7 @@ export async function priceRange(
         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
         (provider_cost_usd IS NOT NULL) as hasStoredCost,
         COALESCE(SUM(provider_cost_usd), 0) as storedCost
-      FROM usage_history
-      WHERE timestamp < ?
-        AND (? IS NULL OR timestamp >= ?)
-        AND provider IS NOT NULL AND provider != ''
-        AND model IS NOT NULL AND model != ''
+${PRICE_RANGE_FROM}
       GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
         requestInputTokens, requestOutputTokens, requestCacheReadTokens,
         requestCacheCreationTokens, requestReasoningTokens, hasStoredCost`
