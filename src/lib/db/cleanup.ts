@@ -132,8 +132,18 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
     try {
       published = await publishDay(day, {
         onCommit: (tx) => {
+          // Team summaries are built from the raw rows, so fold this day's
+          // unprocessed Team rows in before they are deleted, in the same commit.
+          rollupTeamUsageBefore(tx, nextUtcDay(day));
+          // The fold compares timestamp strings while this DELETE buckets by
+          // DATE(), so a row with a non-UTC offset can miss the fold. Never
+          // delete a Team row that has not been folded.
           removed = tx
-            .prepare("DELETE FROM usage_history WHERE DATE(timestamp) = ?")
+            .prepare(
+              `DELETE FROM usage_history WHERE DATE(timestamp) = ?
+               AND (billing_team_id IS NULL OR billing_team_id = ''
+                 OR team_rollup_processed_at IS NOT NULL)`
+            )
             .run(day).changes;
           notePublishedDay(tx, day);
         },
