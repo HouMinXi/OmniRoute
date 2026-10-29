@@ -98,6 +98,8 @@ test("cleanup keeps a Team row with a non-UTC offset until it is folded", async 
     .get(timestamp) as { n: number };
   // Every Team row is either folded into the summary or still on disk.
   assert.equal(folded.n + left.n, 1);
+  // The guard keeps the row; a wider fold cutoff alone would fold and delete it.
+  assert.equal(left.n, 1);
 
   // A later Team day moves the fold cutoff past the offset row: it is folded
   // once, and the next run can delete it without counting it again.
