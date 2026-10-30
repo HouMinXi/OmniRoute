@@ -16131,8 +16131,7 @@
     "greetingFallbackName": "тук",
     "errNoReply": "⚠️ Нямаше отговор от гейтвея.",
     "btnSend": "Изпрати"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Вписани акаунти, техните ботове, умения и локални компютри.",

@@ -16131,8 +16131,7 @@
     "greetingFallbackName": "u yerda",
     "errNoReply": "⚠️ Vositedan javob yoʻq.",
     "btnSend": "Yuborish"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Kirilgan hisoblar, ularning botlari, ko'nikmalari va lokal kompyuterlari.",

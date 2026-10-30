@@ -16131,8 +16131,7 @@
     "greetingFallbackName": "daar",
     "errNoReply": "⚠️ Geen antwoord van de gateway.",
     "btnSend": "Verzenden"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Ingelogde accounts, hun bots, vaardigheden en lokale computers.",

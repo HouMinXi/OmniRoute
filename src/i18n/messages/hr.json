@@ -16131,8 +16131,7 @@
     "greetingFallbackName": "tamo",
     "errNoReply": "⚠️ Nema odgovora od upravljačke točke.",
     "btnSend": "Pošalji"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Prijavljeni računi, njihovi botovi, vještine i lokalna računala.",

@@ -16131,8 +16131,7 @@
     "greetingFallbackName": "tja",
     "errNoReply": "⚠️ Ni odgovora od gatewaysa.",
     "btnSend": "Pošlji"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Prijavljeni računi, njihovi boti, zmožnosti in lokalna računalniška oprema.",

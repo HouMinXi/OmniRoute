@@ -16131,8 +16131,7 @@
     "greetingFallbackName": "tam",
     "errNoReply": "⚠️ Žádná odpověď z brány.",
     "btnSend": "Odeslat"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Přihlášené účty, jejich boti, dovednosti a místní počítače.",
