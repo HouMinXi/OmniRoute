@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Porsiyento ng window",
     "compressionAdaptivePolicyAbsolute": "Nakapirming badyet ng token",
     "compressionOutputStylesDescription": "Mag-inject ng mga tagubilin sa paghubog ng tugon nang hindi muling isinusulat ang output ng provider. Malayang pagsamahin.",
+    "compressionOutputStylesPreviewNote": "Ang isang kahilingan ay nag-inject ng isang wika lamang: ang natukoy na wika, kung hindi ang unang pack. Ang mga bloke sa itaas ay ang mga variant ng per-pack, hindi isang pinagsamang iniksyon.",
     "mcpAccessibilityDescription": "Nililimitahan ang mga output ng MCP tool (hiwalay na store).",
     "compressionStylesTileSummary": "{tokens, number} na token ang na-save · {runs, plural, one {# run ang na-style} other {# na run ang na-style}}",
     "compressionStylesTileEmpty": "Wala pang na-style na mga run.",

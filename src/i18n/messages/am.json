@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "የመስኮቱ መቶኛ",
     "compressionAdaptivePolicyAbsolute": "ቋሚ የቶከን በጀት",
     "compressionOutputStylesDescription": "የአቅራቢውን ውጤት እንደገና ሳይጽፉ የምላሽ ቅርጽ መመሪያዎችን ያክሉ። በነፃነት ያጣምሩ።",
+    "compressionOutputStylesPreviewNote": "ጥያቄ አንድ ቋንቋ ብቻ ነው የሚያስገባው፡ የተገኘውን ቋንቋ፣ ካልሆነ ደግሞ የመጀመሪያውን ጥቅል። ከላይ ያሉት ማገጃዎች በአንድ ጥቅል ውስጥ ያሉት ልዩነቶች እንጂ የተዋሃዱ መርፌ አይደሉም።",
     "mcpAccessibilityDescription": "የMCP መሣሪያ ውጤቶችን ወሰን ይወስናል (በተለየ ማከማቻ)።",
     "compressionStylesTileSummary": "{tokens, number} ቶከኖች ተቆጥበዋል · {runs, plural, one {# ቅጥ የተሰጠው ሂደት} other {# ቅጥ የተሰጣቸው ሂደቶች}}",
     "compressionStylesTileEmpty": "እስካሁን ቅጥ የተሰጣቸው ሂደቶች የሉም።",

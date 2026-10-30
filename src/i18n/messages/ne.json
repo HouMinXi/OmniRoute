@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "विन्डोको प्रतिशत",
     "compressionAdaptivePolicyAbsolute": "निरपेक्ष टोकन बजेट",
     "compressionOutputStylesDescription": "प्रदायकको आउटपुट पुनर्लेखन नगरी प्रतिक्रिया-आकार निर्धारण गर्ने निर्देशनहरू समावेश गर्नुहोस्। स्वतन्त्र रूपमा संयोजन गर्नुहोस्।",
+    "compressionOutputStylesPreviewNote": "अनुरोधले एउटा भाषा मात्र इन्जेक्ट गर्छ: पत्ता लगाइएको भाषा, अन्यथा पहिलो प्याक। माथिका ब्लकहरू प्रति-प्याक संस्करणहरू हुन्, संयुक्त इंजेक्शन होइन।",
     "mcpAccessibilityDescription": "MCP उपकरणका आउटपुटहरूमा लागू हुन्छ (छुट्टै भण्डार)।",
     "compressionStylesTileSummary": "{tokens, number} टोकन बचत भयो · {runs, plural, one {# शैलीबद्ध रन} other {# शैलीबद्ध रनहरू}}",
     "compressionStylesTileEmpty": "अहिलेसम्म कुनै शैलीबद्ध रन छैन।",

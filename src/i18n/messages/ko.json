@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "창 대비 비율",
     "compressionAdaptivePolicyAbsolute": "절대 토큰 예산",
     "compressionOutputStylesDescription": "제공자 출력을 다시 작성하지 않고 응답 형성 지침을 주입합니다. 자유롭게 조합하세요.",
+    "compressionOutputStylesPreviewNote": "요청은 하나의 언어, 즉 감지된 언어만 삽입하고, 그렇지 않으면 첫 번째 팩을 삽입합니다. 위의 블록은 결합 주사가 아닌 팩당 변형입니다.",
     "mcpAccessibilityDescription": "MCP 도구 출력의 범위를 제한합니다(별도 저장소).",
     "compressionStylesTileSummary": "{tokens, number} 토큰 절약됨 · {runs, plural, one {#개 실행 스타일 지정됨} other {#개 실행 스타일 지정됨}}",
     "compressionStylesTileEmpty": "아직 스타일이 지정된 실행이 없습니다.",

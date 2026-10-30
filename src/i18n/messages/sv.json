@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Procentandel av fönstret",
     "compressionAdaptivePolicyAbsolute": "Absolut tokenbudget",
     "compressionOutputStylesDescription": "Infoga instruktioner för svarsformning utan att skriva om leverantörens utdata. Kombinera fritt.",
+    "compressionOutputStylesPreviewNote": "En begäran injicerar endast ett språk: det upptäckta språket, annars det första paketet. Blocken ovan är per-pack-varianterna, inte en kombinerad injektion.",
     "mcpAccessibilityDescription": "Avgränsar MCP-verktygsutdata (separat lagring).",
     "compressionStylesTileSummary": "{tokens, number} tokens sparade · {runs, plural, one {# körning stylad} other {# körningar stylade}}",
     "compressionStylesTileEmpty": "Inga stylade körningar ännu.",

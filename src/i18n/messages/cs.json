@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Procento kontextového okna",
     "compressionAdaptivePolicyAbsolute": "Absolutní rozpočet tokenů",
     "compressionOutputStylesDescription": "Vkládejte instrukce pro formování odpovědi bez přepisování výstupu poskytovatele. Libovolně kombinujte.",
+    "compressionOutputStylesPreviewNote": "Požadavek vloží pouze jeden jazyk: detekovaný jazyk, jinak první balíček. Bloky výše jsou varianty v balení, nikoli kombinované vstřikování.",
     "mcpAccessibilityDescription": "Omezuje rozsah výstupů nástrojů MCP (samostatné úložiště).",
     "compressionStylesTileSummary": "{tokens, number} ušetřených tokenů · {runs, plural, one {# stylované spuštění} few {# stylovaná spuštění} other {# stylovaných spuštění}}",
     "compressionStylesTileEmpty": "Zatím žádná stylovaná spuštění.",

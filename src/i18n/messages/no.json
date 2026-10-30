@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Prosentandel av vinduet",
     "compressionAdaptivePolicyAbsolute": "Absolutt tokenbudsjett",
     "compressionOutputStylesDescription": "Sett inn instruksjoner for responsforming uten å omskrive leverandørutdata. Kombiner fritt.",
+    "compressionOutputStylesPreviewNote": "En forespørsel injiserer kun ett språk: det oppdagede språket, ellers den første pakken. Blokkene ovenfor er variantene per pakke, ikke en kombinert injeksjon.",
     "mcpAccessibilityDescription": "Avgrenser MCP-verktøyutdata (eget lager).",
     "compressionStylesTileSummary": "{tokens, number} tokener spart · {runs, plural, one {# kjøring stiltilpasset} other {# kjøringer stiltilpasset}}",
     "compressionStylesTileEmpty": "Ingen stiltilpassede kjøringer ennå.",

@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "視窗百分比",
     "compressionAdaptivePolicyAbsolute": "絕對 token 預算",
     "compressionOutputStylesDescription": "注入回應塑形指令，無需改寫提供者輸出。可自由組合。",
+    "compressionOutputStylesPreviewNote": "請求僅注入一種語言：偵測到的語言，否則是第一個套件。上面的塊是每個包裝的變體，而不是組合注射。",
     "mcpAccessibilityDescription": "限定 MCP 工具輸出範圍（獨立儲存區）。",
     "compressionStylesTileSummary": "已節省 {tokens, number} 個權杖 · {runs, plural, one {# 次執行已套用樣式} other {# 次執行已套用樣式}}",
     "compressionStylesTileEmpty": "尚無已套用風格的執行。",

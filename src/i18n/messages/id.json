@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Persentase jendela",
     "compressionAdaptivePolicyAbsolute": "Anggaran token absolut",
     "compressionOutputStylesDescription": "Suntikkan instruksi pembentukan respons tanpa menulis ulang output penyedia. Kombinasikan secara bebas.",
+    "compressionOutputStylesPreviewNote": "Permintaan memasukkan satu bahasa saja: bahasa yang terdeteksi, jika tidak, paket pertama. Blok di atas adalah varian per bungkus, bukan suntikan gabungan.",
     "mcpAccessibilityDescription": "Membatasi cakupan output alat MCP (penyimpanan terpisah).",
     "compressionStylesTileSummary": "{tokens, number} token disimpan · {runs, plural, one {# eksekusi digayakan} other {# eksekusi digayakan}}",
     "compressionStylesTileEmpty": "Belum ada eksekusi yang digayakan.",

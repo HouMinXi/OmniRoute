@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "विंडोची टक्केवारी",
     "compressionAdaptivePolicyAbsolute": "निश्चित टोकन बजेट",
     "compressionOutputStylesDescription": "प्रोव्हाइडर आउटपुट पुन्हा न लिहिता रिस्पॉन्स-शेपिंग सूचना इंजेक्ट करा. मुक्तपणे एकत्र करा.",
+    "compressionOutputStylesPreviewNote": "विनंती फक्त एक भाषा इंजेक्ट करते: आढळलेली भाषा, अन्यथा पहिला पॅक. वरील ब्लॉक्स हे प्रति-पॅक प्रकार आहेत, एकत्रित इंजेक्शन नाहीत.",
     "mcpAccessibilityDescription": "MCP टूल आउटपुटची व्याप्ती ठरवते (स्वतंत्र स्टोअर).",
     "compressionStylesTileSummary": "{tokens, number} टोकन्स वाचवले · {runs, plural, one {# रन स्टाईल केला} other {# रन्स स्टाईल केले}}",
     "compressionStylesTileEmpty": "अद्याप कोणतेही स्टाईल केलेले रन्स नाहीत.",

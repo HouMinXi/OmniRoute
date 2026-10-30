@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Protsent kontekstiaknast",
     "compressionAdaptivePolicyAbsolute": "Absoluutne tokenite eelarve",
     "compressionOutputStylesDescription": "Lisage vastuse vormimist suunavaid juhiseid ilma teenusepakkuja väljundit ümber kirjutamata. Kombineerige vabalt.",
+    "compressionOutputStylesPreviewNote": "Taotlus sisestab ainult ühe keele: tuvastatud keele, muul juhul esimese paketi. Ülaltoodud plokid on pakipõhised variandid, mitte kombineeritud süstimine.",
     "mcpAccessibilityDescription": "Piiritleb MCP-tööriistade väljundite ulatuse (eraldi hoidlas).",
     "compressionStylesTileSummary": "Säästetud {tokens, number} sõnet · {runs, plural, one {# stiliseeritud käituskord} other {# stiliseeritud käituskorda}}",
     "compressionStylesTileEmpty": "Stiliseeritud käitusi veel pole.",

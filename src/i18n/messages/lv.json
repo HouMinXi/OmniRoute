@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Konteksta loga procentuālā daļa",
     "compressionAdaptivePolicyAbsolute": "Absolūtais tokenu budžets",
     "compressionOutputStylesDescription": "Iestrādā atbildes formēšanas instrukcijas, nepārrakstot pakalpojumu sniedzēja izvadi. Var brīvi kombinēt.",
+    "compressionOutputStylesPreviewNote": "Pieprasījums ievada tikai vienu valodu: noteikto valodu, pārējā gadījumā pirmo pakotni. Iepriekš minētie bloki ir iepakojuma varianti, nevis kombinēta injekcija.",
     "mcpAccessibilityDescription": "Nosaka MCP rīku izvažu tvērumu (atsevišķa glabātuve).",
     "compressionStylesTileSummary": "{tokens, number} tokeni ietaupīti · {runs, plural, one {# stilizēta palaišana} other {# stilizētas palaišanas}}",
     "compressionStylesTileEmpty": "Vēl nav stilizētu palaišanu.",

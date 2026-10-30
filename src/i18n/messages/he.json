@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "אחוז מהחלון",
     "compressionAdaptivePolicyAbsolute": "תקציב טוקנים מוחלט",
     "compressionOutputStylesDescription": "הזרקת הנחיות לעיצוב תגובה מבלי לשכתב את פלט הספק. ניתן לשלב באופן חופשי.",
+    "compressionOutputStylesPreviewNote": "בקשה מזריקה שפה אחת בלבד: השפה שזוהתה, אחרת החבילה הראשונה. הבלוקים שלמעלה הם גרסאות לכל אריזה, לא הזרקה משולבת.",
     "mcpAccessibilityDescription": "מגביל את הטווח של פלטי כלי MCP (אחסון נפרד).",
     "compressionStylesTileSummary": "{tokens, number} טוקנים נחסכו · {runs, plural, one {הרצה אחת עוצבה} other {# הרצות עוצבו}}",
     "compressionStylesTileEmpty": "אין עדיין הרצות מעוצבות.",

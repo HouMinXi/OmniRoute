@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Postotak prozora",
     "compressionAdaptivePolicyAbsolute": "Apsolutni budžet tokena",
     "compressionOutputStylesDescription": "Ubaci instrukcije za oblikovanje odgovora bez ponovnog pisanja izlaza providera. Kombinuj slobodno.",
+    "compressionOutputStylesPreviewNote": "Zahtjev ubacuje samo jedan jezik: otkriveni jezik, inače prvi paket. Gore navedeni blokovi su varijante po pakovanju, a ne kombinovana injekcija.",
     "mcpAccessibilityDescription": "Ograničava MCP izlaze alata (zasebno skladište).",
     "compressionStylesTileSummary": "{tokens, number} tokena uštedano · {runs, plural, one {# stilizirano pokretanje} other {# stiliziranih pokretanja}}",
     "compressionStylesTileEmpty": "Još nema stiliziranih pokretanja.",

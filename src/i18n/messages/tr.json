@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Pencere yüzdesi",
     "compressionAdaptivePolicyAbsolute": "Mutlak belirteç bütçesi",
     "compressionOutputStylesDescription": "Sağlayıcı çıktısını yeniden yazmadan yanıt şekillendirme talimatları ekleyin. Serbestçe birleştirin.",
+    "compressionOutputStylesPreviewNote": "Bir istek yalnızca bir dili enjekte eder: algılanan dil, aksi takdirde ilk paket. Yukarıdaki bloklar, kombine enjeksiyon değil, paket başına çeşitlerdir.",
     "mcpAccessibilityDescription": "MCP araç çıktılarını kapsama alır (ayrı depo).",
     "compressionStylesTileSummary": "{tokens, number} token tasarruf edildi · {runs, plural, one {# çalıştırma stillendirildi} other {# çalıştırma stillendirildi}}",
     "compressionStylesTileEmpty": "Henüz stillendirilmiş çalıştırma yok.",

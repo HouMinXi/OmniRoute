@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "ਵਿੰਡੋ ਦਾ ਪ੍ਰਤੀਸ਼ਤ",
     "compressionAdaptivePolicyAbsolute": "ਨਿਰਪੇਖ ਟੋਕਨ ਬਜਟ",
     "compressionOutputStylesDescription": "ਪ੍ਰਦਾਤਾ ਦੇ ਆਉਟਪੁੱਟ ਨੂੰ ਮੁੜ ਲਿਖੇ ਬਿਨਾਂ ਜਵਾਬ ਨੂੰ ਆਕਾਰ ਦੇਣ ਵਾਲੀਆਂ ਹਦਾਇਤਾਂ ਸ਼ਾਮਲ ਕਰੋ। ਇਨ੍ਹਾਂ ਨੂੰ ਖੁੱਲ੍ਹੇ ਤੌਰ 'ਤੇ ਜੋੜੋ।",
+    "compressionOutputStylesPreviewNote": "ਇੱਕ ਬੇਨਤੀ ਸਿਰਫ ਇੱਕ ਭਾਸ਼ਾ ਨੂੰ ਇੰਜੈਕਟ ਕਰਦੀ ਹੈ: ਖੋਜੀ ਗਈ ਭਾਸ਼ਾ, ਨਹੀਂ ਤਾਂ ਪਹਿਲਾ ਪੈਕ। ਉਪਰੋਕਤ ਬਲਾਕ ਪ੍ਰਤੀ-ਪੈਕ ਰੂਪ ਹਨ, ਇੱਕ ਸੰਯੁਕਤ ਇੰਜੈਕਸ਼ਨ ਨਹੀਂ।",
     "mcpAccessibilityDescription": "MCP ਟੂਲ ਆਉਟਪੁੱਟਾਂ ਦਾ ਦਾਇਰਾ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ (ਵੱਖਰਾ ਸਟੋਰ)।",
     "compressionStylesTileSummary": "{tokens, number} ਟੋਕਨ ਬਚਾਏ · {runs, plural, one {# ਸ਼ੈਲੀਬੱਧ ਰਨ} other {# ਸ਼ੈਲੀਬੱਧ ਰਨ}}",
     "compressionStylesTileEmpty": "ਹਾਲੇ ਕੋਈ ਸ਼ੈਲੀਬੱਧ ਰਨ ਨਹੀਂ ਹੈ।",

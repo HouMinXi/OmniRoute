@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Perċentwal tat-tieqa",
     "compressionAdaptivePolicyAbsolute": "Baġit assolut ta’ tokens",
     "compressionOutputStylesDescription": "Injetta struzzjonijiet għat-tiswir tat-tweġiba mingħajr ma tikteb mill-ġdid l-output tal-fornitur. Għaqqadhom liberament.",
+    "compressionOutputStylesPreviewNote": "Talba tinjetta lingwa waħda biss: il-lingwa misjuba, inkella l-ewwel pakkett. Il-blokok ta' hawn fuq huma l-varjanti għal kull pakkett, mhux injezzjoni kombinata.",
     "mcpAccessibilityDescription": "Jillimita l-ambitu tal-outputs tal-għodod MCP (ħażna separata).",
     "compressionStylesTileSummary": "{tokens, number} token iffrankati · {runs, plural, one {# eżekuzzjoni bi stil} other {# eżekuzzjonijiet bi stil}}",
     "compressionStylesTileEmpty": "Għad m'hemmx eżekuzzjonijiet bi stil.",

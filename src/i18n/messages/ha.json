@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Kason taga cikin ɗari",
     "compressionAdaptivePolicyAbsolute": "Takamaiman kasafin token",
     "compressionOutputStylesDescription": "Saka umarnin tsara amsa ba tare da sake rubuta fitarwar mai samarwa ba. Haɗa su yadda ake so.",
+    "compressionOutputStylesPreviewNote": "Buƙatun allurar harshe ɗaya kawai: harshen da aka gano, in ba haka ba fakitin farko. Tubalan da ke sama su ne bambance-bambancen kowane fakiti, ba haɗaɗɗun allura ba.",
     "mcpAccessibilityDescription": "Yana ware fitarwar kayan aikin MCP (ma'ajiya ta daban).",
     "compressionStylesTileSummary": "An adana token {tokens, number} · {runs, plural, one {# gudanarwa da aka yi wa salo} other {# gudanarwa da aka yi wa salo}}",
     "compressionStylesTileEmpty": "Babu gudanarwar da aka yi wa salo tukuna.",

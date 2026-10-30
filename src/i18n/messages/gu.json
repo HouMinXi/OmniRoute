@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "વિન્ડોની ટકાવારી",
     "compressionAdaptivePolicyAbsolute": "નિરપેક્ષ ટોકન બજેટ",
     "compressionOutputStylesDescription": "પ્રોવાઇડર આઉટપુટને ફરીથી લખ્યા વિના રિસ્પોન્સ-શેપિંગ સૂચનાઓ ઇન્જેક્ટ કરો. મુક્તપણે જોડો.",
+    "compressionOutputStylesPreviewNote": "વિનંતી ફક્ત એક જ ભાષાને દાખલ કરે છે: શોધાયેલ ભાષા, અન્યથા પ્રથમ પેક. ઉપરના બ્લોક્સ પ્રતિ-પેક વેરિઅન્ટ છે, સંયુક્ત ઈન્જેક્શન નથી.",
     "mcpAccessibilityDescription": "MCP ટૂલ આઉટપુટ્સને સ્કોપ કરે છે (અલગ સ્ટોર).",
     "compressionStylesTileSummary": "{tokens, number} ટોકન્સ સાચવ્યા · {runs, plural, one {# રન સ્ટાઇલ કરેલ} other {# રન સ્ટાઇલ કરેલ}}",
     "compressionStylesTileEmpty": "હજી સુધી કોઈ સ્ટાઇલ કરેલ રન નથી.",

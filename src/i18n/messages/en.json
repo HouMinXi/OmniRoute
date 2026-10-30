@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Percentage of window",
     "compressionAdaptivePolicyAbsolute": "Absolute token budget",
     "compressionOutputStylesDescription": "Inject response-shaping instructions without rewriting provider output. Combine freely.",
+    "compressionOutputStylesPreviewNote": "A request injects one language only: the detected language, else the first pack. Blocks above are the per-pack variants, not a combined injection.",
     "mcpAccessibilityDescription": "Scopes MCP tool outputs (separate store).",
     "compressionStylesTileSummary": "{tokens, number} tokens saved · {runs, plural, one {# run styled} other {# runs styled}}",
     "compressionStylesTileEmpty": "No styled runs yet.",

@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "النسبة المئوية من نافذة السياق",
     "compressionAdaptivePolicyAbsolute": "ميزانية مطلقة للرموز",
     "compressionOutputStylesDescription": "حقن تعليمات تشكيل الاستجابة دون إعادة كتابة مخرجات المزود. ادمج بحرية.",
+    "compressionOutputStylesPreviewNote": "يقوم الطلب بإدخال لغة واحدة فقط: اللغة المكتشفة، وإلا الحزمة الأولى. الكتل المذكورة أعلاه هي متغيرات لكل حزمة، وليست حقنة مدمجة.",
     "mcpAccessibilityDescription": "يحدد نطاق مخرجات أداة MCP (مخزن منفصل).",
     "compressionStylesTileSummary": "{tokens, number} رمز تم توفيره · {runs, plural, one {# تشغيل تم تنسيقه} other {# تشغيلات تم تنسيقها}}",
     "compressionStylesTileEmpty": "لا توجد عمليات تشغيل منسقة بعد.",

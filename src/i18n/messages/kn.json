@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "ವಿಂಡೋದ ಶೇಕಡಾವಾರು",
     "compressionAdaptivePolicyAbsolute": "ನಿರಪೇಕ್ಷ ಟೋಕನ್ ಬಜೆಟ್",
     "compressionOutputStylesDescription": "ಪೂರೈಕೆದಾರರ ಔಟ್ಪುಟ್ ಅನ್ನು ಮರುಬರೆಯದೆ ಪ್ರತಿಕ್ರಿಯೆಯ ಸ್ವರೂಪವನ್ನು ರೂಪಿಸುವ ಸೂಚನೆಗಳನ್ನು ಸೇರಿಸಿ. ಮುಕ್ತವಾಗಿ ಸಂಯೋಜಿಸಿ.",
+    "compressionOutputStylesPreviewNote": "ವಿನಂತಿಯು ಒಂದು ಭಾಷೆಯನ್ನು ಮಾತ್ರ ಚುಚ್ಚುತ್ತದೆ: ಪತ್ತೆಯಾದ ಭಾಷೆ, ಇಲ್ಲದಿದ್ದರೆ ಮೊದಲ ಪ್ಯಾಕ್. ಮೇಲಿನ ಬ್ಲಾಕ್ಗಳು ಪ್ರತಿ-ಪ್ಯಾಕ್ ರೂಪಾಂತರಗಳಾಗಿವೆ, ಸಂಯೋಜಿತ ಇಂಜೆಕ್ಷನ್ ಅಲ್ಲ.",
     "mcpAccessibilityDescription": "MCP ಉಪಕರಣದ ಔಟ್ಪುಟ್ಗಳಿಗೆ ವ್ಯಾಪ್ತಿಯನ್ನು ನಿಗದಿಪಡಿಸುತ್ತದೆ (ಪ್ರತ್ಯೇಕ ಸಂಗ್ರಹ).",
     "compressionStylesTileSummary": "{tokens, number} ಟೋಕನ್ಗಳನ್ನು ಉಳಿಸಲಾಗಿದೆ · {runs, plural, one {# ಶೈಲೀಕೃತ ರನ್} other {# ಶೈಲೀಕೃತ ರನ್ಗಳು}}",
     "compressionStylesTileEmpty": "ಇನ್ನೂ ಯಾವುದೇ ಶೈಲೀಕೃತ ರನ್ಗಳಿಲ್ಲ.",

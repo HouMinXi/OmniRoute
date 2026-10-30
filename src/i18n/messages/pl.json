@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Procent okna",
     "compressionAdaptivePolicyAbsolute": "Bezwzględny budżet tokenów",
     "compressionOutputStylesDescription": "Wstrzykuj instrukcje kształtujące odpowiedź bez przepisywania danych wyjściowych dostawcy. Łącz dowolnie.",
+    "compressionOutputStylesPreviewNote": "Żądanie wprowadza tylko jeden język: wykryty język, w przeciwnym razie pierwszy pakiet. Powyższe bloki to warianty w opakowaniu, a nie łączony zastrzyk.",
     "mcpAccessibilityDescription": "Ogranicza zakres danych wyjściowych narzędzi MCP (osobny magazyn).",
     "compressionStylesTileSummary": "{tokens, number} tokenów zaoszczędzonych · {runs, plural, one {# przebieg ostylowany} few {# przebiegi ostylowane} many {# przebiegów ostylowanych} other {# przebiegów ostylowanych}}",
     "compressionStylesTileEmpty": "Brak ostylowanych przebiegów.",

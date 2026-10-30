@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "উইন্ডোর শতাংশ",
     "compressionAdaptivePolicyAbsolute": "নির্দিষ্ট টোকেন বাজেট",
     "compressionOutputStylesDescription": "প্রোভাইডার আউটপুট রিরাইট না করেই রেসপন্স-শেপিং নির্দেশাবলী ইনজেক্ট করুন। অবাধে একত্রিত করুন।",
+    "compressionOutputStylesPreviewNote": "একটি অনুরোধ শুধুমাত্র একটি ভাষা ইনজেক্ট করে: সনাক্ত করা ভাষা, অন্যথায় প্রথম প্যাক। উপরের ব্লকগুলি প্রতি-প্যাক ভেরিয়েন্ট, একটি সম্মিলিত ইনজেকশন নয়।",
     "mcpAccessibilityDescription": "MCP টুল আউটপুট স্কোপ করে (আলাদা স্টোর)।",
     "compressionStylesTileSummary": "{tokens, number} টোকেন সাশ্রয় হয়েছে · {runs, plural, one {#টি রান স্টাইল করা হয়েছে} other {#টি রান স্টাইল করা হয়েছে}}",
     "compressionStylesTileEmpty": "এখনও কোনো স্টাইল করা রান নেই।",

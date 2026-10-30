@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Asilimia ya dirisha",
     "compressionAdaptivePolicyAbsolute": "Bajeti isiyobadilika ya tokeni",
     "compressionOutputStylesDescription": "Ingiza maagizo ya kuunda majibu bila kuandika upya matokeo ya mtoa huduma. Changanya kwa uhuru.",
+    "compressionOutputStylesPreviewNote": "Ombi huingiza lugha moja pekee: lugha iliyotambuliwa, vinginevyo pakiti ya kwanza. Vitalu hapo juu ni lahaja za kila pakiti, sio sindano iliyojumuishwa.",
     "mcpAccessibilityDescription": "Inaweka mipaka ya matokeo ya zana ya MCP (hifadhi tofauti).",
     "compressionStylesTileSummary": "{tokens, number} tokeni zimehifadhiwa · {runs, plural, one {# umewekewa mtindo} other {# imewekewa mtindo}}",
     "compressionStylesTileEmpty": "Hakuna uendeshaji uliowekewa mtindo bado.",

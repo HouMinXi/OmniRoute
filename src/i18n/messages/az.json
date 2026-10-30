@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Pəncərənin faizi",
     "compressionAdaptivePolicyAbsolute": "Mütləq token büdcəsi",
     "compressionOutputStylesDescription": "Provayder çıxışını yenidən yazmadan cavab-formalaşdıran təlimatları daxil edin. Sərbəst şəkildə birləşdirin.",
+    "compressionOutputStylesPreviewNote": "Sorğu yalnız bir dili daxil edir: aşkar edilmiş dil, başqa ilk paket. Yuxarıdakı bloklar birləşmiş inyeksiya deyil, paket başına olan variantlardır.",
     "mcpAccessibilityDescription": "MCP alət çıxışlarını əhatə edir (ayrıca depo).",
     "compressionStylesTileSummary": "{tokens, number} tokenə qənaət edilib · {runs, plural, one {# işəsalma üslublaşdırılıb} other {# işəsalma üslublaşdırılıb}}",
     "compressionStylesTileEmpty": "Hələ ki üslublaşdırılmış işəsalma yoxdur.",

@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Prozentsatz des Fensters",
     "compressionAdaptivePolicyAbsolute": "Absolutes Token-Budget",
     "compressionOutputStylesDescription": "Anweisungen zur Antwortgestaltung einfügen, ohne die Provider-Ausgabe umzuschreiben. Frei kombinierbar.",
+    "compressionOutputStylesPreviewNote": "Eine Anfrage fügt nur eine Sprache ein: die erkannte Sprache, andernfalls das erste Paket. Bei den oben genannten Blöcken handelt es sich um Varianten pro Packung, nicht um eine kombinierte Injektion.",
     "mcpAccessibilityDescription": "Schränkt MCP-Tool-Ausgaben ein (separater Speicher).",
     "compressionStylesTileSummary": "{tokens, number} Tokens eingespart · {runs, plural, one {# Ausführung gestylt} other {# Ausführungen gestylt}}",
     "compressionStylesTileEmpty": "Noch keine gestylten Ausführungen.",

@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "ୱିଣ୍ଡୋର ଶତକଡ଼ା",
     "compressionAdaptivePolicyAbsolute": "ନିର୍ଦ୍ଦିଷ୍ଟ ଟୋକନ୍ ବଜେଟ୍",
     "compressionOutputStylesDescription": "ପ୍ରଦାତାଙ୍କ ଆଉଟପୁଟ୍କୁ ପୁନଃଲିଖନ ନକରି ପ୍ରତିକ୍ରିୟାର ଆକାର ନିର୍ଦ୍ଧାରଣକାରୀ ନିର୍ଦ୍ଦେଶ ଯୋଡ଼ନ୍ତୁ। ସ୍ୱେଚ୍ଛାରେ ମିଶାନ୍ତୁ।",
+    "compressionOutputStylesPreviewNote": "ଏକ ଅନୁରୋଧ କେବଳ ଗୋଟିଏ ଭାଷା ଇଞ୍ଜେକ୍ସନ୍ କରେ: ଚିହ୍ନଟ ହୋଇଥିବା ଭାଷା, ଅନ୍ୟଥା ପ୍ରଥମ ପ୍ୟାକ୍ \\| ଉପରୋକ୍ତ ବ୍ଲକଗୁଡିକ ହେଉଛି ପ୍ରତି ପ୍ୟାକ୍ ପ୍ରକାର, ମିଳିତ ଇଞ୍ଜେକ୍ସନ୍ ନୁହେଁ \\|",
     "mcpAccessibilityDescription": "MCP ଟୁଲ୍ ଆଉଟପୁଟ୍ର ପରିସର ନିର୍ଦ୍ଧାରଣ କରେ (ପୃଥକ ଷ୍ଟୋର୍)।",
     "compressionStylesTileSummary": "{tokens, number} ଟୋକନ୍ ସଞ୍ଚୟ ହୋଇଛି · {runs, plural, one {#ଟି ଶୈଳୀବଦ୍ଧ ରନ୍} other {#ଟି ଶୈଳୀବଦ୍ଧ ରନ୍}}",
     "compressionStylesTileEmpty": "ଏପର୍ଯ୍ୟନ୍ତ କୌଣସି ଶୈଳୀବଦ୍ଧ ରନ୍ ନାହିଁ।",

@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "വിൻഡോയുടെ ശതമാനം",
     "compressionAdaptivePolicyAbsolute": "നിശ്ചിത ടോക്കൺ ബജറ്റ്",
     "compressionOutputStylesDescription": "പ്രൊവൈഡർ ഔട്ട്പുട്ട് മാറ്റിയെഴുതാതെ പ്രതികരണത്തിന്റെ ഘടന നിർണ്ണയിക്കുന്ന നിർദ്ദേശങ്ങൾ ചേർക്കുക. ഇഷ്ടാനുസരണം സംയോജിപ്പിക്കുക.",
+    "compressionOutputStylesPreviewNote": "ഒരു അഭ്യർത്ഥന ഒരു ഭാഷയെ മാത്രം കുത്തിവയ്ക്കുന്നു: കണ്ടെത്തിയ ഭാഷ, അല്ലെങ്കിൽ ആദ്യത്തെ പായ്ക്ക്. മുകളിലുള്ള ബ്ലോക്കുകൾ ഓരോ പാക്കിലും ഉള്ള വകഭേദങ്ങളാണ്, ഒരു സംയുക്ത കുത്തിവയ്പ്പല്ല.",
     "mcpAccessibilityDescription": "MCP ടൂൾ ഔട്ട്പുട്ടുകളുടെ പരിധി നിർണ്ണയിക്കുന്നു (പ്രത്യേക സ്റ്റോർ).",
     "compressionStylesTileSummary": "{tokens, number} ടോക്കണുകൾ ലാഭിച്ചു · {runs, plural, one {# ശൈലീകൃത റൺ} other {# ശൈലീകൃത റണ്ണുകൾ}}",
     "compressionStylesTileEmpty": "ഇതുവരെ ശൈലീകൃത റണ്ണുകളൊന്നുമില്ല.",

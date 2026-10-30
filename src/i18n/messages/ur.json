@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "ونڈو کا فیصد",
     "compressionAdaptivePolicyAbsolute": "مطلق ٹوکن بجٹ",
     "compressionOutputStylesDescription": "پرووائیڈر آؤٹ پٹ کو دوبارہ لکھے بغیر رسپانس شیپنگ ہدایات شامل کریں۔ آزادانہ طور پر یکجا کریں۔",
+    "compressionOutputStylesPreviewNote": "ایک درخواست صرف ایک زبان کو انجیکٹ کرتی ہے: پتہ چلنے والی زبان، ورنہ پہلا پیک۔ مندرجہ بالا بلاکس فی پیک کی مختلف حالتیں ہیں، مشترکہ انجیکشن نہیں۔",
     "mcpAccessibilityDescription": "MCP ٹول آؤٹ پٹس کو اسکوپ کرتا ہے (علیحدہ اسٹور)۔",
     "compressionStylesTileSummary": "{tokens, number} ٹوکنز محفوظ کیے گئے · {runs, plural, one {# رن اسٹائل کیا گیا} other {# رنز اسٹائل کیے گئے}}",
     "compressionStylesTileEmpty": "ابھی تک کوئی اسٹائل شدہ رنز نہیں ہیں۔",

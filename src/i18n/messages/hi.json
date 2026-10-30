@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "विंडो का प्रतिशत",
     "compressionAdaptivePolicyAbsolute": "निरपेक्ष टोकन बजट",
     "compressionOutputStylesDescription": "प्रदाता आउटपुट को फिर से लिखे बिना प्रतिक्रिया-आकार देने वाले निर्देश इंजेक्ट करें। स्वतंत्र रूप से संयोजित करें।",
+    "compressionOutputStylesPreviewNote": "एक अनुरोध केवल एक भाषा को इंजेक्ट करता है: पता लगाई गई भाषा, अन्यथा पहला पैक। उपरोक्त ब्लॉक प्रति-पैक वेरिएंट हैं, संयुक्त इंजेक्शन नहीं।",
     "mcpAccessibilityDescription": "MCP टूल आउटपुट को स्कोप करता है (अलग स्टोर)।",
     "compressionStylesTileSummary": "{tokens, number} टोकन बचाए गए · {runs, plural, one {# रन स्टाइल किया गया} other {# रन स्टाइल किए गए}}",
     "compressionStylesTileEmpty": "अभी तक कोई स्टाइल किए गए रन नहीं हैं।",

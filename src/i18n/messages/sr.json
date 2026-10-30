@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Проценат прозора",
     "compressionAdaptivePolicyAbsolute": "Апсолутни буџет токена",
     "compressionOutputStylesDescription": "Убризгајте инструкције за обликовање одговора без преписивања излаза добављача. Слободно их комбинујте.",
+    "compressionOutputStylesPreviewNote": "Захтев убацује само један језик: откривени језик, иначе први пакет. Горе наведени блокови су варијанте по паковању, а не комбинована ињекција.",
     "mcpAccessibilityDescription": "Ограничава излазе MCP алата (посебно складиште).",
     "compressionStylesTileSummary": "{tokens, number} токена сачувано · {runs, plural, one {# покретање стилизовано} few {# покретања стилизована} other {# покретања стилизовано}}",
     "compressionStylesTileEmpty": "Још нема стилизованих покретања.",

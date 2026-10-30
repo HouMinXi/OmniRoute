@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Peratusan tetingkap",
     "compressionAdaptivePolicyAbsolute": "Bajet token mutlak",
     "compressionOutputStylesDescription": "Suntik arahan pembentukan respons tanpa menulis semula output penyedia. Gabungkan secara bebas.",
+    "compressionOutputStylesPreviewNote": "Permintaan menyuntik satu bahasa sahaja: bahasa yang dikesan, jika tidak, pek pertama. Blok di atas ialah varian setiap pek, bukan suntikan gabungan.",
     "mcpAccessibilityDescription": "Menskupkan output alat MCP (storan berasingan).",
     "compressionStylesTileSummary": "{tokens, number} token dijimatkan · {runs, plural, one {# larian digayakan} other {# larian digayakan}}",
     "compressionStylesTileEmpty": "Belum ada larian yang digayakan.",

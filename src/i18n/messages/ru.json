@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Процент контекстного окна",
     "compressionAdaptivePolicyAbsolute": "Абсолютный бюджет токенов",
     "compressionOutputStylesDescription": "Внедряйте инструкции по формированию ответов без перезаписи вывода провайдера. Комбинируйте свободно.",
+    "compressionOutputStylesPreviewNote": "Запрос вводит только один язык: обнаруженный язык, в противном случае — первый пакет. Вышеуказанные блоки представляют собой варианты для каждой упаковки, а не для комбинированной инъекции.",
     "mcpAccessibilityDescription": "Ограничивает область вывода инструментов MCP (отдельное хранилище).",
     "compressionStylesTileSummary": "{tokens, number} токенов сэкономлено · {runs, plural, one {# запуск стилизован} few {# запуска стилизовано} many {# запусков стилизовано} other {# запуска стилизовано}}",
     "compressionStylesTileEmpty": "Пока нет стилизованных запусков.",

@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Pasent nke windo",
     "compressionAdaptivePolicyAbsolute": "Mmefu token zuru oke",
     "compressionOutputStylesDescription": "Tinye ntuziaka nhazi nzaghachi na-edegharịghị mmepụta onye na-eweta ọrụ. Gwakọta ha otú masịrị gị.",
+    "compressionOutputStylesPreviewNote": "Arịrịọ na-etinye naanị otu asụsụ: asụsụ achọpụtara, ọzọ mkpọ mbụ. Ihe mgbochi dị n'elu bụ ụdị ngwungwu ọ bụla, ọ bụghị ntụtụ agwakọtara.",
     "mcpAccessibilityDescription": "Na-amachi mmepụta ngwaọrụ MCP n'ebe nchekwa dị iche.",
     "compressionStylesTileSummary": "Echekwara token {tokens, number} · {runs, plural, one {A haziri ngagharị #} other {A haziri ngagharị #}}",
     "compressionStylesTileEmpty": "Enwebeghị ngagharị ahaziri.",

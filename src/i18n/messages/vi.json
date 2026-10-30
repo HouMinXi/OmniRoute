@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Phần trăm cửa sổ",
     "compressionAdaptivePolicyAbsolute": "Ngân sách token tuyệt đối",
     "compressionOutputStylesDescription": "Chèn hướng dẫn định hình phản hồi mà không viết lại đầu ra của nhà cung cấp. Có thể kết hợp tự do.",
+    "compressionOutputStylesPreviewNote": "Yêu cầu chỉ đưa vào một ngôn ngữ: ngôn ngữ được phát hiện, ngôn ngữ khác là gói đầu tiên. Các khối ở trên là các biến thể trên mỗi gói, không phải là dạng tiêm kết hợp.",
     "mcpAccessibilityDescription": "Giới hạn phạm vi đầu ra của công cụ MCP (được lưu riêng).",
     "compressionStylesTileSummary": "Đã tiết kiệm {tokens, number} token · {runs, number} lượt áp dụng kiểu",
     "compressionStylesTileEmpty": "Chưa có lượt chạy nào áp dụng kiểu đầu ra.",

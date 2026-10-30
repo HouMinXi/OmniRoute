@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Ìdá ọgọ́rùn-ún ti fèrèsé",
     "compressionAdaptivePolicyAbsolute": "Ìnáwó àmì ọ̀rọ̀ tí iye rẹ̀ jẹ́ pàtó",
     "compressionOutputStylesDescription": "Fi àwọn ìtọ́nisọ́nà tó ń ṣe àgbékalẹ̀ èsì kún un láì tún àbájáde olùpèsè kọ. Darapọ̀ wọn bí o ṣe fẹ́.",
+    "compressionOutputStylesPreviewNote": "Ibere fifun ede kan nikan: ede ti a rii, bibẹẹkọ idii akọkọ. Awọn bulọọki loke jẹ awọn iyatọ-pack, kii ṣe abẹrẹ apapọ.",
     "mcpAccessibilityDescription": "Ó fi ààlà sí àwọn àbájáde irinṣẹ́ MCP (ibi ìpamọ́ ọ̀tọ̀).",
     "compressionStylesTileSummary": "A fi àmì ọ̀rọ̀ {tokens, number} pamọ́ · {runs, plural, one {# ìṣiṣẹ́ tí a fi ọ̀nà àfihàn sí} other {# àwọn ìṣiṣẹ́ tí a fi ọ̀nà àfihàn sí}}",
     "compressionStylesTileEmpty": "Kò tíì sí ìṣiṣẹ́ tí a fi ọ̀nà àfihàn sí.",

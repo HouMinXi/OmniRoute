@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Procentdel af vinduet",
     "compressionAdaptivePolicyAbsolute": "Absolut tokenbudget",
     "compressionOutputStylesDescription": "Indsæt instruktioner til formning af svar uden at omskrive udbyderens output. Kombiner frit.",
+    "compressionOutputStylesPreviewNote": "En anmodning injicerer kun ét sprog: det detekterede sprog, ellers den første pakke. Blokkene ovenfor er varianterne pr. pakning, ikke en kombineret injektion.",
     "mcpAccessibilityDescription": "Afgrænser MCP-værktøjsoutput (separat lager).",
     "compressionStylesTileSummary": "{tokens, number} tokens sparet · {runs, plural, one {# kørsel stylet} other {# kørsler stylet}}",
     "compressionStylesTileEmpty": "Ingen stylede kørsler endnu.",

@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "A kontextusablak százaléka",
     "compressionAdaptivePolicyAbsolute": "Abszolút tokenkeret",
     "compressionOutputStylesDescription": "Válaszformáló utasítások beillesztése a szolgáltató kimenetének átírása nélkül. Szabadon kombinálható.",
+    "compressionOutputStylesPreviewNote": "Egy kérés csak egy nyelvet szúr be: az észlelt nyelvet, másrészt az első csomagot. A fenti blokkok a csomagonkénti változatok, nem kombinált injekciók.",
     "mcpAccessibilityDescription": "Hatókörbe foglalja az MCP-eszközök kimeneteit (külön tároló).",
     "compressionStylesTileSummary": "{tokens, number} token megtakarítva · {runs, plural, one {# stílusozott futtatás} other {# stílusozott futtatás}}",
     "compressionStylesTileEmpty": "Még nincsenek stílusozott futtatások.",

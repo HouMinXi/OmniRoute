@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Odstotek kontekstnega okna",
     "compressionAdaptivePolicyAbsolute": "Absolutni proračun žetonov",
     "compressionOutputStylesDescription": "Vstavite navodila za oblikovanje odgovorov brez spreminjanja izhoda ponudnika. Poljubno jih kombinirajte.",
+    "compressionOutputStylesPreviewNote": "Zahteva vstavi samo en jezik: zaznani jezik, sicer prvi paket. Zgornji bloki so različice posameznega pakiranja, ne kombinirane injekcije.",
     "mcpAccessibilityDescription": "Določa obseg izhodov orodij MCP (ločena shramba).",
     "compressionStylesTileSummary": "Prihranjenih {tokens, number} žetonov · {runs, plural, one {# oblikovan zagon} two {# oblikovana zagona} few {# oblikovani zagoni} other {# oblikovanih zagonov}}",
     "compressionStylesTileEmpty": "Ni še oblikovanih zagonov.",

@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Prosenttiosuus ikkunasta",
     "compressionAdaptivePolicyAbsolute": "Absoluuttinen tokenibudjetti",
     "compressionOutputStylesDescription": "Lisää vastauksen muotoiluohjeita kirjoittamatta palveluntarjoajan tulostetta uudelleen. Yhdistele vapaasti.",
+    "compressionOutputStylesPreviewNote": "Pyyntö lisää vain yhden kielen: havaitun kielen, muuten ensimmäisen paketin. Yllä olevat lohkot ovat pakkauskohtaisia variantteja, eivät yhdistettyjä injektioita.",
     "mcpAccessibilityDescription": "Rajaa MCP-työkalujen tulosteet (erillinen tallennustila).",
     "compressionStylesTileSummary": "{tokens, number} tokenia säästetty · {runs, plural, one {# ajo tyylitelty} other {# ajoa tyylitelty}}",
     "compressionStylesTileEmpty": "Ei vielä tyyliteltyjä ajoja.",

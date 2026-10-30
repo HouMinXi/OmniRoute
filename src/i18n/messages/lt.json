@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Konteksto lango procentinė dalis",
     "compressionAdaptivePolicyAbsolute": "Absoliutus žetonų biudžetas",
     "compressionOutputStylesDescription": "Įterpkite atsakymo formavimo instrukcijas neperrašydami teikėjo išvesties. Galite laisvai derinti.",
+    "compressionOutputStylesPreviewNote": "Užklausa įveda tik vieną kalbą: aptiktą kalbą, kitur – pirmąjį paketą. Aukščiau pateikti blokai yra pakuotės variantai, o ne kombinuotas įpurškimas.",
     "mcpAccessibilityDescription": "Taikoma MCP įrankių išvestims (atskira saugykla).",
     "compressionStylesTileSummary": "Sutaupyta {tokens, number} žetonų · {runs, plural, one {# stilizuotas vykdymas} other {stilizuota vykdymų: #}}",
     "compressionStylesTileEmpty": "Stilizuotų vykdymų dar nėra.",

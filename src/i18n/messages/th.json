@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "เปอร์เซ็นต์ของหน้าต่าง",
     "compressionAdaptivePolicyAbsolute": "งบประมาณโทเค็นแบบค่าสัมบูรณ์",
     "compressionOutputStylesDescription": "แทรกคำสั่งกำหนดรูปแบบการตอบกลับโดยไม่ต้องเขียนผลลัพธ์ของผู้ให้บริการใหม่ สามารถผสมผสานได้อย่างอิสระ",
+    "compressionOutputStylesPreviewNote": "คำขอแทรกภาษาเดียวเท่านั้น: ภาษาที่ตรวจพบ มิฉะนั้นเป็นภาษาแรก บล็อกด้านบนเป็นตัวแปรต่อแพ็ค ไม่ใช่การฉีดแบบรวม",
     "mcpAccessibilityDescription": "กำหนดขอบเขตผลลัพธ์เครื่องมือ MCP (แยกพื้นที่จัดเก็บ)",
     "compressionStylesTileSummary": "{tokens, number} โทเค็นที่ประหยัดได้ · {runs, plural, one {จัดรูปแบบแล้ว # ครั้ง} other {จัดรูปแบบแล้ว # ครั้ง}}",
     "compressionStylesTileEmpty": "ยังไม่มีการรันที่จัดรูปแบบ",

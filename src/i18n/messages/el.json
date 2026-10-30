@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Ποσοστό του παραθύρου",
     "compressionAdaptivePolicyAbsolute": "Απόλυτο όριο token",
     "compressionOutputStylesDescription": "Εισαγωγή οδηγιών διαμόρφωσης απαντήσεων χωρίς επανεγγραφή της εξόδου παρόχου. Συνδυάστε ελεύθερα.",
+    "compressionOutputStylesPreviewNote": "Ένα αίτημα εισάγει μόνο μία γλώσσα: τη γλώσσα που εντοπίστηκε, διαφορετικά το πρώτο πακέτο. Τα παραπάνω μπλοκ είναι οι παραλλαγές ανά συσκευασία, όχι συνδυασμένη ένεση.",
     "mcpAccessibilityDescription": "Περιορίζει τις εξόδους εργαλείων MCP (ξεχωριστή αποθήκη).",
     "compressionStylesTileSummary": "{tokens, number} tokens εξοικονομήθηκαν · {runs, plural, one {# εκτέλεση με στυλ} other {# εκτελέσεις με στυλ}}",
     "compressionStylesTileEmpty": "Δεν υπάρχουν ακόμη εκτελέσεις με στυλ.",

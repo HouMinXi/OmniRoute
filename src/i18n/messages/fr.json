@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Pourcentage de la fenêtre",
     "compressionAdaptivePolicyAbsolute": "Budget absolu de jetons",
     "compressionOutputStylesDescription": "Injecter des instructions de mise en forme des réponses sans réécrire la sortie du fournisseur. À combiner librement.",
+    "compressionOutputStylesPreviewNote": "Une requête n'injecte qu'une seule langue : la langue détectée, sinon le premier pack. Les blocs ci-dessus sont les variantes par pack, et non une injection combinée.",
     "mcpAccessibilityDescription": "Limite la portée des sorties d'outils MCP (magasin distinct).",
     "compressionStylesTileSummary": "{tokens, number} jetons économisés · {runs, plural, one {# exécution stylisée} other {# exécutions stylisées}}",
     "compressionStylesTileEmpty": "Aucune exécution stylisée pour le moment.",

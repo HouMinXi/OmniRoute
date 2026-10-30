@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "කවුළුවේ ප්රතිශතය",
     "compressionAdaptivePolicyAbsolute": "නිරපේක්ෂ ටෝකන අයවැය",
     "compressionOutputStylesDescription": "සපයන්නාගේ ප්රතිදානය නැවත ලිවීමෙන් තොරව ප්රතිචාරය හැඩගැන්වීමේ උපදෙස් ඇතුළත් කරන්න. නිදහසේ ඒකාබද්ධ කරන්න.",
+    "compressionOutputStylesPreviewNote": "ඉල්ලීමක් එක් භාෂාවක් පමණක් එන්නත් කරයි: අනාවරණය කරගත් භාෂාව, වෙනත් පළමු ඇසුරුම. ඉහත කුට්ටි යනු එක් ඇසුරුමක ප්‍රභේදයන් මිස ඒකාබද්ධ එන්නත් කිරීමක් නොවේ.",
     "mcpAccessibilityDescription": "MCP මෙවලම් ප්රතිදානවල විෂය පථය සීමා කරයි (වෙනම ගබඩාවක්).",
     "compressionStylesTileSummary": "ටෝකන {tokens, number}ක් සුරකින ලදී · {runs, plural, one {හැඩගැන්වූ ධාවනය #ක්} other {හැඩගැන්වූ ධාවන #ක්}}",
     "compressionStylesTileEmpty": "තවම හැඩගැන්වූ ධාවන නොමැත.",

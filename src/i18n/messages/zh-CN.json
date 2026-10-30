@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "窗口百分比",
     "compressionAdaptivePolicyAbsolute": "绝对 token 预算",
     "compressionOutputStylesDescription": "注入响应塑造指令，而无需重写服务商输出。自由组合。",
+    "compressionOutputStylesPreviewNote": "请求仅注入一种语言：检测到的语言，否则是第一个包。上面的块是每个包装的变体，而不是组合注射。",
     "mcpAccessibilityDescription": "限制 MCP 工具输出的范围 (独立存储)。",
     "compressionStylesTileSummary": "{tokens, number} 个 token 已节省 · {runs, plural, one {# 次运行已应用样式} other {# 次运行已应用样式}}",
     "compressionStylesTileEmpty": "尚无已应用样式的运行。",

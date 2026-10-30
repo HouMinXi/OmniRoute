@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "ფანჯრის პროცენტული წილი",
     "compressionAdaptivePolicyAbsolute": "ტოკენების აბსოლუტური ბიუჯეტი",
     "compressionOutputStylesDescription": "ამატებს პასუხის ფორმირების ინსტრუქციებს პროვაიდერის გამოტანილი შედეგის გადაწერის გარეშე. შეგიძლიათ, თავისუფლად შეუთავსოთ ერთმანეთს.",
+    "compressionOutputStylesPreviewNote": "მოთხოვნა აწვდის მხოლოდ ერთ ენას: აღმოჩენილ ენას, სხვა შემთხვევაში პირველ პაკეტს. ზემოთ მოყვანილი ბლოკები არის თითო პაკეტის ვარიანტები და არა კომბინირებული ინექცია.",
     "mcpAccessibilityDescription": "განსაზღვრავს MCP ხელსაწყოების შედეგების მოქმედების სფეროს (ცალკე საცავი).",
     "compressionStylesTileSummary": "დაზოგილია {tokens, number} ტოკენი · {runs, plural, one {# სტილიზებული გაშვება} other {# სტილიზებული გაშვება}}",
     "compressionStylesTileEmpty": "სტილიზებული გაშვებები ჯერ არ არის.",

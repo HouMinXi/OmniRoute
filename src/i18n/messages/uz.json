@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Oynaning foizi",
     "compressionAdaptivePolicyAbsolute": "Mutlaq token byudjeti",
     "compressionOutputStylesDescription": "Provayder chiqishini qayta yozmasdan javob shaklini belgilovchi koʻrsatmalarni kiriting. Erkin birlashtiring.",
+    "compressionOutputStylesPreviewNote": "So'rov faqat bitta tilni kiritadi: aniqlangan til, boshqasi birinchi paket. Yuqoridagi bloklar estrodiol in'ektsiya emas, balki har bir paket uchun variantlardir.",
     "mcpAccessibilityDescription": "MCP vositalari chiqishlarining doirasini belgilaydi (alohida saqlash joyi).",
     "compressionStylesTileSummary": "{tokens, number} token tejandi · {runs, plural, one {# ta uslub qoʻllangan ishga tushirish} other {# ta uslub qoʻllangan ishga tushirish}}",
     "compressionStylesTileEmpty": "Hali uslublangan ishga tushirishlar yoʻq.",

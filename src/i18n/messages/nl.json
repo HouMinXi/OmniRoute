@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Percentage van het venster",
     "compressionAdaptivePolicyAbsolute": "Absoluut tokenbudget",
     "compressionOutputStylesDescription": "Injecteer instructies voor responsvormgeving zonder de uitvoer van de provider te herschrijven. Vrij te combineren.",
+    "compressionOutputStylesPreviewNote": "Een verzoek injecteert slechts één taal: de gedetecteerde taal, anders het eerste pakket. De bovenstaande blokken zijn de varianten per verpakking, niet een gecombineerde injectie.",
     "mcpAccessibilityDescription": "Beperkt de scope van MCP-tooluitvoer (afzonderlijke opslag).",
     "compressionStylesTileSummary": "{tokens, number} tokens bespaard · {runs, plural, one {# run gestyled} other {# runs gestyled}}",
     "compressionStylesTileEmpty": "Nog geen gestylede runs.",

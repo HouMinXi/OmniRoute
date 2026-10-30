@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "ភាគរយនៃបង្អួច",
     "compressionAdaptivePolicyAbsolute": "ថវិកាថូខឹនដាច់ខាត",
     "compressionOutputStylesDescription": "បញ្ចូលសេចក្តីណែនាំសម្រាប់កំណត់ទម្រង់ចម្លើយ ដោយមិនសរសេរលទ្ធផលរបស់អ្នកផ្តល់សេវាឡើងវិញ។ អាចបញ្ចូលគ្នាបានដោយសេរី។",
+    "compressionOutputStylesPreviewNote": "សំណើមួយចាក់បញ្ចូលតែភាសាមួយប៉ុណ្ណោះ៖ ភាសាដែលបានរកឃើញ ផ្សេងទៀត កញ្ចប់ទីមួយ។ ប្លុកខាងលើគឺជាវ៉ារ្យ៉ង់ក្នុងមួយកញ្ចប់ មិនមែនជាការចាក់បញ្ចូលគ្នាទេ។",
     "mcpAccessibilityDescription": "កំណត់វិសាលភាពលទ្ធផលឧបករណ៍ MCP (ឃ្លាំងដាច់ដោយឡែក)។",
     "compressionStylesTileSummary": "បានសន្សំ {tokens, number} ថូខឹន · {runs, plural, one {បានកំណត់រចនាប័ទ្ម # ដង} other {បានកំណត់រចនាប័ទ្ម # ដង}}",
     "compressionStylesTileEmpty": "មិនទាន់មានការដំណើរការដែលបានកំណត់រចនាប័ទ្មទេ។",

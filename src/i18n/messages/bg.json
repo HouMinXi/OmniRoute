@@ -8457,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Процент от прозореца",
     "compressionAdaptivePolicyAbsolute": "Абсолютен бюджет от токени",
     "compressionOutputStylesDescription": "Вмъкване на инструкции за оформяне на отговора без пренаписване на изхода от доставчика. Комбинирайте свободно.",
+    "compressionOutputStylesPreviewNote": "Една заявка инжектира само един език: открития език, в противен случай първият пакет. Блоковете по-горе са вариантите за опаковка, а не комбинирана инжекция.",
     "mcpAccessibilityDescription": "Ограничава обхвата на изходите от MCP инструменти (отделно хранилище).",
     "compressionStylesTileSummary": "{tokens, number} спестени токена · {runs, plural, one {# стилизирано изпълнение} other {# стилизирани изпълнения}}",
     "compressionStylesTileEmpty": "Все още няма стилизирани изпълнения.",

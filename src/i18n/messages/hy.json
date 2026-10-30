@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Պատուհանի տոկոսը",
     "compressionAdaptivePolicyAbsolute": "Թոքենների բացարձակ բյուջե",
     "compressionOutputStylesDescription": "Ներմուծեք պատասխանի ձևավորման հրահանգներ՝ առանց մատակարարի ելքային արդյունքը վերաշարադրելու։ Կարող եք ազատորեն համակցել։",
+    "compressionOutputStylesPreviewNote": "Հարցումը ներարկում է միայն մեկ լեզու՝ հայտնաբերված լեզուն, մյուս դեպքում՝ առաջին փաթեթը: Վերևում գտնվող բլոկները մեկ փաթեթի տարբերակներն են, այլ ոչ թե համակցված ներարկում:",
     "mcpAccessibilityDescription": "Սահմանափակում է MCP գործիքների ելքային արդյունքների շրջանակը (առանձին պահոց)։",
     "compressionStylesTileSummary": "Խնայվել է {tokens, number} թոքեն · {runs, plural, one {# ոճավորված գործարկում} other {# ոճավորված գործարկում}}",
     "compressionStylesTileEmpty": "Դեռևս ոճավորված գործարկումներ չկան։",

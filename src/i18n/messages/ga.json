@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Céatadán den fhuinneog",
     "compressionAdaptivePolicyAbsolute": "Buiséad absalóideach comharthaí",
     "compressionOutputStylesDescription": "Cuir isteach treoracha múnlaithe freagraí gan aschur an tsoláthraí a athscríobh. Comhcheangail go saor.",
+    "compressionOutputStylesPreviewNote": "Ní instealladh ach teanga amháin in iarratas: an teanga braite, eile an chéad phacáiste. Is iad na bloic thuas na leaganacha in aghaidh an phacáiste, ní instealladh comhcheangailte.",
     "mcpAccessibilityDescription": "Cuirtear raon feidhme i bhfeidhm ar aschuir uirlisí MCP (stór ar leith).",
     "compressionStylesTileSummary": "{tokens, number} comhartha coigilte · {runs, plural, one {cuireadh stíl ar # rith} other {cuireadh stíl ar # rith}}",
     "compressionStylesTileEmpty": "Níl aon rith stílithe fós.",

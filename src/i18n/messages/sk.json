@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Percento okna",
     "compressionAdaptivePolicyAbsolute": "Absolútny rozpočet tokenov",
     "compressionOutputStylesDescription": "Vložiť inštrukcie na formovanie odpovede bez prepisovania výstupu poskytovateľa. Voľne kombinujte.",
+    "compressionOutputStylesPreviewNote": "Požiadavka vloží iba jeden jazyk: zistený jazyk, inak prvý balík. Bloky vyššie sú varianty na balenie, nie kombinovaná injekcia.",
     "mcpAccessibilityDescription": "Obmedzuje rozsah výstupov nástrojov MCP (samostatné úložisko).",
     "compressionStylesTileSummary": "{tokens, number} tokenov ušetrených · {runs, plural, one {# štylizované spustenie} few {# štylizované spustenia} other {# štylizovaných spustení}}",
     "compressionStylesTileEmpty": "Zatiaľ žiadne štylizované spustenia.",

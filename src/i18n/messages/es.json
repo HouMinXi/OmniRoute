@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Porcentaje de la ventana",
     "compressionAdaptivePolicyAbsolute": "Presupuesto absoluto de tokens",
     "compressionOutputStylesDescription": "Inyecta instrucciones para dar forma a la respuesta sin reescribir la salida del proveedor. Combínalas libremente.",
+    "compressionOutputStylesPreviewNote": "Una solicitud inyecta un solo idioma: el idioma detectado; en caso contrario, el primer paquete. Los bloques anteriores son variantes por paquete, no una inyección combinada.",
     "mcpAccessibilityDescription": "Limita el alcance de las salidas de herramientas MCP (almacén independiente).",
     "compressionStylesTileSummary": "{tokens, number} tokens ahorrados · {runs, plural, one {# ejecución con estilo} other {# ejecuciones con estilo}}",
     "compressionStylesTileEmpty": "Aún no hay ejecuciones con estilo.",

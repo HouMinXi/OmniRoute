@@ -8380,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "ウィンドウの割合",
     "compressionAdaptivePolicyAbsolute": "絶対値のトークン予算",
     "compressionOutputStylesDescription": "プロバイダーの出力を書き換えることなく、レスポンス整形指示を挿入します。自由に組み合わせ可能です。",
+    "compressionOutputStylesPreviewNote": "リクエストは 1 つの言語のみを挿入します。つまり、検出された言語、それ以外の場合は最初のパックです。上記のブロックはパックごとのバリアントであり、複合注入ではありません。",
     "mcpAccessibilityDescription": "MCPツールの出力をスコープします（別ストア）。",
     "compressionStylesTileSummary": "{tokens, number} トークン節約 · {runs, plural, one {# 回の実行にスタイル適用} other {# 回の実行にスタイル適用}}",
     "compressionStylesTileEmpty": "スタイル適用された実行はまだありません。",
