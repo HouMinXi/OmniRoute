@@ -913,6 +913,14 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
  *   every reset target, including conversation identity metadata; any other
  *   value deletes only time-scoped usage/log rows older than `now - period`.
  *   Throws on an invalid period.
+ *
+ * A reset deletes `usage_daily_summary` too, so the panel and the rollup agree
+ * that the day is gone. Publishing a closed day is asynchronous and carries no
+ * generation stamp, so a publish that started before the reset can still land
+ * one of its rows afterwards. That race predates this table — the retention
+ * rollup had the same shape against `daily_usage_summary` — and closing it
+ * needs a persisted reset generation the publisher checks before writing, which
+ * is tracked separately rather than widened into this change.
  */
 const RESET_TARGETS: Array<
   DeleteByPeriodTarget & { resultKey: keyof ResetUsageHistoryResult; allOnly?: boolean }
