@@ -87,6 +87,14 @@ export function readPublishedCutoffDate(db: {
   return pointer?.last_completed_date ?? UNPUBLISHED_CUTOFF_DATE;
 }
 
+function includesPublishedDays(
+  rawCutoffDate: string,
+  sinceDate: string | null,
+  apiKeyWhere: string | null
+): boolean {
+  return (!sinceDate || sinceDate <= rawCutoffDate) && !apiKeyWhere;
+}
+
 /**
  * Builds the UNION subquery that merges recent `usage_history` rows with
  * published `usage_daily_summary` days, preventing double-counting and
@@ -104,7 +112,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
   // Include summaries only when the window starts on or before the last
   // published day and no api_key filter is active.
   const needsAggregated =
-    rawCutoffDate !== null && (!sinceDate || sinceDate <= rawCutoffDate) && !apiKeyWhere;
+    rawCutoffDate !== null && includesPublishedDays(rawCutoffDate, sinceDate, apiKeyWhere);
 
   const unifiedParams: AnalyticsParams = {};
 
@@ -213,7 +221,7 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
   const sinceDate = sinceIso?.split("T")[0] ?? null;
 
   const needsAggregated =
-    rawCutoffDate !== null && (!sinceDate || sinceDate <= rawCutoffDate) && !apiKeyWhere;
+    rawCutoffDate !== null && includesPublishedDays(rawCutoffDate, sinceDate, apiKeyWhere);
 
   const presetParams: AnalyticsParams = {};
 
