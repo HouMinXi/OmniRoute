@@ -3402,12 +3402,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi လည်ပတ်နေသည့်စက်မှ လက်လှမ်းမီနိုင်သော URL သုံးပါ။ OpenAI-သဟဇာတဖြစ်သော /v1 အဆုံးမှတ်ကို အလိုအလျောက် ထည့်သွင်းထားသည်။",
     "piManualMergeHint": "အစမ်းကြည့်ရန်သာ။ ဤ providers.omniroute ထဲသို့ ဝင်ရောက်မှုကို models.json တွင် ပေါင်းစည်းခြင်းဖြင့် သင်၏ အခြားသော ဝန်ဆောင်မှုပေးသူများနှင့် ဆက်တင်များ မပျက်မစီး ရှိနေစေရန်။",
-    "removeMapping": "ချိတ်ဆက်သတ်မှတ်မှုကို ဖယ်ရှားရန်",
     "customUrl": "စိတ်ကြိုက် URL",
     "customEndpointAria": "ကွဲပြားသော endpoint",
     "useDefaultKey": "OmniRoute ကိုယ်ပိုင် default key ကို အသုံးပြုပါ",
     "mainModelAria": "လက်မောင်းမုခ်ခံစက်",
-    "manualConfigTitle": "Grok Build manual ကွန်ဖစ်ဂျူးရင်"
+    "manualConfigTitle": "Grok Build manual ကွန်ဖစ်ဂျူးရင်",
+    "removeMapping": "ချိတ်ဆက်သတ်မှတ်မှုကို ဖယ်ရှားရန်"
   },
   "modelCatalog": {
     "title": "မော်ဒယ်များနှင့် Combos",
@@ -3654,6 +3654,7 @@
     "more": "နောက်ထပ် +{count} ခု",
     "reqs": "တောင်းဆိုမှုများ",
     "success": "အောင်မြင်မှု",
+    "fallbackSummary": "စတင်သော request များ၏ {rate}% သည် fallback သို့ ပြန်လည်သွားခဲ့ပြီး တစ်ခုလျှင် ပျမ်းမျှ ~{skips} target များကို ကျော်လွှားခဲ့သည်",
     "proxyConfigured": "ပရောက်စီကို စီစဉ်သတ်မှတ်ပြီးပါပြီ",
     "copyComboName": "ကွန်ဘိုအမည်ကို ကူးယူရန်",
     "enableCombo": "ကွန်ဘိုကို ဖွင့်ရန်",
@@ -4237,8 +4238,7 @@
     "duplicateAutoComboSnapshotMsg": "ဤလုပ်ဆောင်ချက်သည် လက်ရှိချိတ်ဆက်ထားပြီး ဤတမ်းပလိတ်နှင့် ကိုက်ညီသော ဝန်ဆောင်မှုပေးသူများ/မော်ဒယ်များကို တည်းဖြတ်နိုင်သည့် ပေါင်းစပ်မှုတစ်ခုအဖြစ် လက်ရှိအခြေအနေအတိုင်း မှတ်တမ်းတင်မည်။",
     "duplicateAutoComboFailedPrefix": "အလိုအလျောက်ပေါင်းစပ်မှုကို မိတ္တူပွား၍မရပါ:",
     "duplicateAutoComboUnknownError": "မသိသော အမှား",
-    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်",
-    "fallbackSummary": "စတင်သော request များ၏ {rate}% သည် fallback သို့ ပြန်လည်သွားခဲ့ပြီး တစ်ခုလျှင် ပျမ်းမျှ ~{skips} target များကို ကျော်လွှားခဲ့သည်"
+    "duplicateAutoComboTitle": "{name} မှ တည်ငြိမ်သော ပေါင်းစပ်မှုတစ်ခု ဖန်တီးရန်"
   },
   "costs": {
     "title": "ကုန်ကျစရိတ်များ",
@@ -9254,9 +9254,9 @@
         "financial": "ငွေကြေး",
         "brazilian": "ဘရာဇီး",
         "usa": "အမေရိကန်",
-        "full": "အပြည့်အစုံ",
         "gdpr": "GDPR (ဥရောပသမဂ္ဂ)",
-        "popia": "POPIA (တောင်အာဖရိက)"
+        "popia": "POPIA (တောင်အာဖရိက)",
+        "full": "အပြည့်အစုံ"
       },
       "builtinTypes": "မူလပါဝင်သော အမျိုးအစားများ",
       "types": {
@@ -12308,6 +12308,10 @@
     "messageInputAria": "မက်ဆေ့ချ်"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
+    "upstreamStatus": "အထက်ဆာဗာ {status}",
+    "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
+    "transportError": "ပို့ဆောင်မှု အမှား",
     "recording": "မှတ်တမ်းတင်နေသည်",
     "paused": "ခေတ္တရပ်ထားသည်",
     "pipelineLogsOn": "Pipeline မှတ်တမ်းများ ဖွင့်ထားသည်",
@@ -12391,6 +12395,8 @@
       "increase": "ကြားကာလ တိုးရန်"
     },
     "status": {
+      "recoveredAttemptsTitle": "{count} ကြိမ် ကြိုးပမ်းပြီးနောက် တောင်းဆိုချက် ပြန်လည်အောင်မြင်ခဲ့သည်",
+      "latestOutcomeFailed": "နောက်ဆုံးတောင်းဆိုချက်၏ ရလဒ် မအောင်မြင်ပါ",
       "inProgress": "လုပ်ဆောင်ဆဲ",
       "recoveredByRetry": "ပြန်လည်ကြိုးစားခြင်းဖြင့် ပြန်လည်ကောင်းမွန်ခဲ့သည်",
       "goToParent": "ပင်မတောင်းဆိုချက်သို့ သွားရန်",
@@ -12399,12 +12405,13 @@
       "failedTitle": "ကြိုးပမ်းမှု {count} ကြိမ်စလုံး မအောင်မြင်ပါ",
       "failed": "မအောင်မြင်ပါ",
       "pinnedTitle": "context-cache session pinning မှတစ်ဆင့် ရွေးချယ်ထားသော မော်ဒယ်",
-      "pinned": "ပုံသေသတ်မှတ်ထားသည်",
-      "recoveredAttemptsTitle": "{count} ကြိမ် ကြိုးပမ်းပြီးနောက် တောင်းဆိုချက် ပြန်လည်အောင်မြင်ခဲ့သည်",
-      "latestOutcomeFailed": "နောက်ဆုံးတောင်းဆိုချက်၏ ရလဒ် မအောင်မြင်ပါ"
+      "pinned": "ပုံသေသတ်မှတ်ထားသည်"
     },
     "attempts": "ကြိုးပမ်းမှုများ",
     "detail": {
+      "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
+      "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
+      "transportError": "ပို့ဆောင်မှု အမှား",
       "collapse": "{title} ကို ခေါက်သိမ်းရန်",
       "expand": "{title} ကို ဖြန့်ရန်",
       "copyTitle": "{title} ကို ကူးယူရန်",
@@ -12503,20 +12510,13 @@
       "continuesFromParent": "မိခင်မှ ဆက်လက်သည်",
       "continuesFrom": "{id} မှ ဆက်လက်သည်",
       "viewConversation": "စကားဝိုင်းကို ကြည့်ရန်",
-      "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်",
-      "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
-      "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
-      "transportError": "ပို့ဆောင်မှု အမှား"
+      "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်"
     },
     "tableLabel": "တောင်းဆိုမှုမှတ်တမ်းများ",
     "throughputPostFirstToken": "ပထမတိုကင် နောက်ပိုင်း",
     "throughputEndToEnd": "အစမှအဆုံး",
     "throughputRate": "{value} တိုကင်/စက္ကန့်",
-    "throughputExplanation": "နှုန်းနှစ်ခုစလုံးသည် output နှင့် reasoning တိုကင်အရေအတွက်များထဲမှ ပိုကြီးသည့်အရေအတွက်ကို အသုံးပြုသည်။ ပထမတိုကင် နောက်ပိုင်းနှုန်းသည် တရားဝင် TTFT ကို ချန်လှပ်ထားသည်။ မဟုတ်ပါက စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ အစမှအဆုံးနှုန်းသည် အမြဲတမ်း စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ ဘာဖာလုပ်ထားသော တုံ့ပြန်မှုတစ်ခုသည် မော်ဒယ်ထုတ်လုပ်မှု ပိုမြန်ခြင်းမရှိဘဲ မြင့်မားသော အရှိန်အဟုန်ဖြင့် ပို့ဆောင်မှုနှုန်း ရှိနိုင်သည်။",
-    "omittedHttpAttempts": "HTTP ပို့မှု {count} ခုကို မသိမ်းဆည်းထားပါ",
-    "upstreamStatus": "အထက်ဆာဗာ {status}",
-    "noHttpResponse": "HTTP တုံ့ပြန်မှုကို မတွေ့ရှိရပါ",
-    "transportError": "ပို့ဆောင်မှု အမှား"
+    "throughputExplanation": "နှုန်းနှစ်ခုစလုံးသည် output နှင့် reasoning တိုကင်အရေအတွက်များထဲမှ ပိုကြီးသည့်အရေအတွက်ကို အသုံးပြုသည်။ ပထမတိုကင် နောက်ပိုင်းနှုန်းသည် တရားဝင် TTFT ကို ချန်လှပ်ထားသည်။ မဟုတ်ပါက စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ အစမှအဆုံးနှုန်းသည် အမြဲတမ်း စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ ဘာဖာလုပ်ထားသော တုံ့ပြန်မှုတစ်ခုသည် မော်ဒယ်ထုတ်လုပ်မှု ပိုမြန်ခြင်းမရှိဘဲ မြင့်မားသော အရှိန်အဟုန်ဖြင့် ပို့ဆောင်မှုနှုန်း ရှိနိုင်သည်။"
   },
   "proxyLogger": {
     "filterAll": "အားလုံး",

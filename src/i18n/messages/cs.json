@@ -3402,12 +3402,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Použijte URL dosažitelné ze stroje, na kterém běží Pi. Koncový bod /v1 kompatibilní s OpenAI se přidá automaticky.",
     "piManualMergeHint": "Pouze náhled. Sloučte tento záznam providers.omniroute do models.json, aby vaši ostatní poskytovatelé a nastavení zůstali nedotčeni.",
-    "removeMapping": "Odebrat mapování",
     "customUrl": "Vlastní adresa URL",
     "customEndpointAria": "Vlastní koncový bod",
     "useDefaultKey": "Použít výchozí klíč OmniRoute",
     "mainModelAria": "Hlavní model",
-    "manualConfigTitle": "Ruční konfigurace buildu pro Grok"
+    "manualConfigTitle": "Ruční konfigurace buildu pro Grok",
+    "removeMapping": "Odebrat mapování"
   },
   "modelCatalog": {
     "title": "Modely a komba",
@@ -3654,6 +3654,7 @@
     "more": "+{count} dalších",
     "reqs": "požadavky",
     "success": "úspěch",
+    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů",
     "proxyConfigured": "Proxy nastavena",
     "copyComboName": "Kopírovat název komba",
     "enableCombo": "Povolit kombo",
@@ -4237,8 +4238,7 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
-    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
   },
   "costs": {
     "title": "Náklady",
@@ -9254,9 +9254,9 @@
         "financial": "Finanční",
         "brazilian": "Brazilská",
         "usa": "USA",
-        "full": "Úplná",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (Jihoafrická republika)"
+        "popia": "POPIA (Jihoafrická republika)",
+        "full": "Úplná"
       },
       "builtinTypes": "Vestavěné typy",
       "types": {
@@ -10192,6 +10192,10 @@
     "healthExtraUsageBypass": "Kvóta je vyčerpána; dodatečné využití je povoleno, takže služba pokračuje.",
     "healthPaidCreditsBypass": "Kvóta je vyčerpána; dostupné placené kredity umožňují pokračování služby.",
     "healthFilteringBypass": "Kvóta je vyčerpána; místní filtrování kvót je vypnuto, takže služba pokračuje.",
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Použití",
     "grokExtraUsageCredits": "Další kredit na použití",
     "grokAutoTopUp": "Automatické dobíjení",
@@ -10649,10 +10653,6 @@
     "confirmRedeemClaudeResetCredit": "Uplatnění okamžitě resetuje příslušné limity využití Claude a trvale spotřebuje tento kredit.",
     "claudeResetCreditsModalTitle": "Kredity na reset Claude",
     "claudeResetCreditsModalExplainer": "Dostupné kredity na reset Claude a týdenní resety relací pro tento účet.",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Podle posledních pozorování, nejde o živou kontrolu. Vyberte účet pro podrobnosti.",
     "healthRecovery": "Očekávané obnovení",
     "healthAvailable": "Dostupné",
@@ -12308,6 +12308,10 @@
     "messageInputAria": "Zpráva"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
+    "upstreamStatus": "Nadřazený server {status}",
+    "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
+    "transportError": "Chyba přenosu",
     "recording": "Zaznamenávání",
     "paused": "Pozastaveno",
     "pipelineLogsOn": "Protokolování pipeline je zapnuté",
@@ -12391,6 +12395,8 @@
       "increase": "Zvýšit interval"
     },
     "status": {
+      "recoveredAttemptsTitle": "Požadavek byl obnoven po {count} pokusech",
+      "latestOutcomeFailed": "Výsledek posledního požadavku byl neúspěšný",
       "inProgress": "Probíhá",
       "recoveredByRetry": "Obnoveno opětovným pokusem",
       "goToParent": "Přejít na nadřazenou žádost",
@@ -12399,12 +12405,13 @@
       "failedTitle": "Všechny {count} pokusy selhaly",
       "failed": "neúspěšné",
       "pinnedTitle": "Model vybrán prostřednictvím připnutí relace kontextové cache",
-      "pinned": "připnutý",
-      "recoveredAttemptsTitle": "Požadavek byl obnoven po {count} pokusech",
-      "latestOutcomeFailed": "Výsledek posledního požadavku byl neúspěšný"
+      "pinned": "připnutý"
     },
     "attempts": "pokusy",
     "detail": {
+      "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
+      "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
+      "transportError": "Chyba přenosu",
       "collapse": "Sbalit {title}",
       "expand": "Rozbalit {title}",
       "copyTitle": "Kopírovat {title}",
@@ -12503,20 +12510,13 @@
       "continuesFromParent": "pokračuje z nadřazené položky",
       "continuesFrom": "Pokračuje z {id}",
       "viewConversation": "zobrazit konverzaci",
-      "openConversation": "Otevřít konverzaci {id}",
-      "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
-      "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
-      "transportError": "Chyba přenosu"
+      "openConversation": "Otevřít konverzaci {id}"
     },
     "tableLabel": "Protokoly požadavků",
     "throughputPostFirstToken": "Po prvním tokenu",
     "throughputEndToEnd": "Od začátku do konce",
     "throughputRate": "{value} tokenů/s",
-    "throughputExplanation": "Obě rychlosti používají větší z počtu výstupních tokenů a tokenů pro uvažování. Hodnota po prvním tokenu nezahrnuje platné TTFT; jinak používá celkovou dobu trvání. Hodnota od začátku do konce vždy používá celkovou dobu trvání. U bufferované odpovědi může být vysoká rychlost doručení v dávce, aniž by model generoval rychleji.",
-    "omittedHttpAttempts": "{count} odeslání HTTP nebylo uchováno",
-    "upstreamStatus": "Nadřazený server {status}",
-    "noHttpResponse": "Nebyla zaznamenána žádná odpověď HTTP",
-    "transportError": "Chyba přenosu"
+    "throughputExplanation": "Obě rychlosti používají větší z počtu výstupních tokenů a tokenů pro uvažování. Hodnota po prvním tokenu nezahrnuje platné TTFT; jinak používá celkovou dobu trvání. Hodnota od začátku do konce vždy používá celkovou dobu trvání. U bufferované odpovědi může být vysoká rychlost doručení v dávce, aniž by model generoval rychleji."
   },
   "proxyLogger": {
     "filterAll": "Vše",

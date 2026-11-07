@@ -3402,12 +3402,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Utilize o URL acessível na máquina que executa o Pi. O endpoint /v1 compatível com OpenAI é adicionado automaticamente.",
     "piManualMergeHint": "Apenas visualização. Mescle esta entrada providers.omniroute no models.json para que os seus outros providers e definições permaneçam intactos.",
-    "removeMapping": "Remover mapeamento",
     "customUrl": "URL personalizado",
     "customEndpointAria": "Endpoint personalizado",
     "useDefaultKey": "Usar a chave predefinida do OmniRoute",
     "mainModelAria": "Modelo principal",
-    "manualConfigTitle": "Configuração manual do Grok Build"
+    "manualConfigTitle": "Configuração manual do Grok Build",
+    "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
     "title": "Modelos e Combos",
@@ -3654,6 +3654,7 @@
     "more": "+{count} mais",
     "reqs": "requisitos",
     "success": "sucesso",
+    "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma",
     "proxyConfigured": "Proxy configurado",
     "copyComboName": "Copiar nome do combo",
     "enableCombo": "Ativar combinação",
@@ -4237,8 +4238,7 @@
     "duplicateAutoComboSnapshotMsg": "Isto irá capturar os provedores/modelos atualmente conectados que correspondem a este modelo em uma combinação editável.",
     "duplicateAutoComboFailedPrefix": "Falha ao duplicar a combinação automática:",
     "duplicateAutoComboUnknownError": "Erro desconhecido",
-    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}",
-    "fallbackSummary": "{rate}% das requisições usaram fallback, ~{skips} alvos ignorados por cada uma"
+    "duplicateAutoComboTitle": "Criar uma combinação estática de {name}"
   },
   "costs": {
     "title": "Custos",
@@ -6341,7 +6341,7 @@
     "apiRegionChina": "China Continental",
     "apiRegionHint": "Selecione a região do endpoint utilizada para o acesso à API e o controlo de quotas.",
     "apiRegionInternational": "Internacional",
-    "apiRegionLabel": "__MISSING__:API Region",
+    "apiRegionLabel": "Região API",
     "apikey": "Chave de API",
     "audio": "Áudio",
     "audioProvidersHeading": "Fornecedores de Áudio",
@@ -9254,9 +9254,9 @@
         "financial": "Financeiro",
         "brazilian": "Brasileiro",
         "usa": "EUA",
-        "full": "Completo",
         "gdpr": "RGPD (UE)",
-        "popia": "POPIA (África do Sul)"
+        "popia": "POPIA (África do Sul)",
+        "full": "Completo"
       },
       "builtinTypes": "Tipos incorporados",
       "types": {
@@ -10192,6 +10192,10 @@
     "healthExtraUsageBypass": "Quota esgotada; a utilização adicional é permitida, pelo que o serviço continua.",
     "healthPaidCreditsBypass": "Quota esgotada; os créditos pagos disponíveis permitem continuar o serviço.",
     "healthFilteringBypass": "Quota esgotada; a filtragem local de quotas está desativada, pelo que o serviço continua.",
+    "codexPaidCreditsLabel": "Créditos pagos do Codex",
+    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
+    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Uso",
     "grokExtraUsageCredits": "Créditos de Uso Extra",
     "grokAutoTopUp": "Recarregamento Automático",
@@ -10649,10 +10653,6 @@
     "confirmRedeemClaudeResetCredit": "O resgate repõe imediatamente os limites de utilização elegíveis do Claude e consome permanentemente este crédito.",
     "claudeResetCreditsModalTitle": "Créditos de reposição do Claude",
     "claudeResetCreditsModalExplainer": "Créditos de reposição do Claude disponíveis e reposições semanais de sessão para esta conta.",
-    "codexPaidCreditsLabel": "Créditos pagos do Codex",
-    "codexPaidCreditsAvailable": "Disponíveis (saldo não indicado)",
-    "codexPaidCreditsUnavailable": "Indisponíveis ou limite de gastos atingido",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Com base nas observações recentes, não num teste em direto. Selecione uma conta para ver detalhes.",
     "healthRecovery": "Recuperação prevista",
     "healthAvailable": "Disponível",
@@ -12308,6 +12308,10 @@
     "messageInputAria": "Mensagem"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+    "upstreamStatus": "Servidor a montante {status}",
+    "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+    "transportError": "Erro de transporte",
     "recording": "A gravar",
     "paused": "Em pausa",
     "pipelineLogsOn": "Registos de pipeline ligados",
@@ -12391,6 +12395,8 @@
       "increase": "Aumentar intervalo"
     },
     "status": {
+      "recoveredAttemptsTitle": "Pedido recuperado após {count} tentativas",
+      "latestOutcomeFailed": "O resultado mais recente do pedido falhou",
       "inProgress": "Em progresso",
       "recoveredByRetry": "Recuperado por nova tentativa",
       "goToParent": "Ir para o pedido pai",
@@ -12399,12 +12405,13 @@
       "failedTitle": "Todas as {count} tentativas falharam",
       "failed": "falhou",
       "pinnedTitle": "Modelo selecionado através do fixador de sessão do cache de contexto",
-      "pinned": "fixado",
-      "recoveredAttemptsTitle": "Pedido recuperado após {count} tentativas",
-      "latestOutcomeFailed": "O resultado mais recente do pedido falhou"
+      "pinned": "fixado"
     },
     "attempts": "tentativas",
     "detail": {
+      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
+      "noHttpResponse": "Não foi observada qualquer resposta HTTP",
+      "transportError": "Erro de transporte",
       "collapse": "Colapsar {title}",
       "expand": "Expandir {title}",
       "copyTitle": "Copiar {title}",
@@ -12503,20 +12510,13 @@
       "continuesFromParent": "continua a partir do elemento principal",
       "continuesFrom": "Continua a partir de {id}",
       "viewConversation": "ver conversa",
-      "openConversation": "Abrir conversa {id}",
-      "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
-      "noHttpResponse": "Não foi observada qualquer resposta HTTP",
-      "transportError": "Erro de transporte"
+      "openConversation": "Abrir conversa {id}"
     },
     "tableLabel": "Registos de pedidos",
     "throughputPostFirstToken": "Após o primeiro token",
     "throughputEndToEnd": "Ponta a ponta",
     "throughputRate": "{value} tokens/s",
-    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida.",
-    "omittedHttpAttempts": "{count} envios HTTP não foram retidos",
-    "upstreamStatus": "Servidor a montante {status}",
-    "noHttpResponse": "Não foi observada qualquer resposta HTTP",
-    "transportError": "Erro de transporte"
+    "throughputExplanation": "Ambas as taxas utilizam o maior valor entre a contagem de tokens de saída e de raciocínio. A taxa após o primeiro token exclui um TTFT válido; caso contrário, utiliza a duração total. A taxa ponta a ponta utiliza sempre a duração total. Uma resposta em buffer pode ter uma taxa de entrega em rajada elevada sem que a geração do modelo seja mais rápida."
   },
   "proxyLogger": {
     "filterAll": "Todos",

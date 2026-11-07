@@ -3402,12 +3402,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Pi ከሚያሄደው ማሽን URL ሊደረስበት የሚችለውን ይጠቀሙ። የOpenAI-ተኳሃኝ/v1 የመጨረሻ ነጥብ በራስ-ሰር ይታከላል።",
     "piManualMergeHint": "ቅድመ እይታ ብቻ። ሌሎች አቅራቢዎችዎ እና ቅንብሮችዎ ሳይበላሹ እንዲቆዩ ይህን providers.omniroute ግቤት ወደ models.json ያዋህዱ።",
-    "removeMapping": "ማዛመዱን አስወግድ",
     "customUrl": "ግሌባ URL",
     "customEndpointAria": "ግሌባ ጫፍ ነጥብ",
     "useDefaultKey": "የOmniRoute ድምፅ ቁልፍ ይጠቀሙ",
     "mainModelAria": "ዋና ሞዴል",
-    "manualConfigTitle": "Grok Build የራስ-ሰር ኮንፊግ"
+    "manualConfigTitle": "Grok Build የራስ-ሰር ኮንፊግ",
+    "removeMapping": "ማዛመዱን አስወግድ"
   },
   "modelCatalog": {
     "title": "ሞዴሎች እና ኮምቦዎች",
@@ -3654,6 +3654,7 @@
     "more": "+{count} ተጨማሪ",
     "reqs": "ጥያቄዎች",
     "success": "ስኬት",
+    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን",
     "proxyConfigured": "ፕሮክሲ ተዋቅሯል",
     "copyComboName": "የጥምረቱን ስም ቅዳ",
     "enableCombo": "ጥምረቱን አንቃ",
@@ -4237,8 +4238,7 @@
     "duplicateAutoComboSnapshotMsg": "ይህ ከዚህ አብነት ጋር የሚዛመዱትን በአሁኑ ጊዜ የተገናኙ አቅራቢዎች/ሞዴሎች ቅጽበታዊ ቅጂ ወደሚስተካከል ጥምረት ይቀይራል።",
     "duplicateAutoComboFailedPrefix": "ራስ-ሰር ጥምረቱን ማባዛት አልተሳካም፦",
     "duplicateAutoComboUnknownError": "ያልታወቀ ስህተት",
-    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር",
-    "fallbackSummary": "የጥያቄዎች {rate}% ተመለሱ፣ እያንዳንዱ ~{skips} ግዴታዎች ተገለጭዋለን"
+    "duplicateAutoComboTitle": "ከ{name} የማይለወጥ ጥምረት ፍጠር"
   },
   "costs": {
     "title": "ወጪዎች",
@@ -9254,9 +9254,9 @@
         "financial": "ፋይናንስ",
         "brazilian": "ብራዚላዊ",
         "usa": "አሜሪካ",
-        "full": "ሙሉ",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (ደቡብ አፍሪካ)"
+        "popia": "POPIA (ደቡብ አፍሪካ)",
+        "full": "ሙሉ"
       },
       "builtinTypes": "አብሮ የተሰሩ ዓይነቶች",
       "types": {
@@ -12308,6 +12308,10 @@
     "messageInputAria": "መልዕክት"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+    "upstreamStatus": "የላይኛው አገልጋይ {status}",
+    "noHttpResponse": "የHTTP ምላሽ አልታየም",
+    "transportError": "የማጓጓዣ ስህተት",
     "recording": "በመቅዳት ላይ",
     "paused": "ለጊዜው ቆሟል",
     "pipelineLogsOn": "የፓይፕላይን ምዝግብ ማስታወሻዎች በርተዋል",
@@ -12391,6 +12395,8 @@
       "increase": "ክፍተቱን ጨምር"
     },
     "status": {
+      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
+      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም",
       "inProgress": "በሂደት ላይ",
       "recoveredByRetry": "በድጋሚ ሙከራ ተስተካክሏል",
       "goToParent": "ወደ ዋናው ጥያቄ ሂድ",
@@ -12399,12 +12405,13 @@
       "failedTitle": "ሁሉም {count} ሙከራዎች አልተሳኩም",
       "failed": "አልተሳካም",
       "pinnedTitle": "ሞዴሉ በcontext-cache ክፍለ ጊዜ ማጣበቅ ተመርጧል",
-      "pinned": "ተያይዟል",
-      "recoveredAttemptsTitle": "ጥያቄው በ{count} ሙከራዎች ተሳክቷል",
-      "latestOutcomeFailed": "የመጨረሻው ጥያቄ ውጤት አልተሳካም"
+      "pinned": "ተያይዟል"
     },
     "attempts": "ሙከራዎች",
     "detail": {
+      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
+      "noHttpResponse": "የHTTP ምላሽ አልታየም",
+      "transportError": "የማጓጓዣ ስህተት",
       "collapse": "{title}ን ሰብስብ",
       "expand": "{title}ን ዘርጋ",
       "copyTitle": "{title}ን ቅዳ",
@@ -12503,20 +12510,13 @@
       "continuesFromParent": "ከወላጅ ይቀጥላል",
       "continuesFrom": "ከ{id} ይቀጥላል",
       "viewConversation": "ውይይቱን ይመልከቱ",
-      "openConversation": "ውይይት {id}ን ይክፈቱ",
-      "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
-      "noHttpResponse": "የHTTP ምላሽ አልታየም",
-      "transportError": "የማጓጓዣ ስህተት"
+      "openConversation": "ውይይት {id}ን ይክፈቱ"
     },
     "tableLabel": "የጥያቄ ምዝግብ ማስታወሻዎች",
     "throughputPostFirstToken": "ከመጀመሪያው ቶከን በኋላ",
     "throughputEndToEnd": "ከጫፍ እስከ ጫፍ",
     "throughputRate": "በሰከንድ {value} ቶከኖች",
-    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።",
-    "omittedHttpAttempts": "{count} የHTTP መላኪያዎች አልተቀመጡም",
-    "upstreamStatus": "የላይኛው አገልጋይ {status}",
-    "noHttpResponse": "የHTTP ምላሽ አልታየም",
-    "transportError": "የማጓጓዣ ስህተት"
+    "throughputExplanation": "ሁለቱም ፍጥነቶች ከውጤት እና ከምክንያታዊ ትንተና ቶከኖች ብዛት የሚበልጠውን ይጠቀማሉ። ከመጀመሪያው ቶከን በኋላ ያለው ፍጥነት ትክክለኛ TTFTን አያካትትም፤ ካልሆነ ግን ሙሉውን ቆይታ ይጠቀማል። ከጫፍ እስከ ጫፍ ሁልጊዜ ሙሉውን ቆይታ ይጠቀማል። በቋት የተያዘ ምላሽ የሞዴሉ ማመንጨት ሳይፈጥን ከፍተኛ የፈጣን ማድረስ ፍጥነት ሊኖረው ይችላል።"
   },
   "proxyLogger": {
     "filterAll": "ሁሉም",

@@ -3402,12 +3402,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Utilizza URL raggiungibile dalla macchina che esegue Pi. L'endpoint /v1 compatibile con OpenAI viene aggiunto automaticamente.",
     "piManualMergeHint": "Solo anteprima. Unisci questa voce providers.omniroute in models.json in modo che gli altri provider e le impostazioni rimangano intatti.",
-    "removeMapping": "Rimuovi mappatura",
     "customUrl": "URL personalizzata",
     "customEndpointAria": "Endpoint personalizzato",
     "useDefaultKey": "Utilizza la chiave predefinita di OmniRoute",
     "mainModelAria": "Modello principale",
-    "manualConfigTitle": "Configurazione manuale di Grok Build"
+    "manualConfigTitle": "Configurazione manuale di Grok Build",
+    "removeMapping": "Rimuovi mappatura"
   },
   "modelCatalog": {
     "title": "Modelli e combo",
@@ -3654,6 +3654,7 @@
     "more": "+{count} altro",
     "reqs": "req",
     "success": "successo",
+    "fallbackSummary": "{rate}% delle richieste ha utilizzato un fallback, saltando in media ~{skips} target ciascuna",
     "proxyConfigured": "Proxy configurato",
     "copyComboName": "Copia il nome della combinazione",
     "enableCombo": "Abilita combinazione",
@@ -4237,8 +4238,7 @@
     "duplicateAutoComboSnapshotMsg": "Questo catturerà i fornitori/modelli attualmente connessi che corrispondono a questo modello in una combinazione modificabile.",
     "duplicateAutoComboFailedPrefix": "Duplicazione della combinazione automatica fallita:",
     "duplicateAutoComboUnknownError": "Errore sconosciuto",
-    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}",
-    "fallbackSummary": "{rate}% delle richieste ha utilizzato un fallback, saltando in media ~{skips} target ciascuna"
+    "duplicateAutoComboTitle": "Crea una combinazione statica da {name}"
   },
   "costs": {
     "title": "Costi",
@@ -9254,9 +9254,9 @@
         "financial": "Finanziario",
         "brazilian": "Brasiliano",
         "usa": "USA",
-        "full": "Completo",
         "gdpr": "GDPR (UE)",
-        "popia": "POPIA (Sudafrica)"
+        "popia": "POPIA (Sudafrica)",
+        "full": "Completo"
       },
       "builtinTypes": "Tipi integrati",
       "types": {
@@ -10192,6 +10192,10 @@
     "healthExtraUsageBypass": "Quota esaurita; l’utilizzo aggiuntivo è consentito, quindi il servizio continua.",
     "healthPaidCreditsBypass": "Quota esaurita; i crediti a pagamento disponibili consentono di continuare il servizio.",
     "healthFilteringBypass": "Quota esaurita; il filtro locale delle quote è disattivato, quindi il servizio continua.",
+    "codexPaidCreditsLabel": "Crediti a pagamento Codex",
+    "codexPaidCreditsAvailable": "Disponibili (saldo non riportato)",
+    "codexPaidCreditsUnavailable": "Non disponibili o limite di spesa raggiunto",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Utilizzo",
     "grokExtraUsageCredits": "Crediti Aggiuntivi di Utilizzo",
     "grokAutoTopUp": "Ricarica Automatica",
@@ -10649,10 +10653,6 @@
     "confirmRedeemClaudeResetCredit": "Il riscatto ripristina immediatamente i limiti di utilizzo di Claude idonei e consuma permanentemente questo credito.",
     "claudeResetCreditsModalTitle": "Crediti di ripristino Claude",
     "claudeResetCreditsModalExplainer": "Crediti di ripristino Claude disponibili e ripristini settimanali delle sessioni per questo account.",
-    "codexPaidCreditsLabel": "Crediti a pagamento Codex",
-    "codexPaidCreditsAvailable": "Disponibili (saldo non riportato)",
-    "codexPaidCreditsUnavailable": "Non disponibili o limite di spesa raggiunto",
-    "codexPaidCreditsUnlimited": "Unlimited",
     "healthAccountHint": "Basato sulle osservazioni recenti, non su un test in tempo reale. Seleziona un account per i dettagli.",
     "healthRecovery": "Ripristino previsto",
     "healthAvailable": "Disponibile",
@@ -12308,6 +12308,10 @@
     "messageInputAria": "Messaggio"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} invii HTTP non conservati",
+    "upstreamStatus": "Server a monte {status}",
+    "noHttpResponse": "Nessuna risposta HTTP osservata",
+    "transportError": "Errore di trasporto",
     "recording": "Registrazione in corso",
     "paused": "In pausa",
     "pipelineLogsOn": "Log della pipeline attivi",
@@ -12391,6 +12395,8 @@
       "increase": "Aumenta l'intervallo"
     },
     "status": {
+      "recoveredAttemptsTitle": "Richiesta recuperata dopo {count} tentativi",
+      "latestOutcomeFailed": "L'ultimo esito della richiesta è fallito",
       "inProgress": "In corso",
       "recoveredByRetry": "Recuperato tramite ripetizione",
       "goToParent": "Vai alla richiesta padre",
@@ -12399,12 +12405,13 @@
       "failedTitle": "Tutti i {count} tentativi sono falliti",
       "failed": "fallito",
       "pinnedTitle": "Modello selezionato tramite il pinning della sessione context-cache",
-      "pinned": "pinnato",
-      "recoveredAttemptsTitle": "Richiesta recuperata dopo {count} tentativi",
-      "latestOutcomeFailed": "L'ultimo esito della richiesta è fallito"
+      "pinned": "pinnato"
     },
     "attempts": "tentativi",
     "detail": {
+      "omittedHttpAttempts": "{count} invii HTTP non conservati",
+      "noHttpResponse": "Nessuna risposta HTTP osservata",
+      "transportError": "Errore di trasporto",
       "collapse": "Riduci {title}",
       "expand": "Espandi {title}",
       "copyTitle": "Copia {title}",
@@ -12503,20 +12510,13 @@
       "continuesFromParent": "continua dal padre",
       "continuesFrom": "Continua da {id}",
       "viewConversation": "visualizza conversazione",
-      "openConversation": "Apri conversazione {id}",
-      "omittedHttpAttempts": "{count} invii HTTP non conservati",
-      "noHttpResponse": "Nessuna risposta HTTP osservata",
-      "transportError": "Errore di trasporto"
+      "openConversation": "Apri conversazione {id}"
     },
     "tableLabel": "Log delle richieste",
     "throughputPostFirstToken": "Dopo il primo token",
     "throughputEndToEnd": "Da inizio a fine",
     "throughputRate": "{value} token/sec",
-    "throughputExplanation": "Entrambe le velocità usano il maggiore tra il conteggio dei token di output e di reasoning. La velocità dopo il primo token esclude un TTFT valido; in caso contrario usa la durata completa. La velocità da inizio a fine usa sempre la durata completa. Una risposta bufferizzata può avere un'elevata velocità di consegna a raffica senza una generazione del modello più rapida.",
-    "omittedHttpAttempts": "{count} invii HTTP non conservati",
-    "upstreamStatus": "Server a monte {status}",
-    "noHttpResponse": "Nessuna risposta HTTP osservata",
-    "transportError": "Errore di trasporto"
+    "throughputExplanation": "Entrambe le velocità usano il maggiore tra il conteggio dei token di output e di reasoning. La velocità dopo il primo token esclude un TTFT valido; in caso contrario usa la durata completa. La velocità da inizio a fine usa sempre la durata completa. Una risposta bufferizzata può avere un'elevata velocità di consegna a raffica senza una generazione del modello più rapida."
   },
   "proxyLogger": {
     "filterAll": "Tutti",

@@ -3402,12 +3402,12 @@
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "استخدم URL الذي يمكن الوصول إليه من الجهاز الذي يقوم بتشغيل Pi. تتم إضافة نقطة النهاية /v1 المتوافقة مع OpenAI تلقائيًا.",
     "piManualMergeHint": "معاينة فقط. قم بدمج إدخال providers.omniroute هذا في models.json حتى يظل مقدمو الخدمة والإعدادات الأخرى كما هي.",
-    "removeMapping": "إزالة التعيين",
     "customUrl": "رابط مخصص",
     "customEndpointAria": "نقطة اتصال مخصصة",
     "useDefaultKey": "استخدام مفتاح OmniRoute الافتراضي",
     "mainModelAria": "النموذج الرئيسي",
-    "manualConfigTitle": "إعدادات Grok Build اليدوية"
+    "manualConfigTitle": "إعدادات Grok Build اليدوية",
+    "removeMapping": "إزالة التعيين"
   },
   "modelCatalog": {
     "title": "النماذج والمجموعات",
@@ -3654,6 +3654,7 @@
     "more": "+{count} المزيد",
     "reqs": "الطلبات",
     "success": "النجاح",
+    "fallbackSummary": "نسبة {rate}% من الطلبات استخدمت المسار البديل، مع تخطي ~{skips} أهداف لكل طلب تقريباً",
     "proxyConfigured": "تم تكوين بروكسي",
     "copyComboName": "نسخ اسم المجموعة",
     "enableCombo": "تمكين المجموعة",
@@ -4237,8 +4238,7 @@
     "duplicateAutoComboSnapshotMsg": "سيؤدي هذا إلى التقاط المزودين/النماذج المتصلة حاليًا التي تطابق هذا القالب في مجموعة قابلة للتحرير.",
     "duplicateAutoComboFailedPrefix": "فشل تكرار المجموعة التلقائية:",
     "duplicateAutoComboUnknownError": "خطأ غير معروف",
-    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}",
-    "fallbackSummary": "نسبة {rate}% من الطلبات استخدمت المسار البديل، مع تخطي ~{skips} أهداف لكل طلب تقريباً"
+    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}"
   },
   "costs": {
     "title": "التكاليف",
@@ -9254,9 +9254,9 @@
         "financial": "مالي",
         "brazilian": "برازيلي",
         "usa": "الولايات المتحدة",
-        "full": "كامل",
         "gdpr": "GDPR (EU)",
-        "popia": "POPIA (جنوب أفريقيا)"
+        "popia": "POPIA (جنوب أفريقيا)",
+        "full": "كامل"
       },
       "builtinTypes": "الأنواع المضمّنة",
       "types": {
@@ -10192,6 +10192,10 @@
     "healthExtraUsageBypass": "نفدت الحصة؛ الاستخدام الإضافي مسموح، لذا تستمر الخدمة.",
     "healthPaidCreditsBypass": "نفدت الحصة؛ تتيح الأرصدة المدفوعة المتاحة استمرار الخدمة.",
     "healthFilteringBypass": "نفدت الحصة؛ تصفية الحصة المحلية معطلة، لذا تستمر الخدمة.",
+    "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
+    "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
+    "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
+    "codexPaidCreditsUnlimited": "غير محدود",
     "title": "الاستخدام",
     "grokExtraUsageCredits": "رصيد استخدام إضافي",
     "grokAutoTopUp": "إعادة تعبئة تلقائية",
@@ -10649,10 +10653,6 @@
     "confirmRedeemClaudeResetCredit": "يؤدي الاسترداد إلى إعادة تعيين حدود استخدام Claude المؤهلة فورًا واستهلاك هذا الرصيد بشكل دائم.",
     "claudeResetCreditsModalTitle": "أرصدة إعادة تعيين Claude",
     "claudeResetCreditsModalExplainer": "أرصدة إعادة تعيين Claude المتاحة وعمليات إعادة تعيين الجلسات الأسبوعية لهذا الحساب.",
-    "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
-    "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
-    "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
-    "codexPaidCreditsUnlimited": "غير محدود",
     "healthAccountHint": "استنادًا إلى أحدث الملاحظات، وليس فحصًا مباشرًا. حدد حسابًا لعرض التفاصيل.",
     "healthRecovery": "وقت الاستعادة المتوقع",
     "healthAvailable": "متاح",
@@ -12308,6 +12308,10 @@
     "messageInputAria": "الرسالة"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
+    "upstreamStatus": "الخادم الأعلى {status}",
+    "noHttpResponse": "لم تُرصد أي استجابة HTTP",
+    "transportError": "خطأ في النقل",
     "recording": "التسجيل",
     "paused": "متوقف مؤقتًا",
     "pipelineLogsOn": "سجلات مسار المعالجة مفعّلة",
@@ -12391,6 +12395,8 @@
       "increase": "زيادة الفاصل الزمني"
     },
     "status": {
+      "recoveredAttemptsTitle": "تم استرداد الطلب عبر {count} من المحاولات",
+      "latestOutcomeFailed": "فشلت نتيجة الطلب الأخيرة",
       "inProgress": "قيد التقدم",
       "recoveredByRetry": "تم الاسترداد عن طريق إعادة المحاولة",
       "goToParent": "اذهب إلى الطلب الرئيسي",
@@ -12399,12 +12405,13 @@
       "failedTitle": "فشلت جميع المحاولات {count}",
       "failed": "فشل",
       "pinnedTitle": "تم اختيار النموذج عبر تثبيت جلسة ذاكرة التخزين المؤقت للسياق",
-      "pinned": "مثبت",
-      "recoveredAttemptsTitle": "تم استرداد الطلب عبر {count} من المحاولات",
-      "latestOutcomeFailed": "فشلت نتيجة الطلب الأخيرة"
+      "pinned": "مثبت"
     },
     "attempts": "محاولات",
     "detail": {
+      "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
+      "noHttpResponse": "لم تُرصد أي استجابة HTTP",
+      "transportError": "خطأ في النقل",
       "collapse": "طي {title}",
       "expand": "قم بتوسيع {title}",
       "copyTitle": "نسخ {title}",
@@ -12503,20 +12510,13 @@
       "continuesFromParent": "يتابع من الأصل",
       "continuesFrom": "يتابع من {id}",
       "viewConversation": "عرض المحادثة",
-      "openConversation": "فتح المحادثة {id}",
-      "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
-      "noHttpResponse": "لم تُرصد أي استجابة HTTP",
-      "transportError": "خطأ في النقل"
+      "openConversation": "فتح المحادثة {id}"
     },
     "tableLabel": "سجلات الطلبات",
     "throughputPostFirstToken": "ما بعد الرمز الأول",
     "throughputEndToEnd": "من البداية إلى النهاية",
     "throughputRate": "{value} رمز/ثانية",
-    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع.",
-    "omittedHttpAttempts": "لم يتم الاحتفاظ بـ {count} من عمليات إرسال HTTP",
-    "upstreamStatus": "الخادم الأعلى {status}",
-    "noHttpResponse": "لم تُرصد أي استجابة HTTP",
-    "transportError": "خطأ في النقل"
+    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع."
   },
   "proxyLogger": {
     "filterAll": "الكل",
